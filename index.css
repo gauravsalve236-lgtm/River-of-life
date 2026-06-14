@@ -2358,7 +2358,7 @@ body {
   bottom: 0;
   left: 0;
   width: 100vw;
-  height: 64px;
+  height: 76px;
   background-color: var(--bg-content);
   border-top: 1px solid var(--border);
   display: flex;
@@ -2366,6 +2366,7 @@ body {
   align-items: center;
   gap: 16px;
   padding: 0 24px;
+  padding-bottom: env(safe-area-inset-bottom);
   z-index: 100;
   box-shadow: 0 -4px 20px rgba(0,0,0,0.03);
 }
@@ -2375,7 +2376,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 8px 18px;
+  padding: 10px 20px;
   border-radius: 20px;
   border: none;
   background: none;
@@ -2384,17 +2385,17 @@ body {
   transition: all 0.2s ease;
   font-family: var(--font-ui);
   font-weight: 700;
-  font-size: 13.5px;
+  font-size: 15px;
 }
 
 .mobile-bottom-tabs .tab-btn svg {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   stroke-width: 2.3;
 }
 
 .mobile-bottom-tabs .tab-label {
-  font-size: 13.5px;
+  font-size: 15px;
   font-weight: 700;
   font-family: var(--font-ui);
 }
@@ -2429,31 +2430,33 @@ body {
 
   /* Show mobile bottom tab bar with safe area clearance */
   .mobile-bottom-tabs {
-    height: 84px;
-    padding-bottom: 24px; /* Clearance for iOS home indicator bar */
-    gap: 8px;
+    height: 102px;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom)); /* Clearance for iOS home indicator bar */
+    gap: 12px;
   }
 }
 
 @media (max-width: 480px) {
   .mobile-bottom-tabs {
-    gap: 4px;
-    padding: 0 8px;
+    gap: 6px;
+    padding: 0 12px;
+    height: 100px;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom));
   }
   
   .mobile-bottom-tabs .tab-btn {
-    padding: 6px 12px;
+    padding: 8px 14px;
     gap: 6px;
-    font-size: 12px;
+    font-size: 13.5px;
   }
   
   .mobile-bottom-tabs .tab-btn svg {
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
   }
   
   .mobile-bottom-tabs .tab-label {
-    font-size: 11px;
+    font-size: 12.5px;
   }
 }
 
@@ -2492,15 +2495,15 @@ body {
 
   /* Adjust scroller spacing for mobile */
   .view-scroll-content {
-    padding: 24px 16px 100px 16px;
+    padding: 24px 16px 136px 16px;
   }
 
   .verses-scroller {
-    padding: 16px 16px 120px 16px;
+    padding: 16px 16px 150px 16px;
   }
 
   .floating-playbar-container {
-    bottom: 96px; /* sits hovering above mobile bottom tab bar */
+    bottom: 114px; /* sits hovering above mobile bottom tab bar */
   }
 
   .app-header {
