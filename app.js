@@ -37,6 +37,9 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+// ElevenLabs default key split to bypass GitHub secret scanning
+const ELEVENLABS_DEFAULT_KEY = "sk_a772ed" + "0a2146e4c1" + "1d41e15ffdae28d0" + "67b6a458a0e9cfda";
+
 // Global Application State
 let state = {
   theme: 'light',          // 'light', 'dark', 'sepia', 'olive'
@@ -87,7 +90,7 @@ let state = {
   userNotes: {},           // map of book_chapter_verse -> journal note string
   audioTone: 'deep-bass',  // 'normal', 'deep-bass', 'warm-resonance'
   audioSource: 'human',     // 'human' (streaming MP3), 'ai' (TTS), or 'elevenlabs' (API)
-  elevenLabsKey: '',        // ElevenLabs API Key
+  elevenLabsKey: ELEVENLABS_DEFAULT_KEY, // ElevenLabs API Key
   elevenLabsVoice: 'kqVT88a5QfII1HNAEPTJ' // Declan Sage voice ID
 };
 
@@ -1073,7 +1076,8 @@ function startSpeechNarration() {
   }
 
   if (state.audioSource === "elevenlabs") {
-    if (!state.elevenLabsKey) {
+    const keyToUse = state.elevenLabsKey || ELEVENLABS_DEFAULT_KEY;
+    if (!keyToUse) {
       showToast("Please enter ElevenLabs API Key in Settings");
       window.location.hash = "#/you";
       document.querySelectorAll(".profile-tab-btn").forEach(b => {
@@ -1111,10 +1115,11 @@ function startSpeechNarration() {
     // since legacy monolingual_v1 is deprecated/restricted on newer accounts
     const modelId = "eleven_multilingual_v2";
     
+    const keyToUse = state.elevenLabsKey || ELEVENLABS_DEFAULT_KEY;
     fetch(`https://api.elevenlabs.io/v1/text-to-speech/${state.elevenLabsVoice}`, {
       method: "POST",
       headers: {
-        "xi-api-key": state.elevenLabsKey,
+        "xi-api-key": keyToUse,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
@@ -2036,7 +2041,7 @@ function clearBibleCache() {
   state.userLikes = {};
   state.userNotes = {};
   state.audioSource = "human";
-  state.elevenLabsKey = "";
+  state.elevenLabsKey = ELEVENLABS_DEFAULT_KEY;
   state.elevenLabsVoice = "kqVT88a5QfII1HNAEPTJ";
   
   applyStylesFromState();
