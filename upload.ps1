@@ -5,7 +5,6 @@ if ($scriptDir) { Set-Location $scriptDir }
 $gitPath = Join-Path $scriptDir "..\mingit\cmd\git.exe"
 if (-not (Test-Path $gitPath)) {
     Write-Error "Could not find portable Git executable at $gitPath"
-    Pause
     Exit
 }
 
@@ -35,4 +34,3 @@ Write-Host "A GitHub sign-in window may pop up on your screen. Please complete t
 
 Write-Host ""
 Write-Host "--- Upload Process Completed! ---" -ForegroundColor Green
-Pause
