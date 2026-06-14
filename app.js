@@ -485,9 +485,28 @@ function formatScriptureText(bookKey, chapterNum, verseNum, text, lang) {
    Bible Reader Engine (Verses & Navigation UI rendering)
    ========================================================================== */
 async function openReader(bookKey, chapterNum) {
+  let metadata = booksMetadataMr.find(b => b.filename.replace(".json", "") === bookKey);
+  if (!metadata) {
+    if (booksMetadataMr.length > 0) {
+      bookKey = booksMetadataMr[0].filename.replace(".json", "");
+      metadata = booksMetadataMr[0];
+    } else {
+      return;
+    }
+  }
+  
+  let parsedChapter = parseInt(chapterNum);
+  if (isNaN(parsedChapter) || parsedChapter < 1) {
+    parsedChapter = 1;
+  } else if (parsedChapter > metadata.chaptersCount) {
+    parsedChapter = metadata.chaptersCount;
+  }
+  
   state.activeBook = bookKey;
-  state.activeChapter = parseInt(chapterNum);
+  state.activeChapter = parsedChapter;
   saveStateToLocalStorage();
+  
+  chapterNum = parsedChapter;
   
   const versesContainer = document.getElementById("reader-verses");
   versesContainer.innerHTML = `
@@ -1007,6 +1026,22 @@ function openCardCreatorFromVOD() {
   openShareCardCreator();
 }
 
+function openVerseOptionsFromVOD() {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const diff = now - start;
+  const oneDay = 1000 * 60 * 60 * 24;
+  const dayOfYear = Math.floor(diff / oneDay);
+  const vod = VOD_LIST[dayOfYear % VOD_LIST.length];
+  
+  const textToPreview = (state.translation === "eng") ? vod.engText : vod.text;
+  const activeBookMeta = booksMetadataMr.find(b => b.filename.replace(".json", "") === vod.book);
+  const bookName = activeBookMeta ? ((state.translation === "eng") ? activeBookMeta.engName : activeBookMeta.name) : vod.book;
+  
+  closeModal("modal-fullscreen-vod");
+  openVerseOptionsDrawer(`${vod.book}_${vod.chapter}_${vod.verse}`, bookName, vod.chapter, vod.verse, textToPreview);
+}
+
 function fallbackToDirectPlay(mp3Url) {
   if (audioPlayerInstance) {
     audioPlayerInstance.pause();
@@ -1096,6 +1131,7 @@ function startSpeechNarration() {
     const keyToUse = state.elevenLabsKey || ELEVENLABS_DEFAULT_KEY;
     if (!keyToUse) {
       showToast("Please enter ElevenLabs API Key in Settings");
+      closeAllDrawers();
       window.location.hash = "#/you";
       document.querySelectorAll(".profile-tab-btn").forEach(b => {
         b.classList.toggle("active", b.dataset.tab === "you-settings");
@@ -1924,9 +1960,76 @@ function renderYouProfile() {
   }
   
   const keyInput = document.getElementById("you-elevenlabs-key");
-  if (keyInput) keyInput.value = state.elevenLabsKey || "";
+  if (keyInput) {
+    keyInput.value = state.elevenLabsKey || "";
+    validateElevenLabsKey(state.elevenLabsKey);
+  }
   const voiceInput = document.getElementById("you-elevenlabs-voice");
   if (voiceInput) voiceInput.value = state.elevenLabsVoice || "kqVT88a5QfII1HNAEPTJ";
+}
+
+async function validateElevenLabsKey(key) {
+  const statusEl = document.getElementById("elevenlabs-key-status");
+  if (!statusEl) return;
+  
+  if (!key) {
+    statusEl.style.display = "none";
+    return;
+  }
+  
+  statusEl.style.display = "block";
+  statusEl.textContent = "Checking API Key...";
+  statusEl.style.color = "var(--text-muted)";
+  
+  try {
+    const response = await fetch("https://api.elevenlabs.io/v1/voices", {
+      headers: {
+        "xi-api-key": key
+      }
+    });
+    if (response.ok) {
+      const data = await response.json();
+      const count = data.voices ? data.voices.length : 0;
+      statusEl.textContent = `✓ Key has active voice support! (${count} voices available)`;
+      statusEl.style.color = "var(--primary)";
+      
+      // Update voice selection dropdown dynamically
+      if (data.voices && data.voices.length > 0) {
+        const elSelect = document.getElementById("tts-voice-select");
+        if (elSelect) {
+          data.voices.forEach(v => {
+            let exists = false;
+            for (let i = 0; i < elSelect.options.length; i++) {
+              if (elSelect.options[i].value === `elevenlabs_custom_${v.voice_id}`) {
+                exists = true;
+                break;
+              }
+            }
+            if (!exists) {
+              const opt = document.createElement("option");
+              opt.value = `elevenlabs_custom_${v.voice_id}`;
+              opt.textContent = `👑 ElevenLabs: ${v.name} (${v.category})`;
+              elSelect.appendChild(opt);
+            }
+          });
+          
+          const customOptVal = `elevenlabs_custom_${state.elevenLabsVoice}`;
+          for (let i = 0; i < elSelect.options.length; i++) {
+            if (elSelect.options[i].value === customOptVal) {
+              elSelect.value = customOptVal;
+              break;
+            }
+          }
+        }
+      }
+    } else {
+      statusEl.textContent = "✗ Invalid Key or subscription limit reached.";
+      statusEl.style.color = "var(--danger)";
+    }
+  } catch (e) {
+    statusEl.textContent = "✗ Connection error. Could not verify.";
+    statusEl.style.color = "var(--danger)";
+  }
 }
 
 function createLibraryCard(ref, text, bookKey, ch, v, onDelete) {
@@ -2366,11 +2469,16 @@ function setupEventListeners() {
   }
 
   // ElevenLabs Key & Voice Input Handlers
+  let keyValidationTimeout = null;
   const elKeyInput = document.getElementById("you-elevenlabs-key");
   if (elKeyInput) {
     elKeyInput.addEventListener("input", (e) => {
       state.elevenLabsKey = e.target.value.trim();
       saveStateToLocalStorage();
+      clearTimeout(keyValidationTimeout);
+      keyValidationTimeout = setTimeout(() => {
+        validateElevenLabsKey(state.elevenLabsKey);
+      }, 800);
     });
   }
   const elVoiceInput = document.getElementById("you-elevenlabs-voice");
@@ -2437,6 +2545,7 @@ function setupEventListeners() {
   // VOD Fullscreen modal triggers
   document.getElementById("btn-open-fullscreen-vod").addEventListener("click", () => openModal("modal-fullscreen-vod"));
   document.getElementById("btn-close-fullscreen-vod").addEventListener("click", () => closeModal("modal-fullscreen-vod"));
+  document.getElementById("btn-fs-options").addEventListener("click", openVerseOptionsFromVOD);
 
   // Daily Verse Card tabs interaction
   const dailyVerseTabPills = document.querySelectorAll(".daily-verse-header-tabs .tab-pill");

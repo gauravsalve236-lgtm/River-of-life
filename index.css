@@ -1920,11 +1920,15 @@ body {
 }
 
 .dot-btn {
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   border: none;
   cursor: pointer;
+  transition: transform 0.2s ease;
+}
+.dot-btn:active {
+  transform: scale(0.9);
 }
 
 .dot-btn.yellow { background-color: #fef08a; }
@@ -3545,4 +3549,10 @@ body {
 
 .margin-top-sm {
   margin-top: 16px;
+}
+
+/* Accessibility overrides for input fields, textareas and select dropdown focus/taps on iOS */
+input, textarea, select, [contenteditable="true"] {
+  user-select: text !important;
+  -webkit-user-select: text !important;
 }
