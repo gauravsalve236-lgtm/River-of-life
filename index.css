@@ -2361,11 +2361,11 @@ body {
   height: 76px;
   background-color: var(--bg-content);
   border-top: 1px solid var(--border);
-  display: flex;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  justify-items: center;
   align-items: center;
-  gap: 16px;
-  padding: 0 24px;
+  padding: 0;
   padding-bottom: env(safe-area-inset-bottom);
   z-index: 100;
   box-shadow: 0 -4px 20px rgba(0,0,0,0.03);
@@ -2373,50 +2373,38 @@ body {
 
 .mobile-bottom-tabs .tab-btn {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 10px 20px;
-  border-radius: 20px;
+  gap: 4px;
+  padding: 6px 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
   border: none;
   background: none;
   color: var(--text-muted);
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: var(--font-ui);
-  font-weight: 700;
-  font-size: 15px;
+  font-weight: 600;
 }
 
 .mobile-bottom-tabs .tab-btn svg {
   width: 22px;
   height: 22px;
-  stroke-width: 2.3;
+  stroke-width: 2.2;
 }
 
 .mobile-bottom-tabs .tab-label {
-  font-size: 15px;
+  font-size: 11.5px;
   font-weight: 700;
   font-family: var(--font-ui);
 }
 
 .mobile-bottom-tabs .tab-btn.active {
-  background-color: #dbeafe; /* light blue pill */
-  color: #1e40af; /* dark blue */
-}
-
-/* Theme active capsule overrides */
-.ios-theme-dark .mobile-bottom-tabs .tab-btn.active {
-  background-color: #1e3a8a;
-  color: #93c5fd;
-}
-.ios-theme-sepia .mobile-bottom-tabs .tab-btn.active {
-  background-color: #eeddb2;
-  color: #b58900;
-}
-.ios-theme-olive .mobile-bottom-tabs .tab-btn.active {
-  background-color: #d4dcb8;
-  color: #6b8e23;
+  color: var(--primary);
+  background: transparent;
 }
 
 /* ==========================================================================
@@ -2430,24 +2418,25 @@ body {
 
   /* Show mobile bottom tab bar with safe area clearance */
   .mobile-bottom-tabs {
-    height: 102px;
-    padding-bottom: calc(16px + env(safe-area-inset-bottom)); /* Clearance for iOS home indicator bar */
-    gap: 12px;
+    height: 94px;
+    padding-bottom: calc(14px + env(safe-area-inset-bottom)); /* Clearance for iOS home indicator bar */
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0;
   }
 }
 
 @media (max-width: 480px) {
   .mobile-bottom-tabs {
-    gap: 6px;
-    padding: 0 12px;
-    height: 100px;
-    padding-bottom: calc(16px + env(safe-area-inset-bottom));
+    gap: 0;
+    padding: 0;
+    height: 92px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
   }
   
   .mobile-bottom-tabs .tab-btn {
-    padding: 8px 14px;
-    gap: 6px;
-    font-size: 13.5px;
+    padding: 6px 0;
+    gap: 3px;
   }
   
   .mobile-bottom-tabs .tab-btn svg {
@@ -2456,7 +2445,7 @@ body {
   }
   
   .mobile-bottom-tabs .tab-label {
-    font-size: 12.5px;
+    font-size: 10.5px;
   }
 }
 
