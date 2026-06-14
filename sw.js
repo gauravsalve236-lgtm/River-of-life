@@ -1,12 +1,12 @@
 // Service Worker for River of Life Bible App
-const CACHE_NAME = 'river-of-life-cache-v25';
+const CACHE_NAME = 'river-of-life-cache-v26';
 
 // Static App Shell assets to cache immediately
 const STATIC_ASSETS = [
   './',
   './index.html',
-  './index.css?v=25',
-  './app.js?v=25',
+  './index.css?v=26',
+  './app.js?v=26',
   './manifest.json',
   './assets/bible/books.json',
   './assets/bible/books_mr.json',

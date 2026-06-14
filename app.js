@@ -1496,14 +1496,24 @@ function initAudioVoices() {
       select.appendChild(opt);
     });
     
-    // Add ElevenLabs Premium Voice option at the end
-    const optEleven = document.createElement("option");
-    optEleven.value = "elevenlabs";
-    optEleven.textContent = "👑 ElevenLabs Premium Voice (Declan Sage)";
-    select.appendChild(optEleven);
+    // Add ElevenLabs options
+    const elVoices = [
+      { value: "elevenlabs_antoni", label: "👑 ElevenLabs Antoni (Free Male Voice)", id: "ErXwobaYiN019PkySvjV" },
+      { value: "elevenlabs_clyde", label: "👑 ElevenLabs Clyde (Free Male Voice)", id: "2E2jMRHfEMvvEBjL7aKG" },
+      { value: "elevenlabs_rachel", label: "👑 ElevenLabs Rachel (Free Female Voice)", id: "21m00Tcm4TlvDq8ikWAM" },
+      { value: "elevenlabs_declan", label: "👑 ElevenLabs Declan Sage (Paid Premium Storyteller)", id: "kqVT88a5QfII1HNAEPTJ" }
+    ];
+
+    elVoices.forEach(ev => {
+      const opt = document.createElement("option");
+      opt.value = ev.value;
+      opt.textContent = ev.label;
+      select.appendChild(opt);
+    });
     
     if (state.audioSource === "elevenlabs") {
-      select.value = "elevenlabs";
+      const matched = elVoices.find(ev => ev.id === state.elevenLabsVoice);
+      select.value = matched ? matched.value : "elevenlabs_declan";
     } else {
       const best = findBestDefaultVoice(audioState.voices, state.translation);
       if (best) {
@@ -2288,7 +2298,14 @@ function setupEventListeners() {
       const voiceSelect = document.getElementById("tts-voice-select");
       if (voiceSelect) {
         if (state.audioSource === "elevenlabs") {
-          voiceSelect.value = "elevenlabs";
+          const elVoices = [
+            { value: "elevenlabs_antoni", id: "ErXwobaYiN019PkySvjV" },
+            { value: "elevenlabs_clyde", id: "2E2jMRHfEMvvEBjL7aKG" },
+            { value: "elevenlabs_rachel", id: "21m00Tcm4TlvDq8ikWAM" },
+            { value: "elevenlabs_declan", id: "kqVT88a5QfII1HNAEPTJ" }
+          ];
+          const matched = elVoices.find(ev => ev.id === state.elevenLabsVoice);
+          voiceSelect.value = matched ? matched.value : "elevenlabs_declan";
         } else {
           // Re-populate system voices
           initAudioVoices();
@@ -2301,11 +2318,27 @@ function setupEventListeners() {
   const voiceSelect = document.getElementById("tts-voice-select");
   if (voiceSelect) {
     voiceSelect.addEventListener("change", (e) => {
-      if (e.target.value === "elevenlabs") {
+      const val = e.target.value;
+      if (val.startsWith("elevenlabs_")) {
         state.audioSource = "elevenlabs";
+        if (val === "elevenlabs_antoni") state.elevenLabsVoice = "ErXwobaYiN019PkySvjV";
+        else if (val === "elevenlabs_clyde") state.elevenLabsVoice = "2E2jMRHfEMvvEBjL7aKG";
+        else if (val === "elevenlabs_rachel") state.elevenLabsVoice = "21m00Tcm4TlvDq8ikWAM";
+        else state.elevenLabsVoice = "kqVT88a5QfII1HNAEPTJ";
+        
         saveStateToLocalStorage();
         toggleVoiceDropdownVisibility();
         if (audioSourceSelect) audioSourceSelect.value = "elevenlabs";
+        
+        // Sync setting voice input if it exists
+        const voiceInput = document.getElementById("you-elevenlabs-voice");
+        if (voiceInput) voiceInput.value = state.elevenLabsVoice;
+      } else {
+        // User selected a system voice (index or 'default')
+        state.audioSource = "ai";
+        saveStateToLocalStorage();
+        toggleVoiceDropdownVisibility();
+        if (audioSourceSelect) audioSourceSelect.value = "ai";
       }
     });
   }
