@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>River of Life - Marathi & English Bible</title>
+  
+  <!-- Web App Capabilities & Icons -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="River of Life">
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+  <link rel="icon" type="image/png" href="assets/icons/icon-192.png">
+  <link rel="shortcut icon" href="assets/icons/icon-192.png">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#f8fafc" id="theme-meta">
+  
+  <!-- Premium Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="index.css?v=22">
+</head>
+<body>
+  
+  <div id="app" class="ios-theme-light">
+    
+    <!-- 1. LEFT SIDEBAR NAVIGATION (Desktop/Tablet) -->
+    <aside class="desktop-sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <img src="assets/icons/icon-192.png" alt="Logo" class="logo-img">
+          <span class="logo-text">River of Life</span>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-tab="home">
+          <svg viewBox="0 0 24 24" class="nav-icon" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+          <span class="nav-label">Today</span>
+        </button>
+        <button class="nav-item" data-tab="reader">
+          <svg viewBox="0 0 24 24" class="nav-icon" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+          <span class="nav-label">Bible</span>
+        </button>
+        <button class="nav-item" data-tab="plans">
+          <svg viewBox="0 0 24 24" class="nav-icon" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><path d="M9 16l2 2 4-4"></path></svg>
+          <span class="nav-label">Plans</span>
+        </button>
+        <button class="nav-item" data-tab="discover">
+          <svg viewBox="0 0 24 24" class="nav-icon" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <span class="nav-label">Search</span>
+        </button>
+        <button class="nav-item" data-tab="you">
+          <div class="avatar-nav-mini">R</div>
+          <span class="nav-label">Profile</span>
+        </button>
+      </nav>
+    </aside>
+
+    <!-- 2. MAIN LAYOUT CONTAINER -->
+    <div class="main-layout-container">
+      
+      <!-- Top Navigation/Header Bar (Responsive) -->
+      <header class="app-header">
+        <div id="nav-reader-controls" class="header-pane active">
+          <div class="header-left">
+            <button id="btn-history-trigger" class="header-icon-btn" title="Reading History">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            </button>
+          </div>
+          <div class="header-center">
+            <div class="header-selector-capsule">
+              <button id="btn-audio-tts" class="capsule-icon-btn" aria-label="Listen">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+              </button>
+              <span class="capsule-divider"></span>
+              <button id="btn-book-selector" class="capsule-text-btn">
+                <span id="nav-book-title">शास्ते १३</span>
+              </button>
+              <span class="capsule-divider"></span>
+              <button id="btn-translation-selector" class="capsule-text-btn">
+                <span id="nav-translation-title">मराठी</span>
+                <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="3.5" style="margin-left: 4px;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </button>
+            </div>
+          </div>
+          <div class="header-right">
+            <button id="btn-search-trigger" class="header-icon-btn" aria-label="Search">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </button>
+            <button id="btn-text-settings" class="header-icon-btn" aria-label="Text Settings">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            </button>
+          </div>
+        </div>
+        
+        <div id="nav-static-controls" class="header-pane">
+          <h1 id="static-header-title">Today</h1>
+        </div>
+      </header>
+
+      <!-- Content Views Stack -->
+      <main class="content-view-viewport">
+        
+        <!-- VIEW 1: TODAY / HOME VIEW (Redesigned Grid Layout) -->
+        <section id="view-home" class="app-view active">
+          <div class="view-scroll-content">
+            <!-- Search bar at top center -->
+            <div class="home-search-container">
+              <input type="text" id="home-search-trigger-input" class="home-search-bar" placeholder="Search Bible, Topics, or Questions" readonly>
+            </div>
+
+            <div class="home-grid-layout">
+              <!-- Card 1: Daily Bible Verse -->
+              <div class="daily-verse-card" id="btn-open-fullscreen-vod">
+                <div class="daily-verse-card-bg"></div>
+                <div class="daily-verse-tint"></div>
+                <div class="daily-verse-header-tabs">
+                  <span class="tab-pill active">✉ DAILY BIBLE VERSE</span>
+                  <span class="tab-pill">❓ DAILY TOUCHPOINT QUESTION</span>
+                  <span class="tab-pill">📖 DAILY DEVO</span>
+                </div>
+                <div class="daily-verse-body">
+                  <blockquote id="home-vod-text">"तू जलांतून चालशील तेव्हा मी तुझ्याबरोबर असेन..."</blockquote>
+                  <cite id="home-vod-ref">Psalm 20:5 NLT</cite>
+                </div>
+                <div class="daily-verse-social-metrics">
+                  <div class="metric"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path></svg><span>12.6L</span></div>
+                  <div class="metric"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg><span>24.3K</span></div>
+                  <div class="metric"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg><span>5.3L</span></div>
+                  <div class="metric-right">More</div>
+                </div>
+              </div>
+
+              <!-- Card 2: TouchPoint Hope -->
+              <div class="touchpoint-hope-card">
+                <div class="touchpoint-image-bg"></div>
+                <div class="touchpoint-overlay"></div>
+                <div class="touchpoint-body">
+                  <div class="touchpoint-tag">💡 TouchPoint: Hope</div>
+                  <h3>Why should I trust God as my hope?</h3>
+                  <p class="touchpoint-author">Includes lesson on faith and trust — Speaker, Leadership Coach & Pastor</p>
+                </div>
+              </div>
+
+              <!-- Card 3: Deepen Study Premium -->
+              <div class="premium-promo-card">
+                <div class="promo-content">
+                  <span class="promo-desc">Unlimited access to <strong>150+ study titles</strong> • read entirely <strong>offline</strong> • first month <strong>free</strong></span>
+                  <h2>DEEPEN</h2>
+                  <p>Your Bible Study With</p>
+                  <h3>PREMIUM</h3>
+                  <button class="btn-premium-action">Learn more about Premium</button>
+                </div>
+              </div>
+
+              <!-- Card 4: Commentary Mockup Graphic -->
+              <div class="commentary-mockup-card">
+                <img src="assets/images/premium_commentary_promo.png" alt="Commentary Mockup" class="mockup-img">
+              </div>
+
+              <!-- Card 5: TouchPoints Tag Grid -->
+              <div class="touchpoints-tags-card">
+                <span class="tags-card-label">TouchPoints</span>
+                <h4>I'm wondering about...</h4>
+                <div class="tag-chips-grid">
+                  <button class="tag-chip" data-query="wealth">Wealth</button>
+                  <button class="tag-chip" data-query="refreshment">Refreshment</button>
+                  <button class="tag-chip" data-query="words">Words</button>
+                  <button class="tag-chip" data-query="advantage">Advantage</button>
+                  <button class="tag-chip" data-query="restoration">Restoration</button>
+                  <button class="tag-chip" data-query="differences">Differences</button>
+                  <button class="tag-chip" data-query="prosperity">Prosperity</button>
+                  <button class="tag-chip" data-query="parents">Parents</button>
+                  <button class="tag-chip" data-query="sensitivity">Sensitivity</button>
+                  <button class="tag-chip" data-query="goodness">Goodness</button>
+                  <button class="tag-chip" data-query="discrimination">Discrimination</button>
+                  <button class="tag-chip" data-query="temper">Temper</button>
+                  <button class="tag-chip" data-query="bible">Bible</button>
+                  <button class="tag-chip" data-query="expectations">Expectations</button>
+                  <button class="tag-chip" data-query="love">Love</button>
+                  <button class="tag-chip" data-query="godliness">Godliness</button>
+                </div>
+                <div class="tags-footer-row">
+                  <span>Discover 500 life topic questions and answers</span>
+                  <button class="btn-see-all-tags">SEE ALL</button>
+                </div>
+              </div>
+
+              <!-- Card 6: My Reading Plans Suggested List -->
+              <div class="suggested-plans-card">
+                <div class="suggested-plans-header">
+                  <h4>My Reading Plans</h4>
+                  <span class="sub-label">SUGGESTED PLANS</span>
+                </div>
+                <div class="suggested-plans-list">
+                  <div class="suggested-plan-row" data-plan-id="anxiety_tremble">
+                    <span class="plan-avatar-icon">🌊</span>
+                    <div class="plan-info">
+                      <strong>Made to Tremble: Finding Awe in Your Anxiety</strong>
+                      <span class="plan-type">Bible Plan</span>
+                    </div>
+                  </div>
+                  <div class="suggested-plan-row" data-plan-id="still_heart">
+                    <span class="plan-avatar-icon">🕊️</span>
+                    <div class="plan-info">
+                      <strong>Cultivating a Still Heart in a Noisy World</strong>
+                      <span class="plan-type">Bible Plan</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Card 7: Resilient and Redeemed banner card -->
+              <div class="resilient-banner-card">
+                <div class="resilient-body">
+                  <h2>RESILIENT & REDEEMED</h2>
+                  <p>Lesson About Faith, Depression & Suicidality</p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW 2: BIBLE READER VIEW (Redesigned with inline elements) -->
+        <section id="view-reader" class="app-view split-screen-parent">
+          
+          <!-- Column 2 (Center): Bible Scripture Pane -->
+          <div class="reader-pane-left">
+            <div class="verses-scroller" id="reader-scroll-container">
+              <div class="chapter-info-badge">
+                <h2 id="reader-chapter-title">शास्ते</h2>
+                <p id="reader-chapter-number">अध्याय १३</p>
+              </div>
+              <div id="reader-verses" class="verses-text-layout">
+                <div class="loader-container">
+                  <div class="ios-spinner"></div>
+                </div>
+              </div>
+              
+              <!-- Quick Prev/Next buttons at bottom of text -->
+              <div class="reader-navigation-row">
+                <button id="btn-prev-chapter" class="chapter-nav-btn">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                  <span>मागे</span>
+                </button>
+                <button id="btn-next-chapter" class="chapter-nav-btn">
+                  <span>पुढे</span>
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Column 3 (Right): Study commentary split pane (collapsible) -->
+          <div id="reader-study-pane" class="reader-pane-right">
+            <div class="study-pane-header">
+              <div class="drag-handle-bar"></div>
+              <div class="study-title-row">
+                <span id="study-pane-ref-title" class="ref-title">Study Tools</span>
+                <button id="btn-close-study-pane" class="close-btn" aria-label="Close Study Tools">&times;</button>
+              </div>
+              <!-- Segmented Subtabs Control -->
+              <div class="study-segmented-control">
+                <button class="study-subtab-btn active" data-study-tab="explain">📖 Explain</button>
+                <button class="study-subtab-btn" data-study-tab="crossref">🔗 References</button>
+                <button class="study-subtab-btn" data-study-tab="journal">✍️ Journal</button>
+              </div>
+            </div>
+            
+            <div class="study-pane-body-scroller">
+              <!-- Subtab 1: Commentary -->
+              <div id="study-tab-explain" class="study-subtab-content active">
+                <div class="subtab-section-label">Bilingual Explanation</div>
+                <div id="study-explain-text-mr" class="commentary-card mr-lang">Loading Marathi commentary...</div>
+                <div id="study-explain-text-en" class="commentary-card en-lang">Loading English commentary...</div>
+              </div>
+              
+              <!-- Subtab 2: Cross References -->
+              <div id="study-tab-crossref" class="study-subtab-content">
+                <div class="subtab-section-label">Cross Referenced Scriptures</div>
+                <div id="study-crossref-list" class="crossrefs-flex-list">
+                  <!-- References will render here dynamically -->
+                </div>
+              </div>
+              
+              <!-- Subtab 3: Journal / Note Editor -->
+              <div id="study-tab-journal" class="study-subtab-content">
+                <div class="subtab-section-label">Personal Reflection Journal</div>
+                <div class="journal-editor-box">
+                  <textarea id="study-journal-editor" class="journal-textarea" placeholder="Write down your prayers, thoughts or what you learned from this scripture..."></textarea>
+                  <div class="journal-footer-row">
+                    <span id="study-journal-status" class="autosave-label">Saved in local storage</span>
+                    <button id="btn-save-journal" class="btn-save-note">Save Note</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW 3: READING PLANS VIEW (Redesigned with Discover Subtabs) -->
+        <section id="view-plans" class="app-view">
+          <div class="view-scroll-content plans-scroll-view">
+            <!-- Plans Subtabs Control -->
+            <div class="plans-subnav-row">
+              <button class="plans-subnav-btn active" data-plans-subtab="discover">DISCOVER</button>
+              <button class="plans-subnav-btn" data-plans-subtab="myplans">MY PLANS</button>
+              <button class="plans-subnav-btn" data-plans-subtab="today">TODAY</button>
+            </div>
+
+            <!-- Subtab Content 1: DISCOVER PLANS -->
+            <div id="plans-subtab-discover" class="plans-subtab-panel active">
+              <div class="plans-search-container">
+                <svg viewBox="0 0 24 24" class="plans-search-icon" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="search" id="plans-search-input" placeholder="Search by title or author" autocomplete="off">
+              </div>
+
+              <!-- Top Carousel Banners -->
+              <div class="plans-carousel">
+                <div class="carousel-card active slide-1">
+                  <div class="carousel-body">
+                    <h2>RESILIENT & REDEEMED</h2>
+                    <p>Lesson About Faith, Depression & Suicidality</p>
+                  </div>
+                </div>
+                <div class="carousel-card slide-2">
+                  <div class="carousel-body">
+                    <h2>Life Bible Book Club</h2>
+                    <p>Job - Psalms • Join the Discussion</p>
+                  </div>
+                </div>
+                <div class="carousel-card slide-3">
+                  <div class="carousel-body">
+                    <h2>A SIMPLY HEALTHY life</h2>
+                    <p>By Caroline Fausel</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Book of the Month Horizontal Scroller -->
+              <div class="plans-section-group">
+                <div class="plans-section-header">
+                  <h4>Book of the Month 2026</h4>
+                  <button class="btn-see-all">SEE ALL</button>
+                </div>
+                <div class="horizontal-scrollable-row">
+                  <div class="book-cover-tile color-psalms" data-book="psalms">
+                    <span class="cover-tag">JULY</span>
+                    <h4>PSALMS</h4>
+                    <span class="cover-desc">BOOK OF THE MONTH</span>
+                  </div>
+                  <div class="book-cover-tile color-philippians" data-book="philippians">
+                    <span class="cover-tag">AUG</span>
+                    <h4>PHILIPPIANS</h4>
+                    <span class="cover-desc">BOOK OF THE MONTH</span>
+                  </div>
+                  <div class="book-cover-tile color-daniel" data-book="daniel">
+                    <span class="cover-tag">SEPT</span>
+                    <h4>DANIEL</h4>
+                    <span class="cover-desc">BOOK OF THE MONTH</span>
+                  </div>
+                  <div class="book-cover-tile color-colossians" data-book="colossians">
+                    <span class="cover-tag">OCT</span>
+                    <h4>COLOSSIANS</h4>
+                    <span class="cover-desc">BOOK OF THE MONTH</span>
+                  </div>
+                  <div class="book-cover-tile color-nehemiah" data-book="nehemiah">
+                    <span class="cover-tag">NOV</span>
+                    <h4>NEHEMIAH</h4>
+                    <span class="cover-desc">BOOK OF THE MONTH</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- "Just for you" (Anxiety) horizontal scroller -->
+              <div class="plans-section-group margin-top">
+                <div class="plans-section-header">
+                  <h4>Anxiety</h4>
+                  <button class="btn-see-all">SEE ALL</button>
+                </div>
+                <div class="horizontal-scrollable-row text-covers">
+                  <div class="plan-cover-tile theme-blue" data-plan="nt90">
+                    <div class="plan-inner">
+                      <h4>Free from Anxiety</h4>
+                      <p>Finding peace in the storm</p>
+                    </div>
+                  </div>
+                  <div class="plan-cover-tile theme-dark" data-plan="bible365">
+                    <div class="plan-inner">
+                      <h4>Peace is Possible</h4>
+                      <p>Through trust in God</p>
+                    </div>
+                  </div>
+                  <div class="plan-cover-tile theme-green" data-plan="nt90">
+                    <div class="plan-inner">
+                      <h4>Letting Go of Anxiety</h4>
+                      <p>7-day devotional plan</p>
+                    </div>
+                  </div>
+                  <div class="plan-cover-tile theme-gold" data-plan="bible365">
+                    <div class="plan-inner">
+                      <h4>Don't Worry</h4>
+                      <p>Daily lessons on hope</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Subtab Content 2: MY PLANS (Reading portion list tracker) -->
+            <div id="plans-subtab-myplans" class="plans-subtab-panel">
+              <div class="panel-empty-state" id="myplans-empty-state" style="display: none; padding: 40px 20px; text-align: center;">
+                <span style="display: block; margin-bottom: 16px; color: var(--text-muted);">You don't have any active reading plan. Discover curated plans or tap '+' to build a custom one!</span>
+                <button class="btn-primary-block" id="btn-discover-plans-fallback" style="max-width: 200px; margin: 0 auto;">Explore Plans</button>
+              </div>
+              <div class="plan-card active-plan-detail">
+                <div class="plan-card-header">
+                  <div>
+                    <h4 class="plan-title" id="plans-tab-name">New Testament in 90 Days</h4>
+                    <span class="plan-meta-info" id="plans-tab-meta">Day 1 of 90 • 0% Complete</span>
+                    <div class="day-jump-wrapper">
+                      <label for="plans-select-day">Go to Day:</label>
+                      <select id="plans-select-day" class="dropdown-selector"></select>
+                    </div>
+                  </div>
+                  <div class="status-badge">Active</div>
+                </div>
+                
+                <div class="progress-bar-wrapper">
+                  <div class="progress-bar-fill" id="plans-tab-fill" style="width: 0%"></div>
+                </div>
+                
+                <div class="daily-portions-checklist plan-reading-portions">
+                  <!-- Portions checked checklists -->
+                </div>
+                <button id="btn-complete-day-plans" class="btn-primary-block margin-top">Complete Day</button>
+              </div>
+            </div>
+
+            <!-- Subtab Content 3: TODAY (Suggested Devos) -->
+            <div id="plans-subtab-today" class="plans-subtab-panel">
+              <div class="panel-empty-state">
+                <span>No plans scheduled for today. Explore reading plans in DISCOVER tab.</span>
+              </div>
+            </div>
+
+            <!-- Floating + Plan action button (Screenshot 4) -->
+            <button class="floating-plans-action-btn" aria-label="Create Plan">
+              <span>+ Plan</span>
+            </button>
+
+          </div>
+        </section>
+
+        <!-- VIEW 4: DISCOVER VIEW (Redesigned Search page, Screenshot 3) -->
+        <section id="view-discover" class="app-view">
+          <div class="search-header-container">
+            <div class="search-field-row">
+              <svg viewBox="0 0 24 24" class="search-field-icon" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              <input type="search" id="discover-search-input" placeholder="Search Bible, Topics, or Questions" autocomplete="off">
+              <button id="btn-discover-search-clear" class="btn-clear-search" style="display: none;">&times;</button>
+            </div>
+            <div class="search-filter-pills">
+              <button class="filter-pill active" id="btn-filter-books">📖 Books: All</button>
+              <button class="filter-pill" id="btn-filter-translation">🗂️ Translations: Marathi & English</button>
+              <button class="filter-pill" id="btn-filter-favorites">⭐ Favorites: All</button>
+            </div>
+          </div>
+          
+          <div class="search-results-viewport">
+            <!-- Empty state center content (Screenshot 3) -->
+            <div id="search-empty-state-content" class="search-empty-state">
+              <img src="assets/images/search_illustration.png" alt="Search illustration" class="search-illustration-img">
+              <p class="search-instruction-text">Find verses by searching for words, a phrase or asking a question.</p>
+              
+              <div class="search-examples-box">
+                <div class="example-group">
+                  <h5>Word Search Examples</h5>
+                  <ul>
+                    <li class="clickable-search-example" data-search="vision">vision / दर्शन</li>
+                    <li class="clickable-search-example" data-search="love your neighbor">love your neighbor / शेजाऱ्यावर प्रीती</li>
+                    <li class="clickable-search-example" data-search="pride humility">pride humility / नम्रता</li>
+                  </ul>
+                </div>
+                
+                <div class="example-group margin-top-sm">
+                  <h5>AI Verse Search Examples</h5>
+                  <ul>
+                    <li class="clickable-search-example" data-search="How do I handle my stress?">How do I handle my stress? / तणाव कसा हाताळायचा?</li>
+                    <li class="clickable-search-example" data-search="Where is that verse about trusting God?">Where is that verse about trusting God? / देवावर विश्वास ठेवणे</li>
+                    <li class="clickable-search-example" data-search="How do I know what purpose Jesus wants for me?">How do I know what purpose Jesus wants for me? / येशूची माझ्यासाठी इच्छा</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- Matches dynamic list -->
+            <div id="discover-search-results-status" class="search-results-label" style="display: none;">Enter search terms to find scriptures</div>
+            <div id="discover-search-results-list" class="search-results-list-wrapper">
+              <!-- Matches -->
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW 5: YOU / SETTINGS VIEW (Library & Themes) -->
+        <section id="view-you" class="app-view">
+          <div class="view-scroll-content">
+            <div class="profile-card">
+              <div class="avatar-circle">R</div>
+              <div class="profile-details">
+                <h3>Gaurav Salve</h3>
+                <p>Member Since 2026 • ⚡ 1 Day Streak</p>
+              </div>
+            </div>
+            
+            <!-- Library Segmented Controls -->
+            <div class="profile-tabs-row">
+              <button class="profile-tab-btn" data-tab="you-highlights">Highlights</button>
+              <button class="profile-tab-btn" data-tab="you-bookmarks">Bookmarks</button>
+              <button class="profile-tab-btn" data-tab="you-history">History</button>
+              <button class="profile-tab-btn active" data-tab="you-settings">Settings</button>
+            </div>
+            
+            <div class="profile-tabs-content-viewport">
+              
+              <!-- Subtab 1: Highlights -->
+              <div id="you-tab-content-you-highlights" class="profile-tab-panel">
+                <div id="you-highlights-empty" class="panel-empty-state">
+                  <span>No highlighted verses yet.</span>
+                </div>
+                <div id="you-highlights-list" class="library-cards-list"></div>
+              </div>
+              
+              <!-- Subtab 2: Bookmarks -->
+              <div id="you-tab-content-you-bookmarks" class="profile-tab-panel">
+                <div id="you-bookmarks-empty" class="panel-empty-state">
+                  <span>No bookmarks created yet.</span>
+                </div>
+                <div id="you-bookmarks-list" class="library-cards-list"></div>
+              </div>
+              
+              <!-- Subtab 3: History -->
+              <div id="you-tab-content-you-history" class="profile-tab-panel">
+                <div id="you-history-empty" class="panel-empty-state">
+                  <span>Your reading history is empty.</span>
+                </div>
+                <div id="you-history-list" class="library-cards-list"></div>
+              </div>
+              
+              <!-- Subtab 4: Settings -->
+              <div id="you-tab-content-you-settings" class="profile-tab-panel active">
+                <div class="settings-card-group">
+                  <h4 class="settings-group-label">Active Translations</h4>
+                  <div class="settings-form-row">
+                    <label for="you-select-translation">Default Translation</label>
+                    <select id="you-select-translation" class="dropdown-selector">
+                      <option value="mar">मराठी (MARVBSI)</option>
+                      <option value="eng">English (KJV)</option>
+                      <option value="parallel">Parallel Mode (Stack Both)</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div class="settings-card-group margin-top">
+                  <h4 class="settings-group-label">Application Theme</h4>
+                  <div class="themes-selector-grid">
+                    <button class="theme-btn light" data-theme="light">
+                      <span class="swatch"></span>
+                      <span>Light</span>
+                    </button>
+                    <button class="theme-btn sepia" data-theme="sepia">
+                      <span class="swatch"></span>
+                      <span>Sepia</span>
+                    </button>
+                    <button class="theme-btn olive" data-theme="olive">
+                      <span class="swatch"></span>
+                      <span>Olive</span>
+                    </button>
+                    <button class="theme-btn dark active" data-theme="dark">
+                      <span class="swatch"></span>
+                      <span>Midnight</span>
+                    </button>
+                  </div>
+                </div>
+
+              <div class="settings-card-group margin-top">
+                <h4 class="settings-group-label">👑 ElevenLabs Premium Voice</h4>
+                <div class="settings-form-row" style="flex-direction: column; align-items: flex-start; gap: 8px;">
+                  <label for="you-elevenlabs-key">ElevenLabs API Key</label>
+                  <input type="password" id="you-elevenlabs-key" class="dropdown-selector" style="width: 100%; text-align: left; padding: 10px;" placeholder="Paste ElevenLabs API Key here">
+                  <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Stored locally in your browser. Bypasses standard TTS for high-fidelity storyteller voices.</p>
+                </div>
+                <div class="settings-form-row" style="flex-direction: column; align-items: flex-start; gap: 8px; margin-top: 12px;">
+                  <label for="you-elevenlabs-voice">Voice ID</label>
+                  <input type="text" id="you-elevenlabs-voice" class="dropdown-selector" style="width: 100%; text-align: left; padding: 10px;" placeholder="kqVT88a5QfII1HNAEPTJ (Declan Sage)">
+                </div>
+              </div>
+ 
+              <div class="settings-card-group margin-top">
+                  <h4 class="settings-group-label">Offline Features</h4>
+                  <div class="settings-action-row">
+                    <div class="action-desc">
+                      <span>Download Both Bibles</span>
+                      <p id="you-offline-cache-status">Store KJV & Marathi for full offline use</p>
+                    </div>
+                    <button id="you-btn-cache-bible" class="btn-secondary-mini">Download</button>
+                  </div>
+                  <div class="settings-action-row">
+                    <div class="action-desc">
+                      <span>Reset App Data</span>
+                      <p>Wipe highlights, history, notes, and cache</p>
+                    </div>
+                    <button id="you-btn-clear-cache" class="btn-danger-mini">Wipe Data</button>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <!-- 3. MOBILE BOTTOM NAVIGATION TAB BAR -->
+      <nav class="mobile-bottom-tabs">
+        <button class="tab-btn active" data-tab="home">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+          <span class="tab-label">Home</span>
+        </button>
+        <button class="tab-btn" data-tab="reader">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+          <span class="tab-label">Bible</span>
+        </button>
+        <button class="tab-btn" data-tab="discover">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <span class="tab-label">Search</span>
+        </button>
+        <button class="tab-btn" data-tab="plans">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><path d="M9 16l2 2 4-4"></path></svg>
+          <span class="tab-label">Plans</span>
+        </button>
+        <button class="tab-btn" data-tab="you">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="12" cy="12" r="1.5"></circle><circle cx="19" cy="12" r="1.5"></circle><circle cx="5" cy="12" r="1.5"></circle></svg>
+          <span class="tab-label">More</span>
+        </button>
+      </nav>
+
+      <!-- Floating playbar capsule above the mobile tab bar / bottom desktop page -->
+      <div id="floating-audio-playbar" class="floating-playbar-container">
+        <button id="playbar-btn-prev" class="playbar-control-btn" aria-label="Previous Verse">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <button id="playbar-btn-play" class="playbar-play-circle" aria-label="Play / Pause">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" id="playbar-icon-svg"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+        </button>
+        <button id="playbar-btn-next" class="playbar-control-btn" aria-label="Next Verse">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </button>
+        <button id="playbar-btn-close-widget" class="playbar-control-btn close" aria-label="Close Player">&times;</button>
+        
+        <div class="playbar-progress-line-bg">
+          <div id="playbar-progress-line" class="playbar-progress-line-fill" style="width: 0%"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 4. BOTTOM DRAWERS & MODALS -->
+    
+    <!-- Translation Selector Drawer -->
+    <div id="drawer-translation-selector" class="drawer-overlay">
+      <div class="ios-drawer-sheet">
+        <div class="drawer-header-row">
+          <div class="grabber-bar"></div>
+          <h3>Select Translation</h3>
+          <button class="close-drawer-btn">&times;</button>
+        </div>
+        <div class="drawer-body-list">
+          <button class="select-row-item" data-lang="mar">
+            <span class="title">मराठी (MARVBSI)</span>
+            <span class="subtitle">Marathi Bible translation</span>
+          </button>
+          <button class="select-row-item" data-lang="eng">
+            <span class="title">English (NLT)</span>
+            <span class="subtitle">New Living Translation</span>
+          </button>
+          <button class="select-row-item" data-lang="parallel">
+            <span class="title">Bilingual Parallel Mode</span>
+            <span class="subtitle">Stack English and Marathi verses side-by-side</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Text Styling Settings Drawer -->
+    <div id="drawer-text-settings" class="drawer-overlay">
+      <div class="ios-drawer-sheet">
+        <div class="drawer-header-row">
+          <div class="grabber-bar"></div>
+          <h3>Display Settings</h3>
+          <button class="close-drawer-btn">&times;</button>
+        </div>
+        <div class="drawer-body-settings">
+          <div class="setting-item-row">
+            <label>Text Size</label>
+            <div class="size-toggles">
+              <button id="btn-size-dec" class="size-btn">A-</button>
+              <span id="text-size-value">100%</span>
+              <button id="btn-size-inc" class="size-btn">A+</button>
+            </div>
+          </div>
+          <div class="setting-item-row">
+            <label>Font Styling</label>
+            <div class="fonts-toggle-grid">
+              <button class="font-btn serif active" data-font="serif">Serif (Lora)</button>
+              <button class="font-btn sans-serif" data-font="sans">Sans (Inter)</button>
+              <button class="font-btn rounded" data-font="rounded">Rounded (Outfit)</button>
+            </div>
+          </div>
+          <div class="setting-item-row">
+            <label>Line Spacing</label>
+            <div class="heights-toggle-grid">
+              <button class="spacing-btn active" data-height="1.5">Compact</button>
+              <button class="spacing-btn" data-height="1.8">Normal</button>
+              <button class="spacing-btn" data-height="2.1">Spacious</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Book & Chapter Selector Drawer (Tecarta styled, list view on desktop) -->
+    <div id="drawer-book-selector" class="drawer-overlay">
+      <div class="ios-drawer-sheet full-height">
+        <div class="drawer-header-row">
+          <div class="grabber-bar"></div>
+          <h3 id="book-selector-header-title">Books</h3>
+          <button class="close-drawer-btn">&times;</button>
+        </div>
+        <div class="drawer-book-selector-scroll">
+          <!-- Books Selection View -->
+          <div id="selector-books-pane" class="selector-pane-view active">
+            <div class="testament-block" id="section-ot-books">
+              <h4 class="testament-heading">जुना करार (Old Testament)</h4>
+              <div id="ot-books-grid" class="books-buttons-grid">
+                <!-- OT books grid loads here -->
+              </div>
+            </div>
+            <div class="testament-block" id="section-nt-books">
+              <h4 class="testament-heading">नवा करार (New Testament)</h4>
+              <div id="nt-books-grid" class="books-buttons-grid">
+                <!-- NT books grid loads here -->
+              </div>
+            </div>
+          </div>
+          
+          <!-- Chapters selection view -->
+          <div id="selector-chapters-pane" class="selector-pane-view">
+            <button id="btn-back-to-books" class="btn-back-link">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+              <span id="selected-book-name-indicator">शास्ते</span>
+            </button>
+            <div id="chapters-number-grid" class="chapters-buttons-grid">
+              <!-- Chapters list loads dynamically -->
+            </div>
+          </div>
+        </div>
+        <!-- Sorting bar inside book selector footer -->
+        <div class="selector-sorting-footer">
+          <div class="sorting-tabs-capsule">
+            <button id="btn-sort-traditional" class="sort-tab active">Traditional</button>
+            <button id="btn-sort-alphabetical" class="sort-tab">Alphabetical</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Verse Options Menu Bottom Drawer -->
+    <div id="drawer-verse-options" class="drawer-overlay">
+      <div class="ios-drawer-sheet">
+        <div class="drawer-header-row">
+          <div class="grabber-bar"></div>
+          <h3 id="verse-options-title">Verse Options</h3>
+          <button class="close-drawer-btn">&times;</button>
+        </div>
+        <div class="drawer-body-verse-options">
+          <blockquote id="verse-options-preview" class="verse-options-preview-text">"तू जलांतून चालशील..."</blockquote>
+          
+          <!-- Color Dot Highlights -->
+          <div class="options-group flex-column">
+            <label class="group-label">Highlight Color</label>
+            <div class="highlights-dots-row">
+              <button class="dot-btn yellow" data-color="yellow" aria-label="Yellow highlight"></button>
+              <button class="dot-btn green" data-color="green" aria-label="Green highlight"></button>
+              <button class="dot-btn blue" data-color="blue" aria-label="Blue highlight"></button>
+              <button class="dot-btn pink" data-color="pink" aria-label="Pink highlight"></button>
+              <button class="dot-btn clear" data-color="clear" aria-label="Clear highlight">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Actions Grid -->
+          <div class="options-actions-grid">
+            <button id="btn-action-explain" class="action-tile-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+              <span>Explain</span>
+            </button>
+            <button id="btn-action-bookmark" class="action-tile-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="bookmark-svg-state"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+              <span id="bookmark-action-label">Bookmark</span>
+            </button>
+            <button id="btn-action-copy" class="action-tile-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              <span>Copy</span>
+            </button>
+            <button id="btn-action-share" class="action-tile-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+              <span>Share Card</span>
+            </button>
+            <button id="btn-action-speak" class="action-tile-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+              <span>Read Aloud</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fullscreen Verse of the Day Card Modal -->
+    <div id="modal-fullscreen-vod" class="modal-overlay-fullscreen">
+      <div class="fullscreen-vod-capsule">
+        <button id="btn-close-fullscreen-vod" class="round-close-btn top-left" aria-label="Close">&times;</button>
+        <button id="btn-fs-options" class="round-close-btn top-right" aria-label="Options">&#8942;</button>
+        
+        <div class="fullscreen-vod-content">
+          <div class="fs-card-label">Verse of the Day</div>
+          <blockquote id="fs-vod-text" class="fs-card-text">"तू जलांतून चालशील..."</blockquote>
+          <cite id="fs-vod-ref" class="fs-card-ref">यशया ४३:२ MARVBSI</cite>
+        </div>
+        
+        <div class="fullscreen-vod-actions">
+          <div class="social-row-buttons">
+            <button id="btn-fs-like" class="social-btn">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" id="fs-like-heart"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path></svg>
+              <span id="fs-like-count">12.6L</span>
+            </button>
+            <button id="btn-fs-comment" class="social-btn">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+              <span>24.4K</span>
+            </button>
+            <button id="btn-fs-share-trigger" class="social-btn">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+              <span>5.3L</span>
+            </button>
+          </div>
+          <button id="btn-fs-customize-card" class="btn-customize-theme-pill">🎨 Customize Card</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Image Share Card Creator Modal -->
+    <div id="modal-card-share" class="drawer-overlay">
+      <div class="ios-drawer-sheet modal-height">
+        <div class="drawer-header-row">
+          <h3>Create Verse Card</h3>
+          <button class="close-drawer-btn" id="btn-close-card-share">&times;</button>
+        </div>
+        <div class="modal-card-creator-body">
+          <div id="share-card-canvas" class="verse-card-canvas gradient-1">
+            <div class="watermark-cross">†</div>
+            <div id="share-card-text" class="card-quote-text">"For God so loved..."</div>
+            <div id="share-card-source" class="card-quote-source">John 3:16 • KJV</div>
+          </div>
+          
+          <div class="canvas-customization-tools">
+            <label>Choose Card Style</label>
+            <div class="gradients-palette">
+              <button class="grad-dot grad-1 active" data-grad="gradient-1"></button>
+              <button class="grad-dot grad-2" data-grad="gradient-2"></button>
+              <button class="grad-dot grad-3" data-grad="gradient-3"></button>
+              <button class="grad-dot grad-4" data-grad="gradient-4"></button>
+              <button class="grad-dot grad-5" data-grad="gradient-5"></button>
+              <button class="grad-dot grad-6" data-grad="gradient-6"></button>
+            </div>
+            
+            <button id="btn-download-card" class="btn-primary-block">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              <span>Save to Photos</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Audio Speech Settings Modal -->
+    <div id="modal-audio-settings" class="drawer-overlay">
+      <div class="ios-drawer-sheet">
+        <div class="drawer-header-row">
+          <h3>Narration Settings</h3>
+          <button class="close-drawer-btn" id="btn-close-audio-settings">&times;</button>
+        </div>
+        <div class="drawer-body-settings">
+          <div class="setting-item-row">
+            <label>Speech Speed</label>
+            <div class="slider-wrapper">
+              <input type="range" id="tts-speed-slider" min="0.75" max="1.75" step="0.05" value="1.0" class="speed-slider">
+              <span id="tts-speed-val">1.0x</span>
+            </div>
+          </div>
+          <div class="setting-item-row" id="audio-source-row">
+            <label>Reader Type</label>
+            <select id="audio-source-select" class="dropdown-selector">
+              <option value="human">Professional Human Voice</option>
+              <option value="ai">AI Text-to-Speech Reader</option>
+              <option value="elevenlabs">ElevenLabs Premium Voice</option>
+            </select>
+          </div>
+          <div class="setting-item-row" id="voice-select-row">
+            <label>Speech Voice</label>
+            <select id="tts-voice-select" class="dropdown-selector">
+              <option value="default">Default System Voice</option>
+            </select>
+          </div>
+          <div class="setting-item-row" id="tone-select-row">
+            <label>Voice Tone Style</label>
+            <select id="audio-tone-select" class="dropdown-selector">
+              <option value="normal">Normal Voice</option>
+              <option value="deep-bass" selected>Deep Studio Bass (Morgan Freeman Style)</option>
+              <option value="warm-resonance">Warm Resonance</option>
+            </select>
+          </div>
+          <button id="btn-start-tts-reading" class="btn-primary-block margin-top">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            <span>Start Reading Aloud</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Premium Trial Promo Modal -->
+    <div id="modal-premium-promo" class="drawer-overlay">
+      <div class="ios-drawer-sheet">
+        <div class="drawer-header-row">
+          <div class="grabber-bar"></div>
+          <h3>River of Life Premium</h3>
+          <button class="close-drawer-btn" id="btn-close-premium-promo">&times;</button>
+        </div>
+        <div class="drawer-body-settings" style="text-align: center; padding: 24px;">
+          <div style="font-size: 48px; margin-bottom: 16px;">👑</div>
+          <h4 style="font-family: var(--font-ui); font-size: 20px; font-weight: 800; margin-bottom: 8px;">Unlock All Study Tools</h4>
+          <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px; line-height: 1.5;">
+            Gain unlimited access to 150+ study titles, commentaries, parallel translations, and offline audio downloads.
+          </p>
+          <ul style="text-align: left; max-width: 280px; margin: 0 auto 24px auto; list-style: none; font-size: 14px; line-height: 2;">
+            <li>📖 150+ Study Commentaries & Lexicons</li>
+            <li>🗂️ Side-by-side Translation Study</li>
+            <li>🎙️ High-Quality Narrator Voices</li>
+            <li>⚡ Read and Listen 100% Offline</li>
+          </ul>
+          <button id="btn-start-premium-trial" class="btn-primary-block">Start 30-Day Free Trial</button>
+          <p style="font-size: 11px; color: var(--text-muted); margin-top: 12px;">Cancel anytime. Just ₹199/month after trial.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Touchpoint Hope Study Detail Drawer -->
+    <div id="modal-touchpoint-detail" class="drawer-overlay">
+      <div class="ios-drawer-sheet">
+        <div class="drawer-header-row">
+          <div class="grabber-bar"></div>
+          <h3>Touchpoint: Hope</h3>
+          <button class="close-drawer-btn" id="btn-close-touchpoint-detail">&times;</button>
+        </div>
+        <div class="drawer-body-settings" style="padding: 24px;">
+          <h4 style="font-family: var(--font-ui); font-size: 18px; font-weight: 800; margin-bottom: 12px; color: var(--primary);">Why should I trust God as my hope?</h4>
+          <p style="font-size: 14px; line-height: 1.6; margin-bottom: 20px; color: var(--text);">
+            We can trust God because His character is unchanging and His promises are secure. In times of trouble, He is a refuge. The scriptures show us that hope in God does not disappoint. True hope is not just a wish; it is a confident expectation of God's goodness.
+          </p>
+          <div class="subtab-section-label" style="margin-bottom: 12px;">Study Scriptures</div>
+          <div class="touchpoint-verses-list" style="display: flex; flex-direction: column; gap: 8px;">
+            <button class="crossref-link-item touchpoint-verse-btn" data-book="isaiah" data-chapter="43" data-verse="2">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              <span>यशया ४३:२ (Isaiah 43:2) - देवाचे अभिवचन</span>
+            </button>
+            <button class="crossref-link-item touchpoint-verse-btn" data-book="psalms" data-chapter="23" data-verse="1">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              <span>स्तोत्रसंहिता २३:१ (Psalm 23:1) - परमेश्वर माझा मेंढपाळ</span>
+            </button>
+            <button class="crossref-link-item touchpoint-verse-btn" data-book="john" data-chapter="3" data-verse="16">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              <span>योहान ३:१६ (John 3:16) - देवाचे जगावरील प्रेम</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Custom Reading Plan Generator Modal -->
+    <div id="modal-create-plan" class="drawer-overlay">
+      <div class="ios-drawer-sheet">
+        <div class="drawer-header-row">
+          <div class="grabber-bar"></div>
+          <h3>Create Reading Plan</h3>
+          <button class="close-drawer-btn" id="btn-close-create-plan">&times;</button>
+        </div>
+        <div class="drawer-body-settings" style="padding: 24px;">
+          <div class="setting-item-row" style="flex-direction: column; align-items: flex-start; gap: 8px; border: none; padding: 0; margin-bottom: 16px;">
+            <label style="font-weight: 700;">Select Book of the Bible</label>
+            <select id="create-plan-book-select" class="dropdown-selector" style="width: 100%;">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+          <div class="setting-item-row" style="flex-direction: column; align-items: flex-start; gap: 8px; border: none; padding: 0; margin-bottom: 24px;">
+            <label style="font-weight: 700;">Duration</label>
+            <select id="create-plan-duration-select" class="dropdown-selector" style="width: 100%;">
+              <option value="7">7 Days Study</option>
+              <option value="15">15 Days Study</option>
+              <option value="30">30 Days Study</option>
+              <option value="90">90 Days Full Study</option>
+            </select>
+          </div>
+          <button id="btn-generate-plan-submit" class="btn-primary-block">Generate Plan</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification Overlay -->
+    <div id="toast-notification" class="app-toast">
+      <span id="toast-message">Copied to clipboard!</span>
+    </div>
+
+  </div>
+
+  <!-- App Main Logic -->
+  <script src="app.js?v=22" type="module"></script>
+</body>
+</html>
