@@ -1168,7 +1168,6 @@ function startSpeechNarration() {
     // since legacy monolingual_v1 is deprecated/restricted on newer accounts
     const modelId = "eleven_multilingual_v2";
     
-    const keyToUse = state.elevenLabsKey || ELEVENLABS_DEFAULT_KEY;
     fetch(`https://api.elevenlabs.io/v1/text-to-speech/${state.elevenLabsVoice}`, {
       method: "POST",
       headers: {
