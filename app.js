@@ -509,7 +509,24 @@ async function openReader(bookKey, chapterNum) {
   const metadata = booksMetadataMr.find(b => b.filename.replace(".json", "") === bookKey);
   if (!metadata) return;
   
-  const activeBookName = (state.translation === "eng") ? bookDataEng.name : bookDataMr.name;
+  // Verify that book data was successfully loaded to prevent runtime crash when offline
+  if ((state.translation === "mar" && !bookDataMr) || 
+      (state.translation === "eng" && !bookDataEng) || 
+      (state.translation === "parallel" && !bookDataMr && !bookDataEng)) {
+    versesContainer.innerHTML = `
+      <div class="offline-error-card" style="text-align: center; padding: 40px 24px; background-color: var(--bg-content); border: 1px solid var(--border); border-radius: 16px; margin: 20px; font-family: var(--font-ui);">
+        <span style="font-size: 32px; display: block; margin-bottom: 12px;">⚠️</span>
+        <h4 style="font-size: 16px; font-weight: 800; margin-bottom: 8px; color: var(--text);">Scripture Offline</h4>
+        <p style="font-size: 13px; color: var(--text-muted); line-height: 1.6; margin-bottom: 20px;">
+          This book chapter is not cached on your device. Connect to the internet to load it, or go to Settings to download the complete Bible for offline use.
+        </p>
+        <button onclick="window.location.hash='#/you'" class="btn-secondary-mini" style="padding: 8px 16px; font-weight: 700; font-size: 12px; border: 1px solid var(--border); border-radius: 8px; background-color: var(--bg-content); color: var(--text); cursor: pointer;">Go to Settings</button>
+      </div>
+    `;
+    return;
+  }
+  
+  const activeBookName = (state.translation === "eng") ? metadata.engName : metadata.name;
   document.getElementById("nav-book-title").textContent = `${activeBookName} ${chapterNum}`;
   document.getElementById("reader-chapter-title").textContent = activeBookName;
   
