@@ -2358,14 +2358,15 @@ body {
   bottom: 0;
   left: 0;
   width: 100vw;
-  height: 76px;
+  height: calc(60px + env(safe-area-inset-bottom));
   background-color: var(--bg-content);
   border-top: 1px solid var(--border);
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   justify-items: center;
-  align-items: center;
+  align-items: start;
   padding: 0;
+  padding-top: 6px;
   padding-bottom: env(safe-area-inset-bottom);
   z-index: 100;
   box-shadow: 0 -4px 20px rgba(0,0,0,0.03);
@@ -2377,9 +2378,9 @@ body {
   align-items: center;
   justify-content: center;
   gap: 4px;
-  padding: 6px 0;
+  padding: 4px 0;
   width: 100%;
-  height: 100%;
+  height: 48px;
   border-radius: 0;
   border: none;
   background: none;
@@ -2397,8 +2398,8 @@ body {
 }
 
 .mobile-bottom-tabs .tab-label {
-  font-size: 11.5px;
-  font-weight: 700;
+  font-size: 11px;
+  font-weight: 600;
   font-family: var(--font-ui);
 }
 
@@ -2418,8 +2419,9 @@ body {
 
   /* Show mobile bottom tab bar with safe area clearance */
   .mobile-bottom-tabs {
-    height: 94px;
-    padding-bottom: calc(14px + env(safe-area-inset-bottom)); /* Clearance for iOS home indicator bar */
+    height: calc(66px + env(safe-area-inset-bottom));
+    padding-top: 8px;
+    padding-bottom: env(safe-area-inset-bottom);
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 0;
@@ -2430,22 +2432,25 @@ body {
   .mobile-bottom-tabs {
     gap: 0;
     padding: 0;
-    height: 92px;
-    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+    height: calc(64px + env(safe-area-inset-bottom));
+    padding-top: 6px;
+    padding-bottom: env(safe-area-inset-bottom);
   }
   
   .mobile-bottom-tabs .tab-btn {
-    padding: 6px 0;
+    padding: 2px 0;
     gap: 3px;
+    height: 50px;
   }
   
   .mobile-bottom-tabs .tab-btn svg {
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
   }
   
   .mobile-bottom-tabs .tab-label {
-    font-size: 10.5px;
+    font-size: 11px;
+    font-weight: 600;
   }
 }
 
@@ -2492,7 +2497,7 @@ body {
   }
 
   .floating-playbar-container {
-    bottom: 114px; /* sits hovering above mobile bottom tab bar */
+    bottom: calc(80px + env(safe-area-inset-bottom)); /* dynamically sits above mobile bottom tab bar */
   }
 
   .app-header {
