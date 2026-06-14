@@ -1,13 +1,23 @@
-# River of Life Bible - Walkthrough: Premium Audio, Global Input Fixes & Custom Voice Support (v30)
+# River of Life Bible - Walkthrough: Unresponsive Screen Fix & Cache Refresh (v31)
 
-We have successfully resolved all touch/click unresponsiveness on mobile screens, integrated dynamic ElevenLabs key verification, wired up the options menu for the Verse of the Day, and bumped the cache system to `v30`.
+We have successfully resolved the page freeze issue by removing a duplicate `metadata` variable declaration in `app.js` and pushing `v31` with forced browser cache invalidation.
 
 The updated codebase is located in:
 [life-bible-mr](file:///C:/Users/Gaurav.Salve/.gemini/antigravity/scratch/life-bible-mr)
 
 ---
 
-## 🛠️ Critical Responsiveness & Options Fixes (v30 Deploy)
+## 🛠️ Critical Responsiveness & Options Fixes (v31 Deploy)
+
+### 1. Fixed Screen Freeze / SyntaxError from Duplicate Declaration
+* **The Issue:** A duplicate `const metadata` declaration was present in `openReader()` in `app.js` (around line 528). In ES6 Javascript, declaring a variable with `const` or `let` that has already been declared in the same scope throws an immediate `SyntaxError: Identifier 'metadata' has already been declared`. This prevented `app.js` from loading at all in browsers, freezing the user interface (clicks did nothing).
+* **The Fix:** Removed the duplicate `const metadata` declaration block. The variable is already safely declared and validated at the beginning of the function.
+
+### 2. Forced Cache Invalidation to v31
+* **The Issue:** PWAs cache scripts aggressively. If a user previously loaded the broken version, their browser serves the syntax-error crash code from cache, rendering the app unresponsive.
+* **The Fix:** Bumped the cache version to `v31` in `sw.js` and updated query parameters for `app.js?v=31` and `index.css?v=31` in both `index.html` and `sw.js`. This forces client browsers to fetch the clean, compiled version directly from the network.
+
+---
 
 ### 1. Fixed Unresponsive Input and Textarea Fields on iOS/Safari
 * **The Issue:** The CSS global body style set `user-select: none;` which was inherited by all elements. On mobile Safari (iOS), this completely blocked focus and keyboard entry for all input fields and textareas (such as ElevenLabs settings and journal reflection boxes).
