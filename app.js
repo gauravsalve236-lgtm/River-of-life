@@ -525,9 +525,6 @@ async function openReader(bookKey, chapterNum) {
     bookDataEng = await fetchBookDataEng(bookKey);
   }
   
-  const metadata = booksMetadataMr.find(b => b.filename.replace(".json", "") === bookKey);
-  if (!metadata) return;
-  
   // Verify that book data was successfully loaded to prevent runtime crash when offline
   if ((state.translation === "mar" && !bookDataMr) || 
       (state.translation === "eng" && !bookDataEng) || 
