@@ -1906,11 +1906,13 @@ function renderYouProfile() {
     if (loggedInContainer) loggedInContainer.style.display = "none";
     if (loggedOutContainer) loggedOutContainer.style.display = "block";
     renderAuthScreen();
+    updateAuthUI();
     return;
   }
   
   if (loggedInContainer) loggedInContainer.style.display = "block";
   if (loggedOutContainer) loggedOutContainer.style.display = "none";
+  updateAuthUI();
   
   const profileNameEl = document.getElementById("profile-user-name");
   if (profileNameEl) {
@@ -1924,7 +1926,13 @@ function renderYouProfile() {
   
   const pastorLabelEl = document.getElementById("profile-pastor-badge");
   if (pastorLabelEl) {
-    pastorLabelEl.style.display = state.currentUser.isPastor ? "inline-block" : "none";
+    const isIntercessor = state.currentUser.isPastor || state.currentUser.isAdmin || state.currentUser.username.toLowerCase() === "admin";
+    pastorLabelEl.style.display = isIntercessor ? "inline-block" : "none";
+    if (state.currentUser.username.toLowerCase() === "admin") {
+      pastorLabelEl.textContent = "Admin";
+    } else {
+      pastorLabelEl.textContent = "Pastor";
+    }
   }
   
   const streakEl = document.getElementById("profile-streak-count");
@@ -3711,7 +3719,25 @@ function initBibleQuiz() {
 // Helper to get all registered users
 function getRegisteredUsers() {
   try {
-    return JSON.parse(localStorage.getItem("river_of_life_users") || "[]");
+    let users = JSON.parse(localStorage.getItem("river_of_life_users") || "[]");
+    // Seed default admin account if not exists
+    if (!users.some(u => u.username.toLowerCase() === "admin")) {
+      users.push({
+        username: "admin",
+        password: "admin", // Plain text password for local mock database
+        email: "admin@riveroflife.org",
+        isPastor: true,
+        isAdmin: true,
+        bookmarks: [],
+        highlights: {},
+        userNotes: {},
+        quizPoints: 0,
+        quizHighscore: 0,
+        quizBadges: []
+      });
+      localStorage.setItem("river_of_life_users", JSON.stringify(users));
+    }
+    return users;
   } catch (e) {
     console.error("Error loading users:", e);
     return [];
@@ -3765,7 +3791,8 @@ function loginUser(username, password) {
   state.currentUser = {
     username: user.username,
     email: user.email,
-    isPastor: user.isPastor
+    isPastor: user.isPastor,
+    isAdmin: user.isAdmin || user.username.toLowerCase() === "admin"
   };
   
   // Restore user-specific data into state
@@ -3837,7 +3864,9 @@ function toggleAnsweredPrayer(prayerId) {
 
 // Pastor acknowledge prayer
 function pastorAckPrayer(prayerId, note) {
-  if (!state.currentUser || !state.currentUser.isPastor) return false;
+  if (!state.currentUser) return false;
+  const hasAccess = state.currentUser.isPastor || state.currentUser.isAdmin || state.currentUser.username.toLowerCase() === "admin";
+  if (!hasAccess) return false;
   
   const prayers = getGlobalPrayers();
   const idx = prayers.findIndex(p => p.id === prayerId);
@@ -3882,7 +3911,8 @@ function renderPrayersScreen() {
   const userPortal = document.getElementById("prayers-user-portal");
   const pastorPortal = document.getElementById("prayers-pastor-portal");
   
-  if (state.currentUser.isPastor) {
+  const hasAccess = state.currentUser.isPastor || state.currentUser.isAdmin || state.currentUser.username.toLowerCase() === "admin";
+  if (hasAccess) {
     if (userPortal) userPortal.style.display = "none";
     if (pastorPortal) pastorPortal.style.display = "block";
     renderPastorPortal();
@@ -3928,7 +3958,7 @@ function renderUserPortal() {
       let badgeText = "Pending / प्रलंबित";
       if (p.status === "answered") {
         badgeClass = "answered";
-        badgeText = "Answered 🎉 / उत्तर मिळालेली";
+        badgeText = "Answered / उत्तर मिळालेली";
       } else if (p.status === "acknowledged") {
         badgeClass = "acknowledged";
         badgeText = "Acknowledged / स्वीकृत";
@@ -3941,7 +3971,7 @@ function renderUserPortal() {
       if (p.pastorNote) {
         pastorNoteHtml = `
           <div class="pastor-blessing-box">
-            <strong>⛪ Pastor's Note:</strong>
+            <strong>Response / संदेश:</strong>
             <p>"${p.pastorNote}"</p>
           </div>
         `;
@@ -3956,7 +3986,7 @@ function renderUserPortal() {
         ${pastorNoteHtml}
         ${p.status !== "answered" ? `
           <button class="btn-secondary-mini btn-mark-answered" style="margin-top: 12px; font-size: 12px;" data-id="${p.id}">
-            Mark as Answered / उत्तर मिळाले ✔
+            Mark as Answered / उत्तर मिळाले
           </button>
         ` : ""}
       `;
@@ -4003,7 +4033,7 @@ function renderPastorPortal() {
       let badgeText = "Pending / प्रलंबित";
       if (p.status === "answered") {
         badgeClass = "answered";
-        badgeText = "Answered 🎉 / उत्तर मिळालेली";
+        badgeText = "Answered / उत्तर मिळालेली";
       } else if (p.status === "acknowledged") {
         badgeClass = "acknowledged";
         badgeText = "Acknowledged / स्वीकृत";
@@ -4016,7 +4046,7 @@ function renderPastorPortal() {
       if (p.status === "pending") {
         ackButtonHtml = `
           <button class="btn-secondary-mini btn-pastor-ack" style="margin-top: 12px; font-size: 12px;" data-id="${p.id}">
-            Acknowledge & Pray / स्वीकृत करा ⛪
+            Acknowledge & Pray / स्वीकृत करा
           </button>
         `;
       }
@@ -4025,7 +4055,7 @@ function renderPastorPortal() {
       if (p.pastorNote) {
         pastorNoteHtml = `
           <div class="pastor-blessing-box">
-            <strong>⛪ Pastor's Note:</strong>
+            <strong>Response / संदेश:</strong>
             <p>"${p.pastorNote}"</p>
           </div>
         `;
@@ -4144,6 +4174,28 @@ function initAuthAndPrayers() {
       renderPrayersScreen();
     });
   }
+
+  // Home page authentication banner action
+  const homeBannerBtn = document.getElementById("home-auth-banner-btn");
+  if (homeBannerBtn) {
+    homeBannerBtn.addEventListener("click", () => {
+      if (state.currentUser) {
+        logoutUser();
+        renderYouProfile();
+        renderPrayersScreen();
+      } else {
+        window.location.hash = "#/you";
+      }
+    });
+  }
+  
+  // Header authentication button action
+  const headerAuthBtn = document.getElementById("header-auth-btn");
+  if (headerAuthBtn) {
+    headerAuthBtn.addEventListener("click", () => {
+      window.location.hash = "#/you";
+    });
+  }
   
   const prayerForm = document.getElementById("prayer-form");
   if (prayerForm) {
@@ -4182,5 +4234,41 @@ function initAuthAndPrayers() {
         renderPastorPortal();
       }
     });
+  }
+}
+
+// Update Authentication UI elements across Home page banner and Header bar
+function updateAuthUI() {
+  const homeBannerText = document.getElementById("home-auth-banner-text");
+  const homeBannerBtn = document.getElementById("home-auth-banner-btn");
+  
+  const headerIconLoggedOut = document.getElementById("header-auth-icon-loggedout");
+  const headerAvatar = document.getElementById("header-auth-avatar");
+  
+  if (state.currentUser) {
+    // Logged In
+    if (homeBannerText) {
+      homeBannerText.innerHTML = `Welcome back, <strong>${state.currentUser.username}</strong>! Your readings and quiz points are synced.`;
+    }
+    if (homeBannerBtn) {
+      homeBannerBtn.textContent = "Log Out / बाहेर पडा";
+    }
+    
+    if (headerIconLoggedOut) headerIconLoggedOut.style.display = "none";
+    if (headerAvatar) {
+      headerAvatar.style.display = "flex";
+      headerAvatar.textContent = state.currentUser.username.substring(0, 1).toUpperCase();
+    }
+  } else {
+    // Logged Out
+    if (homeBannerText) {
+      homeBannerText.textContent = "Sign in to save your highlights, quiz points & submit prayer requests.";
+    }
+    if (homeBannerBtn) {
+      homeBannerBtn.textContent = "Sign In / लॉगिन";
+    }
+    
+    if (headerIconLoggedOut) headerIconLoggedOut.style.display = "block";
+    if (headerAvatar) headerAvatar.style.display = "none";
   }
 }

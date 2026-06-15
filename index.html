@@ -91,6 +91,10 @@
             </div>
           </div>
           <div class="header-right">
+            <button id="header-auth-btn" class="header-icon-btn" aria-label="Account Settings" style="margin-right: 8px;">
+              <svg id="header-auth-icon-loggedout" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+              <div id="header-auth-avatar" class="avatar-circle" style="width: 24px; height: 24px; font-size: 11px; font-weight: 800; display: none; margin: 0; background: var(--primary); color: #1e1b4b; line-height: 24px; justify-content: center; align-items: center; border-radius: 50%;">U</div>
+            </button>
             <button id="btn-search-trigger" class="header-icon-btn" aria-label="Search">
               <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
             </button>
@@ -114,6 +118,15 @@
             <!-- Search bar at top center -->
             <div class="home-search-container">
               <input type="text" id="home-search-trigger-input" class="home-search-bar" placeholder="Search Bible, Topics, or Questions" readonly>
+            </div>
+
+            <!-- Dynamic Home Page Auth Banner -->
+            <div id="home-auth-banner" class="settings-card-group" style="margin: 0 16px 16px 16px; padding: 14px 20px; border-radius: 12px; background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(212, 175, 55, 0.05) 100%); border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;">
+              <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 200px;">
+                <span style="font-size: 16px; color: var(--primary);">✦</span>
+                <span id="home-auth-banner-text" style="font-size: 13.5px; font-weight: 600; color: var(--text);">Sign in to save your highlights, quiz points & submit prayer requests.</span>
+              </div>
+              <button id="home-auth-banner-btn" class="btn-primary-mini" style="margin: 0; padding: 8px 16px; font-size: 12.5px; font-weight: 700; border-radius: 6px; white-space: nowrap;">Sign In / लॉगिन</button>
             </div>
 
             <div class="home-grid-layout">
@@ -518,10 +531,15 @@
             
             <!-- Lock state (Logged Out) -->
             <div id="prayers-logged-out-container" style="text-align: center; padding: 60px 20px;">
-              <div style="font-size: 64px; margin-bottom: 16px;">🙏</div>
+              <div style="margin-bottom: 20px; color: var(--primary); display: flex; justify-content: center;">
+                <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.8" style="opacity: 0.85;">
+                  <line x1="12" y1="2" x2="12" y2="22"></line>
+                  <line x1="8" y1="9" x2="16" y2="9"></line>
+                </svg>
+              </div>
               <h4 style="font-family: var(--font-ui); font-size: 20px; font-weight: 800; margin-bottom: 8px; color: var(--primary);">Prayer Requests / प्रार्थना विनंत्या</h4>
               <p style="font-size: 14px; color: var(--text-muted); max-width: 340px; margin: 0 auto 24px auto; line-height: 1.6;">
-                Join our church prayer circle. Sign in to submit personal requests, mark prayers as answered, and interact with the pastor.
+                Join our church prayer circle. Sign in to submit personal requests, mark prayers as answered, and interact with the pastor or admin group.
               </p>
               <button onclick="window.location.hash='#/you'" class="btn-primary-block" style="width: auto; display: inline-flex; padding: 12px 24px; font-size: 13.5px; border-radius: 12px;">
                 Sign In to Continue / लॉगिन करा &rarr;
@@ -533,27 +551,36 @@
               
               <!-- 1. Normal User Dashboard -->
               <div id="prayers-user-portal">
-                <div class="settings-card-group" style="padding: 20px;">
-                  <h4 class="settings-group-label" style="font-size: 14px; margin-bottom: 12px;">🙏 Send Prayer Request / प्रार्थना विनंती</h4>
-                  <form id="prayer-form" onsubmit="return false;" style="display: flex; flex-direction: column; gap: 12px;">
-                    <textarea id="prayer-input-text" class="dropdown-selector" style="width: 100%; height: 100px; text-align: left; padding: 12px; font-family: var(--font-sans); font-size: 13.5px; resize: vertical;" placeholder="Type your prayer request here..." required></textarea>
+                <div class="settings-card-group" style="padding: 24px;">
+                  <h4 class="settings-group-label" style="font-size: 15px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 20px; color: var(--primary);">New Prayer Request / नवीन प्रार्थना विनंती</h4>
+                  <form id="prayer-form" onsubmit="return false;" style="display: flex; flex-direction: column; gap: 20px;">
                     
-                    <div class="settings-form-row">
-                      <label for="prayer-input-privacy" style="font-size: 13px;">Privacy Level / गोपनीयता</label>
-                      <select id="prayer-input-privacy" class="dropdown-selector">
-                        <option value="public">Share with Church / चर्चसह सामायिक करा</option>
-                        <option value="private">Pastor Only (Private) / फक्त पास्टर (खाजगी)</option>
-                      </select>
+                    <div class="form-input-group" style="display: flex; flex-direction: column; gap: 8px;">
+                      <label for="prayer-input-text" style="font-size: 12.5px; font-weight: 700; color: var(--text-muted);">Request Details / विनंती तपशील</label>
+                      <textarea id="prayer-input-text" class="dropdown-selector" style="width: 100%; height: 120px; text-align: left; padding: 14px; font-family: var(--font-sans); font-size: 14px; line-height: 1.5; resize: vertical; border-radius: 8px; border: 1px solid var(--border); background-color: var(--bg);" placeholder="Describe what we can stand with you in prayer for..." required></textarea>
                     </div>
                     
-                    <button type="submit" id="btn-prayer-submit" class="btn-primary-block" style="margin-top: 8px;">
-                      <span>Send Request / प्रार्थना विनंती पाठवा</span>
-                    </button>
+                    <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+                      <div class="form-input-group" style="flex: 1.5; min-width: 240px; display: flex; flex-direction: column; gap: 8px;">
+                        <label for="prayer-input-privacy" style="font-size: 12.5px; font-weight: 700; color: var(--text-muted);">Privacy Setting / गोपनीयता पर्याय</label>
+                        <select id="prayer-input-privacy" class="dropdown-selector" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background-color: var(--bg);">
+                          <option value="public">Share with Church Congregation / चर्चसह सामायिक करा</option>
+                          <option value="private">Pastor & Admin Only (Confidential) / फक्त पास्टर आणि ॲडमिन (खाजगी)</option>
+                        </select>
+                      </div>
+                      
+                      <div style="flex: 1; min-width: 200px; display: flex; align-items: flex-end;">
+                        <button type="submit" id="btn-prayer-submit" class="btn-primary-block" style="width: 100%; margin: 0; padding: 12px; font-size: 13.5px; border-radius: 8px; font-weight: 700; height: 46px;">
+                          <span>Submit Request / विनंती पाठवा</span>
+                        </button>
+                      </div>
+                    </div>
+                    
                   </form>
                 </div>
                 
-                <div class="settings-card-group margin-top" style="padding: 20px;">
-                  <h4 class="settings-group-label" style="font-size: 14px;">📜 My Prayer Requests / माझ्या प्रार्थना विनंत्या</h4>
+                <div class="settings-card-group margin-top" style="padding: 24px;">
+                  <h4 class="settings-group-label" style="font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;">My Requests / माझ्या प्रार्थना विनंत्या</h4>
                   <div id="prayers-user-list-empty" class="panel-empty-state" style="padding: 24px 0;">
                     <span>You haven't submitted any prayer requests yet.</span>
                   </div>
@@ -566,15 +593,15 @@
               <!-- 2. Pastor Administration Portal -->
               <div id="prayers-pastor-portal" style="display: none;">
                 <div class="profile-card" style="background: linear-gradient(135deg, #1a2a24, #2d1d0f); margin-bottom: 24px; border: 1px solid rgba(251, 191, 36, 0.25);">
-                  <div class="avatar-circle" style="background: var(--primary); color: #1e1b4b;">⛪</div>
+                  <div class="avatar-circle" style="background: var(--primary); color: #1e1b4b; border-radius: 50%; width: 44px; height: 44px; line-height: 44px; justify-content: center; align-items: center; display: flex;">⛪</div>
                   <div class="profile-details">
-                    <h3>Pastor Dashboard</h3>
+                    <h3>Admin & Pastor Dashboard</h3>
                     <p id="pastor-dashboard-stats">Active: 0 • Pending: 0 • Answered: 0</p>
                   </div>
                 </div>
                 
-                <div class="settings-card-group" style="padding: 20px;">
-                  <h4 class="settings-group-label" style="font-size: 14px;">📋 Incoming Prayer Requests / चर्चमधील विनंत्या</h4>
+                <div class="settings-card-group" style="padding: 24px;">
+                  <h4 class="settings-group-label" style="font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;">Incoming Requests / चर्चमधील विनंत्या</h4>
                   <div id="prayers-pastor-list-empty" class="panel-empty-state" style="padding: 24px 0;">
                     <span>No prayer requests submitted yet.</span>
                   </div>
