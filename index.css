@@ -3725,3 +3725,172 @@ input, textarea, select, [contenteditable="true"] {
   font-size: 16px;
 }
 
+/* ==========================================================================
+   8. Authentication & Prayer Requests Styling
+   ========================================================================== */
+
+/* Auth UI styles */
+.auth-card {
+  max-width: 460px;
+  width: 100%;
+  margin: 40px auto;
+  border-radius: 20px;
+  padding: 28px;
+  background-color: var(--bg-content);
+  border: 1px solid var(--border);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15), var(--shadow-md);
+  transition: all 0.3s ease;
+}
+
+.auth-tab-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.auth-tab-btn.active {
+  background-color: var(--primary) !important;
+  color: #1e1b4b !important;
+}
+
+.auth-text-input {
+  width: 100%;
+  height: 44px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background-color: var(--bg);
+  color: var(--text);
+  padding: 0 14px;
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.auth-text-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary-light);
+}
+
+/* Prayer card and elements styling */
+.prayer-card {
+  background-color: var(--bg-content);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+  text-align: left;
+}
+
+.prayer-card:hover {
+  border-color: rgba(251, 191, 36, 0.3);
+  transform: translateY(-1px);
+}
+
+.prayer-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.prayer-meta {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.prayer-text {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--text);
+  word-break: break-word;
+  white-space: pre-wrap;
+  font-family: var(--font-sans);
+}
+
+/* Badge Status Styles */
+.badge-status {
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  width: fit-content;
+  display: inline-block;
+}
+
+.badge-status.pending {
+  background-color: rgba(234, 179, 8, 0.15); /* Yellow */
+  color: #eab308;
+  border: 1px solid rgba(234, 179, 8, 0.3);
+}
+
+.badge-status.acknowledged {
+  background-color: rgba(59, 130, 246, 0.15); /* Blue */
+  color: #3b82f6;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.badge-status.answered {
+  background-color: rgba(34, 197, 94, 0.15); /* Green */
+  color: #22c55e;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+/* Pastor blessing message box */
+.pastor-blessing-box {
+  background-color: rgba(251, 191, 36, 0.06);
+  border-left: 3.5px solid var(--primary);
+  border-radius: 4px 12px 12px 4px;
+  padding: 12px;
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pastor-blessing-box strong {
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pastor-blessing-box p {
+  font-style: italic;
+  line-height: 1.45;
+  color: var(--text);
+}
+
+/* Block buttons */
+.btn-danger-block {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  background-color: #ef4444;
+  color: #ffffff;
+  border: none;
+  font-family: var(--font-ui);
+  font-weight: 800;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+}
+
+.btn-danger-block:hover {
+  background-color: #dc2626;
+}
+
+

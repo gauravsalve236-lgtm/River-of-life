@@ -94,7 +94,8 @@ let state = {
   elevenLabsVoice: 'kqVT88a5QfII1HNAEPTJ', // Declan Sage voice ID
   quizPoints: 0,           // Total points earned
   quizHighscore: 0,        // High score in a single quiz session
-  quizBadges: []           // Unlocked badge IDs
+  quizBadges: [],          // Unlocked badge IDs
+  currentUser: null        // Logged in user session ({ username, isPastor, email })
 };
 
 // Memory Cache for JSON scripture data
@@ -212,6 +213,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   
   updateQuizCardStats();
   initBibleQuiz();
+  initAuthAndPrayers();
 });
 
 // Sync operations with LocalStorage
@@ -231,6 +233,23 @@ function loadStateFromLocalStorage() {
 
 function saveStateToLocalStorage() {
   localStorage.setItem("river_of_life_state_v2", JSON.stringify(state));
+  if (state.currentUser) {
+    try {
+      const users = JSON.parse(localStorage.getItem("river_of_life_users") || "[]");
+      const idx = users.findIndex(u => u.username.toLowerCase() === state.currentUser.username.toLowerCase());
+      if (idx !== -1) {
+        users[idx].bookmarks = state.bookmarks || [];
+        users[idx].highlights = state.highlights || {};
+        users[idx].userNotes = state.userNotes || {};
+        users[idx].quizPoints = state.quizPoints || 0;
+        users[idx].quizHighscore = state.quizHighscore || 0;
+        users[idx].quizBadges = state.quizBadges || [];
+        localStorage.setItem("river_of_life_users", JSON.stringify(users));
+      }
+    } catch (e) {
+      console.error("Error saving user state:", e);
+    }
+  }
 }
 
 // Update DOM elements layout, theme, and font sizing parameters from state
@@ -328,6 +347,8 @@ function initRouting() {
         renderDailyDevotion();
       } else if (route === "plans") {
         renderReadingPlansTab();
+      } else if (route === "prayers") {
+        renderPrayersScreen();
       }
     }
   };
@@ -1878,6 +1899,39 @@ function getReadingForDay(planType, day) {
    User Profile Dashboard rendering
    ========================================================================== */
 function renderYouProfile() {
+  const loggedInContainer = document.getElementById("you-logged-in-container");
+  const loggedOutContainer = document.getElementById("you-logged-out-container");
+  
+  if (!state.currentUser) {
+    if (loggedInContainer) loggedInContainer.style.display = "none";
+    if (loggedOutContainer) loggedOutContainer.style.display = "block";
+    renderAuthScreen();
+    return;
+  }
+  
+  if (loggedInContainer) loggedInContainer.style.display = "block";
+  if (loggedOutContainer) loggedOutContainer.style.display = "none";
+  
+  const profileNameEl = document.getElementById("profile-user-name");
+  if (profileNameEl) {
+    profileNameEl.textContent = state.currentUser.username;
+  }
+  
+  const avatarEl = document.getElementById("profile-avatar");
+  if (avatarEl && state.currentUser.username) {
+    avatarEl.textContent = state.currentUser.username.substring(0, 1).toUpperCase();
+  }
+  
+  const pastorLabelEl = document.getElementById("profile-pastor-badge");
+  if (pastorLabelEl) {
+    pastorLabelEl.style.display = state.currentUser.isPastor ? "inline-block" : "none";
+  }
+  
+  const streakEl = document.getElementById("profile-streak-count");
+  if (streakEl) {
+    streakEl.textContent = state.streak || 1;
+  }
+
   const highEmpty = document.getElementById("you-highlights-empty");
   const highList = document.getElementById("you-highlights-list");
   highList.innerHTML = "";
@@ -3642,14 +3696,491 @@ function initBibleQuiz() {
     });
   }
   
-  const openQuizPromoBtn = document.getElementById("btn-open-bible-quiz");
-  if (openQuizPromoBtn) {
-    openQuizPromoBtn.addEventListener("click", () => {
-      updateQuizCardStats();
-      document.getElementById("quiz-welcome-screen").style.display = "block";
-      document.getElementById("quiz-question-screen").style.display = "none";
-      document.getElementById("quiz-results-screen").style.display = "none";
+  const openQuizBtn = document.getElementById("btn-open-bible-quiz");
+  if (openQuizBtn) {
+    openQuizBtn.addEventListener("click", () => {
       openModal("modal-bible-quiz");
+    });
+  }
+}
+
+/* ==========================================================================
+   8. User Authentication & Prayer Requests
+   ========================================================================== */
+
+// Helper to get all registered users
+function getRegisteredUsers() {
+  try {
+    return JSON.parse(localStorage.getItem("river_of_life_users") || "[]");
+  } catch (e) {
+    console.error("Error loading users:", e);
+    return [];
+  }
+}
+
+// Helper to get all global prayers
+function getGlobalPrayers() {
+  try {
+    return JSON.parse(localStorage.getItem("river_of_life_prayers") || "[]");
+  } catch (e) {
+    console.error("Error loading prayers:", e);
+    return [];
+  }
+}
+
+// Register user
+function registerUser(username, email, password, isPastor) {
+  const users = getRegisteredUsers();
+  if (users.some(u => u.username.toLowerCase() === username.toLowerCase())) {
+    return { success: false, messageMr: "युझरनेम आधीच अस्तित्वात आहे!", messageEn: "Username already exists!" };
+  }
+  
+  const newUser = {
+    username,
+    email: email || "",
+    password, // Storing plain password as requested for local mock database
+    isPastor: !!isPastor,
+    bookmarks: [],
+    highlights: {},
+    userNotes: {},
+    quizPoints: 0,
+    quizHighscore: 0,
+    quizBadges: []
+  };
+  
+  users.push(newUser);
+  localStorage.setItem("river_of_life_users", JSON.stringify(users));
+  return { success: true };
+}
+
+// Login user
+function loginUser(username, password) {
+  const users = getRegisteredUsers();
+  const user = users.find(u => u.username.toLowerCase() === username.toLowerCase() && u.password === password);
+  if (!user) {
+    return { success: false, messageMr: "अवैध युझरनेम किंवा पासवर्ड!", messageEn: "Invalid username or password!" };
+  }
+  
+  // Set current user session
+  state.currentUser = {
+    username: user.username,
+    email: user.email,
+    isPastor: user.isPastor
+  };
+  
+  // Restore user-specific data into state
+  state.bookmarks = user.bookmarks || [];
+  state.highlights = user.highlights || {};
+  state.userNotes = user.userNotes || {};
+  state.quizPoints = user.quizPoints || 0;
+  state.quizHighscore = user.quizHighscore || 0;
+  state.quizBadges = user.quizBadges || [];
+  
+  saveStateToLocalStorage();
+  applyStylesFromState();
+  return { success: true };
+}
+
+// Logout user
+function logoutUser() {
+  if (state.currentUser) {
+    // Force one final sync to users database before clearing
+    saveStateToLocalStorage();
+  }
+  
+  state.currentUser = null;
+  state.bookmarks = [];
+  state.highlights = {};
+  state.userNotes = {};
+  state.quizPoints = 0;
+  state.quizHighscore = 0;
+  state.quizBadges = [];
+  
+  saveStateToLocalStorage();
+  applyStylesFromState();
+  
+  // Navigate to home
+  window.location.hash = "#/home";
+}
+
+// Submit prayer request
+function submitPrayerRequest(text, isPublic) {
+  if (!state.currentUser) return { success: false, messageEn: "Not signed in" };
+  
+  const prayers = getGlobalPrayers();
+  const newPrayer = {
+    id: "prayer_" + Date.now(),
+    username: state.currentUser.username,
+    text: text,
+    isPublic: !!isPublic,
+    status: "pending",
+    pastorNote: "",
+    createdAt: Date.now()
+  };
+  
+  prayers.unshift(newPrayer);
+  localStorage.setItem("river_of_life_prayers", JSON.stringify(prayers));
+  return { success: true };
+}
+
+// Toggle answered prayer status
+function toggleAnsweredPrayer(prayerId) {
+  const prayers = getGlobalPrayers();
+  const idx = prayers.findIndex(p => p.id === prayerId);
+  if (idx !== -1) {
+    prayers[idx].status = prayers[idx].status === "answered" ? "pending" : "answered";
+    localStorage.setItem("river_of_life_prayers", JSON.stringify(prayers));
+    return true;
+  }
+  return false;
+}
+
+// Pastor acknowledge prayer
+function pastorAckPrayer(prayerId, note) {
+  if (!state.currentUser || !state.currentUser.isPastor) return false;
+  
+  const prayers = getGlobalPrayers();
+  const idx = prayers.findIndex(p => p.id === prayerId);
+  if (idx !== -1) {
+    prayers[idx].status = "acknowledged";
+    prayers[idx].pastorNote = note || "";
+    localStorage.setItem("river_of_life_prayers", JSON.stringify(prayers));
+    return true;
+  }
+  return false;
+}
+
+// Render Auth Screen on Profile page
+function renderAuthScreen() {
+  const usernameInput = document.getElementById("auth-input-username");
+  const emailInput = document.getElementById("auth-input-email");
+  const passwordInput = document.getElementById("auth-input-password");
+  const pastorCheckbox = document.getElementById("auth-input-pastor");
+  const errorMsg = document.getElementById("auth-error-msg");
+  
+  if (usernameInput) usernameInput.value = "";
+  if (emailInput) emailInput.value = "";
+  if (passwordInput) passwordInput.value = "";
+  if (pastorCheckbox) pastorCheckbox.checked = false;
+  if (errorMsg) errorMsg.style.display = "none";
+}
+
+// Render Prayers Screen
+function renderPrayersScreen() {
+  const loggedOutView = document.getElementById("prayers-logged-out-container");
+  const loggedInView = document.getElementById("prayers-logged-in-container");
+  
+  if (!state.currentUser) {
+    if (loggedOutView) loggedOutView.style.display = "block";
+    if (loggedInView) loggedInView.style.display = "none";
+    return;
+  }
+  
+  if (loggedOutView) loggedOutView.style.display = "none";
+  if (loggedInView) loggedInView.style.display = "block";
+  
+  const userPortal = document.getElementById("prayers-user-portal");
+  const pastorPortal = document.getElementById("prayers-pastor-portal");
+  
+  if (state.currentUser.isPastor) {
+    if (userPortal) userPortal.style.display = "none";
+    if (pastorPortal) pastorPortal.style.display = "block";
+    renderPastorPortal();
+  } else {
+    if (userPortal) userPortal.style.display = "block";
+    if (pastorPortal) pastorPortal.style.display = "none";
+    renderUserPortal();
+  }
+}
+
+// Helper to format timestamps
+function formatTimeAgo(timestamp) {
+  const diffMs = Date.now() - timestamp;
+  const diffSec = Math.floor(diffMs / 1000);
+  const diffMin = Math.floor(diffSec / 60);
+  const diffHr = Math.floor(diffMin / 60);
+  const diffDays = Math.floor(diffHr / 24);
+  
+  if (diffSec < 60) return "Just now";
+  if (diffMin < 60) return `${diffMin}m ago`;
+  if (diffHr < 24) return `${diffHr}h ago`;
+  return `${diffDays}d ago`;
+}
+
+// Render User Portal list
+function renderUserPortal() {
+  const listEl = document.getElementById("prayers-user-list");
+  const emptyEl = document.getElementById("prayers-user-list-empty");
+  if (!listEl || !emptyEl) return;
+  
+  const prayers = getGlobalPrayers().filter(p => p.username === state.currentUser.username);
+  
+  listEl.innerHTML = "";
+  if (prayers.length === 0) {
+    emptyEl.style.display = "block";
+  } else {
+    emptyEl.style.display = "none";
+    prayers.forEach(p => {
+      const card = document.createElement("div");
+      card.className = "prayer-card";
+      
+      let badgeClass = "pending";
+      let badgeText = "Pending / प्रलंबित";
+      if (p.status === "answered") {
+        badgeClass = "answered";
+        badgeText = "Answered 🎉 / उत्तर मिळालेली";
+      } else if (p.status === "acknowledged") {
+        badgeClass = "acknowledged";
+        badgeText = "Acknowledged / स्वीकृत";
+      }
+      
+      const privacyText = p.isPublic ? "Shared with Church / सार्वजनिक" : "Pastor Only / फक्त पास्टर";
+      const timeStr = formatTimeAgo(p.createdAt);
+      
+      let pastorNoteHtml = "";
+      if (p.pastorNote) {
+        pastorNoteHtml = `
+          <div class="pastor-blessing-box">
+            <strong>⛪ Pastor's Note:</strong>
+            <p>"${p.pastorNote}"</p>
+          </div>
+        `;
+      }
+      
+      card.innerHTML = `
+        <div class="prayer-card-header">
+          <span class="badge-status ${badgeClass}">${badgeText}</span>
+          <span class="prayer-meta">${timeStr} • ${privacyText}</span>
+        </div>
+        <p class="prayer-text">${p.text}</p>
+        ${pastorNoteHtml}
+        ${p.status !== "answered" ? `
+          <button class="btn-secondary-mini btn-mark-answered" style="margin-top: 12px; font-size: 12px;" data-id="${p.id}">
+            Mark as Answered / उत्तर मिळाले ✔
+          </button>
+        ` : ""}
+      `;
+      
+      const ansBtn = card.querySelector(".btn-mark-answered");
+      if (ansBtn) {
+        ansBtn.addEventListener("click", () => {
+          toggleAnsweredPrayer(p.id);
+          renderUserPortal();
+        });
+      }
+      
+      listEl.appendChild(card);
+    });
+  }
+}
+
+// Render Pastor Portal list
+function renderPastorPortal() {
+  const listEl = document.getElementById("prayers-pastor-list");
+  const emptyEl = document.getElementById("prayers-pastor-list-empty");
+  const statsEl = document.getElementById("pastor-dashboard-stats");
+  if (!listEl || !emptyEl) return;
+  
+  const prayers = getGlobalPrayers();
+  
+  const activeCount = prayers.filter(p => p.status === "pending" || p.status === "acknowledged").length;
+  const pendingCount = prayers.filter(p => p.status === "pending").length;
+  const answeredCount = prayers.filter(p => p.status === "answered").length;
+  if (statsEl) {
+    statsEl.textContent = `Active: ${activeCount} • Pending: ${pendingCount} • Answered: ${answeredCount}`;
+  }
+  
+  listEl.innerHTML = "";
+  if (prayers.length === 0) {
+    emptyEl.style.display = "block";
+  } else {
+    emptyEl.style.display = "none";
+    prayers.forEach(p => {
+      const card = document.createElement("div");
+      card.className = "prayer-card";
+      
+      let badgeClass = "pending";
+      let badgeText = "Pending / प्रलंबित";
+      if (p.status === "answered") {
+        badgeClass = "answered";
+        badgeText = "Answered 🎉 / उत्तर मिळालेली";
+      } else if (p.status === "acknowledged") {
+        badgeClass = "acknowledged";
+        badgeText = "Acknowledged / स्वीकृत";
+      }
+      
+      const privacyText = p.isPublic ? "Shared with Church / सार्वजनिक" : "Pastor Only / फक्त पास्टर (खाजगी)";
+      const timeStr = formatTimeAgo(p.createdAt);
+      
+      let ackButtonHtml = "";
+      if (p.status === "pending") {
+        ackButtonHtml = `
+          <button class="btn-secondary-mini btn-pastor-ack" style="margin-top: 12px; font-size: 12px;" data-id="${p.id}">
+            Acknowledge & Pray / स्वीकृत करा ⛪
+          </button>
+        `;
+      }
+      
+      let pastorNoteHtml = "";
+      if (p.pastorNote) {
+        pastorNoteHtml = `
+          <div class="pastor-blessing-box">
+            <strong>⛪ Pastor's Note:</strong>
+            <p>"${p.pastorNote}"</p>
+          </div>
+        `;
+      }
+      
+      card.innerHTML = `
+        <div class="prayer-card-header">
+          <span class="badge-status ${badgeClass}">${badgeText}</span>
+          <span class="prayer-meta">From: @${p.username} • ${timeStr} • ${privacyText}</span>
+        </div>
+        <p class="prayer-text">${p.text}</p>
+        ${pastorNoteHtml}
+        ${ackButtonHtml}
+      `;
+      
+      const ackBtn = card.querySelector(".btn-pastor-ack");
+      if (ackBtn) {
+        ackBtn.addEventListener("click", () => {
+          openPastorAckModal(p.id, p.text);
+        });
+      }
+      
+      listEl.appendChild(card);
+    });
+  }
+}
+
+let activeAckPrayerId = null;
+
+function openPastorAckModal(prayerId, previewText) {
+  activeAckPrayerId = prayerId;
+  const previewEl = document.getElementById("modal-ack-request-preview");
+  const noteInput = document.getElementById("pastor-ack-note");
+  if (previewEl) previewEl.textContent = `"${previewText}"`;
+  if (noteInput) noteInput.value = "";
+  openModal("modal-pastor-ack");
+}
+
+function initAuthAndPrayers() {
+  const tabSignin = document.getElementById("auth-tab-signin");
+  const tabSignup = document.getElementById("auth-tab-signup");
+  const formEl = document.getElementById("auth-form");
+  const errorMsg = document.getElementById("auth-error-msg");
+  const btnSubmit = document.getElementById("btn-auth-submit");
+  
+  let currentAuthTab = "signin";
+  
+  if (tabSignin && tabSignup) {
+    tabSignin.addEventListener("click", () => {
+      currentAuthTab = "signin";
+      tabSignin.classList.add("active");
+      tabSignup.classList.remove("active");
+      document.querySelectorAll(".signup-only").forEach(el => el.style.display = "none");
+      const titleEl = document.getElementById("auth-title");
+      if (titleEl) titleEl.textContent = "Sign In / लॉगिन करा";
+      if (btnSubmit) btnSubmit.querySelector("span").textContent = "Sign In / लॉगिन करा";
+      if (errorMsg) errorMsg.style.display = "none";
+    });
+    
+    tabSignup.addEventListener("click", () => {
+      currentAuthTab = "signup";
+      tabSignup.classList.add("active");
+      tabSignin.classList.remove("active");
+      document.querySelectorAll(".signup-only").forEach(el => el.style.display = "flex");
+      const titleEl = document.getElementById("auth-title");
+      if (titleEl) titleEl.textContent = "Register / नोंदणी करा";
+      if (btnSubmit) btnSubmit.querySelector("span").textContent = "Register / नोंदणी करा";
+      if (errorMsg) errorMsg.style.display = "none";
+    });
+  }
+  
+  if (formEl) {
+    formEl.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const username = document.getElementById("auth-input-username").value.trim();
+      const email = document.getElementById("auth-input-email").value.trim();
+      const password = document.getElementById("auth-input-password").value;
+      const isPastor = document.getElementById("auth-input-pastor").checked;
+      
+      if (!username || !password) return;
+      
+      if (currentAuthTab === "signup") {
+        const res = registerUser(username, email, password, isPastor);
+        if (!res.success) {
+          if (errorMsg) {
+            errorMsg.textContent = state.translation !== "eng" ? res.messageMr : res.messageEn;
+            errorMsg.style.display = "block";
+          }
+          return;
+        }
+        const loginRes = loginUser(username, password);
+        if (loginRes.success) {
+          renderYouProfile();
+          renderPrayersScreen();
+        }
+      } else {
+        const res = loginUser(username, password);
+        if (!res.success) {
+          if (errorMsg) {
+            errorMsg.textContent = state.translation !== "eng" ? res.messageMr : res.messageEn;
+            errorMsg.style.display = "block";
+          }
+          return;
+        }
+        renderYouProfile();
+        renderPrayersScreen();
+      }
+    });
+  }
+  
+  const logoutBtn = document.getElementById("you-btn-logout");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+      logoutUser();
+      renderYouProfile();
+      renderPrayersScreen();
+    });
+  }
+  
+  const prayerForm = document.getElementById("prayer-form");
+  if (prayerForm) {
+    prayerForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const text = document.getElementById("prayer-input-text").value.trim();
+      const privacy = document.getElementById("prayer-input-privacy").value;
+      const isPublic = (privacy === "public");
+      
+      if (!text) return;
+      
+      const res = submitPrayerRequest(text, isPublic);
+      if (res.success) {
+        document.getElementById("prayer-input-text").value = "";
+        renderUserPortal();
+      }
+    });
+  }
+  
+  const closeAckBtn = document.getElementById("btn-close-pastor-ack");
+  if (closeAckBtn) {
+    closeAckBtn.addEventListener("click", () => {
+      closeModal("modal-pastor-ack");
+    });
+  }
+  
+  const ackSubmitBtn = document.getElementById("btn-pastor-ack-submit");
+  if (ackSubmitBtn) {
+    ackSubmitBtn.addEventListener("click", () => {
+      const note = document.getElementById("pastor-ack-note").value.trim();
+      if (!note || !activeAckPrayerId) return;
+      
+      const res = pastorAckPrayer(activeAckPrayerId, note);
+      if (res) {
+        closeModal("modal-pastor-ack");
+        renderPastorPortal();
+      }
     });
   }
 }

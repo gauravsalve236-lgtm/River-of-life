@@ -22,7 +22,7 @@ Write-Host "--- Committing Changes ---" -ForegroundColor Cyan
 # Configure standard user details for the commit if not already configured
 & $gitPath config user.name "Gaurav Salve"
 & $gitPath config user.email "gauravsalve236@gmail.com"
-& $gitPath commit -m "Integrate Daily Bible Quiz and remove DEEPEN and Commentary cards"
+& $gitPath commit -m "Integrate Daily Bible Quiz, User Authentication and Prayer Request Section"
 
 Write-Host "--- Setting Main Branch ---" -ForegroundColor Cyan
 & $gitPath branch -M main
