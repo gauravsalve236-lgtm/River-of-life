@@ -145,20 +145,22 @@
                 </div>
               </div>
 
-              <!-- Card 3: Deepen Study Premium -->
-              <div class="premium-promo-card">
-                <div class="promo-content">
-                  <span class="promo-desc">Unlimited access to <strong>150+ study titles</strong> • read entirely <strong>offline</strong> • first month <strong>free</strong></span>
-                  <h2>DEEPEN</h2>
-                  <p>Your Bible Study With</p>
-                  <h3>PREMIUM</h3>
-                  <button class="btn-premium-action">Learn more about Premium</button>
+              <!-- Card 3: Daily Bible Quiz (Replaces DEEPEN & Commentary Mockup) -->
+              <div class="bible-quiz-promo-card" id="btn-open-bible-quiz">
+                <div class="quiz-card-content">
+                  <div class="quiz-card-art">🏆</div>
+                  <div class="quiz-card-details">
+                    <span class="quiz-badge-gold">NEW FEATURE</span>
+                    <h5>बायबल सामान्य ज्ञान स्पर्धा</h5>
+                    <p>Daily Bible Quiz • Bilingual Trivia • Earn Badges</p>
+                    <div class="quiz-card-stats">
+                      <span id="quiz-stat-points">Total: 0 pts</span>
+                      <span class="dot-separator">•</span>
+                      <span id="quiz-stat-highscore">High Score: 0 pts</span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-
-              <!-- Card 4: Commentary Mockup Graphic -->
-              <div class="commentary-mockup-card">
-                <img src="assets/images/premium_commentary_promo.png" alt="Commentary Mockup" class="mockup-img">
+                <button class="btn-play-quiz">Play Now &rarr;</button>
               </div>
 
               <!-- Card 5: TouchPoints Tag Grid -->
@@ -1025,6 +1027,95 @@
             </select>
           </div>
           <button id="btn-generate-plan-submit" class="btn-primary-block">Generate Plan</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Daily Bible Quiz Drawer -->
+    <div id="modal-bible-quiz" class="drawer-overlay">
+      <div class="ios-drawer-sheet modal-height">
+        <div class="drawer-header-row">
+          <div class="grabber-bar"></div>
+          <h3>Daily Bible Quiz</h3>
+          <button class="close-drawer-btn" id="btn-close-bible-quiz">&times;</button>
+        </div>
+        <div class="drawer-body-settings" style="padding: 16px 24px; max-height: 75vh; overflow-y: auto;">
+          
+          <!-- Screen 1: Welcome/Start -->
+          <div id="quiz-welcome-screen" class="quiz-screen active" style="text-align: center; padding: 20px 0;">
+            <div style="font-size: 64px; margin-bottom: 16px;">🏆</div>
+            <h4 style="font-family: var(--font-ui); font-size: 22px; font-weight: 800; margin-bottom: 8px; color: var(--primary);">बायबल सामान्य ज्ञान स्पर्धा</h4>
+            <h5 style="font-family: var(--font-ui); font-size: 16px; font-weight: 600; margin-bottom: 16px; color: var(--text-muted);">Daily Bible Trivia Competition</h5>
+            <p style="font-size: 14px; line-height: 1.6; margin-bottom: 24px; color: var(--text);">
+              Answer 10 multiple-choice questions to test your scripture knowledge, earn points, and unlock achievements! Available in both Marathi and English.
+            </p>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+              <div style="background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 12px;">
+                <span style="font-size: 24px; display: block; margin-bottom: 4px;">⚡</span>
+                <span style="font-size: 11px; color: var(--text-muted); display: block; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Your Total Points</span>
+                <strong style="font-size: 18px; color: var(--text);" id="quiz-welcome-total-points">0 pts</strong>
+              </div>
+              <div style="background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 12px;">
+                <span style="font-size: 24px; display: block; margin-bottom: 4px;">⭐</span>
+                <span style="font-size: 11px; color: var(--text-muted); display: block; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">High Score (Session)</span>
+                <strong style="font-size: 18px; color: var(--text);" id="quiz-welcome-highscore">0 pts</strong>
+              </div>
+            </div>
+            
+            <button class="btn-primary-block" id="btn-start-quiz" style="margin-top: 10px;">
+              <span>Start Quiz / क्विझ सुरू करा</span>
+            </button>
+          </div>
+          
+          <!-- Screen 2: Question & Choices -->
+          <div id="quiz-question-screen" class="quiz-screen" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+              <span style="font-size: 13px; font-weight: 800; color: var(--primary);" id="quiz-question-number">Question 1 of 10</span>
+              <span style="font-size: 13px; font-weight: 700; color: var(--text-muted);" id="quiz-current-score">Score: 0</span>
+            </div>
+            
+            <!-- Progress Bar -->
+            <div style="height: 6px; background: var(--border); border-radius: 3px; margin-bottom: 20px; overflow: hidden; width: 100%;">
+              <div id="quiz-progress-bar" style="height: 100%; background: var(--primary); width: 10%; transition: width 0.3s ease;"></div>
+            </div>
+            
+            <!-- Question Box -->
+            <div class="commentary-card" style="border-left: 4px solid var(--primary); background: var(--bg); margin-bottom: 20px; padding: 16px;">
+              <h4 id="quiz-question-mr" style="font-family: 'Lora', serif; font-size: 17px; line-height: 1.6; margin-bottom: 10px; color: var(--text);"></h4>
+              <p id="quiz-question-en" style="font-size: 15px; line-height: 1.5; color: var(--text-muted); margin: 0;"></p>
+            </div>
+            
+            <!-- Choices Container -->
+            <div id="quiz-choices-container" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;">
+              <!-- Choices will be rendered here dynamically -->
+            </div>
+            
+            <!-- Next Action -->
+            <button class="btn-primary-block" id="btn-next-quiz-question" style="display: none;">
+              <span>Next Question / पुढचा प्रश्न &rarr;</span>
+            </button>
+          </div>
+          
+          <!-- Screen 3: Results -->
+          <div id="quiz-results-screen" class="quiz-screen" style="display: none; text-align: center; padding: 20px 0;">
+            <div style="font-size: 64px; margin-bottom: 16px;" id="quiz-results-emoji">🎉</div>
+            <h4 style="font-family: var(--font-ui); font-size: 22px; font-weight: 800; margin-bottom: 8px; color: var(--primary);" id="quiz-results-title">Great Job!</h4>
+            <p style="font-size: 15px; margin-bottom: 20px; color: var(--text);" id="quiz-results-score-text">You scored 80 / 100 points!</p>
+            
+            <!-- Badge unlocked alert -->
+            <div id="quiz-badge-unlock-container" style="display: none; background: rgba(34, 197, 94, 0.1); border: 1px solid #22c55e; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+              <span style="font-size: 28px; display: block; margin-bottom: 4px;">🎖️</span>
+              <strong style="color: #22c55e; font-size: 14px; display: block;">NEW ACHIEVEMENT UNLOCKED!</strong>
+              <span style="font-size: 13px; color: var(--text);" id="quiz-badge-name">Scripture Scholar (शास्त्र पंडित)</span>
+            </div>
+            
+            <div style="display: flex; gap: 12px;">
+              <button class="btn-secondary-mini" id="btn-close-quiz-results" style="flex: 1; padding: 12px; border-radius: 12px; font-size: 14px;">Close / बंद करा</button>
+              <button class="btn-primary-block" id="btn-restart-quiz" style="flex: 1; margin: 0; padding: 12px; font-size: 14px;">Play Again / पुन्हा खेळा</button>
+            </div>
+          </div>
+          
         </div>
       </div>
     </div>

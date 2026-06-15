@@ -91,7 +91,10 @@ let state = {
   audioTone: 'deep-bass',  // 'normal', 'deep-bass', 'warm-resonance'
   audioSource: 'human',     // 'human' (streaming MP3), 'ai' (TTS), or 'elevenlabs' (API)
   elevenLabsKey: ELEVENLABS_DEFAULT_KEY, // ElevenLabs API Key
-  elevenLabsVoice: 'kqVT88a5QfII1HNAEPTJ' // Declan Sage voice ID
+  elevenLabsVoice: 'kqVT88a5QfII1HNAEPTJ', // Declan Sage voice ID
+  quizPoints: 0,           // Total points earned
+  quizHighscore: 0,        // High score in a single quiz session
+  quizBadges: []           // Unlocked badge IDs
 };
 
 // Memory Cache for JSON scripture data
@@ -206,6 +209,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   renderDailyDevotion();
   renderYouProfile();
   checkStreak();
+  
+  updateQuizCardStats();
+  initBibleQuiz();
 });
 
 // Sync operations with LocalStorage
@@ -3321,5 +3327,329 @@ function toggleVoiceDropdownVisibility() {
       if (voiceSelectRow) voiceSelectRow.style.display = "flex";
       if (toneSelectRow) toneSelectRow.style.display = "none";
     }
+  }
+}
+
+const QUIZ_QUESTIONS = [
+  {
+    qMr: "नोहाच्या पुरादरम्यान किती दिवस आणि रात्री पाऊस पडला?",
+    qEn: "How many days and nights did it rain during Noah's flood?",
+    choices: [
+      { textMr: "४० दिवस आणि ४० रात्री", textEn: "40 Days and 40 Nights", correct: true },
+      { textMr: "३० दिवस आणि ३० रात्री", textEn: "30 Days and 30 Nights", correct: false },
+      { textMr: "७ दिवस आणि ७ रात्री", textEn: "7 Days and 7 Nights", correct: false },
+      { textMr: "५० दिवस आणि ५० रात्री", textEn: "50 Days and 50 Nights", correct: false }
+    ]
+  },
+  {
+    qMr: "देवाने हव्वा बनवण्यासाठी आदामाच्या शरीरातील कोणत्या भागाचा वापर केला?",
+    qEn: "What did God use from Adam's body to create Eve?",
+    choices: [
+      { textMr: "फासळी (Rib)", textEn: "A rib", correct: true },
+      { textMr: "धूळ (Dust)", textEn: "Dust", correct: false },
+      { textMr: "माती (Clay)", textEn: "Clay", correct: false },
+      { textMr: "हृदय (Heart)", textEn: "Heart", correct: false }
+    ]
+  },
+  {
+    qMr: "देवापासून पळून जाताना योनाला कोणत्या जीवाने गिळले?",
+    qEn: "Who/What swallowed Jonah when he tried to run away from God?",
+    choices: [
+      { textMr: "मोठा मासा (Great Fish)", textEn: "A great fish", correct: true },
+      { textMr: "मगर (Crocodile)", textEn: "A crocodile", correct: false },
+      { textMr: "समुद्र सर्प (Sea Serpent)", textEn: "A sea serpent", correct: false },
+      { textMr: "शार्क (Shark)", textEn: "A shark", correct: false }
+    ]
+  },
+  {
+    qMr: "येशू ख्रिस्ताचा जन्म कोणत्या शहरात झाला?",
+    qEn: "In which town was Jesus Christ born?",
+    choices: [
+      { textMr: "बेथलेहेम (Bethlehem)", textEn: "Bethlehem", correct: true },
+      { textMr: "नाझरेथ (Nazareth)", textEn: "Nazareth", correct: false },
+      { textMr: "यरुशलेम (Jerusalem)", textEn: "Jerusalem", correct: false },
+      { textMr: "अलेक्झांड्रिया (Alexandria)", textEn: "Alexandria", correct: false }
+    ]
+  },
+  {
+    qMr: "तरुण मेंढपाळ दाविदाने पराभूत केलेल्या पलिश्ती राक्षसाचे नाव काय होते?",
+    qEn: "What was the name of the Philistine giant defeated by young shepherd David?",
+    choices: [
+      { textMr: "गोल्याथ (Goliath)", textEn: "Goliath", correct: true },
+      { textMr: "शमशोन (Samson)", textEn: "Samson", correct: false },
+      { textMr: "शौल (Saul)", textEn: "Saul", correct: false },
+      { textMr: "अबशालोम (Absalom)", textEn: "Absalom", correct: false }
+    ]
+  },
+  {
+    qMr: "येशूने आपल्या सेवेसाठी किती मुख्य शिष्य निवडले?",
+    qEn: "How many main apostles did Jesus choose for His ministry?",
+    choices: [
+      { textMr: "१२ (12)", textEn: "12", correct: true },
+      { textMr: "१० (10)", textEn: "10", correct: false },
+      { textMr: "७ (7)", textEn: "7", correct: false },
+      { textMr: "१५ (15)", textEn: "15", correct: false }
+    ]
+  },
+  {
+    qMr: "बायबलचे सर्वात पहिले पुस्तक कोणते आहे?",
+    qEn: "What is the very first book of the Bible?",
+    choices: [
+      { textMr: "उत्पत्ती (Genesis)", textEn: "Genesis", correct: true },
+      { textMr: "निर्गम (Exodus)", textEn: "Exodus", correct: false },
+      { textMr: "मत्तय (Matthew)", textEn: "Matthew", correct: false },
+      { textMr: "स्तोत्रसंहिता (Psalms)", textEn: "Psalms", correct: false }
+    ]
+  },
+  {
+    qMr: "सीनाय पर्वतावर देवाने कोणाला दगडी पाट्यांवर दहा आज्ञा दिल्या?",
+    qEn: "Who received the Ten Commandments written on stone tablets from God on Mount Sinai?",
+    choices: [
+      { textMr: "मोशे (Moses)", textEn: "Moses", correct: true },
+      { textMr: "अब्राहम (Abraham)", textEn: "Abraham", correct: false },
+      { textMr: "हारून (Aaron)", textEn: "Aaron", correct: false },
+      { textMr: "जाेशुआ (Joshua)", textEn: "Joshua", correct: false }
+    ]
+  },
+  {
+    qMr: "येशूचे भूमीवरील पालक योसेफ यांचा व्यवसाय काय होता?",
+    qEn: "What was the profession of Joseph, the earthly father of Jesus?",
+    choices: [
+      { textMr: "सुतार (Carpenter)", textEn: "Carpenter", correct: true },
+      { textMr: "कोळी (Fisherman)", textEn: "Fisherman", correct: false },
+      { textMr: "कर वसूल करणारा (Tax Collector)", textEn: "Tax Collector", correct: false },
+      { textMr: "मेंढपाळ (Shepherd)", textEn: "Shepherd", correct: false }
+    ]
+  },
+  {
+    qMr: "येशूला ३० चांदीच्या नाण्यांसाठी कोणत्या शिष्याने फसवून धरून दिले?",
+    qEn: "Which apostle betrayed Jesus for 30 pieces of silver with a kiss?",
+    choices: [
+      { textMr: "यहुदा इस्कर्योत (Judas Iscariot)", textEn: "Judas Iscariot", correct: true },
+      { textMr: "शिमोन पेत्र (Simon Peter)", textEn: "Simon Peter", correct: false },
+      { textMr: "योहान (John)", textEn: "John", correct: false },
+      { textMr: "थॉमस (Thomas)", textEn: "Thomas", correct: false }
+    ]
+  }
+];
+
+let quizCurrentQuestionIdx = 0;
+let quizSessionScore = 0;
+let quizShuffledQuestions = [];
+
+function playQuizSound(type) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (type === 'correct') {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sine';
+      gain.gain.setValueAtTime(0.1, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+      osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
+      osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1); // E5
+      osc.start();
+      osc.stop(ctx.currentTime + 0.3);
+    } else if (type === 'incorrect') {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sawtooth';
+      gain.gain.setValueAtTime(0.08, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+      osc.frequency.setValueAtTime(150, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.3);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.4);
+    }
+  } catch (e) {
+    console.warn("AudioContext sound play blocked or unsupported:", e);
+  }
+}
+
+function updateQuizCardStats() {
+  const statPointsEl = document.getElementById("quiz-stat-points");
+  const statHighscoreEl = document.getElementById("quiz-stat-highscore");
+  const welcomePointsEl = document.getElementById("quiz-welcome-total-points");
+  const welcomeHighscoreEl = document.getElementById("quiz-welcome-highscore");
+  
+  const pts = state.quizPoints || 0;
+  const hs = state.quizHighscore || 0;
+  
+  if (statPointsEl) statPointsEl.textContent = `Total: ${pts} pts`;
+  if (statHighscoreEl) statHighscoreEl.textContent = `High Score: ${hs} pts`;
+  if (welcomePointsEl) welcomePointsEl.textContent = `${pts} pts`;
+  if (welcomeHighscoreEl) welcomeHighscoreEl.textContent = `${hs} pts`;
+}
+
+function startQuiz() {
+  quizCurrentQuestionIdx = 0;
+  quizSessionScore = 0;
+  
+  quizShuffledQuestions = [...QUIZ_QUESTIONS].sort(() => Math.random() - 0.5);
+  
+  document.getElementById("quiz-welcome-screen").style.display = "none";
+  document.getElementById("quiz-results-screen").style.display = "none";
+  document.getElementById("quiz-question-screen").style.display = "block";
+  
+  showQuizQuestion();
+}
+
+function showQuizQuestion() {
+  const currentQ = quizShuffledQuestions[quizCurrentQuestionIdx];
+  const qNumEl = document.getElementById("quiz-question-number");
+  const scoreEl = document.getElementById("quiz-current-score");
+  const progressEl = document.getElementById("quiz-progress-bar");
+  const qMrEl = document.getElementById("quiz-question-mr");
+  const qEnEl = document.getElementById("quiz-question-en");
+  const choicesContainer = document.getElementById("quiz-choices-container");
+  const nextBtn = document.getElementById("btn-next-quiz-question");
+  
+  qNumEl.textContent = `Question ${quizCurrentQuestionIdx + 1} of 10`;
+  scoreEl.textContent = `Score: ${quizSessionScore}`;
+  progressEl.style.width = `${((quizCurrentQuestionIdx + 1) / 10) * 100}%`;
+  
+  qMrEl.textContent = currentQ.qMr;
+  qEnEl.textContent = currentQ.qEn;
+  
+  choicesContainer.innerHTML = "";
+  nextBtn.style.display = "none";
+  
+  currentQ.choices.forEach((choice, idx) => {
+    const btn = document.createElement("button");
+    btn.className = "quiz-choice-btn";
+    btn.innerHTML = `
+      <span>${state.translation !== "eng" ? choice.textMr : choice.textEn}</span>
+      <span class="choice-status-icon"></span>
+    `;
+    btn.addEventListener("click", () => selectQuizChoice(btn, choice.correct));
+    choicesContainer.appendChild(btn);
+  });
+}
+
+function selectQuizChoice(selectedBtn, isCorrect) {
+  const choicesContainer = document.getElementById("quiz-choices-container");
+  const buttons = choicesContainer.querySelectorAll(".quiz-choice-btn");
+  const currentQ = quizShuffledQuestions[quizCurrentQuestionIdx];
+  
+  buttons.forEach(btn => btn.disabled = true);
+  
+  if (isCorrect) {
+    quizSessionScore += 10;
+    selectedBtn.classList.add("correct");
+    selectedBtn.querySelector(".choice-status-icon").textContent = "✓";
+    playQuizSound('correct');
+  } else {
+    selectedBtn.classList.add("incorrect");
+    selectedBtn.querySelector(".choice-status-icon").textContent = "✗";
+    playQuizSound('incorrect');
+    
+    buttons.forEach((btn, idx) => {
+      if (currentQ.choices[idx].correct) {
+        btn.classList.add("correct");
+        btn.querySelector(".choice-status-icon").textContent = "✓";
+      }
+    });
+  }
+  
+  document.getElementById("btn-next-quiz-question").style.display = "block";
+}
+
+function showQuizResults() {
+  document.getElementById("quiz-question-screen").style.display = "none";
+  
+  const scoreTextEl = document.getElementById("quiz-results-score-text");
+  const badgeUnlockContainer = document.getElementById("quiz-badge-unlock-container");
+  const badgeNameEl = document.getElementById("quiz-badge-name");
+  const resultsEmojiEl = document.getElementById("quiz-results-emoji");
+  const resultsTitleEl = document.getElementById("quiz-results-title");
+  
+  scoreTextEl.textContent = `You scored ${quizSessionScore} / 100 points!`;
+  
+  state.quizPoints = (state.quizPoints || 0) + quizSessionScore;
+  
+  if (quizSessionScore > (state.quizHighscore || 0)) {
+    state.quizHighscore = quizSessionScore;
+  }
+  
+  badgeUnlockContainer.style.display = "none";
+  let unlockedBadge = null;
+  
+  if (quizSessionScore >= 100) {
+    unlockedBadge = { id: "quiz_badge_theologian", nameMr: "बायबल शास्त्रज्ञ (Theologian)", nameEn: "Bible Theologian (बायबल शास्त्रज्ञ)" };
+  } else if (quizSessionScore >= 70) {
+    unlockedBadge = { id: "quiz_badge_scholar", nameMr: "शास्त्र पंडित (Scholar)", nameEn: "Scripture Scholar (शास्त्र पंडित)" };
+  } else if (quizSessionScore >= 30) {
+    unlockedBadge = { id: "quiz_badge_novice", nameMr: "नवा शोधक (Novice Explorer)", nameEn: "Novice Explorer (नवा शोधक)" };
+  }
+  
+  if (unlockedBadge && !state.quizBadges.includes(unlockedBadge.id)) {
+    state.quizBadges.push(unlockedBadge.id);
+    badgeUnlockContainer.style.display = "block";
+    badgeNameEl.textContent = state.translation !== "eng" ? unlockedBadge.nameMr : unlockedBadge.nameEn;
+  }
+  
+  saveStateToLocalStorage();
+  updateQuizCardStats();
+  
+  if (quizSessionScore >= 80) {
+    resultsEmojiEl.textContent = "🏆";
+    resultsTitleEl.textContent = state.translation !== "eng" ? "उत्कृष्ट कामगिरी!" : "Excellent Job!";
+  } else if (quizSessionScore >= 40) {
+    resultsEmojiEl.textContent = "🎉";
+    resultsTitleEl.textContent = state.translation !== "eng" ? "खूप छान!" : "Great Job!";
+  } else {
+    resultsEmojiEl.textContent = "💡";
+    resultsTitleEl.textContent = state.translation !== "eng" ? "पुन्हा प्रयत्न करा!" : "Keep Learning!";
+  }
+  
+  document.getElementById("quiz-results-screen").style.display = "block";
+}
+
+function initBibleQuiz() {
+  const startBtn = document.getElementById("btn-start-quiz");
+  if (startBtn) startBtn.addEventListener("click", startQuiz);
+  
+  const nextBtn = document.getElementById("btn-next-quiz-question");
+  if (nextBtn) {
+    nextBtn.addEventListener("click", () => {
+      quizCurrentQuestionIdx++;
+      if (quizCurrentQuestionIdx < 10) {
+        showQuizQuestion();
+      } else {
+        showQuizResults();
+      }
+    });
+  }
+  
+  const restartBtn = document.getElementById("btn-restart-quiz");
+  if (restartBtn) restartBtn.addEventListener("click", startQuiz);
+  
+  const closeResultsBtn = document.getElementById("btn-close-quiz-results");
+  if (closeResultsBtn) {
+    closeResultsBtn.addEventListener("click", () => {
+      closeModal("modal-bible-quiz");
+    });
+  }
+  
+  const closeQuizBtn = document.getElementById("btn-close-bible-quiz");
+  if (closeQuizBtn) {
+    closeQuizBtn.addEventListener("click", () => {
+      closeModal("modal-bible-quiz");
+    });
+  }
+  
+  const openQuizPromoBtn = document.getElementById("btn-open-bible-quiz");
+  if (openQuizPromoBtn) {
+    openQuizPromoBtn.addEventListener("click", () => {
+      updateQuizCardStats();
+      document.getElementById("quiz-welcome-screen").style.display = "block";
+      document.getElementById("quiz-question-screen").style.display = "none";
+      document.getElementById("quiz-results-screen").style.display = "none";
+      openModal("modal-bible-quiz");
+    });
   }
 }

@@ -2564,8 +2564,7 @@ body {
 
 .daily-verse-card { grid-column: span 4; }
 .touchpoint-hope-card { grid-column: span 2; }
-.premium-promo-card { grid-column: span 2; }
-.commentary-mockup-card { grid-column: span 2; }
+.bible-quiz-promo-card { grid-column: span 4; }
 .touchpoints-tags-card { grid-column: span 2; }
 .suggested-plans-card { grid-column: span 3; }
 .resilient-banner-card { grid-column: span 3; }
@@ -2576,8 +2575,7 @@ body {
   }
   .daily-verse-card { grid-column: span 2; }
   .touchpoint-hope-card { grid-column: span 1; }
-  .premium-promo-card { grid-column: span 1; }
-  .commentary-mockup-card { grid-column: span 1; }
+  .bible-quiz-promo-card { grid-column: span 2; }
   .touchpoints-tags-card { grid-column: span 1; }
   .suggested-plans-card { grid-column: span 1; }
   .resilient-banner-card { grid-column: span 1; }
@@ -2590,8 +2588,7 @@ body {
   }
   .daily-verse-card,
   .touchpoint-hope-card,
-  .premium-promo-card,
-  .commentary-mockup-card,
+  .bible-quiz-promo-card,
   .touchpoints-tags-card,
   .suggested-plans-card,
   .resilient-banner-card {
@@ -3556,3 +3553,175 @@ input, textarea, select, [contenteditable="true"] {
   user-select: text !important;
   -webkit-user-select: text !important;
 }
+
+/* ==========================================================================
+   7. Daily Bible Quiz Styles
+   ========================================================================== */
+
+.bible-quiz-promo-card {
+  background: linear-gradient(135deg, #2c1d0f 0%, #452a12 50%, #78350f 100%);
+  border: 1px solid rgba(251, 191, 36, 0.25);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), var(--shadow-md);
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 220px;
+  cursor: pointer;
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.bible-quiz-promo-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(251, 191, 36, 0.6);
+  box-shadow: 0 15px 30px -5px rgba(251, 191, 36, 0.15), var(--shadow-lg);
+}
+
+.quiz-card-content {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.quiz-card-art {
+  font-size: 48px;
+  line-height: 1;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 16px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.quiz-card-details {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.quiz-badge-gold {
+  background-color: var(--primary);
+  color: #1e1b4b;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 6px;
+  width: fit-content;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.quiz-card-details h5 {
+  font-family: var(--font-ui);
+  font-size: 18px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.quiz-card-details p {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.quiz-card-stats {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.quiz-card-stats span {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.dot-separator {
+  color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.btn-play-quiz {
+  background: var(--primary);
+  color: #1e1b4b;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-family: var(--font-ui);
+  font-weight: 800;
+  font-size: 13px;
+  cursor: pointer;
+  width: fit-content;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.2);
+}
+
+.btn-play-quiz:hover {
+  background-color: #fcd34d;
+  box-shadow: 0 6px 16px rgba(251, 191, 36, 0.45);
+  transform: translateY(-1px);
+}
+
+/* Quiz Modal Elements */
+.quiz-choice-btn {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 14px 20px;
+  border-radius: 12px;
+  background-color: var(--bg-content);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 14.5px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.quiz-choice-btn:hover:not(:disabled) {
+  border-color: var(--primary);
+  background-color: var(--primary-light);
+  transform: translateY(-1px);
+}
+
+.quiz-choice-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.85;
+}
+
+/* Correct feedback state */
+.quiz-choice-btn.correct {
+  border-color: #22c55e !important;
+  background-color: rgba(34, 197, 94, 0.15) !important;
+  color: #22c55e !important;
+}
+
+.quiz-choice-btn.correct .choice-status-icon {
+  color: #22c55e;
+  font-weight: 800;
+  font-size: 16px;
+}
+
+/* Incorrect feedback state */
+.quiz-choice-btn.incorrect {
+  border-color: var(--danger) !important;
+  background-color: rgba(248, 113, 113, 0.15) !important;
+  color: var(--danger) !important;
+}
+
+.quiz-choice-btn.incorrect .choice-status-icon {
+  color: var(--danger);
+  font-weight: 800;
+  font-size: 16px;
+}
+
