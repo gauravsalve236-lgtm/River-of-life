@@ -22,7 +22,7 @@ Write-Host "--- Committing Changes ---" -ForegroundColor Cyan
 # Configure standard user details for the commit if not already configured
 & $gitPath config user.name "Gaurav Salve"
 & $gitPath config user.email "gauravsalve236@gmail.com"
-& $gitPath commit -m "Improve Auth accessibility with header/home shortcuts, pre-seeded admin, and professional prayer form"
+& $gitPath commit -m "Add Live Fellowship (Meetings) module and package app for iOS using CapacitorJS"
 
 Write-Host "--- Setting Main Branch ---" -ForegroundColor Cyan
 & $gitPath branch -M main

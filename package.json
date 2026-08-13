@@ -1,0 +1,16 @@
+{
+  "name": "river-of-life-bible",
+  "version": "1.0.0",
+  "description": "River of Life bilingual Bible app packaged for iOS",
+  "main": "app.js",
+  "scripts": {
+    "sync": "cap sync"
+  },
+  "dependencies": {
+    "@capacitor/core": "^6.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.0.0",
+    "@capacitor/ios": "^6.0.0"
+  }
+}
