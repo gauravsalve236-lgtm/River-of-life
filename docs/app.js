@@ -6039,10 +6039,43 @@ const CHURCH_MEMBERS = [
   { username: "Ruth Shinde", isPastor: false }
 ];
 
-// Helper to save LocalStorage meetings
-
-
-
+function getMeetingsFromStorage() {
+  const data = localStorage.getItem("river_of_life_meetings");
+  if (data) {
+    try {
+      const parsed = JSON.parse(data);
+      if (parsed && parsed.length > 0) return parsed;
+    } catch (e) {}
+  }
+  const defaultMeetings = [
+    {
+      id: "friday-prayer",
+      title: "Friday Family Prayer / कौटुंबिक प्रार्थना",
+      description: "Weekly fellowship, live prayer requests, and Marathi/English Bible study.",
+      host: "Pastor John",
+      date: new Date().toISOString().split("T")[0],
+      time: "20:00",
+      duration: "60",
+      status: "live",
+      participantsCount: 7,
+      createdAt: Date.now()
+    },
+    {
+      id: "sunday-worship",
+      title: "Sunday Divine Worship Service / रविवारची उपासना",
+      description: "Sunday morning live praise, worship, and sermon.",
+      host: "Pastor Sunil",
+      date: new Date(Date.now() + 86400000 * 2).toISOString().split("T")[0],
+      time: "09:30",
+      duration: "90",
+      status: "scheduled",
+      participantsCount: 0,
+      createdAt: Date.now()
+    }
+  ];
+  saveMeetingsToStorage(defaultMeetings);
+  return defaultMeetings;
+}
 
 function saveMeetingsToStorage(meetings) {
   localStorage.setItem("river_of_life_meetings", JSON.stringify(meetings));
