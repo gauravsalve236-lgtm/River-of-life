@@ -3763,6 +3763,35 @@ function setupEventListeners() {
     });
   });
 
+  const playCustomBtn = document.getElementById("btn-meet-play-custom");
+  if (playCustomBtn) {
+    playCustomBtn.addEventListener("click", () => {
+      if (!activeMeetingSession) return;
+      const inputUrl = document.getElementById("meet-music-custom-url").value.trim();
+      if (!inputUrl) {
+        showToast("Please enter a valid YouTube or MP3 link.");
+        return;
+      }
+      
+      const isYoutube = inputUrl.includes("youtube.com") || inputUrl.includes("youtu.be");
+      if (isYoutube) {
+        broadcastMeetingEvent(activeMeetingSession.meetingId, {
+          type: "PLAY_YOUTUBE",
+          url: inputUrl
+        });
+      } else {
+        broadcastMeetingEvent(activeMeetingSession.meetingId, {
+          type: "PLAY_MUSIC",
+          trackUrl: inputUrl,
+          title: "Custom Shared Praise Track",
+          volume: 55
+        });
+      }
+      closeAllDrawers();
+      document.getElementById("meet-music-custom-url").value = "";
+    });
+  }
+
   const musicStopBtn = document.getElementById("btn-meet-music-stop");
   if (musicStopBtn) {
     musicStopBtn.addEventListener("click", () => {
@@ -3770,8 +3799,11 @@ function setupEventListeners() {
       broadcastMeetingEvent(activeMeetingSession.meetingId, {
         type: "STOP_MUSIC"
       });
+      broadcastMeetingEvent(activeMeetingSession.meetingId, {
+        type: "STOP_YOUTUBE"
+      });
       closeAllDrawers();
-      showToast("Stopped background music.");
+      showToast("Stopped background audio / video.");
     });
   }
 
@@ -6673,6 +6705,10 @@ async function handleMeetingBroadcastEvent(msg) {
     playWorshipTrack(msg.trackUrl, msg.title, msg.volume);
   } else if (msg.type === "STOP_MUSIC") {
     stopWorshipTrack();
+  } else if (msg.type === "PLAY_YOUTUBE") {
+    syncSharedWorshipVideo(msg.url);
+  } else if (msg.type === "STOP_YOUTUBE") {
+    hideSharedWorshipVideo();
   }
 }
 
@@ -6694,31 +6730,31 @@ async function renderSharedBibleContent(bookKey, chapter, verse) {
   
   let html = `
     <div style="display: flex; flex-direction: column; height: 100%;">
-      <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; border-bottom: 1px solid rgba(255,255,255,0.08); background: #1e293b;">
-        <h4 style="margin: 0; font-size: 13.5px; font-weight: 800; color: #d4af37; text-align: left;">
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; border-bottom: 1px solid #e2e8f0; background: #f8fafc;">
+        <h4 style="margin: 0; font-size: 13.5px; font-weight: 800; color: #b45309; text-align: left;">
           📖 Scripture Shared: ${metadata.name} ${chapter} / ${metadata.engName} ${chapter}
         </h4>
-        <span style="font-size: 10px; background: rgba(212,175,55,0.15); color: #d4af37; padding: 2px 8px; border-radius: 4px; font-weight: 700;">LIVE STUDY</span>
+        <span style="font-size: 10px; background: rgba(180,83,9,0.12); color: #b45309; padding: 2px 8px; border-radius: 4px; font-weight: 700;">LIVE STUDY</span>
       </div>
-      <div style="flex: 1; overflow-y: auto; padding: 16px; background: #0f172a; display: flex; flex-direction: column; gap: 12px; text-align: left;">
+      <div style="flex: 1; overflow-y: auto; padding: 16px; background: #faf6eb; display: flex; flex-direction: column; gap: 12px; text-align: left;">
   `;
   
   if (verse && verse !== "all") {
     const vIdx = parseInt(verse) - 1;
     html += `
-      <div style="padding: 12px 16px; border-radius: 8px; background: rgba(212,175,55,0.08); border-left: 3px solid #d4af37;">
-        <strong style="color: #d4af37; font-size: 12px;">Verse ${verse}</strong>
-        <p style="margin: 6px 0 4px 0; font-size: 14.5px; font-weight: 500; color: #f8fafc; line-height: 1.5;">${versesEng[vIdx] || ""}</p>
-        <p style="margin: 4px 0 0 0; font-size: 14px; color: #cbd5e1; font-style: italic; line-height: 1.5;">${versesMr[vIdx] || ""}</p>
+      <div style="padding: 12px 16px; border-radius: 8px; background: #fffdf9; border-left: 4px solid #b45309; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <strong style="color: #b45309; font-size: 12px;">Verse ${verse}</strong>
+        <p style="margin: 6px 0 4px 0; font-size: 15px; font-weight: 600; color: #0f172a; line-height: 1.6;">${versesEng[vIdx] || ""}</p>
+        <p style="margin: 4px 0 0 0; font-size: 14.5px; color: #475569; font-style: italic; line-height: 1.6;">${versesMr[vIdx] || ""}</p>
       </div>
     `;
   } else {
     for (let i = 0; i < totalVerses; i++) {
       html += `
-        <div style="padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.04);">
-          <strong style="color: #94a3b8; font-size: 11px;">Verse ${i + 1}</strong>
-          <p style="margin: 4px 0 2px 0; font-size: 14px; color: #f1f5f9; line-height: 1.5;">${versesEng[i] || ""}</p>
-          <p style="margin: 2px 0 0 0; font-size: 13.5px; color: #94a3b8; font-style: italic; line-height: 1.5;">${versesMr[i] || ""}</p>
+        <div style="padding-bottom: 10px; border-bottom: 1px solid #e2e8f0;">
+          <strong style="color: #64748b; font-size: 11px;">Verse ${i + 1}</strong>
+          <p style="margin: 4px 0 2px 0; font-size: 14.5px; font-weight: 550; color: #0f172a; line-height: 1.6;">${versesEng[i] || ""}</p>
+          <p style="margin: 2px 0 0 0; font-size: 14px; color: #475569; font-style: italic; line-height: 1.6;">${versesMr[i] || ""}</p>
         </div>
       `;
     }
@@ -7477,39 +7513,65 @@ function syncSharedBiblePassage(book, chapter, verse, translation) {
   }
 }
 
-// Sync Worship YouTube player embed inside call
+// Sync Worship YouTube player embed inside call with split-screen layout
 function syncSharedWorshipVideo(youtubeUrl) {
   const container = document.getElementById("meeting-shared-content-area");
   const worshipBox = document.getElementById("worship-video-frame-container");
   const bibleBox = document.getElementById("meeting-shared-bible");
   const screenshareBox = document.getElementById("meeting-screenshare-container");
+  const jitsiCont = document.getElementById("meeting-jitsi-container");
   
+  if (!container || !worshipBox || !jitsiCont) return;
+
   // Extract YouTube ID
   let videoId = "nQWFzMvCfLE"; // Default Give Thanks
   if (youtubeUrl.includes("v=")) {
     videoId = youtubeUrl.split("v=")[1].split("&")[0];
   } else if (youtubeUrl.includes("youtu.be/")) {
     videoId = youtubeUrl.split("youtu.be/")[1].split("?")[0];
+  } else if (!youtubeUrl.startsWith("http") && youtubeUrl.length > 5) {
+    videoId = youtubeUrl; // Raw video ID
   }
+
+  // Stop any active background music
+  stopWorshipTrack();
 
   container.style.display = "block";
   worshipBox.style.display = "block";
-  bibleBox.style.display = "none";
-  screenshareBox.style.display = "none";
+  if (bibleBox) bibleBox.style.display = "none";
+  if (screenshareBox) screenshareBox.style.display = "none";
 
-  // Embed player
+  // Embed player inside the split screen
   const player = document.getElementById("worship-youtube-player");
   if (player) {
     player.innerHTML = `
-      <iframe width="100%" height="100%" src="https://www.youtube.com/embed/${videoId}?autoplay=1&enablejsapi=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      <iframe width="100%" height="100%" src="https://www.youtube.com/embed/${videoId}?autoplay=1&enablejsapi=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="width:100%; height:100%;"></iframe>
     `;
   }
 
-  appendMeetingChatMessage("SYSTEM", `🎵 Host shared worship song link`, false);
-  showToast("Worship video playing for all participants.");
+  showToast("Playing shared worship video for all participants.");
 
-  if (activeJitsiAPIInstance) {
-    activeJitsiAPIInstance.executeCommand("sendChatMessage", `🎵 [WORSHIP_SYNC]: https://youtu.be/${videoId}`, true);
+  // Resize meeting iframe to top split view
+  jitsiCont.style.height = "calc(55% - 50px)";
+  jitsiCont.style.top = "calc(45% + 50px)";
+}
+
+// Hide shared worship video and restore screen
+function hideSharedWorshipVideo() {
+  const container = document.getElementById("meeting-shared-content-area");
+  const worshipBox = document.getElementById("worship-video-frame-container");
+  const jitsiCont = document.getElementById("meeting-jitsi-container");
+  
+  if (worshipBox) {
+    worshipBox.style.display = "none";
+    const player = document.getElementById("worship-youtube-player");
+    if (player) player.innerHTML = "";
+  }
+  
+  if (container) container.style.display = "none";
+  if (jitsiCont) {
+    jitsiCont.style.height = "calc(100% - 50px)";
+    jitsiCont.style.top = "50px";
   }
 }
 
