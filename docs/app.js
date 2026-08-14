@@ -6680,6 +6680,142 @@ function triggerMeetingReaction(reaction) {
 let meetingEventSource = null;
 let activeWorshipAudio = null;
 let currentWorshipTrack = null;
+let rtcPeerConnections = {};
+
+const rtcConfig = {
+  iceServers: [
+    { urls: "stun:stun.l.google.com:19302" },
+    { urls: "stun:stun1.l.google.com:19302" }
+  ]
+};
+
+// Host initiates WebRTC P2P Audio Stream to connected participants
+async function initHostWebRTCAudioStream(participantId, audioTrack) {
+  try {
+    const pc = new RTCPeerConnection(rtcConfig);
+    rtcPeerConnections[participantId] = pc;
+
+    if (audioTrack) {
+      pc.addTrack(audioTrack, new MediaStream([audioTrack]));
+    }
+
+    pc.onicecandidate = (event) => {
+      if (event.candidate && activeMeetingSession) {
+        broadcastMeetingEvent(activeMeetingSession.meetingId, {
+          type: "RTC_ICE_CANDIDATE",
+          target: participantId,
+          sender: state.currentUser ? state.currentUser.username : "Host",
+          candidate: event.candidate
+        });
+      }
+    };
+
+    const offer = await pc.createOffer();
+    await pc.setLocalDescription(offer);
+
+    broadcastMeetingEvent(activeMeetingSession.meetingId, {
+      type: "RTC_AUDIO_OFFER",
+      target: participantId,
+      sender: state.currentUser ? state.currentUser.username : "Host",
+      sdp: offer
+    });
+
+    logAudioDebug(`WebRTC Offer sent to ${participantId}`);
+  } catch (err) {
+    console.warn("RTC Offer error:", err);
+  }
+}
+
+// Participant receives WebRTC Audio Stream from Host
+async function handleParticipantWebRTCOffer(msg) {
+  const myUsername = state.currentUser ? state.currentUser.username : "Guest";
+  if (msg.target && msg.target !== myUsername && msg.target !== "ALL") return;
+
+  try {
+    const pc = new RTCPeerConnection(rtcConfig);
+    rtcPeerConnections[msg.sender] = pc;
+
+    pc.ontrack = (event) => {
+      console.log("[RTC_AUDIO] Incoming WebRTC Audio Track from Host!", event.track);
+      let rtcAudioEl = document.getElementById("webrtc-remote-audio-player");
+      if (!rtcAudioEl) {
+        rtcAudioEl = document.createElement("audio");
+        rtcAudioEl.id = "webrtc-remote-audio-player";
+        rtcAudioEl.autoplay = true;
+        rtcAudioEl.playsInline = true;
+        document.body.appendChild(rtcAudioEl);
+      }
+
+      rtcAudioEl.srcObject = event.streams[0] || new MediaStream([event.track]);
+      rtcAudioEl.play().then(() => {
+        console.log("[RTC_AUDIO] WebRTC Audio playing successfully on mobile speaker!");
+        showToast("🔊 Live WebRTC audio streaming through your speaker!");
+      }).catch(err => {
+        console.warn("[RTC_AUDIO] Mobile play rejected:", err);
+        const banner = document.getElementById("meeting-worship-audio-banner");
+        if (banner) {
+          banner.style.cssText = "display:flex; top:60px; background: rgba(34, 197, 94, 0.95); cursor: pointer;";
+          banner.querySelector("span").textContent = "🔊 Tap to Hear Live Audio";
+          banner.onclick = () => {
+            rtcAudioEl.play();
+            banner.style.display = "none";
+          };
+        }
+      });
+    };
+
+    pc.onicecandidate = (event) => {
+      if (event.candidate && activeMeetingSession) {
+        broadcastMeetingEvent(activeMeetingSession.meetingId, {
+          type: "RTC_ICE_CANDIDATE",
+          target: msg.sender,
+          sender: myUsername,
+          candidate: event.candidate
+        });
+      }
+    };
+
+    await pc.setRemoteDescription(new RTCSessionDescription(msg.sdp));
+    const answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
+
+    broadcastMeetingEvent(activeMeetingSession.meetingId, {
+      type: "RTC_AUDIO_ANSWER",
+      target: msg.sender,
+      sender: myUsername,
+      sdp: answer
+    });
+
+    logAudioDebug(`WebRTC Answer sent to ${msg.sender}`);
+  } catch (err) {
+    console.warn("RTC Answer error:", err);
+  }
+}
+
+// Handle incoming WebRTC Answer on Host
+async function handleHostWebRTCAnswer(msg) {
+  const pc = rtcPeerConnections[msg.sender];
+  if (pc) {
+    try {
+      await pc.setRemoteDescription(new RTCSessionDescription(msg.sdp));
+      logAudioDebug(`WebRTC Remote Description set for ${msg.sender}`);
+    } catch (err) {
+      console.warn("Set Remote Description error:", err);
+    }
+  }
+}
+
+// Handle ICE Candidates
+async function handleWebRTCICECandidate(msg) {
+  const pc = rtcPeerConnections[msg.sender];
+  if (pc && msg.candidate) {
+    try {
+      await pc.addIceCandidate(new RTCIceCandidate(msg.candidate));
+    } catch (err) {
+      console.warn("Add ICE Candidate error:", err);
+    }
+  }
+}
 
 // Subscribe to real-time sync channel
 function subscribeToMeetingEvents(meetingId) {
@@ -6742,7 +6878,14 @@ async function handleMeetingBroadcastEvent(msg) {
     handleParticipantVideoAudioShareStart(msg);
   } else if (msg.type === "STOP_VIDEO_AUDIO_SHARE") {
     handleParticipantVideoAudioShareStop(msg);
+  } else if (msg.type === "RTC_AUDIO_OFFER") {
+    handleParticipantWebRTCOffer(msg);
+  } else if (msg.type === "RTC_AUDIO_ANSWER") {
+    handleHostWebRTCAnswer(msg);
+  } else if (msg.type === "RTC_ICE_CANDIDATE") {
+    handleWebRTCICECandidate(msg);
   }
+
 }
 
 
@@ -8056,6 +8199,12 @@ async function startShareAudioOnly() {
     const btn = document.getElementById("btn-meet-screenshare");
     if (btn) btn.classList.add("active");
 
+    // Broadcast WebRTC PCM audio stream directly to all connected participants
+    if (audioSharingDestination && audioSharingDestination.stream.getAudioTracks().length > 0) {
+      initHostWebRTCAudioStream("ALL", audioSharingDestination.stream.getAudioTracks()[0]);
+      logAudioDebug("WebRTC P2P Audio Stream broadcast initiated to ALL participants! ✅");
+    }
+
     broadcastMeetingEvent(activeMeetingSession.meetingId, {
       type: "START_AUDIO_ONLY_SHARE",
       sender: state.currentUser ? state.currentUser.username : "Host",
@@ -8066,6 +8215,7 @@ async function startShareAudioOnly() {
     logAudioDebug("Audio Published: YES ✅");
     logAudioDebug("=== AUDIO PIPELINE READY ===");
     showToast("🔊 Audio-Only Sharing Active! Participants hear your media audio + mic.");
+
 
     audioTrack.onended = () => {
       logAudioDebug("Audio track ended by user/system.");
