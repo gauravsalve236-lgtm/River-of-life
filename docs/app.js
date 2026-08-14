@@ -359,8 +359,10 @@ function applyStylesFromState() {
   appEl.classList.add(`ios-theme-${state.theme}`);
   
   // Apply theme class to document body as well so that all drawers, overlays and modals inherit theme colors
-  document.body.className = "";
-  document.body.classList.add(`ios-theme-${state.theme}`);
+  if (document.body) {
+    document.body.className = "";
+    document.body.classList.add(`ios-theme-${state.theme}`);
+  }
   
   const readerEl = document.getElementById("view-reader");
   if (readerEl) {
@@ -402,75 +404,99 @@ function applyStylesFromState() {
   if (state.theme === "light") metaColor = "#f8fafc";
   else if (state.theme === "sepia") metaColor = "#fdf6e3";
   else if (state.theme === "olive") metaColor = "#f4f6f0";
-  document.getElementById("theme-meta").setAttribute("content", metaColor);
+  const themeMeta = document.getElementById("theme-meta");
+  if (themeMeta) themeMeta.setAttribute("content", metaColor);
 }
 
 /* ==========================================================================
-   Routing View Handler
+   Routing View Handler (Guaranteed Direct Tab Switching)
    ========================================================================== */
+function switchTab(rawRoute) {
+  if (!rawRoute) rawRoute = "home";
+  const route = rawRoute.replace("#/", "").split("?")[0].split("/")[0] || "home";
+  
+  // Hide all view panels
+  document.querySelectorAll(".app-view").forEach(view => {
+    view.classList.remove("active");
+    view.style.setProperty("display", "none", "important");
+  });
+  
+  // Deactivate sidebars and mobile tabs
+  document.querySelectorAll(".nav-item").forEach(item => item.classList.remove("active"));
+  document.querySelectorAll(".tab-btn").forEach(item => item.classList.remove("active"));
+  
+  const viewId = `view-${route}`;
+  const targetView = document.getElementById(viewId);
+  if (targetView) {
+    targetView.classList.add("active");
+    
+    // Restore appropriate display mode inline
+    if (targetView.classList.contains("split-screen-parent")) {
+      targetView.style.setProperty("display", "flex", "important");
+    } else {
+      targetView.style.setProperty("display", "block", "important");
+    }
+    
+    // Highlight sidebar & bottom nav items
+    document.querySelectorAll(`.nav-item[data-tab="${route}"]`).forEach(btn => btn.classList.add("active"));
+    document.querySelectorAll(`.tab-btn[data-tab="${route}"]`).forEach(btn => btn.classList.add("active"));
+    
+    adjustHeaderForRoute(route);
+    
+    // Reload specific data lists on tab changes
+    if (route === "you") {
+      renderYouProfile();
+    } else if (route === "home") {
+      renderDailyDevotion();
+    } else if (route === "plans") {
+      renderReadingPlansTab();
+    } else if (route === "prayers") {
+      renderPrayersScreen();
+    } else if (route === "meetings") {
+      renderMeetingsDashboard();
+    }
+  } else {
+    // Fallback to home view if route is unmapped
+    const homeView = document.getElementById("view-home");
+    if (homeView) {
+      homeView.classList.add("active");
+      homeView.style.setProperty("display", "block", "important");
+      adjustHeaderForRoute("home");
+    }
+  }
+}
+
 function initRouting() {
   const handleHashChange = () => {
     const hash = window.location.hash || "#/home";
-    const route = hash.replace("#/", "");
-    
-    // Hide all view panels
-    document.querySelectorAll(".app-view").forEach(view => {
-      view.classList.remove("active");
-      view.style.setProperty("display", "none", "important");
-    });
-    
-    // Deactivate sidebars and mobile tabs
-    document.querySelectorAll(".nav-item").forEach(item => item.classList.remove("active"));
-    document.querySelectorAll(".tab-btn").forEach(item => item.classList.remove("active"));
-    
-    const viewId = `view-${route}`;
-    const targetView = document.getElementById(viewId);
-    if (targetView) {
-      targetView.classList.add("active");
-      
-      // Restore appropriate display mode inline
-      if (targetView.classList.contains("split-screen-parent")) {
-        targetView.style.setProperty("display", "flex", "important");
-      } else {
-        targetView.style.setProperty("display", "block", "important");
-      }
-      
-      // Highlight sidebar & bottom nav items
-      document.querySelectorAll(`.nav-item[data-tab="${route}"]`).forEach(btn => btn.classList.add("active"));
-      document.querySelectorAll(`.tab-btn[data-tab="${route}"]`).forEach(btn => btn.classList.add("active"));
-      
-      adjustHeaderForRoute(route);
-      
-      // Reload specific data lists on tab changes
-      if (route === "you") {
-        renderYouProfile();
-      } else if (route === "home") {
-        renderDailyDevotion();
-      } else if (route === "plans") {
-        renderReadingPlansTab();
-      } else if (route === "prayers") {
-        renderPrayersScreen();
-      } else if (route === "meetings") {
-        renderMeetingsDashboard();
-      }
-    }
+    switchTab(hash);
   };
   
   window.addEventListener("hashchange", handleHashChange);
   handleHashChange();
   
-  // Click bindings for side/bottom tabs navigation
+  // Click bindings for side & bottom tabs navigation (Direct switchTab call guarantees execution on every click!)
   document.querySelectorAll(".nav-item").forEach(item => {
-    item.addEventListener("click", () => {
-      window.location.hash = `#/${item.dataset.tab}`;
+    item.addEventListener("click", (e) => {
+      const tab = item.dataset.tab || item.getAttribute("data-tab");
+      if (tab) {
+        window.location.hash = `#/${tab}`;
+        switchTab(tab);
+      }
     });
   });
+  
   document.querySelectorAll(".tab-btn").forEach(item => {
-    item.addEventListener("click", () => {
-      window.location.hash = `#/${item.dataset.tab}`;
+    item.addEventListener("click", (e) => {
+      const tab = item.dataset.tab || item.getAttribute("data-tab");
+      if (tab) {
+        window.location.hash = `#/${tab}`;
+        switchTab(tab);
+      }
     });
   });
 }
+
 
 function adjustHeaderForRoute(route) {
   const readerCtrls = document.getElementById("nav-reader-controls");
