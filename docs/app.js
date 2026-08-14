@@ -342,6 +342,10 @@ function applyStylesFromState() {
   appEl.className = "";
   appEl.classList.add(`ios-theme-${state.theme}`);
   
+  // Apply theme class to document body as well so that all drawers, overlays and modals inherit theme colors
+  document.body.className = "";
+  document.body.classList.add(`ios-theme-${state.theme}`);
+  
   const readerEl = document.getElementById("view-reader");
   if (readerEl) {
     readerEl.className = "app-view split-screen-parent";
