@@ -2450,5 +2450,16 @@
 
   <!-- App Main Logic -->
   <script src="app.js?v=37" type="module"></script>
+  <script>
+    // Fallback Safety: Guarantee splash screen is hidden within 2.5s no matter what
+    setTimeout(function() {
+      var splash = document.getElementById("splash-screen");
+      if (splash && splash.style.display !== "none") {
+        splash.classList.add("fade-out");
+        setTimeout(function() { splash.style.display = "none"; }, 500);
+      }
+    }, 2500);
+  </script>
 </body>
 </html>
+

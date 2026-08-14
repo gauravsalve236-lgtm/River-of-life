@@ -241,38 +241,73 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.body.style.paddingTop = "50px";
   }
 
-  loadStateFromLocalStorage();
-  applyStylesFromState();
-  initRouting();
-  setupEventListeners();
-  initAudioVoices();
-  toggleVoiceDropdownVisibility();
+  // 1. Fire splash screen timer IMMEDIATELY so splash always dismisses cleanly
+
+  try {
+    initSplashAndNotifications();
+  } catch (splashErr) {
+    console.warn("Splash init warning:", splashErr);
+    const splash = document.getElementById("splash-screen");
+    if (splash) splash.style.display = "none";
+  }
+
+  // Safety fallback: Ensure splash screen is hidden within 2.5s no matter what
+  setTimeout(() => {
+    const splash = document.getElementById("splash-screen");
+    if (splash && splash.style.display !== "none") {
+      splash.classList.add("fade-out");
+      setTimeout(() => { splash.style.display = "none"; }, 500);
+    }
+  }, 2500);
+
+  // 2. Wrap all app initializations in safe try/catch blocks
+  try {
+    loadStateFromLocalStorage();
+    applyStylesFromState();
+    initRouting();
+    setupEventListeners();
+    initAudioVoices();
+    toggleVoiceDropdownVisibility();
+  } catch (e) {
+    console.error("Base init error:", e);
+  }
   
   // Load local scripture indexes
-  await Promise.all([loadBooksIndexEng(), loadBooksIndexMr()]);
+  try {
+    await Promise.all([loadBooksIndexEng(), loadBooksIndexMr()]);
+  } catch (e) {
+    console.error("Index load error:", e);
+  }
   
   // Set default starting chapter and render elements
-  openReader(state.activeBook, state.activeChapter);
-  renderDailyDevotion();
-  renderYouProfile();
-  checkStreak();
-  
-  updateQuizCardStats();
-  initBibleQuiz();
-  initAuthAndPrayers();
+  try {
+    openReader(state.activeBook, state.activeChapter);
+    renderDailyDevotion();
+    renderYouProfile();
+    checkStreak();
+    updateQuizCardStats();
+    initBibleQuiz();
+    initAuthAndPrayers();
+  } catch (e) {
+    console.error("Reader/Devotion init error:", e);
+  }
 
   // Premium Features Initializations
-  initSplashAndNotifications();
-  initNotificationPrompt();
-  initAICompanion();
-  initAmbientAudioSynth();
-  initPersonalizedDevotionals();
-  initLifeSituationsSearch();
-  initFamilyMode();
-  initOfflineManager();
-  initChurchCompanion();
-  initMeetings();
+  try {
+    initNotificationPrompt();
+    initAICompanion();
+    initAmbientAudioSynth();
+    initPersonalizedDevotionals();
+    initLifeSituationsSearch();
+    initFamilyMode();
+    initOfflineManager();
+    initChurchCompanion();
+    initMeetings();
+  } catch (e) {
+    console.error("Features init error:", e);
+  }
 });
+
 
 // Sync operations with LocalStorage
 function loadStateFromLocalStorage() {
