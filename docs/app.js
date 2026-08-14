@@ -6323,7 +6323,7 @@ function launchLiveMeetingRoom(meeting, stream) {
     
     // Setup API options
     const domain = "meet.jit.si";
-    const roomName = `RiverOfLife_Room_${meeting.id}`;
+    const roomName = `RiverOfLife_GauravSalve_${meeting.id}`;
     
     const options = {
       roomName: roomName,
