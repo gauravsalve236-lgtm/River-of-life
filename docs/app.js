@@ -3790,20 +3790,6 @@ function setupEventListeners() {
     });
   }
 
-  const gridToggleBtnTop = document.getElementById("btn-meeting-grid-toggle");
-  if (gridToggleBtnTop) {
-    gridToggleBtnTop.addEventListener("click", () => {
-      toggleMeetingGridView();
-    });
-  }
-
-  const gridToggleBtnBottom = document.getElementById("btn-meet-grid");
-  if (gridToggleBtnBottom) {
-    gridToggleBtnBottom.addEventListener("click", () => {
-      toggleMeetingGridView();
-    });
-  }
-
   const musicBtn = document.getElementById("btn-meeting-music");
   if (musicBtn) {
     musicBtn.addEventListener("click", () => {
@@ -3813,22 +3799,18 @@ function setupEventListeners() {
 
   const shareWordSubmitBtn = document.getElementById("btn-meet-share-bible-submit");
   if (shareWordSubmitBtn) {
-    shareWordSubmitBtn.addEventListener("click", async () => {
+    shareWordSubmitBtn.addEventListener("click", () => {
+      if (!activeMeetingSession) return;
       const book = document.getElementById("meeting-share-book").value;
       const chapter = document.getElementById("meeting-share-chapter").value;
       const verse = document.getElementById("meeting-share-verse").value;
       
-      // Render locally immediately on sharer's screen
-      await renderSharedBibleContent(book, chapter, verse);
-      
-      if (activeMeetingSession) {
-        broadcastMeetingEvent(activeMeetingSession.meetingId, {
-          type: "SHARE_BIBLE",
-          book,
-          chapter,
-          verse
-        });
-      }
+      broadcastMeetingEvent(activeMeetingSession.meetingId, {
+        type: "SHARE_BIBLE",
+        book,
+        chapter,
+        verse
+      });
       closeAllDrawers();
       showToast("Scripture shared with participants!");
     });
@@ -3837,12 +3819,10 @@ function setupEventListeners() {
   const shareWordStopBtn = document.getElementById("btn-meet-share-bible-stop");
   if (shareWordStopBtn) {
     shareWordStopBtn.addEventListener("click", () => {
-      hideSharedBibleContent();
-      if (activeMeetingSession) {
-        broadcastMeetingEvent(activeMeetingSession.meetingId, {
-          type: "STOP_SHARE_BIBLE"
-        });
-      }
+      if (!activeMeetingSession) return;
+      broadcastMeetingEvent(activeMeetingSession.meetingId, {
+        type: "STOP_SHARE_BIBLE"
+      });
       closeAllDrawers();
       showToast("Stopped scripture sharing.");
     });
@@ -6039,43 +6019,10 @@ const CHURCH_MEMBERS = [
   { username: "Ruth Shinde", isPastor: false }
 ];
 
-function getMeetingsFromStorage() {
-  const data = localStorage.getItem("river_of_life_meetings");
-  if (data) {
-    try {
-      const parsed = JSON.parse(data);
-      if (parsed && parsed.length > 0) return parsed;
-    } catch (e) {}
-  }
-  const defaultMeetings = [
-    {
-      id: "friday-prayer",
-      title: "Friday Family Prayer / कौटुंबिक प्रार्थना",
-      description: "Weekly fellowship, live prayer requests, and Marathi/English Bible study.",
-      host: "Pastor John",
-      date: new Date().toISOString().split("T")[0],
-      time: "20:00",
-      duration: "60",
-      status: "live",
-      participantsCount: 7,
-      createdAt: Date.now()
-    },
-    {
-      id: "sunday-worship",
-      title: "Sunday Divine Worship Service / रविवारची उपासना",
-      description: "Sunday morning live praise, worship, and sermon.",
-      host: "Pastor Sunil",
-      date: new Date(Date.now() + 86400000 * 2).toISOString().split("T")[0],
-      time: "09:30",
-      duration: "90",
-      status: "scheduled",
-      participantsCount: 0,
-      createdAt: Date.now()
-    }
-  ];
-  saveMeetingsToStorage(defaultMeetings);
-  return defaultMeetings;
-}
+// Helper to save LocalStorage meetings
+
+
+
 
 function saveMeetingsToStorage(meetings) {
   localStorage.setItem("river_of_life_meetings", JSON.stringify(meetings));
@@ -6509,51 +6456,34 @@ function generateICSFile(meeting) {
   showToast("Calendar File (.ics) downloaded!");
 }
 
-// Trigger Joining Flow (Camera preview checks & Instant Launch)
+// Trigger Joining Flow (Camera preview checks)
 function triggerJoinMeetingFlow(meetingId) {
-  let targetMeeting = { id: meetingId || 'friday-prayer', title: 'Friday Family Prayer / कौटुंबिक प्रार्थना', host: 'Pastor John' };
-  try {
-    const meetings = getMeetingsFromStorage();
-    if (meetings && meetings.length) {
-      const found = meetings.find(x => x.id === meetingId);
-      if (found) targetMeeting = found;
-    }
-  } catch (e) {
-    console.warn("Storage fetch fallback:", e);
-  }
+  const meetings = getMeetingsFromStorage();
+  const m = meetings.find(x => x.id === meetingId);
+  if (!m) return;
 
-  // INSTANTLY launch live meeting room modal so desktop & mobile users get 0ms latency UI response!
-  launchLiveMeetingRoom(targetMeeting, null);
-
-  // Background media stream capture
-  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-      .then(stream => {
-        if (activeMeetingSession) activeMeetingSession.localStream = stream;
-        const videoEl = document.getElementById("meeting-local-video");
-        const avatarEl = document.getElementById("video-cell-local-avatar");
-        if (videoEl) {
-          videoEl.srcObject = stream;
-          videoEl.style.display = "block";
-          if (avatarEl) avatarEl.style.display = "none";
-        }
-      })
-      .catch(err => {
-        console.warn("Media permissions notice:", err);
-      });
-  }
+  // Real or simulated meeting, we request permissions and launch it inside the app modal!
+  showToast("Requesting camera and microphone permissions...");
+  navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+    .then(stream => {
+      // Permission granted, launch meeting inside app modal
+      launchLiveMeetingRoom(m, stream);
+    })
+    .catch(err => {
+      console.warn("Media permissions denied:", err);
+      // Fallback: Proceed with mocked feeds if they deny camera (highly resilient)
+      showToast("Media permissions denied. Joining in listen-only/avatar mode.");
+      launchLiveMeetingRoom(m, null);
+    });
 }
 
 // Fullscreen Live Meeting Room Entry
 function launchLiveMeetingRoom(meeting, stream) {
   try {
-    if (!meeting) meeting = { id: 'friday-prayer', title: 'Friday Family Prayer / कौटुंबिक प्रार्थना', host: 'Pastor John' };
-
     // Lock screen view overlay
     const roomModal = document.getElementById("modal-live-meeting");
     if (roomModal) {
-      roomModal.style.setProperty("display", "block", "important");
-      roomModal.style.setProperty("z-index", "999999", "important");
+      roomModal.style.display = "block";
       setTimeout(() => {
         roomModal.classList.add("active");
       }, 10);
@@ -6563,15 +6493,11 @@ function launchLiveMeetingRoom(meeting, stream) {
     const titleEl = document.getElementById("meeting-room-title");
     if (titleEl) titleEl.textContent = meeting.title;
   
-    // Hide top header and bottom tabs with null safety
-    const appHeader = document.querySelector(".app-header");
-    if (appHeader) appHeader.style.display = "none";
-    
-    const bottomTabs = document.querySelector(".mobile-bottom-tabs");
-    if (bottomTabs) bottomTabs.style.display = "none";
-    
-    const sidebar = document.querySelector(".desktop-sidebar");
-    if (sidebar) sidebar.style.display = "none";
+  // Hide top header and bottom tabs
+  document.querySelector(".app-header").style.display = "none";
+  document.querySelector(".mobile-bottom-tabs").style.display = "none";
+  const sidebar = document.querySelector(".desktop-sidebar");
+  if (sidebar) sidebar.style.display = "none";
 
   // Setup active session state
   const loggedIn = state.currentUser ? state.currentUser.username : "Guest User";
@@ -6588,8 +6514,7 @@ function launchLiveMeetingRoom(meeting, stream) {
   };
 
   // Sync profile display initials
-  const localNameEl = document.getElementById("meeting-local-name");
-  if (localNameEl) localNameEl.textContent = `${loggedIn} ${isHost ? "(Host)" : ""}`;
+  document.getElementById("meeting-local-name").textContent = `${loggedIn} ${isHost ? "(Host)" : ""}`;
   
   // Sync host moderator controls drawer button
   const modBtn = document.getElementById("btn-meet-moderator");
@@ -6613,43 +6538,41 @@ function launchLiveMeetingRoom(meeting, stream) {
     }
   }
 
-  // Setup real P2P WebRTC Live Media Call container (Active by default so multi-device calls work live)
+  // Enable REAL Multi-User Live Video Call Room for Friends & Family
+  const gridEl = document.getElementById("meeting-video-grid");
   const jitsiCont = document.getElementById("meeting-jitsi-container");
-  const galleryGrid = document.getElementById("meeting-video-grid");
-  const realStreamBtn = document.getElementById("btn-toggle-real-stream");
 
+  // Hide static grid and show live WebRTC video room
+  if (gridEl) gridEl.style.display = "none";
+  
   if (jitsiCont) {
     jitsiCont.style.display = "block";
     jitsiCont.style.position = "absolute";
-    jitsiCont.style.top = "68px";
-    jitsiCont.style.left = "12px";
-    jitsiCont.style.right = "12px";
-    jitsiCont.style.bottom = "75px";
-    jitsiCont.style.width = "calc(100% - 24px)";
-    jitsiCont.style.height = "calc(100% - 143px)";
-    jitsiCont.style.borderRadius = "20px";
-    jitsiCont.style.overflow = "hidden";
-    jitsiCont.style.zIndex = "10";
+    jitsiCont.style.top = "50px";
+    jitsiCont.style.left = "0";
+    jitsiCont.style.right = "0";
+    jitsiCont.style.bottom = "0";
+    jitsiCont.style.width = "100%";
+    jitsiCont.style.height = "calc(100% - 50px - 72px - env(safe-area-inset-bottom, 20px))";
+    jitsiCont.style.zIndex = "5";
 
-    const cleanRoomId = (meeting.id || "live-fellowship").replace(/[^a-zA-Z0-9]/g, "_");
-    const roomUrl = `https://p2p.mirotalk.com/join/RiverOfLife_${cleanRoomId}?name=${encodeURIComponent(loggedIn)}&audio=1&video=1&muted=0`;
-    
+    showToast("Connecting to live video call for friends & family...");
+
+    const roomUrl = `https://p2p.mirotalk.com/join/RiverOfLife_GauravSalve_${meeting.id}?name=${encodeURIComponent(loggedIn)}`;
     jitsiCont.innerHTML = `
       <iframe 
         src="${roomUrl}" 
         width="100%" 
         height="100%" 
-        allow="camera *; microphone *; speaker-selection *; display-capture *; fullscreen *; autoplay *; picture-in-picture *;" 
+        allow="camera; microphone; speaker-selection; display-capture; fullscreen; autoplay; picture-in-picture;" 
         style="border: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; background: #090d16;">
       </iframe>
     `;
   }
 
-  if (galleryGrid) galleryGrid.style.display = "none";
-  if (realStreamBtn) {
-    realStreamBtn.innerHTML = "▦ <span>Demo Grid View</span>";
-    realStreamBtn.style.background = "#059669";
-  }
+  // Ensure bottom custom toolbar is visible above live call
+  const customToolbar = document.querySelector(".meeting-room-toolbar");
+  if (customToolbar) customToolbar.style.display = "flex";
 
   // Attach global screen tap listener inside meeting room to unlock audio on mobile browsers
   const autoAudioUnlocker = () => {
@@ -7006,94 +6929,49 @@ async function handleMeetingBroadcastEvent(msg) {
 
 
 
-// Toggle Grid View mode (responsive 2x2/3x3 grid for iOS, Android, and Windows)
-function toggleMeetingGridView() {
-  const gridEl = document.getElementById("meeting-video-grid");
-  const jitsiCont = document.getElementById("meeting-jitsi-container");
-  const btnTop = document.getElementById("btn-meeting-grid-toggle");
-  const btnBottom = document.getElementById("btn-meet-grid");
-
-  if (!gridEl) return;
-
-  const isGridShowing = gridEl.style.display !== "none";
-
-  if (isGridShowing && jitsiCont && jitsiCont.innerHTML.trim() !== "") {
-    // Switch to Full Call Stage View
-    gridEl.style.display = "none";
-    jitsiCont.style.display = "block";
-    if (btnTop) btnTop.classList.remove("active");
-    if (btnBottom) btnBottom.classList.remove("active");
-    showToast("Switched to Full Call View");
-  } else {
-    // Switch to Grid View Mode (All Participants Visible)
-    gridEl.style.display = "grid";
-    if (jitsiCont) jitsiCont.style.display = "none";
-    if (btnTop) btnTop.classList.add("active");
-    if (btnBottom) btnBottom.classList.add("active");
-    showToast("Grid View Active — All Participants Visible");
-  }
-}
-
-// Video Camera toggle
-  const camBtn = document.getElementById("btn-meet-cam") || document.getElementById("btn-meet-video");
-  if (camBtn) {
-    camBtn.onclick = () => toggleCameraFeed();
-  }
-
-// Fetch and render parallel Bible verse/chapter content in meeting layout (100% Light Theme)
+// Fetch and render parallel Bible verse/chapter content in meeting layout
 async function renderSharedBibleContent(bookKey, chapter, verse) {
   const area = document.getElementById("meeting-shared-content-area");
   const bibleCont = document.getElementById("meeting-shared-bible");
   const jitsiCont = document.getElementById("meeting-jitsi-container");
-  const gridEl = document.getElementById("meeting-video-grid");
   
-  if (!area || !bibleCont) return;
-
-  let cleanKey = bookKey ? bookKey.toLowerCase().replace(".json", "") : "psalms";
+  if (!area || !bibleCont || !jitsiCont) return;
   
-  const bookDataMr = await fetchBookDataMr(cleanKey);
-  const bookDataEng = await fetchBookDataEng(cleanKey);
-  const metadata = booksMetadataMr.find(b => b.filename.replace(".json", "") === cleanKey || b.engName.toLowerCase() === cleanKey || b.name === cleanKey) || { name: bookKey, engName: bookKey };
+  const bookDataMr = await fetchBookDataMr(bookKey);
+  const bookDataEng = await fetchBookDataEng(bookKey);
+  const metadata = booksMetadataMr.find(b => b.filename.replace(".json", "") === bookKey) || { name: bookKey, engName: bookKey };
   
   const versesMr = bookDataMr ? bookDataMr.chapters[chapter - 1] : [];
   const versesEng = bookDataEng ? bookDataEng.chapters[chapter - 1] : [];
-  const totalVerses = Math.max(versesMr ? versesMr.length : 0, versesEng ? versesEng.length : 0);
+  const totalVerses = Math.max(versesMr.length, versesEng.length);
   
   let html = `
-    <div style="display: flex; flex-direction: column; height: 100%; background: #ffffff; color: #0f172a; border-bottom: 2px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.08);">
-      <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; border-bottom: 1.5px solid #f1f5f9; background: #ffffff;">
-        <h4 style="margin: 0; font-size: 14px; font-weight: 800; color: #1e293b; text-align: left; display: flex; align-items: center; gap: 8px;">
-          <span style="font-size: 18px;">📖</span>
-          <span>Scripture Shared: <span style="color: #b45309;">${metadata.name} ${chapter}</span> (${metadata.engName} ${chapter})</span>
+    <div style="display: flex; flex-direction: column; height: 100%;">
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; border-bottom: 1px solid #e2e8f0; background: #f8fafc;">
+        <h4 style="margin: 0; font-size: 13.5px; font-weight: 800; color: #b45309; text-align: left;">
+          📖 Scripture Shared: ${metadata.name} ${chapter} / ${metadata.engName} ${chapter}
         </h4>
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <span style="font-size: 10.5px; background: #fef3c7; color: #92400e; padding: 3px 10px; border-radius: 20px; font-weight: 800; border: 1px solid #fde68a;">🔴 LIVE STUDY</span>
-          <button id="btn-stop-shared-scripture-top" onclick="hideSharedBibleContent()" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.25); color: #ef4444; border-radius: 6px; padding: 4px 10px; font-size: 12px; font-weight: 800; cursor: pointer;">✕ Close</button>
-        </div>
+        <span style="font-size: 10px; background: rgba(180,83,9,0.12); color: #b45309; padding: 2px 8px; border-radius: 4px; font-weight: 700;">LIVE STUDY</span>
       </div>
-      <div style="flex: 1; overflow-y: auto; padding: 16px 20px; background: #faf6eb; color: #0f172a; display: flex; flex-direction: column; gap: 12px; text-align: left;">
+      <div style="flex: 1; overflow-y: auto; padding: 16px; background: #faf6eb; display: flex; flex-direction: column; gap: 12px; text-align: left;">
   `;
   
   if (verse && verse !== "all") {
     const vIdx = parseInt(verse) - 1;
     html += `
-      <div style="padding: 14px 18px; border-radius: 12px; background: #ffffff; border: 1px solid #f1f5f9; border-left: 4px solid #b45309; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
-        <span style="display: inline-block; background: #fef3c7; color: #92400e; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 4px; margin-bottom: 6px;">Verse ${verse}</span>
-        <p style="margin: 4px 0 4px 0; font-size: 15.5px; font-weight: 700; color: #0f172a; line-height: 1.6; font-family: var(--font-body);">${(versesEng && versesEng[vIdx]) || ""}</p>
-        <p style="margin: 6px 0 0 0; font-size: 15px; color: #334155; font-style: italic; line-height: 1.6; font-family: var(--font-body);">${(versesMr && versesMr[vIdx]) || ""}</p>
+      <div style="padding: 12px 16px; border-radius: 8px; background: #fffdf9; border-left: 4px solid #b45309; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <strong style="color: #b45309; font-size: 12px;">Verse ${verse}</strong>
+        <p style="margin: 6px 0 4px 0; font-size: 15px; font-weight: 600; color: #0f172a; line-height: 1.6;">${versesEng[vIdx] || ""}</p>
+        <p style="margin: 4px 0 0 0; font-size: 14.5px; color: #475569; font-style: italic; line-height: 1.6;">${versesMr[vIdx] || ""}</p>
       </div>
     `;
   } else {
-    const renderLimit = totalVerses > 0 ? totalVerses : 30;
-    for (let i = 0; i < renderLimit; i++) {
-      const enTxt = versesEng && versesEng[i] ? versesEng[i] : "";
-      const mrTxt = versesMr && versesMr[i] ? versesMr[i] : "";
-      if (!enTxt && !mrTxt) continue;
+    for (let i = 0; i < totalVerses; i++) {
       html += `
-        <div style="padding: 10px 14px; border-radius: 8px; background: #ffffff; border: 1px solid #f1f5f9; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
-          <strong style="color: #b45309; font-size: 11.5px;">Verse ${i + 1}</strong>
-          <p style="margin: 4px 0 2px 0; font-size: 15px; font-weight: 600; color: #0f172a; line-height: 1.6;">${enTxt}</p>
-          <p style="margin: 2px 0 0 0; font-size: 14.5px; color: #475569; font-style: italic; line-height: 1.6;">${mrTxt}</p>
+        <div style="padding-bottom: 10px; border-bottom: 1px solid #e2e8f0;">
+          <strong style="color: #64748b; font-size: 11px;">Verse ${i + 1}</strong>
+          <p style="margin: 4px 0 2px 0; font-size: 14.5px; font-weight: 550; color: #0f172a; line-height: 1.6;">${versesEng[i] || ""}</p>
+          <p style="margin: 2px 0 0 0; font-size: 14px; color: #475569; font-style: italic; line-height: 1.6;">${versesMr[i] || ""}</p>
         </div>
       `;
     }
@@ -7102,27 +6980,13 @@ async function renderSharedBibleContent(bookKey, chapter, verse) {
   html += `</div></div>`;
   
   bibleCont.innerHTML = html;
-  
-  area.style.position = "absolute";
-  area.style.top = "50px";
-  area.style.left = "0";
-  area.style.right = "0";
-  area.style.height = "42%";
-  area.style.zIndex = "25";
   area.style.display = "block";
-  area.style.background = "#ffffff";
-
   bibleCont.style.display = "block";
   
-  if (jitsiCont) {
-    jitsiCont.style.top = "calc(42% + 50px)";
-  }
-  if (gridEl) {
-    gridEl.style.top = "calc(42% + 50px)";
-  }
+  // Resize meeting iframe to top split view
+  jitsiCont.style.height = "calc(55% - 50px)";
+  jitsiCont.style.top = "calc(45% + 50px)";
 }
-window.renderSharedBibleContent = renderSharedBibleContent;
-window.toggleMeetingGridView = toggleMeetingGridView;
 
 // Hide shared scripture pane
 function hideSharedBibleContent() {
@@ -7133,14 +6997,7 @@ function hideSharedBibleContent() {
     jitsiCont.style.height = "calc(100% - 50px)";
     jitsiCont.style.top = "50px";
   }
-
-  if (activeMeetingSession) {
-    broadcastMeetingEvent(activeMeetingSession.meetingId, {
-      type: "STOP_SHARE_BIBLE"
-    });
-  }
 }
-
 
 // Helper to extract YouTube Video ID from any format URL
 function extractYouTubeVideoId(url) {
@@ -7304,13 +7161,14 @@ function exitLiveMeetingRoom() {
     jitsiCont.style.display = "none";
     jitsiCont.innerHTML = "";
   }
-  // Restore main application header and bottom navigation tab bar
-  const appHeader = document.querySelector(".app-header");
-  if (appHeader) appHeader.style.display = "flex";
+  const videoGrid = document.getElementById("meeting-video-grid");
+  if (videoGrid) videoGrid.style.display = "grid";
+  const customToolbar = document.querySelector(".meeting-room-toolbar");
+  if (customToolbar) customToolbar.style.display = "flex";
   
-  const bottomTabs = document.querySelector(".mobile-bottom-tabs");
-  if (bottomTabs) bottomTabs.style.display = "grid";
-  
+  // Restore navigation panels
+  document.querySelector(".app-header").style.display = "flex";
+  document.querySelector(".mobile-bottom-tabs").style.display = "flex";
   const sidebar = document.querySelector(".desktop-sidebar");
   if (sidebar) sidebar.style.display = "flex";
 
@@ -8185,380 +8043,6 @@ function injectAudioViaLocalPlayback(stream) {
   relay.play().catch(e => console.warn("Relay play error:", e));
 }
 
-// ============================================================================
-// MICROSOFT TEAMS VIDEO CONFERENCING ENGINE & VIEW STATE MANAGER
-// ============================================================================
-let currentMeetingView = "gallery"; // 'gallery', 'large-gallery', 'together', 'speaker'
-let isLocalHandRaised = false;
-
-const mockParticipantsList = [
-  { id: 'local', name: 'You (Host)', initials: 'U', bg: '#3b82f6', color: '#ffffff', isMuted: false, isHandRaised: false, isSpeaking: false, isLocal: true },
-  { id: 'pj', name: 'Pastor John', initials: 'PJ', bg: '#8b5cf6', color: '#ffffff', isMuted: false, isHandRaised: false, isSpeaking: true },
-  { id: 'sm', name: 'Sister Mary', initials: 'SM', bg: '#ec4899', color: '#ffffff', isMuted: true, isHandRaised: true, isSpeaking: false },
-  { id: 'bd', name: 'Brother David', initials: 'BD', bg: '#10b981', color: '#ffffff', isMuted: false, isHandRaised: false, isSpeaking: false }
-];
-
-function toggleMeetingViewDropdown() {
-  const menu = document.getElementById("meeting-view-dropdown-menu");
-  if (menu) {
-    menu.style.display = menu.style.display === "none" ? "block" : "none";
-  }
-}
-
-function switchMeetingView(viewName) {
-  currentMeetingView = viewName;
-  const menu = document.getElementById("meeting-view-dropdown-menu");
-  if (menu) menu.style.display = "none";
-
-  const label = document.getElementById("current-view-label");
-
-  // Hide all view containers
-  const galleryGrid = document.getElementById("meeting-video-grid");
-  const largeGalleryGrid = document.getElementById("meeting-large-gallery-grid");
-  const togetherMode = document.getElementById("meeting-together-mode");
-  const speakerView = document.getElementById("meeting-speaker-view");
-
-  if (galleryGrid) galleryGrid.style.display = "none";
-  if (largeGalleryGrid) largeGalleryGrid.style.display = "none";
-  if (togetherMode) togetherMode.style.display = "none";
-  if (speakerView) speakerView.style.display = "none";
-
-  // Update dropdown checkmarks
-  document.querySelectorAll(".view-menu-item").forEach(item => {
-    item.classList.remove("active");
-    item.style.background = "transparent";
-    item.style.color = "#cbd5e1";
-    const chk = item.querySelector(".check-mark");
-    if (chk) chk.style.display = "none";
-  });
-
-  const activeItem = document.getElementById(`view-item-${viewName}`);
-  if (activeItem) {
-    activeItem.classList.add("active");
-    activeItem.style.background = "rgba(59, 130, 246, 0.15)";
-    activeItem.style.color = "#60a5fa";
-    const chk = activeItem.querySelector(".check-mark");
-    if (chk) chk.style.display = "inline";
-  }
-
-  if (viewName === "gallery") {
-    if (label) label.textContent = "Gallery (Grid)";
-    if (galleryGrid) galleryGrid.style.display = "grid";
-    renderGalleryView();
-    showToast("Switched to Gallery View (Responsive Grid)");
-  } else if (viewName === "large-gallery") {
-    if (label) label.textContent = "Large Gallery (7x7)";
-    if (largeGalleryGrid) largeGalleryGrid.style.display = "grid";
-    renderLargeGalleryView();
-    showToast("Switched to Large Gallery View (49 Tiles Matrix)");
-  } else if (viewName === "together") {
-    if (label) label.textContent = "Together Mode";
-    if (togetherMode) togetherMode.style.display = "flex";
-    renderTogetherModeView();
-    showToast("Switched to Together Mode (Auditorium Seats)");
-  } else if (viewName === "speaker") {
-    if (label) label.textContent = "Speaker View";
-    if (speakerView) speakerView.style.display = "flex";
-    renderSpeakerView();
-    showToast("Switched to Speaker View (Focus + Filmstrip)");
-  }
-}
-
-// Helper to bind live camera stream to local video element
-function syncLocalUserCameraFeed() {
-  const videoEl = document.getElementById("meeting-local-video");
-  const avatarEl = document.getElementById("video-cell-local-avatar");
-  
-  if (activeMeetingSession && activeMeetingSession.localStream && !activeMeetingSession.isCamOff) {
-    if (videoEl) {
-      if (videoEl.srcObject !== activeMeetingSession.localStream) {
-        videoEl.srcObject = activeMeetingSession.localStream;
-      }
-      videoEl.style.display = "block";
-    }
-    if (avatarEl) avatarEl.style.display = "none";
-  } else {
-    if (videoEl) videoEl.style.display = "none";
-    if (avatarEl) avatarEl.style.display = "flex";
-  }
-}
-
-// Toggle Live Camera Feed
-function toggleCameraFeed() {
-  if (!activeMeetingSession) return;
-  activeMeetingSession.isCamOff = !activeMeetingSession.isCamOff;
-
-  const camBtn = document.getElementById("btn-meet-cam") || document.getElementById("btn-meet-video");
-  if (camBtn) {
-    camBtn.style.background = activeMeetingSession.isCamOff ? "#ef4444" : "#334155";
-  }
-
-  if (activeMeetingSession.localStream) {
-    activeMeetingSession.localStream.getVideoTracks().forEach(track => {
-      track.enabled = !activeMeetingSession.isCamOff;
-    });
-    syncLocalUserCameraFeed();
-    showToast(activeMeetingSession.isCamOff ? "📹 Camera Turned Off" : "📹 Camera Turned On");
-  } else if (!activeMeetingSession.isCamOff) {
-    showToast("Requesting camera feed...");
-    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-      .then(str => {
-        activeMeetingSession.localStream = str;
-        activeMeetingSession.isCamOff = false;
-        syncLocalUserCameraFeed();
-        showToast("📹 Camera Active!");
-      })
-      .catch(err => {
-        console.warn("Camera request error:", err);
-        showToast("⚠️ Could not access camera");
-      });
-  }
-}
-
-// Toggle Real P2P WebRTC Live Call Stream Mode
-function toggleRealLiveStreamMode() {
-  const jitsiCont = document.getElementById("meeting-jitsi-container");
-  const galleryGrid = document.getElementById("meeting-video-grid");
-  const btn = document.getElementById("btn-toggle-real-stream");
-
-  if (!jitsiCont) return;
-
-  const isHidden = jitsiCont.style.display === "none" || getComputedStyle(jitsiCont).display === "none";
-  if (isHidden) {
-    jitsiCont.style.display = "block";
-    if (galleryGrid) galleryGrid.style.display = "none";
-    if (btn) {
-      btn.innerHTML = "▦ <span>4-Tile Grid View</span>";
-      btn.style.background = "#059669";
-    }
-    showToast("📹 Connected to Real P2P Live Call! Real member cameras & mics active.");
-  } else {
-    jitsiCont.style.display = "none";
-    if (galleryGrid) galleryGrid.style.display = "grid";
-    if (btn) {
-      btn.innerHTML = "📹 <span>Real Live Stream</span>";
-      btn.style.background = "#2563eb";
-    }
-    renderGalleryView();
-    showToast("Switched to 4-Tile Gallery View");
-  }
-}
-
-// RENDER VIEW 1: Gallery View (Clean 2x2 Grid - 4 Medium-Sized Cards + Active Speaker Highlight)
-function renderGalleryView() {
-  const gridEl = document.getElementById("meeting-video-grid");
-  if (!gridEl) return;
-  
-  let html = "";
-  mockParticipantsList.forEach(p => {
-    const isSpeakingClass = p.isSpeaking ? "active-speaker" : "";
-    const micIcon = p.isMuted ? "🔇" : (p.isSpeaking ? `<span style="color:#a855f7; font-weight:800; font-size:10px; background:rgba(168,85,247,0.2); padding:2px 6px; border-radius:10px; border:1px solid #a855f7;">🎙️ SPEAKING</span>` : "🎙️");
-    const handBadge = p.isHandRaised ? `<div class="video-cell-hand-badge">✋</div>` : "";
-    
-    if (p.id === 'local') {
-      html += `
-        <div class="video-cell ${isSpeakingClass}" id="video-cell-local">
-          <video id="meeting-local-video" autoplay playsinline muted style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); z-index: 3; display: none;"></video>
-          <div class="simulated-live-video-bg"></div>
-          ${handBadge}
-          <div class="video-cell-avatar" id="video-cell-local-avatar" style="position: relative; z-index: 5; background-color: ${p.bg} !important;">${p.initials}</div>
-          <div class="video-cell-label">
-            <span id="meeting-local-name">${p.name}</span>
-            <span id="meeting-local-mic-status">${micIcon}</span>
-          </div>
-        </div>
-      `;
-    } else {
-      html += `
-        <div class="video-cell ${isSpeakingClass}" id="video-cell-${p.id}">
-          <div class="simulated-live-video-bg"></div>
-          ${handBadge}
-          <div class="video-cell-avatar" style="position: relative; z-index: 5; background-color: ${p.bg} !important;">${p.initials}</div>
-          <div class="video-cell-label">
-            <span>${p.name}</span>
-            <span>${micIcon}</span>
-          </div>
-        </div>
-      `;
-    }
-  });
-  gridEl.innerHTML = html;
-  syncLocalUserCameraFeed();
-}
-
-// RENDER VIEW 2: Large Gallery View (7x7 Matrix, 49 Tiles)
-function renderLargeGalleryView() {
-  const gridEl = document.getElementById("meeting-large-gallery-grid");
-  if (!gridEl) return;
-
-  let html = "";
-  const bgColors = ["#3b82f6", "#8b5cf6", "#ec4899", "#10b981", "#f59e0b", "#ef4444", "#06b6d4", "#84cc16", "#6366f1", "#d946ef"];
-  
-  for (let i = 1; i <= 49; i++) {
-    const color = bgColors[i % bgColors.length];
-    const isSpeaking = i === 2; // Pastor John
-    const speakerClass = isSpeaking ? "active-speaker" : "";
-    const name = i === 1 ? "You (Host)" : (i === 2 ? "Pastor John" : `Member ${i}`);
-    const initials = i === 1 ? "U" : (i === 2 ? "PJ" : `M${i}`);
-    const micIcon = i % 3 === 0 ? "🔇" : "🎙️";
-
-    html += `
-      <div class="video-cell ${speakerClass}" style="position: relative; min-height: 54px; aspect-ratio: 4/3; border-radius: 8px !important;">
-        <div class="simulated-live-video-bg"></div>
-        <div class="video-cell-avatar" style="width: 32px; height: 32px; font-size: 13px; z-index: 5; background-color: ${color} !important;">${initials}</div>
-        <div class="video-cell-label" style="font-size: 9px; padding: 2px 5px; bottom: 4px; left: 4px;">
-          <span>${name}</span>
-          <span>${micIcon}</span>
-        </div>
-      </div>
-    `;
-  }
-  gridEl.innerHTML = html;
-}
-
-// RENDER VIEW 3: Together Mode (Auditorium Tiered Seating)
-function renderTogetherModeView() {
-  const container = document.getElementById("together-mode-auditorium-seats");
-  if (!container) return;
-
-  const backRow = mockParticipantsList.slice(0, 5);
-  const midRow = mockParticipantsList.slice(5, 9);
-  const frontRow = mockParticipantsList.slice(9, 12);
-
-  let html = "";
-  [backRow, midRow, frontRow].forEach((row, rIdx) => {
-    html += `<div class="together-seat-row" style="transform: scale(${0.85 + rIdx * 0.08});">`;
-    row.forEach(p => {
-      const isSpeakingStyle = p.isSpeaking ? "border-color: #a855f7; box-shadow: 0 0 20px #a855f7;" : "";
-      html += `
-        <div class="together-seat-card">
-          <div class="together-avatar" style="background-color: ${p.bg}; ${isSpeakingStyle}">
-            ${p.initials}
-          </div>
-          <div class="together-seat-chair"></div>
-          <div class="together-name-tag">${p.name}</div>
-        </div>
-      `;
-    });
-    html += `</div>`;
-  });
-
-  container.innerHTML = html;
-}
-
-// RENDER VIEW 4: Speaker View (Focus active speaker + filmstrip)
-function renderSpeakerView() {
-  const mainStage = document.getElementById("speaker-view-main-stage");
-  const filmstrip = document.getElementById("speaker-view-filmstrip");
-  if (!mainStage || !filmstrip) return;
-
-  const activeSpeaker = mockParticipantsList.find(p => p.isSpeaking) || mockParticipantsList[1]; // Pastor John
-
-  mainStage.innerHTML = `
-    <div class="simulated-live-video-bg" style="opacity: 0.8;"></div>
-    <div style="position: relative; z-index: 10; display: flex; flex-direction: column; align-items: center; gap: 14px;">
-      <div class="video-cell-avatar" style="width: 100px; height: 100px; font-size: 48px; background-color: ${activeSpeaker.bg} !important; border: 4px solid #a855f7 !important; box-shadow: 0 0 30px rgba(168,85,247,0.7);">
-        ${activeSpeaker.initials}
-      </div>
-      <div style="font-size: 18px; font-weight: 800; color: #f8fafc; background: rgba(15,23,42,0.85); padding: 6px 16px; border-radius: 20px; border: 1px solid #a855f7; display: flex; align-items: center; gap: 8px;">
-        <span>🎙️ ${activeSpeaker.name} (Active Speaker)</span>
-        <span style="font-size: 11px; background: #a855f7; color: #fff; padding: 2px 8px; border-radius: 10px;">SPEAKING</span>
-      </div>
-    </div>
-  `;
-
-  let stripHtml = "";
-  mockParticipantsList.filter(p => p.id !== activeSpeaker.id).forEach(p => {
-    stripHtml += `
-      <div class="video-cell" style="width: 110px; height: 90px; flex-shrink: 0; position: relative; border-radius: 10px !important;">
-        <div class="simulated-live-video-bg"></div>
-        <div class="video-cell-avatar" style="width: 36px; height: 36px; font-size: 15px; z-index: 5; background-color: ${p.bg} !important;">${p.initials}</div>
-        <div class="video-cell-label" style="font-size: 9.5px; padding: 2px 6px; bottom: 4px; left: 4px;">
-          <span>${p.name.split(' ')[0]}</span>
-        </div>
-      </div>
-    `;
-  });
-  filmstrip.innerHTML = stripHtml;
-}
-
-// 1-Tap Quick Scripture Share Preset
-async function shareQuickScripturePreset(bookKey, chapter, verse) {
-  const bookSelect = document.getElementById("meeting-share-book");
-  const chapterSelect = document.getElementById("meeting-share-chapter");
-  const verseSelect = document.getElementById("meeting-share-verse");
-  
-  if (bookSelect) bookSelect.value = bookKey;
-  if (chapterSelect) chapterSelect.value = chapter;
-  if (verseSelect) verseSelect.value = verse;
-
-  await renderSharedBibleContent(bookKey, chapter, verse);
-  
-  if (typeof broadcastMeetingEvent === "function" && activeMeetingSession) {
-    broadcastMeetingEvent(activeMeetingSession.meetingId, {
-      type: "SHARE_BIBLE",
-      book: bookKey,
-      chapter: chapter,
-      verse: verse
-    });
-  }
-
-  if (typeof closeAllDrawers === "function") closeAllDrawers();
-  showToast(`📖 Broadcasted ${bookKey.toUpperCase()} ${chapter}:${verse}!`);
-}
-
-// Hand Raise Toggle
-function toggleHandRaise() {
-  isLocalHandRaised = !isLocalHandRaised;
-  mockParticipantsList[0].isHandRaised = isLocalHandRaised;
-  
-  const railBtn = document.getElementById("btn-teams-rail-hand");
-  if (railBtn) {
-    railBtn.style.color = isLocalHandRaised ? "#f59e0b" : "#94a3b8";
-  }
-
-  if (currentMeetingView === "gallery") renderGalleryView();
-  showToast(isLocalHandRaised ? "✋ Hand Raised!" : "✋ Hand Lowered");
-}
-
-// Theme Switcher for Meeting Room
-function toggleMeetingRoomTheme() {
-  const roomModal = document.getElementById("modal-live-meeting");
-  const btn = document.getElementById("btn-meeting-theme-toggle");
-  if (!roomModal) return;
-
-  const isDark = roomModal.classList.contains("teams-dark-theme");
-  if (isDark) {
-    roomModal.classList.remove("teams-dark-theme");
-    roomModal.style.background = "#f8fafc";
-    roomModal.style.color = "#0f172a";
-    if (btn) btn.innerHTML = "☀️ <span>Light</span>";
-    showToast("Switched to Light Theme");
-  } else {
-    roomModal.classList.add("teams-dark-theme");
-    roomModal.style.background = "#090d16";
-    roomModal.style.color = "#f8fafc";
-    if (btn) btn.innerHTML = "🌙 <span>Dark</span>";
-    showToast("Switched to MS Teams Dark Theme");
-  }
-}
-
-// Expose global window helpers for meetings, drawers, scripture sharing, and view switcher
-window.renderSharedBibleContent = renderSharedBibleContent;
-window.hideSharedBibleContent = hideSharedBibleContent;
-window.openDrawer = openDrawer;
-window.closeDrawer = closeDrawer;
-window.populateMeetingShareBibleDropdowns = populateMeetingShareBibleDropdowns;
-window.toggleMeetingGridView = toggleMeetingGridView;
-window.launchLiveMeetingRoom = launchLiveMeetingRoom;
-window.triggerJoinMeetingFlow = triggerJoinMeetingFlow;
-window.switchTab = switchTab;
-window.toggleMeetingViewDropdown = toggleMeetingViewDropdown;
-window.switchMeetingView = switchMeetingView;
-window.shareQuickScripturePreset = shareQuickScripturePreset;
-window.toggleHandRaise = toggleHandRaise;
-window.toggleMeetingRoomTheme = toggleMeetingRoomTheme;
-
 // Stop capturing worship audio and restore normal microphone
 function stopWorshipAudioCapture() {
   if (worshipAudioStream) {
@@ -8914,115 +8398,5 @@ function handleParticipantVideoAudioShareStop(msg) {
   showToast("Video + Audio share stopped by host.");
 }
 
-// Sidebar Drawer Panel Opener (Chat, Participants, Notes)
-function openMeetingSidebarPanel(panelName) {
-  const panel = document.getElementById("meeting-sidebar-panel");
-  const chatPane = document.getElementById("meeting-panel-chat");
-  const partPane = document.getElementById("meeting-panel-participants");
-  const notesPane = document.getElementById("meeting-panel-notes");
-  const titleEl = document.getElementById("meeting-sidebar-title");
-
-  if (!panel) return;
-
-  // Toggle if clicking same panel that is already open
-  if (panel.style.display !== "none" && ((panelName === "chat" && chatPane && chatPane.style.display !== "none") || (panelName === "participants" && partPane && partPane.style.display !== "none") || (panelName === "notes" && notesPane && notesPane.style.display !== "none"))) {
-    panel.style.display = "none";
-    return;
-  }
-
-  panel.style.display = "flex";
-  if (chatPane) chatPane.style.display = "none";
-  if (partPane) partPane.style.display = "none";
-  if (notesPane) notesPane.style.display = "none";
-
-  if (panelName === "chat") {
-    if (chatPane) chatPane.style.display = "flex";
-    if (titleEl) titleEl.textContent = "Meeting Chat";
-  } else if (panelName === "participants") {
-    if (partPane) partPane.style.display = "block";
-    if (titleEl) titleEl.textContent = "Active Participants (12)";
-  } else if (panelName === "notes") {
-    if (notesPane) notesPane.style.display = "flex";
-    if (titleEl) titleEl.textContent = "Prayer & Sermon Notes";
-  }
-}
-
-// Live Reaction Menu Toggle & Emoji Animations
-function toggleReactionMenu() {
-  const menu = document.getElementById("meeting-reactions-menu");
-  if (menu) {
-    const isHidden = menu.style.display === "none" || getComputedStyle(menu).display === "none";
-    menu.style.display = isHidden ? "flex" : "none";
-  }
-}
-
-function sendLiveEmojiReaction(emoji) {
-  const menu = document.getElementById("meeting-reactions-menu");
-  if (menu) menu.style.display = "none";
-
-  showToast(`Reaction sent: ${emoji}`);
-  
-  // Animate floating emoji on local video card
-  const localCard = document.getElementById("video-cell-local") || document.querySelector(".video-cell");
-  if (localCard) {
-    const floatingEmoji = document.createElement("div");
-    floatingEmoji.style.cssText = "position: absolute; bottom: 20px; right: 20px; font-size: 32px; z-index: 100; animation: floatUp 1.5s ease-out forwards; pointer-events: none;";
-    floatingEmoji.textContent = emoji;
-    localCard.appendChild(floatingEmoji);
-    setTimeout(() => floatingEmoji.remove(), 1500);
-  }
-}
-
-// Expose global window helpers for meetings, drawers, scripture sharing, and view switcher
-window.renderSharedBibleContent = renderSharedBibleContent;
-window.hideSharedBibleContent = hideSharedBibleContent;
-window.openDrawer = openDrawer;
-window.closeDrawer = closeDrawer;
-window.populateMeetingShareBibleDropdowns = populateMeetingShareBibleDropdowns;
-window.toggleMeetingGridView = toggleMeetingGridView;
-window.launchLiveMeetingRoom = launchLiveMeetingRoom;
-window.triggerJoinMeetingFlow = triggerJoinMeetingFlow;
-window.switchTab = switchTab;
-window.toggleMeetingViewDropdown = toggleMeetingViewDropdown;
-window.switchMeetingView = switchMeetingView;
-window.shareQuickScripturePreset = shareQuickScripturePreset;
-window.toggleHandRaise = toggleHandRaise;
-window.toggleMeetingRoomTheme = toggleMeetingRoomTheme;
-window.openMeetingSidebarPanel = openMeetingSidebarPanel;
-window.toggleReactionMenu = toggleReactionMenu;
-window.sendLiveEmojiReaction = sendLiveEmojiReaction;
-// Edit Meeting Title Modal Handlers
-function openEditMeetingTitleModal() {
-  const modal = document.getElementById("modal-edit-meeting-title");
-  const input = document.getElementById("input-edit-meeting-title");
-  const titleEl = document.getElementById("meeting-room-title");
-  if (modal) {
-    modal.style.display = "flex";
-    if (input && titleEl) {
-      input.value = titleEl.textContent;
-      input.focus();
-    }
-  }
-}
-
-function closeEditMeetingTitleModal() {
-  const modal = document.getElementById("modal-edit-meeting-title");
-  if (modal) modal.style.display = "none";
-}
-
-function saveEditedMeetingTitle() {
-  const input = document.getElementById("input-edit-meeting-title");
-  const titleEl = document.getElementById("meeting-room-title");
-  if (input && input.value.trim() && titleEl) {
-    const newTitle = input.value.trim();
-    titleEl.textContent = newTitle;
-    showToast(`Meeting title updated: "${newTitle}"`);
-    closeEditMeetingTitleModal();
-  }
-}
-
-window.openEditMeetingTitleModal = openEditMeetingTitleModal;
-window.closeEditMeetingTitleModal = closeEditMeetingTitleModal;
-window.saveEditedMeetingTitle = saveEditedMeetingTitle;
 
 
