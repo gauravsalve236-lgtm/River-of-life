@@ -3698,6 +3698,104 @@ function setupEventListeners() {
       showToast("Giving features coming soon!");
     });
   }
+
+  // Live Meeting Share Word & Background Music binds
+  const shareWordBtn = document.getElementById("btn-meeting-share-bible");
+  if (shareWordBtn) {
+    shareWordBtn.addEventListener("click", () => {
+      populateMeetingShareBibleDropdowns();
+      openDrawer("drawer-meet-share-bible");
+    });
+  }
+
+  const musicBtn = document.getElementById("btn-meeting-music");
+  if (musicBtn) {
+    musicBtn.addEventListener("click", () => {
+      openDrawer("drawer-meet-music");
+    });
+  }
+
+  const shareWordSubmitBtn = document.getElementById("btn-meet-share-bible-submit");
+  if (shareWordSubmitBtn) {
+    shareWordSubmitBtn.addEventListener("click", () => {
+      if (!activeMeetingSession) return;
+      const book = document.getElementById("meeting-share-book").value;
+      const chapter = document.getElementById("meeting-share-chapter").value;
+      const verse = document.getElementById("meeting-share-verse").value;
+      
+      broadcastMeetingEvent(activeMeetingSession.meetingId, {
+        type: "SHARE_BIBLE",
+        book,
+        chapter,
+        verse
+      });
+      closeAllDrawers();
+      showToast("Scripture shared with participants!");
+    });
+  }
+
+  const shareWordStopBtn = document.getElementById("btn-meet-share-bible-stop");
+  if (shareWordStopBtn) {
+    shareWordStopBtn.addEventListener("click", () => {
+      if (!activeMeetingSession) return;
+      broadcastMeetingEvent(activeMeetingSession.meetingId, {
+        type: "STOP_SHARE_BIBLE"
+      });
+      closeAllDrawers();
+      showToast("Stopped scripture sharing.");
+    });
+  }
+
+  document.querySelectorAll(".meet-music-track-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      if (!activeMeetingSession) return;
+      const url = btn.dataset.url;
+      const title = btn.dataset.title;
+      const volume = parseInt(document.getElementById("meet-music-volume").value);
+      
+      broadcastMeetingEvent(activeMeetingSession.meetingId, {
+        type: "PLAY_MUSIC",
+        trackUrl: url,
+        title: title,
+        volume: volume
+      });
+      showToast(`Playing background music: ${title}`);
+    });
+  });
+
+  const musicStopBtn = document.getElementById("btn-meet-music-stop");
+  if (musicStopBtn) {
+    musicStopBtn.addEventListener("click", () => {
+      if (!activeMeetingSession) return;
+      broadcastMeetingEvent(activeMeetingSession.meetingId, {
+        type: "STOP_MUSIC"
+      });
+      closeAllDrawers();
+      showToast("Stopped background music.");
+    });
+  }
+
+  const volSlider = document.getElementById("meet-music-volume");
+  const volLabel = document.getElementById("meet-music-vol-label");
+  if (volSlider && volLabel) {
+    volSlider.addEventListener("input", (e) => {
+      const val = e.target.value;
+      volLabel.textContent = `${val}%`;
+      
+      if (activeWorshipAudio) {
+        activeWorshipAudio.volume = val / 100;
+      }
+      
+      if (activeMeetingSession && currentWorshipTrack) {
+        broadcastMeetingEvent(activeMeetingSession.meetingId, {
+          type: "PLAY_MUSIC",
+          trackUrl: currentWorshipTrack.url,
+          title: currentWorshipTrack.title,
+          volume: parseInt(val)
+        });
+      }
+    });
+  }
 }
 
 /* ==========================================================================
@@ -6286,6 +6384,8 @@ function launchLiveMeetingRoom(meeting, stream) {
   const loggedIn = state.currentUser ? state.currentUser.username : "Guest User";
   const isHost = meeting.host === loggedIn;
   
+  subscribeToMeetingEvents(meeting.id);
+  
   activeMeetingSession = {
     meetingId: meeting.id,
     localStream: stream,
@@ -6538,9 +6638,235 @@ function triggerMeetingReaction(reaction) {
   setTimeout(() => rEl.remove(), 3000);
 }
 
+// Global Real-time Meeting Sync State
+let meetingEventSource = null;
+let activeWorshipAudio = null;
+let currentWorshipTrack = null;
+
+// Subscribe to real-time sync channel
+function subscribeToMeetingEvents(meetingId) {
+  if (meetingEventSource) {
+    meetingEventSource.close();
+  }
+  
+  const topic = `RiverOfLife_GauravSalve_meeting_${meetingId}`;
+  meetingEventSource = new EventSource(`https://ntfy.sh/${topic}/sse`);
+  
+  meetingEventSource.onmessage = (event) => {
+    try {
+      const payload = JSON.parse(event.data);
+      if (payload.message) {
+        const msg = JSON.parse(payload.message);
+        handleMeetingBroadcastEvent(msg);
+      }
+    } catch (e) {
+      console.warn("SSE Event parse error:", e);
+    }
+  };
+}
+
+// Broadcast event to other participants
+function broadcastMeetingEvent(meetingId, data) {
+  const topic = `RiverOfLife_GauravSalve_meeting_${meetingId}`;
+  fetch(`https://ntfy.sh/${topic}`, {
+    method: "POST",
+    body: JSON.stringify(data)
+  }).catch(e => console.warn("Broadcast error:", e));
+}
+
+// Handle incoming synchronized event
+async function handleMeetingBroadcastEvent(msg) {
+  if (msg.type === "SHARE_BIBLE") {
+    await renderSharedBibleContent(msg.book, msg.chapter, msg.verse);
+  } else if (msg.type === "STOP_SHARE_BIBLE") {
+    hideSharedBibleContent();
+  } else if (msg.type === "PLAY_MUSIC") {
+    playWorshipTrack(msg.trackUrl, msg.title, msg.volume);
+  } else if (msg.type === "STOP_MUSIC") {
+    stopWorshipTrack();
+  }
+}
+
+// Fetch and render parallel Bible verse/chapter content in meeting layout
+async function renderSharedBibleContent(bookKey, chapter, verse) {
+  const area = document.getElementById("meeting-shared-content-area");
+  const bibleCont = document.getElementById("meeting-shared-bible");
+  const jitsiCont = document.getElementById("meeting-jitsi-container");
+  
+  if (!area || !bibleCont || !jitsiCont) return;
+  
+  const bookDataMr = await fetchBookDataMr(bookKey);
+  const bookDataEng = await fetchBookDataEng(bookKey);
+  const metadata = booksMetadataMr.find(b => b.filename.replace(".json", "") === bookKey) || { name: bookKey, engName: bookKey };
+  
+  const versesMr = bookDataMr ? bookDataMr.chapters[chapter - 1] : [];
+  const versesEng = bookDataEng ? bookDataEng.chapters[chapter - 1] : [];
+  const totalVerses = Math.max(versesMr.length, versesEng.length);
+  
+  let html = `
+    <div style="display: flex; flex-direction: column; height: 100%;">
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; border-bottom: 1px solid rgba(255,255,255,0.08); background: #1e293b;">
+        <h4 style="margin: 0; font-size: 13.5px; font-weight: 800; color: #d4af37; text-align: left;">
+          📖 Scripture Shared: ${metadata.name} ${chapter} / ${metadata.engName} ${chapter}
+        </h4>
+        <span style="font-size: 10px; background: rgba(212,175,55,0.15); color: #d4af37; padding: 2px 8px; border-radius: 4px; font-weight: 700;">LIVE STUDY</span>
+      </div>
+      <div style="flex: 1; overflow-y: auto; padding: 16px; background: #0f172a; display: flex; flex-direction: column; gap: 12px; text-align: left;">
+  `;
+  
+  if (verse && verse !== "all") {
+    const vIdx = parseInt(verse) - 1;
+    html += `
+      <div style="padding: 12px 16px; border-radius: 8px; background: rgba(212,175,55,0.08); border-left: 3px solid #d4af37;">
+        <strong style="color: #d4af37; font-size: 12px;">Verse ${verse}</strong>
+        <p style="margin: 6px 0 4px 0; font-size: 14.5px; font-weight: 500; color: #f8fafc; line-height: 1.5;">${versesEng[vIdx] || ""}</p>
+        <p style="margin: 4px 0 0 0; font-size: 14px; color: #cbd5e1; font-style: italic; line-height: 1.5;">${versesMr[vIdx] || ""}</p>
+      </div>
+    `;
+  } else {
+    for (let i = 0; i < totalVerses; i++) {
+      html += `
+        <div style="padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.04);">
+          <strong style="color: #94a3b8; font-size: 11px;">Verse ${i + 1}</strong>
+          <p style="margin: 4px 0 2px 0; font-size: 14px; color: #f1f5f9; line-height: 1.5;">${versesEng[i] || ""}</p>
+          <p style="margin: 2px 0 0 0; font-size: 13.5px; color: #94a3b8; font-style: italic; line-height: 1.5;">${versesMr[i] || ""}</p>
+        </div>
+      `;
+    }
+  }
+  
+  html += `</div></div>`;
+  
+  bibleCont.innerHTML = html;
+  area.style.display = "block";
+  bibleCont.style.display = "block";
+  
+  // Resize meeting iframe to top split view
+  jitsiCont.style.height = "calc(55% - 50px)";
+  jitsiCont.style.top = "calc(45% + 50px)";
+}
+
+// Hide shared scripture pane
+function hideSharedBibleContent() {
+  const area = document.getElementById("meeting-shared-content-area");
+  const jitsiCont = document.getElementById("meeting-jitsi-container");
+  if (area) area.style.display = "none";
+  if (jitsiCont) {
+    jitsiCont.style.height = "calc(100% - 50px)";
+    jitsiCont.style.top = "50px";
+  }
+}
+
+// Play background praise track
+function playWorshipTrack(url, title, volume) {
+  if (activeWorshipAudio) {
+    activeWorshipAudio.pause();
+    activeWorshipAudio = null;
+  }
+  
+  activeWorshipAudio = new Audio(url);
+  activeWorshipAudio.loop = true;
+  activeWorshipAudio.volume = volume / 100;
+  activeWorshipAudio.play().catch(e => console.warn("Audio autoplay blocked:", e));
+  
+  currentWorshipTrack = { url, title, volume };
+  
+  // Update UI now playing state
+  const titleEl = document.getElementById("meet-music-now-playing");
+  if (titleEl) titleEl.textContent = title;
+  
+  // Stagger state on track buttons
+  document.querySelectorAll(".meet-music-track-btn").forEach(btn => {
+    const isPlayingThis = btn.dataset.url === url;
+    btn.classList.toggle("active", isPlayingThis);
+    btn.querySelector("span:last-child").textContent = isPlayingThis ? "⏸️ Playing" : "▶️ Play";
+  });
+}
+
+// Stop background praise track
+function stopWorshipTrack() {
+  if (activeWorshipAudio) {
+    activeWorshipAudio.pause();
+    activeWorshipAudio = null;
+  }
+  currentWorshipTrack = null;
+  
+  const titleEl = document.getElementById("meet-music-now-playing");
+  if (titleEl) titleEl.textContent = "None (Silent)";
+  
+  document.querySelectorAll(".meet-music-track-btn").forEach(btn => {
+    btn.classList.remove("active");
+    btn.querySelector("span:last-child").textContent = "▶️ Play";
+  });
+}
+
+// Populate the Scripture selection dropdown options inside meetings
+function populateMeetingShareBibleDropdowns() {
+  const bookSelect = document.getElementById("meeting-share-book");
+  const chapterSelect = document.getElementById("meeting-share-chapter");
+  const verseSelect = document.getElementById("meeting-share-verse");
+  if (!bookSelect || !chapterSelect || !verseSelect) return;
+  
+  bookSelect.innerHTML = "";
+  booksMetadataMr.forEach(b => {
+    const opt = document.createElement("option");
+    opt.value = b.filename.replace(".json", "");
+    opt.textContent = `${b.name} (${b.engName})`;
+    bookSelect.appendChild(opt);
+  });
+  
+  const updateChapters = () => {
+    const bookKey = bookSelect.value;
+    const meta = booksMetadataMr.find(b => b.filename.replace(".json", "") === bookKey);
+    if (!meta) return;
+    
+    chapterSelect.innerHTML = "";
+    for (let c = 1; c <= meta.chaptersCount; c++) {
+      const opt = document.createElement("option");
+      opt.value = c;
+      opt.textContent = `Chapter ${c}`;
+      chapterSelect.appendChild(opt);
+    }
+    updateVerses();
+  };
+  
+  const updateVerses = async () => {
+    const bookKey = bookSelect.value;
+    const chapterNum = parseInt(chapterSelect.value);
+    
+    verseSelect.innerHTML = `<option value="all">Whole Chapter / संपूर्ण अध्याय</option>`;
+    
+    const bookData = await fetchBookDataEng(bookKey);
+    if (!bookData || !bookData.chapters[chapterNum - 1]) return;
+    
+    const count = bookData.chapters[chapterNum - 1].length;
+    for (let v = 1; v <= count; v++) {
+      const opt = document.createElement("option");
+      opt.value = v;
+      opt.textContent = `Verse ${v}`;
+      verseSelect.appendChild(opt);
+    }
+  };
+  
+  bookSelect.onchange = updateChapters;
+  chapterSelect.onchange = updateVerses;
+  
+  updateChapters();
+}
+
 // Leave meeting session
 function exitLiveMeetingRoom() {
   if (!activeMeetingSession) return;
+
+  // Clear EventSource subscription
+  if (meetingEventSource) {
+    meetingEventSource.close();
+    meetingEventSource = null;
+  }
+  
+  // Stop background music and hide shared pane
+  stopWorshipTrack();
+  hideSharedBibleContent();
 
   // Clear interval loop
   if (meetingSandboxInterval) {

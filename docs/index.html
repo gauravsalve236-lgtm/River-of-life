@@ -2020,7 +2020,13 @@
               🔴 RECORDING
             </span>
           </div>
-          <div style="display: flex; gap: 10px; align-items: center;">
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <button id="btn-meeting-share-bible" class="btn-secondary-mini" style="padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; background: rgba(212, 175, 55, 0.2); border-color: rgba(212, 175, 55, 0.4); color: #d4af37; display: flex; align-items: center; gap: 6px; cursor: pointer; text-shadow: 0 1px 1px #000;" title="Share Scripture to Meeting">
+              📖 <span>Share Word</span>
+            </button>
+            <button id="btn-meeting-music" class="btn-secondary-mini" style="padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; background: rgba(59, 130, 246, 0.25); border-color: rgba(59, 130, 246, 0.4); color: #60a5fa; display: flex; align-items: center; gap: 6px; cursor: pointer; text-shadow: 0 1px 1px #000;" title="Play Background Music">
+              🎵 <span>Music</span>
+            </button>
             <button class="round-close-btn" id="btn-meeting-info" style="font-size: 14px; width: 32px; height: 32px; background: rgba(255,255,255,0.1); border-color: transparent; color: #fff;" title="Meeting Details">ℹ️</button>
             <button id="btn-meeting-exit-top" class="round-close-btn" style="font-size: 14.5px; width: 32px; height: 32px; background: #ef4444; border-color: #ef4444; color: #fff; font-weight: 800; display: flex; align-items: center; justify-content: center;" title="Leave Call">❌</button>
           </div>
@@ -2265,15 +2271,97 @@
       </div>
     </div>
 
-    <!-- Jitsi Meet External API Script (Hosted Locally to bypass Content Security Policy blocking) -->
-    <script src="external_api.js?v=36"></script>
+    <!-- Meeting Bible Share Selection Drawer -->
+    <div id="drawer-meet-share-bible" class="drawer-overlay" style="z-index: 2500;">
+      <div class="ios-drawer-sheet" style="max-height: 70%; background: #0f172a; color: #fff;">
+        <div class="drawer-header-row" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+          <div class="grabber-bar"></div>
+          <h3 style="color: #fff;">Share Scripture / शास्त्रवचन शेअर करा</h3>
+          <button class="close-drawer-btn" onclick="closeDrawer('drawer-meet-share-bible')" style="color: #fff;">&times;</button>
+        </div>
+        <div class="drawer-body-settings" style="padding: 20px; display: flex; flex-direction: column; gap: 16px; text-align: left;">
+          <div class="form-input-group" style="display: flex; flex-direction: column; gap: 4px;">
+            <label style="font-size: 12px; font-weight: 700; color: #94a3b8;">Select Book / पुस्तक निवडा</label>
+            <select id="meeting-share-book" class="dropdown-selector" style="width: 100%; background: #1e293b; color: #fff; border-color: #334155; padding: 10px;">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-input-group" style="display: flex; flex-direction: column; gap: 4px;">
+              <label style="font-size: 12px; font-weight: 700; color: #94a3b8;">Chapter / अध्याय</label>
+              <select id="meeting-share-chapter" class="dropdown-selector" style="width: 100%; background: #1e293b; color: #fff; border-color: #334155; padding: 10px;">
+                <!-- Populated dynamically -->
+              </select>
+            </div>
+            <div class="form-input-group" style="display: flex; flex-direction: column; gap: 4px;">
+              <label style="font-size: 12px; font-weight: 700; color: #94a3b8;">Verse (Opt.) / वचने</label>
+              <select id="meeting-share-verse" class="dropdown-selector" style="width: 100%; background: #1e293b; color: #fff; border-color: #334155; padding: 10px;">
+                <option value="all">Whole Chapter / संपूर्ण अध्याय</option>
+              </select>
+            </div>
+          </div>
 
+          <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <button id="btn-meet-share-bible-submit" class="btn-primary-block" style="flex: 2; padding: 12px; font-weight: 800; background: #d4af37; border-color: #d4af37; color: #000; cursor: pointer; border-radius: 8px;">
+              Broadcast / सादर करा
+            </button>
+            <button id="btn-meet-share-bible-stop" class="btn-secondary-mini" style="flex: 1; padding: 12px; border-radius: 8px; font-weight: 700; background: rgba(239, 68, 68, 0.2); border-color: rgba(239, 68, 68, 0.4); color: #f87171 !important; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+              Stop
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Meeting Background Music Player Drawer -->
+    <div id="drawer-meet-music" class="drawer-overlay" style="z-index: 2500;">
+      <div class="ios-drawer-sheet" style="max-height: 70%; background: #0f172a; color: #fff;">
+        <div class="drawer-header-row" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+          <div class="grabber-bar"></div>
+          <h3 style="color: #fff;">Background Music / पार्श्वसंगीत</h3>
+          <button class="close-drawer-btn" onclick="closeDrawer('drawer-meet-music')" style="color: #fff;">&times;</button>
+        </div>
+        <div class="drawer-body-settings" style="padding: 20px; display: flex; flex-direction: column; gap: 16px; text-align: left;">
+          
+          <div style="background: rgba(255,255,255,0.05); padding: 12px 16px; border-radius: 12px; text-align: center; border: 1px dashed rgba(255,255,255,0.1);">
+            <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Currently Playing</div>
+            <div id="meet-music-now-playing" style="font-size: 14px; font-weight: 800; color: #60a5fa; margin-top: 4px;">None (Silent)</div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 5px;">
+            <button class="btn-secondary-mini meet-music-track-btn" data-track-id="track1" data-url="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" data-title="Ambient Worship Pads (Key G)" style="padding: 14px; border-radius: 10px; font-size: 13px; font-weight: 700; text-align: left; display: flex; justify-content: space-between; align-items: center; background: #1e293b; color: #fff; border-color: #334155; cursor: pointer; width: 100%;">
+              <span>🎹 Ambient Worship Pads</span>
+              <span>▶️ Play</span>
+            </button>
+            <button class="btn-secondary-mini meet-music-track-btn" data-track-id="track2" data-url="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" data-title="Harp & Strings Hymn" style="padding: 14px; border-radius: 10px; font-size: 13px; font-weight: 700; text-align: left; display: flex; justify-content: space-between; align-items: center; background: #1e293b; color: #fff; border-color: #334155; cursor: pointer; width: 100%;">
+              <span>🎻 Harp & Strings Hymn</span>
+              <span>▶️ Play</span>
+            </button>
+            <button class="btn-secondary-mini meet-music-track-btn" data-track-id="track3" data-url="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" data-title="Acoustic Praise Chords" style="padding: 14px; border-radius: 10px; font-size: 13px; font-weight: 700; text-align: left; display: flex; justify-content: space-between; align-items: center; background: #1e293b; color: #fff; border-color: #334155; cursor: pointer; width: 100%;">
+              <span>🎸 Acoustic Praise Chords</span>
+              <span>▶️ Play</span>
+            </button>
+          </div>
+
+          <div class="form-input-group" style="display: flex; flex-direction: column; gap: 4px; margin-top: 10px;">
+            <div style="display: flex; justify-content: space-between; font-size: 12px; color: #94a3b8; font-weight: 700;">
+              <span>Volume / आवाज</span>
+              <span id="meet-music-vol-label">50%</span>
+            </div>
+            <input type="range" id="meet-music-volume" min="0" max="100" value="50" style="width: 100%; accent-color: #60a5fa; cursor: pointer;">
+          </div>
+
+          <button id="btn-meet-music-stop" class="btn-danger-block" style="padding: 12px; border-radius: 8px; font-weight: 800; background: #ef4444; border-color: #ef4444; color: #fff; margin-top: 10px; cursor: pointer; border: none; width: 100%;">
+            Stop Music / संगीत थांबवा
+          </button>
+        </div>
+      </div>
+    </div>
     <!-- Toast Notification Overlay -->
     <div id="toast-notification" class="app-toast">
       <span id="toast-message">Copied to clipboard!</span>
     </div>
-
-  </div>
 
   <!-- App Main Logic -->
   <script src="app.js?v=36" type="module"></script>
