@@ -5243,20 +5243,28 @@ function initSplashAndNotifications() {
     splashRef.textContent = state.translation === "eng" ? randVerse.engRef : randVerse.ref;
   }
 
-  // Dismiss splash screen after 3.2s load progress completes
-  setTimeout(() => {
-    const splash = document.getElementById("splash-screen");
-    if (splash) {
+  const splash = document.getElementById("splash-screen");
+
+  const dismissNow = () => {
+    if (splash && splash.style.display !== "none") {
       splash.classList.add("fade-out");
+      splash.style.pointerEvents = "none";
       setTimeout(() => {
         splash.style.display = "none";
         checkNotificationPrompt();
-      }, 600);
-    } else {
-      checkNotificationPrompt();
+      }, 300);
     }
-  }, 3200);
+  };
+
+  // Instant tap anywhere on splash screen to dismiss immediately
+  if (splash) {
+    splash.addEventListener("click", dismissNow);
+  }
+
+  // Fast auto-dismiss splash screen after 1.2 seconds
+  setTimeout(dismissNow, 1200);
 }
+
 
 function checkNotificationPrompt() {
   const choice = localStorage.getItem("river_of_life_notifications_choice");
