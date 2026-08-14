@@ -6553,7 +6553,7 @@ function launchLiveMeetingRoom(meeting, stream) {
     jitsiCont.style.right = "0";
     jitsiCont.style.bottom = "0";
     jitsiCont.style.width = "100%";
-    jitsiCont.style.height = "calc(100% - 50px - 72px - env(safe-area-inset-bottom, 20px))";
+    jitsiCont.style.height = "calc(100% - 50px)";
     jitsiCont.style.zIndex = "5";
 
     showToast("Connecting to live video call for friends & family...");
@@ -6570,9 +6570,9 @@ function launchLiveMeetingRoom(meeting, stream) {
     `;
   }
 
-  // Ensure bottom custom toolbar is visible above live call
+  // Ensure bottom custom toolbar is hidden so Mirotalk's clean bar is used
   const customToolbar = document.querySelector(".meeting-room-toolbar");
-  if (customToolbar) customToolbar.style.display = "flex";
+  if (customToolbar) customToolbar.style.display = "none";
 
   // Attach global screen tap listener inside meeting room to unlock audio on mobile browsers
   const autoAudioUnlocker = () => {

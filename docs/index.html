@@ -2056,7 +2056,7 @@
         </div>
 
         <!-- Main Content Area: Video Grid and Drawers -->
-        <div style="flex: 1; display: flex; width: 100%; overflow: hidden; position: relative; padding-top: 50px; padding-bottom: 74px;">
+        <div style="flex: 1; display: flex; width: 100%; overflow: hidden; position: relative; padding-top: 50px; padding-bottom: 0px;">
           
           <!-- Left Area: Video Grid and YouTube stream -->
           <div style="flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; height: 100%;">
@@ -2234,36 +2234,7 @@
           
         </div>
 
-        <!-- Bottom Toolbar Control Panel -->
-        <div class="meeting-room-toolbar" style="position: absolute; bottom: 0; left: 0; right: 0; height: 74px; background: rgba(9, 13, 22, 0.95); border-top: 1px solid var(--border); display: flex; justify-content: center; align-items: center; padding: 0 10px; z-index: 10; gap: 8px; overflow-x: auto; white-space: nowrap;">
-          <button class="control-icon-btn active" id="btn-meet-mic" title="Toggle Mic" style="background: rgba(255,255,255,0.08); border: none; color: #fff; width: 44px; height: 44px; border-radius: 50%; cursor: pointer;">🎙️</button>
-          <button class="control-icon-btn active" id="btn-meet-video" title="Toggle Video" style="background: rgba(255,255,255,0.08); border: none; color: #fff; width: 44px; height: 44px; border-radius: 50%; cursor: pointer;">📹</button>
-          <button class="control-icon-btn" id="btn-meet-screenshare" title="Share Screen" style="background: rgba(255,255,255,0.08); border: none; color: #fff; width: 44px; height: 44px; border-radius: 50%; cursor: pointer;">🖥️</button>
-          <button class="control-icon-btn" id="btn-meet-chat" title="Chat" style="background: rgba(255,255,255,0.08); border: none; color: #fff; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; position: relative;">💬<span id="meet-chat-badge" style="position: absolute; top: 0; right: 0; background: #ef4444; color: #fff; font-size: 9px; width: 14px; height: 14px; border-radius: 50%; display: none; align-items: center; justify-content: center; font-weight: 800;">1</span></button>
-          <button class="control-icon-btn" id="btn-meet-hand" title="Raise Hand" style="background: rgba(255,255,255,0.08); border: none; color: #fff; width: 44px; height: 44px; border-radius: 50%; cursor: pointer;">✋</button>
-          <button class="control-icon-btn" id="btn-meet-prayer" title="Live Prayer Request" style="background: rgba(255,255,255,0.08); border: none; color: #fff; width: 44px; height: 44px; border-radius: 50%; cursor: pointer;">🙏</button>
-          <button class="control-icon-btn" id="btn-meet-reactions" title="Reactions" style="background: rgba(255,255,255,0.08); border: none; color: #fff; width: 44px; height: 44px; border-radius: 50%; cursor: pointer;">😊</button>
-          <button class="control-icon-btn" id="btn-meet-members" title="Participants" style="background: rgba(255,255,255,0.08); border: none; color: #fff; width: 44px; height: 44px; border-radius: 50%; cursor: pointer;">👥</button>
-          <button class="control-icon-btn" id="btn-meet-bible" title="Bible Mode" style="background: rgba(255,255,255,0.08); border: none; color: #fff; width: 44px; height: 44px; border-radius: 50%; cursor: pointer;">📖</button>
-          <button class="control-icon-btn" id="btn-meet-worship" title="Worship Mode" style="background: rgba(255,255,255,0.08); border: none; color: #fff; width: 44px; height: 44px; border-radius: 50%; cursor: pointer;">🎵</button>
-          <button class="control-icon-btn" id="btn-meet-moderator" title="Host Controls" style="background: rgba(255,255,255,0.08); border: none; color: #fff; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; display: none;">⚙️</button>
-          <button class="control-icon-btn leave-btn" id="btn-meet-leave" title="Leave Call" style="background: #ef4444; border: none; color: #fff; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center;">🔴</button>
-        </div>
 
-        <!-- Reconnection overlay banner -->
-        <div id="meet-reconnecting-overlay" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(9,13,22,0.9); z-index: 100; flex-direction: column; align-items: center; justify-content: center; gap: 16px;">
-          <div class="ios-spinner" style="border-top-color: var(--primary);"></div>
-          <span style="font-family: var(--font-ui); font-size: 15px; font-weight: 700;">Reconnecting / पुन्हा जोडत आहे...</span>
-        </div>
-        
-        <!-- Temp Reactions Overlay Panel -->
-        <div id="meet-reactions-select-panel" style="display: none; position: absolute; bottom: 84px; background: rgba(9, 13, 22, 0.9); border: 1px solid var(--border); border-radius: 30px; padding: 6px 12px; gap: 10px; z-index: 100;">
-          <button class="reaction-select-btn" data-reaction="🙏" style="background: none; border: none; font-size: 20px; cursor: pointer;">🙏</button>
-          <button class="reaction-select-btn" data-reaction="❤️" style="background: none; border: none; font-size: 20px; cursor: pointer;">❤️</button>
-          <button class="reaction-select-btn" data-reaction="🙌" style="background: none; border: none; font-size: 20px; cursor: pointer;">🙌</button>
-          <button class="reaction-select-btn" data-reaction="👏" style="background: none; border: none; font-size: 20px; cursor: pointer;">👏</button>
-          <button class="reaction-select-btn" data-reaction="Amen" style="background: var(--pill-bg); border: none; font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 12px; color: #fff; cursor: pointer;">Amen</button>
-        </div>
         
         <!-- Live meeting Floating Reactions display container -->
         <div id="meet-floating-reactions-container" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; overflow: hidden;"></div>
