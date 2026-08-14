@@ -6913,6 +6913,7 @@ function exitLiveMeetingRoom() {
   // Stop background music and hide shared pane
   stopWorshipTrack();
   hideSharedBibleContent();
+  hideSharedWorshipVideo();
 
   // Clear interval loop
   if (meetingSandboxInterval) {
@@ -7535,14 +7536,15 @@ function syncSharedBiblePassage(book, chapter, verse, translation) {
 }
 
 // Sync Worship YouTube player embed inside call with full-screen focus layout
+// Sync Worship YouTube audio in the background (no video overlay, cameras remain full screen)
+let youtubeAudioIsMuted = true;
+
 function syncSharedWorshipVideo(youtubeUrl) {
-  const container = document.getElementById("meeting-shared-content-area");
-  const worshipBox = document.getElementById("worship-video-frame-container");
-  const bibleBox = document.getElementById("meeting-shared-bible");
-  const screenshareBox = document.getElementById("meeting-screenshare-container");
   const jitsiCont = document.getElementById("meeting-jitsi-container");
+  const hiddenPlayerCont = document.getElementById("hidden-youtube-audio-container");
+  const banner = document.getElementById("meeting-worship-audio-banner");
   
-  if (!container || !worshipBox || !jitsiCont) return;
+  if (!hiddenPlayerCont || !jitsiCont || !banner) return;
 
   // Extract YouTube ID
   let videoId = "nQWFzMvCfLE"; // Default Give Thanks
@@ -7554,55 +7556,71 @@ function syncSharedWorshipVideo(youtubeUrl) {
     videoId = youtubeUrl; // Raw video ID
   }
 
-  // Stop any active background music
+  // Stop any active local ambient track
   stopWorshipTrack();
 
-  // Hide the camera video streams entirely to focus 100% on the praise song!
-  jitsiCont.style.display = "none";
+  // Load the YouTube iframe inside the hidden container in the background
+  // We load it with autoplay=1 and mute=1 so mobile Safari/Chrome allow background playback to start immediately.
+  hiddenPlayerCont.innerHTML = `
+    <iframe id="bg-youtube-iframe" width="100%" height="100%" 
+      src="https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=1&mute=1" 
+      frameborder="0" allow="autoplay; encrypted-media;"></iframe>
+  `;
 
-  container.style.display = "block";
-  container.style.height = "calc(100% - 50px)";
-  container.style.top = "50px";
-  
-  worshipBox.style.display = "block";
-  if (bibleBox) bibleBox.style.display = "none";
-  if (screenshareBox) screenshareBox.style.display = "none";
+  // Restore the MiroTalk camera container to full screen view (no split screen!)
+  jitsiCont.style.display = "block";
+  jitsiCont.style.height = "calc(100% - 50px)";
+  jitsiCont.style.top = "50px";
 
-  // Embed player inside the full screen area
-  const player = document.getElementById("worship-youtube-player");
-  if (player) {
-    player.innerHTML = `
-      <div style="position: relative; width: 100%; height: 100%;">
-        <iframe width="100%" height="100%" src="https://www.youtube.com/embed/${videoId}?enablejsapi=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="width:100%; height:100%;"></iframe>
-        <div style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.75); color: #60a5fa; padding: 6px 12px; border-radius: 20px; font-size: 10.5px; font-weight: 700; pointer-events: none; z-index: 100; text-align: center; border: 1px solid rgba(96,165,250,0.3); box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
-          🔊 Tap video to play with audio / आवाज ऐकण्यासाठी व्हिडिओवर टॅप करा
-        </div>
-      </div>
-    `;
-  }
+  // Reset mute state
+  youtubeAudioIsMuted = true;
 
-  showToast("Playing shared worship video for all participants.");
+  // Show the floating audio unmute banner
+  banner.style.display = "flex";
+  banner.querySelector("span").textContent = "🔊 Tap to Hear Shared Song / गाणे ऐकण्यासाठी टॅप करा";
+  banner.style.background = "rgba(59, 130, 246, 0.95)";
+
+  // Setup click event for the banner
+  banner.onclick = () => {
+    const iframe = document.getElementById("bg-youtube-iframe");
+    if (!iframe || !iframe.contentWindow) return;
+
+    if (youtubeAudioIsMuted) {
+      // Unmute and play
+      iframe.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', '*');
+      iframe.contentWindow.postMessage('{"event":"command","func":"setVolume","args":[100]}', '*');
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      
+      youtubeAudioIsMuted = false;
+      banner.querySelector("span").textContent = "🔇 Mute Praise Song / गाणे म्यूट करा";
+      banner.style.background = "rgba(34, 197, 94, 0.95)"; // Green background when playing
+      showToast("Praise song unmuted!");
+    } else {
+      // Mute
+      iframe.contentWindow.postMessage('{"event":"command","func":"mute","args":""}', '*');
+      
+      youtubeAudioIsMuted = true;
+      banner.querySelector("span").textContent = "🔊 Tap to Hear Shared Song / गाणे ऐकण्यासाठी टॅप करा";
+      banner.style.background = "rgba(59, 130, 246, 0.95)"; // Blue when muted
+      showToast("Praise song muted.");
+    }
+  };
+
+  showToast("Worship audio shared in the background!");
 }
 
-// Hide shared worship video and restore camera screen
+// Stop and clear the worship audio player
 function hideSharedWorshipVideo() {
-  const container = document.getElementById("meeting-shared-content-area");
-  const worshipBox = document.getElementById("worship-video-frame-container");
-  const jitsiCont = document.getElementById("meeting-jitsi-container");
+  const hiddenPlayerCont = document.getElementById("hidden-youtube-audio-container");
+  const banner = document.getElementById("meeting-worship-audio-banner");
   
-  if (worshipBox) {
-    worshipBox.style.display = "none";
-    const player = document.getElementById("worship-youtube-player");
-    if (player) player.innerHTML = "";
+  if (hiddenPlayerCont) {
+    hiddenPlayerCont.innerHTML = "";
   }
   
-  if (container) container.style.display = "none";
-  
-  // Restore user camera screens back to full display
-  if (jitsiCont) {
-    jitsiCont.style.display = "block";
-    jitsiCont.style.height = "calc(100% - 50px)";
-    jitsiCont.style.top = "50px";
+  if (banner) {
+    banner.style.display = "none";
+    banner.onclick = null;
   }
 }
 

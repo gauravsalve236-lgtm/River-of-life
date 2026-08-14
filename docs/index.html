@@ -2039,6 +2039,11 @@
         <!-- Dedicated Jitsi Fullscreen Container (Absolute positioning guarantees it fills the call screen) -->
         <div id="meeting-jitsi-container" style="display: none; position: absolute; top: 50px; left: 0; right: 0; bottom: 0; width: 100%; height: calc(100% - 50px); background: #090d16; z-index: 5;"></div>
 
+        <!-- Floating Audio Stream Unmute Banner -->
+        <div id="meeting-worship-audio-banner" style="display: none; position: absolute; top: 60px; left: 50%; transform: translateX(-50%); background: rgba(59, 130, 246, 0.95); color: #fff; padding: 10px 20px; border-radius: 30px; font-family: var(--font-ui); font-size: 12.5px; font-weight: 700; cursor: pointer; z-index: 1000; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 1.5px solid rgba(255,255,255,0.25); align-items: center; gap: 8px; transition: all 0.3s ease;">
+          <span>🔊 Tap to Hear Shared Song / गाणे ऐकण्यासाठी टॅप करा</span>
+        </div>
+
         <!-- Main Content Area: Video Grid and Drawers -->
         <div style="flex: 1; display: flex; width: 100%; overflow: hidden; position: relative; padding-top: 50px; padding-bottom: 74px;">
           
@@ -2243,6 +2248,8 @@
         <!-- Live meeting Floating Reactions display container -->
         <div id="meet-floating-reactions-container" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; overflow: hidden;"></div>
 
+        <!-- Hidden Background YouTube Player (Plays praise audio for everyone silently in the background) -->
+        <div id="hidden-youtube-audio-container" style="position: absolute; top: -9999px; left: -9999px; width: 1px; height: 1px; overflow: hidden; opacity: 0.01; pointer-events: none;"></div>
       </div>
     </div>
 
