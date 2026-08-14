@@ -6504,47 +6504,39 @@ function launchLiveMeetingRoom(meeting, stream) {
     }
   }
 
-  // Clean & Render 2x2 Responsive Video Call Grid View for all participants
+  // Enable REAL Multi-User Live Video Call Room for Friends & Family
   const gridEl = document.getElementById("meeting-video-grid");
   const jitsiCont = document.getElementById("meeting-jitsi-container");
 
-  if (gridEl) {
-    gridEl.style.display = "grid";
-    gridEl.style.cssText = "display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; padding: 10px !important; width: 100%; height: 100%; background: #090d16;";
-    
-    const localCell = document.getElementById("video-cell-local");
-    if (localCell) localCell.style.display = "flex";
-
-    // Clear previous mock tiles
-    gridEl.querySelectorAll(".video-cell-mock").forEach(el => el.remove());
-
-    // Populate side-by-side 2x2 Grid Participants
-    const mockMembers = [
-      { name: "Pastor Gaurav", role: "Host", avatar: "G", color: "#3b82f6" },
-      { name: "Sister Priya", role: "Co-Host", avatar: "P", color: "#ec4899" },
-      { name: "Brother Rahul", role: "Member", avatar: "R", color: "#10b981" }
-    ];
-
-    mockMembers.forEach(m => {
-      const cell = document.createElement("div");
-      cell.className = "video-cell video-cell-mock";
-      cell.style.cssText = "position: relative; background: #1a2035; border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; min-height: 130px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: 1.5px solid rgba(255,255,255,0.05);";
-      cell.innerHTML = `
-        <div class="video-cell-avatar" style="font-size: 28px; font-weight: 800; width: 56px; height: 56px; border-radius: 50%; background: ${m.color}; color: #fff; display: flex; align-items: center; justify-content: center;">${m.avatar}</div>
-        <div class="video-cell-label" style="position: absolute; bottom: 8px; left: 8px; font-size: 11px; font-weight: 700; background: rgba(0,0,0,0.65); backdrop-filter: blur(4px); padding: 4px 8px; border-radius: 6px; display: flex; align-items: center; gap: 6px; color: #fff;">
-          <span>${m.name} (${m.role})</span>
-          <span>🎙️</span>
-        </div>
-      `;
-      gridEl.appendChild(cell);
-    });
-  }
-
+  // Hide static grid and show live WebRTC video room
+  if (gridEl) gridEl.style.display = "none";
+  
   if (jitsiCont) {
-    jitsiCont.style.display = "none";
+    jitsiCont.style.display = "block";
+    jitsiCont.style.position = "absolute";
+    jitsiCont.style.top = "50px";
+    jitsiCont.style.left = "0";
+    jitsiCont.style.right = "0";
+    jitsiCont.style.bottom = "0";
+    jitsiCont.style.width = "100%";
+    jitsiCont.style.height = "calc(100% - 50px - 72px - env(safe-area-inset-bottom, 20px))";
+    jitsiCont.style.zIndex = "5";
+
+    showToast("Connecting to live video call for friends & family...");
+
+    const roomUrl = `https://p2p.mirotalk.com/join/RiverOfLife_GauravSalve_${meeting.id}?name=${encodeURIComponent(loggedIn)}`;
+    jitsiCont.innerHTML = `
+      <iframe 
+        src="${roomUrl}" 
+        width="100%" 
+        height="100%" 
+        allow="camera; microphone; speaker-selection; display-capture; fullscreen; autoplay; picture-in-picture;" 
+        style="border: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; background: #090d16;">
+      </iframe>
+    `;
   }
 
-  // Ensure bottom custom toolbar is visible
+  // Ensure bottom custom toolbar is visible above live call
   const customToolbar = document.querySelector(".meeting-room-toolbar");
   if (customToolbar) customToolbar.style.display = "flex";
 
@@ -6554,6 +6546,7 @@ function launchLiveMeetingRoom(meeting, stream) {
   };
   document.addEventListener("touchstart", autoAudioUnlocker, { once: true });
   document.addEventListener("click", autoAudioUnlocker, { once: true });
+
 
 
       
