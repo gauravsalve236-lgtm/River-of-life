@@ -6285,8 +6285,8 @@ function launchLiveMeetingRoom(meeting, stream) {
   // Setup synchronous Bible book dropdown selections
   populateMeetingBibleSelector();
 
-  // Always use our custom Google-Meet style video grid design for stable native mobile execution
-  const useJitsi = false;
+  // Real-world multiuser meetings load Jitsi Meet, private ones run our mock sandbox layout
+  const useJitsi = (meeting.visibility === "public" && typeof JitsiMeetExternalAPI !== "undefined");
 
   if (useJitsi) {
     // REAL MULTIUSER JITSI CONNECTION
@@ -6310,6 +6310,7 @@ function launchLiveMeetingRoom(meeting, stream) {
       configOverwrite: {
         startWithAudioMuted: false,
         startWithVideoMuted: !stream,
+        disableDeepLinking: true, // Bypass mobile Jitsi app installation banners to join inline
         toolbarButtons: [] // Hide native Jitsi controls to let our custom toolbar drive
       }
     };
