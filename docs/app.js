@@ -6576,7 +6576,7 @@ function launchLiveMeetingRoom(meeting, stream) {
     jitsiCont.style.zIndex = "10";
 
     const cleanRoomId = (meeting.id || "live-fellowship").replace(/[^a-zA-Z0-9]/g, "_");
-    const roomUrl = `https://p2p.mirotalk.com/join/RiverOfLife_${cleanRoomId}?name=${encodeURIComponent(loggedIn)}&audio=true&video=true`;
+    const roomUrl = `https://p2p.mirotalk.com/join/RiverOfLife_${cleanRoomId}?name=${encodeURIComponent(loggedIn)}&audio=1&video=1&muted=0`;
     
     jitsiCont.innerHTML = `
       <iframe 
