@@ -3861,10 +3861,20 @@ function openDrawer(id) {
   if (overlay) overlay.classList.add("active");
 }
 
+function closeDrawer(id) {
+  const overlay = document.getElementById(id);
+  if (overlay) overlay.classList.remove("active");
+}
+
 function closeAllDrawers() {
   document.querySelectorAll(".drawer-overlay").forEach(overlay => overlay.classList.remove("active"));
   document.querySelectorAll(".verse-row").forEach(v => v.classList.remove("selected-pulse"));
 }
+
+window.openDrawer = openDrawer;
+window.closeDrawer = closeDrawer;
+window.closeAllDrawers = closeAllDrawers;
+
 
 function openModal(id) {
   const overlay = document.getElementById(id);
