@@ -6558,47 +6558,8 @@ function launchLiveMeetingRoom(meeting, stream) {
     }
   }
 
-  // Populate Grid View with all meeting participants (for iOS, Android, and Windows)
-  const gridEl = document.getElementById("meeting-video-grid");
-  const jitsiCont = document.getElementById("meeting-jitsi-container");
-
-  // Populate mock participant tiles if grid element exists
-  if (gridEl) {
-    // Keep local video cell as first tile
-    const localCellHtml = `
-      <div class="video-cell" id="video-cell-local" style="position: relative; background: #ffffff; border-radius: 14px; overflow: hidden; display: flex; align-items: center; justify-content: center; aspect-ratio: 4/3; box-shadow: 0 4px 12px rgba(0,0,0,0.06); border: 1.5px solid #e2e8f0;">
-        <video id="meeting-local-video" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); display: ${stream ? 'block' : 'none'};"></video>
-        <div class="video-cell-avatar" id="video-cell-local-avatar" style="position: absolute; font-size: 32px; font-weight: 800; width: 64px; height: 64px; border-radius: 50%; background: #fef3c7; color: #92400e; display: ${stream ? 'none' : 'flex'}; align-items: center; justify-content: center; border: 2px solid #fde68a;">${loggedIn.substring(0, 1).toUpperCase()}</div>
-        <div class="video-cell-label" style="position: absolute; bottom: 8px; left: 8px; font-size: 11px; font-weight: 700; background: rgba(255,255,255,0.92); color: #0f172a; padding: 4px 10px; border-radius: 6px; display: flex; align-items: center; gap: 6px; border: 1px solid #cbd5e1; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-          <span>${loggedIn} ${isHost ? "(Host)" : ""}</span>
-          <span id="meeting-local-mic-status">🎙️</span>
-        </div>
-      </div>
-    `;
-
-    const sampleUsers = [
-      { name: "Pastor John", initials: "PJ", bg: "#dbeafe", color: "#1e40af" },
-      { name: "Sister Mary", initials: "SM", bg: "#fce7f3", color: "#9d174d" },
-      { name: "Brother David", initials: "BD", bg: "#dcfce7", color: "#166534" },
-      { name: "Rahul S.", initials: "RS", bg: "#fef3c7", color: "#92400e" }
-    ];
-
-    let mockGridHtml = localCellHtml;
-    sampleUsers.forEach((user, idx) => {
-      mockGridHtml += `
-        <div class="video-cell" id="video-cell-mock-${idx}" style="position: relative; background: #ffffff; border-radius: 14px; overflow: hidden; display: flex; align-items: center; justify-content: center; aspect-ratio: 4/3; box-shadow: 0 4px 12px rgba(0,0,0,0.06); border: 1.5px solid #e2e8f0;">
-          <div class="video-cell-avatar" style="font-size: 28px; font-weight: 800; width: 60px; height: 60px; border-radius: 50%; background: ${user.bg}; color: ${user.color}; display: flex; align-items: center; justify-content: center; border: 2px solid #e2e8f0;">${user.initials}</div>
-          <div class="video-cell-label" style="position: absolute; bottom: 8px; left: 8px; font-size: 11px; font-weight: 700; background: rgba(255,255,255,0.92); color: #0f172a; padding: 4px 10px; border-radius: 6px; display: flex; align-items: center; gap: 6px; border: 1px solid #cbd5e1; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-            <span>${user.name}</span>
-            <span>🎙️</span>
-          </div>
-        </div>
-      `;
-    });
-
-    gridEl.innerHTML = mockGridHtml;
-    gridEl.style.display = "grid";
-  }
+  // Initialize default MS Teams Gallery View for all participants
+  switchMeetingView("gallery");
   
   if (jitsiCont) {
     jitsiCont.style.display = "none";
@@ -8155,6 +8116,292 @@ function injectAudioViaLocalPlayback(stream) {
   relay.volume = 1.0;
   relay.play().catch(e => console.warn("Relay play error:", e));
 }
+
+// ============================================================================
+// MICROSOFT TEAMS VIDEO CONFERENCING ENGINE & VIEW STATE MANAGER
+// ============================================================================
+let currentMeetingView = "gallery"; // 'gallery', 'large-gallery', 'together', 'speaker'
+let isLocalHandRaised = false;
+
+const mockParticipantsList = [
+  { id: 'local', name: 'You (Host)', initials: 'U', bg: '#3b82f6', color: '#ffffff', isMuted: false, isHandRaised: false, isSpeaking: false, isLocal: true },
+  { id: 'pj', name: 'Pastor John', initials: 'PJ', bg: '#8b5cf6', color: '#ffffff', isMuted: false, isHandRaised: false, isSpeaking: true },
+  { id: 'sm', name: 'Sister Mary', initials: 'SM', bg: '#ec4899', color: '#ffffff', isMuted: true, isHandRaised: true, isSpeaking: false },
+  { id: 'bd', name: 'Brother David', initials: 'BD', bg: '#10b981', color: '#ffffff', isMuted: false, isHandRaised: false, isSpeaking: false },
+  { id: 'rs', name: 'Rahul S.', initials: 'RS', bg: '#f59e0b', color: '#ffffff', isMuted: false, isHandRaised: false, isSpeaking: false },
+  { id: 'pm', name: 'Priyanka M.', initials: 'PM', bg: '#ef4444', color: '#ffffff', isMuted: true, isHandRaised: false, isSpeaking: false },
+  { id: 'ak', name: 'Anil K.', initials: 'AK', bg: '#06b6d4', color: '#ffffff', isMuted: false, isHandRaised: false, isSpeaking: false },
+  { id: 'sd', name: 'Sunita D.', initials: 'SD', bg: '#84cc16', color: '#ffffff', isMuted: true, isHandRaised: false, isSpeaking: false },
+  { id: 'vg', name: 'Vijay G.', initials: 'VG', bg: '#6366f1', color: '#ffffff', isMuted: false, isHandRaised: true, isSpeaking: false },
+  { id: 'rn', name: 'Rutuja N.', initials: 'RN', bg: '#d946ef', color: '#ffffff', isMuted: true, isHandRaised: false, isSpeaking: false },
+  { id: 'sk', name: 'Sanjay K.', initials: 'SK', bg: '#14b8a6', color: '#ffffff', isMuted: false, isHandRaised: false, isSpeaking: false },
+  { id: 'lp', name: 'Lata P.', initials: 'LP', bg: '#f97316', color: '#ffffff', isMuted: true, isHandRaised: false, isSpeaking: false }
+];
+
+function toggleMeetingViewDropdown() {
+  const menu = document.getElementById("meeting-view-dropdown-menu");
+  if (menu) {
+    menu.style.display = menu.style.display === "none" ? "block" : "none";
+  }
+}
+
+function switchMeetingView(viewName) {
+  currentMeetingView = viewName;
+  const menu = document.getElementById("meeting-view-dropdown-menu");
+  if (menu) menu.style.display = "none";
+
+  const label = document.getElementById("current-view-label");
+
+  // Hide all view containers
+  const galleryGrid = document.getElementById("meeting-video-grid");
+  const largeGalleryGrid = document.getElementById("meeting-large-gallery-grid");
+  const togetherMode = document.getElementById("meeting-together-mode");
+  const speakerView = document.getElementById("meeting-speaker-view");
+
+  if (galleryGrid) galleryGrid.style.display = "none";
+  if (largeGalleryGrid) largeGalleryGrid.style.display = "none";
+  if (togetherMode) togetherMode.style.display = "none";
+  if (speakerView) speakerView.style.display = "none";
+
+  // Update dropdown checkmarks
+  document.querySelectorAll(".view-menu-item").forEach(item => {
+    item.classList.remove("active");
+    item.style.background = "transparent";
+    item.style.color = "#cbd5e1";
+    const chk = item.querySelector(".check-mark");
+    if (chk) chk.style.display = "none";
+  });
+
+  const activeItem = document.getElementById(`view-item-${viewName}`);
+  if (activeItem) {
+    activeItem.classList.add("active");
+    activeItem.style.background = "rgba(59, 130, 246, 0.15)";
+    activeItem.style.color = "#60a5fa";
+    const chk = activeItem.querySelector(".check-mark");
+    if (chk) chk.style.display = "inline";
+  }
+
+  if (viewName === "gallery") {
+    if (label) label.textContent = "Gallery (Grid)";
+    if (galleryGrid) galleryGrid.style.display = "grid";
+    renderGalleryView();
+    showToast("Switched to Gallery View (Responsive Grid)");
+  } else if (viewName === "large-gallery") {
+    if (label) label.textContent = "Large Gallery (7x7)";
+    if (largeGalleryGrid) largeGalleryGrid.style.display = "grid";
+    renderLargeGalleryView();
+    showToast("Switched to Large Gallery View (49 Tiles Matrix)");
+  } else if (viewName === "together") {
+    if (label) label.textContent = "Together Mode";
+    if (togetherMode) togetherMode.style.display = "flex";
+    renderTogetherModeView();
+    showToast("Switched to Together Mode (Auditorium Seats)");
+  } else if (viewName === "speaker") {
+    if (label) label.textContent = "Speaker View";
+    if (speakerView) speakerView.style.display = "flex";
+    renderSpeakerView();
+    showToast("Switched to Speaker View (Focus + Filmstrip)");
+  }
+}
+
+// RENDER VIEW 1: Gallery View
+function renderGalleryView() {
+  const gridEl = document.getElementById("meeting-video-grid");
+  if (!gridEl) return;
+  
+  let html = "";
+  mockParticipantsList.forEach(p => {
+    const isSpeakingClass = p.isSpeaking ? "active-speaker" : "";
+    const micIcon = p.isMuted ? "🔇" : "🎙️";
+    const handBadge = p.isHandRaised ? `<div class="video-cell-hand-badge">✋</div>` : "";
+    
+    html += `
+      <div class="video-cell ${isSpeakingClass}" id="video-cell-${p.id}">
+        <div class="simulated-live-video-bg"></div>
+        ${handBadge}
+        <div class="video-cell-avatar" style="position: relative; z-index: 5; background-color: ${p.bg} !important;">${p.initials}</div>
+        <div class="video-cell-label">
+          <span>${p.name}</span>
+          <span>${micIcon}</span>
+        </div>
+      </div>
+    `;
+  });
+  gridEl.innerHTML = html;
+}
+
+// RENDER VIEW 2: Large Gallery View (7x7 Matrix, 49 Tiles)
+function renderLargeGalleryView() {
+  const gridEl = document.getElementById("meeting-large-gallery-grid");
+  if (!gridEl) return;
+
+  let html = "";
+  const bgColors = ["#3b82f6", "#8b5cf6", "#ec4899", "#10b981", "#f59e0b", "#ef4444", "#06b6d4", "#84cc16", "#6366f1", "#d946ef"];
+  
+  for (let i = 1; i <= 49; i++) {
+    const color = bgColors[i % bgColors.length];
+    const isSpeaking = i === 2; // Pastor John
+    const speakerClass = isSpeaking ? "active-speaker" : "";
+    const name = i === 1 ? "You (Host)" : (i === 2 ? "Pastor John" : `Member ${i}`);
+    const initials = i === 1 ? "U" : (i === 2 ? "PJ" : `M${i}`);
+    const micIcon = i % 3 === 0 ? "🔇" : "🎙️";
+
+    html += `
+      <div class="video-cell ${speakerClass}" style="position: relative; min-height: 54px; aspect-ratio: 4/3; border-radius: 8px !important;">
+        <div class="simulated-live-video-bg"></div>
+        <div class="video-cell-avatar" style="width: 32px; height: 32px; font-size: 13px; z-index: 5; background-color: ${color} !important;">${initials}</div>
+        <div class="video-cell-label" style="font-size: 9px; padding: 2px 5px; bottom: 4px; left: 4px;">
+          <span>${name}</span>
+          <span>${micIcon}</span>
+        </div>
+      </div>
+    `;
+  }
+  gridEl.innerHTML = html;
+}
+
+// RENDER VIEW 3: Together Mode (Auditorium Tiered Seating)
+function renderTogetherModeView() {
+  const container = document.getElementById("together-mode-auditorium-seats");
+  if (!container) return;
+
+  const backRow = mockParticipantsList.slice(0, 5);
+  const midRow = mockParticipantsList.slice(5, 9);
+  const frontRow = mockParticipantsList.slice(9, 12);
+
+  let html = "";
+  [backRow, midRow, frontRow].forEach((row, rIdx) => {
+    html += `<div class="together-seat-row" style="transform: scale(${0.85 + rIdx * 0.08});">`;
+    row.forEach(p => {
+      const isSpeakingStyle = p.isSpeaking ? "border-color: #a855f7; box-shadow: 0 0 20px #a855f7;" : "";
+      html += `
+        <div class="together-seat-card">
+          <div class="together-avatar" style="background-color: ${p.bg}; ${isSpeakingStyle}">
+            ${p.initials}
+          </div>
+          <div class="together-seat-chair"></div>
+          <div class="together-name-tag">${p.name}</div>
+        </div>
+      `;
+    });
+    html += `</div>`;
+  });
+
+  container.innerHTML = html;
+}
+
+// RENDER VIEW 4: Speaker View (Focus active speaker + filmstrip)
+function renderSpeakerView() {
+  const mainStage = document.getElementById("speaker-view-main-stage");
+  const filmstrip = document.getElementById("speaker-view-filmstrip");
+  if (!mainStage || !filmstrip) return;
+
+  const activeSpeaker = mockParticipantsList.find(p => p.isSpeaking) || mockParticipantsList[1]; // Pastor John
+
+  mainStage.innerHTML = `
+    <div class="simulated-live-video-bg" style="opacity: 0.8;"></div>
+    <div style="position: relative; z-index: 10; display: flex; flex-direction: column; align-items: center; gap: 14px;">
+      <div class="video-cell-avatar" style="width: 100px; height: 100px; font-size: 48px; background-color: ${activeSpeaker.bg} !important; border: 4px solid #a855f7 !important; box-shadow: 0 0 30px rgba(168,85,247,0.7);">
+        ${activeSpeaker.initials}
+      </div>
+      <div style="font-size: 18px; font-weight: 800; color: #f8fafc; background: rgba(15,23,42,0.85); padding: 6px 16px; border-radius: 20px; border: 1px solid #a855f7; display: flex; align-items: center; gap: 8px;">
+        <span>🎙️ ${activeSpeaker.name} (Active Speaker)</span>
+        <span style="font-size: 11px; background: #a855f7; color: #fff; padding: 2px 8px; border-radius: 10px;">SPEAKING</span>
+      </div>
+    </div>
+  `;
+
+  let stripHtml = "";
+  mockParticipantsList.filter(p => p.id !== activeSpeaker.id).forEach(p => {
+    stripHtml += `
+      <div class="video-cell" style="width: 110px; height: 90px; flex-shrink: 0; position: relative; border-radius: 10px !important;">
+        <div class="simulated-live-video-bg"></div>
+        <div class="video-cell-avatar" style="width: 36px; height: 36px; font-size: 15px; z-index: 5; background-color: ${p.bg} !important;">${p.initials}</div>
+        <div class="video-cell-label" style="font-size: 9.5px; padding: 2px 6px; bottom: 4px; left: 4px;">
+          <span>${p.name.split(' ')[0]}</span>
+        </div>
+      </div>
+    `;
+  });
+  filmstrip.innerHTML = stripHtml;
+}
+
+// 1-Tap Quick Scripture Share Preset
+async function shareQuickScripturePreset(bookKey, chapter, verse) {
+  const bookSelect = document.getElementById("meeting-share-book");
+  const chapterSelect = document.getElementById("meeting-share-chapter");
+  const verseSelect = document.getElementById("meeting-share-verse");
+  
+  if (bookSelect) bookSelect.value = bookKey;
+  if (chapterSelect) chapterSelect.value = chapter;
+  if (verseSelect) verseSelect.value = verse;
+
+  await renderSharedBibleContent(bookKey, chapter, verse);
+  
+  if (typeof broadcastMeetingEvent === "function" && activeMeetingSession) {
+    broadcastMeetingEvent(activeMeetingSession.meetingId, {
+      type: "SHARE_BIBLE",
+      book: bookKey,
+      chapter: chapter,
+      verse: verse
+    });
+  }
+
+  if (typeof closeAllDrawers === "function") closeAllDrawers();
+  showToast(`📖 Broadcasted ${bookKey.toUpperCase()} ${chapter}:${verse}!`);
+}
+
+// Hand Raise Toggle
+function toggleHandRaise() {
+  isLocalHandRaised = !isLocalHandRaised;
+  mockParticipantsList[0].isHandRaised = isLocalHandRaised;
+  
+  const railBtn = document.getElementById("btn-teams-rail-hand");
+  if (railBtn) {
+    railBtn.style.color = isLocalHandRaised ? "#f59e0b" : "#94a3b8";
+  }
+
+  if (currentMeetingView === "gallery") renderGalleryView();
+  showToast(isLocalHandRaised ? "✋ Hand Raised!" : "✋ Hand Lowered");
+}
+
+// Theme Switcher for Meeting Room
+function toggleMeetingRoomTheme() {
+  const roomModal = document.getElementById("modal-live-meeting");
+  const btn = document.getElementById("btn-meeting-theme-toggle");
+  if (!roomModal) return;
+
+  const isDark = roomModal.classList.contains("teams-dark-theme");
+  if (isDark) {
+    roomModal.classList.remove("teams-dark-theme");
+    roomModal.style.background = "#f8fafc";
+    roomModal.style.color = "#0f172a";
+    if (btn) btn.innerHTML = "☀️ <span>Light</span>";
+    showToast("Switched to Light Theme");
+  } else {
+    roomModal.classList.add("teams-dark-theme");
+    roomModal.style.background = "#090d16";
+    roomModal.style.color = "#f8fafc";
+    if (btn) btn.innerHTML = "🌙 <span>Dark</span>";
+    showToast("Switched to MS Teams Dark Theme");
+  }
+}
+
+// Expose global window helpers for meetings, drawers, scripture sharing, and view switcher
+window.renderSharedBibleContent = renderSharedBibleContent;
+window.hideSharedBibleContent = hideSharedBibleContent;
+window.openDrawer = openDrawer;
+window.closeDrawer = closeDrawer;
+window.populateMeetingShareBibleDropdowns = populateMeetingShareBibleDropdowns;
+window.toggleMeetingGridView = toggleMeetingGridView;
+window.launchLiveMeetingRoom = launchLiveMeetingRoom;
+window.triggerJoinMeetingFlow = triggerJoinMeetingFlow;
+window.switchTab = switchTab;
+window.toggleMeetingViewDropdown = toggleMeetingViewDropdown;
+window.switchMeetingView = switchMeetingView;
+window.shareQuickScripturePreset = shareQuickScripturePreset;
+window.toggleHandRaise = toggleHandRaise;
+window.toggleMeetingRoomTheme = toggleMeetingRoomTheme;
 
 // Stop capturing worship audio and restore normal microphone
 function stopWorshipAudioCapture() {
