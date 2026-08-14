@@ -5951,6 +5951,7 @@ function createNewMeeting() {
     duration,
     repeat,
     visibility,
+    isSimulation: (visibility !== "public"),
     maxParticipants: maxVal || "Unlimited",
     status: "scheduled",
     participantsCount: 0,
@@ -6300,14 +6301,25 @@ function launchLiveMeetingRoom(meeting, stream) {
   populateMeetingBibleSelector();
 
   // Real-world multiuser meetings load Jitsi Meet, private ones run our mock sandbox layout
-  const useJitsi = (meeting.visibility === "public" && typeof JitsiMeetExternalAPI !== "undefined");
+  const useJitsi = (typeof JitsiMeetExternalAPI !== "undefined" && !meeting.isSimulation);
 
   if (useJitsi) {
     // REAL MULTIUSER JITSI CONNECTION
     showToast("Connecting to Jitsi Meet Room...");
     
-    // Hide standard local stream cell since Jitsi renders it
+    // Hide standard local stream cell & grid, show Jitsi fullscreen container
     document.getElementById("video-cell-local").style.display = "none";
+    document.getElementById("meeting-video-grid").style.display = "none";
+    
+    const jitsiCont = document.getElementById("meeting-jitsi-container");
+    if (jitsiCont) {
+      jitsiCont.style.display = "block";
+      jitsiCont.innerHTML = ""; // Clear any previous frame
+    }
+    
+    // Hide bottom custom controls toolbar to prevent overlap with Jitsi's native controls
+    const customToolbar = document.querySelector(".meeting-room-toolbar");
+    if (customToolbar) customToolbar.style.display = "none";
     
     // Setup API options
     const domain = "meet.jit.si";
@@ -6317,7 +6329,7 @@ function launchLiveMeetingRoom(meeting, stream) {
       roomName: roomName,
       width: "100%",
       height: "100%",
-      parentNode: gridEl,
+      parentNode: jitsiCont || gridEl,
       userInfo: {
         displayName: loggedIn
       },
@@ -6325,11 +6337,16 @@ function launchLiveMeetingRoom(meeting, stream) {
         startWithAudioMuted: false,
         startWithVideoMuted: !stream,
         disableDeepLinking: true, // Bypass mobile Jitsi app installation banners to join inline
-        toolbarButtons: [] // Hide native Jitsi controls to let our custom toolbar drive
+        prejoinPageEnabled: false, // Bypass prejoin page
       }
     };
     
     activeJitsiAPIInstance = new JitsiMeetExternalAPI(domain, options);
+    
+    // If user clicks Hangup/Leave inside the Jitsi frame, close the modal automatically
+    activeJitsiAPIInstance.addListener("videoConferenceLeft", () => {
+      exitLiveMeetingRoom();
+    });
     
     // Bind API listeners to update button active status
     activeJitsiAPIInstance.addListener("audioMuteStatusChanged", (data) => {
@@ -6345,6 +6362,12 @@ function launchLiveMeetingRoom(meeting, stream) {
     });
     
   } else {
+    // Show standard grid, hide Jitsi container
+    document.getElementById("meeting-video-grid").style.display = "grid";
+    const jitsiCont = document.getElementById("meeting-jitsi-container");
+    if (jitsiCont) jitsiCont.style.display = "none";
+    const customToolbar = document.querySelector(".meeting-room-toolbar");
+    if (customToolbar) customToolbar.style.display = "flex";
     // HIGH FIDELITY SANDBOX SIMULATED MODE (Resilient local developer mode)
     document.getElementById("video-cell-local").style.display = "flex";
     showToast("Live Meeting Joined (Simulated Sandbox)");
@@ -6542,6 +6565,17 @@ function exitLiveMeetingRoom() {
     roomModal.classList.remove("active");
     roomModal.style.display = "none";
   }
+  
+  // Restore Jitsi container state
+  const jitsiCont = document.getElementById("meeting-jitsi-container");
+  if (jitsiCont) {
+    jitsiCont.style.display = "none";
+    jitsiCont.innerHTML = "";
+  }
+  const videoGrid = document.getElementById("meeting-video-grid");
+  if (videoGrid) videoGrid.style.display = "grid";
+  const customToolbar = document.querySelector(".meeting-room-toolbar");
+  if (customToolbar) customToolbar.style.display = "flex";
   
   // Restore navigation panels
   document.querySelector(".app-header").style.display = "flex";
