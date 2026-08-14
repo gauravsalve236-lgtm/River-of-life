@@ -2871,6 +2871,16 @@ function setupEventListeners() {
     });
   }
 
+  // Top exit button inside meeting room
+  const topExitBtn = document.getElementById("btn-meeting-exit-top");
+  if (topExitBtn) {
+    topExitBtn.addEventListener("click", () => {
+      if (confirm("Leave this meeting? / तुम्ही मीटिंग सोडणार आहात का?")) {
+        exitLiveMeetingRoom();
+      }
+    });
+  }
+
   // Navigation trigger drawers
   document.getElementById("btn-text-settings").addEventListener("click", () => openDrawer("drawer-text-settings"));
   
@@ -6322,66 +6332,35 @@ function launchLiveMeetingRoom(meeting, stream) {
   // Setup synchronous Bible book dropdown selections
   populateMeetingBibleSelector();
 
-  // Real-world multiuser meetings load Jitsi Meet, private ones run our mock sandbox layout
-  const useJitsi = (typeof JitsiMeetExternalAPI !== "undefined" && !meeting.isSimulation);
+  // Real-world multiuser meetings load MiroTalk P2P WebRTC, private ones run our mock sandbox layout
+  const useRealCall = (!meeting.isSimulation);
 
-  if (useJitsi) {
-    // REAL MULTIUSER JITSI CONNECTION
-    showToast("Connecting to Jitsi Meet Room...");
+  if (useRealCall) {
+    showToast("Connecting to live video call...");
     
-    // Hide standard local stream cell & grid, show Jitsi fullscreen container
+    // Hide standard local stream cell & grid, show MiroTalk container
     document.getElementById("video-cell-local").style.display = "none";
     document.getElementById("meeting-video-grid").style.display = "none";
     
     const jitsiCont = document.getElementById("meeting-jitsi-container");
     if (jitsiCont) {
       jitsiCont.style.display = "block";
-      jitsiCont.innerHTML = ""; // Clear any previous frame
+      // Embed MiroTalk P2P WebRTC room inside the app
+      const roomUrl = `https://p2p.mirotalk.com/join/RiverOfLife_GauravSalve_${meeting.id}?name=${encodeURIComponent(loggedIn)}`;
+      jitsiCont.innerHTML = `
+        <iframe 
+          src="${roomUrl}" 
+          width="100%" 
+          height="100%" 
+          allow="camera; microphone; speaker-selection; display-capture; fullscreen; autoplay; picture-in-picture;" 
+          style="border: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; background: #090d16;">
+        </iframe>
+      `;
     }
     
-    // Hide bottom custom controls toolbar to prevent overlap with Jitsi's native controls
+    // Hide bottom custom controls toolbar to prevent overlap with MiroTalk's controls
     const customToolbar = document.querySelector(".meeting-room-toolbar");
     if (customToolbar) customToolbar.style.display = "none";
-    
-    // Setup API options (Using free community fmc Jitsi server to bypass moderator requirements)
-    const domain = "meet.ffmuc.net";
-    const roomName = `RiverOfLife_GauravSalve_${meeting.id}`;
-    
-    const options = {
-      roomName: roomName,
-      width: "100%",
-      height: "100%",
-      parentNode: jitsiCont || gridEl,
-      userInfo: {
-        displayName: loggedIn
-      },
-      configOverwrite: {
-        startWithAudioMuted: false,
-        startWithVideoMuted: !stream,
-        disableDeepLinking: true, // Bypass mobile Jitsi app installation banners to join inline
-        prejoinPageEnabled: false, // Bypass prejoin page
-      }
-    };
-    
-    activeJitsiAPIInstance = new JitsiMeetExternalAPI(domain, options);
-    
-    // If user clicks Hangup/Leave inside the Jitsi frame, close the modal automatically
-    activeJitsiAPIInstance.addListener("videoConferenceLeft", () => {
-      exitLiveMeetingRoom();
-    });
-    
-    // Bind API listeners to update button active status
-    activeJitsiAPIInstance.addListener("audioMuteStatusChanged", (data) => {
-      const micBtn = document.getElementById("btn-meet-mic");
-      activeMeetingSession.isMuted = data.muted;
-      if (micBtn) micBtn.classList.toggle("muted", data.muted);
-    });
-    
-    activeJitsiAPIInstance.addListener("videoMuteStatusChanged", (data) => {
-      const videoBtn = document.getElementById("btn-meet-video");
-      activeMeetingSession.isCamOff = data.muted;
-      if (videoBtn) videoBtn.classList.toggle("muted", data.muted);
-    });
     
   } else {
     // Show standard grid, hide Jitsi container
