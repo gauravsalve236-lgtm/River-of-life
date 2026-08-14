@@ -410,8 +410,8 @@ function applyStylesFromState() {
    ========================================================================== */
 function initRouting() {
   const handleHashChange = () => {
-    const rawHash = window.location.hash || "#/home";
-    const cleanRoute = rawHash.replace("#/", "").split("?")[0].split("/")[0] || "home";
+    const hash = window.location.hash || "#/home";
+    const route = hash.replace("#/", "");
     
     // Hide all view panels
     document.querySelectorAll(".app-view").forEach(view => {
@@ -423,7 +423,7 @@ function initRouting() {
     document.querySelectorAll(".nav-item").forEach(item => item.classList.remove("active"));
     document.querySelectorAll(".tab-btn").forEach(item => item.classList.remove("active"));
     
-    const viewId = `view-${cleanRoute}`;
+    const viewId = `view-${route}`;
     const targetView = document.getElementById(viewId);
     if (targetView) {
       targetView.classList.add("active");
@@ -436,30 +436,22 @@ function initRouting() {
       }
       
       // Highlight sidebar & bottom nav items
-      document.querySelectorAll(`.nav-item[data-tab="${cleanRoute}"]`).forEach(btn => btn.classList.add("active"));
-      document.querySelectorAll(`.tab-btn[data-tab="${cleanRoute}"]`).forEach(btn => btn.classList.add("active"));
+      document.querySelectorAll(`.nav-item[data-tab="${route}"]`).forEach(btn => btn.classList.add("active"));
+      document.querySelectorAll(`.tab-btn[data-tab="${route}"]`).forEach(btn => btn.classList.add("active"));
       
-      adjustHeaderForRoute(cleanRoute);
+      adjustHeaderForRoute(route);
       
       // Reload specific data lists on tab changes
-      if (cleanRoute === "you") {
+      if (route === "you") {
         renderYouProfile();
-      } else if (cleanRoute === "home") {
+      } else if (route === "home") {
         renderDailyDevotion();
-      } else if (cleanRoute === "plans") {
+      } else if (route === "plans") {
         renderReadingPlansTab();
-      } else if (cleanRoute === "prayers") {
+      } else if (route === "prayers") {
         renderPrayersScreen();
-      } else if (cleanRoute === "meetings") {
+      } else if (route === "meetings") {
         renderMeetingsDashboard();
-      }
-    } else {
-      // Default fallback to home if route is unmapped
-      const homeView = document.getElementById("view-home");
-      if (homeView) {
-        homeView.classList.add("active");
-        homeView.style.setProperty("display", "block", "important");
-        adjustHeaderForRoute("home");
       }
     }
   };
@@ -469,19 +461,16 @@ function initRouting() {
   
   // Click bindings for side/bottom tabs navigation
   document.querySelectorAll(".nav-item").forEach(item => {
-    item.addEventListener("click", (e) => {
-      const tab = item.dataset.tab || item.getAttribute("data-tab");
-      if (tab) window.location.hash = `#/${tab}`;
+    item.addEventListener("click", () => {
+      window.location.hash = `#/${item.dataset.tab}`;
     });
   });
   document.querySelectorAll(".tab-btn").forEach(item => {
-    item.addEventListener("click", (e) => {
-      const tab = item.dataset.tab || item.getAttribute("data-tab");
-      if (tab) window.location.hash = `#/${tab}`;
+    item.addEventListener("click", () => {
+      window.location.hash = `#/${item.dataset.tab}`;
     });
   });
 }
-
 
 function adjustHeaderForRoute(route) {
   const readerCtrls = document.getElementById("nav-reader-controls");
@@ -5661,88 +5650,37 @@ const DEVOTIONAL_DB = {
   }
 };
 
-function saveMeetingsToStorage(meetings) {
+function getMeetingsFromStorage() {
   try {
-    localStorage.setItem("river_of_life_meetings", JSON.stringify(meetings));
-  } catch (e) {
-    console.error("Error saving meetings to storage:", e);
-  }
-}
-
-// Global Real-time Meeting Scheduling Sync Engine
-function syncGlobalCreatedMeeting(newMeeting) {
-  fetch("https://ntfy.sh/RiverOfLife_GauravSalve_global_meetings", {
-    method: "POST",
-    headers: { "Title": "NEW_MEETING_SCHEDULED" },
-    body: JSON.stringify(newMeeting)
-  }).catch(e => console.warn("Global meeting sync error:", e));
-}
-
-let globalMeetingsEventSource = null;
-
-function subscribeToGlobalMeetingsSync() {
-  if (globalMeetingsEventSource) return;
-
-  try {
-    globalMeetingsEventSource = new EventSource("https://ntfy.sh/RiverOfLife_GauravSalve_global_meetings/sse");
-    globalMeetingsEventSource.onmessage = (event) => {
-      try {
-        const payload = JSON.parse(event.data);
-        if (payload.message) {
-          const m = JSON.parse(payload.message);
-          if (m && m.id && m.title) {
-            addOrUpdateMeetingInStorage(m);
-            renderMeetingsDashboard();
-          }
+    let meetings = JSON.parse(localStorage.getItem("river_of_life_meetings"));
+    
+    if (!meetings) {
+      const today = new Date();
+      const formatDate = (d) => d.toISOString().split('T')[0];
+      
+      meetings = [
+        {
+          id: "meeting_1",
+          title: "Friday Family Prayer / शुक्रवारची कौटुंबिक प्रार्थना",
+          description: "Live family prayer, praise, worship and Marathi scripture study.",
+          host: "Pastor John",
+          date: formatDate(today),
+          time: "20:00",
+          duration: "60",
+          repeat: "weekly",
+          visibility: "public",
+          status: "live",
+          createdAt: Date.now()
         }
-      } catch (e) {}
-    };
-  } catch (e) {
-    console.warn("Global meeting SSE subscribe error:", e);
-  }
-}
-
-// Fetch recently created meetings from cloud cache on app load
-async function fetchGlobalMeetingsCloud() {
-  try {
-    const res = await fetch("https://ntfy.sh/RiverOfLife_GauravSalve_global_meetings/json?poll=1");
-    if (!res.ok) return;
-    const text = await res.text();
-    const lines = text.trim().split("\n");
-    lines.forEach(line => {
-      try {
-        const item = JSON.parse(line);
-        if (item.message) {
-          const m = JSON.parse(item.message);
-          if (m && m.id && m.title) {
-            addOrUpdateMeetingInStorage(m);
-          }
-        }
-      } catch (e) {}
-    });
-    renderMeetingsDashboard();
-  } catch (e) {
-    console.warn("Fetch global meetings cloud error:", e);
-  }
-}
-
-function addOrUpdateMeetingInStorage(newMeeting) {
-  let meetings = getMeetingsFromStorage();
-  const exists = meetings.some(x => x.id === newMeeting.id);
-  if (!exists) {
-    meetings.unshift(newMeeting);
-    saveMeetingsToStorage(meetings);
-  } else {
-    // Update existing meeting
-    const idx = meetings.findIndex(x => x.id === newMeeting.id);
-    if (idx !== -1) {
-      meetings[idx] = newMeeting;
-      saveMeetingsToStorage(meetings);
+      ];
+      localStorage.setItem("river_of_life_meetings", JSON.stringify(meetings));
     }
+    return meetings;
+  } catch (e) {
+    console.error("Error loading meetings DB:", e);
+    return [];
   }
 }
-
-
 
 function initPersonalizedDevotionals() {
   document.querySelectorAll(".devo-topic-pill").forEach(pill => {
@@ -6108,12 +6046,8 @@ function initMeetings() {
   // Bind meeting toolbar clicks
   setupMeetingRoomControls();
 
-  // Subscribe & Fetch real-time meeting scheduling sync across all devices
-  subscribeToGlobalMeetingsSync();
-  fetchGlobalMeetingsCloud();
-
+  // Initial dashboard load
   renderMeetingsDashboard();
-
 }
 
 // Populate Hosts, Co-Hosts, and Invitees in Schedule Drawer
@@ -6207,12 +6141,8 @@ function createNewMeeting() {
   meetings.unshift(newMeeting);
   saveMeetingsToStorage(meetings);
 
-  // Broadcast scheduled meeting to all devices over global cloud sync channel
-  syncGlobalCreatedMeeting(newMeeting);
-
-  showToast("Meeting Scheduled Successfully & Synced to All Devices!");
+  showToast("Meeting Scheduled Successfully!");
   closeAllDrawers();
-
   
   // Reset form
   document.getElementById("schedule-meeting-form").reset();
@@ -6492,39 +6422,26 @@ function generateICSFile(meeting) {
   showToast("Calendar File (.ics) downloaded!");
 }
 
-// Trigger Joining Flow (Instant Launch)
+// Trigger Joining Flow (Camera preview checks)
 function triggerJoinMeetingFlow(meetingId) {
   const meetings = getMeetingsFromStorage();
-  let m = meetings.find(x => x.id === meetingId);
-  if (!m) {
-    // Universal fallback meeting object if ID was created on another device
-    m = {
-      id: meetingId,
-      title: "Live Family Prayer / कौटुंबिक प्रार्थना",
-      host: state.currentUser ? state.currentUser.username : "Gaurav Salve",
-      status: "live"
-    };
-  }
+  const m = meetings.find(x => x.id === meetingId);
+  if (!m) return;
 
-  showToast("Entering Live Fellowship Room...");
-  
-  // Launch meeting room modal IMMEDIATELY for zero delay!
-  launchLiveMeetingRoom(m, null);
-
-  // Request camera & audio stream in background
-  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-      .then(stream => {
-        const videoEl = document.getElementById("meeting-local-video");
-        if (videoEl && stream) {
-          videoEl.srcObject = stream;
-          videoEl.style.display = "block";
-        }
-      })
-      .catch(err => console.warn("Background media request:", err));
-  }
+  // Real or simulated meeting, we request permissions and launch it inside the app modal!
+  showToast("Requesting camera and microphone permissions...");
+  navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+    .then(stream => {
+      // Permission granted, launch meeting inside app modal
+      launchLiveMeetingRoom(m, stream);
+    })
+    .catch(err => {
+      console.warn("Media permissions denied:", err);
+      // Fallback: Proceed with mocked feeds if they deny camera (highly resilient)
+      showToast("Media permissions denied. Joining in listen-only/avatar mode.");
+      launchLiveMeetingRoom(m, null);
+    });
 }
-
 
 // Fullscreen Live Meeting Room Entry
 function launchLiveMeetingRoom(meeting, stream) {
@@ -6591,11 +6508,8 @@ function launchLiveMeetingRoom(meeting, stream) {
   const gridEl = document.getElementById("meeting-video-grid");
   const jitsiCont = document.getElementById("meeting-jitsi-container");
 
-  // PURGE any mock participant cards completely from DOM
-  if (gridEl) {
-    gridEl.innerHTML = ""; // Complete wipe of static/mock tiles
-    gridEl.style.display = "none";
-  }
+  // Hide static grid and show live WebRTC video room
+  if (gridEl) gridEl.style.display = "none";
   
   if (jitsiCont) {
     jitsiCont.style.display = "block";
@@ -6608,7 +6522,7 @@ function launchLiveMeetingRoom(meeting, stream) {
     jitsiCont.style.height = "calc(100% - 50px - 72px - env(safe-area-inset-bottom, 20px))";
     jitsiCont.style.zIndex = "5";
 
-    showToast("Connecting live call for friends & family...");
+    showToast("Connecting to live video call for friends & family...");
 
     const roomUrl = `https://p2p.mirotalk.com/join/RiverOfLife_GauravSalve_${meeting.id}?name=${encodeURIComponent(loggedIn)}`;
     jitsiCont.innerHTML = `
@@ -6632,7 +6546,6 @@ function launchLiveMeetingRoom(meeting, stream) {
   };
   document.addEventListener("touchstart", autoAudioUnlocker, { once: true });
   document.addEventListener("click", autoAudioUnlocker, { once: true });
-
 
 
 
@@ -7633,9 +7546,66 @@ function renderCallParticipantsList() {
   `;
   container.appendChild(localRow);
 
-  const totalCount = document.getElementById("meeting-participants-count");
-  if (totalCount) totalCount.textContent = "1";
+  // Add mock participants if sandbox mode
+  if (!activeJitsiAPIInstance) {
+    const mocks = [
+      { name: "Pastor John", avatar: "P", role: "Host" },
+      { name: "Esther (Youth Leader)", avatar: "E", role: "Co-Host" },
+      { name: "Samuel Salve", avatar: "S", role: "Member" }
+    ];
 
+    mocks.forEach(m => {
+      const row = document.createElement("div");
+      row.style.display = "flex";
+      row.style.justifyContent = "space-between";
+      row.style.alignItems = "center";
+      row.style.padding = "8px";
+      row.style.borderBottom = "1px solid var(--border)";
+      
+      // Moderator actions displayed if current user is Host
+      const modActions = activeMeetingSession && activeMeetingSession.isHost ? `
+        <select class="dropdown-selector meet-moderation-dropdown" data-name="${m.name}" style="padding: 2px 4px; font-size: 10px;">
+          <option value="none">Actions</option>
+          <option value="mute">Mute Mic</option>
+          <option value="cohost">Make Co-Host</option>
+          <option value="remove">Remove User</option>
+        </select>
+      ` : `<span style="font-size: 12px; color: var(--text-muted);">${m.role}</span>`;
+
+      row.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div class="avatar-nav-mini" style="width: 28px; height: 28px; font-size: 10px; background: var(--primary); color: #000;">${m.avatar}</div>
+          <span style="font-size: 13px; font-weight: 500; color: var(--text);">${m.name}</span>
+        </div>
+        ${modActions}
+      `;
+
+      // Event actions
+      const select = row.querySelector(".meet-moderation-dropdown");
+      if (select) {
+        select.addEventListener("change", (e) => {
+          const act = e.target.value;
+          if (act === "mute") {
+            showToast(`Moderator muted ${m.name}`);
+            appendMeetingChatMessage("SYSTEM", `🔇 Moderator muted ${m.name}'s microphone`, false);
+          } else if (act === "cohost") {
+            showToast(`${m.name} is now Co-Host`);
+            appendMeetingChatMessage("SYSTEM", `👑 ${m.name} has been assigned Co-Host role`, false);
+          } else if (act === "remove") {
+            showToast(`Removed ${m.name} from meeting.`);
+            appendMeetingChatMessage("SYSTEM", `❌ ${m.name} was removed from meeting by moderator`, false);
+            row.remove();
+          }
+          select.value = "none";
+        });
+      }
+
+      container.appendChild(row);
+    });
+
+    const totalCount = document.getElementById("meeting-participants-count");
+    if (totalCount) totalCount.textContent = "4";
+  }
 }
 
 // Populate dropdown selectors in Bible synchronizer drawer

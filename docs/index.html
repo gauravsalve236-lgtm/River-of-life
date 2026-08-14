@@ -833,14 +833,13 @@
               </button>
             </div>
 
-            <!-- Meetings Subtabs Row (Clean Horizontal Scroll Pill Bar) -->
-            <div class="meetings-subtab-bar" style="margin-bottom: 20px; display: flex; gap: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 6px;">
-              <button class="meeting-subtab-pill active" data-meetings-subtab="live">🔴 LIVE NOW / थेट सुरू</button>
-              <button class="meeting-subtab-pill" data-meetings-subtab="upcoming">📅 UPCOMING / आगामी</button>
-              <button class="meeting-subtab-pill" data-meetings-subtab="my">👤 MY MEETINGS / माझ्या सभा</button>
-              <button class="meeting-subtab-pill" data-meetings-subtab="past">📜 PAST / मागील सभा</button>
+            <!-- Meetings Subtabs Row (Slide Segmented Control style) -->
+            <div class="plans-subnav-row" style="margin-bottom: 20px; display: flex; gap: 4px; overflow-x: auto;">
+              <button class="plans-subnav-btn active" data-meetings-subtab="live" style="flex: 1; min-width: 100px; white-space: nowrap;">LIVE NOW / थेट सुरू</button>
+              <button class="plans-subnav-btn" data-meetings-subtab="upcoming" style="flex: 1; min-width: 100px; white-space: nowrap;">UPCOMING / आगामी</button>
+              <button class="plans-subnav-btn" data-meetings-subtab="my" style="flex: 1; min-width: 110px; white-space: nowrap;">MY MEETINGS / माझ्या सभा</button>
+              <button class="plans-subnav-btn" data-meetings-subtab="past" style="flex: 1; min-width: 90px; white-space: nowrap;">PAST / मागील सभा</button>
             </div>
-
 
             <!-- Panel 1: Live Now -->
             <div id="meetings-subtab-live" class="meetings-subtab-panel active">
