@@ -7534,7 +7534,7 @@ function syncSharedBiblePassage(book, chapter, verse, translation) {
   }
 }
 
-// Sync Worship YouTube player embed inside call with split-screen layout
+// Sync Worship YouTube player embed inside call with full-screen focus layout
 function syncSharedWorshipVideo(youtubeUrl) {
   const container = document.getElementById("meeting-shared-content-area");
   const worshipBox = document.getElementById("worship-video-frame-container");
@@ -7557,12 +7557,18 @@ function syncSharedWorshipVideo(youtubeUrl) {
   // Stop any active background music
   stopWorshipTrack();
 
+  // Hide the camera video streams entirely to focus 100% on the praise song!
+  jitsiCont.style.display = "none";
+
   container.style.display = "block";
+  container.style.height = "calc(100% - 50px)";
+  container.style.top = "50px";
+  
   worshipBox.style.display = "block";
   if (bibleBox) bibleBox.style.display = "none";
   if (screenshareBox) screenshareBox.style.display = "none";
 
-  // Embed player inside the split screen
+  // Embed player inside the full screen area
   const player = document.getElementById("worship-youtube-player");
   if (player) {
     player.innerHTML = `
@@ -7576,13 +7582,9 @@ function syncSharedWorshipVideo(youtubeUrl) {
   }
 
   showToast("Playing shared worship video for all participants.");
-
-  // Resize meeting iframe to top split view
-  jitsiCont.style.height = "calc(55% - 50px)";
-  jitsiCont.style.top = "calc(45% + 50px)";
 }
 
-// Hide shared worship video and restore screen
+// Hide shared worship video and restore camera screen
 function hideSharedWorshipVideo() {
   const container = document.getElementById("meeting-shared-content-area");
   const worshipBox = document.getElementById("worship-video-frame-container");
@@ -7595,7 +7597,10 @@ function hideSharedWorshipVideo() {
   }
   
   if (container) container.style.display = "none";
+  
+  // Restore user camera screens back to full display
   if (jitsiCont) {
+    jitsiCont.style.display = "block";
     jitsiCont.style.height = "calc(100% - 50px)";
     jitsiCont.style.top = "50px";
   }
