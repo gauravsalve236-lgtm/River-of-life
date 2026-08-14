@@ -2462,10 +2462,12 @@ body {
   grid-template-columns: repeat(6, 1fr) !important;
   justify-items: center !important;
   align-items: center !important;
-  z-index: 1000 !important;
+  z-index: 10000 !important;
+  pointer-events: auto !important;
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08) !important;
   box-sizing: border-box !important;
 }
+
 
 .mobile-bottom-tabs .tab-btn {
   display: flex !important;

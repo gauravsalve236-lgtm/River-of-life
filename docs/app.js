@@ -6481,26 +6481,39 @@ function generateICSFile(meeting) {
   showToast("Calendar File (.ics) downloaded!");
 }
 
-// Trigger Joining Flow (Camera preview checks)
+// Trigger Joining Flow (Instant Launch)
 function triggerJoinMeetingFlow(meetingId) {
   const meetings = getMeetingsFromStorage();
-  const m = meetings.find(x => x.id === meetingId);
-  if (!m) return;
+  let m = meetings.find(x => x.id === meetingId);
+  if (!m) {
+    // Universal fallback meeting object if ID was created on another device
+    m = {
+      id: meetingId,
+      title: "Live Family Prayer / कौटुंबिक प्रार्थना",
+      host: state.currentUser ? state.currentUser.username : "Gaurav Salve",
+      status: "live"
+    };
+  }
 
-  // Real or simulated meeting, we request permissions and launch it inside the app modal!
-  showToast("Requesting camera and microphone permissions...");
-  navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-    .then(stream => {
-      // Permission granted, launch meeting inside app modal
-      launchLiveMeetingRoom(m, stream);
-    })
-    .catch(err => {
-      console.warn("Media permissions denied:", err);
-      // Fallback: Proceed with mocked feeds if they deny camera (highly resilient)
-      showToast("Media permissions denied. Joining in listen-only/avatar mode.");
-      launchLiveMeetingRoom(m, null);
-    });
+  showToast("Entering Live Fellowship Room...");
+  
+  // Launch meeting room modal IMMEDIATELY for zero delay!
+  launchLiveMeetingRoom(m, null);
+
+  // Request camera & audio stream in background
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+      .then(stream => {
+        const videoEl = document.getElementById("meeting-local-video");
+        if (videoEl && stream) {
+          videoEl.srcObject = stream;
+          videoEl.style.display = "block";
+        }
+      })
+      .catch(err => console.warn("Background media request:", err));
+  }
 }
+
 
 // Fullscreen Live Meeting Room Entry
 function launchLiveMeetingRoom(meeting, stream) {
