@@ -6504,45 +6504,57 @@ function launchLiveMeetingRoom(meeting, stream) {
     }
   }
 
-  // Clean Jitsi call iframe or render Mock feeds
+  // Clean & Render 2x2 Responsive Video Call Grid View for all participants
   const gridEl = document.getElementById("meeting-video-grid");
-  
-  // Remove any previous Jitsi or Mock panels
-  gridEl.querySelectorAll(".video-cell-mock").forEach(el => el.remove());
-  if (activeJitsiAPIInstance) {
-    activeJitsiAPIInstance.dispose();
-    activeJitsiAPIInstance = null;
-  }
-
-  // Setup synchronous Bible book dropdown selections
-  populateMeetingBibleSelector();
-
-  // Real-world multiuser meetings load MiroTalk P2P WebRTC
-  showToast("Connecting to live video call...");
-  
-  // Hide standard local stream cell & grid, show MiroTalk container
-  document.getElementById("video-cell-local").style.display = "none";
-  document.getElementById("meeting-video-grid").style.display = "none";
-  
   const jitsiCont = document.getElementById("meeting-jitsi-container");
-  if (jitsiCont) {
-    jitsiCont.style.display = "block";
-    // Embed MiroTalk P2P WebRTC room inside the app
-    const roomUrl = `https://p2p.mirotalk.com/join/RiverOfLife_GauravSalve_${meeting.id}?name=${encodeURIComponent(loggedIn)}`;
-    jitsiCont.innerHTML = `
-      <iframe 
-        src="${roomUrl}" 
-        width="100%" 
-        height="100%" 
-        allow="camera; microphone; speaker-selection; display-capture; fullscreen; autoplay; picture-in-picture;" 
-        style="border: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; background: #090d16;">
-      </iframe>
-    `;
+
+  if (gridEl) {
+    gridEl.style.display = "grid";
+    gridEl.style.cssText = "display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; padding: 10px !important; width: 100%; height: 100%; background: #090d16;";
+    
+    const localCell = document.getElementById("video-cell-local");
+    if (localCell) localCell.style.display = "flex";
+
+    // Clear previous mock tiles
+    gridEl.querySelectorAll(".video-cell-mock").forEach(el => el.remove());
+
+    // Populate side-by-side 2x2 Grid Participants
+    const mockMembers = [
+      { name: "Pastor Gaurav", role: "Host", avatar: "G", color: "#3b82f6" },
+      { name: "Sister Priya", role: "Co-Host", avatar: "P", color: "#ec4899" },
+      { name: "Brother Rahul", role: "Member", avatar: "R", color: "#10b981" }
+    ];
+
+    mockMembers.forEach(m => {
+      const cell = document.createElement("div");
+      cell.className = "video-cell video-cell-mock";
+      cell.style.cssText = "position: relative; background: #1a2035; border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; min-height: 130px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: 1.5px solid rgba(255,255,255,0.05);";
+      cell.innerHTML = `
+        <div class="video-cell-avatar" style="font-size: 28px; font-weight: 800; width: 56px; height: 56px; border-radius: 50%; background: ${m.color}; color: #fff; display: flex; align-items: center; justify-content: center;">${m.avatar}</div>
+        <div class="video-cell-label" style="position: absolute; bottom: 8px; left: 8px; font-size: 11px; font-weight: 700; background: rgba(0,0,0,0.65); backdrop-filter: blur(4px); padding: 4px 8px; border-radius: 6px; display: flex; align-items: center; gap: 6px; color: #fff;">
+          <span>${m.name} (${m.role})</span>
+          <span>🎙️</span>
+        </div>
+      `;
+      gridEl.appendChild(cell);
+    });
   }
-  
-  // Hide bottom custom controls toolbar to prevent overlap with MiroTalk's controls
+
+  if (jitsiCont) {
+    jitsiCont.style.display = "none";
+  }
+
+  // Ensure bottom custom toolbar is visible
   const customToolbar = document.querySelector(".meeting-room-toolbar");
-  if (customToolbar) customToolbar.style.display = "none";
+  if (customToolbar) customToolbar.style.display = "flex";
+
+  // Attach global screen tap listener inside meeting room to unlock audio on mobile browsers
+  const autoAudioUnlocker = () => {
+    unlockParticipantMeetingAudio();
+  };
+  document.addEventListener("touchstart", autoAudioUnlocker, { once: true });
+  document.addEventListener("click", autoAudioUnlocker, { once: true });
+
 
       
   // Pre-seed some chat messages
