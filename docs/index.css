@@ -2370,7 +2370,23 @@ body {
   overflow: hidden;
   transition: opacity 0.3s ease;
   background: #090d16;
+  display: none !important;
+  pointer-events: none !important;
 }
+
+.modal-overlay-fullscreen.active,
+#modal-live-meeting.active {
+  display: block !important;
+  pointer-events: auto !important;
+}
+
+.drawer-overlay:not(.active),
+.modal-overlay:not(.active),
+.modal-overlay-fullscreen:not(.active) {
+  display: none !important;
+  pointer-events: none !important;
+}
+
 
 .meeting-room-container {
   height: 100vh;
