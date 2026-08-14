@@ -1,5 +1,6 @@
 import UIKit
 import Capacitor
+import AVFoundation
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -7,9 +8,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        // Configure iOS AVAudioSession: Category = playback, Options = mixWithOthers, allowBluetooth, defaultToSpeaker
+        do {
+            let audioSession = AVAudioSession.sharedInstance()
+            try audioSession.setCategory(
+                .playback,
+                mode: .moviePlayback,
+                options: [.mixWithOthers, .allowBluetooth, .allowBluetoothA2DP, .defaultToSpeaker]
+            )
+            try audioSession.setActive(true)
+            print("[AUDIO_SESSION] iOS AVAudioSession configured: category=.playback, options=[.mixWithOthers, .allowBluetooth]")
+        } catch {
+            print("[AUDIO_SESSION] Error setting AVAudioSession category: \(error)")
+        }
         return true
     }
+
 
     func applicationWillResignActive(_ application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.

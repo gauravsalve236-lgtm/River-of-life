@@ -7941,8 +7941,22 @@ let capturedAudioMediaStream = null;
 let audioSharingContext = null;
 let audioSharingDestination = null;
 
+// Global AudioSession Configuration (System-level media stream with mixWithOthers)
+function configureGlobalAudioSession() {
+  if ('audioSession' in navigator) {
+    try {
+      navigator.audioSession.type = 'playback';
+      console.log("[AUDIO_SESSION] Web Navigator audioSession configured: category='playback'");
+    } catch (e) {
+      console.warn("[AUDIO_SESSION] Web audioSession type setting warning:", e);
+    }
+  }
+}
+configureGlobalAudioSession();
+
 // Diagnostic Logger for Admin Audio Sharing Debug Panel
 function logAudioDebug(msgText, append = true) {
+
   console.log("[AUDIO_DEBUG]", msgText);
   const panel = document.getElementById("admin-audio-debug-panel");
   const content = document.getElementById("admin-audio-debug-content");
