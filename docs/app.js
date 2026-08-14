@@ -5650,44 +5650,87 @@ const DEVOTIONAL_DB = {
   }
 };
 
-function getMeetingsFromStorage() {
+function saveMeetingsToStorage(meetings) {
   try {
-    let meetings = JSON.parse(localStorage.getItem("river_of_life_meetings"));
-    const loggedIn = state.currentUser ? state.currentUser.username : "Gaurav Salve";
-
-    // Auto-wipe stale legacy mock meetings if host is Pastor John or meeting_1
-    if (meetings && (JSON.stringify(meetings).includes("Pastor John") || JSON.stringify(meetings).includes("meeting_1"))) {
-      localStorage.removeItem("river_of_life_meetings");
-      meetings = null;
-    }
-    
-    if (!meetings) {
-      const today = new Date();
-      const formatDate = (d) => d.toISOString().split('T')[0];
-      
-      meetings = [
-        {
-          id: "RiverOfLife_Global_Fellowship",
-          title: "Live Family Prayer / कौटुंबिक प्रार्थना",
-          description: "Live family prayer fellowship room for friends & family.",
-          host: loggedIn,
-          date: formatDate(today),
-          time: "20:00",
-          duration: "60",
-          repeat: "daily",
-          visibility: "public",
-          status: "live",
-          createdAt: Date.now()
-        }
-      ];
-      localStorage.setItem("river_of_life_meetings", JSON.stringify(meetings));
-    }
-    return meetings;
+    localStorage.setItem("river_of_life_meetings", JSON.stringify(meetings));
   } catch (e) {
-    console.error("Error loading meetings DB:", e);
-    return [];
+    console.error("Error saving meetings to storage:", e);
   }
 }
+
+// Global Real-time Meeting Scheduling Sync Engine
+function syncGlobalCreatedMeeting(newMeeting) {
+  fetch("https://ntfy.sh/RiverOfLife_GauravSalve_global_meetings", {
+    method: "POST",
+    headers: { "Title": "NEW_MEETING_SCHEDULED" },
+    body: JSON.stringify(newMeeting)
+  }).catch(e => console.warn("Global meeting sync error:", e));
+}
+
+let globalMeetingsEventSource = null;
+
+function subscribeToGlobalMeetingsSync() {
+  if (globalMeetingsEventSource) return;
+
+  try {
+    globalMeetingsEventSource = new EventSource("https://ntfy.sh/RiverOfLife_GauravSalve_global_meetings/sse");
+    globalMeetingsEventSource.onmessage = (event) => {
+      try {
+        const payload = JSON.parse(event.data);
+        if (payload.message) {
+          const m = JSON.parse(payload.message);
+          if (m && m.id && m.title) {
+            addOrUpdateMeetingInStorage(m);
+            renderMeetingsDashboard();
+          }
+        }
+      } catch (e) {}
+    };
+  } catch (e) {
+    console.warn("Global meeting SSE subscribe error:", e);
+  }
+}
+
+// Fetch recently created meetings from cloud cache on app load
+async function fetchGlobalMeetingsCloud() {
+  try {
+    const res = await fetch("https://ntfy.sh/RiverOfLife_GauravSalve_global_meetings/json?poll=1");
+    if (!res.ok) return;
+    const text = await res.text();
+    const lines = text.trim().split("\n");
+    lines.forEach(line => {
+      try {
+        const item = JSON.parse(line);
+        if (item.message) {
+          const m = JSON.parse(item.message);
+          if (m && m.id && m.title) {
+            addOrUpdateMeetingInStorage(m);
+          }
+        }
+      } catch (e) {}
+    });
+    renderMeetingsDashboard();
+  } catch (e) {
+    console.warn("Fetch global meetings cloud error:", e);
+  }
+}
+
+function addOrUpdateMeetingInStorage(newMeeting) {
+  let meetings = getMeetingsFromStorage();
+  const exists = meetings.some(x => x.id === newMeeting.id);
+  if (!exists) {
+    meetings.unshift(newMeeting);
+    saveMeetingsToStorage(meetings);
+  } else {
+    // Update existing meeting
+    const idx = meetings.findIndex(x => x.id === newMeeting.id);
+    if (idx !== -1) {
+      meetings[idx] = newMeeting;
+      saveMeetingsToStorage(meetings);
+    }
+  }
+}
+
 
 
 function initPersonalizedDevotionals() {
@@ -6054,8 +6097,12 @@ function initMeetings() {
   // Bind meeting toolbar clicks
   setupMeetingRoomControls();
 
-  // Initial dashboard load
+  // Subscribe & Fetch real-time meeting scheduling sync across all devices
+  subscribeToGlobalMeetingsSync();
+  fetchGlobalMeetingsCloud();
+
   renderMeetingsDashboard();
+
 }
 
 // Populate Hosts, Co-Hosts, and Invitees in Schedule Drawer
@@ -6149,8 +6196,12 @@ function createNewMeeting() {
   meetings.unshift(newMeeting);
   saveMeetingsToStorage(meetings);
 
-  showToast("Meeting Scheduled Successfully!");
+  // Broadcast scheduled meeting to all devices over global cloud sync channel
+  syncGlobalCreatedMeeting(newMeeting);
+
+  showToast("Meeting Scheduled Successfully & Synced to All Devices!");
   closeAllDrawers();
+
   
   // Reset form
   document.getElementById("schedule-meeting-form").reset();
