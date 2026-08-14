@@ -21,7 +21,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- Main Stylesheet -->
-  <link rel="stylesheet" href="index.css?v=1000">
+  <link rel="stylesheet" href="index.css?v=1100">
 </head>
 <body>
   
@@ -1987,79 +1987,73 @@
             </div>
           </div>
 
-    <!-- Fullscreen Live Meeting Room Modal (River of Life - Premium Light Fellowship Stage) -->
-    <div id="modal-live-meeting" class="river-light-theme" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; width: 100vw; height: 100vh; background: linear-gradient(180deg, #eef6ff 0%, #f8fafc 100%); color: #0f172a; z-index: 999999; overflow: hidden; font-family: var(--font-ui);">
+    <!-- Fullscreen Live Meeting Room Modal (Lark Mobile Meeting Design - Matching User Screenshots) -->
+    <div id="modal-live-meeting" class="lark-meeting-theme" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; width: 100vw; height: 100vh; background: #f3f4f6; color: #111827; z-index: 999999; overflow: hidden; font-family: var(--font-ui);">
       <div class="meeting-room-container" style="position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; overflow: hidden;">
         
-        <!-- Clean Light Top Header Bar -->
-        <div class="meeting-room-topbar" style="position: absolute; top: 0; left: 0; right: 0; height: 60px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; padding: 0 16px; z-index: 30; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
-          <!-- Left: Logo + App Name + Subtitle + Edit Pencil -->
-          <div style="display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1;">
-            <div style="width: 36px; height: 36px; border-radius: 50%; background: #dbeafe; display: flex; align-items: center; justify-content: center; font-size: 18px; border: 1.5px solid #bfdbfe;">🕊️</div>
-            <div style="display: flex; flex-direction: column; min-width: 0;">
-              <div style="display: flex; align-items: center; gap: 6px;">
-                <span style="font-size: 14px; font-weight: 800; color: #1e3a8a;">River of Life</span>
-                <button onclick="openEditMeetingTitleModal()" style="background: none; border: none; color: #3b82f6; cursor: pointer; padding: 0; font-size: 13px;" title="Rename Meeting">✏️</button>
+        <!-- Lark Top Header Bar (Matching Screenshot 1 & 2) -->
+        <div class="meeting-room-topbar" style="position: absolute; top: 0; left: 0; right: 0; height: 60px; background: #f3f4f6; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; padding: 0 16px; z-index: 30;">
+          
+          <!-- Left: Back Arrow + Meeting Info Dropdown + Duration Timer -->
+          <div style="display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1;">
+            <button onclick="exitLiveMeetingRoom()" style="background: none; border: none; font-size: 20px; color: #111827; cursor: pointer; padding: 0;" title="Back">&lt;</button>
+            <div style="display: flex; flex-direction: column; min-width: 0; cursor: pointer;" onclick="openEditMeetingTitleModal()">
+              <div style="display: flex; align-items: center; gap: 4px;">
+                <span id="meeting-room-title" style="font-size: 15px; font-weight: 700; color: #111827; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;">Meeting Info</span>
+                <span style="font-size: 11px; color: #6b7280;">▾</span>
               </div>
-              <span id="meeting-room-title" style="font-size: 11px; font-weight: 600; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px;">Fellowship - Prayer Meeting</span>
+              <span id="meeting-timer-display" style="font-size: 11px; color: #6b7280; font-weight: 500;">00:37</span>
             </div>
           </div>
 
-          <!-- Right: Live Pill Badge -->
-          <span style="font-size: 11px; background: #dbeafe; color: #2563eb; padding: 4px 10px; border-radius: 14px; font-weight: 700; display: flex; align-items: center; gap: 4px;" id="meeting-live-indicator">
-            <span style="display: inline-block; width: 6px; height: 6px; background: #2563eb; border-radius: 50%; animation: pulseGlow 1s infinite;"></span> • Live
-          </span>
+          <!-- Right: Circular Chat Icon + Red Rounded End Call Button -->
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <button onclick="openMeetingSidebarPanel('chat')" style="width: 36px; height: 36px; border-radius: 50%; background: #ffffff; border: 1px solid #e5e7eb; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #374151; cursor: pointer;" title="Chat">
+              💬
+            </button>
+            <button onclick="exitLiveMeetingRoom()" style="width: 36px; height: 36px; border-radius: 10px; background: #ef4444; border: none; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; box-shadow: 0 2px 6px rgba(239,68,68,0.3);" title="End Call">
+              🔴
+            </button>
+          </div>
         </div>
 
-        <!-- Dedicated Fullscreen Video Stream Container -->
-        <div id="meeting-jitsi-container" style="display: block; position: absolute; top: 60px; left: 0; right: 0; bottom: 85px; width: 100%; height: calc(100% - 145px); background: #f1f5f9; z-index: 10;"></div>
+        <!-- Dedicated Fullscreen Video Stream Container (Lark Rounded Card Stage) -->
+        <div id="meeting-jitsi-container" style="display: block; position: absolute; top: 68px; left: 12px; right: 12px; bottom: 75px; width: calc(100% - 24px); height: calc(100% - 143px); background: #ffffff; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); z-index: 10; border: 1px solid #e5e7eb;"></div>
 
-        <!-- Metallic Glass Floating Bottom Control Dock (Exact Mockup Bar) -->
-        <div class="river-floating-dock" style="position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); width: calc(100% - 24px); max-width: 540px; height: 68px; background: linear-gradient(135deg, rgba(255,255,255,0.92), rgba(226,232,240,0.96)); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: 34px; border: 1.5px solid rgba(255, 255, 255, 0.9); box-shadow: 0 15px 35px rgba(15, 23, 42, 0.15); display: flex; justify-content: space-around; align-items: center; padding: 0 8px; z-index: 2500;">
+        <!-- Lark Fixed Bottom Action Control Bar (Exact 5 Icons from Screenshot 1) -->
+        <div class="lark-bottom-control-bar" style="position: absolute; bottom: 0; left: 0; right: 0; height: 68px; background: #ffffff; border-top: 1px solid #e5e7eb; display: flex; justify-content: space-around; align-items: center; padding: 0 8px; z-index: 2500;">
           
-          <!-- 1. Mute -->
-          <button id="dock-btn-mute" onclick="toggleCameraFeed()" style="background: none; border: none; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; flex: 1;">
-            <div style="width: 38px; height: 38px; border-radius: 50%; background: #3b82f6; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 2px 8px rgba(59,130,246,0.3);">🎙️</div>
-            <span style="font-size: 9.5px; font-weight: 800; color: #334155;">Mute</span>
+          <!-- 1. Mic -->
+          <button id="lark-btn-mic" onclick="toggleCameraFeed()" style="background: none; border: none; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; flex: 1;">
+            <div style="font-size: 20px; color: #ef4444;">🔇</div>
+            <span style="font-size: 10.5px; font-weight: 600; color: #4b5563;">Mic</span>
           </button>
 
-          <!-- 2. Video -->
-          <button id="dock-btn-video" onclick="toggleCameraFeed()" style="background: none; border: none; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; flex: 1;">
-            <div style="width: 38px; height: 38px; border-radius: 50%; background: #3b82f6; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 2px 8px rgba(59,130,246,0.3);">📹</div>
-            <span style="font-size: 9.5px; font-weight: 800; color: #334155;">Video</span>
+          <!-- 2. Camera -->
+          <button id="lark-btn-cam" onclick="toggleCameraFeed()" style="background: none; border: none; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; flex: 1;">
+            <div style="font-size: 20px; color: #ef4444;">📹</div>
+            <span style="font-size: 10.5px; font-weight: 600; color: #4b5563;">Camera</span>
           </button>
 
-          <!-- 3. Participants (7) -->
-          <button onclick="openMeetingSidebarPanel('participants')" style="background: none; border: none; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; flex: 1; position: relative;">
-            <div style="width: 38px; height: 38px; border-radius: 50%; background: #3b82f6; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 2px 8px rgba(59,130,246,0.3); position: relative;">
-              👥
-              <span style="position: absolute; top: -2px; right: -2px; background: #059669; color: #fff; font-size: 8px; font-weight: 800; padding: 1px 4px; border-radius: 8px; border: 1px solid #fff;">+7</span>
+          <!-- 3. Speaker -->
+          <button onclick="showToast('Speaker Output Active / स्पीकर चालू आहे')" style="background: none; border: none; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; flex: 1;">
+            <div style="font-size: 20px; color: #374151;">🔊</div>
+            <span style="font-size: 10.5px; font-weight: 600; color: #4b5563;">Speaker</span>
+          </button>
+
+          <!-- 4. Participants -->
+          <button onclick="openMeetingSidebarPanel('participants')" style="background: none; border: none; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; flex: 1; position: relative;">
+            <div style="font-size: 20px; color: #374151; position: relative;">
+              👤
+              <span style="position: absolute; top: -4px; right: -8px; background: #3b82f6; color: #fff; font-size: 8px; font-weight: 800; padding: 1px 4px; border-radius: 8px;">1</span>
             </div>
-            <span style="font-size: 9.5px; font-weight: 800; color: #334155; white-space: nowrap;">Participants (7)</span>
+            <span style="font-size: 10.5px; font-weight: 600; color: #4b5563;">Participants</span>
           </button>
 
-          <!-- 4. Share Content -->
-          <button onclick="openDrawer('drawer-meet-share-bible')" style="background: none; border: none; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; flex: 1;">
-            <div style="width: 38px; height: 38px; border-radius: 50%; background: #3b82f6; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 2px 8px rgba(59,130,246,0.3);">🖥️</div>
-            <span style="font-size: 9.5px; font-weight: 800; color: #334155; white-space: nowrap;">Share Content</span>
-          </button>
-
-          <!-- 5. Chat -->
-          <button onclick="openMeetingSidebarPanel('chat')" style="background: none; border: none; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; flex: 1;">
-            <div style="width: 38px; height: 38px; border-radius: 50%; background: #3b82f6; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 2px 8px rgba(59,130,246,0.3);">💬</div>
-            <span style="font-size: 9.5px; font-weight: 800; color: #334155;">Chat</span>
-          </button>
-
-          <!-- 6. Pray -->
-          <button onclick="openMeetingSidebarPanel('notes')" style="background: none; border: none; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; flex: 1;">
-            <div style="width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 2px 8px rgba(217,119,6,0.4);">🙏</div>
-            <span style="font-size: 9.5px; font-weight: 800; color: #334155;">Pray</span>
-          </button>
-
-          <!-- 7. Leave -->
-          <button onclick="exitLiveMeetingRoom()" style="background: none; border: none; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; flex: 1;">
-            <div style="width: 38px; height: 38px; border-radius: 50%; background: #ef4444; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 2px 8px rgba(239,68,68,0.4);">🔴</div>
-            <span style="font-size: 9.5px; font-weight: 800; color: #dc2626;">Leave</span>
+          <!-- 5. More (Triggers Lark Bottom Sheet from Screenshot 2!) -->
+          <button onclick="openDrawer('drawer-lark-more')" style="background: none; border: none; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; flex: 1;">
+            <div style="font-size: 20px; color: #374151;">•••</div>
+            <span style="font-size: 10.5px; font-weight: 600; color: #4b5563;">More</span>
           </button>
 
         </div>8px; left: 8px; font-size: 11px; font-weight: 700; background: rgba(15, 23, 42, 0.85); color: #f8fafc; padding: 4px 10px; border-radius: 6px; display: flex; align-items: center; gap: 6px; border: 1px solid #334155;">
@@ -2514,10 +2508,82 @@
           <button onclick="saveEditedMeetingTitle()" class="btn-primary-block" style="flex: 1; margin: 0; padding: 10px; border-radius: 8px; font-weight: 800; background: #3b82f6; color: #fff; border: none; cursor: pointer;">Save / सेव्ह करा</button>
         </div>
       </div>
+    <!-- Lark "More" Options Bottom Sheet Drawer (Matching Screenshot 2) -->
+    <div id="drawer-lark-more" class="drawer-overlay" style="z-index: 3500;">
+      <div class="ios-drawer-sheet" style="background: #f8fafc; border-radius: 24px 24px 0 0; padding: 20px; box-shadow: 0 -10px 30px rgba(0,0,0,0.15);">
+        <div class="grabber-bar" style="margin-bottom: 16px;"></div>
+        
+        <!-- 8 Rounded Square Icon Grid (Matching Screenshot 2 layout) -->
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;">
+          
+          <!-- Share -->
+          <button onclick="openDrawer('drawer-meet-share-bible')" style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 12px 6px; display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
+            <div style="width: 36px; height: 36px; border-radius: 10px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; font-size: 18px;">📤</div>
+            <span style="font-size: 11px; font-weight: 600; color: #374151;">Share</span>
+          </button>
+
+          <!-- Record -->
+          <button onclick="showToast('Recording Started / रेकॉर्डिंग सुरू झाले')" style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 12px 6px; display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
+            <div style="width: 36px; height: 36px; border-radius: 10px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; font-size: 18px;">⭕</div>
+            <span style="font-size: 11px; font-weight: 600; color: #374151;">Record</span>
+          </button>
+
+          <!-- Subtitles / Lyrics -->
+          <button onclick="showToast('Subtitles Enabled / उपशीर्षके चालू केली')" style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 12px 6px; display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; position: relative; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
+            <span style="position: absolute; top: 4px; right: 4px; background: #fef3c7; color: #92400e; font-size: 8px; font-weight: 800; padding: 1px 4px; border-radius: 4px;">VAS</span>
+            <div style="width: 36px; height: 36px; border-radius: 10px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800; color: #374151;">CC</div>
+            <span style="font-size: 11px; font-weight: 600; color: #374151;">Subtitles</span>
+          </button>
+
+          <!-- Effects / Worship Music -->
+          <button onclick="openDrawer('drawer-meet-music')" style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 12px 6px; display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
+            <div style="width: 36px; height: 36px; border-radius: 10px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; font-size: 18px;">⭐</div>
+            <span style="font-size: 11px; font-weight: 600; color: #374151;">Effects</span>
+          </button>
+
+          <!-- Countdown -->
+          <button onclick="showToast('Prayer Timer Active / प्रार्थना टायमर')" style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 12px 6px; display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
+            <div style="width: 36px; height: 36px; border-radius: 10px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; font-size: 18px;">⏱️</div>
+            <span style="font-size: 11px; font-weight: 600; color: #374151;">Countdown</span>
+          </button>
+
+          <!-- Poll -->
+          <button onclick="showToast('Prayer Poll Started / मतदान')" style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 12px 6px; display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; position: relative; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
+            <span style="position: absolute; top: 4px; right: 4px; background: #fef3c7; color: #92400e; font-size: 8px; font-weight: 800; padding: 1px 4px; border-radius: 4px;">VAS</span>
+            <div style="width: 36px; height: 36px; border-radius: 10px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; font-size: 18px;">📊</div>
+            <span style="font-size: 11px; font-weight: 600; color: #374151;">Poll</span>
+          </button>
+
+          <!-- Human Interpret -->
+          <button onclick="showToast('Marathi / English Interpretation Active')" style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 12px 6px; display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; position: relative; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
+            <span style="position: absolute; top: 4px; right: 4px; background: #fef3c7; color: #92400e; font-size: 8px; font-weight: 800; padding: 1px 4px; border-radius: 4px;">VAS</span>
+            <div style="width: 36px; height: 36px; border-radius: 10px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; font-size: 18px;">🌐</div>
+            <span style="font-size: 11px; font-weight: 600; color: #374151; white-space: nowrap;">Interpret</span>
+          </button>
+
+          <!-- Settings -->
+          <button onclick="openDrawer('drawer-meet-settings')" style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 12px 6px; display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
+            <div style="width: 36px; height: 36px; border-radius: 10px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; font-size: 18px;">⚙️</div>
+            <span style="font-size: 11px; font-weight: 600; color: #374151;">Settings</span>
+          </button>
+
+        </div>
+
+        <!-- Bottom 2 Wide Action Pill Buttons (Matching Screenshot 2) -->
+        <div style="display: flex; gap: 12px;">
+          <button onclick="showToast('Meeting Security Active / सुरक्षा')" style="flex: 1; padding: 14px; border-radius: 14px; background: #ffffff; border: 1px solid #e5e7eb; color: #111827; font-size: 13.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
+            🛡️ <span>Security</span>
+          </button>
+          <button onclick="showToast('Muted All Participants / सर्व सदस्यांचे आवाज बंद केले')" style="flex: 1; padding: 14px; border-radius: 14px; background: #ffffff; border: 1px solid #e5e7eb; color: #111827; font-size: 13.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
+            🔇 <span>Mute All</span>
+          </button>
+        </div>
+
+      </div>
     </div>
 
   <!-- App Main Logic -->
-  <script src="app.js?v=1000"></script>
+  <script src="app.js?v=1100"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 2.5s no matter what

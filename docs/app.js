@@ -6607,12 +6607,14 @@ function launchLiveMeetingRoom(meeting, stream) {
   if (jitsiCont) {
     jitsiCont.style.display = "block";
     jitsiCont.style.position = "absolute";
-    jitsiCont.style.top = "60px";
-    jitsiCont.style.left = "0";
-    jitsiCont.style.right = "0";
-    jitsiCont.style.bottom = "85px";
-    jitsiCont.style.width = "100%";
-    jitsiCont.style.height = "calc(100% - 145px)";
+    jitsiCont.style.top = "68px";
+    jitsiCont.style.left = "12px";
+    jitsiCont.style.right = "12px";
+    jitsiCont.style.bottom = "75px";
+    jitsiCont.style.width = "calc(100% - 24px)";
+    jitsiCont.style.height = "calc(100% - 143px)";
+    jitsiCont.style.borderRadius = "20px";
+    jitsiCont.style.overflow = "hidden";
     jitsiCont.style.zIndex = "10";
 
     const cleanRoomId = (meeting.id || "live-fellowship").replace(/[^a-zA-Z0-9]/g, "_");
