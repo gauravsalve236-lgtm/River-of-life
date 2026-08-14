@@ -7630,55 +7630,49 @@ async function syncSharedWorshipVideo(youtubeUrl, mode = "audio", startedAt = nu
     showToast("Worship video shared with participants!");
 
   } else {
-    // ── AUDIO ONLY MODE: SYNCHRONIZED PLAYBACK ──────────────────────────────
-    // HOW IT WORKS:
-    // - Pastor presses play: records startedAt = Date.now(), broadcasts to all
-    // - Audience receives the event with startedAt timestamp
-    // - Each audience device calculates elapsed = (Date.now() - startedAt) / 1000
-    // - Loads YouTube iframe with &start=elapsed so everyone is in sync
-    // - Since each device plays its OWN YouTube player, audio works natively!
-    
-    // Calculate seek position if we are the audience receiving a broadcast
+    // ── AUDIO ONLY MODE: PURE AUDIO PLAYBACK (ZERO UI FOR PARTICIPANTS) ──────
+    // - Pastor's device: Can display small control strip to manage worship audio.
+    // - Participant devices: ZERO video containers, ZERO YouTube icons, ZERO bottom bars.
+    // - The YouTube audio iframe is rendered strictly offscreen in #hidden-youtube-audio-container
+    // - Participants hear the song natively through their device speaker while seeing full meeting view.
+
     const isAudience = (startedAt !== null && startedAt !== undefined);
     const elapsedSeconds = isAudience ? Math.floor((Date.now() - startedAt) / 1000) : 0;
     const startParam = elapsedSeconds > 0 ? `&start=${elapsedSeconds}` : "";
 
-    container.style.cssText = "display:block; position:absolute; top:auto; bottom:74px; height:100px; left:0; right:0; z-index:20; background:#0f0f0f;";
-    worshipBox.style.display = "block";
-    if (bibleBox) bibleBox.style.display = "none";
+    if (isAudience) {
+      // ── AUDIENCE DEVICE: Hide all video/content panels completely ───────────
+      container.style.display = "none";
+      worshipBox.style.display = "none";
+      if (bibleBox) bibleBox.style.display = "none";
 
-    if (player) {
-      if (isAudience) {
-        // ── AUDIENCE DEVICE: Auto-play at synchronized seek position ──────────
-        // The user has already tapped to join the meeting (user gesture), so
-        // autoplay with audio is allowed by the browser.
-        player.innerHTML = `
-          <div style="display:flex;align-items:center;height:100%;background:#0f0f0f;padding:0 12px;gap:10px;">
-            <iframe id="worship-yt-iframe" width="130" height="85"
-              src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0${startParam}&enablejsapi=1"
-              frameborder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media"
-              style="flex-shrink:0;border-radius:6px;border:0;"></iframe>
-            <div style="flex:1;color:#fff;">
-              <div style="font-size:11px;font-weight:800;color:#22c55e;margin-bottom:3px;">🎵 Worship Music Playing</div>
-              <div style="font-size:10px;color:#94a3b8;">Pastor is sharing this song with everyone</div>
-              <div style="font-size:10px;color:#60a5fa;margin-top:3px;">🔊 Turn up your volume! / आवाज वाढवा!</div>
-            </div>
-          </div>
+      // Cameras fill 100% of meeting view
+      jitsiCont.style.display = "block";
+      jitsiCont.style.top     = "50px";
+      jitsiCont.style.height  = "calc(100% - 50px)";
+
+      // Inject audio-only YouTube player into off-screen hidden container
+      const hiddenAudioCont = document.getElementById("hidden-youtube-audio-container");
+      if (hiddenAudioCont) {
+        hiddenAudioCont.innerHTML = `
+          <iframe id="hidden-yt-audio-iframe" width="1" height="1"
+            src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0${startParam}&enablejsapi=1"
+            allow="autoplay; encrypted-media"></iframe>
         `;
-        // Show green banner to audience
-        if (banner) {
-          banner.style.cssText = "display:flex; top:60px;";
-          banner.querySelector("span").textContent = "🎵 Worship music is playing — turn up your volume! / गाणे सुरू आहे — आवाज वाढवा!";
-          banner.style.background = "rgba(34, 197, 94, 0.95)";
-          setTimeout(() => { banner.style.display = "none"; }, 8000);
-        }
-        showToast("🎵 Worship music is now playing for everyone!");
-      } else {
-        // ── PASTOR'S DEVICE: Record startedAt and broadcast to audience ───────
-        const now = Date.now();
-        currentWorshipSyncTimestamp = now;
-        
+      }
+
+      showToast("🎵 Worship song audio playing through your device speaker!");
+
+    } else {
+      // ── PASTOR'S DEVICE: Show small control strip at bottom of Pastor's screen ──────
+      const now = Date.now();
+      currentWorshipSyncTimestamp = now;
+
+      container.style.cssText = "display:block; position:absolute; top:auto; bottom:74px; height:100px; left:0; right:0; z-index:20; background:#0f0f0f;";
+      worshipBox.style.display = "block";
+      if (bibleBox) bibleBox.style.display = "none";
+
+      if (player) {
         player.innerHTML = `
           <div style="display:flex;align-items:center;height:100%;background:#0f0f0f;padding:0 12px;gap:10px;">
             <iframe id="worship-yt-iframe" width="130" height="85"
@@ -7691,26 +7685,19 @@ async function syncSharedWorshipVideo(youtubeUrl, mode = "audio", startedAt = nu
               <div id="worship-audio-status" style="font-size:10px;color:#94a3b8;">Tap below to share with audience</div>
               <button id="btn-broadcast-worship" onclick="broadcastWorshipAudioToAudience('${videoId}', ${now})"
                 style="margin-top:6px;background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;border:none;border-radius:20px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(34,197,94,0.4);">
-                🔴 Share with Audience / प्रेक्षकांना ऐकवा
+                🔴 Share Audio Only with Audience
               </button>
             </div>
           </div>
         `;
-        // Show banner on pastor's device
-        if (banner) {
-          banner.style.cssText = "display:flex; top:60px;";
-          banner.querySelector("span").textContent = "🎵 Song is playing. Press 'Share with Audience' to send it to everyone!";
-          banner.style.background = "rgba(59, 130, 246, 0.9)";
-          setTimeout(() => { banner.style.display = "none"; }, 7000);
-        }
-        showToast("Song playing! Press 'Share with Audience' to send to all!");
       }
-    }
 
-    // Cameras take the rest of screen above the player strip
-    jitsiCont.style.display = "block";
-    jitsiCont.style.top     = "50px";
-    jitsiCont.style.height  = "calc(100% - 50px - 74px - 100px)";
+      jitsiCont.style.display = "block";
+      jitsiCont.style.top     = "50px";
+      jitsiCont.style.height  = "calc(100% - 50px - 74px - 100px)";
+
+      showToast("Song playing! Press 'Share Audio Only' to send to participants!");
+    }
   }
 }
 
@@ -7724,19 +7711,20 @@ function broadcastWorshipAudioToAudience(videoId, startedAt) {
       type: "PLAY_YOUTUBE",
       url: videoId,
       mode: "audio",
-      startedAt: startedAt // Unix timestamp when pastor pressed play
+      startedAt: startedAt
     });
-    if (statusEl) statusEl.textContent = "🔴 BROADCASTING — Audience is now hearing the song!";
+    if (statusEl) statusEl.textContent = "🔴 BROADCASTING AUDIO ONLY — Participants hear song on device speaker!";
     if (broadcastBtn) {
       broadcastBtn.style.background = "linear-gradient(135deg,#6b21a8,#a855f7)";
-      broadcastBtn.textContent = "✅ Shared! / प्रेक्षकांना पाठवले";
+      broadcastBtn.textContent = "✅ Audio Shared to Audience!";
       broadcastBtn.disabled = true;
     }
-    showToast("🎵 Worship song shared with all participants!");
+    showToast("🎵 Worship song audio shared with all participants!");
   } else {
-    showToast("Join a meeting first to share with audience.");
+    showToast("Join a meeting first to share audio.");
   }
 }
+
 
 
 
@@ -7902,8 +7890,10 @@ function showWorshipAudioLiveBanner(videoId) {
 
 // Stop and clear the worship audio player / video
 function hideSharedWorshipVideo() {
-  // Stop any active audio capture
   stopWorshipAudioCapture();
+
+  const hiddenAudioCont = document.getElementById("hidden-youtube-audio-container");
+  if (hiddenAudioCont) hiddenAudioCont.innerHTML = "";
 
   const container = document.getElementById("meeting-shared-content-area");
   const worshipBox = document.getElementById("worship-video-frame-container");
@@ -7932,6 +7922,7 @@ function hideSharedWorshipVideo() {
     jitsiCont.style.top     = "50px";
   }
 }
+
 
 /* ==========================================================================
    11. DUAL MEDIA SHARING ENGINE (MODE 1: VIDEO+AUDIO / MODE 2: AUDIO ONLY)
