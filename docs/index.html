@@ -1901,6 +1901,18 @@
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
               <div class="form-input-group" style="display: flex; flex-direction: column; gap: 4px;">
+                <label for="meeting-host" style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Assign Host / होस्ट निवडा</label>
+                <select id="meeting-host" class="dropdown-selector" style="width: 100%;">
+                  <!-- Populated dynamically -->
+                </select>
+              </div>
+              <div class="form-input-group" style="display: flex; flex-direction: column; gap: 4px;">
+                <label for="meeting-custom-url" style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Custom Meeting Link (e.g. Google Meet, Zoom) [Optional] / सभेची स्वतःची लिंक</label>
+                <input type="url" id="meeting-custom-url" class="dropdown-selector" style="width: 100%; text-align: left; padding: 8px;" placeholder="https://meet.google.com/abc-def-ghi">
+              </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              <div class="form-input-group" style="display: flex; flex-direction: column; gap: 4px;">
                 <label for="meeting-duration" style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Duration / कालावधी</label>
                 <select id="meeting-duration" class="dropdown-selector" style="width: 100%;">
                   <option value="30">30 minutes</option>
@@ -1933,12 +1945,7 @@
                 <input type="number" id="meeting-max-users" class="dropdown-selector" style="width: 100%; text-align: left; padding: 8px;" placeholder="Unlimited" min="2">
               </div>
             </div>
-            <div class="form-input-group" style="display: flex; flex-direction: column; gap: 4px;">
-              <label for="meeting-host" style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Assign Host / होस्ट निवडा</label>
-              <select id="meeting-host" class="dropdown-selector" style="width: 100%;">
-                <!-- Populated dynamically -->
-              </select>
-            </div>
+
             <div class="form-input-group" style="display: flex; flex-direction: column; gap: 4px;">
               <label style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Invite Members / सदस्यांना आमंत्रित करा</label>
               <div id="meeting-invitees-list" style="max-height: 100px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; padding: 8px; display: flex; flex-direction: column; gap: 6px; background: var(--bg);">

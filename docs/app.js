@@ -1,39 +1,20 @@
 // River of Life Bible - Core Application Logic
 
-// PWA Service Worker Registration
+// Force Unregister PWA Service Worker and Clear Caches to prevent browser caching bugs
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js')
-      .then(reg => {
-        console.log('Service Worker registered:', reg.scope);
-        
-        // Check for updates
-        reg.update();
-        
-        // Listen for new service worker installation
-        reg.addEventListener('updatefound', () => {
-          const installingWorker = reg.installing;
-          if (installingWorker) {
-            installingWorker.addEventListener('statechange', () => {
-              if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                console.log('New service worker version detected, reloading...');
-                window.location.reload();
-              }
-            });
-          }
-        });
-      })
-      .catch(err => console.error('Service Worker registration failed:', err));
-  });
-
-  // Reload the page when the active service worker changes (controllerchange)
-  let refreshing = false;
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (!refreshing) {
-      refreshing = true;
-      console.log('Service worker updated, reloading page...');
-      window.location.reload();
+  navigator.serviceWorker.getRegistrations().then(registrations => {
+    for (let registration of registrations) {
+      registration.unregister().then(() => {
+        console.log('Old Service Worker unregistered successfully.');
+      });
     }
+  });
+  caches.keys().then(names => {
+    for (let name of names) {
+      caches.delete(name);
+    }
+  }).then(() => {
+    console.log('Cache storage cleared.');
   });
 }
 
@@ -5938,6 +5919,7 @@ function createNewMeeting() {
   const visibility = document.getElementById("meeting-visibility").value;
   const maxVal = document.getElementById("meeting-max-users").value;
   const host = document.getElementById("meeting-host").value;
+  const customUrl = document.getElementById("meeting-custom-url").value.trim();
 
   if (!title || !date || !time) {
     showToast("Please fill in required fields.");
@@ -5963,6 +5945,7 @@ function createNewMeeting() {
     repeat,
     visibility,
     isSimulation: (visibility !== "public"),
+    customUrl: customUrl || "",
     maxParticipants: maxVal || "Unlimited",
     status: "scheduled",
     participantsCount: 0,
