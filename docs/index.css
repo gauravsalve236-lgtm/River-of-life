@@ -18,6 +18,11 @@
   --highlight-pink: #fbcfe8;
 }
 
+/* Force hide duplicate custom bottom bar */
+.meeting-room-toolbar {
+  display: none !important;
+}
+
 /* Theme 1: Slate Midnight (Dark Mode - Default) */
 .ios-theme-dark {
   --bg: #0f172a;           /* Dark Slate */
