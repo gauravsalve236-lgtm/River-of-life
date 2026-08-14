@@ -2583,14 +2583,6 @@ body {
 }
 
 
-    height: 22px;
-  }
-  
-  .mobile-bottom-tabs .tab-label {
-    font-size: 11px;
-  }
-}
-
 @media (max-width: 767px) {
   /* Mobile Split Screen layout (Bible on top, Study on bottom) */
   .split-screen-parent {
