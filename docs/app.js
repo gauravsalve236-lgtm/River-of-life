@@ -3796,9 +3796,11 @@ function setupEventListeners() {
       
       const isYoutube = inputUrl.includes("youtube.com") || inputUrl.includes("youtu.be");
       if (isYoutube) {
+        const mode = document.getElementById("meet-music-custom-mode").value || "audio";
         broadcastMeetingEvent(activeMeetingSession.meetingId, {
           type: "PLAY_YOUTUBE",
-          url: inputUrl
+          url: inputUrl,
+          mode: mode
         });
       } else {
         broadcastMeetingEvent(activeMeetingSession.meetingId, {
@@ -6727,7 +6729,7 @@ async function handleMeetingBroadcastEvent(msg) {
   } else if (msg.type === "STOP_MUSIC") {
     stopWorshipTrack();
   } else if (msg.type === "PLAY_YOUTUBE") {
-    syncSharedWorshipVideo(msg.url);
+    syncSharedWorshipVideo(msg.url, msg.mode);
   } else if (msg.type === "STOP_YOUTUBE") {
     hideSharedWorshipVideo();
   }
@@ -7294,13 +7296,33 @@ function setupMeetingRoomControls() {
     btn.onclick = () => {
       const url = btn.dataset.url;
       document.getElementById("worship-youtube-url").value = url;
-      syncSharedWorshipVideo(url);
+      const mode = document.getElementById("worship-youtube-mode").value || "audio";
+      if (activeMeetingSession) {
+        broadcastMeetingEvent(activeMeetingSession.meetingId, {
+          type: "PLAY_YOUTUBE",
+          url: url,
+          mode: mode
+        });
+      } else {
+        syncSharedWorshipVideo(url, mode);
+      }
     };
   });
 
   document.getElementById("btn-sync-worship-video").onclick = () => {
     const url = document.getElementById("worship-youtube-url").value.trim();
-    if (url) syncSharedWorshipVideo(url);
+    if (url) {
+      const mode = document.getElementById("worship-youtube-mode").value || "audio";
+      if (activeMeetingSession) {
+        broadcastMeetingEvent(activeMeetingSession.meetingId, {
+          type: "PLAY_YOUTUBE",
+          url: url,
+          mode: mode
+        });
+      } else {
+        syncSharedWorshipVideo(url, mode);
+      }
+    }
   };
 }
 
@@ -7535,16 +7557,19 @@ function syncSharedBiblePassage(book, chapter, verse, translation) {
   }
 }
 
-// Sync Worship YouTube player embed inside call with full-screen focus layout
-// Sync Worship YouTube audio in the background (no video overlay, cameras remain full screen)
+// Sync Worship YouTube player/audio inside call (supports Video and Audio Only modes)
 let youtubeAudioIsMuted = true;
 
-function syncSharedWorshipVideo(youtubeUrl) {
+function syncSharedWorshipVideo(youtubeUrl, mode = "audio") {
+  const container = document.getElementById("meeting-shared-content-area");
+  const worshipBox = document.getElementById("worship-video-frame-container");
+  const bibleBox = document.getElementById("meeting-shared-bible");
+  const screenshareBox = document.getElementById("meeting-screenshare-container");
   const jitsiCont = document.getElementById("meeting-jitsi-container");
   const hiddenPlayerCont = document.getElementById("hidden-youtube-audio-container");
   const banner = document.getElementById("meeting-worship-audio-banner");
   
-  if (!hiddenPlayerCont || !jitsiCont || !banner) return;
+  if (!container || !worshipBox || !jitsiCont || !hiddenPlayerCont || !banner) return;
 
   // Extract YouTube ID
   let videoId = "nQWFzMvCfLE"; // Default Give Thanks
@@ -7559,58 +7584,96 @@ function syncSharedWorshipVideo(youtubeUrl) {
   // Stop any active local ambient track
   stopWorshipTrack();
 
-  // Load the YouTube iframe inside the hidden container in the background
-  // We load it with autoplay=1 and mute=1 so mobile Safari/Chrome allow background playback to start immediately.
-  hiddenPlayerCont.innerHTML = `
-    <iframe id="bg-youtube-iframe" width="100%" height="100%" 
-      src="https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=1&mute=1" 
-      frameborder="0" allow="autoplay; encrypted-media;"></iframe>
-  `;
+  // Clear any existing hidden background player and the split screen player
+  hiddenPlayerCont.innerHTML = "";
+  const player = document.getElementById("worship-youtube-player");
+  if (player) player.innerHTML = "";
 
-  // Restore the MiroTalk camera container to full screen view (no split screen!)
-  jitsiCont.style.display = "block";
-  jitsiCont.style.height = "calc(100% - 50px)";
-  jitsiCont.style.top = "50px";
+  if (mode === "video") {
+    // 📺 SHARE VIDEO MODE: Embed YouTube player inside the split screen
+    container.style.display = "block";
+    container.style.height = "45%";
+    container.style.top = "50px";
+    
+    worshipBox.style.display = "block";
+    if (bibleBox) bibleBox.style.display = "none";
+    if (screenshareBox) screenshareBox.style.display = "none";
 
-  // Reset mute state
-  youtubeAudioIsMuted = true;
-
-  // Show the floating audio unmute banner
-  banner.style.display = "flex";
-  banner.querySelector("span").textContent = "🔊 Tap to Hear Shared Song / गाणे ऐकण्यासाठी टॅप करा";
-  banner.style.background = "rgba(59, 130, 246, 0.95)";
-
-  // Setup click event for the banner
-  banner.onclick = () => {
-    const iframe = document.getElementById("bg-youtube-iframe");
-    if (!iframe || !iframe.contentWindow) return;
-
-    if (youtubeAudioIsMuted) {
-      // Unmute and play
-      iframe.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', '*');
-      iframe.contentWindow.postMessage('{"event":"command","func":"setVolume","args":[100]}', '*');
-      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-      
-      youtubeAudioIsMuted = false;
-      banner.querySelector("span").textContent = "🔇 Mute Praise Song / गाणे म्यूट करा";
-      banner.style.background = "rgba(34, 197, 94, 0.95)"; // Green background when playing
-      showToast("Praise song unmuted!");
-    } else {
-      // Mute
-      iframe.contentWindow.postMessage('{"event":"command","func":"mute","args":""}', '*');
-      
-      youtubeAudioIsMuted = true;
-      banner.querySelector("span").textContent = "🔊 Tap to Hear Shared Song / गाणे ऐकण्यासाठी टॅप करा";
-      banner.style.background = "rgba(59, 130, 246, 0.95)"; // Blue when muted
-      showToast("Praise song muted.");
+    if (player) {
+      player.innerHTML = `
+        <div style="position: relative; width: 100%; height: 100%;">
+          <iframe id="split-youtube-iframe" width="100%" height="100%" src="https://www.youtube.com/embed/${videoId}?enablejsapi=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="width:100%; height:100%;"></iframe>
+          <div style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.75); color: #60a5fa; padding: 6px 12px; border-radius: 20px; font-size: 10.5px; font-weight: 700; pointer-events: none; z-index: 100; text-align: center; border: 1px solid rgba(96,165,250,0.3); box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+            🔊 Tap video to play with audio / आवाज ऐकण्यासाठी व्हिडिओवर टॅप करा
+          </div>
+        </div>
+      `;
     }
-  };
 
-  showToast("Worship audio shared in the background!");
+    // Resize meeting cameras iframe to bottom split view
+    jitsiCont.style.display = "block";
+    jitsiCont.style.height = "calc(55% - 50px)";
+    jitsiCont.style.top = "calc(45% + 50px)";
+
+    // Hide background audio banner since video is visible
+    banner.style.display = "none";
+    showToast("Worship video shared with participants!");
+  } else {
+    // 🔊 SHARE AUDIO ONLY MODE: Hide split screen video completely
+    container.style.display = "none";
+    worshipBox.style.display = "none";
+
+    // Load the YouTube iframe inside the hidden container in the background
+    hiddenPlayerCont.innerHTML = `
+      <iframe id="bg-youtube-iframe" width="100%" height="100%" 
+        src="https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=1&mute=1" 
+        frameborder="0" allow="autoplay; encrypted-media;"></iframe>
+    `;
+
+    // Keep user cameras full screen
+    jitsiCont.style.display = "block";
+    jitsiCont.style.height = "calc(100% - 50px)";
+    jitsiCont.style.top = "50px";
+
+    // Show floating unmute audio banner
+    youtubeAudioIsMuted = true;
+    banner.style.display = "flex";
+    banner.querySelector("span").textContent = "🔊 Tap to Hear Shared Song / गाणे ऐकण्यासाठी टॅप करा";
+    banner.style.background = "rgba(59, 130, 246, 0.95)";
+
+    // Setup click unmute toggle event
+    banner.onclick = () => {
+      const iframe = document.getElementById("bg-youtube-iframe");
+      if (!iframe || !iframe.contentWindow) return;
+
+      if (youtubeAudioIsMuted) {
+        iframe.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', '*');
+        iframe.contentWindow.postMessage('{"event":"command","func":"setVolume","args":[100]}', '*');
+        iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+        
+        youtubeAudioIsMuted = false;
+        banner.querySelector("span").textContent = "🔇 Mute Praise Song / गाणे म्यूट करा";
+        banner.style.background = "rgba(34, 197, 94, 0.95)";
+        showToast("Praise song unmuted!");
+      } else {
+        iframe.contentWindow.postMessage('{"event":"command","func":"mute","args":""}', '*');
+        
+        youtubeAudioIsMuted = true;
+        banner.querySelector("span").textContent = "🔊 Tap to Hear Shared Song / गाणे ऐकण्यासाठी टॅप करा";
+        banner.style.background = "rgba(59, 130, 246, 0.95)";
+        showToast("Praise song muted.");
+      }
+    };
+
+    showToast("Worship audio shared in the background!");
+  }
 }
 
-// Stop and clear the worship audio player
+// Stop and clear the worship audio player / video
 function hideSharedWorshipVideo() {
+  const container = document.getElementById("meeting-shared-content-area");
+  const worshipBox = document.getElementById("worship-video-frame-container");
+  const jitsiCont = document.getElementById("meeting-jitsi-container");
   const hiddenPlayerCont = document.getElementById("hidden-youtube-audio-container");
   const banner = document.getElementById("meeting-worship-audio-banner");
   
@@ -7618,9 +7681,24 @@ function hideSharedWorshipVideo() {
     hiddenPlayerCont.innerHTML = "";
   }
   
+  if (worshipBox) {
+    worshipBox.style.display = "none";
+    const player = document.getElementById("worship-youtube-player");
+    if (player) player.innerHTML = "";
+  }
+  
+  if (container) container.style.display = "none";
+  
   if (banner) {
     banner.style.display = "none";
     banner.onclick = null;
+  }
+
+  // Restore cameras back to full display
+  if (jitsiCont) {
+    jitsiCont.style.display = "block";
+    jitsiCont.style.height = "calc(100% - 50px)";
+    jitsiCont.style.top = "50px";
   }
 }
 
