@@ -2879,6 +2879,17 @@ function resetCardCreatorModal() {
    UI Event Bindings & Listeners Setup
    ========================================================================== */
 function setupEventListeners() {
+  // WhatsApp App Invite Trigger
+  const homeWaInviteBtn = document.getElementById("btn-home-whatsapp-invite");
+  if (homeWaInviteBtn) {
+    homeWaInviteBtn.addEventListener("click", () => {
+      const appUrl = window.location.origin + window.location.pathname;
+      const inviteMsg = `🕊️ *River of Life App Invitation* / *आमंत्रण*\n\nJoin us on the *River of Life Bible App*! Read and listen to Marathi/English scriptures, participate in live audio/video Bible study rooms, and sync daily reading plans.\n👉 *Register & Join here:* ${appUrl}`;
+      const encodedMsg = encodeURIComponent(inviteMsg);
+      window.open(`https://api.whatsapp.com/send?text=${encodedMsg}`, "_blank");
+    });
+  }
+
   // Navigation trigger drawers
   document.getElementById("btn-text-settings").addEventListener("click", () => openDrawer("drawer-text-settings"));
   
@@ -5993,11 +6004,9 @@ function createNewMeeting() {
 
 // Render Meetings list on Dashboard
 function renderMeetingsDashboard() {
-  // Check auth privilege to display the Schedule button
   const triggerBtn = document.getElementById("btn-schedule-meeting-trigger");
   if (triggerBtn) {
-    const isAuthorized = state.currentUser && (state.currentUser.isPastor || state.currentUser.isAdmin || state.currentUser.username.toLowerCase() === "admin");
-    triggerBtn.style.display = isAuthorized ? "block" : "none";
+    triggerBtn.style.display = "block"; // Allow all members to schedule meetings during testing
   }
 
   const activeTabBtn = document.querySelector("[data-meetings-subtab].active");
@@ -6146,12 +6155,31 @@ function openMeetingDetails(meetingId) {
     copyMeetingInvitation(m);
   };
 
+  // Bind WhatsApp Share button
+  const waBtn = document.getElementById("btn-details-whatsapp-share");
+  if (waBtn) {
+    waBtn.onclick = () => {
+      shareMeetingToWhatsApp(m);
+    };
+  }
+
   // Bind Calendar button
   document.getElementById("btn-details-calendar").onclick = () => {
     generateICSFile(m);
   };
 
   openDrawer("drawer-meeting-details");
+}
+
+// Share meeting invitation via WhatsApp
+function shareMeetingToWhatsApp(meeting) {
+  const domain = window.location.origin + window.location.pathname;
+  // Deep-link query to join directly
+  const link = `${domain}?join=${meeting.id}`;
+  const invitationText = `🕊️ *River of Life Meeting Invite* / *आमंत्रण*\n\n📢 *Title:* ${meeting.title}\n📅 *Date:* ${meeting.date}\n⏰ *Time:* ${meeting.time}\n👤 *Host:* ${meeting.host}\n\nJoin us for prayer, worship and Marathi/English Bible study room!\n👉 *Click to join call directly:* ${link}`;
+  
+  const encodedText = encodeURIComponent(invitationText);
+  window.open(`https://api.whatsapp.com/send?text=${encodedText}`, "_blank");
 }
 
 // Share invitation text builder

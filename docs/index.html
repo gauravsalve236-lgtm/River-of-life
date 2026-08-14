@@ -158,6 +158,21 @@
               <button id="home-auth-banner-btn" class="btn-primary-mini" style="margin: 0; padding: 8px 16px; font-size: 12.5px; font-weight: 700; border-radius: 6px; white-space: nowrap;">Sign In / लॉगिन</button>
             </div>
 
+            <!-- WhatsApp Invite Friends Card -->
+            <div class="settings-card-group" style="margin: 0 16px 16px 16px; padding: 16px 20px; border-radius: 12px; background: rgba(37, 211, 102, 0.08); border: 1px solid rgba(37, 211, 102, 0.2); display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;">
+              <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 220px;">
+                <span style="font-size: 22px; line-height: 1;">💬</span>
+                <div style="display: flex; flex-direction: column; text-align: left;">
+                  <strong style="font-size: 13.5px; color: var(--text); font-weight: 700;">Invite Friends & Family / मित्रांना आमंत्रित करा</strong>
+                  <span style="font-size: 12px; color: var(--text-muted);">Share River of Life on WhatsApp to register and study together.</span>
+                </div>
+              </div>
+              <button id="btn-home-whatsapp-invite" class="btn-primary-mini" style="margin: 0; padding: 8px 16px; font-size: 12.5px; font-weight: 700; border-radius: 8px; background: #25d366; border-color: #25d366; color: #fff; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 5px rgba(37,211,102,0.2);">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display: inline-block; vertical-align: middle;"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.09-3.974c1.652.98 3.271 1.498 4.902 1.499 5.485 0 9.948-4.464 9.951-9.95.002-2.658-1.03-5.155-2.903-7.03C16.229 2.67 13.738 1.636 11.08 1.636 5.596 1.636 1.132 6.098 1.13 11.585c-.001 1.761.472 3.479 1.371 5.011L1.472 22.03l5.675-1.488-.009-.016zm11.233-7.56c-.322-.16-.1.905-.31.84s-.977-.4-1.354-.736c-.314-.28-.52-.627-.582-.736-.062-.108-.007-.167.047-.221.05-.049.108-.127.163-.19.054-.064.072-.11.108-.182.036-.073.018-.137-.009-.19-.027-.055-.246-.593-.337-.813-.089-.214-.177-.185-.246-.188h-.21c-.072 0-.188.027-.287.137-.1.108-.38.371-.38.905 0 .533.39 1.048.444 1.12.054.072.766 1.17 1.856 1.64.26.11.462.176.62.227.26.082.497.07.684.043.21-.031.643-.263.733-.517.09-.255.09-.473.063-.518-.027-.046-.099-.073-.42-.232z"/></svg>
+                <span>Invite Friends</span>
+              </button>
+            </div>
+
             <div class="home-grid-layout">
               <!-- Card 1: Daily Bible Verse -->
               <div class="daily-verse-card" id="btn-open-fullscreen-vod">
@@ -1963,12 +1978,16 @@
             </div>
           </div>
           
-          <div style="display: flex; gap: 10px; margin-bottom: 12px;">
-            <button id="btn-details-calendar" class="btn-secondary-mini" style="flex: 1; padding: 12px; border-radius: 12px; font-size: 13.5px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <div style="display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap;">
+            <button id="btn-details-calendar" class="btn-secondary-mini" style="flex: 1; padding: 12px; border-radius: 12px; font-size: 13.5px; display: flex; align-items: center; justify-content: center; gap: 8px; min-width: 130px;">
               📅 <span>Add to Calendar</span>
             </button>
-            <button id="btn-details-share" class="btn-secondary-mini" style="flex: 1; padding: 12px; border-radius: 12px; font-size: 13.5px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-              🔗 <span>Share Invitation</span>
+            <button id="btn-details-share" class="btn-secondary-mini" style="flex: 1; padding: 12px; border-radius: 12px; font-size: 13.5px; display: flex; align-items: center; justify-content: center; gap: 8px; min-width: 130px;">
+              🔗 <span>Copy Invite</span>
+            </button>
+            <button id="btn-details-whatsapp-share" class="btn-secondary-mini" style="flex: 1; padding: 12px; border-radius: 12px; font-size: 13.5px; display: flex; align-items: center; justify-content: center; gap: 8px; min-width: 130px; background: rgba(37, 211, 102, 0.12); border-color: rgba(37, 211, 102, 0.3); color: #25d366 !important;">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display: inline-block; vertical-align: middle;"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.09-3.974c1.652.98 3.271 1.498 4.902 1.499 5.485 0 9.948-4.464 9.951-9.95.002-2.658-1.03-5.155-2.903-7.03C16.229 2.67 13.738 1.636 11.08 1.636 5.596 1.636 1.132 6.098 1.13 11.585c-.001 1.761.472 3.479 1.371 5.011L1.472 22.03l5.675-1.488-.009-.016zm11.233-7.56c-.322-.16-.1.905-.31.84s-.977-.4-1.354-.736c-.314-.28-.52-.627-.582-.736-.062-.108-.007-.167.047-.221.05-.049.108-.127.163-.19.054-.064.072-.11.108-.182.036-.073.018-.137-.009-.19-.027-.055-.246-.593-.337-.813-.089-.214-.177-.185-.246-.188h-.21c-.072 0-.188.027-.287.137-.1.108-.38.371-.38.905 0 .533.39 1.048.444 1.12.054.072.766 1.17 1.856 1.64.26.11.462.176.62.227.26.082.497.07.684.043.21-.031.643-.263.733-.517.09-.255.09-.473.063-.518-.027-.046-.099-.073-.42-.232z"/></svg>
+              <span>WhatsApp</span>
             </button>
           </div>
           
