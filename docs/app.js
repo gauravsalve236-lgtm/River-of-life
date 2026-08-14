@@ -6218,6 +6218,9 @@ function launchLiveMeetingRoom(meeting, stream) {
   // Lock screen view overlay
   const roomModal = document.getElementById("modal-live-meeting");
   roomModal.style.display = "block";
+  setTimeout(() => {
+    roomModal.classList.add("active");
+  }, 10);
   
   // Setup room title
   document.getElementById("meeting-room-title").textContent = meeting.title;
@@ -6278,9 +6281,8 @@ function launchLiveMeetingRoom(meeting, stream) {
   // Setup synchronous Bible book dropdown selections
   populateMeetingBibleSelector();
 
-  // Switch between Mock simulation vs Jitsi Meet API
-  // Jitsi is used if they select a 'public' visibility or if Jitsi library is loaded successfully.
-  const useJitsi = (meeting.visibility === "public" && typeof JitsiMeetExternalAPI !== "undefined");
+  // Always use our custom Google-Meet style video grid design for stable native mobile execution
+  const useJitsi = false;
 
   if (useJitsi) {
     // REAL MULTIUSER JITSI CONNECTION
@@ -6325,7 +6327,7 @@ function launchLiveMeetingRoom(meeting, stream) {
     
   } else {
     // HIGH FIDELITY SANDBOX SIMULATED MODE (Resilient local developer mode)
-    document.getElementById("video-cell-local").style.display = "relative";
+    document.getElementById("video-cell-local").style.display = "flex";
     showToast("Live Meeting Joined (Simulated Sandbox)");
     
     // Create 3 simulated participants
@@ -6512,7 +6514,11 @@ function exitLiveMeetingRoom() {
   }
 
   // Close live modal
-  document.getElementById("modal-live-meeting").style.display = "none";
+  const roomModal = document.getElementById("modal-live-meeting");
+  roomModal.classList.remove("active");
+  setTimeout(() => {
+    roomModal.style.display = "none";
+  }, 300);
   
   // Restore navigation panels
   document.querySelector(".app-header").style.display = "flex";
