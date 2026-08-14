@@ -6508,8 +6508,11 @@ function launchLiveMeetingRoom(meeting, stream) {
   const gridEl = document.getElementById("meeting-video-grid");
   const jitsiCont = document.getElementById("meeting-jitsi-container");
 
-  // Hide static grid and show live WebRTC video room
-  if (gridEl) gridEl.style.display = "none";
+  // PURGE any mock participant cards completely from DOM
+  if (gridEl) {
+    gridEl.innerHTML = ""; // Complete wipe of static/mock tiles
+    gridEl.style.display = "none";
+  }
   
   if (jitsiCont) {
     jitsiCont.style.display = "block";
@@ -6522,7 +6525,7 @@ function launchLiveMeetingRoom(meeting, stream) {
     jitsiCont.style.height = "calc(100% - 50px - 72px - env(safe-area-inset-bottom, 20px))";
     jitsiCont.style.zIndex = "5";
 
-    showToast("Connecting to live video call for friends & family...");
+    showToast("Connecting live call for friends & family...");
 
     const roomUrl = `https://p2p.mirotalk.com/join/RiverOfLife_GauravSalve_${meeting.id}?name=${encodeURIComponent(loggedIn)}`;
     jitsiCont.innerHTML = `
@@ -6546,6 +6549,7 @@ function launchLiveMeetingRoom(meeting, stream) {
   };
   document.addEventListener("touchstart", autoAudioUnlocker, { once: true });
   document.addEventListener("click", autoAudioUnlocker, { once: true });
+
 
 
 
@@ -7546,66 +7550,9 @@ function renderCallParticipantsList() {
   `;
   container.appendChild(localRow);
 
-  // Add mock participants if sandbox mode
-  if (!activeJitsiAPIInstance) {
-    const mocks = [
-      { name: "Pastor John", avatar: "P", role: "Host" },
-      { name: "Esther (Youth Leader)", avatar: "E", role: "Co-Host" },
-      { name: "Samuel Salve", avatar: "S", role: "Member" }
-    ];
+  const totalCount = document.getElementById("meeting-participants-count");
+  if (totalCount) totalCount.textContent = "1";
 
-    mocks.forEach(m => {
-      const row = document.createElement("div");
-      row.style.display = "flex";
-      row.style.justifyContent = "space-between";
-      row.style.alignItems = "center";
-      row.style.padding = "8px";
-      row.style.borderBottom = "1px solid var(--border)";
-      
-      // Moderator actions displayed if current user is Host
-      const modActions = activeMeetingSession && activeMeetingSession.isHost ? `
-        <select class="dropdown-selector meet-moderation-dropdown" data-name="${m.name}" style="padding: 2px 4px; font-size: 10px;">
-          <option value="none">Actions</option>
-          <option value="mute">Mute Mic</option>
-          <option value="cohost">Make Co-Host</option>
-          <option value="remove">Remove User</option>
-        </select>
-      ` : `<span style="font-size: 12px; color: var(--text-muted);">${m.role}</span>`;
-
-      row.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <div class="avatar-nav-mini" style="width: 28px; height: 28px; font-size: 10px; background: var(--primary); color: #000;">${m.avatar}</div>
-          <span style="font-size: 13px; font-weight: 500; color: var(--text);">${m.name}</span>
-        </div>
-        ${modActions}
-      `;
-
-      // Event actions
-      const select = row.querySelector(".meet-moderation-dropdown");
-      if (select) {
-        select.addEventListener("change", (e) => {
-          const act = e.target.value;
-          if (act === "mute") {
-            showToast(`Moderator muted ${m.name}`);
-            appendMeetingChatMessage("SYSTEM", `🔇 Moderator muted ${m.name}'s microphone`, false);
-          } else if (act === "cohost") {
-            showToast(`${m.name} is now Co-Host`);
-            appendMeetingChatMessage("SYSTEM", `👑 ${m.name} has been assigned Co-Host role`, false);
-          } else if (act === "remove") {
-            showToast(`Removed ${m.name} from meeting.`);
-            appendMeetingChatMessage("SYSTEM", `❌ ${m.name} was removed from meeting by moderator`, false);
-            row.remove();
-          }
-          select.value = "none";
-        });
-      }
-
-      container.appendChild(row);
-    });
-
-    const totalCount = document.getElementById("meeting-participants-count");
-    if (totalCount) totalCount.textContent = "4";
-  }
 }
 
 // Populate dropdown selectors in Bible synchronizer drawer
