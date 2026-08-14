@@ -6576,14 +6576,14 @@ function launchLiveMeetingRoom(meeting, stream) {
     jitsiCont.style.zIndex = "10";
 
     const cleanRoomId = (meeting.id || "live-fellowship").replace(/[^a-zA-Z0-9]/g, "_");
-    const roomUrl = `https://p2p.mirotalk.com/join/RiverOfLife_${cleanRoomId}?name=${encodeURIComponent(loggedIn)}`;
+    const roomUrl = `https://p2p.mirotalk.com/join/RiverOfLife_${cleanRoomId}?name=${encodeURIComponent(loggedIn)}&audio=true&video=true`;
     
     jitsiCont.innerHTML = `
       <iframe 
         src="${roomUrl}" 
         width="100%" 
         height="100%" 
-        allow="camera; microphone; speaker-selection; display-capture; fullscreen; autoplay; picture-in-picture;" 
+        allow="camera *; microphone *; speaker-selection *; display-capture *; fullscreen *; autoplay *; picture-in-picture *;" 
         style="border: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; background: #090d16;">
       </iframe>
     `;
