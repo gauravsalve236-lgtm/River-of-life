@@ -1,11 +1,12 @@
-const CACHE_NAME = 'river-of-life-cache-v31';
+const CACHE_NAME = 'river-of-life-cache-v36';
 
 // Static App Shell assets to cache immediately
 const STATIC_ASSETS = [
   './',
   './index.html',
-  './index.css?v=31',
-  './app.js?v=31',
+  './index.css?v=36',
+  './app.js?v=36',
+  './external_api.js?v=36',
   './manifest.json',
   './assets/bible/books.json',
   './assets/bible/books_mr.json',
