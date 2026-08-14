@@ -1,0 +1,9 @@
+{
+  "appId": "com.riveroflife.bibleapp",
+  "appName": "River of Life",
+  "webDir": "docs",
+  "bundledWebRuntime": false,
+  "server": {
+    "iosScheme": "ionic"
+  }
+}
