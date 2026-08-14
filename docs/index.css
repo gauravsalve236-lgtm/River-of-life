@@ -4892,20 +4892,21 @@ input, textarea, select, [contenteditable="true"] {
   display: grid !important;
   grid-template-columns: repeat(2, 1fr) !important; /* Forces 2x2 Grid View on Mobile */
   grid-auto-rows: minmax(130px, 1fr);
-  gap: 8px !important;
+  gap: 10px !important;
   width: 100% !important;
   height: 100% !important;
-  padding: 10px !important;
+  padding: 12px !important;
   box-sizing: border-box !important;
   overflow-y: auto !important;
   align-content: center;
   justify-content: center;
+  background-color: #f8fafc !important;
 }
 
 @media (min-width: 640px) {
   .meeting-video-grid {
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
-    gap: 12px !important;
+    gap: 14px !important;
     padding: 16px !important;
   }
 }
@@ -4924,10 +4925,10 @@ input, textarea, select, [contenteditable="true"] {
   max-width: 1000px;
 }
 
-/* Video Cell design */
+/* Video Cell design - Light Theme */
 .video-cell {
-  background-color: #1a2035;
-  border-radius: 12px;
+  background-color: #ffffff !important;
+  border-radius: 14px !important;
   overflow: hidden;
   position: relative;
   display: flex;
@@ -4936,14 +4937,14 @@ input, textarea, select, [contenteditable="true"] {
   width: 100%;
   height: 100%;
   min-height: 130px;
-  box-shadow: var(--shadow-md);
-  border: 2px solid transparent;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1.5px solid #e2e8f0 !important;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .video-cell.active-speaker {
-  border-color: var(--primary);
-  box-shadow: 0 0 16px rgba(251, 191, 36, 0.4);
+  border-color: #d4af37 !important;
+  box-shadow: 0 0 16px rgba(212, 175, 55, 0.4) !important;
 }
 .video-cell-avatar {
   font-family: var(--font-ui);
@@ -4952,8 +4953,9 @@ input, textarea, select, [contenteditable="true"] {
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background-color: var(--primary);
-  color: #1e1b4b;
+  background-color: #fef3c7 !important;
+  color: #92400e !important;
+  border: 2px solid #fde68a !important;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -4963,18 +4965,20 @@ input, textarea, select, [contenteditable="true"] {
   position: absolute;
   bottom: 10px;
   left: 10px;
-  background-color: rgba(9, 13, 22, 0.7);
+  background-color: rgba(255, 255, 255, 0.92) !important;
+  border: 1px solid #cbd5e1 !important;
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   padding: 4px 10px;
   border-radius: 6px;
   font-size: 11px;
   font-weight: 700;
-  color: #fff;
+  color: #0f172a !important;
   display: flex;
   align-items: center;
   gap: 6px;
   pointer-events: none;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 /* Floating reactions animations */

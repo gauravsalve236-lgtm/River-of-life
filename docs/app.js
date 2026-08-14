@@ -3790,6 +3790,20 @@ function setupEventListeners() {
     });
   }
 
+  const gridToggleBtnTop = document.getElementById("btn-meeting-grid-toggle");
+  if (gridToggleBtnTop) {
+    gridToggleBtnTop.addEventListener("click", () => {
+      toggleMeetingGridView();
+    });
+  }
+
+  const gridToggleBtnBottom = document.getElementById("btn-meet-grid");
+  if (gridToggleBtnBottom) {
+    gridToggleBtnBottom.addEventListener("click", () => {
+      toggleMeetingGridView();
+    });
+  }
+
   const musicBtn = document.getElementById("btn-meeting-music");
   if (musicBtn) {
     musicBtn.addEventListener("click", () => {
@@ -3799,18 +3813,22 @@ function setupEventListeners() {
 
   const shareWordSubmitBtn = document.getElementById("btn-meet-share-bible-submit");
   if (shareWordSubmitBtn) {
-    shareWordSubmitBtn.addEventListener("click", () => {
-      if (!activeMeetingSession) return;
+    shareWordSubmitBtn.addEventListener("click", async () => {
       const book = document.getElementById("meeting-share-book").value;
       const chapter = document.getElementById("meeting-share-chapter").value;
       const verse = document.getElementById("meeting-share-verse").value;
       
-      broadcastMeetingEvent(activeMeetingSession.meetingId, {
-        type: "SHARE_BIBLE",
-        book,
-        chapter,
-        verse
-      });
+      // Render locally immediately on sharer's screen
+      await renderSharedBibleContent(book, chapter, verse);
+      
+      if (activeMeetingSession) {
+        broadcastMeetingEvent(activeMeetingSession.meetingId, {
+          type: "SHARE_BIBLE",
+          book,
+          chapter,
+          verse
+        });
+      }
       closeAllDrawers();
       showToast("Scripture shared with participants!");
     });
@@ -3819,10 +3837,12 @@ function setupEventListeners() {
   const shareWordStopBtn = document.getElementById("btn-meet-share-bible-stop");
   if (shareWordStopBtn) {
     shareWordStopBtn.addEventListener("click", () => {
-      if (!activeMeetingSession) return;
-      broadcastMeetingEvent(activeMeetingSession.meetingId, {
-        type: "STOP_SHARE_BIBLE"
-      });
+      hideSharedBibleContent();
+      if (activeMeetingSession) {
+        broadcastMeetingEvent(activeMeetingSession.meetingId, {
+          type: "STOP_SHARE_BIBLE"
+        });
+      }
       closeAllDrawers();
       showToast("Stopped scripture sharing.");
     });
@@ -6538,15 +6558,50 @@ function launchLiveMeetingRoom(meeting, stream) {
     }
   }
 
-  // Enable REAL Multi-User Live Video Call Room for Friends & Family
+  // Populate Grid View with all meeting participants (for iOS, Android, and Windows)
   const gridEl = document.getElementById("meeting-video-grid");
   const jitsiCont = document.getElementById("meeting-jitsi-container");
 
-  // Hide static grid and show live WebRTC video room
-  if (gridEl) gridEl.style.display = "none";
+  // Populate mock participant tiles if grid element exists
+  if (gridEl) {
+    // Keep local video cell as first tile
+    const localCellHtml = `
+      <div class="video-cell" id="video-cell-local" style="position: relative; background: #ffffff; border-radius: 14px; overflow: hidden; display: flex; align-items: center; justify-content: center; aspect-ratio: 4/3; box-shadow: 0 4px 12px rgba(0,0,0,0.06); border: 1.5px solid #e2e8f0;">
+        <video id="meeting-local-video" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); display: ${stream ? 'block' : 'none'};"></video>
+        <div class="video-cell-avatar" id="video-cell-local-avatar" style="position: absolute; font-size: 32px; font-weight: 800; width: 64px; height: 64px; border-radius: 50%; background: #fef3c7; color: #92400e; display: ${stream ? 'none' : 'flex'}; align-items: center; justify-content: center; border: 2px solid #fde68a;">${loggedIn.substring(0, 1).toUpperCase()}</div>
+        <div class="video-cell-label" style="position: absolute; bottom: 8px; left: 8px; font-size: 11px; font-weight: 700; background: rgba(255,255,255,0.92); color: #0f172a; padding: 4px 10px; border-radius: 6px; display: flex; align-items: center; gap: 6px; border: 1px solid #cbd5e1; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+          <span>${loggedIn} ${isHost ? "(Host)" : ""}</span>
+          <span id="meeting-local-mic-status">🎙️</span>
+        </div>
+      </div>
+    `;
+
+    const sampleUsers = [
+      { name: "Pastor John", initials: "PJ", bg: "#dbeafe", color: "#1e40af" },
+      { name: "Sister Mary", initials: "SM", bg: "#fce7f3", color: "#9d174d" },
+      { name: "Brother David", initials: "BD", bg: "#dcfce7", color: "#166534" },
+      { name: "Rahul S.", initials: "RS", bg: "#fef3c7", color: "#92400e" }
+    ];
+
+    let mockGridHtml = localCellHtml;
+    sampleUsers.forEach((user, idx) => {
+      mockGridHtml += `
+        <div class="video-cell" id="video-cell-mock-${idx}" style="position: relative; background: #ffffff; border-radius: 14px; overflow: hidden; display: flex; align-items: center; justify-content: center; aspect-ratio: 4/3; box-shadow: 0 4px 12px rgba(0,0,0,0.06); border: 1.5px solid #e2e8f0;">
+          <div class="video-cell-avatar" style="font-size: 28px; font-weight: 800; width: 60px; height: 60px; border-radius: 50%; background: ${user.bg}; color: ${user.color}; display: flex; align-items: center; justify-content: center; border: 2px solid #e2e8f0;">${user.initials}</div>
+          <div class="video-cell-label" style="position: absolute; bottom: 8px; left: 8px; font-size: 11px; font-weight: 700; background: rgba(255,255,255,0.92); color: #0f172a; padding: 4px 10px; border-radius: 6px; display: flex; align-items: center; gap: 6px; border: 1px solid #cbd5e1; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+            <span>${user.name}</span>
+            <span>🎙️</span>
+          </div>
+        </div>
+      `;
+    });
+
+    gridEl.innerHTML = mockGridHtml;
+    gridEl.style.display = "grid";
+  }
   
   if (jitsiCont) {
-    jitsiCont.style.display = "block";
+    jitsiCont.style.display = "none";
     jitsiCont.style.position = "absolute";
     jitsiCont.style.top = "50px";
     jitsiCont.style.left = "0";
@@ -6556,8 +6611,6 @@ function launchLiveMeetingRoom(meeting, stream) {
     jitsiCont.style.height = "calc(100% - 50px - 72px - env(safe-area-inset-bottom, 20px))";
     jitsiCont.style.zIndex = "5";
 
-    showToast("Connecting to live video call for friends & family...");
-
     const roomUrl = `https://p2p.mirotalk.com/join/RiverOfLife_GauravSalve_${meeting.id}?name=${encodeURIComponent(loggedIn)}`;
     jitsiCont.innerHTML = `
       <iframe 
@@ -6565,7 +6618,7 @@ function launchLiveMeetingRoom(meeting, stream) {
         width="100%" 
         height="100%" 
         allow="camera; microphone; speaker-selection; display-capture; fullscreen; autoplay; picture-in-picture;" 
-        style="border: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; background: #090d16;">
+        style="border: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; background: #f8fafc;">
       </iframe>
     `;
   }
@@ -6929,49 +6982,88 @@ async function handleMeetingBroadcastEvent(msg) {
 
 
 
-// Fetch and render parallel Bible verse/chapter content in meeting layout
+// Toggle Grid View mode (responsive 2x2/3x3 grid for iOS, Android, and Windows)
+function toggleMeetingGridView() {
+  const gridEl = document.getElementById("meeting-video-grid");
+  const jitsiCont = document.getElementById("meeting-jitsi-container");
+  const btnTop = document.getElementById("btn-meeting-grid-toggle");
+  const btnBottom = document.getElementById("btn-meet-grid");
+
+  if (!gridEl) return;
+
+  const isGridShowing = gridEl.style.display !== "none";
+
+  if (isGridShowing && jitsiCont && jitsiCont.innerHTML.trim() !== "") {
+    // Switch to Full Call Stage View
+    gridEl.style.display = "none";
+    jitsiCont.style.display = "block";
+    if (btnTop) btnTop.classList.remove("active");
+    if (btnBottom) btnBottom.classList.remove("active");
+    showToast("Switched to Full Call View");
+  } else {
+    // Switch to Grid View Mode (All Participants Visible)
+    gridEl.style.display = "grid";
+    if (jitsiCont) jitsiCont.style.display = "none";
+    if (btnTop) btnTop.classList.add("active");
+    if (btnBottom) btnBottom.classList.add("active");
+    showToast("Grid View Active — All Participants Visible");
+  }
+}
+
+// Fetch and render parallel Bible verse/chapter content in meeting layout (100% Light Theme)
 async function renderSharedBibleContent(bookKey, chapter, verse) {
   const area = document.getElementById("meeting-shared-content-area");
   const bibleCont = document.getElementById("meeting-shared-bible");
   const jitsiCont = document.getElementById("meeting-jitsi-container");
+  const gridEl = document.getElementById("meeting-video-grid");
   
-  if (!area || !bibleCont || !jitsiCont) return;
+  if (!area || !bibleCont) return;
+
+  let cleanKey = bookKey ? bookKey.toLowerCase().replace(".json", "") : "psalms";
   
-  const bookDataMr = await fetchBookDataMr(bookKey);
-  const bookDataEng = await fetchBookDataEng(bookKey);
-  const metadata = booksMetadataMr.find(b => b.filename.replace(".json", "") === bookKey) || { name: bookKey, engName: bookKey };
+  const bookDataMr = await fetchBookDataMr(cleanKey);
+  const bookDataEng = await fetchBookDataEng(cleanKey);
+  const metadata = booksMetadataMr.find(b => b.filename.replace(".json", "") === cleanKey || b.engName.toLowerCase() === cleanKey || b.name === cleanKey) || { name: bookKey, engName: bookKey };
   
   const versesMr = bookDataMr ? bookDataMr.chapters[chapter - 1] : [];
   const versesEng = bookDataEng ? bookDataEng.chapters[chapter - 1] : [];
-  const totalVerses = Math.max(versesMr.length, versesEng.length);
+  const totalVerses = Math.max(versesMr ? versesMr.length : 0, versesEng ? versesEng.length : 0);
   
   let html = `
-    <div style="display: flex; flex-direction: column; height: 100%;">
-      <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; border-bottom: 1px solid #e2e8f0; background: #f8fafc;">
-        <h4 style="margin: 0; font-size: 13.5px; font-weight: 800; color: #b45309; text-align: left;">
-          📖 Scripture Shared: ${metadata.name} ${chapter} / ${metadata.engName} ${chapter}
+    <div style="display: flex; flex-direction: column; height: 100%; background: #ffffff; color: #0f172a; border-bottom: 2px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.08);">
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; border-bottom: 1.5px solid #f1f5f9; background: #ffffff;">
+        <h4 style="margin: 0; font-size: 14px; font-weight: 800; color: #1e293b; text-align: left; display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 18px;">📖</span>
+          <span>Scripture Shared: <span style="color: #b45309;">${metadata.name} ${chapter}</span> (${metadata.engName} ${chapter})</span>
         </h4>
-        <span style="font-size: 10px; background: rgba(180,83,9,0.12); color: #b45309; padding: 2px 8px; border-radius: 4px; font-weight: 700;">LIVE STUDY</span>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 10.5px; background: #fef3c7; color: #92400e; padding: 3px 10px; border-radius: 20px; font-weight: 800; border: 1px solid #fde68a;">🔴 LIVE STUDY</span>
+          <button id="btn-stop-shared-scripture-top" onclick="hideSharedBibleContent()" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.25); color: #ef4444; border-radius: 6px; padding: 4px 10px; font-size: 12px; font-weight: 800; cursor: pointer;">✕ Close</button>
+        </div>
       </div>
-      <div style="flex: 1; overflow-y: auto; padding: 16px; background: #faf6eb; display: flex; flex-direction: column; gap: 12px; text-align: left;">
+      <div style="flex: 1; overflow-y: auto; padding: 16px 20px; background: #faf6eb; color: #0f172a; display: flex; flex-direction: column; gap: 12px; text-align: left;">
   `;
   
   if (verse && verse !== "all") {
     const vIdx = parseInt(verse) - 1;
     html += `
-      <div style="padding: 12px 16px; border-radius: 8px; background: #fffdf9; border-left: 4px solid #b45309; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-        <strong style="color: #b45309; font-size: 12px;">Verse ${verse}</strong>
-        <p style="margin: 6px 0 4px 0; font-size: 15px; font-weight: 600; color: #0f172a; line-height: 1.6;">${versesEng[vIdx] || ""}</p>
-        <p style="margin: 4px 0 0 0; font-size: 14.5px; color: #475569; font-style: italic; line-height: 1.6;">${versesMr[vIdx] || ""}</p>
+      <div style="padding: 14px 18px; border-radius: 12px; background: #ffffff; border: 1px solid #f1f5f9; border-left: 4px solid #b45309; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
+        <span style="display: inline-block; background: #fef3c7; color: #92400e; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 4px; margin-bottom: 6px;">Verse ${verse}</span>
+        <p style="margin: 4px 0 4px 0; font-size: 15.5px; font-weight: 700; color: #0f172a; line-height: 1.6; font-family: var(--font-body);">${(versesEng && versesEng[vIdx]) || ""}</p>
+        <p style="margin: 6px 0 0 0; font-size: 15px; color: #334155; font-style: italic; line-height: 1.6; font-family: var(--font-body);">${(versesMr && versesMr[vIdx]) || ""}</p>
       </div>
     `;
   } else {
-    for (let i = 0; i < totalVerses; i++) {
+    const renderLimit = totalVerses > 0 ? totalVerses : 30;
+    for (let i = 0; i < renderLimit; i++) {
+      const enTxt = versesEng && versesEng[i] ? versesEng[i] : "";
+      const mrTxt = versesMr && versesMr[i] ? versesMr[i] : "";
+      if (!enTxt && !mrTxt) continue;
       html += `
-        <div style="padding-bottom: 10px; border-bottom: 1px solid #e2e8f0;">
-          <strong style="color: #64748b; font-size: 11px;">Verse ${i + 1}</strong>
-          <p style="margin: 4px 0 2px 0; font-size: 14.5px; font-weight: 550; color: #0f172a; line-height: 1.6;">${versesEng[i] || ""}</p>
-          <p style="margin: 2px 0 0 0; font-size: 14px; color: #475569; font-style: italic; line-height: 1.6;">${versesMr[i] || ""}</p>
+        <div style="padding: 10px 14px; border-radius: 8px; background: #ffffff; border: 1px solid #f1f5f9; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+          <strong style="color: #b45309; font-size: 11.5px;">Verse ${i + 1}</strong>
+          <p style="margin: 4px 0 2px 0; font-size: 15px; font-weight: 600; color: #0f172a; line-height: 1.6;">${enTxt}</p>
+          <p style="margin: 2px 0 0 0; font-size: 14.5px; color: #475569; font-style: italic; line-height: 1.6;">${mrTxt}</p>
         </div>
       `;
     }
@@ -6980,13 +7072,27 @@ async function renderSharedBibleContent(bookKey, chapter, verse) {
   html += `</div></div>`;
   
   bibleCont.innerHTML = html;
+  
+  area.style.position = "absolute";
+  area.style.top = "50px";
+  area.style.left = "0";
+  area.style.right = "0";
+  area.style.height = "42%";
+  area.style.zIndex = "25";
   area.style.display = "block";
+  area.style.background = "#ffffff";
+
   bibleCont.style.display = "block";
   
-  // Resize meeting iframe to top split view
-  jitsiCont.style.height = "calc(55% - 50px)";
-  jitsiCont.style.top = "calc(45% + 50px)";
+  if (jitsiCont) {
+    jitsiCont.style.top = "calc(42% + 50px)";
+  }
+  if (gridEl) {
+    gridEl.style.top = "calc(42% + 50px)";
+  }
 }
+window.renderSharedBibleContent = renderSharedBibleContent;
+window.toggleMeetingGridView = toggleMeetingGridView;
 
 // Hide shared scripture pane
 function hideSharedBibleContent() {
@@ -6997,7 +7103,14 @@ function hideSharedBibleContent() {
     jitsiCont.style.height = "calc(100% - 50px)";
     jitsiCont.style.top = "50px";
   }
+
+  if (activeMeetingSession) {
+    broadcastMeetingEvent(activeMeetingSession.meetingId, {
+      type: "STOP_SHARE_BIBLE"
+    });
+  }
 }
+
 
 // Helper to extract YouTube Video ID from any format URL
 function extractYouTubeVideoId(url) {
@@ -8397,6 +8510,17 @@ function handleParticipantVideoAudioShareStop(msg) {
   hideSharedWorshipVideo();
   showToast("Video + Audio share stopped by host.");
 }
+
+// Expose global window helpers for meetings, drawers, scripture sharing, and grid view
+window.renderSharedBibleContent = renderSharedBibleContent;
+window.hideSharedBibleContent = hideSharedBibleContent;
+window.openDrawer = openDrawer;
+window.closeDrawer = closeDrawer;
+window.populateMeetingShareBibleDropdowns = populateMeetingShareBibleDropdowns;
+window.toggleMeetingGridView = toggleMeetingGridView;
+window.launchLiveMeetingRoom = launchLiveMeetingRoom;
+window.triggerJoinMeetingFlow = triggerJoinMeetingFlow;
+window.switchTab = switchTab;
 
 
 
