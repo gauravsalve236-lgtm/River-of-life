@@ -7717,6 +7717,21 @@ let worshipAudioDestination = null;
 let worshipAudioSourceNode = null;
 let currentWorshipSyncTimestamp = null; // Unix ms when pastor pressed play
 
+// Helper to unlock/resume audio on mobile participant browsers
+function unlockParticipantMeetingAudio() {
+  try {
+    const hiddenYtFrame = document.getElementById("hidden-yt-audio-iframe");
+    if (hiddenYtFrame && hiddenYtFrame.contentWindow) {
+      hiddenYtFrame.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+    }
+    if (activeWorshipAudio) {
+      activeWorshipAudio.play().catch(e => console.warn(e));
+    }
+  } catch (e) {
+    console.warn("Audio unlock attempt:", e);
+  }
+}
+
 // Pastor-side: Show YouTube player + broadcast sync event to all participants
 async function syncSharedWorshipVideo(youtubeUrl, mode = "audio", startedAt = null) {
   const container  = document.getElementById("meeting-shared-content-area");
@@ -7764,29 +7779,14 @@ async function syncSharedWorshipVideo(youtubeUrl, mode = "audio", startedAt = nu
     if (hiddenAudioCont) {
       hiddenAudioCont.innerHTML = `
         <iframe id="hidden-yt-audio-iframe" width="1" height="1"
-          src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0${startParam}&enablejsapi=1"
-          allow="autoplay; encrypted-media"></iframe>
+          src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0${startParam}&enablejsapi=1&playsinline=1"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
       `;
     }
 
-// Helper to unlock/resume audio on mobile participant browsers
-function unlockParticipantMeetingAudio() {
-  try {
-    const hiddenYtFrame = document.getElementById("hidden-yt-audio-iframe");
-    if (hiddenYtFrame && hiddenYtFrame.contentWindow) {
-      hiddenYtFrame.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-    }
-    if (activeWorshipAudio) {
-      activeWorshipAudio.play().catch(e => console.warn(e));
-    }
-  } catch (e) {
-    console.warn("Audio unlock attempt:", e);
-  }
-}
-
     if (banner) {
       banner.style.cssText = "display:flex; top:60px; background: rgba(34, 197, 94, 0.95); cursor: pointer;";
-      banner.querySelector("span").textContent = "🔊 Live Worship Audio Playing — Tap if silent!";
+      banner.querySelector("span").textContent = "🔊 Live Worship Audio Active — Tap if silent!";
       banner.onclick = () => {
         unlockParticipantMeetingAudio();
         showToast("Audio unmuted for meeting!");
@@ -7795,6 +7795,7 @@ function unlockParticipantMeetingAudio() {
     showToast("🎵 Worship song playing automatically on your device speaker!");
 
   } else {
+
 
     // ── HOST / PASTOR MACHINE: Render Video / Audio controls on Host screen ─────
     const now = Date.now();
