@@ -5653,6 +5653,13 @@ const DEVOTIONAL_DB = {
 function getMeetingsFromStorage() {
   try {
     let meetings = JSON.parse(localStorage.getItem("river_of_life_meetings"));
+    const loggedIn = state.currentUser ? state.currentUser.username : "Gaurav Salve";
+
+    // Auto-wipe stale legacy mock meetings if host is Pastor John or meeting_1
+    if (meetings && (JSON.stringify(meetings).includes("Pastor John") || JSON.stringify(meetings).includes("meeting_1"))) {
+      localStorage.removeItem("river_of_life_meetings");
+      meetings = null;
+    }
     
     if (!meetings) {
       const today = new Date();
@@ -5660,14 +5667,14 @@ function getMeetingsFromStorage() {
       
       meetings = [
         {
-          id: "meeting_1",
-          title: "Friday Family Prayer / शुक्रवारची कौटुंबिक प्रार्थना",
-          description: "Live family prayer, praise, worship and Marathi scripture study.",
-          host: "Pastor John",
+          id: "RiverOfLife_Global_Fellowship",
+          title: "Live Family Prayer / कौटुंबिक प्रार्थना",
+          description: "Live family prayer fellowship room for friends & family.",
+          host: loggedIn,
           date: formatDate(today),
           time: "20:00",
           duration: "60",
-          repeat: "weekly",
+          repeat: "daily",
           visibility: "public",
           status: "live",
           createdAt: Date.now()
@@ -5681,6 +5688,7 @@ function getMeetingsFromStorage() {
     return [];
   }
 }
+
 
 function initPersonalizedDevotionals() {
   document.querySelectorAll(".devo-topic-pill").forEach(pill => {
