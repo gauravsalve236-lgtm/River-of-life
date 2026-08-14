@@ -8259,15 +8259,47 @@ function toggleCameraFeed() {
   }
 }
 
-// RENDER VIEW 1: Gallery View
+// Toggle Real P2P WebRTC Live Call Stream Mode
+function toggleRealLiveStreamMode() {
+  const jitsiCont = document.getElementById("meeting-jitsi-container");
+  const galleryGrid = document.getElementById("meeting-video-grid");
+  const btn = document.getElementById("btn-toggle-real-stream");
+
+  if (!jitsiCont) return;
+
+  const isHidden = jitsiCont.style.display === "none" || getComputedStyle(jitsiCont).display === "none";
+  if (isHidden) {
+    jitsiCont.style.display = "block";
+    if (galleryGrid) galleryGrid.style.display = "none";
+    if (btn) {
+      btn.innerHTML = "▦ <span>4-Tile Grid View</span>";
+      btn.style.background = "#059669";
+    }
+    showToast("📹 Connected to Real P2P Live Call! Real member cameras & mics active.");
+  } else {
+    jitsiCont.style.display = "none";
+    if (galleryGrid) galleryGrid.style.display = "grid";
+    if (btn) {
+      btn.innerHTML = "📹 <span>Real Live Stream</span>";
+      btn.style.background = "#2563eb";
+    }
+    renderGalleryView();
+    showToast("Switched to 4-Tile Gallery View");
+  }
+}
+
+// RENDER VIEW 1: Gallery View (Focused 4-5 Medium-Sized Cards + Active Speaker Auto-Focus)
 function renderGalleryView() {
   const gridEl = document.getElementById("meeting-video-grid");
   if (!gridEl) return;
   
+  // Select top 4-5 active participants (Local User + Active Speaker + Key Members)
+  const focusedList = mockParticipantsList.slice(0, 5);
+  
   let html = "";
-  mockParticipantsList.forEach(p => {
+  focusedList.forEach(p => {
     const isSpeakingClass = p.isSpeaking ? "active-speaker" : "";
-    const micIcon = p.isMuted ? "🔇" : "🎙️";
+    const micIcon = p.isMuted ? "🔇" : (p.isSpeaking ? `<span style="color:#a855f7; font-weight:800; font-size:10px; background:rgba(168,85,247,0.2); padding:2px 6px; border-radius:10px; border:1px solid #a855f7;">🎙️ SPEAKING</span>` : "🎙️");
     const handBadge = p.isHandRaised ? `<div class="video-cell-hand-badge">✋</div>` : "";
     
     if (p.id === 'local') {
@@ -8906,5 +8938,6 @@ window.toggleMeetingRoomTheme = toggleMeetingRoomTheme;
 window.openMeetingSidebarPanel = openMeetingSidebarPanel;
 window.toggleReactionMenu = toggleReactionMenu;
 window.sendLiveEmojiReaction = sendLiveEmojiReaction;
+window.toggleRealLiveStreamMode = toggleRealLiveStreamMode;
 
 

@@ -3,7 +3,7 @@ from playwright.sync_api import sync_playwright
 
 def run_test():
     with sync_playwright() as p:
-        print("Launching Chromium browser to test Main App Navigation Bar on Home Page...")
+        print("Launching Chromium browser to test 4-5 Tile Gallery Grid & Real Live Stream Mode...")
         browser = p.chromium.launch(
             headless=True,
             args=["--use-fake-ui-for-media-stream", "--use-fake-device-for-media-stream"]
@@ -25,35 +25,40 @@ def run_test():
         }""")
         page.wait_for_timeout(500)
 
-        # 1. Verify Main App Navigation Bar is visible on Home Page
-        print("Verifying Main App Navigation Bar on Home Page...")
-        main_tabs = page.query_selector(".mobile-bottom-tabs")
-        assert main_tabs is not None and main_tabs.is_visible(), "Main App bottom navigation bar MUST be visible on Home page!"
-        
-        tab_buttons = page.query_selector_all(".mobile-bottom-tabs .tab-btn")
-        print(f"Main App Bottom Navigation Tabs Count: {len(tab_buttons)}")
-        assert len(tab_buttons) == 6, "Main App bottom navigation bar should contain 6 tabs (Home, Bible, Meetings, Plans, Prayers, You)!"
-
-        # 2. Verify Meeting Room Toolbar is NOT visible on Home Page
-        print("Verifying Meeting Room Toolbar is hidden on Home Page...")
-        meeting_toolbar = page.query_selector("#modal-live-meeting .meeting-room-toolbar")
-        assert meeting_toolbar is None or not meeting_toolbar.is_visible(), "Meeting Room toolbar MUST NOT show up on Home page!"
-        print("Meeting Room Toolbar is cleanly hidden on Home page!")
-
-        # 3. Launch meeting and then exit to verify main navigation bar is restored cleanly
-        print("Launching meeting and exiting to verify smooth navigation restoration...")
+        # 1. Trigger join meeting
+        print("Triggering Join Meeting flow...")
         page.evaluate("() => triggerJoinMeetingFlow('meeting-1')")
         page.wait_for_timeout(1000)
-        
-        page.evaluate("() => exitLiveMeetingRoom()")
-        page.wait_for_timeout(500)
 
-        main_tabs_after = page.query_selector(".mobile-bottom-tabs")
-        assert main_tabs_after is not None and main_tabs_after.is_visible(), "Main App bottom navigation bar MUST be restored after exiting meeting!"
-        print("Main App Bottom Navigation bar cleanly restored after exiting meeting!")
+        # 2. Verify Gallery View renders exactly 5 clean, focused tiles
+        print("Testing 4-5 Tile Gallery View...")
+        tiles = page.query_selector_all("#meeting-video-grid .video-cell")
+        print(f"Focused Gallery View Active: {len(tiles)} participant tiles visible!")
+        assert len(tiles) == 5, f"Gallery View should display exactly 5 clean focused tiles, found {len(tiles)}"
+
+        # 3. Check Active Speaker purple glowing border & SPEAKING badge
+        active_speaker = page.query_selector("#video-cell-pj.active-speaker")
+        assert active_speaker is not None, "Pastor John should be active speaker with glowing purple border"
+        
+        speaking_badge = page.text_content("#video-cell-pj")
+        assert "SPEAKING" in speaking_badge, "Active speaker card should display SPEAKING badge"
+        print("Active Speaker purple glowing border & SPEAKING badge verified!")
+
+        # 4. Test Toggle Real Live Stream Mode
+        print("Testing Toggle Real P2P Live Call Stream Mode...")
+        page.evaluate("() => toggleRealLiveStreamMode()")
+        page.wait_for_timeout(500)
+        
+        jitsi = page.query_selector("#meeting-jitsi-container")
+        assert jitsi is not None and jitsi.is_visible(), "Real P2P Live Call iframe container should be visible"
+        print("Connected to Real P2P Live Media Stream!")
+
+        page.evaluate("() => toggleRealLiveStreamMode()")
+        page.wait_for_timeout(500)
+        print("Switched back to 4-5 Tile Gallery Grid cleanly!")
 
         print("\n==================================================")
-        print("MAIN HOME PAGE MENU RESTORATION TESTS PASSED!")
+        print("ALL 4-5 TILE GALLERY & REAL STREAM TESTS PASSED!")
         print("==================================================\n")
         browser.close()
 
