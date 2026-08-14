@@ -6559,33 +6559,41 @@ function launchLiveMeetingRoom(meeting, stream) {
     }
   }
 
-  // Setup embedded fallback container
+  // Setup real P2P WebRTC Live Media Call container (Active by default so multi-device calls work live)
   const jitsiCont = document.getElementById("meeting-jitsi-container");
+  const galleryGrid = document.getElementById("meeting-video-grid");
+  const realStreamBtn = document.getElementById("btn-toggle-real-stream");
+
   if (jitsiCont) {
-    jitsiCont.style.display = "none";
+    jitsiCont.style.display = "block";
     jitsiCont.style.position = "absolute";
     jitsiCont.style.top = "50px";
-    jitsiCont.style.left = "0";
+    jitsiCont.style.left = "56px";
     jitsiCont.style.right = "0";
     jitsiCont.style.bottom = "0";
-    jitsiCont.style.width = "100%";
-    jitsiCont.style.height = "calc(100% - 50px - 72px - env(safe-area-inset-bottom, 20px))";
-    jitsiCont.style.zIndex = "5";
+    jitsiCont.style.width = "calc(100% - 56px)";
+    jitsiCont.style.height = "calc(100% - 50px)";
+    jitsiCont.style.zIndex = "10";
 
-    const roomUrl = `https://p2p.mirotalk.com/join/RiverOfLife_GauravSalve_${meeting.id}?name=${encodeURIComponent(loggedIn)}`;
+    const cleanRoomId = (meeting.id || "live-fellowship").replace(/[^a-zA-Z0-9]/g, "_");
+    const roomUrl = `https://p2p.mirotalk.com/join/RiverOfLife_${cleanRoomId}?name=${encodeURIComponent(loggedIn)}`;
+    
     jitsiCont.innerHTML = `
       <iframe 
         src="${roomUrl}" 
         width="100%" 
         height="100%" 
         allow="camera; microphone; speaker-selection; display-capture; fullscreen; autoplay; picture-in-picture;" 
-        style="border: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; background: #f8fafc;">
+        style="border: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; background: #090d16;">
       </iframe>
     `;
   }
 
-  // Initialize default MS Teams Gallery View for all participants
-  switchMeetingView("gallery");
+  if (galleryGrid) galleryGrid.style.display = "none";
+  if (realStreamBtn) {
+    realStreamBtn.innerHTML = "▦ <span>Demo Grid View</span>";
+    realStreamBtn.style.background = "#059669";
+  }
 
   // Attach global screen tap listener inside meeting room to unlock audio on mobile browsers
   const autoAudioUnlocker = () => {
