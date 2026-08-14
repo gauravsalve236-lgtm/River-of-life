@@ -2356,16 +2356,67 @@ body {
   transform: translate(-50%, 0);
 }
 
-/* Mobile Bottom Tab Bar Navigation (Elevated & Bold for iOS) */
+/* Fullscreen Live Room Container — Perfect Fit for iOS Dynamic Viewport */
+.modal-overlay-fullscreen,
+#modal-live-meeting {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  height: -webkit-fill-available;
+  z-index: 2000;
+  overflow: hidden;
+  transition: opacity 0.3s ease;
+  background: #090d16;
+}
+
+.meeting-room-container {
+  height: 100vh;
+  height: 100dvh;
+  height: -webkit-fill-available;
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+}
+
+/* Meeting Room Bottom Toolbar — Guaranteed Visibility on iOS Safe Area */
+.meeting-room-toolbar {
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: calc(72px + env(safe-area-inset-bottom, 20px)) !important;
+  padding-bottom: max(16px, env(safe-area-inset-bottom, 16px)) !important;
+  padding-top: 6px !important;
+  background: rgba(9, 13, 22, 0.96) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+  z-index: 100 !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 8px !important;
+  overflow-x: auto !important;
+  white-space: nowrap !important;
+}
+
+/* Mobile Bottom Tab Bar Navigation (Extra Large & Bold for iOS) */
 .mobile-bottom-tabs {
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100vw;
-  height: calc(64px + env(safe-area-inset-bottom, 22px));
-  padding-bottom: max(14px, env(safe-area-inset-bottom, 14px));
+  height: calc(72px + env(safe-area-inset-bottom, 22px));
+  padding-bottom: max(18px, env(safe-area-inset-bottom, 18px));
   padding-top: 6px;
-  background-color: rgba(var(--bg-rgb, 255, 255, 255), 0.94);
+  background-color: rgba(var(--bg-rgb, 255, 255, 255), 0.96);
   backdrop-filter: blur(25px);
   -webkit-backdrop-filter: blur(25px);
   border-top: 1px solid var(--border);
@@ -2374,7 +2425,7 @@ body {
   justify-items: center;
   align-items: center;
   z-index: 100;
-  box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.08);
   box-sizing: border-box;
 }
 
@@ -2383,7 +2434,7 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
+  gap: 3px;
   width: 100%;
   height: 100%;
   border: none;
@@ -2396,16 +2447,16 @@ body {
 }
 
 .mobile-bottom-tabs .tab-btn svg {
-  width: 23px;
-  height: 23px;
-  stroke-width: 2.4;
+  width: 25px;
+  height: 25px;
+  stroke-width: 2.6;
   flex-shrink: 0;
   transition: transform 0.2s ease;
 }
 
 .mobile-bottom-tabs .tab-label {
-  font-size: 11px;
-  font-weight: 700;
+  font-size: 11.5px;
+  font-weight: 800;
   font-family: var(--font-ui);
   white-space: nowrap;
   overflow: hidden;
@@ -2423,13 +2474,14 @@ body {
 }
 
 .mobile-bottom-tabs .tab-btn.active .tab-label {
-  font-weight: 800;
+  font-weight: 900;
 }
 
 .mobile-bottom-tabs .tab-btn.active svg {
-  stroke-width: 2.6;
-  transform: scale(1.06);
+  stroke-width: 2.8;
+  transform: scale(1.08);
 }
+
 
 /* ==========================================================================
    7. Responsiveness Media Queries (Mobile layout shifts)
