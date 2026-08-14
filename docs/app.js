@@ -6321,8 +6321,8 @@ function launchLiveMeetingRoom(meeting, stream) {
     const customToolbar = document.querySelector(".meeting-room-toolbar");
     if (customToolbar) customToolbar.style.display = "none";
     
-    // Setup API options
-    const domain = "meet.jit.si";
+    // Setup API options (Using free community fmc Jitsi server to bypass moderator requirements)
+    const domain = "meet.ffmuc.net";
     const roomName = `RiverOfLife_GauravSalve_${meeting.id}`;
     
     const options = {
