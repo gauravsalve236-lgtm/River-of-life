@@ -7626,13 +7626,33 @@ async function syncSharedWorshipVideo(youtubeUrl, mode = "audio", startedAt = nu
       `;
     }
 
+// Helper to unlock/resume audio on mobile participant browsers
+function unlockParticipantMeetingAudio() {
+  try {
+    const hiddenYtFrame = document.getElementById("hidden-yt-audio-iframe");
+    if (hiddenYtFrame && hiddenYtFrame.contentWindow) {
+      hiddenYtFrame.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+    }
+    if (activeWorshipAudio) {
+      activeWorshipAudio.play().catch(e => console.warn(e));
+    }
+  } catch (e) {
+    console.warn("Audio unlock attempt:", e);
+  }
+}
+
     if (banner) {
-      banner.style.cssText = "display:flex; top:60px; background: rgba(34, 197, 94, 0.95);";
-      banner.querySelector("span").textContent = "🔊 Live Worship Audio Playing — Turn up volume!";
+      banner.style.cssText = "display:flex; top:60px; background: rgba(34, 197, 94, 0.95); cursor: pointer;";
+      banner.querySelector("span").textContent = "🔊 Live Worship Audio Playing — Tap if silent!";
+      banner.onclick = () => {
+        unlockParticipantMeetingAudio();
+        showToast("Audio unmuted for meeting!");
+      };
     }
     showToast("🎵 Worship song playing automatically on your device speaker!");
 
   } else {
+
     // ── HOST / PASTOR MACHINE: Render Video / Audio controls on Host screen ─────
     const now = Date.now();
     currentWorshipSyncTimestamp = now;
