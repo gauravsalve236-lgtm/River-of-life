@@ -5569,6 +5569,38 @@ const DEVOTIONAL_DB = {
   }
 };
 
+function getMeetingsFromStorage() {
+  try {
+    let meetings = JSON.parse(localStorage.getItem("river_of_life_meetings"));
+    
+    if (!meetings) {
+      const today = new Date();
+      const formatDate = (d) => d.toISOString().split('T')[0];
+      
+      meetings = [
+        {
+          id: "meeting_1",
+          title: "Friday Family Prayer / शुक्रवारची कौटुंबिक प्रार्थना",
+          description: "Live family prayer, praise, worship and Marathi scripture study.",
+          host: "Pastor John",
+          date: formatDate(today),
+          time: "20:00",
+          duration: "60",
+          repeat: "weekly",
+          visibility: "public",
+          status: "live",
+          createdAt: Date.now()
+        }
+      ];
+      localStorage.setItem("river_of_life_meetings", JSON.stringify(meetings));
+    }
+    return meetings;
+  } catch (e) {
+    console.error("Error loading meetings DB:", e);
+    return [];
+  }
+}
+
 function initPersonalizedDevotionals() {
   document.querySelectorAll(".devo-topic-pill").forEach(pill => {
     pill.addEventListener("click", () => {
@@ -5872,99 +5904,8 @@ const CHURCH_MEMBERS = [
   { username: "Ruth Shinde", isPastor: false }
 ];
 
-// Helper to access LocalStorage meetings
-function getMeetingsFromStorage() {
-  try {
-    let meetings = JSON.parse(localStorage.getItem("river_of_life_meetings"));
-    if (meetings && meetings.length > 0) {
-      let updated = false;
-      meetings.forEach(m => {
-        if ((m.id === "meeting_1" || m.id === "meeting_2") && m.visibility !== "public") {
-          m.visibility = "public";
-          updated = true;
-        }
-      });
-      if (updated) {
-        localStorage.setItem("river_of_life_meetings", JSON.stringify(meetings));
-      }
-    }
-    
-    if (!meetings) {
-      const today = new Date();
-      const formatDate = (d) => d.toISOString().split('T')[0];
-      
-      meetings = [
-        {
-          id: "meeting_1",
-          title: "Friday Family Prayer / शुक्रवारची कौटुंबिक प्रार्थना",
-          description: "Weekly family prayer, worship and Marathi scripture study.",
-          host: "Pastor John",
-          date: formatDate(today),
-          time: "20:00",
-          duration: "60",
-          repeat: "weekly",
-          visibility: "public",
-          maxParticipants: "50",
-          status: "live",
-          participantsCount: 12,
-          recordingUrl: "mock_recording_1.mp4",
-          createdAt: Date.now() - 15 * 60 * 1000
-        },
-        {
-          id: "meeting_2",
-          title: "Sunday Youth Fellowship / रविवार युवा फेलोशिप",
-          description: "Gathering for praise, worship and life discussions for youth.",
-          host: "Leader Samuel",
-          date: formatDate(new Date(today.getTime() + 24 * 60 * 60 * 1000 * 2)),
-          time: "18:00",
-          duration: "90",
-          repeat: "weekly",
-          visibility: "public",
-          maxParticipants: "100",
-          status: "scheduled",
-          participantsCount: 0,
-          createdAt: Date.now()
-        },
-        {
-          id: "meeting_3",
-          title: "Wednesday Mid-Week Bible Study",
-          description: "Deep dive expository Bible study covering Hebrews.",
-          host: "Pastor John",
-          date: formatDate(new Date(today.getTime() + 24 * 60 * 60 * 1000 * 5)),
-          time: "19:00",
-          duration: "60",
-          repeat: "weekly",
-          visibility: "public",
-          maxParticipants: "200",
-          status: "scheduled",
-          participantsCount: 0,
-          createdAt: Date.now()
-        },
-        {
-          id: "meeting_4",
-          title: "Weekly Revival Prayer / साप्ताहिक पुनरुज्जीवन प्रार्थना",
-          description: "Special revival prayer service. Record of August 7.",
-          host: "Pastor John",
-          date: formatDate(new Date(today.getTime() - 24 * 60 * 60 * 1000 * 6)),
-          time: "19:30",
-          duration: "58",
-          repeat: "none",
-          visibility: "members",
-          maxParticipants: "100",
-          status: "ended",
-          participantsCount: 42,
-          recordingUrl: "mock_revival_record.mp4",
-          createdAt: Date.now() - 24 * 60 * 60 * 1000 * 6
-        }
-      ];
-      localStorage.setItem("river_of_life_meetings", JSON.stringify(meetings));
-    }
-    return meetings;
-  } catch (e) {
-    console.error("Error loading meetings DB:", e);
-    return [];
-  }
-}
+// Helper to save LocalStorage meetings
+
 
 
 
@@ -6495,82 +6436,34 @@ function launchLiveMeetingRoom(meeting, stream) {
   // Setup synchronous Bible book dropdown selections
   populateMeetingBibleSelector();
 
-  // Real-world multiuser meetings load MiroTalk P2P WebRTC, private ones run our mock sandbox layout
-  const useRealCall = (!meeting.isSimulation);
-
-  if (useRealCall) {
-    showToast("Connecting to live video call...");
-    
-    // Hide standard local stream cell & grid, show MiroTalk container
-    document.getElementById("video-cell-local").style.display = "none";
-    document.getElementById("meeting-video-grid").style.display = "none";
-    
-    const jitsiCont = document.getElementById("meeting-jitsi-container");
-    if (jitsiCont) {
-      jitsiCont.style.display = "block";
-      // Embed MiroTalk P2P WebRTC room inside the app
-      const roomUrl = `https://p2p.mirotalk.com/join/RiverOfLife_GauravSalve_${meeting.id}?name=${encodeURIComponent(loggedIn)}`;
-      jitsiCont.innerHTML = `
-        <iframe 
-          src="${roomUrl}" 
-          width="100%" 
-          height="100%" 
-          allow="camera; microphone; speaker-selection; display-capture; fullscreen; autoplay; picture-in-picture;" 
-          style="border: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; background: #090d16;">
-        </iframe>
-      `;
-    }
-    
-    // Hide bottom custom controls toolbar to prevent overlap with MiroTalk's controls
-    const customToolbar = document.querySelector(".meeting-room-toolbar");
-    if (customToolbar) customToolbar.style.display = "none";
-    
-  } else {
-    // Show standard grid, hide Jitsi container
-    document.getElementById("meeting-video-grid").style.display = "grid";
-    const jitsiCont = document.getElementById("meeting-jitsi-container");
-    if (jitsiCont) jitsiCont.style.display = "none";
-    const customToolbar = document.querySelector(".meeting-room-toolbar");
-    if (customToolbar) customToolbar.style.display = "flex";
-    // HIGH FIDELITY SANDBOX SIMULATED MODE (Resilient local developer mode)
-    document.getElementById("video-cell-local").style.display = "flex";
-    showToast("Live Meeting Joined (Simulated Sandbox)");
-    
-    // Create 3 simulated participants
-    const mockUsers = [
-      { name: "Pastor John", avatar: "👨‍💼", isSpeaking: true, color: "#a855f7" },
-      { name: "Esther (Youth Leader)", avatar: "👱‍♀️", isSpeaking: false, color: "#14b8a6" },
-      { name: "Samuel Salve", avatar: "👦", isSpeaking: false, color: "#3b82f6" }
-    ];
-    
-    mockUsers.forEach((user, index) => {
-      const cell = document.createElement("div");
-      cell.className = "video-cell video-cell-mock";
-      cell.id = `video-cell-mock-${index}`;
-      cell.style.position = "relative";
-      cell.style.background = "#141829";
-      cell.style.borderRadius = "12px";
-      cell.style.overflow = "hidden";
-      cell.style.display = "flex";
-      cell.style.alignItems = "center";
-      cell.style.justifyContent = "center";
-      cell.style.aspectRatio = "4/3";
-      cell.style.border = "2px solid transparent";
-      
-      cell.innerHTML = `
-        <div class="video-cell-avatar" style="background-color: ${user.color}; color: #fff;">${user.avatar}</div>
-        <div class="video-cell-label" style="position: absolute; bottom: 8px; left: 8px;">
-          <span>${user.name}</span>
-          <span class="mock-mic-status">🎙️</span>
-        </div>
-      `;
-      gridEl.appendChild(cell);
-    });
-
-    // Start interval loops to simulate interactions (Chat, Speaker swap, Reactions, Hand raises)
-    startSandboxInterval(mockUsers);
+  // Real-world multiuser meetings load MiroTalk P2P WebRTC
+  showToast("Connecting to live video call...");
+  
+  // Hide standard local stream cell & grid, show MiroTalk container
+  document.getElementById("video-cell-local").style.display = "none";
+  document.getElementById("meeting-video-grid").style.display = "none";
+  
+  const jitsiCont = document.getElementById("meeting-jitsi-container");
+  if (jitsiCont) {
+    jitsiCont.style.display = "block";
+    // Embed MiroTalk P2P WebRTC room inside the app
+    const roomUrl = `https://p2p.mirotalk.com/join/RiverOfLife_GauravSalve_${meeting.id}?name=${encodeURIComponent(loggedIn)}`;
+    jitsiCont.innerHTML = `
+      <iframe 
+        src="${roomUrl}" 
+        width="100%" 
+        height="100%" 
+        allow="camera; microphone; speaker-selection; display-capture; fullscreen; autoplay; picture-in-picture;" 
+        style="border: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; background: #090d16;">
+      </iframe>
+    `;
   }
+  
+  // Hide bottom custom controls toolbar to prevent overlap with MiroTalk's controls
+  const customToolbar = document.querySelector(".meeting-room-toolbar");
+  if (customToolbar) customToolbar.style.display = "none";
 
+      
   // Pre-seed some chat messages
   const chatScroller = document.getElementById("meeting-chat-messages");
   if (chatScroller) {
@@ -6583,6 +6476,7 @@ function launchLiveMeetingRoom(meeting, stream) {
     alert("Live Meeting Launch Error: " + err.message + "\nStack: " + err.stack);
   }
 }
+
 
 // Simulated active interactions inside sandbox
 function startSandboxInterval(mockUsers) {
