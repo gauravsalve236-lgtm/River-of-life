@@ -21,7 +21,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- Main Stylesheet -->
-  <link rel="stylesheet" href="index.css?v=65">
+  <link rel="stylesheet" href="index.css?v=100">
 </head>
 <body>
   
@@ -2009,320 +2009,184 @@
       </div>
     </div>
 
-    <!-- Fullscreen Live Meeting Room Modal (MS Teams Style Video Conferencing Stage) -->
-    <div id="modal-live-meeting" class="teams-dark-theme" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #090d16; color: #f8fafc; z-index: 2000; overflow: hidden;">
-      <div class="meeting-room-container" style="position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; overflow: hidden; background: #090d16;">
+    <!-- Fullscreen Live Meeting Room Modal -->
+    <div id="modal-live-meeting" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #090d16; color: #fff; z-index: 2000; overflow: hidden;">
+      <div class="meeting-room-container" style="position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; overflow: hidden;">
         
-        <!-- Top Bar Control Bar (MS Teams Utility Bar) -->
-        <div class="meeting-room-topbar" style="position: absolute; top: 0; left: 0; right: 0; height: 50px; background: #0f172a; border-bottom: 1px solid #1e293b; display: flex; justify-content: space-between; align-items: center; padding: 0 16px; z-index: 30; color: #f8fafc; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <span style="font-size: 10px; background: #ef4444; color: #fff; padding: 3px 8px; border-radius: 12px; font-weight: 800; display: flex; align-items: center; gap: 4px;" id="meeting-live-indicator">
+        <!-- Top Bar Overlay -->
+        <div class="meeting-room-topbar" style="position: absolute; top: 0; left: 0; right: 0; height: 50px; background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%); display: flex; justify-content: space-between; align-items: center; padding: 0 16px; z-index: 10;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 10px; background: #ef4444; color: #fff; padding: 2px 8px; border-radius: 4px; font-weight: 800; display: flex; align-items: center; gap: 4px;" id="meeting-live-indicator">
               <span style="display: inline-block; width: 6px; height: 6px; background: #fff; border-radius: 50%; animation: pulseGlow 1s infinite;"></span> LIVE
             </span>
-            <span id="meeting-room-title" style="font-size: 14px; font-weight: 800; color: #f8fafc;">Friday Family Prayer Fellowship</span>
-            <span id="meeting-recording-alert" style="font-size: 11px; background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #fca5a5; padding: 2px 8px; border-radius: 4px; font-weight: 700; display: none;">
+            <span id="meeting-room-title" style="font-size: 14px; font-weight: 700; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">Friday Family Prayer</span>
+            <span id="meeting-recording-alert" style="font-size: 11px; background: rgba(239, 68, 68, 0.2); border: 1.5px solid #ef4444; color: #f87171; padding: 2px 6px; border-radius: 4px; font-weight: 700; display: none;">
               🔴 RECORDING
             </span>
           </div>
-
           <div style="display: flex; gap: 8px; align-items: center;">
-            
-            <!-- MS Teams View Selector Dropdown -->
-            <div class="view-dropdown-wrapper" style="position: relative;">
-              <button id="btn-meeting-view-dropdown" onclick="toggleMeetingViewDropdown()" class="btn-secondary-mini" style="padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; background: #1e293b; border: 1px solid #334155; color: #f8fafc; display: flex; align-items: center; gap: 6px; cursor: pointer;" title="Switch Video Layout View">
-                <span>▦ Layout: <strong id="current-view-label" style="color: #60a5fa;">Gallery (Grid)</strong></span> ▾
-              </button>
-
-              <div id="meeting-view-dropdown-menu" style="display: none; position: absolute; top: 115%; right: 0; background: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 6px; width: 230px; z-index: 500; box-shadow: 0 10px 30px rgba(0,0,0,0.6); color: #f8fafc;">
-                <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; color: #64748b; padding: 4px 10px 6px 10px; border-bottom: 1px solid #1e293b; margin-bottom: 4px;">SELECT VIDEO VIEW</div>
-                <button onclick="switchMeetingView('gallery')" class="view-menu-item active" id="view-item-gallery" style="width: 100%; text-align: left; padding: 8px 12px; border: none; background: rgba(59, 130, 246, 0.15); color: #60a5fa; font-size: 12px; font-weight: 700; border-radius: 6px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; margin-bottom: 2px;">
-                  <span>▦ Gallery View (Grid)</span>
-                  <span class="check-mark">✓</span>
-                </button>
-                <button onclick="switchMeetingView('large-gallery')" class="view-menu-item" id="view-item-large-gallery" style="width: 100%; text-align: left; padding: 8px 12px; border: none; background: transparent; color: #cbd5e1; font-size: 12px; font-weight: 600; border-radius: 6px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; margin-bottom: 2px;">
-                  <span>▦ Large Gallery (7x7)</span>
-                  <span class="check-mark" style="display: none;">✓</span>
-                </button>
-                <button onclick="switchMeetingView('together')" class="view-menu-item" id="view-item-together" style="width: 100%; text-align: left; padding: 8px 12px; border: none; background: transparent; color: #cbd5e1; font-size: 12px; font-weight: 600; border-radius: 6px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; margin-bottom: 2px;">
-                  <span>🎭 Together Mode (Auditorium)</span>
-                  <span class="check-mark" style="display: none;">✓</span>
-                </button>
-                <button onclick="switchMeetingView('speaker')" class="view-menu-item" id="view-item-speaker" style="width: 100%; text-align: left; padding: 8px 12px; border: none; background: transparent; color: #cbd5e1; font-size: 12px; font-weight: 600; border-radius: 6px; display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
-                  <span>🎤 Speaker View (Focus + Filmstrip)</span>
-                  <span class="check-mark" style="display: none;">✓</span>
-                </button>
-              </div>
-            </div>
-
-            <!-- Toggle Real Live P2P Call Stream -->
-            <button id="btn-toggle-real-stream" onclick="toggleRealLiveStreamMode()" class="btn-secondary-mini" style="padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; background: #2563eb; border: 1px solid #3b82f6; color: #ffffff; display: flex; align-items: center; gap: 6px; cursor: pointer;" title="Toggle Real P2P Live Call">
-              📹 <span>Real Live Stream</span>
-            </button>
-
-            <!-- Scripture Share Button -->
-            <button id="btn-meeting-share-bible" class="btn-secondary-mini" style="padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; background: #b45309; border: 1px solid #d97706; color: #ffffff; display: flex; align-items: center; gap: 6px; cursor: pointer;" title="Share Scripture to Meeting">
+            <button id="btn-meeting-share-bible" class="btn-secondary-mini" style="padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; background: rgba(212, 175, 55, 0.2); border-color: rgba(212, 175, 55, 0.4); color: #d4af37; display: flex; align-items: center; gap: 6px; cursor: pointer; text-shadow: 0 1px 1px #000;" title="Share Scripture to Meeting">
               📖 <span>Share Word</span>
             </button>
-
-            <!-- Theme Toggle Button -->
-            <button id="btn-meeting-theme-toggle" onclick="toggleMeetingRoomTheme()" class="btn-secondary-mini" style="padding: 6px 10px; border-radius: 8px; font-size: 12px; font-weight: 700; background: #1e293b; border: 1px solid #334155; color: #f8fafc; cursor: pointer;" title="Toggle Dark/Light Theme">
-              🌙 <span>Dark</span>
+            <button id="btn-meeting-music" class="btn-secondary-mini" style="padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; background: rgba(59, 130, 246, 0.25); border-color: rgba(59, 130, 246, 0.4); color: #60a5fa; display: flex; align-items: center; gap: 6px; cursor: pointer; text-shadow: 0 1px 1px #000;" title="Play Background Music">
+              🎵 <span>Music</span>
             </button>
-
-            <!-- Leave Call Button -->
-            <button id="btn-meeting-exit-top" onclick="exitLiveMeetingRoom()" class="round-close-btn" style="font-size: 13px; padding: 6px 14px; border-radius: 8px; background: #ef4444; border: 1px solid #dc2626; color: #fff; font-weight: 800; cursor: pointer;" title="Leave Call">
-              🚪 Leave
-            </button>
+            <button class="round-close-btn" id="btn-meeting-info" style="font-size: 14px; width: 32px; height: 32px; background: rgba(255,255,255,0.1); border-color: transparent; color: #fff;" title="Meeting Details">ℹ️</button>
+            <button id="btn-meeting-exit-top" class="round-close-btn" style="font-size: 14.5px; width: 32px; height: 32px; background: #ef4444; border-color: #ef4444; color: #fff; font-weight: 800; display: flex; align-items: center; justify-content: center;" title="Leave Call">❌</button>
           </div>
         </div>
 
-        <!-- Dedicated Jitsi Fullscreen Container -->
-        <div id="meeting-jitsi-container" style="display: none; position: absolute; top: 50px; left: 56px; right: 0; bottom: 0; width: calc(100% - 56px); height: calc(100% - 50px); background: #090d16; z-index: 5;"></div>
+        <!-- Dedicated Jitsi Fullscreen Container (Absolute positioning guarantees it fills the call screen) -->
+        <div id="meeting-jitsi-container" style="display: none; position: absolute; top: 50px; left: 0; right: 0; bottom: 0; width: 100%; height: calc(100% - 50px); background: #090d16; z-index: 5;"></div>
 
         <!-- Floating Audio Stream Unmute Banner -->
-        <div id="meeting-worship-audio-banner" style="display: none; position: absolute; top: 60px; left: 50%; transform: translateX(-50%); background: #2563eb; color: #fff; padding: 10px 20px; border-radius: 30px; font-family: var(--font-ui); font-size: 12.5px; font-weight: 700; cursor: pointer; z-index: 1000; box-shadow: 0 4px 15px rgba(0,0,0,0.4); border: 1.5px solid #60a5fa; align-items: center; gap: 8px; transition: all 0.3s ease;">
+        <div id="meeting-worship-audio-banner" style="display: none; position: absolute; top: 60px; left: 50%; transform: translateX(-50%); background: rgba(59, 130, 246, 0.95); color: #fff; padding: 10px 20px; border-radius: 30px; font-family: var(--font-ui); font-size: 12.5px; font-weight: 700; cursor: pointer; z-index: 1000; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 1.5px solid rgba(255,255,255,0.25); align-items: center; gap: 8px; transition: all 0.3s ease;">
           <span>🔊 Tap to Hear Shared Song / गाणे ऐकण्यासाठी टॅप करा</span>
         </div>
 
-        <!-- Main Content Area: Left Rail + Video Views + Drawers -->
-        <div style="flex: 1; display: flex; width: 100%; overflow: hidden; position: relative; padding-top: 50px; padding-bottom: 0; background: #090d16;">
-          
-          <!-- Left Sidebar Rail (MS Teams Professional Vertical Toolbar - SVG Icons) -->
-          <div class="teams-left-rail" style="width: 56px; background: #0f172a; border-right: 1px solid #1e293b; display: flex; flex-direction: column; align-items: center; padding: 12px 0; gap: 16px; flex-shrink: 0; z-index: 40;">
-            <!-- Activity Ticker -->
-            <button class="teams-rail-btn active" title="Meeting Activity" style="color: #60a5fa; background: transparent; border: none; padding: 10px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-            </button>
-            <!-- Chat -->
-            <button class="teams-rail-btn" onclick="openMeetingSidebarPanel('chat')" title="Meeting Chat" style="color: #94a3b8; background: transparent; border: none; padding: 10px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            </button>
-            <!-- Participants -->
-            <button class="teams-rail-btn" onclick="openMeetingSidebarPanel('participants')" title="Participants List" style="color: #94a3b8; background: transparent; border: none; padding: 10px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            </button>
-            <!-- Scripture Share -->
-            <button class="teams-rail-btn" onclick="openDrawer('drawer-meet-share-bible')" title="Share Scripture" style="color: #f59e0b; background: transparent; border: none; padding: 10px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-            </button>
-            <!-- Worship Music -->
-            <button class="teams-rail-btn" onclick="openDrawer('drawer-meet-music')" title="Worship Music" style="color: #38bdf8; background: transparent; border: none; padding: 10px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-            </button>
-            <!-- Meeting Notes -->
-            <button class="teams-rail-btn" onclick="openMeetingSidebarPanel('notes')" title="Prayer & Sermon Notes" style="color: #a7f3d0; background: transparent; border: none; padding: 10px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-            </button>
-            <!-- Device Settings -->
-            <button class="teams-rail-btn" onclick="openDrawer('drawer-meet-settings')" title="Device & Call Settings" style="color: #94a3b8; background: transparent; border: none; padding: 10px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-top: auto;">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-            </button>
+        <!-- Floating Admin Audio Sharing Debug Panel Overlay -->
+        <div id="admin-audio-debug-panel" style="display: none; position: absolute; top: 60px; right: 16px; width: 340px; max-height: 80vh; overflow-y: auto; background: rgba(15, 23, 42, 0.95); border: 1.5px solid #334155; border-radius: 12px; padding: 14px; color: #e2e8f0; font-family: monospace; font-size: 11px; z-index: 3000; box-shadow: 0 10px 25px rgba(0,0,0,0.7); backdrop-filter: blur(10px);">
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 8px; margin-bottom: 8px;">
+            <strong style="color: #60a5fa; font-size: 12px;">📊 AUDIO SHARING DEBUG</strong>
+            <button onclick="document.getElementById('admin-audio-debug-panel').style.display='none'" style="background: none; border: none; color: #94a3b8; font-weight: 800; cursor: pointer; font-size: 14px;">✕</button>
           </div>
+          <div id="admin-audio-debug-content" style="white-space: pre-wrap; word-break: break-all; line-height: 1.4;">
+            Initializing audio diagnostic logger...
+          </div>
+        </div>
 
-          <!-- Center Stage Area: Shared Content + Video Views -->
-          <div style="flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; height: 100%; background: #090d16;">
+        <!-- Main Content Area: Video Grid and Drawers -->
+        <div style="flex: 1; display: flex; width: 100%; overflow: hidden; position: relative; padding-top: 50px; padding-bottom: 74px;">
+          
+          <!-- Left Area: Video Grid and YouTube stream -->
+          <div style="flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; height: 100%;">
             
             <!-- Joint Shared Content Area (Bible / YouTube) -->
-            <div id="meeting-shared-content-area" style="display: none; width: 100%; height: 45%; background: #ffffff; border-bottom: 2px solid #cbd5e1; overflow: hidden; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 25;">
-              <!-- Shared Bible passage container -->
-              <div id="meeting-shared-bible" style="display: none; width: 100%; height: 100%; overflow-y: auto; background: #ffffff; text-align: left;"></div>
-              
+            <div id="meeting-shared-content-area" style="display: none; width: 100%; height: 45%; background: #faf6eb; border-bottom: 2px solid #cbd5e1; overflow: hidden; position: relative;">
               <!-- YouTube frame container -->
               <div id="worship-video-frame-container" style="display: none; width: 100%; height: 100%;">
                 <div id="worship-youtube-player" style="width: 100%; height: 100%;"></div>
               </div>
-              
+              <!-- Shared Bible passage container -->
+              <div id="meeting-shared-bible" style="display: none; width: 100%; height: 100%; overflow-y: auto; background: #faf6eb; text-align: left;">
+                <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 10px;">
+                  <h5 id="shared-bible-title" style="font-size: 14px; font-weight: 800; color: var(--primary); margin: 0;">Psalm 23:1</h5>
+                  <span id="shared-bible-ctrl-tag" style="font-size: 10px; background: var(--pill-bg); color: var(--text-muted); padding: 2px 6px; border-radius: 4px;">Host Selected</span>
+                </div>
+                <blockquote id="shared-bible-text" style="font-family: var(--font-body); font-style: italic; font-size: 16px; line-height: 1.6; color: var(--text); margin: 0;">"The Lord is my shepherd..."</blockquote>
+              </div>
               <!-- Screen share frame container -->
-              <div id="meeting-screenshare-container" style="display: none; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #0f172a;">
+              <div id="meeting-screenshare-container" style="display: none; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #fff;">
                 <video id="local-screenshare-video" autoplay playsinline style="max-width: 100%; max-height: 100%; object-fit: contain;"></video>
               </div>
             </div>
 
-            <!-- VIEW 1: Gallery View (Default Grid View) -->
-            <div id="meeting-video-grid" class="meeting-video-grid gallery-view" style="flex: 1; padding: 12px; display: grid; gap: 10px; background: #090d16; align-content: center; justify-content: center; width: 100%; height: calc(100% - 64px); overflow-y: auto;">
+
+            <!-- Participant Video Grid -->
+            <div id="meeting-video-grid" class="meeting-video-grid" style="flex: 1; padding: 12px; display: grid; gap: 8px; background: #090d16; align-content: center; justify-content: center; width: 100%; height: 100%; overflow-y: auto;">
               <!-- Local camera stream cell -->
-              <div class="video-cell" id="video-cell-local" style="position: relative; background: #1e293b; border-radius: 14px; overflow: hidden; display: flex; align-items: center; justify-content: center; aspect-ratio: 4/3; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 1.5px solid #334155;">
-                <video id="meeting-local-video" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); display: none;"></video>
-                <div class="video-cell-avatar" id="video-cell-local-avatar" style="position: absolute; font-size: 32px; font-weight: 800; width: 64px; height: 64px; border-radius: 50%; background: #fef3c7; color: #92400e; display: flex; align-items: center; justify-content: center; border: 2px solid #fde68a;">U</div>
-                <div class="video-cell-label" style="position: absolute; bottom: 8px; left: 8px; font-size: 11px; font-weight: 700; background: rgba(15, 23, 42, 0.85); color: #f8fafc; padding: 4px 10px; border-radius: 6px; display: flex; align-items: center; gap: 6px; border: 1px solid #334155;">
+              <div class="video-cell" id="video-cell-local" style="position: relative; background: #1a2035; border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center; aspect-ratio: 4/3; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+                <video id="meeting-local-video" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1);"></video>
+                <div class="video-cell-avatar" id="video-cell-local-avatar" style="position: absolute; font-size: 32px; font-weight: 800; width: 64px; height: 64px; border-radius: 50%; background: var(--primary); color: #000; display: none; align-items: center; justify-content: center;">U</div>
+                <div class="video-cell-label" style="position: absolute; bottom: 8px; left: 8px; font-size: 11px; font-weight: 700; background: rgba(0,0,0,0.6); padding: 4px 8px; border-radius: 4px; display: flex; align-items: center; gap: 6px;">
                   <span id="meeting-local-name">You (Host)</span>
                   <span id="meeting-local-mic-status">🎙️</span>
                 </div>
               </div>
+              <!-- Mock participants populated dynamically -->
             </div>
-
-            <!-- VIEW 2: Large Gallery View (7x7 Matrix, Up to 49 Participants) -->
-            <div id="meeting-large-gallery-grid" style="display: none; flex: 1; padding: 10px; grid-template-columns: repeat(7, 1fr); gap: 6px; background: #090d16; align-content: center; width: 100%; height: calc(100% - 64px); overflow-y: auto;">
-              <!-- Populated dynamically with 49 participant tiles -->
-            </div>
-
-            <!-- VIEW 3: Together Mode View (Auditorium / Stadium Layout) -->
-            <div id="meeting-together-mode" style="display: none; flex: 1; width: 100%; height: calc(100% - 64px); background: radial-gradient(circle at center, #1e1b4b 0%, #090d16 100%); position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 30px;">
-              <!-- Stadium seating backdrop -->
-              <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(30, 27, 75, 0.8), rgba(9, 13, 22, 0.95)); pointer-events: none;"></div>
-              <div id="together-mode-auditorium-seats" style="position: relative; z-index: 10; width: 100%; max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; padding: 0 20px;">
-                <!-- Populated dynamically with tiered auditorium seating rows -->
-              </div>
-            </div>
-
-            <!-- VIEW 4: Speaker View (Focused Active Speaker + Bottom Filmstrip) -->
-            <div id="meeting-speaker-view" style="display: none; flex: 1; width: 100%; height: calc(100% - 64px); flex-direction: column; background: #090d16; overflow: hidden;">
-              <!-- Focused Main Active Speaker Stage -->
-              <div id="speaker-view-main-stage" style="flex: 1; position: relative; background: #0f172a; margin: 10px 10px 0 10px; border-radius: 16px; overflow: hidden; border: 2px solid #a855f7; box-shadow: 0 0 25px rgba(168, 85, 247, 0.4); display: flex; align-items: center; justify-content: center;">
-                <!-- Main speaker content populated dynamically -->
-              </div>
-              <!-- Bottom Horizontal Scrolling Filmstrip -->
-              <div id="speaker-view-filmstrip" style="height: 110px; padding: 10px; display: flex; gap: 10px; overflow-x: auto; background: #090d16; align-items: center;">
-                <!-- Horizontal participant cards -->
-              </div>
-            </div>
-
-            <!-- Bottom Call Control Bar (Focused MS Teams Action Toolbar - SVG Icons, No Duplicates!) -->
-            <div class="meeting-room-toolbar" style="height: 64px; background: #0f172a; border-top: 1px solid #1e293b; display: flex; justify-content: center; align-items: center; gap: 16px; padding: 0 16px; z-index: 30; flex-shrink: 0;">
-              
-              <!-- Mute / Unmute Mic -->
-              <button id="btn-meet-mic" class="control-btn" style="width: 44px; height: 44px; border-radius: 50%; background: #334155; border: 1px solid #475569; color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer;" title="Mute / Unmute Microphone">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
-              </button>
-
-              <!-- Camera On / Off -->
-              <button id="btn-meet-cam" class="control-btn" style="width: 44px; height: 44px; border-radius: 50%; background: #334155; border: 1px solid #475569; color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer;" title="Camera On / Off">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 8-6 4 6 4V8z"/><rect x="2" y="6" width="14" height="12" rx="2" ry="2"/></svg>
-              </button>
-
-              <!-- Share Screen -->
-              <button id="btn-meet-screenshare" class="control-btn" style="width: 44px; height: 44px; border-radius: 50%; background: #334155; border: 1px solid #475569; color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer;" title="Share Screen / App">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/><path d="M12 11l-3-3h6l-3 3z"/></svg>
-              </button>
-
-              <!-- Live Reactions Picker (Hand Raise & Emojis) -->
-              <div style="position: relative;">
-                <button id="btn-meet-reactions" onclick="toggleReactionMenu()" class="control-btn" style="width: 44px; height: 44px; border-radius: 50%; background: #334155; border: 1px solid #475569; color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer;" title="Reactions & Raise Hand">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
-                </button>
-
-                <!-- Floating Reactions Popup Bar -->
-                <div id="meeting-reactions-menu" style="display: none; position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%); background: #0f172a; border: 1px solid #334155; border-radius: 30px; padding: 6px 12px; gap: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 500;">
-                  <button onclick="sendLiveEmojiReaction('👍')" style="background: none; border: none; font-size: 20px; cursor: pointer;" title="Like">👍</button>
-                  <button onclick="sendLiveEmojiReaction('❤️')" style="background: none; border: none; font-size: 20px; cursor: pointer;" title="Love">❤️</button>
-                  <button onclick="sendLiveEmojiReaction('👏')" style="background: none; border: none; font-size: 20px; cursor: pointer;" title="Clap">👏</button>
-                  <button onclick="sendLiveEmojiReaction('😮')" style="background: none; border: none; font-size: 20px; cursor: pointer;" title="Wow">😮</button>
-                  <button onclick="toggleHandRaise(); toggleReactionMenu();" style="background: none; border: none; font-size: 20px; cursor: pointer;" title="Raise Hand">✋</button>
-                </div>
-              </div>
-
-              <!-- End Call Button (Pill Button) -->
-              <button id="btn-meet-leave-bottom" onclick="exitLiveMeetingRoom()" class="control-btn" style="padding: 0 20px; height: 44px; border-radius: 22px; background: #ef4444; border: 1px solid #dc2626; color: #fff; font-weight: 800; font-size: 13.5px; display: flex; align-items: center; gap: 8px; cursor: pointer;" title="End Call">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08a.996.996 0 0 1 0-1.41C2.97 9.17 6.98 7.5 12 7.5s9.03 1.67 11.71 4.17c.39.39.39 1.02 0 1.41l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/></svg>
-                <span>End Call</span>
-              </button>
-            </div>
-
           </div>
 
-          <!-- Right Area: Sidebar Drawers ( Chat / Participants / Notes ) -->
-          <div id="meeting-sidebar-panel" style="width: 320px; height: 100%; border-left: 1px solid #1e293b; background: #0f172a; display: none; flex-direction: column; overflow: hidden; position: absolute; right: 0; top: 0; bottom: 0; z-index: 20;">
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid #1e293b; flex-shrink: 0; background: #0f172a; color: #f8fafc;">
-              <h4 id="meeting-sidebar-title" style="font-family: var(--font-ui); font-size: 14px; font-weight: 800; color: #f8fafc; margin: 0;">Chat</h4>
-              <button id="btn-close-meeting-sidebar" style="background: transparent; border: none; font-size: 20px; color: #94a3b8; cursor: pointer;">&times;</button>
+          <!-- Right Area: Sidebar Drawers ( Bible, Worship, Chat, Participants, Host Controls ) -->
+          <div id="meeting-sidebar-panel" style="width: 320px; height: 100%; border-left: 1px solid var(--border); background: var(--drawer-bg); display: none; flex-direction: column; overflow: hidden; position: absolute; right: 0; top: 0; bottom: 0; z-index: 20;">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid var(--border); flex-shrink: 0;">
+              <h4 id="meeting-sidebar-title" style="font-family: var(--font-ui); font-size: 14px; font-weight: 800; color: var(--primary); margin: 0;">Chat</h4>
+              <button id="btn-close-meeting-sidebar" style="background: transparent; border: none; font-size: 20px; color: var(--text); cursor: pointer;">&times;</button>
             </div>
             
             <!-- Drawer Panel 1: Chat -->
-            <div id="meeting-panel-chat" style="flex: 1; display: none; flex-direction: column; overflow: hidden; background: #0f172a;">
-              <div id="meeting-chat-messages" style="flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; font-size: 12.5px; text-align: left; background: #0f172a; color: #f8fafc;">
+            <div id="meeting-panel-chat" style="flex: 1; display: none; flex-direction: column; overflow: hidden;">
+              <div id="meeting-chat-messages" style="flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; font-size: 12.5px; text-align: left;">
                 <!-- Chat bubbles -->
               </div>
-              <div style="padding: 10px; border-top: 1px solid #1e293b; display: flex; gap: 8px; background: #090d16;">
-                <input type="text" id="meeting-chat-input" placeholder="Type a message..." style="flex: 1; padding: 8px 12px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: #f8fafc; font-size: 13px;">
-                <button id="btn-meeting-chat-send" class="btn-primary-mini" style="margin: 0; padding: 8px 12px; border-radius: 8px; background: #3b82f6; border-color: #3b82f6; color: #fff; font-weight: 700;">Send</button>
+              <div style="padding: 10px; border-top: 1px solid var(--border); display: flex; gap: 8px; background: var(--bg-content);">
+                <input type="text" id="meeting-chat-input" placeholder="Type a message..." style="flex: 1; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 13px;">
+                <button id="btn-meeting-chat-send" class="btn-primary-mini" style="margin: 0; padding: 8px 12px; border-radius: 8px;">Send</button>
               </div>
             </div>
             
             <!-- Drawer Panel 2: Participants -->
-            <div id="meeting-panel-participants" style="flex: 1; display: none; overflow-y: auto; padding: 12px; background: #0f172a; color: #f8fafc;">
-              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; text-transform: uppercase; font-weight: 800; color: #94a3b8; margin-bottom: 10px;">
+            <div id="meeting-panel-participants" style="flex: 1; display: none; overflow-y: auto; padding: 12px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; text-transform: uppercase; font-weight: 800; color: var(--text-muted); margin-bottom: 10px;">
                 <span>Active Participants</span>
-                <span id="meeting-participants-count" style="color: #60a5fa;">12</span>
+                <span id="meeting-participants-count">1</span>
               </div>
               <div id="meeting-participants-list" style="display: flex; flex-direction: column; gap: 8px;">
-                <!-- Participant list items -->
+                <!-- Participant list items with moderation triggers -->
               </div>
             </div>
-
-            <!-- Drawer Panel 3: Prayer & Meeting Notes (New Teams Option) -->
-            <div id="meeting-panel-notes" style="flex: 1; display: none; flex-direction: column; padding: 14px; background: #0f172a; color: #f8fafc; text-align: left;">
-              <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #a7f3d0; margin-bottom: 8px;">📝 Meeting Notes & Prayer Requests</div>
-              <textarea id="meeting-notes-textarea" placeholder="Type sermon points or prayer requests here..." style="flex: 1; width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #334155; background: #1e293b; color: #f8fafc; font-family: var(--font-body); font-size: 13.5px; line-height: 1.6; resize: none;"></textarea>
-              <button onclick="showToast('📝 Meeting notes saved!')" class="btn-primary-block" style="margin-top: 10px; padding: 10px; border-radius: 8px; background: #10b981; border: none; color: #fff; font-weight: 800; cursor: pointer;">Save Notes</button>
-            </div>
-          </div>
-
-        </div>
-
-      </div>
-    </div>
             
             <!-- Drawer Panel 3: Bible Mode -->
-            <div id="meeting-panel-bible" style="flex: 1; display: none; overflow-y: auto; padding: 12px; text-align: left; background: #ffffff;">
-              <h5 style="font-size: 12px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 12px;">Bible Scripture Sync</h5>
+            <div id="meeting-panel-bible" style="flex: 1; display: none; overflow-y: auto; padding: 12px; text-align: left;">
+              <h5 style="font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 12px;">Bible Scripture Sync</h5>
               <div style="display: flex; flex-direction: column; gap: 10px;">
                 <div style="display: flex; flex-direction: column; gap: 4px;">
-                  <label style="font-size: 11px; font-weight: 700; color: #64748b;">Select Translation</label>
-                  <select id="meeting-bible-trans" class="dropdown-selector" style="width: 100%; background: #f8fafc; color: #0f172a; border-color: #cbd5e1;">
+                  <label style="font-size: 11px; font-weight: 700; color: var(--text-muted);">Select Translation</label>
+                  <select id="meeting-bible-trans" class="dropdown-selector" style="width: 100%;">
                     <option value="mar">मराठी (MARVBSI)</option>
                     <option value="eng">English (KJV)</option>
                   </select>
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 4px;">
-                  <label style="font-size: 11px; font-weight: 700; color: #64748b;">Select Book</label>
-                  <select id="meeting-bible-book" class="dropdown-selector" style="width: 100%; background: #f8fafc; color: #0f172a; border-color: #cbd5e1;">
+                  <label style="font-size: 11px; font-weight: 700; color: var(--text-muted);">Select Book</label>
+                  <select id="meeting-bible-book" class="dropdown-selector" style="width: 100%;">
                     <!-- Populated dynamically -->
                   </select>
                 </div>
                 <div style="display: flex; gap: 8px;">
                   <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
-                    <label style="font-size: 11px; font-weight: 700; color: #64748b;">Chapter</label>
-                    <select id="meeting-bible-chapter" class="dropdown-selector" style="width: 100%; background: #f8fafc; color: #0f172a; border-color: #cbd5e1;"></select>
+                    <label style="font-size: 11px; font-weight: 700; color: var(--text-muted);">Chapter</label>
+                    <select id="meeting-bible-chapter" class="dropdown-selector" style="width: 100%;"></select>
                   </div>
                   <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
-                    <label style="font-size: 11px; font-weight: 700; color: #64748b;">Verse</label>
-                    <select id="meeting-bible-verse" class="dropdown-selector" style="width: 100%; background: #f8fafc; color: #0f172a; border-color: #cbd5e1;"></select>
+                    <label style="font-size: 11px; font-weight: 700; color: var(--text-muted);">Verse</label>
+                    <select id="meeting-bible-verse" class="dropdown-selector" style="width: 100%;"></select>
                   </div>
                 </div>
-                <button id="btn-sync-bible-verse" class="btn-primary-block" style="margin-top: 10px; padding: 10px; font-size: 13px; background: #d4af37; border-color: #d4af37; color: #000; font-weight: 800;">
+                <button id="btn-sync-bible-verse" class="btn-primary-block" style="margin-top: 10px; padding: 10px; font-size: 13px;">
                   Sync Scripture / वचन दाखवा
                 </button>
               </div>
             </div>
             
             <!-- Drawer Panel 4: Worship Mode (YouTube share) -->
-            <div id="meeting-panel-worship" style="flex: 1; display: none; overflow-y: auto; padding: 12px; text-align: left; background: #ffffff;">
-              <h5 style="font-size: 12px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 12px;">Share Worship Content</h5>
+            <div id="meeting-panel-worship" style="flex: 1; display: none; overflow-y: auto; padding: 12px; text-align: left;">
+              <h5 style="font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 12px;">Share Worship Content</h5>
               <div style="display: flex; flex-direction: column; gap: 12px;">
                 <div style="display: flex; flex-direction: column; gap: 4px;">
-                  <label style="font-size: 11px; font-weight: 700; color: #64748b;">YouTube Video Link / युट्यूब लिंक</label>
-                  <input type="text" id="worship-youtube-url" class="dropdown-selector" style="padding: 8px; font-size: 12.5px; width: 100%; background: #f8fafc; color: #0f172a; border-color: #cbd5e1;" placeholder="https://www.youtube.com/watch?v=...">
+                  <label style="font-size: 11px; font-weight: 700; color: var(--text-muted);">YouTube Video Link / युट्यूब लिंक</label>
+                  <input type="text" id="worship-youtube-url" class="dropdown-selector" style="padding: 8px; font-size: 12.5px; width: 100%;" placeholder="https://www.youtube.com/watch?v=...">
                 </div>
                 
                 <div style="display: flex; flex-direction: column; gap: 4px;">
-                  <label style="font-size: 11px; font-weight: 700; color: #64748b;">Share Mode / शेअर करण्याचे पर्याय</label>
-                  <select id="worship-youtube-mode" class="dropdown-selector" style="width: 100%; padding: 8px; font-size: 12.5px; background: #f8fafc; color: #0f172a; border-color: #cbd5e1;">
+                  <label style="font-size: 11px; font-weight: 700; color: var(--text-muted);">Share Mode / शेअर करण्याचे पर्याय</label>
+                  <select id="worship-youtube-mode" class="dropdown-selector" style="width: 100%; padding: 8px; font-size: 12.5px;">
                     <option value="audio">Audio Only (Background) / फक्त ऑडिओ</option>
                     <option value="video">Show Video & Audio / व्हिडिओ आणि ऑडिओ</option>
                   </select>
                 </div>
 
-                <button id="btn-sync-worship-video" class="btn-primary-block" style="padding: 10px; font-size: 13px; background: #d4af37; border-color: #d4af37; color: #000; font-weight: 800;">
+                <button id="btn-sync-worship-video" class="btn-primary-block" style="padding: 10px; font-size: 13px;">
                   Play Video / गाणे लावा
                 </button>
                 
-                <div style="border-top: 1px solid #e2e8f0; padding-top: 12px; margin-top: 8px;">
-                  <label style="font-size: 11px; font-weight: 700; color: #64748b; display: block; margin-bottom: 8px;">Quick Worship Songs (Bilingual)</label>
+                <div style="border-top: 1px solid var(--border); padding-top: 12px; margin-top: 8px;">
+                  <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 8px;">Quick Worship Songs (Bilingual)</label>
                   <div style="display: flex; flex-direction: column; gap: 6px;">
-                    <button class="crossref-link-item quick-song-btn" data-url="https://www.youtube.com/watch?v=nQWFzMvCfLE" style="padding: 8px; font-size: 12px; background: #f8fafc; border: 1px solid #e2e8f0; color: #0f172a;">
+                    <button class="crossref-link-item quick-song-btn" data-url="https://www.youtube.com/watch?v=nQWFzMvCfLE" style="padding: 8px; font-size: 12px;">
                       🎸 Give Thanks (कृतज्ञतेने)
                     </button>
-                    <button class="crossref-link-item quick-song-btn" data-url="https://www.youtube.com/watch?v=C1Tio_tU1xM" style="padding: 8px; font-size: 12px; background: #f8fafc; border: 1px solid #e2e8f0; color: #0f172a;">
+                    <button class="crossref-link-item quick-song-btn" data-url="https://www.youtube.com/watch?v=C1Tio_tU1xM" style="padding: 8px; font-size: 12px;">
                       🎹 10,000 Reasons (हजारो कारणे)
                     </button>
                   </div>
@@ -2331,37 +2195,37 @@
             </div>
             
             <!-- Drawer Panel 5: Host Moderator Controls -->
-            <div id="meeting-panel-host" style="flex: 1; display: none; overflow-y: auto; padding: 12px; text-align: left; background: #ffffff;">
-              <h5 style="font-size: 12px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 12px;">Moderator Panel</h5>
+            <div id="meeting-panel-host" style="flex: 1; display: none; overflow-y: auto; padding: 12px; text-align: left;">
+              <h5 style="font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 12px;">Moderator Panel</h5>
               <div style="display: flex; flex-direction: column; gap: 12px;">
-                <button id="btn-host-mute-all" class="btn-secondary-mini" style="width: 100%; padding: 10px; text-align: left; display: flex; align-items: center; gap: 8px; background: #f8fafc; border-color: #cbd5e1; color: #0f172a;">
+                <button id="btn-host-mute-all" class="btn-secondary-mini" style="width: 100%; padding: 10px; text-align: left; display: flex; align-items: center; gap: 8px;">
                   🎙️ <span>Mute All Participants</span>
                 </button>
-                <button id="btn-host-lock-meeting" class="btn-secondary-mini" style="width: 100%; padding: 10px; text-align: left; display: flex; align-items: center; gap: 8px; background: #f8fafc; border-color: #cbd5e1; color: #0f172a;">
+                <button id="btn-host-lock-meeting" class="btn-secondary-mini" style="width: 100%; padding: 10px; text-align: left; display: flex; align-items: center; gap: 8px;">
                   🔒 <span>Lock Meeting</span>
                 </button>
-                <button id="btn-host-toggle-record" class="btn-danger-mini" style="width: 100%; padding: 10px; text-align: left; display: flex; align-items: center; gap: 8px; background: rgba(239, 68, 68, 0.1); color: #ef4444;">
+                <button id="btn-host-toggle-record" class="btn-danger-mini" style="width: 100%; padding: 10px; text-align: left; display: flex; align-items: center; gap: 8px; background: rgba(239, 68, 68, 0.1); color: var(--danger);">
                   🔴 <span id="host-record-btn-text">Start Recording</span>
                 </button>
-                <div style="border-top: 1px solid #e2e8f0; padding-top: 12px; margin-top: 8px; font-size: 13px; color: #0f172a;">
+                <div style="border-top: 1px solid var(--border); padding-top: 12px; margin-top: 8px; font-size: 13px;">
                   <strong>Meeting Permissions:</strong>
                   <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                       <span>Allow Member Chat</span>
-                      <input type="checkbox" id="chk-host-allow-chat" checked style="accent-color: #d4af37;">
+                      <input type="checkbox" id="chk-host-allow-chat" checked style="accent-color: var(--primary);">
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                       <span>Allow Reactions</span>
-                      <input type="checkbox" id="chk-host-allow-reactions" checked style="accent-color: #d4af37;">
+                      <input type="checkbox" id="chk-host-allow-reactions" checked style="accent-color: var(--primary);">
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                       <span>Allow Screen Share</span>
-                      <input type="checkbox" id="chk-host-allow-screenshare" checked style="accent-color: #d4af37;">
+                      <input type="checkbox" id="chk-host-allow-screenshare" checked style="accent-color: var(--primary);">
                     </div>
                   </div>
                 </div>
                 
-                <button id="btn-host-end-meeting" class="btn-danger-block" style="width: 100%; padding: 12px; border-radius: 8px; font-size: 13px; font-weight: 800; margin-top: 20px; background-color: #ef4444; border: none; color: #fff; cursor: pointer;">
+                <button id="btn-host-end-meeting" class="btn-danger-block" style="width: 100%; padding: 12px; border-radius: 8px; font-size: 13px; font-weight: 800; margin-top: 20px; background-color: var(--danger); border: none; color: #fff; cursor: pointer;">
                   End Meeting for Everyone
                 </button>
               </div>
@@ -2370,25 +2234,39 @@
           
         </div>
 
-
+        <!-- Bottom Toolbar Control Panel -->
+        <div class="meeting-room-toolbar" style="position: absolute; bottom: 0; left: 0; right: 0; height: 74px; background: rgba(9, 13, 22, 0.95); border-top: 1px solid var(--border); display: flex; justify-content: center; align-items: center; padding: 0 10px; z-index: 10; gap: 8px; overflow-x: auto; white-space: nowrap;">
+          <button class="control-icon-btn active" id="btn-meet-mic" title="Toggle Mic" style="background: rgba(255,255,255,0.08); border: none; color: #fff; width: 44px; height: 44px; border-radius: 50%; cursor: pointer;">🎙️</button>
+          <button class="control-icon-btn active" id="btn-meet-video" title="Toggle Video" style="background: rgba(255,255,255,0.08); border: none; color: #fff; width: 44px; height: 44px; border-radius: 50%; cursor: pointer;">📹</button>
+          <button class="control-icon-btn" id="btn-meet-screenshare" title="Share Screen" style="background: rgba(255,255,255,0.08); border: none; color: #fff; width: 44px; height: 44px; border-radius: 50%; cursor: pointer;">🖥️</button>
+          <button class="control-icon-btn" id="btn-meet-chat" title="Chat" style="background: rgba(255,255,255,0.08); border: none; color: #fff; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; position: relative;">💬<span id="meet-chat-badge" style="position: absolute; top: 0; right: 0; background: #ef4444; color: #fff; font-size: 9px; width: 14px; height: 14px; border-radius: 50%; display: none; align-items: center; justify-content: center; font-weight: 800;">1</span></button>
+          <button class="control-icon-btn" id="btn-meet-hand" title="Raise Hand" style="background: rgba(255,255,255,0.08); border: none; color: #fff; width: 44px; height: 44px; border-radius: 50%; cursor: pointer;">✋</button>
+          <button class="control-icon-btn" id="btn-meet-prayer" title="Live Prayer Request" style="background: rgba(255,255,255,0.08); border: none; color: #fff; width: 44px; height: 44px; border-radius: 50%; cursor: pointer;">🙏</button>
+          <button class="control-icon-btn" id="btn-meet-reactions" title="Reactions" style="background: rgba(255,255,255,0.08); border: none; color: #fff; width: 44px; height: 44px; border-radius: 50%; cursor: pointer;">😊</button>
+          <button class="control-icon-btn" id="btn-meet-members" title="Participants" style="background: rgba(255,255,255,0.08); border: none; color: #fff; width: 44px; height: 44px; border-radius: 50%; cursor: pointer;">👥</button>
+          <button class="control-icon-btn" id="btn-meet-bible" title="Bible Mode" style="background: rgba(255,255,255,0.08); border: none; color: #fff; width: 44px; height: 44px; border-radius: 50%; cursor: pointer;">📖</button>
+          <button class="control-icon-btn" id="btn-meet-worship" title="Worship Mode" style="background: rgba(255,255,255,0.08); border: none; color: #fff; width: 44px; height: 44px; border-radius: 50%; cursor: pointer;">🎵</button>
+          <button class="control-icon-btn" id="btn-meet-moderator" title="Host Controls" style="background: rgba(255,255,255,0.08); border: none; color: #fff; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; display: none;">⚙️</button>
+          <button class="control-icon-btn leave-btn" id="btn-meet-leave" title="Leave Call" style="background: #ef4444; border: none; color: #fff; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center;">🔴</button>
+        </div>
 
         <!-- Reconnection overlay banner -->
-        <div id="meet-reconnecting-overlay" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 100; flex-direction: column; align-items: center; justify-content: center; gap: 16px; color: #0f172a;">
-          <div class="ios-spinner" style="border-top-color: #d4af37;"></div>
+        <div id="meet-reconnecting-overlay" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(9,13,22,0.9); z-index: 100; flex-direction: column; align-items: center; justify-content: center; gap: 16px;">
+          <div class="ios-spinner" style="border-top-color: var(--primary);"></div>
           <span style="font-family: var(--font-ui); font-size: 15px; font-weight: 700;">Reconnecting / पुन्हा जोडत आहे...</span>
         </div>
         
         <!-- Temp Reactions Overlay Panel -->
-        <div id="meet-reactions-select-panel" style="display: none; position: absolute; bottom: 84px; background: rgba(255, 255, 255, 0.95); border: 1px solid #cbd5e1; border-radius: 30px; padding: 6px 12px; gap: 10px; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+        <div id="meet-reactions-select-panel" style="display: none; position: absolute; bottom: 84px; background: rgba(9, 13, 22, 0.9); border: 1px solid var(--border); border-radius: 30px; padding: 6px 12px; gap: 10px; z-index: 100;">
           <button class="reaction-select-btn" data-reaction="🙏" style="background: none; border: none; font-size: 20px; cursor: pointer;">🙏</button>
           <button class="reaction-select-btn" data-reaction="❤️" style="background: none; border: none; font-size: 20px; cursor: pointer;">❤️</button>
           <button class="reaction-select-btn" data-reaction="🙌" style="background: none; border: none; font-size: 20px; cursor: pointer;">🙌</button>
           <button class="reaction-select-btn" data-reaction="👏" style="background: none; border: none; font-size: 20px; cursor: pointer;">👏</button>
-          <button class="reaction-select-btn" data-reaction="Amen" style="background: #fef3c7; border: 1px solid #fde68a; font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 12px; color: #92400e; cursor: pointer;">Amen</button>
+          <button class="reaction-select-btn" data-reaction="Amen" style="background: var(--pill-bg); border: none; font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 12px; color: #fff; cursor: pointer;">Amen</button>
         </div>
         
         <!-- Live meeting Floating Reactions display container -->
-        <div id="meet-floating-reactions-container" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 25; overflow: hidden;"></div>
+        <div id="meet-floating-reactions-container" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; overflow: hidden;"></div>
 
         <!-- Hidden Background YouTube Player (Plays praise audio for everyone silently in the background) -->
         <div id="hidden-youtube-audio-container" style="position: absolute; top: -9999px; left: -9999px; width: 1px; height: 1px; overflow: hidden; opacity: 0.01; pointer-events: none;"></div>
@@ -2397,26 +2275,26 @@
 
     <!-- Meeting Live Prayer Request Submission Drawer -->
     <div id="drawer-meet-prayer-request" class="drawer-overlay">
-      <div class="ios-drawer-sheet" style="max-height: 50%; background: #ffffff; color: #0f172a;">
-        <div class="drawer-header-row" style="border-bottom: 1px solid #e2e8f0;">
+      <div class="ios-drawer-sheet" style="max-height: 50%;">
+        <div class="drawer-header-row">
           <div class="grabber-bar"></div>
-          <h3 style="color: #0f172a;">Submit Live Prayer Request / प्रार्थना विनंती</h3>
-          <button class="close-drawer-btn" id="btn-close-meet-prayer-request" style="color: #64748b;">&times;</button>
+          <h3>Submit Live Prayer Request / प्रार्थना विनंती</h3>
+          <button class="close-drawer-btn" id="btn-close-meet-prayer-request">&times;</button>
         </div>
         <div class="drawer-body-settings" style="padding: 20px;">
           <form id="meet-prayer-form" onsubmit="return false;" style="display: flex; flex-direction: column; gap: 12px; text-align: left;">
             <div class="form-input-group" style="display: flex; flex-direction: column; gap: 4px;">
-              <label for="meet-prayer-text" style="font-size: 12px; font-weight: 700; color: #64748b;">Your Request / तुमची विनंती</label>
-              <input type="text" id="meet-prayer-text" class="dropdown-selector" style="width: 100%; text-align: left; padding: 10px; background: #f8fafc; color: #0f172a; border-color: #cbd5e1;" placeholder="e.g. Please pray for my family." required>
+              <label for="meet-prayer-text" style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Your Request / तुमची विनंती</label>
+              <input type="text" id="meet-prayer-text" class="dropdown-selector" style="width: 100%; text-align: left; padding: 10px;" placeholder="e.g. Please pray for my family." required>
             </div>
             <div class="form-input-group" style="display: flex; flex-direction: column; gap: 4px;">
-              <label for="meet-privacy" style="font-size: 12px; font-weight: 700; color: #64748b;">Who can see? / कोणास दिसावे?</label>
-              <select id="meet-prayer-privacy" class="dropdown-selector" style="width: 100%; background: #f8fafc; color: #0f172a; border-color: #cbd5e1;">
+              <label for="meet-prayer-privacy" style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Who can see? / कोणास दिसावे?</label>
+              <select id="meet-prayer-privacy" class="dropdown-selector" style="width: 100%;">
                 <option value="public" selected>All Meeting Participants / सर्व सदस्य</option>
                 <option value="private">Host Only / फक्त होस्ट आणि पास्टर</option>
               </select>
             </div>
-            <button type="submit" id="btn-meet-prayer-submit" class="btn-primary-block" style="padding: 12px; margin-top: 10px; background: #d4af37; border-color: #d4af37; color: #000; font-weight: 800;">
+            <button type="submit" id="btn-meet-prayer-submit" class="btn-primary-block" style="padding: 12px; margin-top: 10px;">
               Send Request / पाठवा
             </button>
           </form>
@@ -2426,37 +2304,37 @@
 
     <!-- Media Share Choice Drawer / Modal -->
     <div id="drawer-meet-share-media" class="drawer-overlay" style="z-index: 2600;">
-      <div class="ios-drawer-sheet" style="max-height: 65%; background: #ffffff; color: #0f172a;">
-        <div class="drawer-header-row" style="border-bottom: 1px solid #e2e8f0;">
+      <div class="ios-drawer-sheet" style="max-height: 65%; background: #0f172a; color: #fff;">
+        <div class="drawer-header-row" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
           <div class="grabber-bar"></div>
-          <h3 style="color: #0f172a;">Share with Meeting / सभेत शेअर करा</h3>
-          <button class="close-drawer-btn" onclick="closeDrawer('drawer-meet-share-media')" style="color: #64748b;">&times;</button>
+          <h3 style="color: #fff;">Share with Meeting / सभेत शेअर करा</h3>
+          <button class="close-drawer-btn" onclick="closeDrawer('drawer-meet-share-media')" style="color: #fff;">&times;</button>
         </div>
         <div class="drawer-body-settings" style="padding: 20px; display: flex; flex-direction: column; gap: 16px; text-align: left;">
           
-          <div style="font-size: 13px; color: #64748b; line-height: 1.5;">
+          <div style="font-size: 13px; color: #94a3b8; line-height: 1.5;">
             Choose how you want to share media with meeting participants:
           </div>
 
           <!-- Mode 1: Video + Audio -->
-          <button id="btn-share-mode-video" class="btn-primary-block" style="padding: 16px; border-radius: 14px; background: #f8fafc; border: 1.5px solid #cbd5e1; color: #0f172a; text-align: left; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: all 0.2s ease;">
-            <span style="font-size: 28px; background: rgba(37, 99, 235, 0.1); padding: 10px; border-radius: 12px;">🎥</span>
+          <button id="btn-share-mode-video" class="btn-primary-block" style="padding: 16px; border-radius: 14px; background: #1e293b; border: 1.5px solid #334155; color: #fff; text-align: left; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: all 0.2s ease;">
+            <span style="font-size: 28px; background: rgba(96,165,250,0.15); padding: 10px; border-radius: 12px;">🎥</span>
             <div style="flex: 1;">
-              <div style="font-size: 15px; font-weight: 800; color: #2563eb; margin-bottom: 3px;">Share Video + Audio</div>
-              <div style="font-size: 12px; color: #64748b; line-height: 1.4;">Participants see the video and hear the audio / व्हिडिओ आणि आवाज दोन्ही दिसेल</div>
+              <div style="font-size: 15px; font-weight: 800; color: #60a5fa; margin-bottom: 3px;">Share Video + Audio</div>
+              <div style="font-size: 12px; color: #94a3b8; line-height: 1.4;">Participants see the video and hear the audio / व्हिडिओ आणि आवाज दोन्ही दिसेल</div>
             </div>
           </button>
 
           <!-- Mode 2: Audio Only -->
-          <button id="btn-share-mode-audio" class="btn-primary-block" style="padding: 16px; border-radius: 14px; background: #f8fafc; border: 1.5px solid #22c55e; color: #0f172a; text-align: left; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 15px rgba(34,197,94,0.15);">
+          <button id="btn-share-mode-audio" class="btn-primary-block" style="padding: 16px; border-radius: 14px; background: #1e293b; border: 1.5px solid #22c55e; color: #fff; text-align: left; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 15px rgba(34,197,94,0.15);">
             <span style="font-size: 28px; background: rgba(34,197,94,0.15); padding: 10px; border-radius: 12px;">🔊</span>
             <div style="flex: 1;">
-              <div style="font-size: 15px; font-weight: 800; color: #16a34a; margin-bottom: 3px;">Share Audio Only</div>
-              <div style="font-size: 12px; color: #64748b; line-height: 1.4;">Participants hear music/audio ONLY (No video shown, no YouTube player)</div>
+              <div style="font-size: 15px; font-weight: 800; color: #4ade80; margin-bottom: 3px;">Share Audio Only</div>
+              <div style="font-size: 12px; color: #94a3b8; line-height: 1.4;">Participants hear music/audio ONLY (No video shown, no YouTube player)</div>
             </div>
           </button>
 
-          <button onclick="closeDrawer('drawer-meet-share-media')" class="btn-secondary-mini" style="padding: 12px; border-radius: 10px; background: transparent; border: 1px solid #cbd5e1; color: #64748b; cursor: pointer; font-weight: 700; width: 100%; text-align: center; margin-top: 4px;">
+          <button onclick="closeDrawer('drawer-meet-share-media')" class="btn-secondary-mini" style="padding: 12px; border-radius: 10px; background: transparent; border: 1px solid #334155; color: #94a3b8; cursor: pointer; font-weight: 700; width: 100%; text-align: center; margin-top: 4px;">
             Cancel / रद्द करा
           </button>
         </div>
@@ -2465,50 +2343,40 @@
 
     <!-- Meeting Bible Share Selection Drawer -->
     <div id="drawer-meet-share-bible" class="drawer-overlay" style="z-index: 2500;">
-      <div class="ios-drawer-sheet" style="max-height: 70%; background: #ffffff; color: #0f172a;">
-        <div class="drawer-header-row" style="border-bottom: 1px solid #e2e8f0;">
+      <div class="ios-drawer-sheet" style="max-height: 70%; background: #0f172a; color: #fff;">
+        <div class="drawer-header-row" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
           <div class="grabber-bar"></div>
-          <h3 style="color: #0f172a;">Share Scripture / शास्त्रवचन शेअर करा</h3>
-          <button class="close-drawer-btn" onclick="closeDrawer('drawer-meet-share-bible')" style="color: #64748b;">&times;</button>
+          <h3 style="color: #fff;">Share Scripture / शास्त्रवचन शेअर करा</h3>
+          <button class="close-drawer-btn" onclick="closeDrawer('drawer-meet-share-bible')" style="color: #fff;">&times;</button>
         </div>
         <div class="drawer-body-settings" style="padding: 20px; display: flex; flex-direction: column; gap: 16px; text-align: left;">
           <div class="form-input-group" style="display: flex; flex-direction: column; gap: 4px;">
-            <label style="font-size: 12px; font-weight: 700; color: #64748b;">Select Book / पुस्तक निवडा</label>
-            <select id="meeting-share-book" class="dropdown-selector" style="width: 100%; background: #f8fafc; color: #0f172a; border-color: #cbd5e1; padding: 10px;">
+            <label style="font-size: 12px; font-weight: 700; color: #94a3b8;">Select Book / पुस्तक निवडा</label>
+            <select id="meeting-share-book" class="dropdown-selector" style="width: 100%; background: #1e293b; color: #fff; border-color: #334155; padding: 10px;">
               <!-- Populated dynamically -->
             </select>
           </div>
           
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
             <div class="form-input-group" style="display: flex; flex-direction: column; gap: 4px;">
-              <label style="font-size: 12px; font-weight: 700; color: #64748b;">Chapter / अध्याय</label>
-              <select id="meeting-share-chapter" class="dropdown-selector" style="width: 100%; background: #f8fafc; color: #0f172a; border-color: #cbd5e1; padding: 10px;">
+              <label style="font-size: 12px; font-weight: 700; color: #94a3b8;">Chapter / अध्याय</label>
+              <select id="meeting-share-chapter" class="dropdown-selector" style="width: 100%; background: #1e293b; color: #fff; border-color: #334155; padding: 10px;">
                 <!-- Populated dynamically -->
               </select>
             </div>
             <div class="form-input-group" style="display: flex; flex-direction: column; gap: 4px;">
-              <label style="font-size: 12px; font-weight: 700; color: #64748b;">Verse (Opt.) / वचने</label>
-              <select id="meeting-share-verse" class="dropdown-selector" style="width: 100%; background: #f8fafc; color: #0f172a; border-color: #cbd5e1; padding: 10px;">
+              <label style="font-size: 12px; font-weight: 700; color: #94a3b8;">Verse (Opt.) / वचने</label>
+              <select id="meeting-share-verse" class="dropdown-selector" style="width: 100%; background: #1e293b; color: #fff; border-color: #334155; padding: 10px;">
                 <option value="all">Whole Chapter / संपूर्ण अध्याय</option>
               </select>
             </div>
           </div>
 
-          <div style="margin-top: 2px;">
-            <label style="font-size: 11.5px; font-weight: 800; color: #64748b; margin-bottom: 6px; display: block;">⚡ Quick 1-Tap Scripture Presets / लोकप्रिय वचने:</label>
-            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-              <button onclick="shareQuickScripturePreset('psalms', 23, 'all')" type="button" style="padding: 6px 12px; border-radius: 20px; font-size: 11.5px; font-weight: 700; background: #fef3c7; border: 1px solid #fde68a; color: #92400e; cursor: pointer;">📖 Psalm 23</button>
-              <button onclick="shareQuickScripturePreset('john', 3, 16)" type="button" style="padding: 6px 12px; border-radius: 20px; font-size: 11.5px; font-weight: 700; background: #dbeafe; border: 1px solid #bfdbfe; color: #1e40af; cursor: pointer;">📖 John 3:16</button>
-              <button onclick="shareQuickScripturePreset('matthew', 5, 1)" type="button" style="padding: 6px 12px; border-radius: 20px; font-size: 11.5px; font-weight: 700; background: #dcfce7; border: 1px solid #bbf7d0; color: #166534; cursor: pointer;">📖 Matthew 5</button>
-              <button onclick="shareQuickScripturePreset('philippians', 4, 13)" type="button" style="padding: 6px 12px; border-radius: 20px; font-size: 11.5px; font-weight: 700; background: #fce7f3; border: 1px solid #fbcfe8; color: #9d174d; cursor: pointer;">📖 Phil 4:13</button>
-            </div>
-          </div>
-
           <div style="display: flex; gap: 10px; margin-top: 10px;">
-            <button id="btn-meet-share-bible-submit" class="btn-primary-block" style="flex: 2; padding: 12px; font-weight: 800; background: #b45309; border-color: #d97706; color: #fff; cursor: pointer; border-radius: 8px;">
+            <button id="btn-meet-share-bible-submit" class="btn-primary-block" style="flex: 2; padding: 12px; font-weight: 800; background: #d4af37; border-color: #d4af37; color: #000; cursor: pointer; border-radius: 8px;">
               Broadcast / सादर करा
             </button>
-            <button id="btn-meet-share-bible-stop" class="btn-secondary-mini" style="flex: 1; padding: 12px; border-radius: 8px; font-weight: 700; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444 !important; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+            <button id="btn-meet-share-bible-stop" class="btn-secondary-mini" style="flex: 1; padding: 12px; border-radius: 8px; font-weight: 700; background: rgba(239, 68, 68, 0.2); border-color: rgba(239, 68, 68, 0.4); color: #f87171 !important; cursor: pointer; display: flex; align-items: center; justify-content: center;">
               Stop
             </button>
           </div>
@@ -2575,55 +2443,13 @@
         </div>
       </div>
     </div>
-
-    <!-- Meeting Device Settings Drawer (New Teams Option) -->
-    <div id="drawer-meet-settings" class="drawer-overlay" style="z-index: 2500;">
-      <div class="ios-drawer-sheet" style="max-height: 70%; background: #0f172a; color: #fff;">
-        <div class="drawer-header-row" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
-          <div class="grabber-bar"></div>
-          <h3 style="color: #fff;">Device & Call Settings / सेटिंग्ज</h3>
-          <button class="close-drawer-btn" onclick="closeDrawer('drawer-meet-settings')" style="color: #fff;">&times;</button>
-        </div>
-        <div class="drawer-body-settings" style="padding: 20px; display: flex; flex-direction: column; gap: 16px; text-align: left;">
-          
-          <div class="form-input-group" style="display: flex; flex-direction: column; gap: 6px;">
-            <label style="font-size: 12px; font-weight: 700; color: #94a3b8;">Camera Input / कॅमेरा</label>
-            <select id="setting-cam-select" class="dropdown-selector" style="width: 100%; background: #1e293b; color: #fff; border-color: #334155; padding: 10px;">
-              <option value="default">Default Front HD Camera</option>
-              <option value="back">Rear Ultra-Wide Camera</option>
-            </select>
-          </div>
-
-          <div class="form-input-group" style="display: flex; flex-direction: column; gap: 6px;">
-            <label style="font-size: 12px; font-weight: 700; color: #94a3b8;">Microphone Input / मायक्रोफोन</label>
-            <select id="setting-mic-select" class="dropdown-selector" style="width: 100%; background: #1e293b; color: #fff; border-color: #334155; padding: 10px;">
-              <option value="default">Built-in Microphone (High Definition)</option>
-              <option value="bluetooth">Bluetooth Headset / Speaker</option>
-            </select>
-          </div>
-
-          <div class="form-input-group" style="display: flex; flex-direction: column; gap: 6px;">
-            <label style="font-size: 12px; font-weight: 700; color: #94a3b8;">Noise Suppression / आवाज फिल्टर</label>
-            <select id="setting-noise-suppression" class="dropdown-selector" style="width: 100%; background: #1e293b; color: #fff; border-color: #334155; padding: 10px;">
-              <option value="auto">Auto AI Noise Suppression (Recommended)</option>
-              <option value="high">High (Filter Keyboard & Background Noise)</option>
-              <option value="low">Low (Music & Singing Optimization)</option>
-            </select>
-          </div>
-
-          <button onclick="closeDrawer('drawer-meet-settings'); showToast('⚙️ Audio & Video Settings Saved!');" class="btn-primary-block" style="padding: 12px; border-radius: 8px; font-weight: 800; background: #3b82f6; border: none; color: #fff; margin-top: 10px; cursor: pointer; width: 100%;">
-            Apply Settings / सेव्ह करा
-          </button>
-        </div>
-      </div>
-    </div>
     <!-- Toast Notification Overlay -->
     <div id="toast-notification" class="app-toast">
       <span id="toast-message">Copied to clipboard!</span>
     </div>
 
   <!-- App Main Logic -->
-  <script src="app.js?v=65"></script>
+  <script src="app.js?v=100"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 2.5s no matter what
