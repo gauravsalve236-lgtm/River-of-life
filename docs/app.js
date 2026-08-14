@@ -6241,19 +6241,30 @@ function triggerJoinMeetingFlow(meetingId) {
   const m = meetings.find(x => x.id === meetingId);
   if (!m) return;
 
-  // Verify camera and mic access
-  showToast("Requesting camera and microphone permissions...");
-  navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-    .then(stream => {
-      // Permission granted, launch meeting
-      launchLiveMeetingRoom(m, stream);
-    })
-    .catch(err => {
-      console.warn("Media permissions denied:", err);
-      // Fallback: Proceed with mocked feeds if they deny camera (highly resilient)
-      showToast("Media permissions denied. Joining in listen-only/avatar mode.");
-      launchLiveMeetingRoom(m, null);
-    });
+  if (!m.isSimulation) {
+    // REAL WORLD MEETING: Open Jitsi Meet directly in a new tab on meet.ffmuc.net
+    const loggedIn = state.currentUser ? state.currentUser.username : "Guest User";
+    const roomUrl = `https://meet.ffmuc.net/RiverOfLife_GauravSalve_${m.id}#config.prejoinPageEnabled=false&config.disableDeepLinking=true&userInfo.displayName="${encodeURIComponent(loggedIn)}"`;
+    
+    showToast("Opening real-world video call in your browser tab...");
+    setTimeout(() => {
+      window.open(roomUrl, "_blank");
+    }, 800);
+  } else {
+    // SIMULATED SANDBOX MODE
+    showToast("Requesting camera and microphone permissions for sandbox...");
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+      .then(stream => {
+        // Permission granted, launch meeting
+        launchLiveMeetingRoom(m, stream);
+      })
+      .catch(err => {
+        console.warn("Media permissions denied:", err);
+        // Fallback: Proceed with mocked feeds if they deny camera (highly resilient)
+        showToast("Media permissions denied. Joining in listen-only/avatar mode.");
+        launchLiveMeetingRoom(m, null);
+      });
+  }
 }
 
 // Fullscreen Live Meeting Room Entry
