@@ -410,8 +410,8 @@ function applyStylesFromState() {
    ========================================================================== */
 function initRouting() {
   const handleHashChange = () => {
-    const hash = window.location.hash || "#/home";
-    const route = hash.replace("#/", "");
+    const rawHash = window.location.hash || "#/home";
+    const cleanRoute = rawHash.replace("#/", "").split("?")[0].split("/")[0] || "home";
     
     // Hide all view panels
     document.querySelectorAll(".app-view").forEach(view => {
@@ -423,7 +423,7 @@ function initRouting() {
     document.querySelectorAll(".nav-item").forEach(item => item.classList.remove("active"));
     document.querySelectorAll(".tab-btn").forEach(item => item.classList.remove("active"));
     
-    const viewId = `view-${route}`;
+    const viewId = `view-${cleanRoute}`;
     const targetView = document.getElementById(viewId);
     if (targetView) {
       targetView.classList.add("active");
@@ -436,22 +436,30 @@ function initRouting() {
       }
       
       // Highlight sidebar & bottom nav items
-      document.querySelectorAll(`.nav-item[data-tab="${route}"]`).forEach(btn => btn.classList.add("active"));
-      document.querySelectorAll(`.tab-btn[data-tab="${route}"]`).forEach(btn => btn.classList.add("active"));
+      document.querySelectorAll(`.nav-item[data-tab="${cleanRoute}"]`).forEach(btn => btn.classList.add("active"));
+      document.querySelectorAll(`.tab-btn[data-tab="${cleanRoute}"]`).forEach(btn => btn.classList.add("active"));
       
-      adjustHeaderForRoute(route);
+      adjustHeaderForRoute(cleanRoute);
       
       // Reload specific data lists on tab changes
-      if (route === "you") {
+      if (cleanRoute === "you") {
         renderYouProfile();
-      } else if (route === "home") {
+      } else if (cleanRoute === "home") {
         renderDailyDevotion();
-      } else if (route === "plans") {
+      } else if (cleanRoute === "plans") {
         renderReadingPlansTab();
-      } else if (route === "prayers") {
+      } else if (cleanRoute === "prayers") {
         renderPrayersScreen();
-      } else if (route === "meetings") {
+      } else if (cleanRoute === "meetings") {
         renderMeetingsDashboard();
+      }
+    } else {
+      // Default fallback to home if route is unmapped
+      const homeView = document.getElementById("view-home");
+      if (homeView) {
+        homeView.classList.add("active");
+        homeView.style.setProperty("display", "block", "important");
+        adjustHeaderForRoute("home");
       }
     }
   };
@@ -461,16 +469,19 @@ function initRouting() {
   
   // Click bindings for side/bottom tabs navigation
   document.querySelectorAll(".nav-item").forEach(item => {
-    item.addEventListener("click", () => {
-      window.location.hash = `#/${item.dataset.tab}`;
+    item.addEventListener("click", (e) => {
+      const tab = item.dataset.tab || item.getAttribute("data-tab");
+      if (tab) window.location.hash = `#/${tab}`;
     });
   });
   document.querySelectorAll(".tab-btn").forEach(item => {
-    item.addEventListener("click", () => {
-      window.location.hash = `#/${item.dataset.tab}`;
+    item.addEventListener("click", (e) => {
+      const tab = item.dataset.tab || item.getAttribute("data-tab");
+      if (tab) window.location.hash = `#/${tab}`;
     });
   });
 }
+
 
 function adjustHeaderForRoute(route) {
   const readerCtrls = document.getElementById("nav-reader-controls");
