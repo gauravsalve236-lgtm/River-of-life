@@ -6509,25 +6509,32 @@ function generateICSFile(meeting) {
   showToast("Calendar File (.ics) downloaded!");
 }
 
-// Trigger Joining Flow (Camera preview checks)
+// Trigger Joining Flow (Camera preview checks & Instant Launch)
 function triggerJoinMeetingFlow(meetingId) {
   const meetings = getMeetingsFromStorage();
   const m = (meetings && meetings.length) ? meetings.find(x => x.id === meetingId) : null;
   const targetMeeting = m || { id: meetingId || 'default-1', title: 'Friday Family Prayer / कौटुंबिक प्रार्थना', host: 'Pastor John' };
 
-  // Real or simulated meeting, we request permissions and launch it inside the app modal!
-  showToast("Requesting camera and microphone permissions...");
-  navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-    .then(stream => {
-      // Permission granted, launch meeting inside app modal
-      launchLiveMeetingRoom(targetMeeting, stream);
-    })
-    .catch(err => {
-      console.warn("Media permissions denied:", err);
-      // Fallback: Proceed with mocked feeds if they deny camera (highly resilient)
-      showToast("Media permissions denied. Joining in listen-only/avatar mode.");
-      launchLiveMeetingRoom(targetMeeting, null);
-    });
+  // INSTANTLY launch live meeting room modal so desktop & mobile users get 0ms latency UI response!
+  launchLiveMeetingRoom(targetMeeting, null);
+
+  // Background media stream capture
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+      .then(stream => {
+        if (activeMeetingSession) activeMeetingSession.localStream = stream;
+        const videoEl = document.getElementById("meeting-local-video");
+        const avatarEl = document.getElementById("video-cell-local-avatar");
+        if (videoEl) {
+          videoEl.srcObject = stream;
+          videoEl.style.display = "block";
+          if (avatarEl) avatarEl.style.display = "none";
+        }
+      })
+      .catch(err => {
+        console.warn("Media permissions notice:", err);
+      });
+  }
 }
 
 // Fullscreen Live Meeting Room Entry
