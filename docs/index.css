@@ -2356,22 +2356,26 @@ body {
   transform: translate(-50%, 0);
 }
 
-/* Mobile Bottom Tab Bar Navigation (Now global bottom navigation, matches Life Bible) */
+/* Mobile Bottom Tab Bar Navigation (Elevated & Bold for iOS) */
 .mobile-bottom-tabs {
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100vw;
-  height: calc(60px + env(safe-area-inset-bottom));
-  background-color: var(--bg-content);
+  height: calc(64px + env(safe-area-inset-bottom, 22px));
+  padding-bottom: max(14px, env(safe-area-inset-bottom, 14px));
+  padding-top: 6px;
+  background-color: rgba(var(--bg-rgb, 255, 255, 255), 0.94);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
   border-top: 1px solid var(--border);
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   justify-items: center;
-  align-items: stretch;
-  padding: 0;
+  align-items: center;
   z-index: 100;
-  box-shadow: 0 -4px 20px rgba(0,0,0,0.03);
+  box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.06);
+  box-sizing: border-box;
 }
 
 .mobile-bottom-tabs .tab-btn {
@@ -2379,36 +2383,52 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  padding-top: 6px;
-  padding-bottom: env(safe-area-inset-bottom);
+  gap: 2px;
   width: 100%;
   height: 100%;
-  border-radius: 0;
   border: none;
-  background: none;
+  background: transparent;
   color: var(--text-muted);
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: var(--font-ui);
-  font-weight: 600;
+  padding: 2px 0;
 }
 
 .mobile-bottom-tabs .tab-btn svg {
-  width: 22px;
-  height: 22px;
-  stroke-width: 2.2;
+  width: 23px;
+  height: 23px;
+  stroke-width: 2.4;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
 }
 
 .mobile-bottom-tabs .tab-label {
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   font-family: var(--font-ui);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  line-height: 1.2;
+  text-align: center;
+  letter-spacing: -0.1px;
 }
 
 .mobile-bottom-tabs .tab-btn.active {
   color: var(--primary);
   background: transparent;
+  transform: translateY(-2px);
+}
+
+.mobile-bottom-tabs .tab-btn.active .tab-label {
+  font-weight: 800;
+}
+
+.mobile-bottom-tabs .tab-btn.active svg {
+  stroke-width: 2.6;
+  transform: scale(1.06);
 }
 
 /* ==========================================================================
@@ -2422,65 +2442,32 @@ body {
 
   /* Show mobile bottom tab bar with safe area clearance */
   .mobile-bottom-tabs {
-    height: calc(70px + env(safe-area-inset-bottom, 20px));
+    height: calc(66px + env(safe-area-inset-bottom, 22px));
+    padding-bottom: max(16px, env(safe-area-inset-bottom, 16px));
     display: grid;
     grid-template-columns: repeat(6, 1fr);
     align-items: center;
     gap: 0;
-    padding-bottom: env(safe-area-inset-bottom, 14px);
-    box-sizing: border-box;
-  }
-  
-  .mobile-bottom-tabs .tab-btn {
-    padding-top: 6px;
-    padding-bottom: 4px;
-    gap: 3px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-width: 0;
-  }
-  
-  .mobile-bottom-tabs .tab-btn svg {
-    width: 20px;
-    height: 20px;
-    flex-shrink: 0;
-  }
-  
-  .mobile-bottom-tabs .tab-label {
-    font-size: 9.5px;
-    font-weight: 600;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
-    line-height: 1.2;
-    text-align: center;
-    padding: 0 1px;
   }
 }
 
 @media (max-width: 480px) {
   .mobile-bottom-tabs {
-    height: calc(66px + env(safe-area-inset-bottom, 16px));
-  }
-  
-  .mobile-bottom-tabs .tab-btn {
-    padding-top: 4px;
-    gap: 2px;
+    height: calc(64px + env(safe-area-inset-bottom, 20px));
+    padding-bottom: max(16px, env(safe-area-inset-bottom, 16px));
   }
   
   .mobile-bottom-tabs .tab-btn svg {
-    width: 19px;
-    height: 19px;
+    width: 22px;
+    height: 22px;
   }
   
   .mobile-bottom-tabs .tab-label {
-    font-size: 9px;
-    letter-spacing: -0.2px;
+    font-size: 10.5px;
+    font-weight: 700;
   }
 }
+
 
     height: 22px;
   }
