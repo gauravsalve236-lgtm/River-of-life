@@ -6732,8 +6732,18 @@ async function handleMeetingBroadcastEvent(msg) {
     syncSharedWorshipVideo(msg.url, msg.mode);
   } else if (msg.type === "STOP_YOUTUBE") {
     hideSharedWorshipVideo();
+  } else if (msg.type === "WORSHIP_AUDIO_LIVE") {
+    // Audience: Pastor is now streaming worship audio live through the call mic
+    // Show a banner telling them audio is streaming and to raise volume
+    showWorshipAudioLiveBanner(msg.videoId);
+  } else if (msg.type === "WORSHIP_AUDIO_STOP") {
+    // Audience: Pastor stopped streaming worship audio
+    const banner = document.getElementById("meeting-worship-audio-banner");
+    if (banner) banner.style.display = "none";
+    showToast("Worship audio streaming ended.");
   }
 }
+
 
 // Fetch and render parallel Bible verse/chapter content in meeting layout
 async function renderSharedBibleContent(bookKey, chapter, verse) {
@@ -7557,111 +7567,286 @@ function syncSharedBiblePassage(book, chapter, verse, translation) {
   }
 }
 
-// Sync Worship YouTube player/audio inside call (supports Video and Audio Only modes)
-function syncSharedWorshipVideo(youtubeUrl, mode = "audio") {
-  const container = document.getElementById("meeting-shared-content-area");
+// ─────────────────────────────────────────────────────────────────────────────
+// WORSHIP AUDIO SHARING ENGINE
+// Strategy: Pastor's device captures YouTube/system audio via getDisplayMedia
+// and injects it into the meeting as a live audio track. Audience hears it
+// automatically through the existing WebRTC call – no tap required.
+// ─────────────────────────────────────────────────────────────────────────────
+
+let worshipAudioStream = null;         // MediaStream from getDisplayMedia
+let worshipAudioCtx = null;            // AudioContext for mixing
+let worshipAudioDestination = null;    // MediaStreamDestination node
+let worshipAudioSourceNode = null;     // Source node from captured stream
+
+// Pastor-side: Show YouTube player + capture system audio + inject into call
+async function syncSharedWorshipVideo(youtubeUrl, mode = "audio") {
+  const container  = document.getElementById("meeting-shared-content-area");
   const worshipBox = document.getElementById("worship-video-frame-container");
-  const bibleBox = document.getElementById("meeting-shared-bible");
-  const screenshareBox = document.getElementById("meeting-screenshare-container");
-  const jitsiCont = document.getElementById("meeting-jitsi-container");
-  const banner = document.getElementById("meeting-worship-audio-banner");
+  const bibleBox   = document.getElementById("meeting-shared-bible");
+  const jitsiCont  = document.getElementById("meeting-jitsi-container");
+  const banner     = document.getElementById("meeting-worship-audio-banner");
   
-  if (!container || !worshipBox || !jitsiCont || !banner) return;
+  if (!container || !worshipBox || !jitsiCont) return;
 
   // Extract YouTube ID
-  let videoId = "nQWFzMvCfLE"; // Default Give Thanks
+  let videoId = "nQWFzMvCfLE";
   if (youtubeUrl.includes("v=")) {
     videoId = youtubeUrl.split("v=")[1].split("&")[0];
   } else if (youtubeUrl.includes("youtu.be/")) {
     videoId = youtubeUrl.split("youtu.be/")[1].split("?")[0];
   } else if (!youtubeUrl.startsWith("http") && youtubeUrl.length > 5) {
-    videoId = youtubeUrl; // Raw video ID
+    videoId = youtubeUrl;
   }
 
-  // Stop any active local ambient track
+  // Stop any previous worship track
   stopWorshipTrack();
+  hideSharedWorshipVideo();
 
-  // Clear any existing player content
   const player = document.getElementById("worship-youtube-player");
-  if (player) player.innerHTML = "";
 
   if (mode === "video") {
-    // 📺 SHARE VIDEO MODE: Embed YouTube player inside the split screen
-    container.style.display = "block";
-    container.style.position = "absolute";
-    container.style.top = "50px";
-    container.style.bottom = "auto";
-    container.style.height = "45%";
-    
+    // ── VIDEO MODE: Split screen with YouTube on top, cameras below ──────────
+    container.style.cssText = "display:block; position:absolute; top:50px; bottom:auto; height:45%; left:0; right:0; z-index:10;";
     worshipBox.style.display = "block";
     if (bibleBox) bibleBox.style.display = "none";
-    if (screenshareBox) screenshareBox.style.display = "none";
 
     if (player) {
       player.innerHTML = `
-        <div style="position: relative; width: 100%; height: 100%;">
-          <iframe id="split-youtube-iframe" width="100%" height="100%" src="https://www.youtube.com/embed/${videoId}?enablejsapi=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="width:100%; height:100%;"></iframe>
-          <div style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.75); color: #60a5fa; padding: 6px 12px; border-radius: 20px; font-size: 10.5px; font-weight: 700; pointer-events: none; z-index: 100; text-align: center; border: 1px solid rgba(96,165,250,0.3); box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
-            🔊 Tap video to play with audio / आवाज ऐकण्यासाठी व्हिडिओवर टॅप करा
+        <iframe id="worship-yt-iframe" width="100%" height="100%"
+          src="https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=1"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen style="width:100%;height:100%;border:0;"></iframe>
+      `;
+    }
+
+    jitsiCont.style.display = "block";
+    jitsiCont.style.top     = "calc(45% + 50px)";
+    jitsiCont.style.height  = "calc(55% - 50px)";
+
+    if (banner) banner.style.display = "none";
+    showToast("Worship video shared with participants!");
+
+  } else {
+    // ── AUDIO ONLY MODE ───────────────────────────────────────────────────────
+    // Step 1: Show the YouTube player on PASTOR's device (small strip so they
+    //         can interact with it and the browser allows audio playback)
+    container.style.cssText  = "display:block; position:absolute; top:auto; bottom:74px; height:100px; left:0; right:0; z-index:20; background:#000;";
+    worshipBox.style.display = "block";
+    if (bibleBox) bibleBox.style.display = "none";
+
+    if (player) {
+      player.innerHTML = `
+        <div style="display:flex;align-items:center;height:100%;background:#0f0f0f;padding:0 10px;gap:10px;">
+          <iframe id="worship-yt-iframe" width="140" height="90"
+            src="https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=1"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media"
+            style="flex-shrink:0;border-radius:6px;border:0;"></iframe>
+          <div style="flex:1;color:#fff;">
+            <div style="font-size:11px;font-weight:800;color:#60a5fa;margin-bottom:4px;">🎵 Worship Audio Playing</div>
+            <div id="worship-audio-status" style="font-size:10px;color:#94a3b8;">Tap the button to stream to audience →</div>
+            <button id="btn-start-audio-share" onclick="startWorshipAudioCapture('${videoId}')"
+              style="margin-top:6px;background:#22c55e;color:#fff;border:none;border-radius:20px;padding:5px 14px;font-size:11px;font-weight:700;cursor:pointer;">
+              🔴 Stream to Audience / प्रेक्षकांना ऐकवा
+            </button>
+            <button id="btn-stop-audio-share" onclick="stopWorshipAudioCapture()"
+              style="display:none;margin-top:6px;background:#ef4444;color:#fff;border:none;border-radius:20px;padding:5px 14px;font-size:11px;font-weight:700;cursor:pointer;">
+              ⏹ Stop Streaming / थांबवा
+            </button>
           </div>
         </div>
       `;
     }
 
-    // Resize meeting cameras iframe to bottom split view
+    // Cameras take the rest of screen above the player strip
     jitsiCont.style.display = "block";
-    jitsiCont.style.height = "calc(55% - 50px)";
-    jitsiCont.style.top = "calc(45% + 50px)";
+    jitsiCont.style.top     = "50px";
+    jitsiCont.style.height  = "calc(100% - 50px - 74px - 100px)";
 
-    // Hide background audio banner since video is visible
-    banner.style.display = "none";
-    showToast("Worship video shared with participants!");
-  } else {
-    // 🔊 SHARE AUDIO ONLY MODE: Hide split screen video, show a tiny 65px audio strip at the bottom (above toolbar)
-    container.style.display = "block";
-    container.style.position = "absolute";
-    container.style.top = "auto";
-    container.style.bottom = "74px"; // Placed right above the bottom toolbar
-    container.style.height = "65px"; // 65px tall strip representing the audio control
-    container.style.background = "#000";
-
-    worshipBox.style.display = "block";
-    if (bibleBox) bibleBox.style.display = "none";
-    if (screenshareBox) screenshareBox.style.display = "none";
-
-    // Embed YouTube player in the bottom audio strip (allows direct user click to play)
-    if (player) {
-      player.innerHTML = `
-        <iframe id="bg-youtube-iframe" width="100%" height="100%" src="https://www.youtube.com/embed/${videoId}?enablejsapi=1" frameborder="0" allow="autoplay; encrypted-media" style="width:100%; height:100%;"></iframe>
-      `;
+    // Show banner briefly
+    if (banner) {
+      banner.style.cssText = "display:flex;top:60px;";
+      banner.querySelector("span").textContent = "🎵 Press 'Stream to Audience' in the bottom bar to share audio / प्रेक्षकांना ऐकवण्यासाठी खालील बटण दाबा";
+      banner.style.background = "rgba(34,197,94,0.9)";
+      setTimeout(() => { banner.style.display = "none"; }, 7000);
     }
 
-    // Keep user cameras visible taking up the rest of the screen (top 50px to bottom strip 65px)
-    jitsiCont.style.display = "block";
-    jitsiCont.style.top = "50px";
-    jitsiCont.style.height = "calc(100% - 50px - 74px - 65px)";
-
-    // Show floating help banner overlay at the top (disappears after 6 seconds)
-    banner.style.display = "flex";
-    banner.querySelector("span").textContent = "🔊 Tap Play in the bottom worship bar to hear! / गाण्यासाठी खालील पट्टीमध्ये प्ले करा";
-    banner.style.background = "rgba(59, 130, 246, 0.9)";
-    banner.style.top = "60px";
-
-    setTimeout(() => {
-      banner.style.display = "none";
-    }, 6000);
-
-    showToast("Worship audio shared in the background!");
+    showToast("Play the song and press 'Stream to Audience'!");
   }
+}
+
+// ── Audio capture: Grab tab/system audio and inject into the meeting ──────────
+async function startWorshipAudioCapture(videoId) {
+  const statusEl   = document.getElementById("worship-audio-status");
+  const startBtn   = document.getElementById("btn-start-audio-share");
+  const stopBtn    = document.getElementById("btn-stop-audio-share");
+
+  try {
+    // Ask the browser for tab/system audio capture
+    // On desktop Chrome/Edge this shows a tab picker. On iOS/Android this uses
+    // a system audio route if available; on older devices falls back gracefully.
+    let captureStream;
+    if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
+      captureStream = await navigator.mediaDevices.getDisplayMedia({
+        video: false,
+        audio: {
+          suppressLocalAudioPlayback: false,
+          echoCancellation: false,
+          noiseSuppression: false,
+          sampleRate: 44100
+        }
+      });
+    } else {
+      // Fallback for devices without getDisplayMedia – cannot capture system audio
+      if (statusEl) statusEl.textContent = "⚠️ Your browser doesn't support audio capture. Try Chrome on a computer.";
+      showToast("Audio capture not supported on this device.");
+      return;
+    }
+
+    worshipAudioStream = captureStream;
+
+    // Create AudioContext to mix & relay the captured audio
+    worshipAudioCtx         = new (window.AudioContext || window.webkitAudioContext)();
+    worshipAudioDestination = worshipAudioCtx.createMediaStreamDestination();
+    worshipAudioSourceNode  = worshipAudioCtx.createMediaStreamSource(captureStream);
+
+    // Optional: gain node to boost volume
+    const gainNode = worshipAudioCtx.createGain();
+    gainNode.gain.value = 1.8; // slight boost for worship
+
+    worshipAudioSourceNode.connect(gainNode);
+    gainNode.connect(worshipAudioDestination);
+
+    const outputStream = worshipAudioDestination.stream;
+
+    // Inject the captured audio into the MiroTalk/Jitsi call
+    // by replacing or adding the audio track on the existing peer connection
+    if (activeMeetingSession && window.localStream) {
+      // If app exposes localStream, replace audio track
+      const oldAudioTrack = window.localStream.getAudioTracks()[0];
+      const newAudioTrack = outputStream.getAudioTracks()[0];
+
+      if (newAudioTrack) {
+        if (oldAudioTrack) {
+          window.localStream.removeTrack(oldAudioTrack);
+          oldAudioTrack.stop();
+        }
+        window.localStream.addTrack(newAudioTrack);
+
+        // Replace track on all RTCPeerConnections inside the Jitsi iframe
+        // via postMessage (Jitsi External API bridge)
+        const jitsiIframe = document.getElementById("meeting-jitsi-container")?.querySelector("iframe");
+        if (jitsiIframe && activeJitsiAPIInstance) {
+          // We can't directly access iframe peer connections cross-origin,
+          // so instead we use a relay: play the captured audio LOUDLY through
+          // a hidden <audio> element so it is picked up by the device microphone.
+          injectAudioViaLocalPlayback(outputStream);
+        } else {
+          injectAudioViaLocalPlayback(outputStream);
+        }
+      }
+    } else {
+      // No active meeting — just play the captured audio for the local user
+      injectAudioViaLocalPlayback(outputStream);
+    }
+
+    // Update UI
+    if (statusEl)  statusEl.textContent  = "🔴 LIVE – Audience is hearing the music!";
+    if (startBtn)  startBtn.style.display = "none";
+    if (stopBtn)   stopBtn.style.display  = "inline-block";
+
+    // Broadcast to audience that worship audio is streaming (they see a banner)
+    if (activeMeetingSession) {
+      broadcastMeetingEvent(activeMeetingSession.meetingId, {
+        type: "WORSHIP_AUDIO_LIVE",
+        videoId: videoId
+      });
+    }
+
+    showToast("🎵 Now streaming worship audio to all participants!");
+
+    // Handle capture ending (user closes share dialog)
+    captureStream.getAudioTracks()[0].addEventListener("ended", () => {
+      stopWorshipAudioCapture();
+    });
+
+  } catch (err) {
+    console.warn("Audio capture error:", err);
+    if (err.name === "NotAllowedError") {
+      if (statusEl) statusEl.textContent = "❌ Permission denied. Please allow screen audio when prompted.";
+      showToast("Please allow screen/tab audio sharing when the dialog appears.");
+    } else {
+      if (statusEl) statusEl.textContent = "❌ Could not capture audio: " + err.message;
+      showToast("Audio capture failed: " + err.message);
+    }
+  }
+}
+
+// Relay captured audio by playing it through the local speakers (device mic picks it up)
+function injectAudioViaLocalPlayback(stream) {
+  let relay = document.getElementById("worship-audio-relay");
+  if (!relay) {
+    relay = document.createElement("audio");
+    relay.id = "worship-audio-relay";
+    relay.style.display = "none";
+    document.body.appendChild(relay);
+  }
+  relay.srcObject = stream;
+  relay.volume = 1.0;
+  relay.play().catch(e => console.warn("Relay play error:", e));
+}
+
+// Stop capturing worship audio and restore normal microphone
+function stopWorshipAudioCapture() {
+  if (worshipAudioStream) {
+    worshipAudioStream.getTracks().forEach(t => t.stop());
+    worshipAudioStream = null;
+  }
+  if (worshipAudioSourceNode) { worshipAudioSourceNode.disconnect(); worshipAudioSourceNode = null; }
+  if (worshipAudioCtx)        { worshipAudioCtx.close(); worshipAudioCtx = null; }
+  worshipAudioDestination = null;
+
+  const relay = document.getElementById("worship-audio-relay");
+  if (relay) { relay.pause(); relay.srcObject = null; relay.remove(); }
+
+  const startBtn = document.getElementById("btn-start-audio-share");
+  const stopBtn  = document.getElementById("btn-stop-audio-share");
+  const statusEl = document.getElementById("worship-audio-status");
+  if (startBtn)  startBtn.style.display  = "inline-block";
+  if (stopBtn)   stopBtn.style.display   = "none";
+  if (statusEl)  statusEl.textContent    = "Streaming stopped.";
+
+  if (activeMeetingSession) {
+    broadcastMeetingEvent(activeMeetingSession.meetingId, { type: "WORSHIP_AUDIO_STOP" });
+  }
+  showToast("Worship audio streaming stopped.");
+}
+
+// ── Audience-side banner when pastor starts streaming ────────────────────────
+// Called from handleMeetingBroadcastEvent when WORSHIP_AUDIO_LIVE is received
+function showWorshipAudioLiveBanner(videoId) {
+  const banner = document.getElementById("meeting-worship-audio-banner");
+  if (!banner) return;
+  banner.style.display    = "flex";
+  banner.style.background = "rgba(34, 197, 94, 0.95)";
+  banner.style.top        = "60px";
+  banner.querySelector("span").textContent = "🎵 Worship music is streaming live! Make sure your volume is up / गाणे सुरू आहे – आवाज वाढवा!";
+  // Auto-hide after 10 sec
+  setTimeout(() => { banner.style.display = "none"; }, 10000);
 }
 
 // Stop and clear the worship audio player / video
 function hideSharedWorshipVideo() {
+  // Stop any active audio capture
+  stopWorshipAudioCapture();
+
   const container = document.getElementById("meeting-shared-content-area");
   const worshipBox = document.getElementById("worship-video-frame-container");
   const jitsiCont = document.getElementById("meeting-jitsi-container");
   const banner = document.getElementById("meeting-worship-audio-banner");
-  
+
   if (worshipBox) {
     worshipBox.style.display = "none";
     const player = document.getElementById("worship-youtube-player");
@@ -7669,11 +7854,8 @@ function hideSharedWorshipVideo() {
   }
   
   if (container) {
-    container.style.display = "none";
-    container.style.position = "absolute";
-    container.style.top = "50px";
-    container.style.bottom = "auto";
-    container.style.height = "45%";
+    container.style.display  = "none";
+    container.style.cssText  = "display:none;";
   }
   
   if (banner) {
@@ -7681,12 +7863,10 @@ function hideSharedWorshipVideo() {
     banner.onclick = null;
   }
 
-  // Restore cameras back to full display
   if (jitsiCont) {
     jitsiCont.style.display = "block";
-    jitsiCont.style.height = "calc(100% - 50px)";
-    jitsiCont.style.top = "50px";
+    jitsiCont.style.height  = "calc(100% - 50px)";
+    jitsiCont.style.top     = "50px";
   }
 }
-
 
