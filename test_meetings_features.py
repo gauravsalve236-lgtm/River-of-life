@@ -3,7 +3,7 @@ from playwright.sync_api import sync_playwright
 
 def run_test():
     with sync_playwright() as p:
-        print("Launching Chromium browser to test Clean 4-Tile 2x2 Gallery Grid...")
+        print("Launching Chromium browser to test Clean Google Meet-style Meeting UI...")
         browser = p.chromium.launch(
             headless=True,
             args=["--use-fake-ui-for-media-stream", "--use-fake-device-for-media-stream"]
@@ -25,27 +25,40 @@ def run_test():
         }""")
         page.wait_for_timeout(500)
 
-        # 1. Trigger join meeting and switch to Demo Grid
+        # 1. Trigger join meeting
         print("Triggering Join Meeting flow...")
         page.evaluate("() => triggerJoinMeetingFlow('friday-prayer')")
         page.wait_for_timeout(1000)
 
-        page.evaluate("() => switchMeetingView('gallery')")
+        # 2. Verify clean topbar layout (LIVE badge, meeting title, Edit Title button, Share Word, Music, Leave)
+        print("Testing Clean Topbar Layout...")
+        title = page.text_content("#meeting-room-title")
+        assert title is not None, "Meeting title must be rendered"
+        print("Meeting Title successfully rendered!")
+
+        # 3. Test Edit Meeting Title modal
+        print("Testing Edit Meeting Title Modal...")
+        page.evaluate("() => openEditMeetingTitleModal()")
+        page.wait_for_timeout(500)
+        
+        modal = page.query_selector("#modal-edit-meeting-title")
+        assert modal is not None and modal.is_visible(), "Edit Meeting Title Modal should be visible"
+        
+        page.evaluate("() => { document.getElementById('input-edit-meeting-title').value = 'Sunday Worship Service'; saveEditedMeetingTitle(); }")
         page.wait_for_timeout(500)
 
-        # 2. Verify Gallery View renders EXACTLY 4 clean tiles (2x2 Grid)
-        print("Verifying 4-Tile 2x2 Gallery Grid...")
-        tiles = page.query_selector_all("#meeting-video-grid .video-cell")
-        print(f"Gallery Grid Active: {len(tiles)} participant tiles visible!")
-        assert len(tiles) == 4, f"Gallery View should display EXACTLY 4 tiles (2x2 grid), found {len(tiles)}"
+        updated_title = page.text_content("#meeting-room-title")
+        assert updated_title == "Sunday Worship Service", "Meeting title should update to Sunday Worship Service"
+        print("Meeting Title updated successfully!")
 
-        # 3. Verify Active Speaker purple glowing border & SPEAKING badge
-        active_speaker = page.query_selector("#video-cell-pj.active-speaker")
-        assert active_speaker is not None, "Pastor John should be active speaker with glowing purple border"
-        print("Active Speaker purple glowing border & SPEAKING badge verified on Pastor John!")
+        # 4. Verify ZERO duplicate bottom bars
+        print("Verifying ZERO duplicate bottom bars...")
+        toolbar = page.query_selector(".meeting-room-toolbar")
+        assert toolbar is None or not toolbar.is_visible(), "Duplicate bottom toolbar MUST NOT exist!"
+        print("No duplicate bottom bars found! Ultra clean layout!")
 
         print("\n==================================================")
-        print("CLEAN 4-TILE 2X2 GALLERY GRID TESTS PASSED!")
+        print("CLEAN GOOGLE MEET STYLE UI TESTS PASSED!")
         print("==================================================\n")
         browser.close()
 

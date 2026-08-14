@@ -4896,10 +4896,9 @@ input, textarea, select, [contenteditable="true"] {
   transition: all 0.3s ease;
 }
 
-@media (max-width: 768px) {
-  .teams-left-rail {
-    display: none !important;
-  }
+.teams-left-rail {
+  display: none !important;
+}
   .meeting-video-grid {
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 8px !important;
