@@ -6215,15 +6215,19 @@ function triggerJoinMeetingFlow(meetingId) {
 
 // Fullscreen Live Meeting Room Entry
 function launchLiveMeetingRoom(meeting, stream) {
-  // Lock screen view overlay
-  const roomModal = document.getElementById("modal-live-meeting");
-  roomModal.style.display = "block";
-  setTimeout(() => {
-    roomModal.classList.add("active");
-  }, 10);
-  
-  // Setup room title
-  document.getElementById("meeting-room-title").textContent = meeting.title;
+  try {
+    // Lock screen view overlay
+    const roomModal = document.getElementById("modal-live-meeting");
+    if (roomModal) {
+      roomModal.style.display = "block";
+      setTimeout(() => {
+        roomModal.classList.add("active");
+      }, 10);
+    }
+    
+    // Setup room title
+    const titleEl = document.getElementById("meeting-room-title");
+    if (titleEl) titleEl.textContent = meeting.title;
   
   // Hide top header and bottom tabs
   document.querySelector(".app-header").style.display = "none";
@@ -6372,6 +6376,10 @@ function launchLiveMeetingRoom(meeting, stream) {
       <div style="text-align: center; color: var(--text-muted); font-size: 11px; margin-bottom: 8px;">Meeting Started / सभा सुरू झाली</div>
     `;
   }
+  } catch (err) {
+    console.error("launchLiveMeetingRoom error:", err);
+    alert("Live Meeting Launch Error: " + err.message + "\nStack: " + err.stack);
+  }
 }
 
 // Simulated active interactions inside sandbox
@@ -6515,10 +6523,10 @@ function exitLiveMeetingRoom() {
 
   // Close live modal
   const roomModal = document.getElementById("modal-live-meeting");
-  roomModal.classList.remove("active");
-  setTimeout(() => {
+  if (roomModal) {
+    roomModal.classList.remove("active");
     roomModal.style.display = "none";
-  }, 300);
+  }
   
   // Restore navigation panels
   document.querySelector(".app-header").style.display = "flex";
