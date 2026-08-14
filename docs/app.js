@@ -3804,18 +3804,22 @@ function setupEventListeners() {
 
   document.querySelectorAll(".meet-music-track-btn").forEach(btn => {
     btn.addEventListener("click", () => {
-      if (!activeMeetingSession) return;
       const url = btn.dataset.url;
       const title = btn.dataset.title;
-      const volume = parseInt(document.getElementById("meet-music-volume").value);
+      const volume = parseInt(document.getElementById("meet-music-volume").value || 50);
       
-      broadcastMeetingEvent(activeMeetingSession.meetingId, {
-        type: "PLAY_MUSIC",
-        trackUrl: url,
-        title: title,
-        volume: volume
-      });
+      playWorshipTrack(url, title, volume);
+
+      if (activeMeetingSession) {
+        broadcastMeetingEvent(activeMeetingSession.meetingId, {
+          type: "PLAY_MUSIC",
+          trackUrl: url,
+          title: title,
+          volume: volume
+        });
+      }
       showToast(`Playing background music: ${title}`);
+      closeAllDrawers();
     });
   });
 
@@ -3836,10 +3840,9 @@ function setupEventListeners() {
       }
 
       const ytId = extractYouTubeVideoId(inputUrl);
-      const isDirectAudio = inputUrl.match(/\.(mp3|wav|m4a|aac|ogg)(\?.*)?$/i) || !ytId;
 
       if (ytId) {
-        // YouTube Link: Extract and play underlying audio or video mode without forced video UI
+        // YouTube Link: Broadcast to all connected participants & sync audio locally on Host
         const now = Date.now();
         if (activeMeetingSession) {
           broadcastMeetingEvent(activeMeetingSession.meetingId, {
@@ -3849,16 +3852,18 @@ function setupEventListeners() {
             startedAt: now
           });
         }
-        syncSharedWorshipVideo(ytId, mode, now);
+        syncSharedWorshipVideo(ytId, mode, null); // Pass null on Host so Host gets control strip
 
         const titleEl = document.getElementById("meet-music-now-playing");
         if (titleEl) {
           titleEl.textContent = mode === "video" ? `YouTube Video & Audio (${ytId})` : `YouTube Audio Only (${ytId})`;
         }
-        showToast(mode === "video" ? "🎥 Playing YouTube Video & Audio" : "🔊 Playing YouTube Audio Only");
+        showToast(mode === "video" ? "🎥 Playing YouTube Video & Audio to all members" : "🔊 Playing YouTube Audio Only to all members");
       } else {
         // Direct Audio Link (MP3 / WAV / Audio Stream)
-        const customTitle = "Custom Audio Track";
+        const customTitle = "Custom Shared Audio Stream";
+        playWorshipTrack(inputUrl, customTitle, volume);
+
         if (activeMeetingSession) {
           broadcastMeetingEvent(activeMeetingSession.meetingId, {
             type: "PLAY_MUSIC",
@@ -3867,14 +3872,14 @@ function setupEventListeners() {
             volume: volume
           });
         }
-        playWorshipTrack(inputUrl, customTitle, volume);
-        showToast("🎵 Playing Custom Audio Stream");
+        showToast("🎵 Playing Custom Audio Stream to all members");
       }
 
       closeAllDrawers();
       if (customUrlInput) customUrlInput.value = "";
     });
   }
+
 
   // Stop Music Button: Completely halts playback & resets Currently Playing status to None (Silent)
   const musicStopBtn = document.getElementById("btn-meet-music-stop");
