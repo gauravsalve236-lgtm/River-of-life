@@ -6511,9 +6511,16 @@ function generateICSFile(meeting) {
 
 // Trigger Joining Flow (Camera preview checks & Instant Launch)
 function triggerJoinMeetingFlow(meetingId) {
-  const meetings = getMeetingsFromStorage();
-  const m = (meetings && meetings.length) ? meetings.find(x => x.id === meetingId) : null;
-  const targetMeeting = m || { id: meetingId || 'default-1', title: 'Friday Family Prayer / कौटुंबिक प्रार्थना', host: 'Pastor John' };
+  let targetMeeting = { id: meetingId || 'friday-prayer', title: 'Friday Family Prayer / कौटुंबिक प्रार्थना', host: 'Pastor John' };
+  try {
+    const meetings = getMeetingsFromStorage();
+    if (meetings && meetings.length) {
+      const found = meetings.find(x => x.id === meetingId);
+      if (found) targetMeeting = found;
+    }
+  } catch (e) {
+    console.warn("Storage fetch fallback:", e);
+  }
 
   // INSTANTLY launch live meeting room modal so desktop & mobile users get 0ms latency UI response!
   launchLiveMeetingRoom(targetMeeting, null);
@@ -6540,10 +6547,13 @@ function triggerJoinMeetingFlow(meetingId) {
 // Fullscreen Live Meeting Room Entry
 function launchLiveMeetingRoom(meeting, stream) {
   try {
+    if (!meeting) meeting = { id: 'friday-prayer', title: 'Friday Family Prayer / कौटुंबिक प्रार्थना', host: 'Pastor John' };
+
     // Lock screen view overlay
     const roomModal = document.getElementById("modal-live-meeting");
     if (roomModal) {
-      roomModal.style.display = "block";
+      roomModal.style.setProperty("display", "block", "important");
+      roomModal.style.setProperty("z-index", "999999", "important");
       setTimeout(() => {
         roomModal.classList.add("active");
       }, 10);
@@ -6553,11 +6563,15 @@ function launchLiveMeetingRoom(meeting, stream) {
     const titleEl = document.getElementById("meeting-room-title");
     if (titleEl) titleEl.textContent = meeting.title;
   
-  // Hide top header and bottom tabs
-  document.querySelector(".app-header").style.display = "none";
-  document.querySelector(".mobile-bottom-tabs").style.display = "none";
-  const sidebar = document.querySelector(".desktop-sidebar");
-  if (sidebar) sidebar.style.display = "none";
+    // Hide top header and bottom tabs with null safety
+    const appHeader = document.querySelector(".app-header");
+    if (appHeader) appHeader.style.display = "none";
+    
+    const bottomTabs = document.querySelector(".mobile-bottom-tabs");
+    if (bottomTabs) bottomTabs.style.display = "none";
+    
+    const sidebar = document.querySelector(".desktop-sidebar");
+    if (sidebar) sidebar.style.display = "none";
 
   // Setup active session state
   const loggedIn = state.currentUser ? state.currentUser.username : "Guest User";
