@@ -1908,9 +1908,9 @@
               <div class="form-input-group" style="display: flex; flex-direction: column; gap: 4px;">
                 <label for="meeting-visibility" style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Visibility / दृश्यता</label>
                 <select id="meeting-visibility" class="dropdown-selector" style="width: 100%;">
-                  <option value="members" selected>Church Members</option>
-                  <option value="invite">Invite Only</option>
-                  <option value="public">Public</option>
+                  <option value="public" selected>Public (Real Live Meeting / थेट बैठक)</option>
+                  <option value="members">Church Members (Simulated Sandbox / सिम्युलेटेड)</option>
+                  <option value="invite">Invite Only (Simulated Sandbox / सिम्युलेटेड)</option>
                 </select>
               </div>
               <div class="form-input-group" style="display: flex; flex-direction: column; gap: 4px;">
@@ -2234,8 +2234,8 @@
       </div>
     </div>
 
-    <!-- Jitsi Meet External API Script -->
-    <script src="https://meet.jit.si/external_api.js"></script>
+    <!-- Jitsi Meet External API Script (Hosted Locally to bypass Content Security Policy blocking) -->
+    <script src="external_api.js?v=36"></script>
 
     <!-- Toast Notification Overlay -->
     <div id="toast-notification" class="app-toast">

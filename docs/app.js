@@ -5721,6 +5721,20 @@ const CHURCH_MEMBERS = [
 function getMeetingsFromStorage() {
   try {
     let meetings = JSON.parse(localStorage.getItem("river_of_life_meetings"));
+    if (meetings && meetings.length > 0) {
+      // Migrate existing stored meetings to public so users can test live meetings instantly
+      let updated = false;
+      meetings.forEach(m => {
+        if ((m.id === "meeting_1" || m.id === "meeting_2") && m.visibility !== "public") {
+          m.visibility = "public";
+          updated = true;
+        }
+      });
+      if (updated) {
+        localStorage.setItem("river_of_life_meetings", JSON.stringify(meetings));
+      }
+    }
+    
     if (!meetings) {
       // Seed default meetings
       const today = new Date();
@@ -5736,7 +5750,7 @@ function getMeetingsFromStorage() {
           time: "20:00",
           duration: "60",
           repeat: "weekly",
-          visibility: "members",
+          visibility: "public",
           maxParticipants: "50",
           status: "live", // Currently Live
           participantsCount: 12,
@@ -5752,7 +5766,7 @@ function getMeetingsFromStorage() {
           time: "18:00",
           duration: "90",
           repeat: "weekly",
-          visibility: "members",
+          visibility: "public",
           maxParticipants: "100",
           status: "scheduled",
           participantsCount: 0,
