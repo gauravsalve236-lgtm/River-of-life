@@ -6559,9 +6559,8 @@ function launchLiveMeetingRoom(meeting, stream) {
     }
   }
 
-  // Initialize default MS Teams Gallery View for all participants
-  switchMeetingView("gallery");
-  
+  // Setup embedded fallback container
+  const jitsiCont = document.getElementById("meeting-jitsi-container");
   if (jitsiCont) {
     jitsiCont.style.display = "none";
     jitsiCont.style.position = "absolute";
@@ -6585,9 +6584,8 @@ function launchLiveMeetingRoom(meeting, stream) {
     `;
   }
 
-  // Ensure bottom custom toolbar is visible above live call
-  const customToolbar = document.querySelector(".meeting-room-toolbar");
-  if (customToolbar) customToolbar.style.display = "flex";
+  // Initialize default MS Teams Gallery View for all participants
+  switchMeetingView("gallery");
 
   // Attach global screen tap listener inside meeting room to unlock audio on mobile browsers
   const autoAudioUnlocker = () => {
