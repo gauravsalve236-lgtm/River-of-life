@@ -3819,57 +3819,88 @@ function setupEventListeners() {
     });
   });
 
+  // Play Custom Song (YouTube or Direct MP3/Audio URL)
   const playCustomBtn = document.getElementById("btn-meet-play-custom");
   if (playCustomBtn) {
     playCustomBtn.addEventListener("click", () => {
-      if (!activeMeetingSession) return;
-      const inputUrl = document.getElementById("meet-music-custom-url").value.trim();
+      const customUrlInput = document.getElementById("meet-music-custom-url");
+      const inputUrl = customUrlInput ? customUrlInput.value.trim() : "";
+      const modeSelect = document.getElementById("meet-music-custom-mode");
+      const mode = modeSelect ? modeSelect.value : "audio";
+      const volSlider = document.getElementById("meet-music-volume");
+      const volume = volSlider ? parseInt(volSlider.value) : 50;
+
       if (!inputUrl) {
-        showToast("Please enter a valid YouTube or MP3 link.");
+        showToast("Please enter a valid YouTube or direct MP3 URL.");
         return;
       }
-      
-      const isYoutube = inputUrl.includes("youtube.com") || inputUrl.includes("youtu.be");
-      if (isYoutube) {
-        const mode = document.getElementById("meet-music-custom-mode").value || "audio";
-        broadcastMeetingEvent(activeMeetingSession.meetingId, {
-          type: "PLAY_YOUTUBE",
-          url: inputUrl,
-          mode: mode
-        });
+
+      const ytId = extractYouTubeVideoId(inputUrl);
+      const isDirectAudio = inputUrl.match(/\.(mp3|wav|m4a|aac|ogg)(\?.*)?$/i) || !ytId;
+
+      if (ytId) {
+        // YouTube Link: Extract and play underlying audio or video mode without forced video UI
+        const now = Date.now();
+        if (activeMeetingSession) {
+          broadcastMeetingEvent(activeMeetingSession.meetingId, {
+            type: "PLAY_YOUTUBE",
+            url: ytId,
+            mode: mode,
+            startedAt: now
+          });
+        }
+        syncSharedWorshipVideo(ytId, mode, now);
+
+        const titleEl = document.getElementById("meet-music-now-playing");
+        if (titleEl) {
+          titleEl.textContent = mode === "video" ? `YouTube Video & Audio (${ytId})` : `YouTube Audio Only (${ytId})`;
+        }
+        showToast(mode === "video" ? "🎥 Playing YouTube Video & Audio" : "🔊 Playing YouTube Audio Only");
       } else {
-        broadcastMeetingEvent(activeMeetingSession.meetingId, {
-          type: "PLAY_MUSIC",
-          trackUrl: inputUrl,
-          title: "Custom Shared Praise Track",
-          volume: 55
-        });
+        // Direct Audio Link (MP3 / WAV / Audio Stream)
+        const customTitle = "Custom Audio Track";
+        if (activeMeetingSession) {
+          broadcastMeetingEvent(activeMeetingSession.meetingId, {
+            type: "PLAY_MUSIC",
+            trackUrl: inputUrl,
+            title: customTitle,
+            volume: volume
+          });
+        }
+        playWorshipTrack(inputUrl, customTitle, volume);
+        showToast("🎵 Playing Custom Audio Stream");
       }
+
       closeAllDrawers();
-      document.getElementById("meet-music-custom-url").value = "";
+      if (customUrlInput) customUrlInput.value = "";
     });
   }
 
+  // Stop Music Button: Completely halts playback & resets Currently Playing status to None (Silent)
   const musicStopBtn = document.getElementById("btn-meet-music-stop");
   if (musicStopBtn) {
     musicStopBtn.addEventListener("click", () => {
-      if (!activeMeetingSession) return;
-      broadcastMeetingEvent(activeMeetingSession.meetingId, {
-        type: "STOP_MUSIC"
-      });
-      broadcastMeetingEvent(activeMeetingSession.meetingId, {
-        type: "STOP_YOUTUBE"
-      });
+      stopWorshipTrack();
+
+      if (activeMeetingSession) {
+        broadcastMeetingEvent(activeMeetingSession.meetingId, {
+          type: "STOP_MUSIC"
+        });
+        broadcastMeetingEvent(activeMeetingSession.meetingId, {
+          type: "STOP_YOUTUBE"
+        });
+      }
       closeAllDrawers();
-      showToast("Stopped background audio / video.");
+      showToast("Stopped music playback.");
     });
   }
 
+  // Volume Slider: Dynamically adjusts playback volume
   const volSlider = document.getElementById("meet-music-volume");
   const volLabel = document.getElementById("meet-music-vol-label");
   if (volSlider && volLabel) {
     volSlider.addEventListener("input", (e) => {
-      const val = e.target.value;
+      const val = parseInt(e.target.value);
       volLabel.textContent = `${val}%`;
       
       if (activeWorshipAudio) {
@@ -3877,15 +3908,15 @@ function setupEventListeners() {
       }
       
       if (activeMeetingSession && currentWorshipTrack) {
+        currentWorshipTrack.volume = val;
         broadcastMeetingEvent(activeMeetingSession.meetingId, {
-          type: "PLAY_MUSIC",
-          trackUrl: currentWorshipTrack.url,
-          title: currentWorshipTrack.title,
-          volume: parseInt(val)
+          type: "VOLUME_CHANGE",
+          volume: val
         });
       }
     });
   }
+
 }
 
 /* ==========================================================================
@@ -6781,6 +6812,14 @@ function hideSharedBibleContent() {
   }
 }
 
+// Helper to extract YouTube Video ID from any format URL
+function extractYouTubeVideoId(url) {
+  if (!url) return null;
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+  const match = url.match(regExp);
+  return (match && match[2].length === 11) ? match[2] : null;
+}
+
 // Play background praise track
 function playWorshipTrack(url, title, volume) {
   if (activeWorshipAudio) {
@@ -6790,7 +6829,7 @@ function playWorshipTrack(url, title, volume) {
   
   activeWorshipAudio = new Audio(url);
   activeWorshipAudio.loop = true;
-  activeWorshipAudio.volume = volume / 100;
+  activeWorshipAudio.volume = (typeof volume === "number" ? volume : 50) / 100;
   activeWorshipAudio.play().catch(e => console.warn("Audio autoplay blocked:", e));
   
   currentWorshipTrack = { url, title, volume };
@@ -6803,26 +6842,37 @@ function playWorshipTrack(url, title, volume) {
   document.querySelectorAll(".meet-music-track-btn").forEach(btn => {
     const isPlayingThis = btn.dataset.url === url;
     btn.classList.toggle("active", isPlayingThis);
-    btn.querySelector("span:last-child").textContent = isPlayingThis ? "⏸️ Playing" : "▶️ Play";
+    const span = btn.querySelector("span:last-child");
+    if (span) span.textContent = isPlayingThis ? "⏸️ Playing" : "▶️ Play";
   });
 }
 
-// Stop background praise track
+// Stop background praise track completely & reset UI state
 function stopWorshipTrack() {
   if (activeWorshipAudio) {
     activeWorshipAudio.pause();
+    activeWorshipAudio.currentTime = 0;
     activeWorshipAudio = null;
   }
   currentWorshipTrack = null;
   
+  // Stop any hidden YouTube video/audio containers
+  hideSharedWorshipVideo();
+  
+  // Reset "Currently Playing" status text back to "None (Silent)"
   const titleEl = document.getElementById("meet-music-now-playing");
   if (titleEl) titleEl.textContent = "None (Silent)";
   
   document.querySelectorAll(".meet-music-track-btn").forEach(btn => {
     btn.classList.remove("active");
-    btn.querySelector("span:last-child").textContent = "▶️ Play";
+    const span = btn.querySelector("span:last-child");
+    if (span) span.textContent = "▶️ Play";
   });
+
+  const customUrlInput = document.getElementById("meet-music-custom-url");
+  if (customUrlInput) customUrlInput.value = "";
 }
+
 
 // Populate the Scripture selection dropdown options inside meetings
 function populateMeetingShareBibleDropdowns() {
