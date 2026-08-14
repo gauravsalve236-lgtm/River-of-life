@@ -7599,69 +7599,69 @@ async function syncSharedWorshipVideo(youtubeUrl, mode = "audio", startedAt = nu
   hideSharedWorshipVideo();
 
   const player = document.getElementById("worship-youtube-player");
+  const isAudience = (startedAt !== null && startedAt !== undefined);
+  const elapsedSeconds = isAudience ? Math.floor((Date.now() - startedAt) / 1000) : 0;
+  const startParam = elapsedSeconds > 0 ? `&start=${elapsedSeconds}` : "";
 
-  if (mode === "video") {
-    // ── VIDEO MODE: Split screen with YouTube on top, cameras below ──────────
-    container.style.cssText = "display:block; position:absolute; top:50px; bottom:auto; height:45%; left:0; right:0; z-index:10;";
-    worshipBox.style.display = "block";
+  if (isAudience) {
+    // ── CONNECTED MEMBERS / AUDIENCE DEVICES: ALWAYS AUDIO ONLY (ZERO VIDEO UI) ──
+    // Members NEVER see the video frame on their device screen.
+    // Member devices automatically stream audio through speakers while viewing the call grid!
+    container.style.display = "none";
+    worshipBox.style.display = "none";
     if (bibleBox) bibleBox.style.display = "none";
 
-    if (player) {
-      player.innerHTML = `
-        <iframe id="worship-yt-iframe" width="100%" height="100%"
-          src="https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=1"
-          frameborder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowfullscreen style="width:100%;height:100%;border:0;"></iframe>
+    // Cameras fill 100% of meeting view for members
+    jitsiCont.style.display = "block";
+    jitsiCont.style.top     = "50px";
+    jitsiCont.style.height  = "calc(100% - 50px)";
+
+    // Inject audio-only YouTube player into off-screen hidden container
+    const hiddenAudioCont = document.getElementById("hidden-youtube-audio-container");
+    if (hiddenAudioCont) {
+      hiddenAudioCont.innerHTML = `
+        <iframe id="hidden-yt-audio-iframe" width="1" height="1"
+          src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0${startParam}&enablejsapi=1"
+          allow="autoplay; encrypted-media"></iframe>
       `;
     }
 
-    jitsiCont.style.display = "block";
-    jitsiCont.style.top     = "calc(45% + 50px)";
-    jitsiCont.style.height  = "calc(55% - 50px)";
-
-    if (banner) banner.style.display = "none";
-    showToast("Worship video shared with participants!");
+    if (banner) {
+      banner.style.cssText = "display:flex; top:60px; background: rgba(34, 197, 94, 0.95);";
+      banner.querySelector("span").textContent = "🔊 Live Worship Audio Playing — Turn up volume!";
+    }
+    showToast("🎵 Worship song playing automatically on your device speaker!");
 
   } else {
-    // ── AUDIO ONLY MODE: PURE AUDIO PLAYBACK (ZERO UI FOR PARTICIPANTS) ──────
-    // - Pastor's device: Can display small control strip to manage worship audio.
-    // - Participant devices: ZERO video containers, ZERO YouTube icons, ZERO bottom bars.
-    // - The YouTube audio iframe is rendered strictly offscreen in #hidden-youtube-audio-container
-    // - Participants hear the song natively through their device speaker while seeing full meeting view.
+    // ── HOST / PASTOR MACHINE: Render Video / Audio controls on Host screen ─────
+    const now = Date.now();
+    currentWorshipSyncTimestamp = now;
 
-    const isAudience = (startedAt !== null && startedAt !== undefined);
-    const elapsedSeconds = isAudience ? Math.floor((Date.now() - startedAt) / 1000) : 0;
-    const startParam = elapsedSeconds > 0 ? `&start=${elapsedSeconds}` : "";
-
-    if (isAudience) {
-      // ── AUDIENCE DEVICE: Hide all video/content panels completely ───────────
-      container.style.display = "none";
-      worshipBox.style.display = "none";
+    if (mode === "video") {
+      // Host sees video player on Host screen
+      container.style.cssText = "display:block; position:absolute; top:50px; bottom:auto; height:45%; left:0; right:0; z-index:10;";
+      worshipBox.style.display = "block";
       if (bibleBox) bibleBox.style.display = "none";
 
-      // Cameras fill 100% of meeting view
-      jitsiCont.style.display = "block";
-      jitsiCont.style.top     = "50px";
-      jitsiCont.style.height  = "calc(100% - 50px)";
-
-      // Inject audio-only YouTube player into off-screen hidden container
-      const hiddenAudioCont = document.getElementById("hidden-youtube-audio-container");
-      if (hiddenAudioCont) {
-        hiddenAudioCont.innerHTML = `
-          <iframe id="hidden-yt-audio-iframe" width="1" height="1"
-            src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0${startParam}&enablejsapi=1"
-            allow="autoplay; encrypted-media"></iframe>
+      if (player) {
+        player.innerHTML = `
+          <iframe id="worship-yt-iframe" width="100%" height="100%"
+            src="https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=1"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen style="width:100%;height:100%;border:0;"></iframe>
         `;
       }
 
-      showToast("🎵 Worship song audio playing through your device speaker!");
+      jitsiCont.style.display = "block";
+      jitsiCont.style.top     = "calc(45% + 50px)";
+      jitsiCont.style.height  = "calc(55% - 50px)";
+
+      if (banner) banner.style.display = "none";
+      showToast("🎥 Video running on Host machine — Connected members hear Audio Only!");
 
     } else {
-      // ── PASTOR'S DEVICE: Show small control strip at bottom of Pastor's screen ──────
-      const now = Date.now();
-      currentWorshipSyncTimestamp = now;
-
+      // Host sees small control strip
       container.style.cssText = "display:block; position:absolute; top:auto; bottom:74px; height:100px; left:0; right:0; z-index:20; background:#0f0f0f;";
       worshipBox.style.display = "block";
       if (bibleBox) bibleBox.style.display = "none";
@@ -7675,12 +7675,8 @@ async function syncSharedWorshipVideo(youtubeUrl, mode = "audio", startedAt = nu
               allow="accelerometer; autoplay; clipboard-write; encrypted-media"
               style="flex-shrink:0;border-radius:6px;border:0;"></iframe>
             <div style="flex:1;color:#fff;">
-              <div style="font-size:11px;font-weight:800;color:#60a5fa;margin-bottom:3px;">🎵 Worship Audio Playing</div>
-              <div id="worship-audio-status" style="font-size:10px;color:#94a3b8;">Tap below to share with audience</div>
-              <button id="btn-broadcast-worship" onclick="broadcastWorshipAudioToAudience('${videoId}', ${now})"
-                style="margin-top:6px;background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;border:none;border-radius:20px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(34,197,94,0.4);">
-                🔴 Share Audio Only with Audience
-              </button>
+              <div style="font-size:11px;font-weight:800;color:#60a5fa;margin-bottom:3px;">🎵 Worship Audio Active</div>
+              <div id="worship-audio-status" style="font-size:10px;color:#22c55e;">🔴 Live streaming audio to all connected members</div>
             </div>
           </div>
         `;
@@ -7690,12 +7686,13 @@ async function syncSharedWorshipVideo(youtubeUrl, mode = "audio", startedAt = nu
       jitsiCont.style.top     = "50px";
       jitsiCont.style.height  = "calc(100% - 50px - 74px - 100px)";
 
-      showToast("Song playing! Press 'Share Audio Only' to send to participants!");
+      showToast("🔊 Audio-only streaming live to all connected members!");
     }
   }
 }
 
 // Pastor broadcasts the YouTube song to all audience participants
+
 function broadcastWorshipAudioToAudience(videoId, startedAt) {
   const statusEl = document.getElementById("worship-audio-status");
   const broadcastBtn = document.getElementById("btn-broadcast-worship");
