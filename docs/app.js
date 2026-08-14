@@ -7242,14 +7242,13 @@ function exitLiveMeetingRoom() {
     jitsiCont.style.display = "none";
     jitsiCont.innerHTML = "";
   }
-  const videoGrid = document.getElementById("meeting-video-grid");
-  if (videoGrid) videoGrid.style.display = "grid";
-  const customToolbar = document.querySelector(".meeting-room-toolbar");
-  if (customToolbar) customToolbar.style.display = "flex";
+  // Restore main application header and bottom navigation tab bar
+  const appHeader = document.querySelector(".app-header");
+  if (appHeader) appHeader.style.display = "flex";
   
-  // Restore navigation panels
-  document.querySelector(".app-header").style.display = "flex";
-  document.querySelector(".mobile-bottom-tabs").style.display = "flex";
+  const bottomTabs = document.querySelector(".mobile-bottom-tabs");
+  if (bottomTabs) bottomTabs.style.display = "grid";
+  
   const sidebar = document.querySelector(".desktop-sidebar");
   if (sidebar) sidebar.style.display = "flex";
 

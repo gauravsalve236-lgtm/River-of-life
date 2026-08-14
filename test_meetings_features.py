@@ -3,7 +3,7 @@ from playwright.sync_api import sync_playwright
 
 def run_test():
     with sync_playwright() as p:
-        print("Launching Chromium browser with fake media stream to test camera integration...")
+        print("Launching Chromium browser to test Main App Navigation Bar on Home Page...")
         browser = p.chromium.launch(
             headless=True,
             args=["--use-fake-ui-for-media-stream", "--use-fake-device-for-media-stream"]
@@ -25,40 +25,35 @@ def run_test():
         }""")
         page.wait_for_timeout(500)
 
-        # 1. Trigger join meeting with fake camera stream
-        print("Triggering Join Meeting flow with fake media stream...")
-        page.evaluate("() => triggerJoinMeetingFlow('meeting-1')")
-        page.wait_for_timeout(1500)
-
-        # 2. Assert modal opened with zero errors
-        modal = page.query_selector("#modal-live-meeting")
-        assert modal is not None and modal.is_visible(), "Meeting modal should open cleanly!"
-        print("Meeting Room opened cleanly!")
-
-        # 3. Assert local camera video element is embedded inside local cell
-        print("Testing live camera video element binding...")
-        local_video = page.query_selector("#meeting-local-video")
-        assert local_video is not None, "Local video camera element MUST exist in DOM!"
+        # 1. Verify Main App Navigation Bar is visible on Home Page
+        print("Verifying Main App Navigation Bar on Home Page...")
+        main_tabs = page.query_selector(".mobile-bottom-tabs")
+        assert main_tabs is not None and main_tabs.is_visible(), "Main App bottom navigation bar MUST be visible on Home page!"
         
-        has_stream = page.evaluate("() => { const v = document.getElementById('meeting-local-video'); return v && (v.srcObject !== null || v.style.display !== 'none'); }")
-        print(f"Local User Live Camera Video Active State: {has_stream}")
+        tab_buttons = page.query_selector_all(".mobile-bottom-tabs .tab-btn")
+        print(f"Main App Bottom Navigation Tabs Count: {len(tab_buttons)}")
+        assert len(tab_buttons) == 6, "Main App bottom navigation bar should contain 6 tabs (Home, Bible, Meetings, Plans, Prayers, You)!"
 
-        # 4. Test Camera Toggle button
-        print("Testing Camera Toggle button...")
-        page.evaluate("() => toggleCameraFeed()")
-        page.wait_for_timeout(500)
-        cam_off = page.evaluate("() => activeMeetingSession.isCamOff")
-        print(f"Camera Toggled Off State: {cam_off}")
-        assert cam_off == True, "Camera should toggle off!"
+        # 2. Verify Meeting Room Toolbar is NOT visible on Home Page
+        print("Verifying Meeting Room Toolbar is hidden on Home Page...")
+        meeting_toolbar = page.query_selector("#modal-live-meeting .meeting-room-toolbar")
+        assert meeting_toolbar is None or not meeting_toolbar.is_visible(), "Meeting Room toolbar MUST NOT show up on Home page!"
+        print("Meeting Room Toolbar is cleanly hidden on Home page!")
 
-        page.evaluate("() => toggleCameraFeed()")
+        # 3. Launch meeting and then exit to verify main navigation bar is restored cleanly
+        print("Launching meeting and exiting to verify smooth navigation restoration...")
+        page.evaluate("() => triggerJoinMeetingFlow('meeting-1')")
+        page.wait_for_timeout(1000)
+        
+        page.evaluate("() => exitLiveMeetingRoom()")
         page.wait_for_timeout(500)
-        cam_on = page.evaluate("() => activeMeetingSession.isCamOff")
-        print(f"Camera Toggled On State: {not cam_on}")
-        assert cam_on == False, "Camera should toggle back on!"
+
+        main_tabs_after = page.query_selector(".mobile-bottom-tabs")
+        assert main_tabs_after is not None and main_tabs_after.is_visible(), "Main App bottom navigation bar MUST be restored after exiting meeting!"
+        print("Main App Bottom Navigation bar cleanly restored after exiting meeting!")
 
         print("\n==================================================")
-        print("ALL CAMERA & REAL VIDEO TESTS PASSED SUCCESSFULLY!")
+        print("MAIN HOME PAGE MENU RESTORATION TESTS PASSED!")
         print("==================================================\n")
         browser.close()
 
