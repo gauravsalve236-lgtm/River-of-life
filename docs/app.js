@@ -8139,15 +8139,7 @@ const mockParticipantsList = [
   { id: 'local', name: 'You (Host)', initials: 'U', bg: '#3b82f6', color: '#ffffff', isMuted: false, isHandRaised: false, isSpeaking: false, isLocal: true },
   { id: 'pj', name: 'Pastor John', initials: 'PJ', bg: '#8b5cf6', color: '#ffffff', isMuted: false, isHandRaised: false, isSpeaking: true },
   { id: 'sm', name: 'Sister Mary', initials: 'SM', bg: '#ec4899', color: '#ffffff', isMuted: true, isHandRaised: true, isSpeaking: false },
-  { id: 'bd', name: 'Brother David', initials: 'BD', bg: '#10b981', color: '#ffffff', isMuted: false, isHandRaised: false, isSpeaking: false },
-  { id: 'rs', name: 'Rahul S.', initials: 'RS', bg: '#f59e0b', color: '#ffffff', isMuted: false, isHandRaised: false, isSpeaking: false },
-  { id: 'pm', name: 'Priyanka M.', initials: 'PM', bg: '#ef4444', color: '#ffffff', isMuted: true, isHandRaised: false, isSpeaking: false },
-  { id: 'ak', name: 'Anil K.', initials: 'AK', bg: '#06b6d4', color: '#ffffff', isMuted: false, isHandRaised: false, isSpeaking: false },
-  { id: 'sd', name: 'Sunita D.', initials: 'SD', bg: '#84cc16', color: '#ffffff', isMuted: true, isHandRaised: false, isSpeaking: false },
-  { id: 'vg', name: 'Vijay G.', initials: 'VG', bg: '#6366f1', color: '#ffffff', isMuted: false, isHandRaised: true, isSpeaking: false },
-  { id: 'rn', name: 'Rutuja N.', initials: 'RN', bg: '#d946ef', color: '#ffffff', isMuted: true, isHandRaised: false, isSpeaking: false },
-  { id: 'sk', name: 'Sanjay K.', initials: 'SK', bg: '#14b8a6', color: '#ffffff', isMuted: false, isHandRaised: false, isSpeaking: false },
-  { id: 'lp', name: 'Lata P.', initials: 'LP', bg: '#f97316', color: '#ffffff', isMuted: true, isHandRaised: false, isSpeaking: false }
+  { id: 'bd', name: 'Brother David', initials: 'BD', bg: '#10b981', color: '#ffffff', isMuted: false, isHandRaised: false, isSpeaking: false }
 ];
 
 function toggleMeetingViewDropdown() {
@@ -8296,16 +8288,13 @@ function toggleRealLiveStreamMode() {
   }
 }
 
-// RENDER VIEW 1: Gallery View (Focused 4-5 Medium-Sized Cards + Active Speaker Auto-Focus)
+// RENDER VIEW 1: Gallery View (Clean 2x2 Grid - 4 Medium-Sized Cards + Active Speaker Highlight)
 function renderGalleryView() {
   const gridEl = document.getElementById("meeting-video-grid");
   if (!gridEl) return;
   
-  // Select top 4-5 active participants (Local User + Active Speaker + Key Members)
-  const focusedList = mockParticipantsList.slice(0, 5);
-  
   let html = "";
-  focusedList.forEach(p => {
+  mockParticipantsList.forEach(p => {
     const isSpeakingClass = p.isSpeaking ? "active-speaker" : "";
     const micIcon = p.isMuted ? "🔇" : (p.isSpeaking ? `<span style="color:#a855f7; font-weight:800; font-size:10px; background:rgba(168,85,247,0.2); padding:2px 6px; border-radius:10px; border:1px solid #a855f7;">🎙️ SPEAKING</span>` : "🎙️");
     const handBadge = p.isHandRaised ? `<div class="video-cell-hand-badge">✋</div>` : "";

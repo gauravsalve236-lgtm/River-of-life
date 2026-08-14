@@ -4879,19 +4879,19 @@ input, textarea, select, [contenteditable="true"] {
   transition: opacity 0.3s ease;
 }
 
-/* Live Video Grid — Responsive 2x2 / 3x3 / MS Teams Grid View */
+/* Live Video Grid — Clean 2x2 Grid View (4 Medium Cards Max) */
 .meeting-video-grid {
   display: grid !important;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
-  grid-auto-rows: 1fr;
-  gap: 12px !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  grid-template-rows: repeat(2, 1fr) !important;
+  gap: 14px !important;
   width: 100% !important;
   height: 100% !important;
-  padding: 12px !important;
+  padding: 14px !important;
   box-sizing: border-box !important;
-  overflow-y: auto !important;
-  align-content: stretch;
-  justify-content: center;
+  overflow: hidden !important;
+  align-items: stretch !important;
+  justify-content: center !important;
   background-color: #090d16 !important;
   transition: all 0.3s ease;
 }
