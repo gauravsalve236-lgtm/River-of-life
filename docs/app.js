@@ -3274,6 +3274,27 @@ function setupEventListeners() {
     closeAllDrawers();
     openStudySplitPane(selectedVerseMeta.book, selectedVerseMeta.chapter, selectedVerseMeta.verse);
   });
+
+  const shareMeetingBtn = document.getElementById("btn-action-share-meeting");
+  if (shareMeetingBtn) {
+    shareMeetingBtn.addEventListener("click", () => {
+      if (!selectedVerseMeta) return;
+      if (!activeMeetingSession) {
+        showToast("You must join a live meeting room first to share scriptures.");
+        return;
+      }
+      
+      broadcastMeetingEvent(activeMeetingSession.meetingId, {
+        type: "SHARE_BIBLE",
+        book: selectedVerseMeta.book,
+        chapter: selectedVerseMeta.chapter,
+        verse: selectedVerseMeta.verse
+      });
+      
+      closeAllDrawers();
+      showToast("Scripture shared to live meeting!");
+    });
+  }
   
   document.getElementById("btn-close-study-pane").addEventListener("click", () => {
     closeStudySplitPane();
@@ -7545,7 +7566,12 @@ function syncSharedWorshipVideo(youtubeUrl) {
   const player = document.getElementById("worship-youtube-player");
   if (player) {
     player.innerHTML = `
-      <iframe width="100%" height="100%" src="https://www.youtube.com/embed/${videoId}?autoplay=1&enablejsapi=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="width:100%; height:100%;"></iframe>
+      <div style="position: relative; width: 100%; height: 100%;">
+        <iframe width="100%" height="100%" src="https://www.youtube.com/embed/${videoId}?enablejsapi=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="width:100%; height:100%;"></iframe>
+        <div style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.75); color: #60a5fa; padding: 6px 12px; border-radius: 20px; font-size: 10.5px; font-weight: 700; pointer-events: none; z-index: 100; text-align: center; border: 1px solid rgba(96,165,250,0.3); box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+          🔊 Tap video to play with audio / आवाज ऐकण्यासाठी व्हिडिओवर टॅप करा
+        </div>
+      </div>
     `;
   }
 

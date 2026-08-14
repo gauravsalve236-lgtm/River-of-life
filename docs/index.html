@@ -1418,6 +1418,10 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
               <span>Read Aloud</span>
             </button>
+            <button id="btn-action-share-meeting" class="action-tile-btn" style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); color: #f59e0b;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+              <span>Share to Meet</span>
+            </button>
           </div>
         </div>
       </div>
@@ -2042,13 +2046,13 @@
           <div style="flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; height: 100%;">
             
             <!-- Joint Shared Content Area (Bible / YouTube) -->
-            <div id="meeting-shared-content-area" style="display: none; width: 100%; height: 45%; background: #000; border-bottom: 2px solid var(--border); overflow: hidden; position: relative;">
+            <div id="meeting-shared-content-area" style="display: none; width: 100%; height: 45%; background: #faf6eb; border-bottom: 2px solid #cbd5e1; overflow: hidden; position: relative;">
               <!-- YouTube frame container -->
               <div id="worship-video-frame-container" style="display: none; width: 100%; height: 100%;">
                 <div id="worship-youtube-player" style="width: 100%; height: 100%;"></div>
               </div>
               <!-- Shared Bible passage container -->
-              <div id="meeting-shared-bible" style="display: none; width: 100%; height: 100%; overflow-y: auto; padding: 20px; background: var(--bg-content); text-align: left;">
+              <div id="meeting-shared-bible" style="display: none; width: 100%; height: 100%; overflow-y: auto; background: #faf6eb; text-align: left;">
                 <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 10px;">
                   <h5 id="shared-bible-title" style="font-size: 14px; font-weight: 800; color: var(--primary); margin: 0;">Psalm 23:1</h5>
                   <span id="shared-bible-ctrl-tag" style="font-size: 10px; background: var(--pill-bg); color: var(--text-muted); padding: 2px 6px; border-radius: 4px;">Host Selected</span>
