@@ -6534,7 +6534,8 @@ function launchLiveMeetingRoom(meeting, stream) {
   };
 
   // Sync profile display initials
-  document.getElementById("meeting-local-name").textContent = `${loggedIn} ${isHost ? "(Host)" : ""}`;
+  const localNameEl = document.getElementById("meeting-local-name");
+  if (localNameEl) localNameEl.textContent = `${loggedIn} ${isHost ? "(Host)" : ""}`;
   
   // Sync host moderator controls drawer button
   const modBtn = document.getElementById("btn-meet-moderator");
@@ -8758,7 +8759,66 @@ function handleParticipantVideoAudioShareStop(msg) {
   showToast("Video + Audio share stopped by host.");
 }
 
-// Expose global window helpers for meetings, drawers, scripture sharing, and grid view
+// Sidebar Drawer Panel Opener (Chat, Participants, Notes)
+function openMeetingSidebarPanel(panelName) {
+  const panel = document.getElementById("meeting-sidebar-panel");
+  const chatPane = document.getElementById("meeting-panel-chat");
+  const partPane = document.getElementById("meeting-panel-participants");
+  const notesPane = document.getElementById("meeting-panel-notes");
+  const titleEl = document.getElementById("meeting-sidebar-title");
+
+  if (!panel) return;
+
+  // Toggle if clicking same panel that is already open
+  if (panel.style.display !== "none" && ((panelName === "chat" && chatPane && chatPane.style.display !== "none") || (panelName === "participants" && partPane && partPane.style.display !== "none") || (panelName === "notes" && notesPane && notesPane.style.display !== "none"))) {
+    panel.style.display = "none";
+    return;
+  }
+
+  panel.style.display = "flex";
+  if (chatPane) chatPane.style.display = "none";
+  if (partPane) partPane.style.display = "none";
+  if (notesPane) notesPane.style.display = "none";
+
+  if (panelName === "chat") {
+    if (chatPane) chatPane.style.display = "flex";
+    if (titleEl) titleEl.textContent = "Meeting Chat";
+  } else if (panelName === "participants") {
+    if (partPane) partPane.style.display = "block";
+    if (titleEl) titleEl.textContent = "Active Participants (12)";
+  } else if (panelName === "notes") {
+    if (notesPane) notesPane.style.display = "flex";
+    if (titleEl) titleEl.textContent = "Prayer & Sermon Notes";
+  }
+}
+
+// Live Reaction Menu Toggle & Emoji Animations
+function toggleReactionMenu() {
+  const menu = document.getElementById("meeting-reactions-menu");
+  if (menu) {
+    const isHidden = menu.style.display === "none" || getComputedStyle(menu).display === "none";
+    menu.style.display = isHidden ? "flex" : "none";
+  }
+}
+
+function sendLiveEmojiReaction(emoji) {
+  const menu = document.getElementById("meeting-reactions-menu");
+  if (menu) menu.style.display = "none";
+
+  showToast(`Reaction sent: ${emoji}`);
+  
+  // Animate floating emoji on local video card
+  const localCard = document.getElementById("video-cell-local") || document.querySelector(".video-cell");
+  if (localCard) {
+    const floatingEmoji = document.createElement("div");
+    floatingEmoji.style.cssText = "position: absolute; bottom: 20px; right: 20px; font-size: 32px; z-index: 100; animation: floatUp 1.5s ease-out forwards; pointer-events: none;";
+    floatingEmoji.textContent = emoji;
+    localCard.appendChild(floatingEmoji);
+    setTimeout(() => floatingEmoji.remove(), 1500);
+  }
+}
+
+// Expose global window helpers for meetings, drawers, scripture sharing, and view switcher
 window.renderSharedBibleContent = renderSharedBibleContent;
 window.hideSharedBibleContent = hideSharedBibleContent;
 window.openDrawer = openDrawer;
@@ -8768,6 +8828,13 @@ window.toggleMeetingGridView = toggleMeetingGridView;
 window.launchLiveMeetingRoom = launchLiveMeetingRoom;
 window.triggerJoinMeetingFlow = triggerJoinMeetingFlow;
 window.switchTab = switchTab;
-
+window.toggleMeetingViewDropdown = toggleMeetingViewDropdown;
+window.switchMeetingView = switchMeetingView;
+window.shareQuickScripturePreset = shareQuickScripturePreset;
+window.toggleHandRaise = toggleHandRaise;
+window.toggleMeetingRoomTheme = toggleMeetingRoomTheme;
+window.openMeetingSidebarPanel = openMeetingSidebarPanel;
+window.toggleReactionMenu = toggleReactionMenu;
+window.sendLiveEmojiReaction = sendLiveEmojiReaction;
 
 

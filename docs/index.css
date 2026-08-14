@@ -4890,25 +4890,54 @@ input, textarea, select, [contenteditable="true"] {
 /* Live Video Grid — Responsive 2x2 / 3x3 / MS Teams Grid View */
 .meeting-video-grid {
   display: grid !important;
-  grid-template-columns: repeat(2, 1fr) !important; /* Forces 2x2 Grid View on Mobile */
-  grid-auto-rows: minmax(130px, 1fr);
-  gap: 10px !important;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+  grid-auto-rows: 1fr;
+  gap: 12px !important;
   width: 100% !important;
   height: 100% !important;
   padding: 12px !important;
   box-sizing: border-box !important;
   overflow-y: auto !important;
-  align-content: center;
+  align-content: stretch;
   justify-content: center;
   background-color: #090d16 !important;
   transition: all 0.3s ease;
 }
 
-@media (min-width: 640px) {
+@media (max-width: 768px) {
+  .teams-left-rail {
+    display: none !important;
+  }
   .meeting-video-grid {
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
-    gap: 12px !important;
-    padding: 14px !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+    padding: 8px !important;
+  }
+}
+
+/* MS Teams Vertical Rail Button Hover Effects */
+.teams-rail-btn {
+  transition: all 0.2s ease;
+}
+.teams-rail-btn:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #60a5fa !important;
+  transform: scale(1.08);
+}
+.teams-rail-btn.active {
+  background: rgba(59, 130, 246, 0.2) !important;
+  color: #60a5fa !important;
+}
+
+/* Floating Reaction Keyframe Animation */
+@keyframes floatUp {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-80px) scale(1.4);
   }
 }
 
@@ -4923,7 +4952,7 @@ input, textarea, select, [contenteditable="true"] {
   justify-content: center;
   width: 100%;
   height: 100%;
-  min-height: 120px;
+  min-height: 140px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
   border: 1.5px solid #334155 !important;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);

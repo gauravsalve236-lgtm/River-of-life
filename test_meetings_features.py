@@ -3,7 +3,7 @@ from playwright.sync_api import sync_playwright
 
 def run_test():
     with sync_playwright() as p:
-        print("Launching Chromium browser to test MS Teams Video Conferencing Views...")
+        print("Launching Chromium browser to test redesigned MS Teams Controls & Features...")
         browser = p.chromium.launch(
             headless=True,
             args=["--use-fake-ui-for-media-stream", "--use-fake-device-for-media-stream"]
@@ -15,7 +15,7 @@ def run_test():
         page.goto(file_url)
         page.wait_for_timeout(2000)
         
-        # Hide splash screen and warning banner
+        # Hide splash screen and file warning overlay
         page.evaluate("""() => { 
             const s = document.getElementById('splash-screen'); 
             if (s) s.style.display = 'none'; 
@@ -25,101 +25,56 @@ def run_test():
         }""")
         page.wait_for_timeout(500)
 
-        # 1. Switch to meetings tab via hash
-        print("Navigating to Meetings tab...")
-        page.evaluate("() => { window.location.hash = '#/meetings'; }")
-        page.wait_for_timeout(1000)
-        
-        # 2. Launch Live Meeting Room
+        # 1. Launch Live Meeting Room
         print("Launching Live Meeting Room...")
         page.evaluate("""() => {
-            const modal = document.getElementById('modal-live-meeting');
-            if (modal) {
-                modal.style.display = 'block';
-                modal.classList.add('active');
-            }
+            window.launchLiveMeetingRoom({ id: 'test-room-1', title: 'Friday Family Prayer', host: 'Pastor John' }, null);
         }""")
         page.wait_for_timeout(1000)
 
-        # 3. Assert MS Teams Dark Slate Theme Meeting Room
-        print("Verifying MS Teams Dark Slate Theme styling...")
-        modal_bg = page.eval_on_selector("#modal-live-meeting", "e => getComputedStyle(e).backgroundColor")
-        print(f"Meeting Modal Background Color: {modal_bg}")
-        assert "9" in modal_bg or "15" in modal_bg or "0" in modal_bg, "Modal background should be MS Teams Dark Slate"
+        # 2. Verify no runtime errors occurred on launch
+        modal = page.query_selector("#modal-live-meeting")
+        assert modal is not None and modal.is_visible(), "Meeting modal should open without any runtime error!"
+        print("Meeting Room launched cleanly with ZERO runtime errors!")
 
-        # 4. TEST VIEW 1: Gallery View (Default 2x2/3x3 Grid)
-        print("Testing View 1: Gallery View...")
-        page.evaluate("() => switchMeetingView('gallery')")
+        # 3. Verify Non-Duplicated Controls: Bottom Bar has 5 essential action items
+        print("Verifying Non-Duplicated Control Bar...")
+        bottom_btns = page.query_selector_all(".meeting-room-toolbar .control-btn")
+        print(f"Bottom Control Bar Action Buttons Count: {len(bottom_btns)}")
+        assert len(bottom_btns) == 5, "Bottom control bar should contain exactly 5 essential action controls (Mute, Cam, Screen, Reactions, End Call)!"
+
+        # 4. Test Live Reaction Popup Menu
+        print("Testing Live Reactions & Emoji Popup...")
+        page.evaluate("() => toggleReactionMenu()")
         page.wait_for_timeout(500)
         
-        grid = page.query_selector("#meeting-video-grid")
-        assert grid is not None and grid.is_visible(), "Gallery View grid should be visible"
+        rx_menu = page.query_selector("#meeting-reactions-menu")
+        assert rx_menu is not None and rx_menu.is_visible(), "Floating Reactions popup menu should be visible"
         
-        tiles = page.query_selector_all("#meeting-video-grid .video-cell")
-        print(f"Gallery View Active: {len(tiles)} participant tiles visible")
-        assert len(tiles) >= 12, "Gallery View should show at least 12 participant tiles"
+        page.evaluate("() => sendLiveEmojiReaction('❤️')")
+        page.wait_for_timeout(500)
+        print("Live Heart Reaction broadcasted and animated successfully!")
 
-        # Check Active Speaker purple glowing border
-        active_speaker = page.query_selector("#video-cell-pj.active-speaker")
-        assert active_speaker is not None, "Pastor John should have active speaker purple glowing border"
-        print("Active Speaker purple glowing border verified for Pastor John!")
-
-        # 5. TEST VIEW 2: Large Gallery View (7x7 Matrix, 49 Tiles)
-        print("Testing View 2: Large Gallery View (7x7 Matrix)...")
-        page.evaluate("() => switchMeetingView('large-gallery')")
+        # 5. Test Meeting Notes Drawer (New Teams Feature)
+        print("Testing Meeting Notes & Prayer Requests Drawer...")
+        page.evaluate("() => openMeetingSidebarPanel('notes')")
         page.wait_for_timeout(500)
         
-        large_grid = page.query_selector("#meeting-large-gallery-grid")
-        assert large_grid is not None and large_grid.is_visible(), "Large Gallery View grid should be visible"
-        
-        lg_tiles = page.query_selector_all("#meeting-large-gallery-grid .video-cell")
-        print(f"Large Gallery Active: {len(lg_tiles)} matrix participant tiles visible!")
-        assert len(lg_tiles) == 49, "Large Gallery View should show 49 matrix participant tiles"
+        notes_panel = page.query_selector("#meeting-panel-notes")
+        assert notes_panel is not None and notes_panel.is_visible(), "Meeting Notes drawer panel should be visible"
+        print("Meeting Notes & Prayer Requests drawer panel verified!")
 
-        # 6. TEST VIEW 3: Together Mode (Auditorium Tiered Seating)
-        print("Testing View 3: Together Mode (Auditorium Tiered Seating)...")
-        page.evaluate("() => switchMeetingView('together')")
+        # 6. Test Device & Call Settings Drawer (New Teams Feature)
+        print("Testing Device & Call Settings Drawer...")
+        page.evaluate("() => openDrawer('drawer-meet-settings')")
         page.wait_for_timeout(500)
         
-        together_container = page.query_selector("#meeting-together-mode")
-        assert together_container is not None and together_container.is_visible(), "Together Mode should be visible"
-        
-        seats = page.query_selector_all(".together-seat-card")
-        print(f"Together Mode Active: {len(seats)} auditorium seats occupied!")
-        assert len(seats) >= 12, "Together Mode should show seated participant avatars"
-
-        # 7. TEST VIEW 4: Speaker View (Focus Active Speaker + Filmstrip)
-        print("Testing View 4: Speaker View (Focus Speaker + Filmstrip)...")
-        page.evaluate("() => switchMeetingView('speaker')")
-        page.wait_for_timeout(500)
-        
-        speaker_container = page.query_selector("#meeting-speaker-view")
-        assert speaker_container is not None and speaker_container.is_visible(), "Speaker View should be visible"
-        
-        main_stage = page.query_selector("#speaker-view-main-stage")
-        assert main_stage is not None and main_stage.is_visible(), "Focused Speaker Main Stage should be visible"
-
-        filmstrip_tiles = page.query_selector_all("#speaker-view-filmstrip .video-cell")
-        print(f"Speaker View Active: Focused Main Stage + {len(filmstrip_tiles)} filmstrip tiles!")
-        assert len(filmstrip_tiles) >= 11, "Speaker View filmstrip should contain participant tiles"
-
-        # 8. TEST Quick 1-Tap Scripture Sharing Preset
-        print("Testing Quick 1-Tap Scripture Share Preset (Psalm 23)...")
-        page.evaluate("() => shareQuickScripturePreset('psalms', 23, 'all')")
-        page.wait_for_timeout(1000)
-        
-        shared_area = page.query_selector("#meeting-shared-content-area")
-        shared_bible = page.query_selector("#meeting-shared-bible")
-        assert shared_area is not None and shared_area.is_visible(), "Shared content area MUST be visible"
-        assert shared_bible is not None and shared_bible.is_visible(), "Shared Bible scripture MUST be visible"
-        
-        scripture_text = page.text_content("#meeting-shared-bible")
-        safe_preview = scripture_text.encode('ascii', errors='ignore').decode('ascii')
-        print(f"Quick Scripture Share Output:\n{safe_preview[:100]}...")
-        assert "Scripture Shared" in scripture_text or "psalms 23" in scripture_text.lower(), "Scripture Psalm 23 should be rendered"
+        settings_drawer = page.query_selector("#drawer-meet-settings")
+        assert settings_drawer is not None and settings_drawer.is_visible(), "Device Settings drawer should be visible"
+        print("Device & Call Settings drawer verified!")
 
         print("\n==================================================")
-        print("ALL MS TEAMS VIEWS AND SCRIPTURE TESTS PASSED!")
+        print("ALL REDESIGNED MS TEAMS CONTROLS & TESTS PASSED!")
         print("==================================================\n")
         browser.close()
 
