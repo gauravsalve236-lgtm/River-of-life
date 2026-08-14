@@ -7931,58 +7931,198 @@ function stopShareAudioOnly() {
   showToast("Audio-Only sharing stopped.");
 }
 
+/* ==========================================================================
+   11. DUAL MEDIA SHARING ENGINE (MODE 1: VIDEO+AUDIO / MODE 2: AUDIO ONLY)
+   ========================================================================== */
+
+let isAudioOnlySharingActive = false;
+let isVideoSharingActive = false;
+let capturedAudioMediaStream = null;
+let audioSharingContext = null;
+let audioSharingDestination = null;
+
+// Diagnostic Logger for Admin Audio Sharing Debug Panel
+function logAudioDebug(msgText, append = true) {
+  console.log("[AUDIO_DEBUG]", msgText);
+  const panel = document.getElementById("admin-audio-debug-panel");
+  const content = document.getElementById("admin-audio-debug-content");
+  if (panel && content) {
+    panel.style.display = "block";
+    if (!append) {
+      content.textContent = msgText + "\n";
+    } else {
+      content.textContent += msgText + "\n";
+    }
+    panel.scrollTop = panel.scrollHeight;
+  }
+}
+
+// MODE 2 — SHARE AUDIO ONLY (Computer / Tab Audio Capture + Host Mic)
+async function startShareAudioOnly() {
+  if (!activeMeetingSession) {
+    showToast("Please join a meeting first to share audio.");
+    return;
+  }
+
+  logAudioDebug("=== AUDIO SHARING DIAGNOSTIC STARTED ===", false);
+  logAudioDebug(`Browser: ${navigator.userAgent}`);
+  logAudioDebug(`Platform: ${navigator.platform}`);
+  logAudioDebug("Step 1: Requesting display capture (getDisplayMedia)...");
+
+  try {
+    const stream = await navigator.mediaDevices.getDisplayMedia({
+      video: { width: 1280, height: 720 },
+      audio: {
+        echoCancellation: false,
+        noiseSuppression: false,
+        autoGainControl: false,
+        suppressLocalAudioPlayback: false
+      }
+    });
+
+    const vTracks = stream.getVideoTracks();
+    const aTracks = stream.getAudioTracks();
+
+    logAudioDebug(`Video tracks count: ${vTracks.length}`);
+    logAudioDebug(`Audio tracks count: ${aTracks.length}`);
+
+    if (aTracks.length === 0) {
+      logAudioDebug("❌ Audio tracks: 0 — Audio track NOT captured!");
+      logAudioDebug("Reason: User did not check 'Share tab audio' in browser prompt or source doesn't support audio.");
+      vTracks.forEach(t => t.stop());
+      showToast("Audio sharing is not available. Please select 'Share tab audio' in the prompt.");
+      alert("⚠️ Audio track was not captured!\n\nWhen the browser prompt appears, please make sure you check the 'Share tab audio' box at the bottom of the selection window.");
+      return;
+    }
+
+    const audioTrack = aTracks[0];
+    logAudioDebug("--- Audio Track Details ---");
+    logAudioDebug(`kind: ${audioTrack.kind}`);
+    logAudioDebug(`id: ${audioTrack.id}`);
+    logAudioDebug(`enabled: ${audioTrack.enabled}`);
+    logAudioDebug(`muted: ${audioTrack.muted}`);
+    logAudioDebug(`readyState: ${audioTrack.readyState}`);
+    logAudioDebug(`label: ${audioTrack.label}`);
+
+    // Stop video track so NO video is rendered or transmitted anywhere
+    vTracks.forEach(t => t.stop());
+
+    // Step 2: Local Audio Diagnostic Test
+    logAudioDebug("Step 2: Connecting local audio diagnostic...");
+    try {
+      audioSharingContext = new (window.AudioContext || window.webkitAudioContext)();
+      audioSharingDestination = audioSharingContext.createMediaStreamDestination();
+
+      const tabSourceNode = audioSharingContext.createMediaStreamSource(new MediaStream([audioTrack]));
+      tabSourceNode.connect(audioSharingDestination);
+
+      if (activeMeetingSession.localStream && activeMeetingSession.localStream.getAudioTracks().length > 0) {
+        const micSourceNode = audioSharingContext.createMediaStreamSource(activeMeetingSession.localStream);
+        micSourceNode.connect(audioSharingDestination);
+        logAudioDebug("Host mic mixed with media audio: YES");
+      }
+
+      injectAudioViaLocalPlayback(audioSharingDestination.stream);
+      logAudioDebug("Local playback test: SUCCESS ✅");
+    } catch (localErr) {
+      logAudioDebug(`Local playback warning: ${localErr.message}`);
+    }
+
+    // Step 3: WebRTC Audio Track Publication
+    logAudioDebug("Step 3: Publishing audio track to meeting...");
+    capturedAudioMediaStream = stream;
+    isAudioOnlySharingActive = true;
+    isScreenSharingActive = false;
+
+    const btn = document.getElementById("btn-meet-screenshare");
+    if (btn) btn.classList.add("active");
+
+    broadcastMeetingEvent(activeMeetingSession.meetingId, {
+      type: "START_AUDIO_ONLY_SHARE",
+      sender: state.currentUser ? state.currentUser.username : "Host",
+      trackId: audioTrack.id,
+      readyState: audioTrack.readyState
+    });
+
+    logAudioDebug("Audio Published: YES ✅");
+    logAudioDebug("=== AUDIO PIPELINE READY ===");
+    showToast("🔊 Audio-Only Sharing Active! Participants hear your media audio + mic.");
+
+    audioTrack.onended = () => {
+      logAudioDebug("Audio track ended by user/system.");
+      stopShareAudioOnly();
+    };
+
+  } catch (err) {
+    logAudioDebug(`❌ getDisplayMedia Error: ${err.name} - ${err.message}`);
+    showToast("Audio share cancelled or unavailable.");
+  }
+}
+
+function stopShareAudioOnly() {
+  logAudioDebug("Stopping Audio-Only sharing...");
+  if (capturedAudioMediaStream) {
+    capturedAudioMediaStream.getTracks().forEach(t => t.stop());
+    capturedAudioMediaStream = null;
+  }
+
+  if (audioSharingContext) {
+    audioSharingContext.close().catch(e => console.warn(e));
+    audioSharingContext = null;
+  }
+  audioSharingDestination = null;
+
+  isAudioOnlySharingActive = false;
+
+  const btn = document.getElementById("btn-meet-screenshare");
+  if (btn) btn.classList.remove("active");
+
+  if (activeMeetingSession) {
+    broadcastMeetingEvent(activeMeetingSession.meetingId, {
+      type: "STOP_AUDIO_ONLY_SHARE"
+    });
+  }
+
+  logAudioDebug("Audio-Only sharing stopped.");
+  showToast("Audio-Only sharing stopped.");
+}
+
 // MODE 1 — SHARE VIDEO + AUDIO
-// Admin shares media with video + audio.
-// Participants see the video AND hear the audio.
 async function startShareVideoAndAudio() {
   if (!activeMeetingSession) {
     showToast("Please join a meeting first to share video.");
     return;
   }
 
-  const inputUrl = prompt("Enter YouTube link to share video & audio (or click OK for browser screen share):");
-  if (inputUrl && inputUrl.trim() !== "") {
-    broadcastMeetingEvent(activeMeetingSession.meetingId, {
-      type: "PLAY_YOUTUBE",
-      url: inputUrl.trim(),
-      mode: "video",
-      startedAt: Date.now()
-    });
+  try {
+    const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+    const videoArea = document.getElementById("meeting-shared-content-area");
+    const screenshareBox = document.getElementById("meeting-screenshare-container");
+    const localVideo = document.getElementById("local-screenshare-video");
+
+    if (videoArea && screenshareBox && localVideo) {
+      videoArea.style.display = "block";
+      screenshareBox.style.display = "flex";
+      document.getElementById("worship-video-frame-container").style.display = "none";
+      document.getElementById("meeting-shared-bible").style.display = "none";
+      localVideo.srcObject = stream;
+    }
+
     isVideoSharingActive = true;
     const btn = document.getElementById("btn-meet-screenshare");
     if (btn) btn.classList.add("active");
-    showToast("🎥 Video + Audio shared with participants!");
-  } else {
-    try {
-      const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
-      const videoArea = document.getElementById("meeting-shared-content-area");
-      const screenshareBox = document.getElementById("meeting-screenshare-container");
-      const localVideo = document.getElementById("local-screenshare-video");
 
-      if (videoArea && screenshareBox && localVideo) {
-        videoArea.style.display = "block";
-        screenshareBox.style.display = "flex";
-        document.getElementById("worship-video-frame-container").style.display = "none";
-        document.getElementById("meeting-shared-bible").style.display = "none";
-        localVideo.srcObject = stream;
-      }
+    broadcastMeetingEvent(activeMeetingSession.meetingId, {
+      type: "START_VIDEO_AUDIO_SHARE"
+    });
 
-      isVideoSharingActive = true;
-      const btn = document.getElementById("btn-meet-screenshare");
-      if (btn) btn.classList.add("active");
-
-      broadcastMeetingEvent(activeMeetingSession.meetingId, {
-        type: "START_VIDEO_AUDIO_SHARE"
-      });
-
-      stream.getVideoTracks()[0].onended = () => {
-        stopShareVideoAndAudio();
-      };
-      showToast("🎥 Screen (Video + Audio) shared!");
-    } catch (err) {
-      console.warn("Video share error:", err);
-      showToast("Screen share cancelled.");
-    }
+    stream.getVideoTracks()[0].onended = () => {
+      stopShareVideoAndAudio();
+    };
+    showToast("🎥 Screen (Video + Audio) shared!");
+  } catch (err) {
+    console.warn("Video share error:", err);
+    showToast("Screen share cancelled.");
   }
 }
 
@@ -8006,9 +8146,6 @@ function stopShareVideoAndAudio() {
     broadcastMeetingEvent(activeMeetingSession.meetingId, {
       type: "STOP_VIDEO_AUDIO_SHARE"
     });
-    broadcastMeetingEvent(activeMeetingSession.meetingId, {
-      type: "STOP_YOUTUBE"
-    });
   }
 
   showToast("Video + Audio share stopped.");
@@ -8026,8 +8163,9 @@ function stopAllMediaSharing() {
 
 // PARTICIPANT SIDE HANDLERS
 function handleParticipantAudioOnlyShareStart(msg) {
-  // Participant does NOT see video, does NOT get YouTube player, does NOT press play.
-  // Participant ONLY hears live audio output through meeting speakers!
+  // PARTICIPANT SIDE:
+  // ZERO YouTube UI (NO player, NO thumbnail, NO title, NO buttons)
+  // Clean meeting view with live WebRTC call audio playing through mobile speakers!
   const banner = document.getElementById("meeting-worship-audio-banner");
   if (banner) {
     banner.style.cssText = "display:flex; top:60px; background: rgba(34, 197, 94, 0.95);";
@@ -8050,5 +8188,6 @@ function handleParticipantVideoAudioShareStop(msg) {
   hideSharedWorshipVideo();
   showToast("Video + Audio share stopped by host.");
 }
+
 
 

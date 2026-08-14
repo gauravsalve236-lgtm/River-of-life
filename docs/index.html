@@ -2044,6 +2044,17 @@
           <span>🔊 Tap to Hear Shared Song / गाणे ऐकण्यासाठी टॅप करा</span>
         </div>
 
+        <!-- Floating Admin Audio Sharing Debug Panel Overlay -->
+        <div id="admin-audio-debug-panel" style="display: none; position: absolute; top: 60px; right: 16px; width: 340px; max-height: 80vh; overflow-y: auto; background: rgba(15, 23, 42, 0.95); border: 1.5px solid #334155; border-radius: 12px; padding: 14px; color: #e2e8f0; font-family: monospace; font-size: 11px; z-index: 3000; box-shadow: 0 10px 25px rgba(0,0,0,0.7); backdrop-filter: blur(10px);">
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 8px; margin-bottom: 8px;">
+            <strong style="color: #60a5fa; font-size: 12px;">📊 AUDIO SHARING DEBUG</strong>
+            <button onclick="document.getElementById('admin-audio-debug-panel').style.display='none'" style="background: none; border: none; color: #94a3b8; font-weight: 800; cursor: pointer; font-size: 14px;">✕</button>
+          </div>
+          <div id="admin-audio-debug-content" style="white-space: pre-wrap; word-break: break-all; line-height: 1.4;">
+            Initializing audio diagnostic logger...
+          </div>
+        </div>
+
         <!-- Main Content Area: Video Grid and Drawers -->
         <div style="flex: 1; display: flex; width: 100%; overflow: hidden; position: relative; padding-top: 50px; padding-bottom: 74px;">
           
