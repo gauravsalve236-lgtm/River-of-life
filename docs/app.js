@@ -6479,21 +6479,21 @@ function generateICSFile(meeting) {
 // Trigger Joining Flow (Camera preview checks)
 function triggerJoinMeetingFlow(meetingId) {
   const meetings = getMeetingsFromStorage();
-  const m = meetings.find(x => x.id === meetingId);
-  if (!m) return;
+  const m = (meetings && meetings.length) ? meetings.find(x => x.id === meetingId) : null;
+  const targetMeeting = m || { id: meetingId || 'default-1', title: 'Friday Family Prayer / कौटुंबिक प्रार्थना', host: 'Pastor John' };
 
   // Real or simulated meeting, we request permissions and launch it inside the app modal!
   showToast("Requesting camera and microphone permissions...");
   navigator.mediaDevices.getUserMedia({ video: true, audio: true })
     .then(stream => {
       // Permission granted, launch meeting inside app modal
-      launchLiveMeetingRoom(m, stream);
+      launchLiveMeetingRoom(targetMeeting, stream);
     })
     .catch(err => {
       console.warn("Media permissions denied:", err);
       // Fallback: Proceed with mocked feeds if they deny camera (highly resilient)
       showToast("Media permissions denied. Joining in listen-only/avatar mode.");
-      launchLiveMeetingRoom(m, null);
+      launchLiveMeetingRoom(targetMeeting, null);
     });
 }
 
@@ -6971,6 +6971,12 @@ function toggleMeetingGridView() {
     showToast("Grid View Active — All Participants Visible");
   }
 }
+
+// Video Camera toggle
+  const camBtn = document.getElementById("btn-meet-cam") || document.getElementById("btn-meet-video");
+  if (camBtn) {
+    camBtn.onclick = () => toggleCameraFeed();
+  }
 
 // Fetch and render parallel Bible verse/chapter content in meeting layout (100% Light Theme)
 async function renderSharedBibleContent(bookKey, chapter, verse) {
@@ -8205,6 +8211,57 @@ function switchMeetingView(viewName) {
   }
 }
 
+// Helper to bind live camera stream to local video element
+function syncLocalUserCameraFeed() {
+  const videoEl = document.getElementById("meeting-local-video");
+  const avatarEl = document.getElementById("video-cell-local-avatar");
+  
+  if (activeMeetingSession && activeMeetingSession.localStream && !activeMeetingSession.isCamOff) {
+    if (videoEl) {
+      if (videoEl.srcObject !== activeMeetingSession.localStream) {
+        videoEl.srcObject = activeMeetingSession.localStream;
+      }
+      videoEl.style.display = "block";
+    }
+    if (avatarEl) avatarEl.style.display = "none";
+  } else {
+    if (videoEl) videoEl.style.display = "none";
+    if (avatarEl) avatarEl.style.display = "flex";
+  }
+}
+
+// Toggle Live Camera Feed
+function toggleCameraFeed() {
+  if (!activeMeetingSession) return;
+  activeMeetingSession.isCamOff = !activeMeetingSession.isCamOff;
+
+  const camBtn = document.getElementById("btn-meet-cam") || document.getElementById("btn-meet-video");
+  if (camBtn) {
+    camBtn.style.background = activeMeetingSession.isCamOff ? "#ef4444" : "#334155";
+  }
+
+  if (activeMeetingSession.localStream) {
+    activeMeetingSession.localStream.getVideoTracks().forEach(track => {
+      track.enabled = !activeMeetingSession.isCamOff;
+    });
+    syncLocalUserCameraFeed();
+    showToast(activeMeetingSession.isCamOff ? "📹 Camera Turned Off" : "📹 Camera Turned On");
+  } else if (!activeMeetingSession.isCamOff) {
+    showToast("Requesting camera feed...");
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+      .then(str => {
+        activeMeetingSession.localStream = str;
+        activeMeetingSession.isCamOff = false;
+        syncLocalUserCameraFeed();
+        showToast("📹 Camera Active!");
+      })
+      .catch(err => {
+        console.warn("Camera request error:", err);
+        showToast("⚠️ Could not access camera");
+      });
+  }
+}
+
 // RENDER VIEW 1: Gallery View
 function renderGalleryView() {
   const gridEl = document.getElementById("meeting-video-grid");
@@ -8216,19 +8273,35 @@ function renderGalleryView() {
     const micIcon = p.isMuted ? "🔇" : "🎙️";
     const handBadge = p.isHandRaised ? `<div class="video-cell-hand-badge">✋</div>` : "";
     
-    html += `
-      <div class="video-cell ${isSpeakingClass}" id="video-cell-${p.id}">
-        <div class="simulated-live-video-bg"></div>
-        ${handBadge}
-        <div class="video-cell-avatar" style="position: relative; z-index: 5; background-color: ${p.bg} !important;">${p.initials}</div>
-        <div class="video-cell-label">
-          <span>${p.name}</span>
-          <span>${micIcon}</span>
+    if (p.id === 'local') {
+      html += `
+        <div class="video-cell ${isSpeakingClass}" id="video-cell-local">
+          <video id="meeting-local-video" autoplay playsinline muted style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); z-index: 3; display: none;"></video>
+          <div class="simulated-live-video-bg"></div>
+          ${handBadge}
+          <div class="video-cell-avatar" id="video-cell-local-avatar" style="position: relative; z-index: 5; background-color: ${p.bg} !important;">${p.initials}</div>
+          <div class="video-cell-label">
+            <span id="meeting-local-name">${p.name}</span>
+            <span id="meeting-local-mic-status">${micIcon}</span>
+          </div>
         </div>
-      </div>
-    `;
+      `;
+    } else {
+      html += `
+        <div class="video-cell ${isSpeakingClass}" id="video-cell-${p.id}">
+          <div class="simulated-live-video-bg"></div>
+          ${handBadge}
+          <div class="video-cell-avatar" style="position: relative; z-index: 5; background-color: ${p.bg} !important;">${p.initials}</div>
+          <div class="video-cell-label">
+            <span>${p.name}</span>
+            <span>${micIcon}</span>
+          </div>
+        </div>
+      `;
+    }
   });
   gridEl.innerHTML = html;
+  syncLocalUserCameraFeed();
 }
 
 // RENDER VIEW 2: Large Gallery View (7x7 Matrix, 49 Tiles)

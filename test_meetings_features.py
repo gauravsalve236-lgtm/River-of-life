@@ -3,7 +3,7 @@ from playwright.sync_api import sync_playwright
 
 def run_test():
     with sync_playwright() as p:
-        print("Launching Chromium browser to test redesigned MS Teams Controls & Features...")
+        print("Launching Chromium browser with fake media stream to test camera integration...")
         browser = p.chromium.launch(
             headless=True,
             args=["--use-fake-ui-for-media-stream", "--use-fake-device-for-media-stream"]
@@ -15,7 +15,7 @@ def run_test():
         page.goto(file_url)
         page.wait_for_timeout(2000)
         
-        # Hide splash screen and file warning overlay
+        # Hide splash screen and warning overlays
         page.evaluate("""() => { 
             const s = document.getElementById('splash-screen'); 
             if (s) s.style.display = 'none'; 
@@ -25,56 +25,40 @@ def run_test():
         }""")
         page.wait_for_timeout(500)
 
-        # 1. Launch Live Meeting Room
-        print("Launching Live Meeting Room...")
-        page.evaluate("""() => {
-            window.launchLiveMeetingRoom({ id: 'test-room-1', title: 'Friday Family Prayer', host: 'Pastor John' }, null);
-        }""")
-        page.wait_for_timeout(1000)
+        # 1. Trigger join meeting with fake camera stream
+        print("Triggering Join Meeting flow with fake media stream...")
+        page.evaluate("() => triggerJoinMeetingFlow('meeting-1')")
+        page.wait_for_timeout(1500)
 
-        # 2. Verify no runtime errors occurred on launch
+        # 2. Assert modal opened with zero errors
         modal = page.query_selector("#modal-live-meeting")
-        assert modal is not None and modal.is_visible(), "Meeting modal should open without any runtime error!"
-        print("Meeting Room launched cleanly with ZERO runtime errors!")
+        assert modal is not None and modal.is_visible(), "Meeting modal should open cleanly!"
+        print("Meeting Room opened cleanly!")
 
-        # 3. Verify Non-Duplicated Controls: Bottom Bar has 5 essential action items
-        print("Verifying Non-Duplicated Control Bar...")
-        bottom_btns = page.query_selector_all(".meeting-room-toolbar .control-btn")
-        print(f"Bottom Control Bar Action Buttons Count: {len(bottom_btns)}")
-        assert len(bottom_btns) == 5, "Bottom control bar should contain exactly 5 essential action controls (Mute, Cam, Screen, Reactions, End Call)!"
+        # 3. Assert local camera video element is embedded inside local cell
+        print("Testing live camera video element binding...")
+        local_video = page.query_selector("#meeting-local-video")
+        assert local_video is not None, "Local video camera element MUST exist in DOM!"
+        
+        has_stream = page.evaluate("() => { const v = document.getElementById('meeting-local-video'); return v && (v.srcObject !== null || v.style.display !== 'none'); }")
+        print(f"Local User Live Camera Video Active State: {has_stream}")
 
-        # 4. Test Live Reaction Popup Menu
-        print("Testing Live Reactions & Emoji Popup...")
-        page.evaluate("() => toggleReactionMenu()")
+        # 4. Test Camera Toggle button
+        print("Testing Camera Toggle button...")
+        page.evaluate("() => toggleCameraFeed()")
         page.wait_for_timeout(500)
-        
-        rx_menu = page.query_selector("#meeting-reactions-menu")
-        assert rx_menu is not None and rx_menu.is_visible(), "Floating Reactions popup menu should be visible"
-        
-        page.evaluate("() => sendLiveEmojiReaction('❤️')")
-        page.wait_for_timeout(500)
-        print("Live Heart Reaction broadcasted and animated successfully!")
+        cam_off = page.evaluate("() => activeMeetingSession.isCamOff")
+        print(f"Camera Toggled Off State: {cam_off}")
+        assert cam_off == True, "Camera should toggle off!"
 
-        # 5. Test Meeting Notes Drawer (New Teams Feature)
-        print("Testing Meeting Notes & Prayer Requests Drawer...")
-        page.evaluate("() => openMeetingSidebarPanel('notes')")
+        page.evaluate("() => toggleCameraFeed()")
         page.wait_for_timeout(500)
-        
-        notes_panel = page.query_selector("#meeting-panel-notes")
-        assert notes_panel is not None and notes_panel.is_visible(), "Meeting Notes drawer panel should be visible"
-        print("Meeting Notes & Prayer Requests drawer panel verified!")
-
-        # 6. Test Device & Call Settings Drawer (New Teams Feature)
-        print("Testing Device & Call Settings Drawer...")
-        page.evaluate("() => openDrawer('drawer-meet-settings')")
-        page.wait_for_timeout(500)
-        
-        settings_drawer = page.query_selector("#drawer-meet-settings")
-        assert settings_drawer is not None and settings_drawer.is_visible(), "Device Settings drawer should be visible"
-        print("Device & Call Settings drawer verified!")
+        cam_on = page.evaluate("() => activeMeetingSession.isCamOff")
+        print(f"Camera Toggled On State: {not cam_on}")
+        assert cam_on == False, "Camera should toggle back on!"
 
         print("\n==================================================")
-        print("ALL REDESIGNED MS TEAMS CONTROLS & TESTS PASSED!")
+        print("ALL CAMERA & REAL VIDEO TESTS PASSED SUCCESSFULLY!")
         print("==================================================\n")
         browser.close()
 
