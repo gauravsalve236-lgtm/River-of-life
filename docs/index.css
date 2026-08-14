@@ -4488,14 +4488,14 @@ input, textarea, select, [contenteditable="true"] {
 }
 
 .splash-verse-container {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 20px;
-  padding: 20px 24px;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 24px;
+  padding: 22px 26px;
   margin-bottom: 32px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.3);
   animation: fadeInSplash 1s ease-out forwards;
 }
 
@@ -4505,16 +4505,16 @@ input, textarea, select, [contenteditable="true"] {
   line-height: 1.6;
   margin: 0 0 12px 0;
   font-style: italic;
-  color: #f1f5f9;
+  color: #0f172a;
 }
 
 #splash-verse-ref {
   font-family: var(--font-ui);
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--primary);
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #d97706;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.8px;
 }
 
 .splash-loading-bar {
@@ -5013,18 +5013,18 @@ input, textarea, select, [contenteditable="true"] {
 /* Centered Alert Modal */
 .centered-modal-card {
   width: 90%;
-  max-width: 420px;
-  background-color: var(--drawer-bg);
+  max-width: 380px;
   border-radius: 24px;
-  padding: 24px;
+  padding: 28px 24px;
   text-align: center;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
   transform: scale(0.9);
   transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
   margin: auto;
+  z-index: 110;
 }
 
 .drawer-overlay.active .centered-modal-card {
@@ -5034,6 +5034,114 @@ input, textarea, select, [contenteditable="true"] {
 .drawer-overlay.centered-align {
   align-items: center !important;
   justify-content: center !important;
+}
+
+/* Light Theme Modal & Drawer Overrides */
+.ios-theme-light .centered-modal-card {
+  background-color: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+}
+.ios-theme-light .centered-modal-card h3 {
+  color: #0f172a !important;
+}
+.ios-theme-light .centered-modal-card h4 {
+  color: #475569 !important;
+}
+.ios-theme-light .centered-modal-card p {
+  color: #64748b !important;
+}
+.ios-theme-light .centered-modal-card .btn-primary-block {
+  background-color: #d97706 !important;
+  color: #ffffff !important;
+}
+.ios-theme-light .centered-modal-card .btn-secondary-mini {
+  color: #475569 !important;
+  border-color: #cbd5e1 !important;
+  background-color: transparent !important;
+}
+.ios-theme-light .ios-drawer-sheet {
+  background-color: #ffffff !important;
+}
+
+/* Dark Theme Modal & Drawer Overrides */
+.ios-theme-dark .centered-modal-card {
+  background-color: #1e293b !important;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+.ios-theme-dark .centered-modal-card h3 {
+  color: #f8fafc !important;
+}
+.ios-theme-dark .centered-modal-card h4 {
+  color: #cbd5e1 !important;
+}
+.ios-theme-dark .centered-modal-card p {
+  color: #94a3b8 !important;
+}
+.ios-theme-dark .centered-modal-card .btn-primary-block {
+  background-color: #fbbf24 !important;
+  color: #0f172a !important;
+}
+.ios-theme-dark .centered-modal-card .btn-secondary-mini {
+  color: #cbd5e1 !important;
+  border-color: #475569 !important;
+  background-color: transparent !important;
+}
+.ios-theme-dark .ios-drawer-sheet {
+  background-color: #1e293b !important;
+}
+
+/* Sepia Theme Modal & Drawer Overrides */
+.ios-theme-sepia .centered-modal-card {
+  background-color: #f4ecd8 !important;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+.ios-theme-sepia .centered-modal-card h3 {
+  color: #586e75 !important;
+}
+.ios-theme-sepia .centered-modal-card h4 {
+  color: #657b83 !important;
+}
+.ios-theme-sepia .centered-modal-card p {
+  color: #839496 !important;
+}
+.ios-theme-sepia .centered-modal-card .btn-primary-block {
+  background-color: #b58900 !important;
+  color: #fdf6e3 !important;
+}
+.ios-theme-sepia .centered-modal-card .btn-secondary-mini {
+  color: #657b83 !important;
+  border-color: #decfa6 !important;
+  background-color: transparent !important;
+}
+.ios-theme-sepia .ios-drawer-sheet {
+  background-color: #f4ecd8 !important;
+}
+
+/* Olive Theme Modal & Drawer Overrides */
+.ios-theme-olive .centered-modal-card {
+  background-color: #e2e7d8 !important;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+.ios-theme-olive .centered-modal-card h3 {
+  color: #2f3e22 !important;
+}
+.ios-theme-olive .centered-modal-card h4 {
+  color: #435832 !important;
+}
+.ios-theme-olive .centered-modal-card p {
+  color: #607052 !important;
+}
+.ios-theme-olive .centered-modal-card .btn-primary-block {
+  background-color: #6b8e23 !important;
+  color: #f4f6f0 !important;
+}
+.ios-theme-olive .centered-modal-card .btn-secondary-mini {
+  color: #435832 !important;
+  border-color: #cad1bd !important;
+  background-color: transparent !important;
+}
+.ios-theme-olive .ios-drawer-sheet {
+  background-color: #e2e7d8 !important;
 }
 
 /* Tablet & Desktop drawer adjustments */
