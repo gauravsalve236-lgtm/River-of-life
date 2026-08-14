@@ -6752,16 +6752,24 @@ async function handleMeetingBroadcastEvent(msg) {
   } else if (msg.type === "STOP_YOUTUBE") {
     hideSharedWorshipVideo();
   } else if (msg.type === "WORSHIP_AUDIO_LIVE") {
-    // Audience: Pastor is now streaming worship audio live through the call mic
-    // Show a banner telling them audio is streaming and to raise volume
     showWorshipAudioLiveBanner(msg.videoId);
   } else if (msg.type === "WORSHIP_AUDIO_STOP") {
-    // Audience: Pastor stopped streaming worship audio
     const banner = document.getElementById("meeting-worship-audio-banner");
     if (banner) banner.style.display = "none";
     showToast("Worship audio streaming ended.");
+  } else if (msg.type === "START_AUDIO_ONLY_SHARE") {
+    // Mode 2: Audio Only Share (Captured System/Tab Audio + Admin Mic)
+    handleParticipantAudioOnlyShareStart(msg);
+  } else if (msg.type === "STOP_AUDIO_ONLY_SHARE") {
+    handleParticipantAudioOnlyShareStop(msg);
+  } else if (msg.type === "START_VIDEO_AUDIO_SHARE") {
+    // Mode 1: Video + Audio Share
+    handleParticipantVideoAudioShareStart(msg);
+  } else if (msg.type === "STOP_VIDEO_AUDIO_SHARE") {
+    handleParticipantVideoAudioShareStop(msg);
   }
 }
+
 
 
 // Fetch and render parallel Bible verse/chapter content in meeting layout
@@ -7070,67 +7078,39 @@ function setupMeetingRoomControls() {
     }
   });
 
-  // Screen sharing toggle
-  document.getElementById("btn-meet-screenshare").addEventListener("click", () => {
-    const videoArea = document.getElementById("meeting-shared-content-area");
-    const screenshareBox = document.getElementById("meeting-screenshare-container");
-    const localVideo = document.getElementById("local-screenshare-video");
+  // Screen / Media Sharing Drawer Trigger
+  const shareBtnEl = document.getElementById("btn-meet-screenshare");
+  if (shareBtnEl) {
+    shareBtnEl.addEventListener("click", () => {
+      if (isAudioOnlySharingActive || isVideoSharingActive || isScreenSharingActive) {
+        stopAllMediaSharing();
+      } else {
+        openDrawer("drawer-meet-share-media");
+      }
+    });
+  }
 
-    isScreenSharingActive = !isScreenSharingActive;
-    
-    const btn = document.getElementById("btn-meet-screenshare");
-    btn.classList.toggle("active", isScreenSharingActive);
+  // Modal Share Mode Options (Mode 1 & Mode 2)
+  const modeVideoBtn = document.getElementById("btn-share-mode-video");
+  if (modeVideoBtn) {
+    modeVideoBtn.addEventListener("click", () => {
+      closeDrawer("drawer-meet-share-media");
+      startShareVideoAndAudio();
+    });
+  }
 
-    if (isScreenSharingActive) {
-      showToast("Starting Screen Share...");
-      navigator.mediaDevices.getDisplayMedia({ video: true })
-        .then(stream => {
-          videoArea.style.display = "block";
-          screenshareBox.style.display = "flex";
-          document.getElementById("worship-video-frame-container").style.display = "none";
-          document.getElementById("meeting-shared-bible").style.display = "none";
-          
-          localVideo.srcObject = stream;
-          
-          stream.getVideoTracks()[0].onended = () => {
-            stopLocalScreenShare();
-          };
-        })
-        .catch(err => {
-          console.warn("Screen share cancelled:", err);
-          showToast("Screen sharing unavailable on this browser.");
-          isScreenSharingActive = false;
-          btn.classList.remove("active");
-        });
-    } else {
-      stopLocalScreenShare();
-    }
-  });
+  const modeAudioBtn = document.getElementById("btn-share-mode-audio");
+  if (modeAudioBtn) {
+    modeAudioBtn.addEventListener("click", () => {
+      closeDrawer("drawer-meet-share-media");
+      startShareAudioOnly();
+    });
+  }
 
   function stopLocalScreenShare() {
-    isScreenSharingActive = false;
-    const btn = document.getElementById("btn-meet-screenshare");
-    if (btn) btn.classList.remove("active");
-    
-    const videoArea = document.getElementById("meeting-shared-content-area");
-    const screenshareBox = document.getElementById("meeting-screenshare-container");
-    const localVideo = document.getElementById("local-screenshare-video");
-    
-    if (localVideo && localVideo.srcObject) {
-      localVideo.srcObject.getTracks().forEach(t => t.stop());
-      localVideo.srcObject = null;
-    }
-    
-    if (screenshareBox) screenshareBox.style.display = "none";
-    
-    // Hide panel if YouTube or Bible sync aren't active either
-    const ytActive = document.getElementById("worship-video-frame-container").style.display === "block";
-    const bibleActive = document.getElementById("meeting-shared-bible").style.display === "block";
-    if (videoArea && !ytActive && !bibleActive) {
-      videoArea.style.display = "none";
-    }
-    showToast("Screen Share Stopped");
+    stopAllMediaSharing();
   }
+
 
   // Chat Panel toggle
   document.getElementById("btn-meet-chat").addEventListener("click", () => {
@@ -7952,4 +7932,238 @@ function hideSharedWorshipVideo() {
     jitsiCont.style.top     = "50px";
   }
 }
+
+/* ==========================================================================
+   11. DUAL MEDIA SHARING ENGINE (MODE 1: VIDEO+AUDIO / MODE 2: AUDIO ONLY)
+   ========================================================================== */
+
+let isAudioOnlySharingActive = false;
+let isVideoSharingActive = false;
+let capturedAudioMediaStream = null;
+let audioSharingContext = null;
+let audioSharingDestination = null;
+
+// MODE 2 — SHARE AUDIO ONLY
+// Admin opens YouTube or media audio, selects Share Audio Only.
+// Participants DO NOT see YouTube video, DO NOT get YouTube player/iframe, DO NOT press Play.
+// Participants ONLY hear live captured audio mixed with Admin Microphone.
+async function startShareAudioOnly() {
+  if (!activeMeetingSession) {
+    showToast("Please join a meeting first to share audio.");
+    return;
+  }
+
+  showToast("Starting Audio-Only Sharing... Select tab/window and ensure 'Share tab audio' is checked.");
+
+  try {
+    const stream = await navigator.mediaDevices.getDisplayMedia({
+      video: { width: 1280, height: 720 },
+      audio: {
+        echoCancellation: false,
+        noiseSuppression: false,
+        autoGainControl: false,
+        suppressLocalAudioPlayback: false
+      }
+    });
+
+    const audioTracks = stream.getAudioTracks();
+    if (!audioTracks || audioTracks.length === 0) {
+      stream.getTracks().forEach(t => t.stop());
+      showToast("Audio sharing is not available. Please select 'Share tab audio' in the prompt.");
+      alert("⚠️ Audio track was not captured!\n\nWhen the browser prompt appears, please make sure you check the 'Share tab audio' (or 'Share audio') box at the bottom of the selection window.");
+      return;
+    }
+
+    // Stop video track so NO video is rendered or transmitted anywhere
+    stream.getVideoTracks().forEach(t => t.stop());
+
+    capturedAudioMediaStream = stream;
+    const tabAudioTrack = audioTracks[0];
+
+    // Web Audio API mixing: Tab Audio + Admin Microphone (so Admin Mic continues working simultaneously!)
+    try {
+      audioSharingContext = new (window.AudioContext || window.webkitAudioContext)();
+      audioSharingDestination = audioSharingContext.createMediaStreamDestination();
+
+      const tabSourceNode = audioSharingContext.createMediaStreamSource(new MediaStream([tabAudioTrack]));
+      tabSourceNode.connect(audioSharingDestination);
+
+      if (activeMeetingSession.localStream && activeMeetingSession.localStream.getAudioTracks().length > 0) {
+        const micSourceNode = audioSharingContext.createMediaStreamSource(activeMeetingSession.localStream);
+        micSourceNode.connect(audioSharingDestination);
+      }
+    } catch (mixErr) {
+      console.warn("Audio mixing setup warning:", mixErr);
+    }
+
+    isAudioOnlySharingActive = true;
+    isScreenSharingActive = false;
+
+    const btn = document.getElementById("btn-meet-screenshare");
+    if (btn) btn.classList.add("active");
+
+    // Broadcast to participants: Audio Only Sharing is live!
+    broadcastMeetingEvent(activeMeetingSession.meetingId, {
+      type: "START_AUDIO_ONLY_SHARE",
+      sender: state.currentUser ? state.currentUser.username : "Host"
+    });
+
+    showToast("🔊 Audio-Only Sharing Active! Participants hear your media audio + mic. No video shown.");
+
+    tabAudioTrack.onended = () => {
+      stopShareAudioOnly();
+    };
+
+  } catch (err) {
+    console.warn("Audio-Only share error:", err);
+    showToast("Audio share cancelled or unavailable on this browser.");
+  }
+}
+
+function stopShareAudioOnly() {
+  if (capturedAudioMediaStream) {
+    capturedAudioMediaStream.getTracks().forEach(t => t.stop());
+    capturedAudioMediaStream = null;
+  }
+
+  if (audioSharingContext) {
+    audioSharingContext.close().catch(e => console.warn(e));
+    audioSharingContext = null;
+  }
+  audioSharingDestination = null;
+
+  isAudioOnlySharingActive = false;
+
+  const btn = document.getElementById("btn-meet-screenshare");
+  if (btn) btn.classList.remove("active");
+
+  if (activeMeetingSession) {
+    broadcastMeetingEvent(activeMeetingSession.meetingId, {
+      type: "STOP_AUDIO_ONLY_SHARE"
+    });
+  }
+
+  showToast("Audio-Only sharing stopped.");
+}
+
+// MODE 1 — SHARE VIDEO + AUDIO
+// Admin shares media with video + audio.
+// Participants see the video AND hear the audio.
+async function startShareVideoAndAudio() {
+  if (!activeMeetingSession) {
+    showToast("Please join a meeting first to share video.");
+    return;
+  }
+
+  const inputUrl = prompt("Enter YouTube link to share video & audio (or click OK for browser screen share):");
+  if (inputUrl && inputUrl.trim() !== "") {
+    broadcastMeetingEvent(activeMeetingSession.meetingId, {
+      type: "PLAY_YOUTUBE",
+      url: inputUrl.trim(),
+      mode: "video",
+      startedAt: Date.now()
+    });
+    isVideoSharingActive = true;
+    const btn = document.getElementById("btn-meet-screenshare");
+    if (btn) btn.classList.add("active");
+    showToast("🎥 Video + Audio shared with participants!");
+  } else {
+    try {
+      const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+      const videoArea = document.getElementById("meeting-shared-content-area");
+      const screenshareBox = document.getElementById("meeting-screenshare-container");
+      const localVideo = document.getElementById("local-screenshare-video");
+
+      if (videoArea && screenshareBox && localVideo) {
+        videoArea.style.display = "block";
+        screenshareBox.style.display = "flex";
+        document.getElementById("worship-video-frame-container").style.display = "none";
+        document.getElementById("meeting-shared-bible").style.display = "none";
+        localVideo.srcObject = stream;
+      }
+
+      isVideoSharingActive = true;
+      const btn = document.getElementById("btn-meet-screenshare");
+      if (btn) btn.classList.add("active");
+
+      broadcastMeetingEvent(activeMeetingSession.meetingId, {
+        type: "START_VIDEO_AUDIO_SHARE"
+      });
+
+      stream.getVideoTracks()[0].onended = () => {
+        stopShareVideoAndAudio();
+      };
+      showToast("🎥 Screen (Video + Audio) shared!");
+    } catch (err) {
+      console.warn("Video share error:", err);
+      showToast("Screen share cancelled.");
+    }
+  }
+}
+
+function stopShareVideoAndAudio() {
+  isVideoSharingActive = false;
+  const btn = document.getElementById("btn-meet-screenshare");
+  if (btn) btn.classList.remove("active");
+
+  const localVideo = document.getElementById("local-screenshare-video");
+  if (localVideo && localVideo.srcObject) {
+    localVideo.srcObject.getTracks().forEach(t => t.stop());
+    localVideo.srcObject = null;
+  }
+
+  const screenshareBox = document.getElementById("meeting-screenshare-container");
+  if (screenshareBox) screenshareBox.style.display = "none";
+
+  hideSharedWorshipVideo();
+
+  if (activeMeetingSession) {
+    broadcastMeetingEvent(activeMeetingSession.meetingId, {
+      type: "STOP_VIDEO_AUDIO_SHARE"
+    });
+    broadcastMeetingEvent(activeMeetingSession.meetingId, {
+      type: "STOP_YOUTUBE"
+    });
+  }
+
+  showToast("Video + Audio share stopped.");
+}
+
+function stopAllMediaSharing() {
+  if (isAudioOnlySharingActive) stopShareAudioOnly();
+  if (isVideoSharingActive) stopShareVideoAndAudio();
+  if (isScreenSharingActive) {
+    isScreenSharingActive = false;
+    const btn = document.getElementById("btn-meet-screenshare");
+    if (btn) btn.classList.remove("active");
+  }
+}
+
+// PARTICIPANT SIDE HANDLERS
+function handleParticipantAudioOnlyShareStart(msg) {
+  // Participant does NOT see video, does NOT get YouTube player, does NOT press play.
+  // Participant ONLY hears live audio output through meeting speakers!
+  const banner = document.getElementById("meeting-worship-audio-banner");
+  if (banner) {
+    banner.style.cssText = "display:flex; top:60px; background: rgba(34, 197, 94, 0.95);";
+    banner.querySelector("span").textContent = `🔊 Live Audio Only Share Active (${msg.sender || "Admin"}) — Turn up volume!`;
+  }
+  showToast(`🔊 ${msg.sender || "Admin"} is sharing Audio Only! Turn up your volume.`);
+}
+
+function handleParticipantAudioOnlyShareStop(msg) {
+  const banner = document.getElementById("meeting-worship-audio-banner");
+  if (banner) banner.style.display = "none";
+  showToast("Audio-Only sharing stopped by host.");
+}
+
+function handleParticipantVideoAudioShareStart(msg) {
+  showToast("🎥 Host started Video + Audio share.");
+}
+
+function handleParticipantVideoAudioShareStop(msg) {
+  hideSharedWorshipVideo();
+  showToast("Video + Audio share stopped by host.");
+}
+
 

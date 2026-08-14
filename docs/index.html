@@ -2291,6 +2291,45 @@
       </div>
     </div>
 
+    <!-- Media Share Choice Drawer / Modal -->
+    <div id="drawer-meet-share-media" class="drawer-overlay" style="z-index: 2600;">
+      <div class="ios-drawer-sheet" style="max-height: 65%; background: #0f172a; color: #fff;">
+        <div class="drawer-header-row" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+          <div class="grabber-bar"></div>
+          <h3 style="color: #fff;">Share with Meeting / सभेत शेअर करा</h3>
+          <button class="close-drawer-btn" onclick="closeDrawer('drawer-meet-share-media')" style="color: #fff;">&times;</button>
+        </div>
+        <div class="drawer-body-settings" style="padding: 20px; display: flex; flex-direction: column; gap: 16px; text-align: left;">
+          
+          <div style="font-size: 13px; color: #94a3b8; line-height: 1.5;">
+            Choose how you want to share media with meeting participants:
+          </div>
+
+          <!-- Mode 1: Video + Audio -->
+          <button id="btn-share-mode-video" class="btn-primary-block" style="padding: 16px; border-radius: 14px; background: #1e293b; border: 1.5px solid #334155; color: #fff; text-align: left; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: all 0.2s ease;">
+            <span style="font-size: 28px; background: rgba(96,165,250,0.15); padding: 10px; border-radius: 12px;">🎥</span>
+            <div style="flex: 1;">
+              <div style="font-size: 15px; font-weight: 800; color: #60a5fa; margin-bottom: 3px;">Share Video + Audio</div>
+              <div style="font-size: 12px; color: #94a3b8; line-height: 1.4;">Participants see the video and hear the audio / व्हिडिओ आणि आवाज दोन्ही दिसेल</div>
+            </div>
+          </button>
+
+          <!-- Mode 2: Audio Only -->
+          <button id="btn-share-mode-audio" class="btn-primary-block" style="padding: 16px; border-radius: 14px; background: #1e293b; border: 1.5px solid #22c55e; color: #fff; text-align: left; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 15px rgba(34,197,94,0.15);">
+            <span style="font-size: 28px; background: rgba(34,197,94,0.15); padding: 10px; border-radius: 12px;">🔊</span>
+            <div style="flex: 1;">
+              <div style="font-size: 15px; font-weight: 800; color: #4ade80; margin-bottom: 3px;">Share Audio Only</div>
+              <div style="font-size: 12px; color: #94a3b8; line-height: 1.4;">Participants hear music/audio ONLY (No video shown, no YouTube player)</div>
+            </div>
+          </button>
+
+          <button onclick="closeDrawer('drawer-meet-share-media')" class="btn-secondary-mini" style="padding: 12px; border-radius: 10px; background: transparent; border: 1px solid #334155; color: #94a3b8; cursor: pointer; font-weight: 700; width: 100%; text-align: center; margin-top: 4px;">
+            Cancel / रद्द करा
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Meeting Bible Share Selection Drawer -->
     <div id="drawer-meet-share-bible" class="drawer-overlay" style="z-index: 2500;">
       <div class="ios-drawer-sheet" style="max-height: 70%; background: #0f172a; color: #fff;">
