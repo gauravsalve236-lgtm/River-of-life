@@ -5877,7 +5877,6 @@ function getMeetingsFromStorage() {
   try {
     let meetings = JSON.parse(localStorage.getItem("river_of_life_meetings"));
     if (meetings && meetings.length > 0) {
-      // Migrate existing stored meetings to public so users can test live meetings instantly
       let updated = false;
       meetings.forEach(m => {
         if ((m.id === "meeting_1" || m.id === "meeting_2") && m.visibility !== "public") {
@@ -5891,7 +5890,6 @@ function getMeetingsFromStorage() {
     }
     
     if (!meetings) {
-      // Seed default meetings
       const today = new Date();
       const formatDate = (d) => d.toISOString().split('T')[0];
       
@@ -5907,17 +5905,17 @@ function getMeetingsFromStorage() {
           repeat: "weekly",
           visibility: "public",
           maxParticipants: "50",
-          status: "live", // Currently Live
+          status: "live",
           participantsCount: 12,
           recordingUrl: "mock_recording_1.mp4",
-          createdAt: Date.now() - 15 * 60 * 1000 // Started 15m ago
+          createdAt: Date.now() - 15 * 60 * 1000
         },
         {
           id: "meeting_2",
           title: "Sunday Youth Fellowship / रविवार युवा फेलोशिप",
           description: "Gathering for praise, worship and life discussions for youth.",
           host: "Leader Samuel",
-          date: formatDate(new Date(today.getTime() + 24 * 60 * 60 * 1000 * 2)), // 2 days from now
+          date: formatDate(new Date(today.getTime() + 24 * 60 * 60 * 1000 * 2)),
           time: "18:00",
           duration: "90",
           repeat: "weekly",
@@ -5932,7 +5930,7 @@ function getMeetingsFromStorage() {
           title: "Wednesday Mid-Week Bible Study",
           description: "Deep dive expository Bible study covering Hebrews.",
           host: "Pastor John",
-          date: formatDate(new Date(today.getTime() + 24 * 60 * 60 * 1000 * 5)), // 5 days from now
+          date: formatDate(new Date(today.getTime() + 24 * 60 * 60 * 1000 * 5)),
           time: "19:00",
           duration: "60",
           repeat: "weekly",
@@ -5947,7 +5945,7 @@ function getMeetingsFromStorage() {
           title: "Weekly Revival Prayer / साप्ताहिक पुनरुज्जीवन प्रार्थना",
           description: "Special revival prayer service. Record of August 7.",
           host: "Pastor John",
-          date: formatDate(new Date(today.getTime() - 24 * 60 * 60 * 1000 * 6)), // 6 days ago
+          date: formatDate(new Date(today.getTime() - 24 * 60 * 60 * 1000 * 6)),
           time: "19:30",
           duration: "58",
           repeat: "none",
@@ -5967,6 +5965,8 @@ function getMeetingsFromStorage() {
     return [];
   }
 }
+
+
 
 function saveMeetingsToStorage(meetings) {
   localStorage.setItem("river_of_life_meetings", JSON.stringify(meetings));
@@ -6152,7 +6152,7 @@ function createNewMeeting() {
 function renderMeetingsDashboard() {
   const triggerBtn = document.getElementById("btn-schedule-meeting-trigger");
   if (triggerBtn) {
-    triggerBtn.style.display = "block"; // Allow all members to schedule meetings during testing
+    triggerBtn.style.display = "block";
   }
 
   const activeTabBtn = document.querySelector("[data-meetings-subtab].active");
@@ -6165,14 +6165,12 @@ function renderMeetingsDashboard() {
 
   listEl.innerHTML = "";
 
-  // Filter meetings
   let filtered = [];
   if (currentSubtab === "live") {
     filtered = meetings.filter(m => m.status === "live");
   } else if (currentSubtab === "upcoming") {
     filtered = meetings.filter(m => m.status === "scheduled");
   } else if (currentSubtab === "my") {
-    // Meetings hosted by current user or where current user is invited (mocked)
     const username = state.currentUser ? state.currentUser.username : "Guest User";
     filtered = meetings.filter(m => m.host === username || m.invitedCount > 0);
   } else if (currentSubtab === "past") {
@@ -6186,12 +6184,18 @@ function renderMeetingsDashboard() {
     filtered.forEach(m => {
       const card = document.createElement("div");
       card.className = "meeting-card";
+
+      // Make entire LIVE card tappable to directly join
+      if (m.status === "live") {
+        card.style.cursor = "pointer";
+        card.style.borderColor = "#22c55e";
+        card.style.boxShadow = "0 0 0 2px rgba(34,197,94,0.2)";
+        card.addEventListener("click", () => triggerJoinMeetingFlow(m.id));
+      }
       
       let badgeHtml = "";
-      let joinBtnText = "Join / सामील व्हा";
       if (m.status === "live") {
-        badgeHtml = `<span class="badge-live">LIVE NOW</span>`;
-        joinBtnText = "JOIN NOW / सामील व्हा";
+        badgeHtml = `<span class="badge-live" style="background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:800;letter-spacing:0.5px;">🔴 LIVE NOW</span>`;
       } else if (m.status === "scheduled") {
         badgeHtml = `<span class="badge-upcoming-pill">UPCOMING</span>`;
       } else if (m.status === "ended") {
@@ -6207,10 +6211,24 @@ function renderMeetingsDashboard() {
         } else {
           actionButtons = `<span style="font-size: 11px; color: var(--text-muted);">No recording available</span>`;
         }
+      } else if (m.status === "live") {
+        // BIG full-width green Join Now button for LIVE meetings
+        actionButtons = `
+          <button class="btn-join-meet" data-id="${m.id}" style="
+            width: 100%; background: linear-gradient(135deg, #16a34a, #22c55e);
+            color: #fff; border: none; border-radius: 14px; padding: 15px 20px;
+            font-size: 16px; font-weight: 800; cursor: pointer; letter-spacing: 0.5px;
+            box-shadow: 0 6px 20px rgba(34,197,94,0.5); margin-top: 8px;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+          ">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+            Join Now / सभेत सामील व्हा
+          </button>
+        `;
       } else {
         actionButtons = `
           <button class="btn-secondary-mini btn-view-meet-details" data-id="${m.id}">Details</button>
-          <button class="btn-primary-mini btn-join-meet" data-id="${m.id}" style="${m.status === 'live' ? 'background: #22c55e; border-color: #22c55e; color: #fff;' : ''}">${joinBtnText}</button>
+          <button class="btn-primary-mini btn-join-meet" data-id="${m.id}">Join / सामील व्हा</button>
         `;
       }
 
@@ -6262,6 +6280,7 @@ function renderMeetingsDashboard() {
     });
   }
 }
+
 
 // Open Details Drawer
 function openMeetingDetails(meetingId) {
@@ -6729,7 +6748,7 @@ async function handleMeetingBroadcastEvent(msg) {
   } else if (msg.type === "STOP_MUSIC") {
     stopWorshipTrack();
   } else if (msg.type === "PLAY_YOUTUBE") {
-    syncSharedWorshipVideo(msg.url, msg.mode);
+    syncSharedWorshipVideo(msg.url, msg.mode, msg.startedAt);
   } else if (msg.type === "STOP_YOUTUBE") {
     hideSharedWorshipVideo();
   } else if (msg.type === "WORSHIP_AUDIO_LIVE") {
@@ -7569,18 +7588,20 @@ function syncSharedBiblePassage(book, chapter, verse, translation) {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // WORSHIP AUDIO SHARING ENGINE
-// Strategy: Pastor's device captures YouTube/system audio via getDisplayMedia
-// and injects it into the meeting as a live audio track. Audience hears it
-// automatically through the existing WebRTC call – no tap required.
+// Strategy: Synchronized YouTube playback — pastor broadcasts the URL + a
+// Unix timestamp. Every audience device loads the SAME YouTube video at the
+// SAME playback position simultaneously. Each device plays it locally with
+// full native audio quality. No tab-sharing or cross-origin audio needed.
 // ─────────────────────────────────────────────────────────────────────────────
 
-let worshipAudioStream = null;         // MediaStream from getDisplayMedia
-let worshipAudioCtx = null;            // AudioContext for mixing
-let worshipAudioDestination = null;    // MediaStreamDestination node
-let worshipAudioSourceNode = null;     // Source node from captured stream
+let worshipAudioStream = null;
+let worshipAudioCtx = null;
+let worshipAudioDestination = null;
+let worshipAudioSourceNode = null;
+let currentWorshipSyncTimestamp = null; // Unix ms when pastor pressed play
 
-// Pastor-side: Show YouTube player + capture system audio + inject into call
-async function syncSharedWorshipVideo(youtubeUrl, mode = "audio") {
+// Pastor-side: Show YouTube player + broadcast sync event to all participants
+async function syncSharedWorshipVideo(youtubeUrl, mode = "audio", startedAt = null) {
   const container  = document.getElementById("meeting-shared-content-area");
   const worshipBox = document.getElementById("worship-video-frame-container");
   const bibleBox   = document.getElementById("meeting-shared-bible");
@@ -7629,53 +7650,115 @@ async function syncSharedWorshipVideo(youtubeUrl, mode = "audio") {
     showToast("Worship video shared with participants!");
 
   } else {
-    // ── AUDIO ONLY MODE ───────────────────────────────────────────────────────
-    // Step 1: Show the YouTube player on PASTOR's device (small strip so they
-    //         can interact with it and the browser allows audio playback)
-    container.style.cssText  = "display:block; position:absolute; top:auto; bottom:74px; height:100px; left:0; right:0; z-index:20; background:#000;";
+    // ── AUDIO ONLY MODE: SYNCHRONIZED PLAYBACK ──────────────────────────────
+    // HOW IT WORKS:
+    // - Pastor presses play: records startedAt = Date.now(), broadcasts to all
+    // - Audience receives the event with startedAt timestamp
+    // - Each audience device calculates elapsed = (Date.now() - startedAt) / 1000
+    // - Loads YouTube iframe with &start=elapsed so everyone is in sync
+    // - Since each device plays its OWN YouTube player, audio works natively!
+    
+    // Calculate seek position if we are the audience receiving a broadcast
+    const isAudience = (startedAt !== null && startedAt !== undefined);
+    const elapsedSeconds = isAudience ? Math.floor((Date.now() - startedAt) / 1000) : 0;
+    const startParam = elapsedSeconds > 0 ? `&start=${elapsedSeconds}` : "";
+
+    container.style.cssText = "display:block; position:absolute; top:auto; bottom:74px; height:100px; left:0; right:0; z-index:20; background:#0f0f0f;";
     worshipBox.style.display = "block";
     if (bibleBox) bibleBox.style.display = "none";
 
     if (player) {
-      player.innerHTML = `
-        <div style="display:flex;align-items:center;height:100%;background:#0f0f0f;padding:0 10px;gap:10px;">
-          <iframe id="worship-yt-iframe" width="140" height="90"
-            src="https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=1"
-            frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media"
-            style="flex-shrink:0;border-radius:6px;border:0;"></iframe>
-          <div style="flex:1;color:#fff;">
-            <div style="font-size:11px;font-weight:800;color:#60a5fa;margin-bottom:4px;">🎵 Worship Audio Playing</div>
-            <div id="worship-audio-status" style="font-size:10px;color:#94a3b8;">Tap the button to stream to audience →</div>
-            <button id="btn-start-audio-share" onclick="startWorshipAudioCapture('${videoId}')"
-              style="margin-top:6px;background:#22c55e;color:#fff;border:none;border-radius:20px;padding:5px 14px;font-size:11px;font-weight:700;cursor:pointer;">
-              🔴 Stream to Audience / प्रेक्षकांना ऐकवा
-            </button>
-            <button id="btn-stop-audio-share" onclick="stopWorshipAudioCapture()"
-              style="display:none;margin-top:6px;background:#ef4444;color:#fff;border:none;border-radius:20px;padding:5px 14px;font-size:11px;font-weight:700;cursor:pointer;">
-              ⏹ Stop Streaming / थांबवा
-            </button>
+      if (isAudience) {
+        // ── AUDIENCE DEVICE: Auto-play at synchronized seek position ──────────
+        // The user has already tapped to join the meeting (user gesture), so
+        // autoplay with audio is allowed by the browser.
+        player.innerHTML = `
+          <div style="display:flex;align-items:center;height:100%;background:#0f0f0f;padding:0 12px;gap:10px;">
+            <iframe id="worship-yt-iframe" width="130" height="85"
+              src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0${startParam}&enablejsapi=1"
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media"
+              style="flex-shrink:0;border-radius:6px;border:0;"></iframe>
+            <div style="flex:1;color:#fff;">
+              <div style="font-size:11px;font-weight:800;color:#22c55e;margin-bottom:3px;">🎵 Worship Music Playing</div>
+              <div style="font-size:10px;color:#94a3b8;">Pastor is sharing this song with everyone</div>
+              <div style="font-size:10px;color:#60a5fa;margin-top:3px;">🔊 Turn up your volume! / आवाज वाढवा!</div>
+            </div>
           </div>
-        </div>
-      `;
+        `;
+        // Show green banner to audience
+        if (banner) {
+          banner.style.cssText = "display:flex; top:60px;";
+          banner.querySelector("span").textContent = "🎵 Worship music is playing — turn up your volume! / गाणे सुरू आहे — आवाज वाढवा!";
+          banner.style.background = "rgba(34, 197, 94, 0.95)";
+          setTimeout(() => { banner.style.display = "none"; }, 8000);
+        }
+        showToast("🎵 Worship music is now playing for everyone!");
+      } else {
+        // ── PASTOR'S DEVICE: Record startedAt and broadcast to audience ───────
+        const now = Date.now();
+        currentWorshipSyncTimestamp = now;
+        
+        player.innerHTML = `
+          <div style="display:flex;align-items:center;height:100%;background:#0f0f0f;padding:0 12px;gap:10px;">
+            <iframe id="worship-yt-iframe" width="130" height="85"
+              src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0&enablejsapi=1"
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media"
+              style="flex-shrink:0;border-radius:6px;border:0;"></iframe>
+            <div style="flex:1;color:#fff;">
+              <div style="font-size:11px;font-weight:800;color:#60a5fa;margin-bottom:3px;">🎵 Worship Audio Playing</div>
+              <div id="worship-audio-status" style="font-size:10px;color:#94a3b8;">Tap below to share with audience</div>
+              <button id="btn-broadcast-worship" onclick="broadcastWorshipAudioToAudience('${videoId}', ${now})"
+                style="margin-top:6px;background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;border:none;border-radius:20px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(34,197,94,0.4);">
+                🔴 Share with Audience / प्रेक्षकांना ऐकवा
+              </button>
+            </div>
+          </div>
+        `;
+        // Show banner on pastor's device
+        if (banner) {
+          banner.style.cssText = "display:flex; top:60px;";
+          banner.querySelector("span").textContent = "🎵 Song is playing. Press 'Share with Audience' to send it to everyone!";
+          banner.style.background = "rgba(59, 130, 246, 0.9)";
+          setTimeout(() => { banner.style.display = "none"; }, 7000);
+        }
+        showToast("Song playing! Press 'Share with Audience' to send to all!");
+      }
     }
 
     // Cameras take the rest of screen above the player strip
     jitsiCont.style.display = "block";
     jitsiCont.style.top     = "50px";
     jitsiCont.style.height  = "calc(100% - 50px - 74px - 100px)";
-
-    // Show banner briefly
-    if (banner) {
-      banner.style.cssText = "display:flex;top:60px;";
-      banner.querySelector("span").textContent = "🎵 Press 'Stream to Audience' in the bottom bar to share audio / प्रेक्षकांना ऐकवण्यासाठी खालील बटण दाबा";
-      banner.style.background = "rgba(34,197,94,0.9)";
-      setTimeout(() => { banner.style.display = "none"; }, 7000);
-    }
-
-    showToast("Play the song and press 'Stream to Audience'!");
   }
 }
+
+// Pastor broadcasts the YouTube song to all audience participants
+function broadcastWorshipAudioToAudience(videoId, startedAt) {
+  const statusEl = document.getElementById("worship-audio-status");
+  const broadcastBtn = document.getElementById("btn-broadcast-worship");
+  
+  if (activeMeetingSession) {
+    broadcastMeetingEvent(activeMeetingSession.meetingId, {
+      type: "PLAY_YOUTUBE",
+      url: videoId,
+      mode: "audio",
+      startedAt: startedAt // Unix timestamp when pastor pressed play
+    });
+    if (statusEl) statusEl.textContent = "🔴 BROADCASTING — Audience is now hearing the song!";
+    if (broadcastBtn) {
+      broadcastBtn.style.background = "linear-gradient(135deg,#6b21a8,#a855f7)";
+      broadcastBtn.textContent = "✅ Shared! / प्रेक्षकांना पाठवले";
+      broadcastBtn.disabled = true;
+    }
+    showToast("🎵 Worship song shared with all participants!");
+  } else {
+    showToast("Join a meeting first to share with audience.");
+  }
+}
+
+
 
 // ── Audio capture: Grab tab/system audio and inject into the meeting ──────────
 async function startWorshipAudioCapture(videoId) {
