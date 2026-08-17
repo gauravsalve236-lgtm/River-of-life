@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v20260817-UNREGISTER-SW-PROD-FINAL';
+const CACHE_NAME = 'river-of-life-cache-v23-UNMUTED-MIC-PROD';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
