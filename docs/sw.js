@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v23-REVERTED-EXACT';
+const CACHE_NAME = 'river-of-life-cache-v20260817-UPPER-TOOLBAR-ONLY-FINAL';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

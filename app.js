@@ -6495,7 +6495,7 @@ function triggerJoinMeetingFlow(meetingId) {
 // Fullscreen Live Meeting Room Entry
 function launchLiveMeetingRoom(meeting, stream) {
   try {
-    console.log("Launching v23 Online Video Fellowship Room:", meeting);
+    console.log("Launching Live Fellowship Room (Upper Toolbar Only):", meeting);
     // Lock screen view overlay
     const roomModal = document.getElementById("modal-live-meeting");
     if (roomModal) {
@@ -6539,29 +6539,17 @@ function launchLiveMeetingRoom(meeting, stream) {
       isHost: isHost
     };
 
-    // Pre-authorize system microphone & camera permissions on Mobile Safari / Chrome before embedding iframe
+    // Pre-authorize system microphone & camera permissions on Mobile Safari / Chrome / Android
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       navigator.mediaDevices.getUserMedia({
         audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
         video: true
       }).then(s => {
-        console.log("Mobile system microphone & speaker authorized for domain!");
-      }).catch(e => console.warn("Mobile mic authorization notice:", e));
+        console.log("System microphone & camera authorized!");
+      }).catch(e => console.warn("Mic authorization notice:", e));
     }
 
-    // Unlock mobile hardware speaker audio playback on screen touch
-    const unlockSpeakerAudio = () => {
-      try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') {
-          audioCtx.resume();
-        }
-      } catch(e) {}
-    };
-    document.addEventListener("touchstart", unlockSpeakerAudio, { once: true });
-    document.addEventListener("click", unlockSpeakerAudio, { once: true });
-
-    // Load Live v23 Online Video Conference Room with Full Mic & Speaker Allow Attributes
+    // Load Live Video Conference Room with Upper Working Toolbar Only
     const jitsiCont = document.getElementById("meeting-jitsi-container");
     if (jitsiCont) {
       jitsiCont.style.display = "block";
@@ -6574,7 +6562,7 @@ function launchLiveMeetingRoom(meeting, stream) {
           width="100%" 
           height="100%" 
           allow="camera *; microphone *; speaker-selection *; display-capture *; fullscreen *; autoplay *; picture-in-picture *; accelerometer; gyroscope;" 
-          style="border: none; width: 100%; height: 100%; border-radius: 18px; background: #000;">
+          style="border: none; width: 100%; height: 100%; background: #17181b;">
         </iframe>
       `;
     }
