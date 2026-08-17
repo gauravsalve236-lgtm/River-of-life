@@ -1,4 +1,27 @@
 
+/* Speaker Sound Unlocker for Windows & Mobile Browsers */
+function unlockDeviceSpeakerSound() {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (AudioCtx) {
+      const ctx = new AudioCtx();
+      if (ctx.state === 'suspended') {
+        ctx.resume();
+      }
+    }
+    document.querySelectorAll("audio, video").forEach(mediaEl => {
+      if (mediaEl.id !== "meeting-local-video") {
+        mediaEl.muted = false;
+      }
+      const p = mediaEl.play();
+      if (p !== undefined) p.catch(() => {});
+    });
+  } catch(e) {}
+}
+window.addEventListener("click", unlockDeviceSpeakerSound);
+window.addEventListener("touchstart", unlockDeviceSpeakerSound);
+
+
 // Force unregister obsolete Service Workers and clear caches on startup for Mobile
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then(registrations => {
@@ -6495,7 +6518,8 @@ function triggerJoinMeetingFlow(meetingId) {
 // Fullscreen Live Meeting Room Entry
 function launchLiveMeetingRoom(meeting, stream) {
   try {
-    console.log("Launching Live Fellowship Room (Upper Toolbar Only):", meeting);
+    console.log("Launching Fellowship Room with Sound Unlock:", meeting);
+    
     // Lock screen view overlay
     const roomModal = document.getElementById("modal-live-meeting");
     if (roomModal) {
@@ -6539,22 +6563,15 @@ function launchLiveMeetingRoom(meeting, stream) {
       isHost: isHost
     };
 
-    // Pre-authorize system microphone & camera permissions on Mobile Safari / Chrome / Android
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      navigator.mediaDevices.getUserMedia({
-        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-        video: true
-      }).then(s => {
-        console.log("System microphone & camera authorized!");
-      }).catch(e => console.warn("Mic authorization notice:", e));
-    }
+    // Unlock Speaker Sound
+    unlockDeviceSpeakerSound();
 
-    // Load Live Video Conference Room with Upper Working Toolbar Only
+    // Load Live Video Conference Room with Full Sound Allow Policy
     const jitsiCont = document.getElementById("meeting-jitsi-container");
     if (jitsiCont) {
       jitsiCont.style.display = "block";
       const roomSlug = meeting ? `RiverOfLife_Sanctuary_${meeting.id}` : "RiverOfLife_Sanctuary_LiveRoom";
-      const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=1&video=1&name=${encodeURIComponent(loggedIn)}`;
+      const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=1&video=1&muted=0&sound=1&name=${encodeURIComponent(loggedIn)}`;
       
       jitsiCont.innerHTML = `
         <iframe 
@@ -6562,7 +6579,7 @@ function launchLiveMeetingRoom(meeting, stream) {
           width="100%" 
           height="100%" 
           allow="camera *; microphone *; speaker-selection *; display-capture *; fullscreen *; autoplay *; picture-in-picture *; accelerometer; gyroscope;" 
-          style="border: none; width: 100%; height: 100%; background: #17181b;">
+          style="border: none; width: 100%; height: 100%; border-radius: 18px; background: #090d16;">
         </iframe>
       `;
     }
@@ -6575,79 +6592,48 @@ function launchLiveMeetingRoom(meeting, stream) {
 
 
 function exitLiveMeetingRoom() {
-  if (!activeMeetingSession) activeMeetingSession = { isMuted: false, isCamOff: false };
-
-  // Clear EventSource subscription
-  if (meetingEventSource) {
-    meetingEventSource.close();
-    meetingEventSource = null;
-  }
-  
-  // Stop background music and hide shared pane
-  stopWorshipTrack();
-  hideSharedBibleContent();
-  hideSharedWorshipVideo();
-
-  // Clear interval loop
-  if (meetingSandboxInterval) {
-    clearInterval(meetingSandboxInterval);
-    meetingSandboxInterval = null;
-  }
-
-  // Shut down camera streams
-  if (activeMeetingSession.localStream) {
-    activeMeetingSession.localStream.getTracks().forEach(track => track.stop());
-  }
-
-  // Dispose real Jitsi call iframe
-  if (activeJitsiAPIInstance) {
-    activeJitsiAPIInstance.executeCommand("hangup");
-    activeJitsiAPIInstance.dispose();
-    activeJitsiAPIInstance = null;
-  }
-
-  // Close live modal
-  const roomModal = document.getElementById("modal-live-meeting");
-  if (roomModal) {
-    roomModal.classList.remove("active");
-    roomModal.style.display = "none";
-  }
-  
-  // Restore Jitsi container state
-  const jitsiCont = document.getElementById("meeting-jitsi-container");
-  if (jitsiCont) {
-    jitsiCont.style.display = "none";
-    jitsiCont.innerHTML = "";
-  }
-  const videoGrid = document.getElementById("meeting-video-grid");
-  if (videoGrid) videoGrid.style.display = "grid";
-  const customToolbar = document.querySelector(".meeting-room-toolbar");
-  if (customToolbar) customToolbar.style.display = "flex";
-  
-  // Restore navigation panels
-  document.querySelector(".app-header").style.display = "flex";
-  document.querySelector(".mobile-bottom-tabs").style.display = "flex";
-  const sidebar = document.querySelector(".desktop-sidebar");
-  if (sidebar) sidebar.style.display = "flex";
-
-  showToast("Meeting Ended / आपण सभेतून बाहेर पडलात");
-
-  // Save history (ended status) if hosted by user
-  const meetings = getMeetingsFromStorage();
-  const mIdx = meetings.findIndex(x => x.id === activeMeetingSession.meetingId);
-  if (mIdx !== -1) {
-    if (activeMeetingSession.isHost) {
-      meetings[mIdx].status = "ended";
-      meetings[mIdx].participantsCount = meetings[mIdx].participantsCount || 15;
+  try {
+    console.log("Exiting Live Fellowship Meeting Room...");
+    
+    // Hide Modal Overlay
+    const roomModal = document.getElementById("modal-live-meeting");
+    if (roomModal) {
+      roomModal.classList.remove("active");
+      setTimeout(() => {
+        roomModal.style.display = "none";
+      }, 200);
     }
-    saveMeetingsToStorage(meetings);
-  }
+    
+    // Restore Top App Header and Mobile Bottom Tabs
+    const header = document.querySelector(".app-header");
+    if (header) header.style.display = "flex";
+    const tabs = document.querySelector(".mobile-bottom-tabs");
+    if (tabs) tabs.style.display = "flex";
+    const sidebar = document.querySelector(".desktop-sidebar");
+    if (sidebar) sidebar.style.display = "flex";
 
-  activeMeetingSession = null;
-  renderMeetingsDashboard();
+    // Cleanly terminate Video Room Iframe
+    const jitsiCont = document.getElementById("meeting-jitsi-container");
+    if (jitsiCont) {
+      jitsiCont.innerHTML = "";
+      jitsiCont.style.display = "none";
+    }
+
+    // Stop all local camera and microphone media tracks
+    if (activeMeetingSession && activeMeetingSession.localStream) {
+      try {
+        activeMeetingSession.localStream.getTracks().forEach(track => track.stop());
+      } catch(e) {}
+    }
+    activeMeetingSession = null;
+
+    showToast("Exited fellowship meeting room");
+  } catch (err) {
+    console.warn("exitLiveMeetingRoom notice:", err);
+  }
 }
 
-// Setup Event listeners for meeting buttons
+
 function setupMeetingRoomControls() {
   // Mic toggle
   document.getElementById("btn-meet-mic").addEventListener("click", () => {
