@@ -6480,7 +6480,7 @@ function triggerJoinMeetingFlow(meetingId) {
 // Fullscreen Live Meeting Room Entry
 function launchLiveMeetingRoom(meeting, stream) {
   try {
-    console.log("Launching Live Meeting Room:", meeting);
+    console.log("Launching Online Video Conference Room:", meeting);
     // Lock screen view overlay
     const roomModal = document.getElementById("modal-live-meeting");
     if (roomModal) {
@@ -6520,70 +6520,29 @@ function launchLiveMeetingRoom(meeting, stream) {
       meetingId: meeting ? meeting.id : "default",
       localStream: stream,
       isMuted: false,
-      isCamOff: !stream,
+      isCamOff: false,
       isHost: isHost
     };
 
-    // Sync profile display names safely
-    const nameEl = document.getElementById("meeting-local-name");
-    if (nameEl) nameEl.textContent = `${loggedIn} ${isHost ? "(Host)" : ""}`;
-    const nameTag = document.getElementById("meeting-local-name-tag");
-    if (nameTag) nameTag.textContent = `${loggedIn} ${isHost ? "(Host)" : ""}`;
-
-    // Ensure Native Gallery Video Stage Grid is VISIBLE (display: flex)
-    const gridEl = document.getElementById("meeting-video-grid");
-    if (gridEl) {
-      gridEl.style.display = "flex";
-      gridEl.style.width = "100%";
-      gridEl.style.height = "100%";
-    }
-
-    // Render local video stream or fallback participant avatar card
-    const videoEl = document.getElementById("meeting-local-video");
-    const avatarEl = document.getElementById("video-cell-local-avatar");
-    
-    if (stream && videoEl) {
-      try {
-        videoEl.srcObject = stream;
-        videoEl.muted = true;
-        videoEl.defaultMuted = true;
-        videoEl.setAttribute("playsinline", "true");
-        videoEl.setAttribute("webkit-playsinline", "true");
-        videoEl.setAttribute("autoplay", "true");
-        videoEl.style.display = "block";
-        videoEl.style.width = "100%";
-        videoEl.style.height = "100%";
-        videoEl.style.objectFit = "cover";
-        
-        const p = videoEl.play();
-        if (p !== undefined) {
-          p.then(() => {
-            console.log("Local camera stream playing successfully!");
-            if (avatarEl) avatarEl.style.display = "none";
-          }).catch(err => {
-            console.warn("Video play error fallback to avatar:", err);
-            if (avatarEl) avatarEl.style.display = "flex";
-          });
-        }
-      } catch(err) {
-        console.warn("Video srcObject error:", err);
-        if (avatarEl) avatarEl.style.display = "flex";
-      }
-    } else {
-      if (videoEl) videoEl.style.display = "none";
-      if (avatarEl) {
-        avatarEl.style.display = "flex";
-      }
-    }
-
-    // Ensure 3rd-party iframe container is disabled
+    // Load Live Online Video Conference Room inside meeting-jitsi-container
     const jitsiCont = document.getElementById("meeting-jitsi-container");
     if (jitsiCont) {
-      jitsiCont.style.display = "none";
-      jitsiCont.innerHTML = "";
+      jitsiCont.style.display = "block";
+      const roomSlug = meeting ? `RiverOfLife_Sanctuary_${meeting.id}` : "RiverOfLife_Sanctuary_LiveRoom";
+      const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?name=${encodeURIComponent(loggedIn)}`;
+      
+      jitsiCont.innerHTML = `
+        <iframe 
+          src="${roomUrl}" 
+          width="100%" 
+          height="100%" 
+          allow="camera; microphone; speaker-selection; display-capture; fullscreen; autoplay; picture-in-picture;" 
+          style="border: none; width: 100%; height: 100%; border-radius: 18px; background: #000;">
+        </iframe>
+      `;
     }
 
-    showToast("Joined Live Fellowship Meeting Room 🙏");
+    showToast("Joined Online Video Conference Room 🙏");
   } catch (err) {
     console.warn("launchLiveMeetingRoom notice:", err);
   }

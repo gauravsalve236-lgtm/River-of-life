@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v20260817-LIVE-VIDEO-FIXED';
+const CACHE_NAME = 'river-of-life-cache-v20260817-ONLINE-CONF-ENABLED';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
