@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v20260817-MOBILE-HARDWARE-MIC-SPEAKER';
+const CACHE_NAME = 'river-of-life-cache-v20260817-UNIVERSAL-MIC-SPEAKER-FIX';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

@@ -1,4 +1,29 @@
 
+/* Universal Speaker & Microphone Audio Unlocker for Windows, iOS & Android */
+function unlockAllDeviceSpeakers() {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (AudioCtx) {
+      const ctx = new AudioCtx();
+      if (ctx.state === 'suspended') {
+        ctx.resume();
+      }
+    }
+    document.querySelectorAll("audio, video").forEach(mediaEl => {
+      if (mediaEl.id !== "meeting-local-video") {
+        mediaEl.muted = false;
+        mediaEl.volume = 1.0;
+      }
+      const p = mediaEl.play();
+      if (p !== undefined) p.catch(() => {});
+    });
+  } catch(e) {}
+}
+window.addEventListener("click", unlockAllDeviceSpeakers);
+window.addEventListener("touchstart", unlockAllDeviceSpeakers);
+window.addEventListener("pointerdown", unlockAllDeviceSpeakers);
+
+
 // Force unregister obsolete Service Workers and clear caches on startup for Mobile
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then(registrations => {
@@ -6495,7 +6520,7 @@ function triggerJoinMeetingFlow(meetingId) {
 // Fullscreen Live Meeting Room Entry
 function launchLiveMeetingRoom(meeting, stream) {
   try {
-    console.log("Launching Mobile Hardware Mic & Speaker Fellowship Room:", meeting);
+    console.log("Launching Universal Fellowship Room (Windows, iOS & Android):", meeting);
     
     // Lock screen view overlay
     const roomModal = document.getElementById("modal-live-meeting");
@@ -6540,91 +6565,41 @@ function launchLiveMeetingRoom(meeting, stream) {
       isHost: isHost
     };
 
-    // Ensure Gallery Stage Grid is VISIBLE
-    const gridEl = document.getElementById("meeting-video-grid");
-    if (gridEl) {
-      gridEl.style.display = "flex";
-      gridEl.style.width = "100%";
-      gridEl.style.height = "100%";
-    }
-
-    const videoEl = document.getElementById("meeting-local-video");
-    const avatarEl = document.getElementById("video-cell-local-avatar");
-    const badgeEl = document.getElementById("local-mic-badge");
-
-    const attachStreamToDOM = (mediaStream) => {
-      activeMeetingSession.localStream = mediaStream;
-      if (videoEl) {
-        videoEl.srcObject = mediaStream;
-        videoEl.muted = true;
-        videoEl.defaultMuted = true;
-        videoEl.setAttribute("playsinline", "true");
-        videoEl.setAttribute("webkit-playsinline", "true");
-        videoEl.setAttribute("autoplay", "true");
-        videoEl.style.display = "block";
-        videoEl.style.width = "100%";
-        videoEl.style.height = "100%";
-        videoEl.style.objectFit = "cover";
-        
-        const p = videoEl.play();
-        if (p !== undefined) {
-          p.then(() => {
-            if (avatarEl) avatarEl.style.display = "none";
-          }).catch(() => {
-            if (avatarEl) avatarEl.style.display = "none";
-          });
-        }
-      }
-      if (badgeEl) {
-        badgeEl.textContent = "🎙️ Hardware Mic Active";
-        badgeEl.style.borderColor = "rgba(74,222,128,0.4)";
-        badgeEl.style.color = "#4ade80";
-      }
-    };
-
-    // Direct Mobile Hardware Media Acquisition
-    if (stream) {
-      attachStreamToDOM(stream);
-    } else if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    // Pre-authorize system microphone & speaker hardware permissions on Windows, iOS & Android
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       navigator.mediaDevices.getUserMedia({
         audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-        video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } }
-      })
-      .then(newStream => {
-        console.log("Direct Mobile Hardware Mic & Camera Activated!");
-        attachStreamToDOM(newStream);
-      })
-      .catch(err => {
-        console.warn("Fallback to audio stream:", err);
-        navigator.mediaDevices.getUserMedia({ audio: true })
-          .then(audioStream => {
-            attachStreamToDOM(audioStream);
-            if (videoEl) videoEl.style.display = "none";
-            if (avatarEl) avatarEl.style.display = "flex";
-          })
-          .catch(() => {
-            if (videoEl) videoEl.style.display = "none";
-            if (avatarEl) avatarEl.style.display = "flex";
-          });
-      });
+        video: { width: { ideal: 1280 }, height: { ideal: 720 } }
+      }).then(s => {
+        console.log("Universal Hardware Microphone & Speaker Authorized!");
+        activeMeetingSession.localStream = s;
+      }).catch(e => console.warn("Mic pre-auth notice:", e));
     }
 
-    // Touch listener for mobile hardware speaker unlock
-    const unlockSpeakerAudio = () => {
-      try {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (AudioCtx) {
-          const ctx = new AudioCtx();
-          if (ctx.state === 'suspended') ctx.resume();
-        }
-        const speakerEl = document.getElementById("mobile-hardware-speaker");
-        if (speakerEl) speakerEl.play().catch(() => {});
-      } catch(e) {}
-    };
-    document.addEventListener("touchstart", unlockSpeakerAudio, { once: false });
-    document.addEventListener("click", unlockSpeakerAudio, { once: false });
+    // Instantly unlock speaker audio context
+    unlockAllDeviceSpeakers();
 
-    showToast("Joined Live Fellowship • Mobile Mic & Speaker Active 🙏");
+    // Load Live Video Conference Room with Universal Microphone & Speaker Audio Engine
+    const jitsiCont = document.getElementById("meeting-jitsi-container");
+    if (jitsiCont) {
+      jitsiCont.style.display = "block";
+      const roomSlug = meeting ? `RiverOfLife_Sanctuary_${meeting.id}` : "RiverOfLife_Sanctuary_LiveRoom";
+      
+      // Force Audio Unmuted & Speaker Output Active for all platforms
+      const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=1&video=1&muted=0&sound=1&layout=grid&grid=1&name=${encodeURIComponent(loggedIn)}`;
+      
+      jitsiCont.innerHTML = `
+        <iframe 
+          src="${roomUrl}" 
+          width="100%" 
+          height="100%" 
+          allow="camera *; microphone *; speaker-selection *; display-capture *; fullscreen *; autoplay *; picture-in-picture *; accelerometer; gyroscope;" 
+          style="border: none; width: 100%; height: 100%; border-radius: 18px; background: #090d16;">
+        </iframe>
+      `;
+    }
+
+    showToast("Joined Online Video Fellowship Room • Mic & Speaker Active 🙏");
   } catch (err) {
     console.warn("launchLiveMeetingRoom notice:", err);
   }
