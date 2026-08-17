@@ -3800,7 +3800,7 @@ function setupEventListeners() {
   const shareWordSubmitBtn = document.getElementById("btn-meet-share-bible-submit");
   if (shareWordSubmitBtn) {
     shareWordSubmitBtn.addEventListener("click", () => {
-      if (!activeMeetingSession) return;
+      if (!activeMeetingSession) activeMeetingSession = { isMuted: false, isCamOff: false };
       const book = document.getElementById("meeting-share-book").value;
       const chapter = document.getElementById("meeting-share-chapter").value;
       const verse = document.getElementById("meeting-share-verse").value;
@@ -3819,7 +3819,7 @@ function setupEventListeners() {
   const shareWordStopBtn = document.getElementById("btn-meet-share-bible-stop");
   if (shareWordStopBtn) {
     shareWordStopBtn.addEventListener("click", () => {
-      if (!activeMeetingSession) return;
+      if (!activeMeetingSession) activeMeetingSession = { isMuted: false, isCamOff: false };
       broadcastMeetingEvent(activeMeetingSession.meetingId, {
         type: "STOP_SHARE_BIBLE"
       });
@@ -6464,7 +6464,7 @@ function triggerJoinMeetingFlow(meetingId) {
 
   // Real or simulated meeting, we request permissions and launch it inside the app modal!
   showToast("Requesting camera and microphone permissions...");
-  navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } }, audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } })
+  navigator.mediaDevices.getUserMedia({ video: true, audio: true })
     .then(stream => {
       // Permission granted, launch meeting inside app modal
       launchLiveMeetingRoom(m, stream);
@@ -6550,7 +6550,7 @@ function launchLiveMeetingRoom(meeting, stream) {
 
 
 function exitLiveMeetingRoom() {
-  if (!activeMeetingSession) return;
+  if (!activeMeetingSession) activeMeetingSession = { isMuted: false, isCamOff: false };
 
   // Clear EventSource subscription
   if (meetingEventSource) {
@@ -6590,7 +6590,7 @@ function exitLiveMeetingRoom() {
   
   // Restore Jitsi container state
   const jitsiCont = document.getElementById("meeting-jitsi-container");
-  if (jitsiCont) { jitsiCont.style.display = "none"; jitsiCont.innerHTML = ""; } if (false) {
+  if (jitsiCont) {
     jitsiCont.style.display = "none";
     jitsiCont.innerHTML = "";
   }
@@ -6626,7 +6626,7 @@ function exitLiveMeetingRoom() {
 function setupMeetingRoomControls() {
   // Mic toggle
   document.getElementById("btn-meet-mic").addEventListener("click", () => {
-    if (!activeMeetingSession) return;
+    if (!activeMeetingSession) activeMeetingSession = { isMuted: false, isCamOff: false };
     activeMeetingSession.isMuted = !activeMeetingSession.isMuted;
     
     const btn = document.getElementById("btn-meet-mic");
@@ -6643,7 +6643,7 @@ function setupMeetingRoomControls() {
 
   // Video Camera toggle
   document.getElementById("btn-meet-video").addEventListener("click", () => {
-    if (!activeMeetingSession) return;
+    if (!activeMeetingSession) activeMeetingSession = { isMuted: false, isCamOff: false };
     activeMeetingSession.isCamOff = !activeMeetingSession.isCamOff;
 
     const btn = document.getElementById("btn-meet-video");
@@ -7543,7 +7543,7 @@ function hideSharedWorshipVideo() {
     banner.onclick = null;
   }
 
-  if (jitsiCont) { jitsiCont.style.display = "none"; jitsiCont.innerHTML = ""; } if (false) {
+  if (jitsiCont) {
     jitsiCont.style.display = "block";
     jitsiCont.style.height  = "calc(100% - 50px)";
     jitsiCont.style.top     = "50px";
@@ -7833,3 +7833,244 @@ function handleParticipantVideoAudioShareStop(msg) {
 
 
 
+
+
+/* ==========================================================================
+   Google Meet-Style Redesigned Meeting & Fellowship Room JS Module
+   ========================================================================== */
+
+// Worship Music Preset Track Streams
+const WORSHIP_PRESET_TRACKS = {
+  track1: {
+    title: "Grace Like Rain (कृपा पावसासारखी)",
+    artist: "River Worship Ensemble",
+    url: "https://actions.google.com/sounds/v1/ambiences/rain_heavy.ogg"
+  },
+  track2: {
+    title: "मराठी स्तुती गाणी (Marathi Stuti Hymns)",
+    artist: "Sanctuary Choir",
+    url: "https://actions.google.com/sounds/v1/weather/rain_heavy_loud.ogg"
+  },
+  track3: {
+    title: "Peaceful Piano Worship (शांततादायक स्तुती संगीत)",
+    artist: "Instrumental Prayer",
+    url: "https://actions.google.com/sounds/v1/water/rain_against_window.ogg"
+  }
+};
+
+let activeWorshipAudioElement = null;
+let currentWorshipTrackKey = null;
+
+// Initialize or setup controls for redesigned Google Meet interface
+
+let _redesignedMeetingControlsSetup = false;
+
+function setupRedesignedMeetingControls() {
+  if (_redesignedMeetingControlsSetup) return;
+  _redesignedMeetingControlsSetup = true;
+
+  document.addEventListener("click", (e) => {
+    // Mic Toggle
+    const micBtn = e.target.closest("#btn-meet-mic");
+    if (micBtn) {
+      if (!activeMeetingSession) activeMeetingSession = { isMuted: false, isCamOff: false };
+      activeMeetingSession.isMuted = !activeMeetingSession.isMuted;
+      micBtn.classList.toggle("active-muted", activeMeetingSession.isMuted);
+      
+      const statusEl = document.getElementById("meeting-local-mic-status");
+      if (statusEl) statusEl.textContent = activeMeetingSession.isMuted ? "🔇" : "🎙️";
+      
+      const micIcon = document.getElementById("meet-mic-icon");
+      if (micIcon) micIcon.textContent = activeMeetingSession.isMuted ? "🔇" : "🎙️";
+
+      showToast(activeMeetingSession.isMuted ? "Microphone Muted" : "Microphone Active");
+      return;
+    }
+
+    // Camera Toggle
+    const camBtn = e.target.closest("#btn-meet-cam, #btn-meet-video");
+    if (camBtn) {
+      if (!activeMeetingSession) activeMeetingSession = { isMuted: false, isCamOff: false };
+      activeMeetingSession.isCamOff = !activeMeetingSession.isCamOff;
+      camBtn.classList.toggle("active-muted", activeMeetingSession.isCamOff);
+
+      const videoEl = document.getElementById("meeting-local-video");
+      const avatarEl = document.getElementById("video-cell-local-avatar");
+      const loggedIn = state.currentUser ? state.currentUser.username : "You";
+
+      if (activeMeetingSession.isCamOff) {
+        if (videoEl) videoEl.style.display = "none";
+        if (avatarEl) {
+          avatarEl.style.display = "flex";
+          avatarEl.textContent = loggedIn.substring(0, 1).toUpperCase();
+        }
+      } else {
+        if (videoEl) videoEl.style.display = "block";
+        if (avatarEl) avatarEl.style.display = "none";
+      }
+
+      showToast(activeMeetingSession.isCamOff ? "Camera Switched Off" : "Camera Active");
+      return;
+    }
+
+    // Hand Raise Toggle
+    const handBtn = e.target.closest("#btn-meet-hand");
+    if (handBtn) {
+      const isRaised = handBtn.classList.toggle("active-gold");
+      const handBadge = document.getElementById("meeting-local-hand-status");
+      if (handBadge) handBadge.style.display = isRaised ? "inline-flex" : "none";
+      
+      appendMeetingChatMessage("SYSTEM", isRaised ? "✋ You raised hand" : "You lowered hand", true);
+      showToast(isRaised ? "Hand Raised 🖐️" : "Hand Lowered");
+      return;
+    }
+
+    // Chat Drawer Toggle
+    const chatBtn = e.target.closest("#btn-meet-chat");
+    if (chatBtn) {
+      toggleMeetingSidebar("chat");
+      return;
+    }
+
+    // Leave Call
+    const leaveBtn = e.target.closest("#btn-meet-leave, #btn-meeting-exit-top");
+    if (leaveBtn) {
+      exitLiveMeetingRoom();
+      return;
+    }
+  });
+}
+
+
+function broadcastScriptureToMeeting(bookName, chapterNum, verseNum) {
+  const overlayStage = document.getElementById("meeting-shared-content-area");
+  const sharedBibleContainer = document.getElementById("meeting-shared-bible");
+  const titleEl = document.getElementById("shared-bible-title");
+  const textEl = document.getElementById("shared-bible-text");
+  const textMrEl = document.getElementById("shared-bible-text-mr");
+
+  if (!overlayStage || !sharedBibleContainer) return;
+
+  const verseRef = `${bookName} ${chapterNum}:${verseNum}`;
+  
+  if (titleEl) titleEl.textContent = `${verseRef} Broadcast`;
+  if (textEl) textEl.textContent = `"For God so loved the world that he gave his one and only Son..." (${verseRef})`;
+  if (textMrEl) textMrEl.textContent = `"कारण देवाने जगावर एवढी प्रीती केली की, त्याने आपला एकुलता एक पुत्र दिला..." (${verseRef})`;
+
+  overlayStage.style.display = "block";
+  sharedBibleContainer.style.display = "block";
+
+  const scriptureBtn = document.getElementById("btn-meet-scripture");
+  if (scriptureBtn) scriptureBtn.classList.add("active-gold");
+
+  showToast(`Broadcasting Scripture: ${verseRef} 📖`);
+}
+
+function hideScriptureBroadcastOverlay() {
+  const overlayStage = document.getElementById("meeting-shared-content-area");
+  if (overlayStage) overlayStage.style.display = "none";
+
+  const scriptureBtn = document.getElementById("btn-meet-scripture");
+  if (scriptureBtn) scriptureBtn.classList.remove("active-gold");
+
+  showToast("Scripture Broadcast ended");
+}
+
+// Worship Music Audio Engine
+function playWorshipMusicTrack(trackKey) {
+  const trackData = WORSHIP_PRESET_TRACKS[trackKey];
+  if (!trackData) return;
+
+  if (activeWorshipAudioElement) {
+    activeWorshipAudioElement.pause();
+  }
+
+  activeWorshipAudioElement = new Audio(trackData.url);
+  activeWorshipAudioElement.loop = true;
+  activeWorshipAudioElement.volume = 0.7;
+
+  currentWorshipTrackKey = trackKey;
+  
+  // Show banner & active states immediately
+  const banner = document.getElementById("meeting-worship-audio-banner");
+  const bannerText = document.getElementById("worship-audio-banner-text");
+  if (banner) banner.style.display = "flex";
+  if (bannerText) bannerText.textContent = `Worship Music: ${trackData.title}`;
+
+  const worshipBtn = document.getElementById("btn-meet-worship");
+  if (worshipBtn) worshipBtn.classList.add("active-blue");
+
+  activeWorshipAudioElement.play().then(() => {
+    showToast(`Playing Worship: ${trackData.title} 🎵`);
+  }).catch(err => {
+    console.warn("Worship audio autoplay deferred by browser:", err);
+    showToast(`Selected Track: ${trackData.title}`);
+  });
+}
+
+function toggleWorshipMusicState() {
+  if (!activeWorshipAudioElement) return;
+  if (activeWorshipAudioElement.paused) {
+    activeWorshipAudioElement.play();
+    showToast("Worship Music Resumed 🎵");
+  } else {
+    activeWorshipAudioElement.pause();
+    showToast("Worship Music Paused");
+  }
+}
+
+function setWorshipMusicVolume(volVal) {
+  if (activeWorshipAudioElement) {
+    activeWorshipAudioElement.volume = Math.max(0, Math.min(1, volVal));
+  }
+  const label = document.getElementById("meet-music-vol-label");
+  if (label) label.textContent = `${Math.round(volVal * 100)}%`;
+}
+
+function stopWorshipMusic() {
+  if (activeWorshipAudioElement) {
+    activeWorshipAudioElement.pause();
+    activeWorshipAudioElement = null;
+  }
+  currentWorshipTrackKey = null;
+
+  const banner = document.getElementById("meeting-worship-audio-banner");
+  if (banner) banner.style.display = "none";
+
+  const worshipBtn = document.getElementById("btn-meet-worship");
+  if (worshipBtn) worshipBtn.classList.remove("active-blue");
+
+  showToast("Worship Music stopped");
+}
+
+// Auto-run initialization of controls on app load
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", setupRedesignedMeetingControls);
+} else {
+  setTimeout(setupRedesignedMeetingControls, 500);
+}
+
+
+// Explicit Global Window Bindings for Meeting Redesign API
+window.setupRedesignedMeetingControls = setupRedesignedMeetingControls;
+window.broadcastScriptureToMeeting = broadcastScriptureToMeeting;
+window.hideScriptureBroadcastOverlay = hideScriptureBroadcastOverlay;
+window.playWorshipMusicTrack = playWorshipMusicTrack;
+window.toggleWorshipMusicState = toggleWorshipMusicState;
+window.setWorshipMusicVolume = setWorshipMusicVolume;
+window.stopWorshipMusic = stopWorshipMusic;
+if (typeof launchLiveMeetingRoom !== 'undefined') window.launchLiveMeetingRoom = launchLiveMeetingRoom;
+if (typeof triggerJoinMeetingFlow !== 'undefined') window.triggerJoinMeetingFlow = triggerJoinMeetingFlow;
+if (typeof exitLiveMeetingRoom !== 'undefined') window.exitLiveMeetingRoom = exitLiveMeetingRoom;
+if (typeof toggleMeetingSidebar !== 'undefined') window.toggleMeetingSidebar = toggleMeetingSidebar;
+
+
+/* Global Window Function Exports */
+if (typeof switchTab === 'function') window.switchTab = switchTab;
+if (typeof toggleMeetingMic === 'function') window.toggleMeetingMic = toggleMeetingMic;
+if (typeof toggleMeetingCam === 'function') window.toggleMeetingCam = toggleMeetingCam;
+if (typeof toggleMeetingHand === 'function') window.toggleMeetingHand = toggleMeetingHand;
+if (typeof exitLiveMeetingRoom === 'function') window.exitLiveMeetingRoom = exitLiveMeetingRoom;
+if (typeof openDrawer === 'function') window.openDrawer = openDrawer;
+if (typeof closeDrawer === 'function') window.closeDrawer = closeDrawer;
+if (typeof populateMeetingShareBibleDropdowns === 'function') window.populateMeetingShareBibleDropdowns = populateMeetingShareBibleDropdowns;
