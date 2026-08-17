@@ -6518,7 +6518,7 @@ function triggerJoinMeetingFlow(meetingId) {
 // Fullscreen Live Meeting Room Entry
 function launchLiveMeetingRoom(meeting, stream) {
   try {
-    console.log("Launching Fellowship Room with Sound Unlock:", meeting);
+    console.log("Launching Synchronized Multi-Device Fellowship Room:", meeting);
     
     // Lock screen view overlay
     const roomModal = document.getElementById("modal-live-meeting");
@@ -6563,15 +6563,33 @@ function launchLiveMeetingRoom(meeting, stream) {
       isHost: isHost
     };
 
-    // Unlock Speaker Sound
-    unlockDeviceSpeakerSound();
+    // Pre-authorize system microphone & camera permissions on domain
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+        video: true
+      }).then(s => {
+        console.log("Hardware Microphone & Speaker Authorized!");
+        activeMeetingSession.localStream = s;
+      }).catch(e => console.warn("Mic pre-auth notice:", e));
+    }
 
-    // Load Live Video Conference Room with Full Sound Allow Policy
+    // Unlock Speaker Sound Output for Windows Pastor Account & Mobile Phone
+    if (typeof unlockDeviceSpeakerSound === 'function') {
+      unlockDeviceSpeakerSound();
+    }
+
+    // Synchronize Room Slug so Windows Pastor Account and Mobile Phone join the EXACT same room
     const jitsiCont = document.getElementById("meeting-jitsi-container");
     if (jitsiCont) {
       jitsiCont.style.display = "block";
-      const roomSlug = meeting ? `RiverOfLife_Sanctuary_${meeting.id}` : "RiverOfLife_Sanctuary_LiveRoom";
-      const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=1&video=1&muted=0&sound=1&name=${encodeURIComponent(loggedIn)}`;
+      
+      // Ensure identical room name for Pastor and Mobile Members
+      const meetingIdSlug = (meeting && meeting.id) ? meeting.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
+      const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
+      
+      // Pass audio=1, video=1, muted=0, sound=1, autoplay=1 to force unmuted incoming phone audio on Windows
+      const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=1&video=1&muted=0&sound=1&autoplay=1&name=${encodeURIComponent(loggedIn)}`;
       
       jitsiCont.innerHTML = `
         <iframe 
@@ -6584,7 +6602,7 @@ function launchLiveMeetingRoom(meeting, stream) {
       `;
     }
 
-    showToast("Joined Online Video Fellowship Room 🙏");
+    showToast("Joined Online Video Fellowship Room • Tap screen once to unmute sound 🔊");
   } catch (err) {
     console.warn("launchLiveMeetingRoom notice:", err);
   }
