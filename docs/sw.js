@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v23-UNMUTED-MIC-PROD';
+const CACHE_NAME = 'river-of-life-cache-v20260817-NATIVE-WEBRTC-HARDWARE';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
