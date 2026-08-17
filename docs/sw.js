@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v20260817-UPPER-TOOLBAR-ONLY-FINAL';
+const CACHE_NAME = 'river-of-life-cache-v20260817-MOBILE-MIC-WORKING-PROD';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

@@ -6495,7 +6495,8 @@ function triggerJoinMeetingFlow(meetingId) {
 // Fullscreen Live Meeting Room Entry
 function launchLiveMeetingRoom(meeting, stream) {
   try {
-    console.log("Launching Live Fellowship Room (Upper Toolbar Only):", meeting);
+    console.log("Launching Mobile & Desktop Live Fellowship Room:", meeting);
+    
     // Lock screen view overlay
     const roomModal = document.getElementById("modal-live-meeting");
     if (roomModal) {
@@ -6545,16 +6546,29 @@ function launchLiveMeetingRoom(meeting, stream) {
         audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
         video: true
       }).then(s => {
-        console.log("System microphone & camera authorized!");
-      }).catch(e => console.warn("Mic authorization notice:", e));
+        console.log("Mobile system microphone & speaker authorized!");
+        activeMeetingSession.localStream = s;
+      }).catch(e => console.warn("Mobile mic authorization notice:", e));
     }
 
-    // Load Live Video Conference Room with Upper Working Toolbar Only
+    // Touch listener to resume mobile hardware speaker audio context
+    const unlockSpeakerAudio = () => {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+      } catch(e) {}
+    };
+    document.addEventListener("touchstart", unlockSpeakerAudio, { once: true });
+    document.addEventListener("click", unlockSpeakerAudio, { once: true });
+
+    // Load Live Video Conference Room with Working Upper Toolbar & Full Mic Allow Policy
     const jitsiCont = document.getElementById("meeting-jitsi-container");
     if (jitsiCont) {
       jitsiCont.style.display = "block";
       const roomSlug = meeting ? `RiverOfLife_Sanctuary_${meeting.id}` : "RiverOfLife_Sanctuary_LiveRoom";
-      const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=1&video=1&name=${encodeURIComponent(loggedIn)}`;
+      const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=1&video=1&muted=0&name=${encodeURIComponent(loggedIn)}`;
       
       jitsiCont.innerHTML = `
         <iframe 
