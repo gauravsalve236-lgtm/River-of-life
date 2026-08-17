@@ -5521,24 +5521,3 @@ input, textarea, select, [contenteditable="true"] {
     min-width: 54px !important;
   }
 }
-
-
-/* Gallery / Grid View Layout for Meeting Video Calls */
-#meeting-jitsi-container {
-  width: 100% !important;
-  height: 100% !important;
-  border-radius: 18px !important;
-  overflow: hidden !important;
-  background: #090d16 !important;
-  position: absolute !important;
-  inset: 0 !important;
-  z-index: 10 !important;
-}
-
-#meeting-jitsi-container iframe {
-  width: 100% !important;
-  height: 100% !important;
-  border: none !important;
-  border-radius: 18px !important;
-  background: #090d16 !important;
-}
