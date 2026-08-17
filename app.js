@@ -6480,7 +6480,7 @@ function triggerJoinMeetingFlow(meetingId) {
 // Fullscreen Live Meeting Room Entry
 function launchLiveMeetingRoom(meeting, stream) {
   try {
-    console.log("Launching Live Online Video Fellowship:", meeting);
+    console.log("Launching Original Online Video Conference Room:", meeting);
     // Lock screen view overlay
     const roomModal = document.getElementById("modal-live-meeting");
     if (roomModal) {
@@ -6524,7 +6524,7 @@ function launchLiveMeetingRoom(meeting, stream) {
       isHost: isHost
     };
 
-    // Load Live Video Conference Room with Auto-Microphone & Auto-Video Enabled
+    // Load Original Live Online Video Conference Room with Built-in Working Controls
     const jitsiCont = document.getElementById("meeting-jitsi-container");
     if (jitsiCont) {
       jitsiCont.style.display = "block";

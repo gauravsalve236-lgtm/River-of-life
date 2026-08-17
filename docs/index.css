@@ -5255,28 +5255,7 @@ input, textarea, select, [contenteditable="true"] {
 
 
 
-/* Official Google Meet Floating Pill Toolbar (Fully Mobile Responsive) */
-.google-meet-official-bar {
-  position: fixed !important;
-  bottom: calc(16px + env(safe-area-inset-bottom, 12px)) !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 8px !important;
-  background: rgba(32, 33, 36, 0.95) !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
-  padding: 8px 14px !important;
-  border-radius: 9999px !important;
-  border: 1px solid rgba(255, 255, 255, 0.15) !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9), 0 0 15px rgba(212, 175, 55, 0.2) !important;
-  z-index: 9999 !important;
-  max-width: 96vw !important;
-  overflow-x: auto !important;
-  -webkit-overflow-scrolling: touch !important;
-  scrollbar-width: none !important;
-}
+
 
 .google-meet-official-bar::-webkit-scrollbar {
   display: none !important;
@@ -5417,28 +5396,7 @@ input, textarea, select, [contenteditable="true"] {
 }
 
 
-/* iPhone 12 Safe Area & Flex Fit Toolbar (No Overlap, No Overflow) */
-.google-meet-official-bar {
-  position: relative !important;
-  margin: 4px auto 0 auto !important;
-  margin-bottom: calc(4px + env(safe-area-inset-bottom, 12px)) !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  gap: 2px !important;
-  width: calc(100% - 16px) !important;
-  max-width: 420px !important;
-  background: rgba(32, 33, 36, 0.96) !important;
-  backdrop-filter: blur(25px) !important;
-  -webkit-backdrop-filter: blur(25px) !important;
-  padding: 6px 8px !important;
-  border-radius: 28px !important;
-  border: 1px solid rgba(255, 255, 255, 0.15) !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9) !important;
-  z-index: 1000 !important;
-  box-sizing: border-box !important;
-  flex-shrink: 0 !important;
-}
+
 
 .gmeet-btn {
   width: 38px !important;
@@ -5567,28 +5525,7 @@ input, textarea, select, [contenteditable="true"] {
 }
 
 
-/* HUGE Accessible Google Meet Control Bar (50px Touch Buttons) */
-.google-meet-official-bar {
-  position: relative !important;
-  margin: 6px auto 0 auto !important;
-  margin-bottom: calc(4px + env(safe-area-inset-bottom, 12px)) !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  gap: 6px !important;
-  width: calc(100% - 16px) !important;
-  max-width: 440px !important;
-  background: rgba(32, 33, 36, 0.98) !important;
-  backdrop-filter: blur(25px) !important;
-  -webkit-backdrop-filter: blur(25px) !important;
-  padding: 10px 14px !important;
-  border-radius: 36px !important;
-  border: 1px solid rgba(255, 255, 255, 0.18) !important;
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.95) !important;
-  z-index: 1000 !important;
-  box-sizing: border-box !important;
-  flex-shrink: 0 !important;
-}
+
 
 .gmeet-btn {
   width: 48px !important;

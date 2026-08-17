@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v20260817-SINGLE-TOOLBAR-MIC-FIX';
+const CACHE_NAME = 'river-of-life-cache-v20260817-REMOVED-PILL-BAR-FINAL';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
