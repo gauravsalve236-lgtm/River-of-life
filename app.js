@@ -6464,7 +6464,7 @@ function triggerJoinMeetingFlow(meetingId) {
 
   // Real or simulated meeting, we request permissions and launch it inside the app modal!
   showToast("Requesting camera and microphone permissions...");
-  navigator.mediaDevices.getUserMedia({ video: true, audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } })
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } }, audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } })
     .then(stream => {
       // Permission granted, launch meeting inside app modal
       launchLiveMeetingRoom(m, stream);
