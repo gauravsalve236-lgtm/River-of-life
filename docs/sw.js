@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v20260817-GOOGLE-MEET-MOBILE-MIC-FIX';
+const CACHE_NAME = 'river-of-life-cache-v23-REVERTED-EXACT';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

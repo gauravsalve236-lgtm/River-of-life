@@ -6495,7 +6495,7 @@ function triggerJoinMeetingFlow(meetingId) {
 // Fullscreen Live Meeting Room Entry
 function launchLiveMeetingRoom(meeting, stream) {
   try {
-    console.log("Launching Google Meet Style Fellowship Room:", meeting);
+    console.log("Launching v23 Online Video Fellowship Room:", meeting);
     // Lock screen view overlay
     const roomModal = document.getElementById("modal-live-meeting");
     if (roomModal) {
@@ -6539,18 +6539,17 @@ function launchLiveMeetingRoom(meeting, stream) {
       isHost: isHost
     };
 
-    // Pre-authorize system microphone & camera permissions on Mobile Safari / Chrome
+    // Pre-authorize system microphone & camera permissions on Mobile Safari / Chrome before embedding iframe
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       navigator.mediaDevices.getUserMedia({
         audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
         video: true
       }).then(s => {
-        console.log("Mobile system microphone & speaker authorized!");
-        activeMeetingSession.localStream = s;
+        console.log("Mobile system microphone & speaker authorized for domain!");
       }).catch(e => console.warn("Mobile mic authorization notice:", e));
     }
 
-    // Attach tap-to-unlock audio context for mobile hardware speakers
+    // Unlock mobile hardware speaker audio playback on screen touch
     const unlockSpeakerAudio = () => {
       try {
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -6562,12 +6561,12 @@ function launchLiveMeetingRoom(meeting, stream) {
     document.addEventListener("touchstart", unlockSpeakerAudio, { once: true });
     document.addEventListener("click", unlockSpeakerAudio, { once: true });
 
-    // Load Live Video Conference Room
+    // Load Live v23 Online Video Conference Room with Full Mic & Speaker Allow Attributes
     const jitsiCont = document.getElementById("meeting-jitsi-container");
     if (jitsiCont) {
       jitsiCont.style.display = "block";
       const roomSlug = meeting ? `RiverOfLife_Sanctuary_${meeting.id}` : "RiverOfLife_Sanctuary_LiveRoom";
-      const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&muted=false&video=true&name=${encodeURIComponent(loggedIn)}`;
+      const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=1&video=1&name=${encodeURIComponent(loggedIn)}`;
       
       jitsiCont.innerHTML = `
         <iframe 
