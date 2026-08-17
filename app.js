@@ -1,3 +1,18 @@
+
+// Force unregister obsolete Service Workers and clear caches on startup for Mobile
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(registrations => {
+    for (let registration of registrations) {
+      registration.unregister().then(() => console.log('Stale SW unregistered'));
+    }
+  });
+}
+if ('caches' in window) {
+  caches.keys().then(names => {
+    for (let name of names) { caches.delete(name); }
+  });
+}
+
 // River of Life Bible - Core Application Logic
 
 // Force Unregister PWA Service Worker and Clear Caches to prevent browser caching bugs
@@ -6480,7 +6495,7 @@ function triggerJoinMeetingFlow(meetingId) {
 // Fullscreen Live Meeting Room Entry
 function launchLiveMeetingRoom(meeting, stream) {
   try {
-    console.log("Launching Original Online Video Conference Room:", meeting);
+    console.log("Launching Exact Windows Working Video Conference Room:", meeting);
     // Lock screen view overlay
     const roomModal = document.getElementById("modal-live-meeting");
     if (roomModal) {
@@ -6524,7 +6539,14 @@ function launchLiveMeetingRoom(meeting, stream) {
       isHost: isHost
     };
 
-    // Load Original Live Online Video Conference Room with Built-in Working Controls
+    // Pre-request system microphone permission on Mobile Safari / Chrome before embedding iframe
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ audio: true, video: true }).then(s => {
+        console.log("Mobile system mic & camera authorized!");
+      }).catch(e => console.warn("Mobile system mic notice:", e));
+    }
+
+    // Load Exact Working Video Conference Room (Same as Windows)
     const jitsiCont = document.getElementById("meeting-jitsi-container");
     if (jitsiCont) {
       jitsiCont.style.display = "block";
@@ -6536,7 +6558,7 @@ function launchLiveMeetingRoom(meeting, stream) {
           src="${roomUrl}" 
           width="100%" 
           height="100%" 
-          allow="camera; microphone; speaker-selection; display-capture; fullscreen; autoplay *; picture-in-picture; accelerometer; gyroscope;" 
+          allow="camera *; microphone *; speaker-selection *; display-capture *; fullscreen *; autoplay *; picture-in-picture *; accelerometer; gyroscope;" 
           style="border: none; width: 100%; height: 100%; background: #17181b;">
         </iframe>
       `;
