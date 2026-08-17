@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v20260817-MOBILE-MIC-WORKING-PROD';
+const CACHE_NAME = 'river-of-life-cache-v20260817-GALLERY-GRID-SOUND-FIX';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

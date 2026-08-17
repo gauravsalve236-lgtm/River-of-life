@@ -6495,7 +6495,7 @@ function triggerJoinMeetingFlow(meetingId) {
 // Fullscreen Live Meeting Room Entry
 function launchLiveMeetingRoom(meeting, stream) {
   try {
-    console.log("Launching Mobile & Desktop Live Fellowship Room:", meeting);
+    console.log("Launching Gallery Grid Live Fellowship Room for All Devices:", meeting);
     
     // Lock screen view overlay
     const roomModal = document.getElementById("modal-live-meeting");
@@ -6540,35 +6540,45 @@ function launchLiveMeetingRoom(meeting, stream) {
       isHost: isHost
     };
 
-    // Pre-authorize system microphone & camera permissions on Mobile Safari / Chrome / Android
+    // Pre-authorize system microphone & camera permissions for Windows, iOS, and Android
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       navigator.mediaDevices.getUserMedia({
         audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-        video: true
+        video: { width: { ideal: 1280 }, height: { ideal: 720 } }
       }).then(s => {
-        console.log("Mobile system microphone & speaker authorized!");
+        console.log("Hardware Microphone & Speaker Authorized for All Devices!");
         activeMeetingSession.localStream = s;
-      }).catch(e => console.warn("Mobile mic authorization notice:", e));
+      }).catch(e => console.warn("Mic hardware authorization notice:", e));
     }
 
-    // Touch listener to resume mobile hardware speaker audio context
-    const unlockSpeakerAudio = () => {
+    // Global User-Gesture Sound Unlock for Windows, iPhone, and Android Speakers
+    const unlockAllAudio = () => {
       try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') {
-          audioCtx.resume();
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtx) {
+          const ctx = new AudioCtx();
+          if (ctx.state === 'suspended') ctx.resume();
         }
+        document.querySelectorAll("audio, video").forEach(el => {
+          if (el.id !== "meeting-local-video") {
+            el.muted = false;
+          }
+          const p = el.play();
+          if (p !== undefined) p.catch(() => {});
+        });
       } catch(e) {}
     };
-    document.addEventListener("touchstart", unlockSpeakerAudio, { once: true });
-    document.addEventListener("click", unlockSpeakerAudio, { once: true });
+    document.addEventListener("click", unlockAllAudio, { once: false });
+    document.addEventListener("touchstart", unlockAllAudio, { once: false });
 
-    // Load Live Video Conference Room with Working Upper Toolbar & Full Mic Allow Policy
+    // Load Live Video Conference Room in Gallery / Grid View Mode
     const jitsiCont = document.getElementById("meeting-jitsi-container");
     if (jitsiCont) {
       jitsiCont.style.display = "block";
       const roomSlug = meeting ? `RiverOfLife_Sanctuary_${meeting.id}` : "RiverOfLife_Sanctuary_LiveRoom";
-      const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=1&video=1&muted=0&name=${encodeURIComponent(loggedIn)}`;
+      
+      // Force Gallery Grid Layout & Default Active Audio/Video Stream
+      const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=1&video=1&muted=0&layout=grid&grid=1&name=${encodeURIComponent(loggedIn)}`;
       
       jitsiCont.innerHTML = `
         <iframe 
@@ -6576,12 +6586,12 @@ function launchLiveMeetingRoom(meeting, stream) {
           width="100%" 
           height="100%" 
           allow="camera *; microphone *; speaker-selection *; display-capture *; fullscreen *; autoplay *; picture-in-picture *; accelerometer; gyroscope;" 
-          style="border: none; width: 100%; height: 100%; background: #17181b;">
+          style="border: none; width: 100%; height: 100%; border-radius: 18px; background: #090d16;">
         </iframe>
       `;
     }
 
-    showToast("Joined Online Video Fellowship Room 🙏");
+    showToast("Joined Online Video Fellowship Room • Gallery View Active 🙏");
   } catch (err) {
     console.warn("launchLiveMeetingRoom notice:", err);
   }
