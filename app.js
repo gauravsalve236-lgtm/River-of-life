@@ -6480,7 +6480,7 @@ function triggerJoinMeetingFlow(meetingId) {
 // Fullscreen Live Meeting Room Entry
 function launchLiveMeetingRoom(meeting, stream) {
   try {
-    console.log("Launching Online Video Conference Room:", meeting);
+    console.log("Launching Live Online Video Fellowship:", meeting);
     // Lock screen view overlay
     const roomModal = document.getElementById("modal-live-meeting");
     if (roomModal) {
@@ -6509,7 +6509,7 @@ function launchLiveMeetingRoom(meeting, stream) {
     if (sidebar) sidebar.style.display = "none";
 
     // Setup active session state
-    const loggedIn = (state && state.currentUser) ? state.currentUser.username : "Guest User";
+    const loggedIn = (state && state.currentUser) ? state.currentUser.username : "Member";
     const isHost = meeting ? (meeting.host === loggedIn) : false;
     
     if (meeting && meeting.id) {
@@ -6524,25 +6524,25 @@ function launchLiveMeetingRoom(meeting, stream) {
       isHost: isHost
     };
 
-    // Load Live Online Video Conference Room inside meeting-jitsi-container
+    // Load Live Video Conference Room with Auto-Microphone & Auto-Video Enabled
     const jitsiCont = document.getElementById("meeting-jitsi-container");
     if (jitsiCont) {
       jitsiCont.style.display = "block";
       const roomSlug = meeting ? `RiverOfLife_Sanctuary_${meeting.id}` : "RiverOfLife_Sanctuary_LiveRoom";
-      const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?name=${encodeURIComponent(loggedIn)}`;
+      const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=1&video=1&name=${encodeURIComponent(loggedIn)}`;
       
       jitsiCont.innerHTML = `
         <iframe 
           src="${roomUrl}" 
           width="100%" 
           height="100%" 
-          allow="camera; microphone; speaker-selection; display-capture; fullscreen; autoplay; picture-in-picture;" 
-          style="border: none; width: 100%; height: 100%; border-radius: 18px; background: #000;">
+          allow="camera; microphone; speaker-selection; display-capture; fullscreen; autoplay *; picture-in-picture; accelerometer; gyroscope;" 
+          style="border: none; width: 100%; height: 100%; background: #17181b;">
         </iframe>
       `;
     }
 
-    showToast("Joined Online Video Conference Room 🙏");
+    showToast("Joined Online Video Fellowship Room 🙏");
   } catch (err) {
     console.warn("launchLiveMeetingRoom notice:", err);
   }
