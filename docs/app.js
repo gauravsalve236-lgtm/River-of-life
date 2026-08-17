@@ -6514,7 +6514,7 @@ function launchLiveMeetingRoom(meeting, stream) {
   };
 
   // Sync profile display initials
-  document.getElementById("meeting-local-name").textContent = `${loggedIn} ${isHost ? "(Host)" : ""}`;
+  const nameEl = document.getElementById("meeting-local-name"); if (nameEl) nameEl.textContent = `${loggedIn} ${isHost ? "(Host)" : ""}`;
   
   // Sync host moderator controls drawer button
   const modBtn = document.getElementById("btn-meet-moderator");

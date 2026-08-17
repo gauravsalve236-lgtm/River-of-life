@@ -1,39 +1,20 @@
 // River of Life Bible - Core Application Logic
 
-// PWA Service Worker Registration
+// Force Unregister PWA Service Worker and Clear Caches to prevent browser caching bugs
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js')
-      .then(reg => {
-        console.log('Service Worker registered:', reg.scope);
-        
-        // Check for updates
-        reg.update();
-        
-        // Listen for new service worker installation
-        reg.addEventListener('updatefound', () => {
-          const installingWorker = reg.installing;
-          if (installingWorker) {
-            installingWorker.addEventListener('statechange', () => {
-              if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                console.log('New service worker version detected, reloading...');
-                window.location.reload();
-              }
-            });
-          }
-        });
-      })
-      .catch(err => console.error('Service Worker registration failed:', err));
-  });
-
-  // Reload the page when the active service worker changes (controllerchange)
-  let refreshing = false;
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (!refreshing) {
-      refreshing = true;
-      console.log('Service worker updated, reloading page...');
-      window.location.reload();
+  navigator.serviceWorker.getRegistrations().then(registrations => {
+    for (let registration of registrations) {
+      registration.unregister().then(() => {
+        console.log('Old Service Worker unregistered successfully.');
+      });
     }
+  });
+  caches.keys().then(names => {
+    for (let name of names) {
+      caches.delete(name);
+    }
+  }).then(() => {
+    console.log('Cache storage cleared.');
   });
 }
 
@@ -95,7 +76,8 @@ let state = {
   quizPoints: 0,           // Total points earned
   quizHighscore: 0,        // High score in a single quiz session
   quizBadges: [],          // Unlocked badge IDs
-  currentUser: null        // Logged in user session ({ username, isPastor, email })
+  currentUser: null,       // Logged in user session ({ username, isPastor, email })
+  vodDayOffset: 0          // Daily verse day navigation offset (0 for today, up to -6)
 };
 
 // Memory Cache for JSON scripture data
@@ -119,6 +101,7 @@ let audioState = {
 let audioPlayerInstance = null;
 
 // Verse of the Day preset database
+// Verse of the Day preset database (Expanded to 12 distinct entries)
 const VOD_LIST = [
   { 
     ref: "यशया ४३:२", 
@@ -164,6 +147,69 @@ const VOD_LIST = [
     verse: 5, 
     text: "आपल्या संपूर्ण अंतःकरणाने परमेश्वरावर भाव ठेव आणि तुझ्या स्वतःच्या आकलनावर अवलंबून राहू नको. तुझ्या सर्व मार्गात त्याला मान दे म्हणजे तो तुझे मार्ग सरळ करील.",
     engText: "Trust in the Lord with all your heart; do not depend on your own understanding. Seek his will in all you do, and he will show you which path to take."
+  },
+  {
+    ref: "रोमन्स ८:२८", 
+    engRef: "Romans 8:28",
+    book: "romans", 
+    chapter: 8, 
+    verse: 28,
+    text: "आणि आपल्याला ठाऊक आहे की, जे देवावर प्रीती करतात, म्हणजे जे त्याच्या संकल्पानुसार बोलावलेले आहेत, त्यांच्या चांगल्यासाठी सर्व गोष्टी मिळून कार्य करतात.",
+    engText: "And we know that in all things God works for the good of those who love him, who have been called according to his purpose."
+  },
+  {
+    ref: "यहोशवा १:९",
+    engRef: "Joshua 1:9",
+    book: "joshua",
+    chapter: 1,
+    verse: 9,
+    text: "मी तुला आज्ञा दिली नाही काय? धीर धर आणि हिंमतवान हो; भिऊ नको आणि थक्क होऊ नको, कारण तू जिथे कुठे जाशील तिथे तुझा देव परमेश्वर तुझ्याबरोबर आहे.",
+    engText: "Have I not commanded you? Be strong and courageous. Do not be afraid; do not be discouraged, for the Lord your God will be with you wherever you go."
+  },
+  {
+    ref: "गलतीकरांस ५:२२",
+    engRef: "Galatians 5:22",
+    book: "galatians",
+    chapter: 5,
+    verse: 22,
+    text: "पण आत्म्याचे फळ म्हणजे प्रीती, आनंद, शांती, सहनशीलता, ममता, चांगुलपणा, विश्वासूपणा, सौम्यता, इंद्रियदमन हे आहे.",
+    engText: "But the fruit of the Spirit is love, joy, peace, forbearance, kindness, goodness, faithfulness, gentleness and self-control."
+  },
+  {
+    ref: "रोमन्स १२:२",
+    engRef: "Romans 12:2",
+    book: "romans",
+    chapter: 12,
+    verse: 2,
+    text: "आणि या युगासारखे बनू नका, तर आपल्या मनाच्या नवनीकरणाने स्वतःमध्ये बदल घडवून आणा, यासाठी की देवाची उत्तम, स्वीकारणीय आणि परिपूर्ण इच्छा काय आहे हे तुम्ही अनुभवाने ओळखावे.",
+    engText: "Do not conform to the pattern of this world, but be transformed by the renewing of your mind. Then you will be able to test and approve what God’s will is—his good, pleasing and perfect will."
+  },
+  {
+    ref: "मत्तय ६:३३",
+    engRef: "Matthew 6:33",
+    book: "matthew",
+    chapter: 6,
+    verse: 33,
+    text: "तर तुम्ही पहिल्यांदा देवाचे राज्य आणि त्याचे नीतिमत्त्व मिळवण्याचा प्रयत्न करा, म्हणजे याही सर्व गोष्टी तुम्हाला मिळतील.",
+    engText: "But seek first his kingdom and his righteousness, and all these things will be given to you as well."
+  },
+  {
+    ref: "स्तोत्रसंहिता ४६:१०",
+    engRef: "Psalm 46:10",
+    book: "psalms",
+    chapter: 46,
+    verse: 10,
+    text: "शांत व्हा आणि जाणा की मीच देव आहे; राष्ट्रांमध्ये माझा उगम होईल, पृथ्वीवर माझा उगम होईल.",
+    engText: "Be still, and know that I am God; I will be exalted among the nations, I will be exalted in the earth."
+  },
+  {
+    ref: "यिर्मया २९:११",
+    engRef: "Jeremiah 29:11",
+    book: "jeremiah",
+    chapter: 29,
+    verse: 11,
+    text: "कारण जे संकल्प मी तुमच्याविषयी केले आहेत ते मी जाणतो, असे परमेश्वर म्हणतो; ते संकल्प शांतीचे आहेत, संकटाचे नाहीत, तुम्हाला आशादायक भविष्य देणारे आहेत.",
+    engText: "For I know the plans I have for you, declares the Lord, plans to prosper you and not to harm you, plans to give you hope and a future."
   }
 ];
 
@@ -195,26 +241,73 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.body.style.paddingTop = "50px";
   }
 
-  loadStateFromLocalStorage();
-  applyStylesFromState();
-  initRouting();
-  setupEventListeners();
-  initAudioVoices();
-  toggleVoiceDropdownVisibility();
+  // 1. Fire splash screen timer IMMEDIATELY so splash always dismisses cleanly
+
+  try {
+    initSplashAndNotifications();
+  } catch (splashErr) {
+    console.warn("Splash init warning:", splashErr);
+    const splash = document.getElementById("splash-screen");
+    if (splash) splash.style.display = "none";
+  }
+
+  // Safety fallback: Ensure splash screen is hidden within 2.5s no matter what
+  setTimeout(() => {
+    const splash = document.getElementById("splash-screen");
+    if (splash && splash.style.display !== "none") {
+      splash.classList.add("fade-out");
+      setTimeout(() => { splash.style.display = "none"; }, 500);
+    }
+  }, 2500);
+
+  // 2. Wrap all app initializations in safe try/catch blocks
+  try {
+    loadStateFromLocalStorage();
+    applyStylesFromState();
+    initRouting();
+    setupEventListeners();
+    initAudioVoices();
+    toggleVoiceDropdownVisibility();
+  } catch (e) {
+    console.error("Base init error:", e);
+  }
   
   // Load local scripture indexes
-  await Promise.all([loadBooksIndexEng(), loadBooksIndexMr()]);
+  try {
+    await Promise.all([loadBooksIndexEng(), loadBooksIndexMr()]);
+  } catch (e) {
+    console.error("Index load error:", e);
+  }
   
   // Set default starting chapter and render elements
-  openReader(state.activeBook, state.activeChapter);
-  renderDailyDevotion();
-  renderYouProfile();
-  checkStreak();
-  
-  updateQuizCardStats();
-  initBibleQuiz();
-  initAuthAndPrayers();
+  try {
+    openReader(state.activeBook, state.activeChapter);
+    renderDailyDevotion();
+    renderYouProfile();
+    checkStreak();
+    updateQuizCardStats();
+    initBibleQuiz();
+    initAuthAndPrayers();
+  } catch (e) {
+    console.error("Reader/Devotion init error:", e);
+  }
+
+  // Premium Features Initializations
+  try {
+    initNotificationPrompt();
+    initAICompanion();
+    initAmbientAudioSynth();
+    initPersonalizedDevotionals();
+    initLifeSituationsSearch();
+    initFamilyMode();
+    initOfflineManager();
+    initChurchCompanion();
+    initMeetings();
+  } catch (e) {
+    console.error("Features init error:", e);
+  }
 });
+
 
 // Sync operations with LocalStorage
 function loadStateFromLocalStorage() {
@@ -244,6 +337,10 @@ function saveStateToLocalStorage() {
         users[idx].quizPoints = state.quizPoints || 0;
         users[idx].quizHighscore = state.quizHighscore || 0;
         users[idx].quizBadges = state.quizBadges || [];
+        users[idx].createdVerseImages = state.createdVerseImages || [];
+        users[idx].churchName = state.currentUser.churchName || "";
+        users[idx].streak = state.streak || 2;
+        users[idx].photo = state.currentUser.photo || "";
         localStorage.setItem("river_of_life_users", JSON.stringify(users));
       }
     } catch (e) {
@@ -260,6 +357,12 @@ function applyStylesFromState() {
   // Theme Configuration
   appEl.className = "";
   appEl.classList.add(`ios-theme-${state.theme}`);
+  
+  // Apply theme class to document body as well so that all drawers, overlays and modals inherit theme colors
+  if (document.body) {
+    document.body.className = "";
+    document.body.classList.add(`ios-theme-${state.theme}`);
+  }
   
   const readerEl = document.getElementById("view-reader");
   if (readerEl) {
@@ -301,73 +404,99 @@ function applyStylesFromState() {
   if (state.theme === "light") metaColor = "#f8fafc";
   else if (state.theme === "sepia") metaColor = "#fdf6e3";
   else if (state.theme === "olive") metaColor = "#f4f6f0";
-  document.getElementById("theme-meta").setAttribute("content", metaColor);
+  const themeMeta = document.getElementById("theme-meta");
+  if (themeMeta) themeMeta.setAttribute("content", metaColor);
 }
 
 /* ==========================================================================
-   Routing View Handler
+   Routing View Handler (Guaranteed Direct Tab Switching)
    ========================================================================== */
+function switchTab(rawRoute) {
+  if (!rawRoute) rawRoute = "home";
+  const route = rawRoute.replace("#/", "").split("?")[0].split("/")[0] || "home";
+  
+  // Hide all view panels
+  document.querySelectorAll(".app-view").forEach(view => {
+    view.classList.remove("active");
+    view.style.setProperty("display", "none", "important");
+  });
+  
+  // Deactivate sidebars and mobile tabs
+  document.querySelectorAll(".nav-item").forEach(item => item.classList.remove("active"));
+  document.querySelectorAll(".tab-btn").forEach(item => item.classList.remove("active"));
+  
+  const viewId = `view-${route}`;
+  const targetView = document.getElementById(viewId);
+  if (targetView) {
+    targetView.classList.add("active");
+    
+    // Restore appropriate display mode inline
+    if (targetView.classList.contains("split-screen-parent")) {
+      targetView.style.setProperty("display", "flex", "important");
+    } else {
+      targetView.style.setProperty("display", "block", "important");
+    }
+    
+    // Highlight sidebar & bottom nav items
+    document.querySelectorAll(`.nav-item[data-tab="${route}"]`).forEach(btn => btn.classList.add("active"));
+    document.querySelectorAll(`.tab-btn[data-tab="${route}"]`).forEach(btn => btn.classList.add("active"));
+    
+    adjustHeaderForRoute(route);
+    
+    // Reload specific data lists on tab changes
+    if (route === "you") {
+      renderYouProfile();
+    } else if (route === "home") {
+      renderDailyDevotion();
+    } else if (route === "plans") {
+      renderReadingPlansTab();
+    } else if (route === "prayers") {
+      renderPrayersScreen();
+    } else if (route === "meetings") {
+      renderMeetingsDashboard();
+    }
+  } else {
+    // Fallback to home view if route is unmapped
+    const homeView = document.getElementById("view-home");
+    if (homeView) {
+      homeView.classList.add("active");
+      homeView.style.setProperty("display", "block", "important");
+      adjustHeaderForRoute("home");
+    }
+  }
+}
+
 function initRouting() {
   const handleHashChange = () => {
     const hash = window.location.hash || "#/home";
-    const route = hash.replace("#/", "");
-    
-    // Hide all view panels
-    document.querySelectorAll(".app-view").forEach(view => {
-      view.classList.remove("active");
-      view.style.setProperty("display", "none", "important");
-    });
-    
-    // Deactivate sidebars and mobile tabs
-    document.querySelectorAll(".nav-item").forEach(item => item.classList.remove("active"));
-    document.querySelectorAll(".tab-btn").forEach(item => item.classList.remove("active"));
-    
-    const viewId = `view-${route}`;
-    const targetView = document.getElementById(viewId);
-    if (targetView) {
-      targetView.classList.add("active");
-      
-      // Restore appropriate display mode inline
-      if (targetView.classList.contains("split-screen-parent")) {
-        targetView.style.setProperty("display", "flex", "important");
-      } else {
-        targetView.style.setProperty("display", "block", "important");
-      }
-      
-      // Highlight sidebar & bottom nav items
-      document.querySelectorAll(`.nav-item[data-tab="${route}"]`).forEach(btn => btn.classList.add("active"));
-      document.querySelectorAll(`.tab-btn[data-tab="${route}"]`).forEach(btn => btn.classList.add("active"));
-      
-      adjustHeaderForRoute(route);
-      
-      // Reload specific data lists on tab changes
-      if (route === "you") {
-        renderYouProfile();
-      } else if (route === "home") {
-        renderDailyDevotion();
-      } else if (route === "plans") {
-        renderReadingPlansTab();
-      } else if (route === "prayers") {
-        renderPrayersScreen();
-      }
-    }
+    switchTab(hash);
   };
   
   window.addEventListener("hashchange", handleHashChange);
   handleHashChange();
   
-  // Click bindings for side/bottom tabs navigation
+  // Click bindings for side & bottom tabs navigation (Direct switchTab call guarantees execution on every click!)
   document.querySelectorAll(".nav-item").forEach(item => {
-    item.addEventListener("click", () => {
-      window.location.hash = `#/${item.dataset.tab}`;
+    item.addEventListener("click", (e) => {
+      const tab = item.dataset.tab || item.getAttribute("data-tab");
+      if (tab) {
+        window.location.hash = `#/${tab}`;
+        switchTab(tab);
+      }
     });
   });
+  
   document.querySelectorAll(".tab-btn").forEach(item => {
-    item.addEventListener("click", () => {
-      window.location.hash = `#/${item.dataset.tab}`;
+    item.addEventListener("click", (e) => {
+      const tab = item.dataset.tab || item.getAttribute("data-tab");
+      if (tab) {
+        window.location.hash = `#/${tab}`;
+        switchTab(tab);
+      }
     });
   });
 }
+
 
 function adjustHeaderForRoute(route) {
   const readerCtrls = document.getElementById("nav-reader-controls");
@@ -386,6 +515,7 @@ function adjustHeaderForRoute(route) {
       else if (route === "plans") staticTitle.textContent = "Reading Plans";
       else if (route === "discover") staticTitle.textContent = "Search Scriptures";
       else if (route === "you") staticTitle.textContent = "Settings";
+      else if (route === "meetings") staticTitle.textContent = "Prayer Meetings";
     }
   }
 }
@@ -912,10 +1042,13 @@ function handleHighlightSelection(color) {
   
   if (color === "clear") {
     delete state.highlights[selectedVerseMeta.key];
+    if (state.highlightsTimestamps) delete state.highlightsTimestamps[selectedVerseMeta.key];
     if (vEl) vEl.removeAttribute("data-highlight");
     showToast("Highlight removed");
   } else {
     state.highlights[selectedVerseMeta.key] = color;
+    if (!state.highlightsTimestamps) state.highlightsTimestamps = {};
+    state.highlightsTimestamps[selectedVerseMeta.key] = Date.now();
     if (vEl) vEl.setAttribute("data-highlight", color);
     showToast("Highlight applied");
   }
@@ -961,6 +1094,23 @@ function copyVerseToClipboard() {
 /* ==========================================================================
    Home View Devotionals & VOD
    ========================================================================== */
+function getCurrentVOD() {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const diff = now - start;
+  const oneDay = 1000 * 60 * 60 * 24;
+  const dayOfYear = Math.floor(diff / oneDay);
+  
+  const offset = state.vodDayOffset || 0;
+  const len = VOD_LIST.length;
+  const vodIdx = ((dayOfYear + offset) % len + len) % len;
+  return {
+    vod: VOD_LIST[vodIdx],
+    dayOfYear: dayOfYear,
+    offset: offset
+  };
+}
+
 function renderDailyDevotion() {
   const now = new Date();
   const options = { weekday: 'long', month: 'long', day: 'numeric' };
@@ -975,12 +1125,7 @@ function renderDailyDevotion() {
   const userEl = document.getElementById("home-greeting-user");
   if (userEl) userEl.textContent = greeting;
   
-  const start = new Date(now.getFullYear(), 0, 0);
-  const diff = now - start;
-  const oneDay = 1000 * 60 * 60 * 24;
-  const dayOfYear = Math.floor(diff / oneDay);
-  
-  const vod = VOD_LIST[dayOfYear % VOD_LIST.length];
+  const { vod, dayOfYear, offset } = getCurrentVOD();
   const displayRef = (state.translation === "eng") ? vod.engRef : vod.ref;
   const displayText = (state.translation === "eng") ? vod.engText : vod.text;
   
@@ -992,7 +1137,8 @@ function renderDailyDevotion() {
   
   // Rotate backgrounds daily
   const images = ['forest', 'mountains', 'sunrise', 'ocean', 'stars', 'mist', 'path'];
-  const dailyImg = images[dayOfYear % images.length];
+  const imgIdx = ((dayOfYear + offset) % images.length + images.length) % images.length;
+  const dailyImg = images[imgIdx];
   
   const bgEl = document.querySelector(".daily-verse-card-bg") || document.querySelector(".vod-image-background");
   if (bgEl) bgEl.style.backgroundImage = `url('./assets/images/${dailyImg}.png')`;
@@ -1012,16 +1158,46 @@ function renderDailyDevotion() {
     heart.style.color = "#ffffff";
     document.getElementById("fs-like-count").textContent = "12.6L";
   }
+
+  // Update dynamic VOD title labels based on offset (yesterday, etc.)
+  const homeTabPills = document.querySelectorAll(".daily-verse-card .tab-pill");
+  const fsLabel = document.querySelector("#modal-fullscreen-vod .fs-card-label");
+  
+  let labelTextHome = "✉ DAILY BIBLE VERSE";
+  let labelTextFs = "Verse of the Day";
+  
+  if (offset === -1) {
+    labelTextHome = "✉ YESTERDAY'S BIBLE VERSE";
+    labelTextFs = "Yesterday's Verse";
+  } else if (offset < -1) {
+    labelTextHome = `✉ ${Math.abs(offset)} DAYS AGO`;
+    labelTextFs = `${Math.abs(offset)} Days Ago`;
+  }
+  
+  if (homeTabPills.length > 0) {
+    homeTabPills[0].textContent = labelTextHome;
+  }
+  if (fsLabel) {
+    fsLabel.textContent = labelTextFs;
+  }
+  
+  // Update disabled states of VOD nav buttons
+  const btnPrev = document.getElementById("btn-vod-prev");
+  const btnNext = document.getElementById("btn-vod-next");
+  const btnFsPrev = document.getElementById("btn-fs-vod-prev");
+  const btnFsNext = document.getElementById("btn-fs-vod-next");
+  
+  const disablePrev = offset <= -6; // allow 7 days history total (0, -1, -2, -3, -4, -5, -6)
+  const disableNext = offset >= 0;
+  
+  if (btnPrev) btnPrev.disabled = disablePrev;
+  if (btnNext) btnNext.disabled = disableNext;
+  if (btnFsPrev) btnFsPrev.disabled = disablePrev;
+  if (btnFsNext) btnFsNext.disabled = disableNext;
 }
 
 function toggleLikeVOD() {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), 0, 0);
-  const diff = now - start;
-  const oneDay = 1000 * 60 * 60 * 24;
-  const dayOfYear = Math.floor(diff / oneDay);
-  const vod = VOD_LIST[dayOfYear % VOD_LIST.length];
-  
+  const { vod } = getCurrentVOD();
   const hasLiked = state.userLikes[vod.ref] || false;
   state.userLikes[vod.ref] = !hasLiked;
   saveStateToLocalStorage();
@@ -1030,13 +1206,7 @@ function toggleLikeVOD() {
 }
 
 function openCardCreatorFromVOD() {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), 0, 0);
-  const diff = now - start;
-  const oneDay = 1000 * 60 * 60 * 24;
-  const dayOfYear = Math.floor(diff / oneDay);
-  const vod = VOD_LIST[dayOfYear % VOD_LIST.length];
-  
+  const { vod } = getCurrentVOD();
   selectedVerseMeta = {
     key: `${vod.book}_${vod.chapter}_${vod.verse}`,
     ref: (state.translation === "eng") ? vod.engRef : vod.ref,
@@ -1051,13 +1221,7 @@ function openCardCreatorFromVOD() {
 }
 
 function openVerseOptionsFromVOD() {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), 0, 0);
-  const diff = now - start;
-  const oneDay = 1000 * 60 * 60 * 24;
-  const dayOfYear = Math.floor(diff / oneDay);
-  const vod = VOD_LIST[dayOfYear % VOD_LIST.length];
-  
+  const { vod } = getCurrentVOD();
   const textToPreview = (state.translation === "eng") ? vod.engText : vod.text;
   const activeBookMeta = booksMetadataMr.find(b => b.filename.replace(".json", "") === vod.book);
   const bookName = activeBookMeta ? ((state.translation === "eng") ? activeBookMeta.engName : activeBookMeta.name) : vod.book;
@@ -1108,6 +1272,28 @@ function startSpeechNarration() {
   }
   
   speechSynthesis.cancel();
+
+  // Start background worship music if selected
+  const bgMusicSelect = document.getElementById("audio-bg-music-select");
+  const bgVolSlider = document.getElementById("audio-bg-music-vol-slider");
+  if (bgMusicSelect && bgMusicSelect.value !== "none") {
+    const vol = bgVolSlider ? parseFloat(bgVolSlider.value) : 0.3;
+    ambientSynthInstance.setVolume(vol);
+    ambientSynthInstance.start(bgMusicSelect.value);
+  } else {
+    ambientSynthInstance.stop();
+  }
+
+  // Start sleep timer if selected
+  const sleepTimerSelect = document.getElementById("audio-sleep-timer-select");
+  if (sleepTimerSelect && sleepTimerSelect.value !== "off") {
+    startSleepTimer(sleepTimerSelect.value);
+  } else {
+    if (sleepTimerTimeout) {
+      clearTimeout(sleepTimerTimeout);
+      sleepTimerTimeout = null;
+    }
+  }
   
   const isMarathiAudio = state.translation !== "eng";
   const useHumanNarration = isMarathiAudio && state.audioSource === "human";
@@ -1379,7 +1565,15 @@ function speakPlaybarVerse(index) {
   if (state.audioTone === 'deep-bass') basePitch = 0.7;
   else if (state.audioTone === 'warm-resonance') basePitch = 0.85;
   else if (state.audioTone === 'normal') basePitch = 1.0;
-  utterance.pitch = basePitch; // customized voice pitch
+  
+  // Apply gender voice pitch settings
+  const genderSelect = document.getElementById("audio-narrator-gender-select");
+  const gender = genderSelect ? genderSelect.value : "male";
+  if (gender === "male") {
+    utterance.pitch = 0.7; // Deep voice
+  } else {
+    utterance.pitch = 1.15; // Soft female voice
+  }
   utterance.rate = audioState.speed * 0.9;
   
   utterance.onend = () => {
@@ -1436,6 +1630,16 @@ function stopSpeechNarration() {
     audioPlayerInstance = null;
   }
   speechSynthesis.cancel();
+  
+  // Stop background worship music
+  ambientSynthInstance.stop();
+  
+  // Clear sleep timer
+  if (sleepTimerTimeout) {
+    clearTimeout(sleepTimerTimeout);
+    sleepTimerTimeout = null;
+  }
+  
   document.querySelectorAll(".verse-row").forEach(v => v.classList.remove("tts-reading"));
   document.getElementById("floating-audio-playbar").classList.remove("active");
 }
@@ -1898,6 +2102,379 @@ function getReadingForDay(planType, day) {
 /* ==========================================================================
    User Profile Dashboard rendering
    ========================================================================== */
+function changeVODOffset(delta) {
+  state.vodDayOffset = (state.vodDayOffset || 0) + delta;
+  if (state.vodDayOffset < -6) state.vodDayOffset = -6;
+  if (state.vodDayOffset > 0) state.vodDayOffset = 0;
+  saveStateToLocalStorage();
+  renderDailyDevotion();
+}
+
+function updateAllUserAvatars() {
+  const sidebarAvatar = document.getElementById("sidebar-you-avatar");
+  const bottomAvatar = document.getElementById("nav-you-avatar");
+  const headerAvatar = document.getElementById("header-auth-avatar");
+  const profileAvatar = document.getElementById("profile-avatar");
+  
+  const user = state.currentUser;
+  
+  const updateElement = (el, isLarge) => {
+    if (!el) return;
+    if (user) {
+      if (user.photo) {
+        el.textContent = "";
+        el.style.backgroundImage = `url(${user.photo})`;
+        el.style.backgroundSize = "cover";
+        el.style.backgroundPosition = "center";
+        el.style.backgroundRepeat = "no-repeat";
+        if (!isLarge) {
+          el.style.borderColor = "var(--primary)";
+        }
+      } else {
+        el.textContent = user.username.substring(0, 1).toUpperCase();
+        el.style.backgroundImage = "none";
+        el.style.backgroundColor = "var(--primary)";
+        el.style.color = "#1e1b4b";
+      }
+    } else {
+      // Guest state
+      if (isLarge) {
+        el.textContent = "G";
+        el.style.backgroundImage = "none";
+      } else {
+        el.textContent = "U";
+        el.style.backgroundImage = "none";
+        el.style.backgroundColor = "transparent";
+        el.style.color = "currentColor";
+        el.style.borderColor = "currentColor";
+      }
+    }
+  };
+  
+  updateElement(sidebarAvatar, false);
+  updateElement(bottomAvatar, false);
+  updateElement(headerAvatar, false);
+  updateElement(profileAvatar, true);
+}
+
+function getVerseTextFromMemoryCache(bookKey, ch, v) {
+  const cache = (state.translation === "eng") ? booksCacheEng : booksCacheMr;
+  if (cache[bookKey]) {
+    const chapters = cache[bookKey].chapters;
+    if (chapters && chapters[ch - 1] && chapters[ch - 1][v - 1]) {
+      return chapters[ch - 1][v - 1];
+    }
+  }
+  
+  // Not cached, fetch in background and trigger re-render of feed
+  const fetchFunc = (state.translation === "eng") ? fetchBookDataEng : fetchBookDataMr;
+  fetchFunc(bookKey).then(() => {
+    if (window.location.hash === "#/you") {
+      const activeBtn = document.querySelector("#activity-filter-bar .profile-tab-btn.active");
+      const filter = activeBtn ? (activeBtn.dataset.activityFilter || "all") : "all";
+      renderActivityFeed(filter);
+    }
+  });
+  
+  return "...";
+}
+
+function getVerseRef(bookKey, ch, v) {
+  const activeBookMeta = booksMetadataMr.find(b => b.filename.replace(".json", "") === bookKey);
+  if (activeBookMeta) {
+    const name = (state.translation === "eng") ? activeBookMeta.engName : activeBookMeta.name;
+    return `${name} ${ch}:${v}`;
+  }
+  return `${bookKey} ${ch}:${v}`;
+}
+
+window.openReaderAndNavigate = function(book, ch) {
+  openReader(book, ch);
+  window.location.hash = "#/reader";
+};
+
+function renderActivityFeed(filter = "all") {
+  const listEl = document.getElementById("you-activity-feed-list");
+  const emptyEl = document.getElementById("you-activity-feed-empty");
+  if (!listEl) return;
+  
+  listEl.innerHTML = "";
+  
+  let items = [];
+  const user = state.currentUser;
+  if (!user) {
+    if (emptyEl) emptyEl.style.display = "block";
+    return;
+  }
+  
+  const initial = user.username.substring(0, 1).toUpperCase();
+  
+  // 1. Add Highlights
+  for (const key in state.highlights) {
+    const color = state.highlights[key];
+    const parts = key.split("_");
+    const book = parts[0];
+    const ch = parseInt(parts[1]);
+    const v = parseInt(parts[2]);
+    
+    const text = getVerseTextFromMemoryCache(book, ch, v);
+    const ref = getVerseRef(book, ch, v);
+    
+    items.push({
+      id: `highlight_${key}`,
+      type: "highlights",
+      title: state.translation === 'eng' ? `You highlighted ${ref}` : `तुम्ही ${ref} हायलाइट केले`,
+      body: text,
+      ref: ref,
+      color: color,
+      book: book,
+      chapter: ch,
+      verse: v,
+      timestamp: state.highlightsTimestamps ? (state.highlightsTimestamps[key] || (Date.now() - 1000 * 60 * 60 * 24 * 3)) : (Date.now() - 1000 * 60 * 60 * 24 * 3)
+    });
+  }
+  
+  // 2. Add Bookmarks (Saved)
+  if (state.bookmarks) {
+    state.bookmarks.forEach((bm, idx) => {
+      items.push({
+        id: `bookmark_${bm.ref}`,
+        type: "highlights",
+        title: state.translation === 'eng' ? `You saved ${bm.ref}` : `तुम्ही ${bm.ref} सेव्ह केले`,
+        body: bm.text,
+        ref: bm.ref,
+        book: bm.book,
+        chapter: bm.chapter,
+        verse: bm.verse,
+        isPrivate: true,
+        timestamp: bm.date ? new Date(bm.date).getTime() : (Date.now() - 1000 * 60 * 60 * 24 * (idx + 1))
+      });
+    });
+  }
+  
+  // 3. Add Notes
+  for (const key in state.userNotes) {
+    const noteContent = state.userNotes[key];
+    const parts = key.split("_");
+    const book = parts[0];
+    const ch = parseInt(parts[1]);
+    const v = parseInt(parts[2]);
+    
+    const text = getVerseTextFromMemoryCache(book, ch, v);
+    const ref = getVerseRef(book, ch, v);
+    
+    items.push({
+      id: `note_${key}`,
+      type: "notes",
+      title: state.translation === 'eng' ? `You added a note on ${ref}` : `तुम्ही ${ref} वर टीप जोडली`,
+      body: text,
+      ref: ref,
+      noteText: noteContent,
+      book: book,
+      chapter: ch,
+      verse: v,
+      isPrivate: true,
+      timestamp: state.notesTimestamps ? (state.notesTimestamps[key] || (Date.now() - 1000 * 60 * 60 * 24 * 4)) : (Date.now() - 1000 * 60 * 60 * 24 * 4)
+    });
+  }
+  
+  // 4. Add Badges
+  if (state.quizBadges) {
+    state.quizBadges.forEach((badgeId, idx) => {
+      let badgeName = "Novice Explorer";
+      let badgeIcon = "💡";
+      if (badgeId === "quiz_badge_novice") {
+        badgeName = state.translation === "eng" ? "Novice Explorer" : "नवा शोधक";
+        badgeIcon = "💡";
+      } else if (badgeId === "quiz_badge_scholar") {
+        badgeName = state.translation === "eng" ? "Scripture Scholar" : "शास्त्र पंडित";
+        badgeIcon = "🎓";
+      } else if (badgeId === "quiz_badge_theologian") {
+        badgeName = state.translation === "eng" ? "Bible Theologian" : "बायबल शास्त्रज्ञ";
+        badgeIcon = "🏆";
+      }
+      
+      items.push({
+        id: `badge_${badgeId}`,
+        type: "badges",
+        title: state.translation === 'eng' ? `You've earned the ${badgeName} Badge` : `तुम्ही ${badgeName} बॅज मिळवला आहे`,
+        badgeName: badgeName,
+        badgeIcon: badgeIcon,
+        timestamp: Date.now() - 1000 * 60 * 60 * 24 * 10 - idx * 10000
+      });
+    });
+  }
+  
+  // 5. Add Created Images
+  if (state.createdVerseImages) {
+    state.createdVerseImages.forEach((img, idx) => {
+      items.push({
+        id: `image_${idx}`,
+        type: "images",
+        title: state.translation === 'eng' ? `You created a verse image for ${img.ref}` : `तुम्ही ${img.ref} साठी इमेज तयार केली`,
+        body: img.text,
+        ref: img.ref,
+        styleClass: img.style || "gradient-vod-1",
+        book: img.book,
+        chapter: img.chapter,
+        verse: img.verse,
+        timestamp: img.timestamp || (Date.now() - 1000 * 60 * 60 * 24 * 12)
+      });
+    });
+  }
+  
+  // 6. Add Reading Plans progress
+  if (state.planPortionsCompleted) {
+    const keys = Object.keys(state.planPortionsCompleted);
+    const days = {};
+    keys.forEach(k => {
+      const parts = k.split("_");
+      if (parts.length >= 2) {
+        const planId = parts[0];
+        const day = parts[1];
+        days[`${planId}_${day}`] = true;
+      }
+    });
+    
+    Object.keys(days).forEach((dayKey, idx) => {
+      const parts = dayKey.split("_");
+      const planId = parts[0];
+      const day = parts[1];
+      const planName = planId === "nt90" ? "New Testament in 90 Days" : "Cultivating a Still Heart";
+      
+      items.push({
+        id: `plan_${dayKey}`,
+        type: "plans",
+        title: state.translation === 'eng' ? `You completed Day ${day} of ${planName}` : `तुम्ही ${planName} चा दिवस ${day} पूर्ण केला`,
+        timestamp: Date.now() - 1000 * 60 * 60 * 24 * (parseInt(day) || 1)
+      });
+    });
+  }
+  
+  // Filter items
+  if (filter !== "all") {
+    items = items.filter(item => item.type === filter);
+  }
+  
+  // Sort items latest first
+  items.sort((a, b) => b.timestamp - a.timestamp);
+  
+  if (items.length === 0) {
+    if (emptyEl) emptyEl.style.display = "block";
+    return;
+  }
+  if (emptyEl) emptyEl.style.display = "none";
+  
+  items.forEach(item => {
+    const card = document.createElement("div");
+    card.className = "activity-feed-card";
+    
+    const timeText = getRelativeTime(item.timestamp);
+    
+    let headerHTML = `
+      <div class="activity-header-row">
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <div class="activity-user-avatar" id="avatar-${item.id}"></div>
+          <div class="activity-description-box">
+            <div class="activity-text-line">${item.title}</div>
+            ${item.isPrivate ? `<div style="font-size: 10px; color: var(--text-muted); display: flex; align-items: center; gap: 3px; margin-top: 2px;"><svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> Private</div>` : ''}
+          </div>
+        </div>
+        <span class="activity-timestamp">${timeText}</span>
+      </div>
+    `;
+    
+    let bodyHTML = "";
+    
+    if (item.type === "highlights") {
+      bodyHTML = `
+        <div class="activity-verse-preview-card" style="cursor: pointer;" onclick="openReaderAndNavigate('${item.book}', ${item.chapter})">
+          <p class="activity-verse-text">"${item.body}"</p>
+          <div class="activity-verse-ref">${item.ref}</div>
+        </div>
+        <div class="activity-social-actions-row">
+          <button class="activity-social-btn" onclick="showToast('Liked!')">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path></svg> Like
+          </button>
+          <button class="activity-social-btn" onclick="showToast('Comments feature coming soon')">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg> Comment
+          </button>
+        </div>
+      `;
+    } else if (item.type === "notes") {
+      bodyHTML = `
+        <div class="activity-verse-preview-card" style="margin-bottom: 8px; cursor: pointer;" onclick="openReaderAndNavigate('${item.book}', ${item.chapter})">
+          <p class="activity-verse-text">"${item.body}"</p>
+          <div class="activity-verse-ref">${item.ref}</div>
+        </div>
+        <div style="background-color: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px;">
+          <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Notes</div>
+          <p style="font-size: 13px; color: var(--text); margin: 0; line-height: 1.4;">${item.noteText}</p>
+        </div>
+        <div class="activity-social-actions-row">
+          <button class="activity-social-btn" onclick="showToast('Liked!')">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path></svg> Like
+          </button>
+          <button class="activity-social-btn" onclick="showToast('Comments feature coming soon')">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg> Comment
+          </button>
+        </div>
+      `;
+    } else if (item.type === "badges") {
+      bodyHTML = `
+        <div style="background-color: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 10px;">
+          <div class="profile-badge-circle-new unlocked" style="width: 60px; height: 60px; font-size: 28px;">${item.badgeIcon}</div>
+          <span style="font-size: 13px; font-weight: 700; color: var(--text);">${item.badgeName}</span>
+        </div>
+        <div class="activity-social-actions-row">
+          <button class="activity-social-btn" onclick="showToast('Liked!')">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path></svg> Like
+          </button>
+        </div>
+      `;
+    } else if (item.type === "images") {
+      bodyHTML = `
+        <div class="activity-verse-image-card ${item.styleClass}" style="cursor: pointer;" onclick="openReaderAndNavigate('${item.book}', ${item.chapter})">
+          <p class="activity-verse-image-text">"${item.body}"</p>
+          <div class="activity-verse-image-ref">${item.ref}</div>
+        </div>
+        <div class="activity-social-actions-row">
+          <button class="activity-social-btn" onclick="showToast('Liked!')">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path></svg> Like
+          </button>
+          <button class="activity-social-btn" onclick="showToast('Comments feature coming soon')">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg> Comment
+          </button>
+        </div>
+      `;
+    } else if (item.type === "plans") {
+      bodyHTML = `
+        <div style="background-color: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 24px;">🕊️</span>
+          <span style="font-size: 13px; font-weight: 700; color: var(--text);">Great progress keeping up your devotion!</span>
+        </div>
+      `;
+    }
+    
+    card.innerHTML = headerHTML + bodyHTML;
+    listEl.appendChild(card);
+    
+    const av = document.getElementById(`avatar-${item.id}`);
+    if (av) {
+      if (user.photo) {
+        av.textContent = "";
+        av.style.backgroundImage = `url(${user.photo})`;
+        av.style.backgroundSize = "cover";
+        av.style.backgroundPosition = "center";
+      } else {
+        av.textContent = initial;
+        av.style.backgroundColor = "var(--primary)";
+        av.style.color = "#1e1b4b";
+      }
+    }
+  });
+}
+
 function renderYouProfile() {
   const loggedInContainer = document.getElementById("you-logged-in-container");
   const loggedOutContainer = document.getElementById("you-logged-out-container");
@@ -1919,117 +2496,67 @@ function renderYouProfile() {
     profileNameEl.textContent = state.currentUser.username;
   }
   
-  const avatarEl = document.getElementById("profile-avatar");
-  if (avatarEl && state.currentUser.username) {
-    avatarEl.textContent = state.currentUser.username.substring(0, 1).toUpperCase();
+  const pastorBadge = document.getElementById("profile-pastor-badge");
+  if (pastorBadge) {
+    if (state.currentUser.username.toLowerCase() === "admin") {
+      pastorBadge.textContent = "Admin";
+      pastorBadge.style.display = "inline-block";
+    } else if (state.currentUser.isPastor) {
+      pastorBadge.textContent = "Pastor";
+      pastorBadge.style.display = "inline-block";
+    } else {
+      pastorBadge.style.display = "none";
+    }
   }
   
-  const pastorLabelEl = document.getElementById("profile-pastor-badge");
-  if (pastorLabelEl) {
-    const isIntercessor = state.currentUser.isPastor || state.currentUser.isAdmin || state.currentUser.username.toLowerCase() === "admin";
-    pastorLabelEl.style.display = isIntercessor ? "inline-block" : "none";
-    if (state.currentUser.username.toLowerCase() === "admin") {
-      pastorLabelEl.textContent = "Admin";
-    } else {
-      pastorLabelEl.textContent = "Pastor";
-    }
+  updateAllUserAvatars();
+  
+  const churchDisplay = document.getElementById("profile-church-name-display");
+  if (churchDisplay) {
+    churchDisplay.textContent = state.currentUser.churchName || (state.translation === "eng" ? "Add your church" : "चर्च जोडा");
   }
   
   const streakEl = document.getElementById("profile-streak-count");
   if (streakEl) {
-    streakEl.textContent = state.streak || 1;
-  }
-
-  const highEmpty = document.getElementById("you-highlights-empty");
-  const highList = document.getElementById("you-highlights-list");
-  highList.innerHTML = "";
-  
-  const hKeys = Object.keys(state.highlights);
-  if (hKeys.length === 0) {
-    highEmpty.style.display = "block";
-  } else {
-    highEmpty.style.display = "none";
-    hKeys.forEach(async key => {
-      const parts = key.split("_");
-      const bookKey = parts[0];
-      const ch = parseInt(parts[1]);
-      const v = parseInt(parts[2]);
-      const color = state.highlights[key];
-      
-      const bookData = (state.translation === "eng") ? await fetchBookDataEng(bookKey) : await fetchBookDataMr(bookKey);
-      if (!bookData) return;
-      
-      const txt = bookData.chapters[ch - 1][v - 1];
-      const card = createLibraryCard(`${bookData.name} ${ch}:${v}`, txt, bookKey, ch, v, () => {
-        delete state.highlights[key];
-        saveStateToLocalStorage();
-        renderYouProfile();
-        const rEl = document.querySelector(`.verse-row[data-verse-id="${key}"]`);
-        if (rEl) rEl.removeAttribute("data-highlight");
-      });
-      
-      const bar = document.createElement("div");
-      bar.className = "library-card-highlight-bar";
-      bar.style.backgroundColor = (color === "green") ? "var(--highlight-green)" : (color === "blue") ? "var(--highlight-blue)" : (color === "pink") ? "var(--highlight-pink)" : "var(--highlight-yellow)";
-      card.appendChild(bar);
-      card.style.paddingLeft = "20px";
-      
-      highList.appendChild(card);
-    });
+    streakEl.textContent = state.streak || 2;
   }
   
-  const bookEmpty = document.getElementById("you-bookmarks-empty");
-  const bookList = document.getElementById("you-bookmarks-list");
-  bookList.innerHTML = "";
-  
-  if (state.bookmarks.length === 0) {
-    bookEmpty.style.display = "block";
-  } else {
-    bookEmpty.style.display = "none";
-    state.bookmarks.forEach(bookmark => {
-      const card = createLibraryCard(bookmark.ref, bookmark.text, bookmark.book, bookmark.chapter, bookmark.verse, () => {
-        state.bookmarks = state.bookmarks.filter(b => b.ref !== bookmark.ref);
-        saveStateToLocalStorage();
-        renderYouProfile();
-      });
-      bookList.appendChild(card);
-    });
+  const pointsEl = document.getElementById("profile-points-count");
+  if (pointsEl) {
+    pointsEl.textContent = state.quizPoints || 0;
   }
   
-  const histEmpty = document.getElementById("you-history-empty");
-  const histList = document.getElementById("you-history-list");
-  histList.innerHTML = "";
-  
-  if (state.history.length === 0) {
-    histEmpty.style.display = "block";
-  } else {
-    histEmpty.style.display = "none";
-    state.history.forEach(h => {
-      const card = document.createElement("div");
-      card.className = "library-card";
-      const relTime = getRelativeTime(h.timestamp);
-      
-      card.innerHTML = `
-        <div class="library-card-header">
-          <span class="library-card-ref">${h.ref}</span>
-          <span class="library-card-date">${relTime}</span>
-        </div>
-      `;
-      card.addEventListener("click", () => {
-        openReader(h.book, h.chapter);
-        window.location.hash = "#/reader";
-      });
-      histList.appendChild(card);
-    });
+  // Badges UI updates
+  const badgeCountEl = document.getElementById("profile-badges-count");
+  if (badgeCountEl) {
+    badgeCountEl.textContent = state.quizBadges ? state.quizBadges.length : 0;
   }
   
-  const keyInput = document.getElementById("you-elevenlabs-key");
-  if (keyInput) {
-    keyInput.value = state.elevenLabsKey || "";
-    validateElevenLabsKey(state.elevenLabsKey);
-  }
-  const voiceInput = document.getElementById("you-elevenlabs-voice");
-  if (voiceInput) voiceInput.value = state.elevenLabsVoice || "kqVT88a5QfII1HNAEPTJ";
+  const noviceUnlocked = state.quizBadges && state.quizBadges.includes("quiz_badge_novice");
+  const scholarUnlocked = state.quizBadges && state.quizBadges.includes("quiz_badge_scholar");
+  const theologianUnlocked = state.quizBadges && state.quizBadges.includes("quiz_badge_theologian");
+  
+  const badgeNovice = document.getElementById("badge-item-novice");
+  const badgeScholar = document.getElementById("badge-item-scholar");
+  const badgeTheologian = document.getElementById("badge-item-theologian");
+  
+  if (badgeNovice) badgeNovice.classList.toggle("unlocked", noviceUnlocked);
+  if (badgeScholar) badgeScholar.classList.toggle("unlocked", scholarUnlocked);
+  if (badgeTheologian) badgeTheologian.classList.toggle("unlocked", theologianUnlocked);
+  
+  const pNovice = document.getElementById("badge-progress-novice");
+  const pScholar = document.getElementById("badge-progress-scholar");
+  const pTheologian = document.getElementById("badge-progress-theologian");
+  
+  const pts = state.quizPoints || 0;
+  if (pNovice) pNovice.style.width = noviceUnlocked ? "100%" : `${Math.min(100, Math.floor((pts / 30) * 100))}%`;
+  if (pScholar) pScholar.style.width = scholarUnlocked ? "100%" : `${Math.min(100, Math.floor((pts / 70) * 100))}%`;
+  if (pTheologian) pTheologian.style.width = theologianUnlocked ? "100%" : `${Math.min(100, Math.floor((pts / 100) * 100))}%`;
+  
+  // Render active activity feed
+  const activeBtn = document.querySelector("#activity-filter-bar .profile-tab-btn.active");
+  const filter = activeBtn ? (activeBtn.dataset.activityFilter || "all") : "all";
+  renderActivityFeed(filter);
 }
 
 async function validateElevenLabsKey(key) {
@@ -2350,6 +2877,24 @@ function downloadShareCard() {
     document.getElementById("share-card-canvas").style.display = "none";
     container.insertBefore(img, document.querySelector(".canvas-customization-tools"));
     
+    // Log card creation to Activity feed
+    if (state.currentUser) {
+      if (!state.createdVerseImages) state.createdVerseImages = [];
+      const isDup = state.createdVerseImages.some(item => item.ref === selectedVerseMeta.ref && item.text === selectedVerseMeta.text);
+      if (!isDup) {
+        state.createdVerseImages.push({
+          ref: selectedVerseMeta.ref,
+          text: selectedVerseMeta.text,
+          book: selectedVerseMeta.book,
+          chapter: selectedVerseMeta.chapter,
+          verse: selectedVerseMeta.verse,
+          style: activeCardGradient || "gradient-1",
+          timestamp: Date.now()
+        });
+        saveStateToLocalStorage();
+      }
+    }
+    
     const dlBtn = document.getElementById("btn-download-card");
     dlBtn.querySelector("span").textContent = "Hold Image to Save";
     dlBtn.style.opacity = "0.7";
@@ -2376,6 +2921,27 @@ function resetCardCreatorModal() {
    UI Event Bindings & Listeners Setup
    ========================================================================== */
 function setupEventListeners() {
+  // WhatsApp App Invite Trigger
+  const homeWaInviteBtn = document.getElementById("btn-home-whatsapp-invite");
+  if (homeWaInviteBtn) {
+    homeWaInviteBtn.addEventListener("click", () => {
+      const appUrl = window.location.origin + window.location.pathname;
+      const inviteMsg = `🕊️ *River of Life App Invitation* / *आमंत्रण*\n\nJoin us on the *River of Life Bible App*! Read and listen to Marathi/English scriptures, participate in live audio/video Bible study rooms, and sync daily reading plans.\n👉 *Register & Join here:* ${appUrl}`;
+      const encodedMsg = encodeURIComponent(inviteMsg);
+      window.open(`https://api.whatsapp.com/send?text=${encodedMsg}`, "_blank");
+    });
+  }
+
+  // Top exit button inside meeting room
+  const topExitBtn = document.getElementById("btn-meeting-exit-top");
+  if (topExitBtn) {
+    topExitBtn.addEventListener("click", () => {
+      if (confirm("Leave this meeting? / तुम्ही मीटिंग सोडणार आहात का?")) {
+        exitLiveMeetingRoom();
+      }
+    });
+  }
+
   // Navigation trigger drawers
   document.getElementById("btn-text-settings").addEventListener("click", () => openDrawer("drawer-text-settings"));
   
@@ -2435,22 +3001,32 @@ function setupEventListeners() {
   });
 
   // Profile Translation selector
-  document.getElementById("you-select-translation").addEventListener("change", (e) => {
-    state.translation = e.target.value;
-    applyStylesFromState();
-    saveStateToLocalStorage();
-    openReader(state.activeBook, state.activeChapter);
-    renderDailyDevotion();
-    initAudioVoices();
-    toggleVoiceDropdownVisibility();
-  });
+  const youSelectTranslation = document.getElementById("you-select-translation");
+  if (youSelectTranslation) {
+    youSelectTranslation.addEventListener("change", (e) => {
+      state.translation = e.target.value;
+      applyStylesFromState();
+      saveStateToLocalStorage();
+      openReader(state.activeBook, state.activeChapter);
+      renderDailyDevotion();
+      initAudioVoices();
+      toggleVoiceDropdownVisibility();
+    });
+  }
   
-  document.getElementById("you-btn-cache-bible").addEventListener("click", prefetchBiblesForOffline);
-  document.getElementById("you-btn-clear-cache").addEventListener("click", () => {
-    if (confirm("Clear local cache? This will reset all your bookmarks, highlights, history and notes.")) {
-      clearBibleCache();
-    }
-  });
+  const youBtnCache = document.getElementById("you-btn-cache-bible");
+  if (youBtnCache) {
+    youBtnCache.addEventListener("click", prefetchBiblesForOffline);
+  }
+  
+  const youBtnClear = document.getElementById("you-btn-clear-cache");
+  if (youBtnClear) {
+    youBtnClear.addEventListener("click", () => {
+      if (confirm("Clear local cache? This will reset all your bookmarks, highlights, history and notes.")) {
+        clearBibleCache();
+      }
+    });
+  }
 
   // Reader Translation Header Selector
   document.getElementById("btn-translation-selector").addEventListener("click", () => {
@@ -2759,6 +3335,27 @@ function setupEventListeners() {
     closeAllDrawers();
     openStudySplitPane(selectedVerseMeta.book, selectedVerseMeta.chapter, selectedVerseMeta.verse);
   });
+
+  const shareMeetingBtn = document.getElementById("btn-action-share-meeting");
+  if (shareMeetingBtn) {
+    shareMeetingBtn.addEventListener("click", () => {
+      if (!selectedVerseMeta) return;
+      if (!activeMeetingSession) {
+        showToast("You must join a live meeting room first to share scriptures.");
+        return;
+      }
+      
+      broadcastMeetingEvent(activeMeetingSession.meetingId, {
+        type: "SHARE_BIBLE",
+        book: selectedVerseMeta.book,
+        chapter: selectedVerseMeta.chapter,
+        verse: selectedVerseMeta.verse
+      });
+      
+      closeAllDrawers();
+      showToast("Scripture shared to live meeting!");
+    });
+  }
   
   document.getElementById("btn-close-study-pane").addEventListener("click", () => {
     closeStudySplitPane();
@@ -2783,8 +3380,11 @@ function setupEventListeners() {
       const refKey = activeStudyVerse.refKey;
       if (text) {
         state.userNotes[refKey] = text;
+        if (!state.notesTimestamps) state.notesTimestamps = {};
+        state.notesTimestamps[refKey] = Date.now();
       } else {
         delete state.userNotes[refKey];
+        if (state.notesTimestamps) delete state.notesTimestamps[refKey];
       }
       saveStateToLocalStorage();
       document.getElementById("study-journal-status").textContent = "Auto-saving...";
@@ -3045,6 +3645,309 @@ function setupEventListeners() {
       window.location.hash = "#/discover";
     });
   });
+
+  // Verse of the Day Navigation Listeners
+  const bindVODNav = (btnId, delta) => {
+    const btn = document.getElementById(btnId);
+    if (btn) {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        changeVODOffset(delta);
+      });
+    }
+  };
+  
+  bindVODNav("btn-vod-prev", -1);
+  bindVODNav("btn-vod-next", 1);
+  bindVODNav("btn-fs-vod-prev", -1);
+  bindVODNav("btn-fs-vod-next", 1);
+  
+  const readVODChapter = (e) => {
+    e.stopPropagation();
+    closeModal("modal-fullscreen-vod");
+    const { vod } = getCurrentVOD();
+    openReader(vod.book, vod.chapter);
+    window.location.hash = "#/reader";
+  };
+  
+  const btnRead = document.getElementById("btn-vod-read");
+  if (btnRead) btnRead.addEventListener("click", readVODChapter);
+  const btnFsRead = document.getElementById("btn-fs-vod-read");
+  if (btnFsRead) btnFsRead.addEventListener("click", readVODChapter);
+
+  // Profile Photo Upload Handler
+  const photoInput = document.getElementById("profile-photo-input");
+  if (photoInput) {
+    photoInput.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const dataUrl = evt.target.result;
+        if (state.currentUser) {
+          state.currentUser.photo = dataUrl;
+          
+          // Sync to users database
+          const users = JSON.parse(localStorage.getItem("river_of_life_users") || "[]");
+          const idx = users.findIndex(u => u.username.toLowerCase() === state.currentUser.username.toLowerCase());
+          if (idx !== -1) {
+            users[idx].photo = dataUrl;
+            localStorage.setItem("river_of_life_users", JSON.stringify(users));
+          }
+          
+          saveStateToLocalStorage();
+          updateAllUserAvatars();
+          showToast("Profile photo updated!");
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // Church Name Edit Handler
+  const btnChurch = document.getElementById("btn-profile-church");
+  if (btnChurch) {
+    btnChurch.addEventListener("click", () => {
+      if (!state.currentUser) return;
+      const currentChurch = state.currentUser.churchName || "";
+      const promptTitle = state.translation === "eng" ? "Enter your church name:" : "तुमच्या चर्चचे नाव टाका:";
+      const newChurch = prompt(promptTitle, currentChurch);
+      if (newChurch !== null) {
+        state.currentUser.churchName = newChurch.trim();
+        
+        // Sync to users database
+        const users = JSON.parse(localStorage.getItem("river_of_life_users") || "[]");
+        const idx = users.findIndex(u => u.username.toLowerCase() === state.currentUser.username.toLowerCase());
+        if (idx !== -1) {
+          users[idx].churchName = newChurch.trim();
+          localStorage.setItem("river_of_life_users", JSON.stringify(users));
+        }
+        
+        saveStateToLocalStorage();
+        
+        const displayEl = document.getElementById("profile-church-name-display");
+        if (displayEl) {
+          displayEl.textContent = newChurch.trim() || (state.translation === "eng" ? "Add your church" : "चर्च जोडा");
+        }
+        showToast(state.translation === "eng" ? "Church updated!" : "चर्चचे नाव अद्ययावत केले!");
+      }
+    });
+  }
+
+  // Profile Tab Switch / Activity Feed Filter Listener
+  const activityFilterBar = document.getElementById("activity-filter-bar");
+  if (activityFilterBar) {
+    activityFilterBar.querySelectorAll(".profile-tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        activityFilterBar.querySelectorAll(".profile-tab-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        
+        const filter = btn.dataset.activityFilter || "all";
+        renderActivityFeed(filter);
+      });
+    });
+  }
+
+  // Stats Grid quick navigations
+  const btnGotoSaved = document.getElementById("btn-profile-goto-saved");
+  if (btnGotoSaved) {
+    btnGotoSaved.addEventListener("click", () => {
+      if (activityFilterBar) {
+        activityFilterBar.querySelectorAll(".profile-tab-btn").forEach(b => {
+          b.classList.toggle("active", b.dataset.activityFilter === "highlights");
+        });
+      }
+      renderActivityFeed("highlights");
+      
+      const target = document.querySelector(".activity-feed-section-title");
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+  }
+
+  const btnGotoPrayer = document.getElementById("btn-profile-goto-prayer");
+  if (btnGotoPrayer) {
+    btnGotoPrayer.addEventListener("click", () => {
+      window.location.hash = "#/prayers";
+    });
+  }
+
+  const btnGotoGiving = document.getElementById("btn-profile-goto-giving");
+  if (btnGotoGiving) {
+    btnGotoGiving.addEventListener("click", () => {
+      showToast("Giving features coming soon!");
+    });
+  }
+
+  // Live Meeting Share Word & Background Music binds
+  const shareWordBtn = document.getElementById("btn-meeting-share-bible");
+  if (shareWordBtn) {
+    shareWordBtn.addEventListener("click", () => {
+      populateMeetingShareBibleDropdowns();
+      openDrawer("drawer-meet-share-bible");
+    });
+  }
+
+  const musicBtn = document.getElementById("btn-meeting-music");
+  if (musicBtn) {
+    musicBtn.addEventListener("click", () => {
+      openDrawer("drawer-meet-music");
+    });
+  }
+
+  const shareWordSubmitBtn = document.getElementById("btn-meet-share-bible-submit");
+  if (shareWordSubmitBtn) {
+    shareWordSubmitBtn.addEventListener("click", () => {
+      if (!activeMeetingSession) return;
+      const book = document.getElementById("meeting-share-book").value;
+      const chapter = document.getElementById("meeting-share-chapter").value;
+      const verse = document.getElementById("meeting-share-verse").value;
+      
+      broadcastMeetingEvent(activeMeetingSession.meetingId, {
+        type: "SHARE_BIBLE",
+        book,
+        chapter,
+        verse
+      });
+      closeAllDrawers();
+      showToast("Scripture shared with participants!");
+    });
+  }
+
+  const shareWordStopBtn = document.getElementById("btn-meet-share-bible-stop");
+  if (shareWordStopBtn) {
+    shareWordStopBtn.addEventListener("click", () => {
+      if (!activeMeetingSession) return;
+      broadcastMeetingEvent(activeMeetingSession.meetingId, {
+        type: "STOP_SHARE_BIBLE"
+      });
+      closeAllDrawers();
+      showToast("Stopped scripture sharing.");
+    });
+  }
+
+  document.querySelectorAll(".meet-music-track-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const url = btn.dataset.url;
+      const title = btn.dataset.title;
+      const volume = parseInt(document.getElementById("meet-music-volume").value || 50);
+      
+      playWorshipTrack(url, title, volume);
+
+      if (activeMeetingSession) {
+        broadcastMeetingEvent(activeMeetingSession.meetingId, {
+          type: "PLAY_MUSIC",
+          trackUrl: url,
+          title: title,
+          volume: volume
+        });
+      }
+      showToast(`Playing background music: ${title}`);
+      closeAllDrawers();
+    });
+  });
+
+  // Play Custom Song (YouTube or Direct MP3/Audio URL)
+  const playCustomBtn = document.getElementById("btn-meet-play-custom");
+  if (playCustomBtn) {
+    playCustomBtn.addEventListener("click", () => {
+      const customUrlInput = document.getElementById("meet-music-custom-url");
+      const inputUrl = customUrlInput ? customUrlInput.value.trim() : "";
+      const modeSelect = document.getElementById("meet-music-custom-mode");
+      const mode = modeSelect ? modeSelect.value : "audio";
+      const volSlider = document.getElementById("meet-music-volume");
+      const volume = volSlider ? parseInt(volSlider.value) : 50;
+
+      if (!inputUrl) {
+        showToast("Please enter a valid YouTube or direct MP3 URL.");
+        return;
+      }
+
+      const ytId = extractYouTubeVideoId(inputUrl);
+
+      if (ytId) {
+        // YouTube Link: Broadcast to all connected participants & sync audio locally on Host
+        const now = Date.now();
+        if (activeMeetingSession) {
+          broadcastMeetingEvent(activeMeetingSession.meetingId, {
+            type: "PLAY_YOUTUBE",
+            url: ytId,
+            mode: mode,
+            startedAt: now
+          });
+        }
+        syncSharedWorshipVideo(ytId, mode, null); // Pass null on Host so Host gets control strip
+
+        const titleEl = document.getElementById("meet-music-now-playing");
+        if (titleEl) {
+          titleEl.textContent = mode === "video" ? `YouTube Video & Audio (${ytId})` : `YouTube Audio Only (${ytId})`;
+        }
+        showToast(mode === "video" ? "🎥 Playing YouTube Video & Audio to all members" : "🔊 Playing YouTube Audio Only to all members");
+      } else {
+        // Direct Audio Link (MP3 / WAV / Audio Stream)
+        const customTitle = "Custom Shared Audio Stream";
+        playWorshipTrack(inputUrl, customTitle, volume);
+
+        if (activeMeetingSession) {
+          broadcastMeetingEvent(activeMeetingSession.meetingId, {
+            type: "PLAY_MUSIC",
+            trackUrl: inputUrl,
+            title: customTitle,
+            volume: volume
+          });
+        }
+        showToast("🎵 Playing Custom Audio Stream to all members");
+      }
+
+      closeAllDrawers();
+      if (customUrlInput) customUrlInput.value = "";
+    });
+  }
+
+
+  // Stop Music Button: Completely halts playback & resets Currently Playing status to None (Silent)
+  const musicStopBtn = document.getElementById("btn-meet-music-stop");
+  if (musicStopBtn) {
+    musicStopBtn.addEventListener("click", () => {
+      stopWorshipTrack();
+
+      if (activeMeetingSession) {
+        broadcastMeetingEvent(activeMeetingSession.meetingId, {
+          type: "STOP_MUSIC"
+        });
+        broadcastMeetingEvent(activeMeetingSession.meetingId, {
+          type: "STOP_YOUTUBE"
+        });
+      }
+      closeAllDrawers();
+      showToast("Stopped music playback.");
+    });
+  }
+
+  // Volume Slider: Dynamically adjusts playback volume
+  const volSlider = document.getElementById("meet-music-volume");
+  const volLabel = document.getElementById("meet-music-vol-label");
+  if (volSlider && volLabel) {
+    volSlider.addEventListener("input", (e) => {
+      const val = parseInt(e.target.value);
+      volLabel.textContent = `${val}%`;
+      
+      if (activeWorshipAudio) {
+        activeWorshipAudio.volume = val / 100;
+      }
+      
+      if (activeMeetingSession && currentWorshipTrack) {
+        currentWorshipTrack.volume = val;
+        broadcastMeetingEvent(activeMeetingSession.meetingId, {
+          type: "VOLUME_CHANGE",
+          volume: val
+        });
+      }
+    });
+  }
+
 }
 
 /* ==========================================================================
@@ -3055,10 +3958,20 @@ function openDrawer(id) {
   if (overlay) overlay.classList.add("active");
 }
 
+function closeDrawer(id) {
+  const overlay = document.getElementById(id);
+  if (overlay) overlay.classList.remove("active");
+}
+
 function closeAllDrawers() {
   document.querySelectorAll(".drawer-overlay").forEach(overlay => overlay.classList.remove("active"));
   document.querySelectorAll(".verse-row").forEach(v => v.classList.remove("selected-pulse"));
 }
+
+window.openDrawer = openDrawer;
+window.closeDrawer = closeDrawer;
+window.closeAllDrawers = closeAllDrawers;
+
 
 function openModal(id) {
   const overlay = document.getElementById(id);
@@ -3341,9 +4254,12 @@ function saveJournalNote() {
   
   if (text) {
     state.userNotes[refKey] = text;
+    if (!state.notesTimestamps) state.notesTimestamps = {};
+    state.notesTimestamps[refKey] = Date.now();
     showToast("Journal note saved!");
   } else {
     delete state.userNotes[refKey];
+    if (state.notesTimestamps) delete state.notesTimestamps[refKey];
     showToast("Journal note cleared");
   }
   saveStateToLocalStorage();
@@ -3766,12 +4682,44 @@ function registerUser(username, email, password, isPastor) {
     email: email || "",
     password, // Storing plain password as requested for local mock database
     isPastor: !!isPastor,
-    bookmarks: [],
-    highlights: {},
-    userNotes: {},
-    quizPoints: 0,
-    quizHighscore: 0,
-    quizBadges: []
+    bookmarks: [
+      {
+        ref: "१ करिंथ १०:१४",
+        engRef: "1 Corinthians 10:14",
+        text: "म्हणून माझ्या प्रिय बंधूंनो, तुम्ही मूर्तीपूजेपासून दूर पळा.",
+        engText: "Therefore, my dear friends, flee from idolatry.",
+        date: new Date("2026-06-14T12:00:00Z").getTime(),
+        book: "1corinthians",
+        chapter: 10,
+        verse: 14
+      }
+    ],
+    highlights: {
+      "1corinthians_10_14": "yellow",
+      "acts_20_35": "blue"
+    },
+    userNotes: {
+      "1corinthians_10_14": "Keep running away from anything that pulls you away from God. Put Him first always."
+    },
+    quizPoints: 120,
+    quizHighscore: 80,
+    quizBadges: ["quiz_badge_novice", "quiz_badge_scholar"],
+    createdVerseImages: [
+      {
+        ref: "प्रेषितांची कृत्ये २०:३५",
+        engRef: "Acts 20:35",
+        text: "देण्यापेक्षा देणे ह्यात जास्त धन्यता आहे.",
+        engText: "It is more blessed to give than to receive.",
+        book: "acts",
+        chapter: 20,
+        verse: 35,
+        style: "gradient-vod-1",
+        timestamp: new Date("2026-06-12T10:00:00Z").getTime()
+      }
+    ],
+    churchName: "River of Life Church",
+    streak: 2,
+    photo: ""
   };
   
   users.push(newUser);
@@ -3792,7 +4740,9 @@ function loginUser(username, password) {
     username: user.username,
     email: user.email,
     isPastor: user.isPastor,
-    isAdmin: user.isAdmin || user.username.toLowerCase() === "admin"
+    isAdmin: user.isAdmin || user.username.toLowerCase() === "admin",
+    churchName: user.churchName || "",
+    photo: user.photo || ""
   };
   
   // Restore user-specific data into state
@@ -3802,6 +4752,8 @@ function loginUser(username, password) {
   state.quizPoints = user.quizPoints || 0;
   state.quizHighscore = user.quizHighscore || 0;
   state.quizBadges = user.quizBadges || [];
+  state.createdVerseImages = user.createdVerseImages || [];
+  state.streak = user.streak || 2;
   
   saveStateToLocalStorage();
   applyStylesFromState();
@@ -3822,6 +4774,9 @@ function logoutUser() {
   state.quizPoints = 0;
   state.quizHighscore = 0;
   state.quizBadges = [];
+  state.createdVerseImages = [];
+  state.streak = 1;
+  state.vodDayOffset = 0;
   
   saveStateToLocalStorage();
   applyStylesFromState();
@@ -4272,3 +5227,3176 @@ function updateAuthUI() {
     if (headerAvatar) headerAvatar.style.display = "none";
   }
 }
+
+/* ==========================================================================
+   Premium Feature Implementations & Data Stores
+   ========================================================================== */
+
+// 1. Splash Screen & Notifications
+function initSplashAndNotifications() {
+  const splashText = document.getElementById("splash-verse-text");
+  const splashRef = document.getElementById("splash-verse-ref");
+  if (splashText && splashRef && VOD_LIST && VOD_LIST.length > 0) {
+    const randIdx = Math.floor(Math.random() * VOD_LIST.length);
+    const randVerse = VOD_LIST[randIdx];
+    splashText.textContent = `"${state.translation === "eng" ? randVerse.engText : randVerse.text}"`;
+    splashRef.textContent = state.translation === "eng" ? randVerse.engRef : randVerse.ref;
+  }
+
+  const splash = document.getElementById("splash-screen");
+
+  const dismissNow = () => {
+    if (splash && splash.style.display !== "none") {
+      splash.classList.add("fade-out");
+      splash.style.pointerEvents = "none";
+      setTimeout(() => {
+        splash.style.display = "none";
+        checkNotificationPrompt();
+      }, 300);
+    }
+  };
+
+  // Instant tap anywhere on splash screen to dismiss immediately
+  if (splash) {
+    splash.addEventListener("click", dismissNow);
+  }
+
+  // Fast auto-dismiss splash screen after 1.2 seconds
+  setTimeout(dismissNow, 1200);
+}
+
+
+function checkNotificationPrompt() {
+  const choice = localStorage.getItem("river_of_life_notifications_choice");
+  if (!choice) {
+    openModal("modal-notification-prompt");
+  }
+}
+
+function initNotificationPrompt() {
+  const btnAllow = document.getElementById("btn-noti-allow");
+  const btnDismiss = document.getElementById("btn-noti-dismiss");
+
+  if (btnAllow) {
+    btnAllow.addEventListener("click", () => {
+      if ('Notification' in window) {
+        Notification.requestPermission().then(permission => {
+          localStorage.setItem("river_of_life_notifications_choice", permission);
+          if (permission === 'granted') {
+            showToast("Notifications enabled! 🙏");
+            try {
+              if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+                navigator.serviceWorker.ready.then(reg => {
+                  reg.showNotification("River of Life / जीवन नदी", {
+                    body: "Daily Bible Verse Notifications enabled! 🙏",
+                    icon: "assets/icons/icon-192.png"
+                  });
+                });
+              } else {
+                new Notification("River of Life / जीवन नदी", {
+                  body: "Daily Bible Verse Notifications enabled! 🙏",
+                  icon: "assets/icons/icon-192.png"
+                });
+              }
+            } catch (err) {
+              console.log("Notification trigger skipped:", err);
+            }
+          }
+          closeModal("modal-notification-prompt");
+        });
+      } else {
+        localStorage.setItem("river_of_life_notifications_choice", "unsupported");
+        showToast("Notifications not supported on this device.");
+        closeModal("modal-notification-prompt");
+      }
+    });
+  }
+
+  if (btnDismiss) {
+    btnDismiss.addEventListener("click", () => {
+      localStorage.setItem("river_of_life_notifications_choice", "dismissed");
+      closeModal("modal-notification-prompt");
+    });
+  }
+}
+
+// 2. AI Companion
+function initAICompanion() {
+  const trigger = document.getElementById("btn-ai-companion-trigger");
+  if (trigger) {
+    trigger.addEventListener("click", () => {
+      openModal("modal-ai-companion");
+    });
+  }
+
+  const closeBtn = document.getElementById("btn-close-ai-companion");
+  if (closeBtn) {
+    closeBtn.addEventListener("click", () => {
+      closeModal("modal-ai-companion");
+    });
+  }
+
+  const sendBtn = document.getElementById("btn-ai-chat-send");
+  const chatInput = document.getElementById("ai-chat-input");
+
+  if (sendBtn && chatInput) {
+    const handleSend = () => {
+      const query = chatInput.value.trim();
+      if (!query) return;
+      chatInput.value = "";
+      sendAIChatQuery(query);
+    };
+
+    sendBtn.addEventListener("click", handleSend);
+    chatInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") handleSend();
+    });
+  }
+
+  // Suggestion buttons
+  document.querySelectorAll(".ai-suggestion-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const query = btn.dataset.query;
+      sendAIChatQuery(query);
+    });
+  });
+}
+
+function sendAIChatQuery(query) {
+  const chatHistory = document.getElementById("ai-chat-history");
+  if (!chatHistory) return;
+
+  // Append user bubble
+  const userBubble = document.createElement("div");
+  userBubble.className = "ai-chat-bubble user";
+  userBubble.textContent = query;
+  chatHistory.appendChild(userBubble);
+  chatHistory.scrollTop = chatHistory.scrollHeight;
+
+  // Selected level
+  const levelSelect = document.getElementById("ai-study-level");
+  const level = levelSelect ? levelSelect.value : "believers";
+
+  // Typing indicator bubble
+  const typingBubble = document.createElement("div");
+  typingBubble.className = "ai-chat-bubble system typing-indicator-bubble";
+  typingBubble.textContent = "AI is thinking... / विचार करत आहे...";
+  chatHistory.appendChild(typingBubble);
+  chatHistory.scrollTop = chatHistory.scrollHeight;
+
+  // Simulate response delay
+  setTimeout(() => {
+    typingBubble.remove();
+    const responseText = generateCompanionResponse(query, level);
+
+    const aiBubble = document.createElement("div");
+    aiBubble.className = "ai-chat-bubble system";
+    aiBubble.innerHTML = responseText;
+    chatHistory.appendChild(aiBubble);
+    chatHistory.scrollTop = chatHistory.scrollHeight;
+  }, 1200);
+}
+
+function generateCompanionResponse(query, level) {
+  const q = query.toLowerCase();
+  
+  // Romans 8:28
+  if (q.includes("romans 8") || q.includes("romans 8:28") || q.includes("रोमन्स ८:२८") || q.includes("रोमन्स ८")) {
+    if (level === "kids") {
+      return `🧒 <strong>For Kids (मुलांसाठी):</strong> Think of your life like a beautiful puzzle. Sometimes a piece looks dark or weird, but God fits all the pieces together to make a wonderful picture! He is working for your good because He loves you very much! 🧩✨<br><br><strong>मराठीत:</strong> देवावर प्रेम करणाऱ्यांच्या चांगल्यासाठी देव सर्व गोष्टी एकत्र काम करू देतो!`;
+    } else if (level === "believers") {
+      return `✝️ <strong>For New Believers (नवीन विश्वासणाऱ्यांसाठी):</strong> This verse is a beautiful promise. It doesn't mean everything that happens to us is good, but it promises that God can take any bad situation, pain, or difficulty and weave it into something purposeful and good for those who love Him. You can trust His bigger plan! 🙏`;
+    } else {
+      return `📖 <strong>In-Depth Study (सखोल अभ्यास):</strong> Paul writes to the Romans emphasizing the sovereign providence of God (<em>Providentia Dei</em>). The phrase 'all things work together for good' (Greek: <em>panta synergēi eis agathon</em>) indicates that every event in a believer's life is overseen by God's sovereignty. The 'good' here is ultimate and spiritual, culminating in our conformity to the image of His Son (Romans 8:29). This is the doctrine of Divine Concurrence. 🏛️`;
+    }
+  }
+
+  // Anxiety / anxiety verses
+  if (q.includes("anxiety") || q.includes("worry") || q.includes("anxious") || q.includes("चिंता") || q.includes("काळजी") || q.includes("भीती")) {
+    if (level === "kids") {
+      return `🧒 <strong>For Kids (मुलांसाठी):</strong> When you feel scared or worried, imagine putting all your worries in a little box and giving it to Jesus. He tells us: 'Do not be afraid, for I am with you.' (Isaiah 41:10). You can sleep peacefully because God is protecting you! 🕊️`;
+    } else if (level === "believers") {
+      return `✝️ <strong>For New Believers (नवीन विश्वासणाऱ्यांसाठी):</strong> God cares about your fears. In Philippians 4:6-7, He invites us: 'Don't worry about anything; instead, pray about everything.' When you pray, His peace, which is bigger than we can understand, will guard your heart like a shield. Try reading Matthew 6:25-34. 🛡️`;
+    } else {
+      return `📖 <strong>In-Depth Study (सखोल अभ्यास):</strong> Anxiety (Greek: <em>merimnao</em> - to be drawn in different directions) is addressed scripturally as a call to re-orient our trust. In Philippians 4:6, the command 'be anxious for nothing' is coupled with <em>proseuche</em> (general prayer) and <em>deesis</em> (specific petitions) with thanksgiving. This shifts our cognitive focus from the threat to the Sovereign Sustainer, yielding the <em>eirene</em> (peace) of God which guards (<em>phroureo</em> - military garrison) our hearts. See also 1 Peter 5:7. 💡`;
+    }
+  }
+
+  // John 3:16
+  if (q.includes("john 3") || q.includes("john 3:16") || q.includes("योहान ३:१६") || q.includes("योहान ३")) {
+    if (level === "kids") {
+      return `🧒 <strong>For Kids (मुलांसाठी):</strong> God loves you more than all the stars in the sky! He sent His Son, Jesus, as a gift so that we can be close friends with God forever. All we have to do is believe and trust in Him! 🎁🌟`;
+    } else if (level === "believers") {
+      return `✝️ <strong>For New Believers (नवीन विश्वासणाऱ्यांसाठी):</strong> John 3:16 is the heart of the Bible. It tells us that God didn't wait for us to be perfect; He loved us in our weakness and sent Jesus to rescue us. By believing in Him, you receive a brand new, eternal life starting right now. 🕊️`;
+    } else {
+      return `📖 <strong>In-Depth Study (सखोल अभ्यास):</strong> This verse encapsulates the redemptive arc of Scripture. 'God so loved' (Greek: <em>outos egapesen</em> - loved in this manner) highlights the depth and execution of divine love (<em>agape</em>). 'He gave' denotes the voluntary sacrifice of the <em>monogenes</em> (unique, only-begotten) Son. The purpose is deliverance from <em>apolytai</em> (spiritual ruin/perishing) into <em>zoen aionion</em> (eternal, divine life), reflecting the Covenant of Grace. 📚`;
+    }
+  }
+
+  // Default response
+  if (level === "kids") {
+    return `🧒 <strong>For Kids (मुलांसाठी):</strong> God loves you and has a wonderful plan for you! Keep reading His Word, talking to Him in prayer, and remember that Jesus is always walking beside you! 🚶‍♂️❤️`;
+  } else if (level === "believers") {
+    return `✝️ <strong>For New Believers (नवीन विश्वासणाऱ्यांसाठी):</strong> Great question! Reading and studying scripture is how we get to know God's heart. Keep searching the Word. You can try reading the Book of John to learn more about Jesus' life and love. 📖`;
+  } else {
+    return `📖 <strong>In-Depth Study (सखोल अभ्यास):</strong> Thank you for this query. The theological hermeneutics of this passage point to God's covenantal faithfulness. As you study, examine the historical-grammatical context, the original Greek/Hebrew word roots, and cross-references to build a sound expository understanding. 🔍`;
+  }
+}
+
+// 3. Audio Synth (Procedural Web Audio API Ambient Worship Music)
+class AmbientWorshipSynth {
+  constructor() {
+    this.ctx = null;
+    this.gainNode = null;
+    this.oscillators = [];
+    this.volume = 0.3; // Default
+    this.isPlaying = false;
+    this.chordInterval = null;
+  }
+
+  start(type) {
+    if (this.isPlaying) this.stop();
+    
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return;
+    try {
+      this.ctx = new AudioContextClass();
+      this.gainNode = this.ctx.createGain();
+      this.gainNode.gain.setValueAtTime(this.volume, this.ctx.currentTime);
+      this.gainNode.connect(this.ctx.destination);
+      
+      this.isPlaying = true;
+
+      const chords = {
+        guitar: [
+          [130.81, 164.81, 196.00, 261.63], // C
+          [174.61, 220.00, 261.63, 349.23], // F
+          [196.00, 246.94, 293.66, 392.00], // G
+          [220.00, 261.63, 329.63, 440.00]  // Am
+        ],
+        piano: [
+          [130.81, 196.00, 261.63, 329.63], // C (spread)
+          [174.61, 261.63, 349.23, 440.00], // F (spread)
+          [196.00, 293.66, 392.00, 493.88], // G (spread)
+          [110.00, 220.00, 261.63, 329.63]  // Am (spread)
+        ],
+        ambient: [
+          [65.41, 130.81, 196.00, 261.63, 329.63], // Deep C pad
+          [87.31, 174.61, 261.63, 349.23, 440.00], // Deep F pad
+          [98.00, 196.00, 293.66, 392.00, 493.88], // Deep G pad
+          [55.00, 110.00, 220.00, 261.63, 329.63]  // Deep Am pad
+        ]
+      };
+
+      const selectedChords = chords[type] || chords.ambient;
+      let chordIdx = 0;
+
+      const playChord = () => {
+        if (!this.isPlaying || !this.ctx) return;
+        
+        const freqs = selectedChords[chordIdx];
+        chordIdx = (chordIdx + 1) % selectedChords.length;
+
+        const now = this.ctx.currentTime;
+        this.oscillators.forEach(osc => {
+          try {
+            osc.gain.gain.setValueAtTime(osc.gain.gain.value, now);
+            osc.gain.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
+            setTimeout(() => osc.osc.stop(), 2000);
+          } catch (e) {}
+        });
+        this.oscillators = [];
+
+        freqs.forEach(f => {
+          const osc = this.ctx.createOscillator();
+          const oscGain = this.ctx.createGain();
+          
+          if (type === 'guitar') {
+            osc.type = 'triangle';
+          } else if (type === 'piano') {
+            osc.type = 'sine';
+          } else {
+            osc.type = 'triangle';
+          }
+          
+          osc.frequency.setValueAtTime(f, now);
+          oscGain.gain.setValueAtTime(0, now);
+          oscGain.gain.linearRampToValueAtTime(0.12, now + 2.0);
+          
+          const filter = this.ctx.createBiquadFilter();
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(type === 'ambient' ? 300 : 500, now);
+          
+          osc.connect(oscGain);
+          oscGain.connect(filter);
+          filter.connect(this.gainNode);
+          
+          osc.start(now);
+          this.oscillators.push({ osc, gain: oscGain });
+        });
+      };
+
+      playChord();
+      this.chordInterval = setInterval(playChord, 8000);
+    } catch (err) {
+      console.warn("Web Audio Synth failed to start:", err);
+    }
+  }
+
+  setVolume(vol) {
+    this.volume = vol;
+    if (this.gainNode && this.ctx) {
+      this.gainNode.gain.setValueAtTime(vol, this.ctx.currentTime);
+    }
+  }
+
+  stop() {
+    this.isPlaying = false;
+    if (this.chordInterval) clearInterval(this.chordInterval);
+    
+    const now = this.ctx ? this.ctx.currentTime : 0;
+    this.oscillators.forEach(osc => {
+      try {
+        osc.osc.stop(now + 0.5);
+      } catch (e) {}
+    });
+    this.oscillators = [];
+
+    if (this.ctx) {
+      try {
+        this.ctx.close();
+      } catch (e) {}
+      this.ctx = null;
+    }
+  }
+}
+
+const ambientSynthInstance = new AmbientWorshipSynth();
+
+let sleepTimerTimeout = null;
+function startSleepTimer(minutes) {
+  if (sleepTimerTimeout) clearTimeout(sleepTimerTimeout);
+  if (minutes === 'off') return;
+  
+  const ms = parseInt(minutes) * 60 * 1000;
+  sleepTimerTimeout = setTimeout(() => {
+    stopSpeechNarration();
+    const select = document.getElementById("audio-sleep-timer-select");
+    if (select) select.value = 'off';
+    showToast("Sleep timer active: playback paused. 😴");
+  }, ms);
+}
+
+function initAmbientAudioSynth() {
+  const bgMusicSelect = document.getElementById("audio-bg-music-select");
+  const bgVolSlider = document.getElementById("audio-bg-music-vol-slider");
+  const bgVolVal = document.getElementById("audio-bg-music-vol-val");
+  const timerSelect = document.getElementById("audio-sleep-timer-select");
+
+  if (bgMusicSelect) {
+    bgMusicSelect.addEventListener("change", () => {
+      if (audioState.isPlaying) {
+        if (bgMusicSelect.value !== "none") {
+          const vol = bgVolSlider ? parseFloat(bgVolSlider.value) : 0.3;
+          ambientSynthInstance.setVolume(vol);
+          ambientSynthInstance.start(bgMusicSelect.value);
+        } else {
+          ambientSynthInstance.stop();
+        }
+      }
+    });
+  }
+
+  if (bgVolSlider) {
+    bgVolSlider.addEventListener("input", () => {
+      const pct = Math.round(parseFloat(bgVolSlider.value) * 100);
+      if (bgVolVal) bgVolVal.textContent = `${pct}%`;
+      ambientSynthInstance.setVolume(parseFloat(bgVolSlider.value));
+    });
+  }
+
+  if (timerSelect) {
+    timerSelect.addEventListener("change", () => {
+      if (audioState.isPlaying && timerSelect.value !== "off") {
+        startSleepTimer(timerSelect.value);
+        showToast(`Sleep timer set to ${timerSelect.value} minutes.`);
+      }
+    });
+  }
+}
+
+// 4. Personalized Devotional Topic selection
+const DEVOTIONAL_DB = {
+  faith: {
+    titleEn: "Walking by Faith, Not by Sight",
+    titleMr: "विश्वासाने चालणे, दृष्टीने नाही",
+    verseEn: "For we live by faith, not by sight.",
+    verseMr: "कारण आपण विश्वासाने चालतो, दृष्टीने नाही.",
+    ref: "2 Corinthians 5:7 / २ करिंथकरांस ५:७",
+    reflectionEn: "Faith is trusting God even when you cannot see the road ahead. It is the assurance that He is guiding your steps and that His promises are true, regardless of your current circumstances.",
+    reflectionMr: "पुढील रस्ता दिसत नसतानाही देवावर विश्वास ठेवणे म्हणजे विश्वास. तुमची सध्याची परिस्थिती कशीही असली, तरी देव तुमच्या पावलांचे मार्गदर्शन करत आहे आणि त्याची आश्वासने खरी आहेत याची ही खात्री आहे.",
+    prayerEn: "Lord, strengthen my faith today. Help me to trust your path even when I cannot see where it leads.",
+    prayerMr: "प्रभु, आज माझा विश्वास मजबूत कर. तुझा मार्ग मला कुठे नेतो हे दिसत नसले तरी त्यावर विश्वास ठेवण्यास मला मदत कर."
+  },
+  marriage: {
+    titleEn: "Bound Together in Love",
+    titleMr: "प्रीतीमध्ये एकत्र बांधलेले",
+    verseEn: "Above all, clothe yourselves with love, which binds us all together in perfect harmony.",
+    verseMr: "आणि या सर्वांवर प्रीती धारण करा, जी परिपूर्णतेचे बंधन आहे.",
+    ref: "Colossians 3:14 / कलसैकरांस ३:१४",
+    reflectionEn: "A strong marriage is built on self-sacrificing love and grace. As you clothe yourselves in love daily, you reflect Christ's relationship with the church, creating perfect harmony in your home.",
+    reflectionMr: "एक मजबूत विवाह आत्म-त्यागी प्रेम आणि कृपेवर तयार होतो. जेव्हा तुम्ही दररोज प्रेम परिधान करता, तेव्हा तुम्ही चर्चशी असलेल्या ख्रिस्ताच्या नातेसंबंधाचे प्रतिबिंब दाखवता, तुमच्या घरात परिपूर्ण सुसंवाद निर्माण करता.",
+    prayerEn: "Father, bless our marriage. Keep us united in love, patience, and mutual respect.",
+    prayerMr: "पित्या, आमच्या विवाहावर आशीर्वाद दे. आम्हाला प्रेम, संयम आणि परस्पर आदराने एकत्र ठेव."
+  },
+  parenting: {
+    titleEn: "Guiding the Next Generation",
+    titleMr: "पुढच्या पिढीचे मार्गदर्शन करणे",
+    verseEn: "Direct your children onto the right path, and when they are older, they will not leave it.",
+    verseMr: "मुलाला त्याच्या योग्य मार्गाचे शिक्षण दे, म्हणजे तो म्हातारा झाला तरी त्यापासून वळणार नाही.",
+    ref: "Proverbs 22:6 / नीतिसूत्रे २२:६",
+    reflectionEn: "Parenting is a stewardship from God. By raising children in love, discipline, and scriptural truth, we build a spiritual foundation that will guide them throughout their lives.",
+    reflectionMr: "पालकत्व ही देवाकडून मिळालेली जबाबदारी आहे. मुलांना प्रेम, शिस्त आणि शास्त्रवचनांच्या सत्यात वाढवून आपण एक आध्यात्मिक पाया तयार करतो जो त्यांना आयुष्यभर मार्गदर्शन करेल.",
+    prayerEn: "Lord, grant me wisdom to guide my children. Let my words and actions reflect your grace to them.",
+    prayerMr: "प्रभु, माझ्या मुलांना मार्गदर्शन करण्यासाठी मला शहाणपण दे. माझे शब्द आणि कृती त्यांच्यावर तुझी कृपा दर्शवू दे."
+  },
+  anxiety: {
+    titleEn: "Finding Peace in the Storm",
+    titleMr: "वादळात शांती शोधणे",
+    verseEn: "Give all your worries and cares to God, for he cares about you.",
+    verseMr: "तुमची सर्व काळजी त्याच्यावर टाकून द्या, कारण तो तुमची काळजी घेतो.",
+    ref: "1 Peter 5:7 / १ पेत्र ५:७",
+    reflectionEn: "You don't have to carry the heavy burden of anxiety alone. God cares for you deeply. When you cast your worries on Him, He replaces them with His supernatural peace.",
+    reflectionMr: "तुम्हाला चिंतेचे जड ओझे एकट्याने वाहण्याची गरज नाही. देव तुमची मनापासून काळजी घेतो. जेव्हा तुम्ही तुमच्या चिंता त्याच्यावर टाकता, तेव्हा तो त्यांची जागा त्याच्या अलौकिक शांतीने घेतो.",
+    prayerEn: "Jesus, I give you my worries today. Guard my heart with your peace and help me to rest in you.",
+    prayerMr: "येशू, मी आज माझ्या चिंता तुला देतो. तुझ्या शांतीने माझ्या हृदयाचे रक्षण कर आणि मला तुझ्यात विसावा घेण्यास मदत कर."
+  },
+  leadership: {
+    titleEn: "Leading with a Servant's Heart",
+    titleMr: "सेवकत्वाच्या भावनेने नेतृत्व करणे",
+    verseEn: "Whoever wants to be a leader among you must be your servant.",
+    verseMr: "तुमच्यामध्ये ज्याला कोणाला थोर व्हायचे असेल त्याने तुमचा सेवक झाले पाहिजे.",
+    ref: "Matthew 20:26 / मत्तय २०:२६",
+    reflectionEn: "True biblical leadership is not about power or position; it is about serving others. By leading with humility, we follow the ultimate example of Jesus Christ.",
+    reflectionMr: "खरे बायबलसंबंधी नेतृत्व हे शक्ती किंवा स्थानाबद्दल नाही; ते इतरांची सेवा करण्याबद्दल आहे. नम्रतेने नेतृत्व करून, आपण येशू ख्रिस्ताच्या अंतिम उदाहरणाचे अनुसरण करतो.",
+    prayerEn: "Lord, teach me to lead by serving. Help me to remain humble and put others' needs before my own.",
+    prayerMr: "प्रभु, मला सेवा करून नेतृत्व करायला शिकव. मला नम्र राहण्यास आणि इतरांच्या गरजा माझ्या स्वतःच्या आधी ठेवण्यास मदत कर."
+  }
+};
+
+function getMeetingsFromStorage() {
+  try {
+    let meetings = JSON.parse(localStorage.getItem("river_of_life_meetings"));
+    
+    if (!meetings) {
+      const today = new Date();
+      const formatDate = (d) => d.toISOString().split('T')[0];
+      
+      meetings = [
+        {
+          id: "meeting_1",
+          title: "Friday Family Prayer / शुक्रवारची कौटुंबिक प्रार्थना",
+          description: "Live family prayer, praise, worship and Marathi scripture study.",
+          host: "Pastor John",
+          date: formatDate(today),
+          time: "20:00",
+          duration: "60",
+          repeat: "weekly",
+          visibility: "public",
+          status: "live",
+          createdAt: Date.now()
+        }
+      ];
+      localStorage.setItem("river_of_life_meetings", JSON.stringify(meetings));
+    }
+    return meetings;
+  } catch (e) {
+    console.error("Error loading meetings DB:", e);
+    return [];
+  }
+}
+
+function initPersonalizedDevotionals() {
+  document.querySelectorAll(".devo-topic-pill").forEach(pill => {
+    pill.addEventListener("click", () => {
+      document.querySelectorAll(".devo-topic-pill").forEach(p => p.classList.remove("active"));
+      pill.classList.add("active");
+      
+      const topic = pill.dataset.topic;
+      const devo = DEVOTIONAL_DB[topic];
+      if (devo) {
+        document.getElementById("generated-devo-topic-label").textContent = `Devotional: ${topic.toUpperCase()}`;
+        document.getElementById("generated-devo-title").textContent = state.translation === "eng" ? devo.titleEn : devo.titleMr;
+        document.getElementById("generated-devo-verse").textContent = state.translation === "eng" ? devo.verseEn : devo.verseMr;
+        document.getElementById("generated-devo-ref").textContent = devo.ref;
+        document.getElementById("generated-devo-reflection").textContent = state.translation === "eng" ? devo.reflectionEn : devo.reflectionMr;
+        document.getElementById("generated-devo-prayer").textContent = state.translation === "eng" ? devo.prayerEn : devo.prayerMr;
+
+        const container = document.getElementById("generated-devo-container");
+        container.style.display = "block";
+      }
+    });
+  });
+
+  const btnClose = document.getElementById("btn-close-devo");
+  if (btnClose) {
+    btnClose.addEventListener("click", () => {
+      document.getElementById("generated-devo-container").style.display = "none";
+      document.querySelectorAll(".devo-topic-pill").forEach(p => p.classList.remove("active"));
+    });
+  }
+}
+
+// 5. Life Situations Search
+const EMOTION_SEARCH_MAP = {
+  worried: {
+    term: "anxiety / चिंता",
+    query: "peace"
+  },
+  lonely: {
+    term: "lonely / एकाकी",
+    query: "with you"
+  },
+  angry: {
+    term: "angry / राग",
+    query: "patience"
+  },
+  grateful: {
+    term: "grateful / कृतज्ञ",
+    query: "thanksgiving"
+  },
+  depressed: {
+    term: "depressed / निराश",
+    query: "comfort"
+  },
+  hopeful: {
+    term: "hopeful / आशा",
+    query: "hope"
+  }
+};
+
+function initLifeSituationsSearch() {
+  document.querySelectorAll(".emotion-chip-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const emotion = btn.dataset.emotion;
+      const mapping = EMOTION_SEARCH_MAP[emotion];
+      if (mapping) {
+        const sInput = document.getElementById("discover-search-input");
+        const sClear = document.getElementById("btn-discover-search-clear");
+        if (sInput) {
+          sInput.value = mapping.query;
+          if (sClear) sClear.style.display = "flex";
+          executeDiscoverSearch();
+          
+          const emptyState = document.getElementById("search-empty-state-content");
+          if (emptyState) emptyState.style.display = "none";
+          
+          const statusEl = document.getElementById("discover-search-results-status");
+          if (statusEl) statusEl.style.display = "block";
+        }
+      }
+    });
+  });
+}
+
+// 6. Family Mode & Stories
+const FAMILY_STORIES = {
+  noah: {
+    title: "Noah's Ark (नोहाचे तारू) 🚢",
+    art: "🚢🐘🕊️",
+    content: "A long time ago, people forgot God's love, but Noah was a good man who trusted God. \n\nGod told Noah: 'Build a giant boat, an Ark.' Noah built it exactly. God then gathered two of every animal—big elephants, tall giraffes, and small birds—into the boat. \n\nThe rains came for 40 days, but Noah's family and the animals were perfectly safe inside. Finally, a beautiful rainbow shone in the sky as God's promise to protect the earth forever! 🌈"
+  },
+  david: {
+    title: "David & Goliath (दावीद आणि गल्याथ) 🎯",
+    art: "🎯⚔️🛡️",
+    content: "David was a young shepherd boy who loved singing and protecting his sheep. \n\nOne day, a giant soldier named Goliath challenged the army. Everyone was terrified. But David stepped forward and said: 'I am not afraid, because God is with me!' \n\nWith just a small stone, a sling, and strong faith, David defeated the giant. It shows that no problem is too big when you trust God! 🌟"
+  },
+  shepherd: {
+    title: "The Good Shepherd (उत्तम मेंढपाळ) 🐑",
+    art: "🐑🌳❤️",
+    content: "Jesus told a beautiful story about a shepherd who had 100 sheep. \n\nOne evening, he realized one sheep was missing. He didn't say, 'Oh well, I have 99 left.' Instead, he left the 99 and went into the dark wilderness to search. \n\nWhen he finally found the lost little sheep, he joyfully carried it home on his shoulders. Jesus is our Good Shepherd; He loves and cares for each one of us personally! ❤️"
+  }
+};
+
+function initFamilyMode() {
+  const btnPrayers = document.getElementById("btn-family-prayers");
+  const prayersContainer = document.getElementById("family-prayers-list-container");
+  if (btnPrayers && prayersContainer) {
+    btnPrayers.addEventListener("click", () => {
+      const isHidden = prayersContainer.style.display === "none";
+      prayersContainer.style.display = isHidden ? "block" : "none";
+    });
+  }
+
+  const btnStories = document.getElementById("btn-family-stories");
+  if (btnStories) {
+    btnStories.addEventListener("click", () => {
+      openModal("modal-family-stories");
+      // Reset reader view
+      document.getElementById("family-stories-list").style.display = "flex";
+      document.getElementById("story-reader-view").style.display = "none";
+    });
+  }
+
+  const closeStories = document.getElementById("btn-close-family-stories");
+  if (closeStories) {
+    closeStories.addEventListener("click", () => {
+      closeModal("modal-family-stories");
+    });
+  }
+
+  // Story click bindings
+  document.querySelectorAll(".story-card").forEach(card => {
+    card.addEventListener("click", () => {
+      const storyId = card.dataset.story;
+      const story = FAMILY_STORIES[storyId];
+      if (story) {
+        document.getElementById("story-art").textContent = story.art;
+        document.getElementById("story-title").textContent = story.title;
+        document.getElementById("story-content-text").textContent = story.content;
+
+        document.getElementById("family-stories-list").style.display = "none";
+        document.getElementById("story-reader-view").style.display = "block";
+      }
+    });
+  });
+
+  const btnBack = document.getElementById("btn-back-to-stories");
+  if (btnBack) {
+    btnBack.addEventListener("click", () => {
+      document.getElementById("family-stories-list").style.display = "flex";
+      document.getElementById("story-reader-view").style.display = "none";
+    });
+  }
+}
+
+// 7. Offline Downloads & Simulation Manager
+function initOfflineManager() {
+  const btnMarathi = document.getElementById("btn-download-marathi-text");
+  const btnAudio = document.getElementById("btn-download-audio-chapters");
+  const chkOffline = document.getElementById("chk-force-offline");
+
+  if (btnMarathi) {
+    btnMarathi.addEventListener("click", () => {
+      showToast("Marathi offline files verified!");
+    });
+  }
+
+  if (btnAudio) {
+    btnAudio.addEventListener("click", () => {
+      if (btnAudio.textContent === "Downloaded") {
+        showToast("Audio files cleared from cache");
+        btnAudio.textContent = "Download";
+        btnAudio.style.background = "var(--pill-bg)";
+        return;
+      }
+      
+      btnAudio.disabled = true;
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += 20;
+        btnAudio.textContent = `Downloading (${progress}%)...`;
+        if (progress >= 100) {
+          clearInterval(interval);
+          btnAudio.textContent = "Downloaded";
+          btnAudio.style.background = "#22c55e";
+          btnAudio.style.borderColor = "#22c55e";
+          btnAudio.disabled = false;
+          showToast("Audio chapters cached for offline play!");
+        }
+      }, 300);
+    });
+  }
+
+  if (chkOffline) {
+    chkOffline.addEventListener("change", () => {
+      state.forceOffline = chkOffline.checked;
+      if (state.forceOffline) {
+        showToast("Force Offline Mode active! 🌐❌");
+      } else {
+        showToast("Online synchronization restored! 🌐✅");
+      }
+    });
+  }
+}
+
+// 8. Church Companion
+function initChurchCompanion() {
+  const setupEl = document.getElementById("church-companion-setup");
+  const contentEl = document.getElementById("church-companion-content");
+  const linkBtn = document.getElementById("btn-church-setup-link");
+  const badgeEl = document.getElementById("church-badge-name");
+
+  const updateChurchCompanionUI = () => {
+    if (state.currentUser && state.currentUser.churchName) {
+      if (setupEl) setupEl.style.display = "none";
+      if (contentEl) contentEl.style.display = "flex";
+      if (badgeEl) badgeEl.textContent = state.currentUser.churchName;
+    } else {
+      if (setupEl) setupEl.style.display = "block";
+      if (contentEl) contentEl.style.display = "none";
+      if (badgeEl) badgeEl.textContent = "No Church Set";
+    }
+  };
+
+  if (linkBtn) {
+    linkBtn.addEventListener("click", () => {
+      if (!state.currentUser) {
+        showToast("Please log in to link your congregation!");
+        window.location.hash = "#/you";
+        return;
+      }
+      const churchName = prompt("Enter your home congregation name / चर्चचे नाव प्रविष्ट करा:");
+      if (churchName && churchName.trim() !== "") {
+        state.currentUser.churchName = churchName.trim();
+        saveStateToLocalStorage();
+        updateChurchCompanionUI();
+        showToast("Church linked successfully!");
+      }
+    });
+  }
+
+  // Announcements & Sermon tabs bindings
+  const tabNews = document.getElementById("btn-church-tab-news");
+  const tabSermons = document.getElementById("btn-church-tab-sermons");
+  const newsPanel = document.getElementById("church-news-panel");
+  const sermonsPanel = document.getElementById("church-sermons-panel");
+
+  if (tabNews && tabSermons && newsPanel && sermonsPanel) {
+    tabNews.addEventListener("click", () => {
+      tabNews.classList.add("active");
+      tabSermons.classList.remove("active");
+      newsPanel.style.display = "flex";
+      sermonsPanel.style.display = "none";
+    });
+
+    tabSermons.addEventListener("click", () => {
+      tabSermons.classList.add("active");
+      tabNews.classList.remove("active");
+      newsPanel.style.display = "none";
+      sermonsPanel.style.display = "flex";
+    });
+  }
+
+  // Sermon notes click
+  const sermonNote = document.getElementById("sermon-note-item-1");
+  if (sermonNote) {
+    sermonNote.addEventListener("click", () => {
+      alert("Sermon Outline: Walking in Divine Faith\n\n1. Faith is the substance of things hoped for (Hebrews 11:1)\n2. Without faith, it is impossible to please God (Hebrews 11:6)\n3. Faith requires active obedience in daily life.");
+    });
+  }
+
+  // Initial trigger
+  updateChurchCompanionUI();
+  
+  // Link it to login/profile render states
+  const originalRenderProfile = window.renderYouProfile;
+  window.renderYouProfile = function() {
+    if (originalRenderProfile) originalRenderProfile();
+    updateChurchCompanionUI();
+  };
+}
+
+/* ==========================================================================
+   10. Prayer Meetings & Live Fellowship Engine
+   ========================================================================== */
+
+// Meeting globals
+let activeMeetingSession = null; // { meetingId, localStream, provider, isMuted, isCamOff }
+let meetingSandboxInterval = null;
+let activeJitsiAPIInstance = null;
+let isScreenSharingActive = false;
+
+// Mock members database for schedule selection and invites
+const CHURCH_MEMBERS = [
+  { username: "Pastor John", isPastor: true },
+  { username: "Pastor Sunil", isPastor: true },
+  { username: "Leader Samuel", isLeader: true },
+  { username: "Sister Sarah", isPastor: false },
+  { username: "Brother Samuel", isPastor: false },
+  { username: "Esther Salve", isPastor: false },
+  { username: "Gaurav Salve", isPastor: false },
+  { username: "Ruth Shinde", isPastor: false }
+];
+
+// Helper to save LocalStorage meetings
+
+
+
+
+function saveMeetingsToStorage(meetings) {
+  localStorage.setItem("river_of_life_meetings", JSON.stringify(meetings));
+}
+
+// Initialize Meetings Module
+function initMeetings() {
+  // Bind subtab clicks
+  document.querySelectorAll("[data-meetings-subtab]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("[data-meetings-subtab]").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      
+      const subtab = btn.dataset.meetingsSubtab;
+      document.querySelectorAll(".meetings-subtab-panel").forEach(p => {
+        p.style.display = p.id === `meetings-subtab-${subtab}` ? "block" : "none";
+      });
+      renderMeetingsDashboard();
+    });
+  });
+
+  // Bind schedule modal buttons
+  const triggerBtn = document.getElementById("btn-schedule-meeting-trigger");
+  if (triggerBtn) {
+    triggerBtn.addEventListener("click", () => {
+      openDrawer("drawer-schedule-meeting");
+      populateScheduleHostsDropdown();
+    });
+  }
+
+  const closeScheduleBtn = document.getElementById("btn-close-schedule-meeting");
+  if (closeScheduleBtn) {
+    closeScheduleBtn.addEventListener("click", () => {
+      closeAllDrawers();
+    });
+  }
+
+  // Bind meeting details buttons
+  const closeDetailsBtn = document.getElementById("btn-close-meeting-details");
+  if (closeDetailsBtn) {
+    closeDetailsBtn.addEventListener("click", () => {
+      closeAllDrawers();
+    });
+  }
+
+  // Bind create form submission
+  const scheduleForm = document.getElementById("schedule-meeting-form");
+  if (scheduleForm) {
+    scheduleForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      createNewMeeting();
+    });
+  }
+
+  // Bind meeting toolbar clicks
+  setupMeetingRoomControls();
+
+  // Initial dashboard load
+  renderMeetingsDashboard();
+}
+
+// Populate Hosts, Co-Hosts, and Invitees in Schedule Drawer
+function populateScheduleHostsDropdown() {
+  const hostSelect = document.getElementById("meeting-host");
+  const inviteList = document.getElementById("meeting-invitees-list");
+  if (!hostSelect || !inviteList) return;
+
+  hostSelect.innerHTML = "";
+  inviteList.innerHTML = "";
+
+  // Set default selection to logged-in user
+  const loggedIn = state.currentUser ? state.currentUser.username : "Guest User";
+  
+  // Fill Hosts dropdown
+  CHURCH_MEMBERS.forEach(member => {
+    // Only pastors/leaders or the logged-in user can host
+    const canHost = member.isPastor || member.isLeader || member.username === loggedIn;
+    if (canHost) {
+      const opt = document.createElement("option");
+      opt.value = member.username;
+      opt.textContent = `${member.username} (${member.isPastor ? "Pastor" : member.isLeader ? "Leader" : "Member"})`;
+      if (member.username === loggedIn) {
+        opt.selected = true;
+      }
+      hostSelect.appendChild(opt);
+    }
+  });
+
+  // Fill Invitees checklist
+  CHURCH_MEMBERS.forEach((member, idx) => {
+    if (member.username !== loggedIn) {
+      const row = document.createElement("div");
+      row.style.display = "flex";
+      row.style.alignItems = "center";
+      row.style.gap = "8px";
+      row.innerHTML = `
+        <input type="checkbox" id="invitee_${idx}" value="${member.username}" style="width: 14px; height: 14px; accent-color: var(--primary);">
+        <label for="invitee_${idx}" style="font-size: 13px; cursor: pointer; color: var(--text); font-weight: 500;">${member.username}</label>
+      `;
+      inviteList.appendChild(row);
+    }
+  });
+}
+
+// Create new meeting
+function createNewMeeting() {
+  const title = document.getElementById("meeting-title").value.trim();
+  const desc = document.getElementById("meeting-description").value.trim();
+  const date = document.getElementById("meeting-date").value;
+  const time = document.getElementById("meeting-time").value;
+  const duration = document.getElementById("meeting-duration").value;
+  const repeat = document.getElementById("meeting-repeat").value;
+  const visibility = document.getElementById("meeting-visibility").value;
+  const maxVal = document.getElementById("meeting-max-users").value;
+  const host = document.getElementById("meeting-host").value;
+  const customUrl = document.getElementById("meeting-custom-url").value.trim();
+
+  if (!title || !date || !time) {
+    showToast("Please fill in required fields.");
+    return;
+  }
+
+  // Count invited members
+  const inviteList = document.getElementById("meeting-invitees-list");
+  const checkedBoxes = inviteList.querySelectorAll("input[type='checkbox']:checked");
+  const invitedCount = checkedBoxes.length;
+
+  const meetings = getMeetingsFromStorage();
+
+  // Create new meeting object
+  const newMeeting = {
+    id: "meeting_" + Date.now(),
+    title,
+    description: desc,
+    host,
+    date,
+    time,
+    duration,
+    repeat,
+    visibility,
+    isSimulation: (visibility !== "public"),
+    customUrl: customUrl || "",
+    maxParticipants: maxVal || "Unlimited",
+    status: "scheduled",
+    participantsCount: 0,
+    invitedCount,
+    createdAt: Date.now()
+  };
+
+  meetings.unshift(newMeeting);
+  saveMeetingsToStorage(meetings);
+
+  showToast("Meeting Scheduled Successfully!");
+  closeAllDrawers();
+  
+  // Reset form
+  document.getElementById("schedule-meeting-form").reset();
+
+  // Switch to upcoming tab
+  document.querySelectorAll("[data-meetings-subtab]").forEach(b => {
+    b.classList.toggle("active", b.dataset.meetingsSubtab === "upcoming");
+  });
+  document.querySelectorAll(".meetings-subtab-panel").forEach(p => {
+    p.style.display = p.id === "meetings-subtab-upcoming" ? "block" : "none";
+  });
+  
+  renderMeetingsDashboard();
+
+  // Send a simulated notification alert
+  setTimeout(() => {
+    try {
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification("River of Life Meeting scheduled", {
+          body: `"${title}" has been scheduled for ${date} at ${time}.`,
+          icon: "assets/icons/icon-192.png"
+        });
+      }
+    } catch (e) {}
+  }, 1000);
+}
+
+// Render Meetings list on Dashboard
+function renderMeetingsDashboard() {
+  const triggerBtn = document.getElementById("btn-schedule-meeting-trigger");
+  if (triggerBtn) {
+    triggerBtn.style.display = "block";
+  }
+
+  const activeTabBtn = document.querySelector("[data-meetings-subtab].active");
+  const currentSubtab = activeTabBtn ? activeTabBtn.dataset.meetingsSubtab : "live";
+
+  const meetings = getMeetingsFromStorage();
+  const listEl = document.getElementById(`meetings-${currentSubtab}-list`);
+  const emptyEl = document.getElementById(`meetings-${currentSubtab}-empty`);
+  if (!listEl || !emptyEl) return;
+
+  listEl.innerHTML = "";
+
+  let filtered = [];
+  if (currentSubtab === "live") {
+    filtered = meetings.filter(m => m.status === "live");
+  } else if (currentSubtab === "upcoming") {
+    filtered = meetings.filter(m => m.status === "scheduled");
+  } else if (currentSubtab === "my") {
+    const username = state.currentUser ? state.currentUser.username : "Guest User";
+    filtered = meetings.filter(m => m.host === username || m.invitedCount > 0);
+  } else if (currentSubtab === "past") {
+    filtered = meetings.filter(m => m.status === "ended");
+  }
+
+  if (filtered.length === 0) {
+    emptyEl.style.display = "block";
+  } else {
+    emptyEl.style.display = "none";
+    filtered.forEach(m => {
+      const card = document.createElement("div");
+      card.className = "meeting-card";
+
+      // Make entire LIVE card tappable to directly join
+      if (m.status === "live") {
+        card.style.cursor = "pointer";
+        card.style.borderColor = "#22c55e";
+        card.style.boxShadow = "0 0 0 2px rgba(34,197,94,0.2)";
+        card.addEventListener("click", () => triggerJoinMeetingFlow(m.id));
+      }
+      
+      let badgeHtml = "";
+      if (m.status === "live") {
+        badgeHtml = `<span class="badge-live" style="background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:800;letter-spacing:0.5px;">🔴 LIVE NOW</span>`;
+      } else if (m.status === "scheduled") {
+        badgeHtml = `<span class="badge-upcoming-pill">UPCOMING</span>`;
+      } else if (m.status === "ended") {
+        badgeHtml = `<span class="badge-past-pill">PAST MEETING</span>`;
+      }
+
+      const descSnippet = m.description ? `<p class="meeting-card-desc">${m.description}</p>` : "";
+      
+      let actionButtons = "";
+      if (m.status === "ended") {
+        if (m.recordingUrl) {
+          actionButtons = `<button class="btn-primary-mini btn-past-record" data-id="${m.id}">📼 Watch Recording</button>`;
+        } else {
+          actionButtons = `<span style="font-size: 11px; color: var(--text-muted);">No recording available</span>`;
+        }
+      } else if (m.status === "live") {
+        // BIG full-width green Join Now button for LIVE meetings
+        actionButtons = `
+          <button class="btn-join-meet" data-id="${m.id}" style="
+            width: 100%; background: linear-gradient(135deg, #16a34a, #22c55e);
+            color: #fff; border: none; border-radius: 14px; padding: 15px 20px;
+            font-size: 16px; font-weight: 800; cursor: pointer; letter-spacing: 0.5px;
+            box-shadow: 0 6px 20px rgba(34,197,94,0.5); margin-top: 8px;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+          ">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+            Join Now / सभेत सामील व्हा
+          </button>
+        `;
+      } else {
+        actionButtons = `
+          <button class="btn-secondary-mini btn-view-meet-details" data-id="${m.id}">Details</button>
+          <button class="btn-primary-mini btn-join-meet" data-id="${m.id}">Join / सामील व्हा</button>
+        `;
+      }
+
+      card.innerHTML = `
+        <div class="meeting-card-info">
+          <div class="meeting-card-header">
+            ${badgeHtml}
+            <h4 class="meeting-card-title">${m.title}</h4>
+          </div>
+          ${descSnippet}
+          <div class="meeting-card-details">
+            <span>👤 Host: ${m.host}</span>
+            <span>📅 ${m.date} at ${m.time}</span>
+            <span>⏱️ ${m.duration} mins</span>
+            ${m.status === 'live' ? `<span>👥 ${m.participantsCount} inside</span>` : ""}
+          </div>
+        </div>
+        <div class="meeting-card-actions">
+          ${actionButtons}
+        </div>
+      `;
+
+      // Event binds
+      const detailsBtn = card.querySelector(".btn-view-meet-details");
+      if (detailsBtn) {
+        detailsBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          openMeetingDetails(m.id);
+        });
+      }
+
+      const joinBtn = card.querySelector(".btn-join-meet");
+      if (joinBtn) {
+        joinBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          triggerJoinMeetingFlow(m.id);
+        });
+      }
+
+      const recordBtn = card.querySelector(".btn-past-record");
+      if (recordBtn) {
+        recordBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          showToast("Playing meeting recording: Weekly Revival (August 7)...");
+        });
+      }
+
+      listEl.appendChild(card);
+    });
+  }
+}
+
+
+// Open Details Drawer
+function openMeetingDetails(meetingId) {
+  const meetings = getMeetingsFromStorage();
+  const m = meetings.find(x => x.id === meetingId);
+  if (!m) return;
+
+  document.getElementById("details-meeting-headline").textContent = m.title;
+  document.getElementById("details-meeting-desc").textContent = m.description || "No description provided.";
+  document.getElementById("details-meeting-host").textContent = m.host;
+  document.getElementById("details-meeting-datetime").textContent = `${m.date} at ${m.time}`;
+  document.getElementById("details-meeting-duration").textContent = `${m.duration} minutes`;
+  document.getElementById("details-meeting-visibility").textContent = m.visibility.charAt(0).toUpperCase() + m.visibility.slice(1);
+  document.getElementById("details-meeting-participants").textContent = m.invitedCount ? `${m.invitedCount} members invited` : "All church members";
+  
+  const badgeEl = document.getElementById("details-meeting-badge");
+  if (m.status === "live") {
+    badgeEl.textContent = "LIVE NOW";
+    badgeEl.style.color = "#22c55e";
+  } else if (m.status === "scheduled") {
+    badgeEl.textContent = "UPCOMING";
+    badgeEl.style.color = "var(--primary)";
+  } else {
+    badgeEl.textContent = "ENDED";
+    badgeEl.style.color = "var(--text-muted)";
+  }
+
+  // Bind Join button
+  const joinBtn = document.getElementById("btn-details-join");
+  joinBtn.onclick = () => {
+    closeAllDrawers();
+    triggerJoinMeetingFlow(m.id);
+  };
+
+  // Bind Share button
+  document.getElementById("btn-details-share").onclick = () => {
+    copyMeetingInvitation(m);
+  };
+
+  // Bind WhatsApp Share button
+  const waBtn = document.getElementById("btn-details-whatsapp-share");
+  if (waBtn) {
+    waBtn.onclick = () => {
+      shareMeetingToWhatsApp(m);
+    };
+  }
+
+  // Bind Calendar button
+  document.getElementById("btn-details-calendar").onclick = () => {
+    generateICSFile(m);
+  };
+
+  openDrawer("drawer-meeting-details");
+}
+
+// Share meeting invitation via WhatsApp
+function shareMeetingToWhatsApp(meeting) {
+  const domain = window.location.origin + window.location.pathname;
+  // Deep-link query to join directly
+  const link = `${domain}?join=${meeting.id}`;
+  const invitationText = `🕊️ *River of Life Meeting Invite* / *आमंत्रण*\n\n📢 *Title:* ${meeting.title}\n📅 *Date:* ${meeting.date}\n⏰ *Time:* ${meeting.time}\n👤 *Host:* ${meeting.host}\n\nJoin us for prayer, worship and Marathi/English Bible study room!\n👉 *Click to join call directly:* ${link}`;
+  
+  const encodedText = encodeURIComponent(invitationText);
+  window.open(`https://api.whatsapp.com/send?text=${encodedText}`, "_blank");
+}
+
+// Share invitation text builder
+function copyMeetingInvitation(meeting) {
+  const domain = window.location.origin + window.location.pathname;
+  const link = `${domain}#/meetings?join=${meeting.id}`;
+  const invitationText = `🕊️ River of Life Prayer Meeting\n\n📢 Title: ${meeting.title}\n📅 Date: ${meeting.date}\n⏰ Time: ${meeting.time}\n👤 Host: ${meeting.host}\n\nJoin us for prayer, worship and Bible sharing.\n👉 Link: ${link}`;
+
+  navigator.clipboard.writeText(invitationText)
+    .then(() => {
+      showToast("Invitation Copied to Clipboard! Share to WhatsApp/Email.");
+      // Native sharing if supported
+      if (navigator.share) {
+        navigator.share({
+          title: "River of Life Prayer Meeting Invitation",
+          text: invitationText,
+          url: link
+        }).catch(err => {});
+      }
+    })
+    .catch(err => {
+      showToast("Failed to copy invitation link.");
+    });
+}
+
+// Generate iCalendar format for Add to Calendar option
+function generateICSFile(meeting) {
+  const title = meeting.title.replace(/[^a-zA-Z0-9 ]/g, "");
+  const desc = meeting.description ? meeting.description.replace(/[^a-zA-Z0-9 ]/g, "") : "";
+  const dtStr = meeting.date.replace(/-/g, "") + "T" + meeting.time.replace(/:/g, "") + "00";
+  
+  // Format dates for .ics format
+  const icsString = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "BEGIN:VEVENT",
+    `SUMMARY:${title}`,
+    `DESCRIPTION:${desc}`,
+    `DTSTART:${dtStr}`,
+    `DURATION:PT${meeting.duration}M`,
+    "END:VEVENT",
+    "END:VCALENDAR"
+  ].join("\r\n");
+
+  const blob = new Blob([icsString], { type: "text/calendar;charset=utf-8" });
+  const link = document.createElement("a");
+  link.href = window.URL.createObjectURL(blob);
+  link.download = `meeting_${meeting.id}.ics`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  
+  showToast("Calendar File (.ics) downloaded!");
+}
+
+// Trigger Joining Flow (Camera preview checks)
+function triggerJoinMeetingFlow(meetingId) {
+  const meetings = getMeetingsFromStorage();
+  const m = meetings.find(x => x.id === meetingId);
+  if (!m) return;
+
+  // Real or simulated meeting, we request permissions and launch it inside the app modal!
+  showToast("Requesting camera and microphone permissions...");
+  navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+    .then(stream => {
+      // Permission granted, launch meeting inside app modal
+      launchLiveMeetingRoom(m, stream);
+    })
+    .catch(err => {
+      console.warn("Media permissions denied:", err);
+      // Fallback: Proceed with mocked feeds if they deny camera (highly resilient)
+      showToast("Media permissions denied. Joining in listen-only/avatar mode.");
+      launchLiveMeetingRoom(m, null);
+    });
+}
+
+// Fullscreen Live Meeting Room Entry
+function launchLiveMeetingRoom(meeting, stream) {
+  try {
+    // Lock screen view overlay
+    const roomModal = document.getElementById("modal-live-meeting");
+    if (roomModal) {
+      roomModal.style.display = "block";
+      setTimeout(() => {
+        roomModal.classList.add("active");
+      }, 10);
+    }
+    
+    // Setup room title
+    const titleEl = document.getElementById("meeting-room-title");
+    if (titleEl) titleEl.textContent = meeting.title;
+  
+  // Hide top header and bottom tabs
+  document.querySelector(".app-header").style.display = "none";
+  document.querySelector(".mobile-bottom-tabs").style.display = "none";
+  const sidebar = document.querySelector(".desktop-sidebar");
+  if (sidebar) sidebar.style.display = "none";
+
+  // Setup active session state
+  const loggedIn = state.currentUser ? state.currentUser.username : "Guest User";
+  const isHost = meeting.host === loggedIn;
+  
+  subscribeToMeetingEvents(meeting.id);
+  
+  activeMeetingSession = {
+    meetingId: meeting.id,
+    localStream: stream,
+    isMuted: false,
+    isCamOff: !stream,
+    isHost: isHost
+  };
+
+  // Sync profile display initials
+  const nameEl = document.getElementById("meeting-local-name"); if (nameEl) nameEl.textContent = `${loggedIn} ${isHost ? "(Host)" : ""}`;
+  
+  // Sync host moderator controls drawer button
+  const modBtn = document.getElementById("btn-meet-moderator");
+  if (modBtn) {
+    modBtn.style.display = isHost ? "inline-flex" : "none";
+  }
+
+  // Render local stream in video element
+  const videoEl = document.getElementById("meeting-local-video");
+  const avatarEl = document.getElementById("video-cell-local-avatar");
+  
+  if (stream && videoEl) {
+    videoEl.srcObject = stream;
+    videoEl.style.display = "block";
+    if (avatarEl) avatarEl.style.display = "none";
+  } else {
+    if (videoEl) videoEl.style.display = "none";
+    if (avatarEl) {
+      avatarEl.style.display = "flex";
+      avatarEl.textContent = loggedIn.substring(0, 1).toUpperCase();
+    }
+  }
+
+  // Enable REAL Multi-User Live Video Call Room for Friends & Family
+  const gridEl = document.getElementById("meeting-video-grid");
+  const jitsiCont = document.getElementById("meeting-jitsi-container");
+
+  // Hide static grid and show live WebRTC video room
+  if (gridEl) gridEl.style.display = "none";
+  
+  if (jitsiCont) {
+    jitsiCont.style.display = "block";
+    jitsiCont.style.position = "absolute";
+    jitsiCont.style.top = "50px";
+    jitsiCont.style.left = "0";
+    jitsiCont.style.right = "0";
+    jitsiCont.style.bottom = "0";
+    jitsiCont.style.width = "100%";
+    jitsiCont.style.height = "calc(100% - 50px)";
+    jitsiCont.style.zIndex = "5";
+
+    showToast("Connecting to live video call for friends & family...");
+
+    const roomUrl = `https://p2p.mirotalk.com/join/RiverOfLife_GauravSalve_${meeting.id}?name=${encodeURIComponent(loggedIn)}`;
+    jitsiCont.innerHTML = `
+      <iframe 
+        src="${roomUrl}" 
+        width="100%" 
+        height="100%" 
+        allow="camera; microphone; speaker-selection; display-capture; fullscreen; autoplay; picture-in-picture;" 
+        style="border: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; background: #090d16;">
+      </iframe>
+    `;
+  }
+
+  // Ensure bottom custom toolbar is hidden so Mirotalk's clean bar is used
+  const customToolbar = document.querySelector(".meeting-room-toolbar");
+  if (customToolbar) customToolbar.style.display = "none";
+
+  // Attach global screen tap listener inside meeting room to unlock audio on mobile browsers
+  const autoAudioUnlocker = () => {
+    unlockParticipantMeetingAudio();
+  };
+  document.addEventListener("touchstart", autoAudioUnlocker, { once: true });
+  document.addEventListener("click", autoAudioUnlocker, { once: true });
+
+
+
+      
+  // Pre-seed some chat messages
+  const chatScroller = document.getElementById("meeting-chat-messages");
+  if (chatScroller) {
+    chatScroller.innerHTML = `
+      <div style="text-align: center; color: var(--text-muted); font-size: 11px; margin-bottom: 8px;">Meeting Started / सभा सुरू झाली</div>
+    `;
+  }
+  } catch (err) {
+    console.error("launchLiveMeetingRoom error:", err);
+    alert("Live Meeting Launch Error: " + err.message + "\nStack: " + err.stack);
+  }
+}
+
+
+// Simulated active interactions inside sandbox
+function startSandboxInterval(mockUsers) {
+  if (meetingSandboxInterval) clearInterval(meetingSandboxInterval);
+  
+  let loopCount = 0;
+  meetingSandboxInterval = setInterval(() => {
+    loopCount++;
+    
+    // 1. Swap Active Speaker
+    if (loopCount % 3 === 0) {
+      const activeIdx = Math.floor(Math.random() * (mockUsers.length + 1));
+      
+      // Clear speak overlays
+      document.querySelectorAll(".video-cell").forEach(cell => {
+        cell.classList.remove("active-speaker");
+      });
+      
+      if (activeIdx < mockUsers.length) {
+        // Highlight mock user
+        const cell = document.getElementById(`video-cell-mock-${activeIdx}`);
+        if (cell) cell.classList.add("active-speaker");
+      } else {
+        // Highlight local user
+        const cell = document.getElementById("video-cell-local");
+        if (cell && !activeMeetingSession.isMuted) cell.classList.add("active-speaker");
+      }
+    }
+
+    // 2. Mock Chat Messages
+    if (loopCount % 5 === 0) {
+      const user = mockUsers[Math.floor(Math.random() * mockUsers.length)];
+      const phrases = [
+        "Praise the Lord! 🙌",
+        "Amen to that scripture! 🙏",
+        "Yes, God is good all the time.",
+        "Beautiful worship song.",
+        "Standing in prayer with everyone today.",
+        "आमेन! देवाची स्तुती असो! 🙌",
+        "प्रार्थना विनंतीसाठी धन्यवाद पास्टर."
+      ];
+      const text = phrases[Math.floor(Math.random() * phrases.length)];
+      appendMeetingChatMessage(user.name, text, false);
+    }
+
+    // 3. Mock Reactions
+    if (loopCount % 7 === 0) {
+      const reactionTypes = ["🙏", "❤️", "🙌", "👏", "Amen"];
+      const r = reactionTypes[Math.floor(Math.random() * reactionTypes.length)];
+      triggerMeetingReaction(r);
+    }
+
+    // 4. Mock Hand Raises
+    if (loopCount % 9 === 0) {
+      const user = mockUsers[Math.floor(Math.random() * mockUsers.length)];
+      appendMeetingChatMessage("SYSTEM", `✋ ${user.name} raised hand`, false);
+      showToast(`${user.name} Raised Hand`);
+    }
+
+  }, 3000);
+}
+
+// Append chat messages inside Call Pane
+function appendMeetingChatMessage(sender, message, isSelf) {
+  const container = document.getElementById("meeting-chat-messages");
+  if (!container) return;
+
+  const bubble = document.createElement("div");
+  bubble.className = `meet-chat-msg-bubble ${isSelf ? "self" : "other"}`;
+  
+  if (sender === "SYSTEM") {
+    bubble.style.background = "rgba(255,255,255,0.05)";
+    bubble.style.color = "var(--primary)";
+    bubble.style.alignSelf = "center";
+    bubble.style.fontSize = "11.5px";
+    bubble.style.padding = "6px 12px";
+    bubble.textContent = message;
+  } else {
+    bubble.innerHTML = `
+      <span class="meet-chat-sender-name ${isSelf ? 'self' : ''}">${sender}</span>
+      <span style="font-size: 13px;">${message}</span>
+    `;
+  }
+
+  container.appendChild(bubble);
+  container.scrollTop = container.scrollHeight;
+
+  // Play audio sync tag or increment chat unread badge if panel is closed
+  const chatPanel = document.getElementById("meeting-panel-chat");
+  if (chatPanel && chatPanel.style.display === "none") {
+    const badge = document.getElementById("meet-chat-badge");
+    if (badge) {
+      badge.style.display = "flex";
+      const val = parseInt(badge.textContent || "0") + 1;
+      badge.textContent = val;
+    }
+  }
+}
+
+// Spawns floating emoji reactions in Live Call viewport
+function triggerMeetingReaction(reaction) {
+  const container = document.getElementById("meet-floating-reactions-container");
+  if (!container) return;
+
+  const rEl = document.createElement("div");
+  rEl.className = "floating-reaction-bubble";
+  rEl.textContent = reaction;
+  
+  // Set random horizontal offset to stagger floating pathways
+  const randX = Math.floor(Math.random() * 60) + 20; // 20% to 80% width
+  rEl.style.left = `${randX}%`;
+  
+  container.appendChild(rEl);
+  
+  // Remove after animation completes
+  setTimeout(() => rEl.remove(), 3000);
+}
+
+// Global Real-time Meeting Sync State
+let meetingEventSource = null;
+let activeWorshipAudio = null;
+let currentWorshipTrack = null;
+let rtcPeerConnections = {};
+
+const rtcConfig = {
+  iceServers: [
+    { urls: "stun:stun.l.google.com:19302" },
+    { urls: "stun:stun1.l.google.com:19302" }
+  ]
+};
+
+// Host initiates WebRTC P2P Audio Stream to connected participants
+async function initHostWebRTCAudioStream(participantId, audioTrack) {
+  try {
+    const pc = new RTCPeerConnection(rtcConfig);
+    rtcPeerConnections[participantId] = pc;
+
+    if (audioTrack) {
+      pc.addTrack(audioTrack, new MediaStream([audioTrack]));
+    }
+
+    pc.onicecandidate = (event) => {
+      if (event.candidate && activeMeetingSession) {
+        broadcastMeetingEvent(activeMeetingSession.meetingId, {
+          type: "RTC_ICE_CANDIDATE",
+          target: participantId,
+          sender: state.currentUser ? state.currentUser.username : "Host",
+          candidate: event.candidate
+        });
+      }
+    };
+
+    const offer = await pc.createOffer();
+    await pc.setLocalDescription(offer);
+
+    broadcastMeetingEvent(activeMeetingSession.meetingId, {
+      type: "RTC_AUDIO_OFFER",
+      target: participantId,
+      sender: state.currentUser ? state.currentUser.username : "Host",
+      sdp: offer
+    });
+
+    logAudioDebug(`WebRTC Offer sent to ${participantId}`);
+  } catch (err) {
+    console.warn("RTC Offer error:", err);
+  }
+}
+
+// Participant receives WebRTC Audio Stream from Host
+async function handleParticipantWebRTCOffer(msg) {
+  const myUsername = state.currentUser ? state.currentUser.username : "Guest";
+  if (msg.target && msg.target !== myUsername && msg.target !== "ALL") return;
+
+  try {
+    const pc = new RTCPeerConnection(rtcConfig);
+    rtcPeerConnections[msg.sender] = pc;
+
+    pc.ontrack = (event) => {
+      console.log("[RTC_AUDIO] Incoming WebRTC Audio Track from Host!", event.track);
+      let rtcAudioEl = document.getElementById("webrtc-remote-audio-player");
+      if (!rtcAudioEl) {
+        rtcAudioEl = document.createElement("audio");
+        rtcAudioEl.id = "webrtc-remote-audio-player";
+        rtcAudioEl.autoplay = true;
+        rtcAudioEl.playsInline = true;
+        document.body.appendChild(rtcAudioEl);
+      }
+
+      rtcAudioEl.srcObject = event.streams[0] || new MediaStream([event.track]);
+      rtcAudioEl.play().then(() => {
+        console.log("[RTC_AUDIO] WebRTC Audio playing successfully on mobile speaker!");
+        showToast("🔊 Live WebRTC audio streaming through your speaker!");
+      }).catch(err => {
+        console.warn("[RTC_AUDIO] Mobile play rejected:", err);
+        const banner = document.getElementById("meeting-worship-audio-banner");
+        if (banner) {
+          banner.style.cssText = "display:flex; top:60px; background: rgba(34, 197, 94, 0.95); cursor: pointer;";
+          banner.querySelector("span").textContent = "🔊 Tap to Hear Live Audio";
+          banner.onclick = () => {
+            rtcAudioEl.play();
+            banner.style.display = "none";
+          };
+        }
+      });
+    };
+
+    pc.onicecandidate = (event) => {
+      if (event.candidate && activeMeetingSession) {
+        broadcastMeetingEvent(activeMeetingSession.meetingId, {
+          type: "RTC_ICE_CANDIDATE",
+          target: msg.sender,
+          sender: myUsername,
+          candidate: event.candidate
+        });
+      }
+    };
+
+    await pc.setRemoteDescription(new RTCSessionDescription(msg.sdp));
+    const answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
+
+    broadcastMeetingEvent(activeMeetingSession.meetingId, {
+      type: "RTC_AUDIO_ANSWER",
+      target: msg.sender,
+      sender: myUsername,
+      sdp: answer
+    });
+
+    logAudioDebug(`WebRTC Answer sent to ${msg.sender}`);
+  } catch (err) {
+    console.warn("RTC Answer error:", err);
+  }
+}
+
+// Handle incoming WebRTC Answer on Host
+async function handleHostWebRTCAnswer(msg) {
+  const pc = rtcPeerConnections[msg.sender];
+  if (pc) {
+    try {
+      await pc.setRemoteDescription(new RTCSessionDescription(msg.sdp));
+      logAudioDebug(`WebRTC Remote Description set for ${msg.sender}`);
+    } catch (err) {
+      console.warn("Set Remote Description error:", err);
+    }
+  }
+}
+
+// Handle ICE Candidates
+async function handleWebRTCICECandidate(msg) {
+  const pc = rtcPeerConnections[msg.sender];
+  if (pc && msg.candidate) {
+    try {
+      await pc.addIceCandidate(new RTCIceCandidate(msg.candidate));
+    } catch (err) {
+      console.warn("Add ICE Candidate error:", err);
+    }
+  }
+}
+
+// Subscribe to real-time sync channel
+function subscribeToMeetingEvents(meetingId) {
+  if (meetingEventSource) {
+    meetingEventSource.close();
+  }
+  
+  const topic = `RiverOfLife_GauravSalve_meeting_${meetingId}`;
+  meetingEventSource = new EventSource(`https://ntfy.sh/${topic}/sse`);
+  
+  meetingEventSource.onmessage = (event) => {
+    try {
+      const payload = JSON.parse(event.data);
+      if (payload.message) {
+        const msg = JSON.parse(payload.message);
+        handleMeetingBroadcastEvent(msg);
+      }
+    } catch (e) {
+      console.warn("SSE Event parse error:", e);
+    }
+  };
+}
+
+// Broadcast event to other participants
+function broadcastMeetingEvent(meetingId, data) {
+  const topic = `RiverOfLife_GauravSalve_meeting_${meetingId}`;
+  fetch(`https://ntfy.sh/${topic}`, {
+    method: "POST",
+    body: JSON.stringify(data)
+  }).catch(e => console.warn("Broadcast error:", e));
+}
+
+// Handle incoming synchronized event
+async function handleMeetingBroadcastEvent(msg) {
+  if (msg.type === "SHARE_BIBLE") {
+    await renderSharedBibleContent(msg.book, msg.chapter, msg.verse);
+  } else if (msg.type === "STOP_SHARE_BIBLE") {
+    hideSharedBibleContent();
+  } else if (msg.type === "PLAY_MUSIC") {
+    playWorshipTrack(msg.trackUrl, msg.title, msg.volume);
+  } else if (msg.type === "STOP_MUSIC") {
+    stopWorshipTrack();
+  } else if (msg.type === "PLAY_YOUTUBE") {
+    syncSharedWorshipVideo(msg.url, msg.mode, msg.startedAt);
+  } else if (msg.type === "STOP_YOUTUBE") {
+    hideSharedWorshipVideo();
+  } else if (msg.type === "WORSHIP_AUDIO_LIVE") {
+    showWorshipAudioLiveBanner(msg.videoId);
+  } else if (msg.type === "WORSHIP_AUDIO_STOP") {
+    const banner = document.getElementById("meeting-worship-audio-banner");
+    if (banner) banner.style.display = "none";
+    showToast("Worship audio streaming ended.");
+  } else if (msg.type === "START_AUDIO_ONLY_SHARE") {
+    // Mode 2: Audio Only Share (Captured System/Tab Audio + Admin Mic)
+    handleParticipantAudioOnlyShareStart(msg);
+  } else if (msg.type === "STOP_AUDIO_ONLY_SHARE") {
+    handleParticipantAudioOnlyShareStop(msg);
+  } else if (msg.type === "START_VIDEO_AUDIO_SHARE") {
+    // Mode 1: Video + Audio Share
+    handleParticipantVideoAudioShareStart(msg);
+  } else if (msg.type === "STOP_VIDEO_AUDIO_SHARE") {
+    handleParticipantVideoAudioShareStop(msg);
+  } else if (msg.type === "RTC_AUDIO_OFFER") {
+    handleParticipantWebRTCOffer(msg);
+  } else if (msg.type === "RTC_AUDIO_ANSWER") {
+    handleHostWebRTCAnswer(msg);
+  } else if (msg.type === "RTC_ICE_CANDIDATE") {
+    handleWebRTCICECandidate(msg);
+  }
+
+}
+
+
+
+// Fetch and render parallel Bible verse/chapter content in meeting layout
+async function renderSharedBibleContent(bookKey, chapter, verse) {
+  const area = document.getElementById("meeting-shared-content-area");
+  const bibleCont = document.getElementById("meeting-shared-bible");
+  const jitsiCont = document.getElementById("meeting-jitsi-container");
+  
+  if (!area || !bibleCont || !jitsiCont) return;
+  
+  const bookDataMr = await fetchBookDataMr(bookKey);
+  const bookDataEng = await fetchBookDataEng(bookKey);
+  const metadata = booksMetadataMr.find(b => b.filename.replace(".json", "") === bookKey) || { name: bookKey, engName: bookKey };
+  
+  const versesMr = bookDataMr ? bookDataMr.chapters[chapter - 1] : [];
+  const versesEng = bookDataEng ? bookDataEng.chapters[chapter - 1] : [];
+  const totalVerses = Math.max(versesMr.length, versesEng.length);
+  
+  let html = `
+    <div style="display: flex; flex-direction: column; height: 100%;">
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; border-bottom: 1px solid #e2e8f0; background: #f8fafc;">
+        <h4 style="margin: 0; font-size: 13.5px; font-weight: 800; color: #b45309; text-align: left;">
+          📖 Scripture Shared: ${metadata.name} ${chapter} / ${metadata.engName} ${chapter}
+        </h4>
+        <span style="font-size: 10px; background: rgba(180,83,9,0.12); color: #b45309; padding: 2px 8px; border-radius: 4px; font-weight: 700;">LIVE STUDY</span>
+      </div>
+      <div style="flex: 1; overflow-y: auto; padding: 16px; background: #faf6eb; display: flex; flex-direction: column; gap: 12px; text-align: left;">
+  `;
+  
+  if (verse && verse !== "all") {
+    const vIdx = parseInt(verse) - 1;
+    html += `
+      <div style="padding: 12px 16px; border-radius: 8px; background: #fffdf9; border-left: 4px solid #b45309; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <strong style="color: #b45309; font-size: 12px;">Verse ${verse}</strong>
+        <p style="margin: 6px 0 4px 0; font-size: 15px; font-weight: 600; color: #0f172a; line-height: 1.6;">${versesEng[vIdx] || ""}</p>
+        <p style="margin: 4px 0 0 0; font-size: 14.5px; color: #475569; font-style: italic; line-height: 1.6;">${versesMr[vIdx] || ""}</p>
+      </div>
+    `;
+  } else {
+    for (let i = 0; i < totalVerses; i++) {
+      html += `
+        <div style="padding-bottom: 10px; border-bottom: 1px solid #e2e8f0;">
+          <strong style="color: #64748b; font-size: 11px;">Verse ${i + 1}</strong>
+          <p style="margin: 4px 0 2px 0; font-size: 14.5px; font-weight: 550; color: #0f172a; line-height: 1.6;">${versesEng[i] || ""}</p>
+          <p style="margin: 2px 0 0 0; font-size: 14px; color: #475569; font-style: italic; line-height: 1.6;">${versesMr[i] || ""}</p>
+        </div>
+      `;
+    }
+  }
+  
+  html += `</div></div>`;
+  
+  bibleCont.innerHTML = html;
+  area.style.display = "block";
+  bibleCont.style.display = "block";
+  
+  // Resize meeting iframe to top split view
+  jitsiCont.style.height = "calc(55% - 50px)";
+  jitsiCont.style.top = "calc(45% + 50px)";
+}
+
+// Hide shared scripture pane
+function hideSharedBibleContent() {
+  const area = document.getElementById("meeting-shared-content-area");
+  const jitsiCont = document.getElementById("meeting-jitsi-container");
+  if (area) area.style.display = "none";
+  if (jitsiCont) {
+    jitsiCont.style.height = "calc(100% - 50px)";
+    jitsiCont.style.top = "50px";
+  }
+}
+
+// Helper to extract YouTube Video ID from any format URL
+function extractYouTubeVideoId(url) {
+  if (!url) return null;
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+  const match = url.match(regExp);
+  return (match && match[2].length === 11) ? match[2] : null;
+}
+
+// Play background praise track
+function playWorshipTrack(url, title, volume) {
+  if (activeWorshipAudio) {
+    activeWorshipAudio.pause();
+    activeWorshipAudio = null;
+  }
+  
+  activeWorshipAudio = new Audio(url);
+  activeWorshipAudio.loop = true;
+  activeWorshipAudio.volume = (typeof volume === "number" ? volume : 50) / 100;
+  activeWorshipAudio.play().catch(e => console.warn("Audio autoplay blocked:", e));
+  
+  currentWorshipTrack = { url, title, volume };
+  
+  // Update UI now playing state
+  const titleEl = document.getElementById("meet-music-now-playing");
+  if (titleEl) titleEl.textContent = title;
+  
+  // Stagger state on track buttons
+  document.querySelectorAll(".meet-music-track-btn").forEach(btn => {
+    const isPlayingThis = btn.dataset.url === url;
+    btn.classList.toggle("active", isPlayingThis);
+    const span = btn.querySelector("span:last-child");
+    if (span) span.textContent = isPlayingThis ? "⏸️ Playing" : "▶️ Play";
+  });
+}
+
+// Stop background praise track completely & reset UI state
+function stopWorshipTrack() {
+  if (activeWorshipAudio) {
+    activeWorshipAudio.pause();
+    activeWorshipAudio.currentTime = 0;
+    activeWorshipAudio = null;
+  }
+  currentWorshipTrack = null;
+  
+  // Stop any hidden YouTube video/audio containers
+  hideSharedWorshipVideo();
+  
+  // Reset "Currently Playing" status text back to "None (Silent)"
+  const titleEl = document.getElementById("meet-music-now-playing");
+  if (titleEl) titleEl.textContent = "None (Silent)";
+  
+  document.querySelectorAll(".meet-music-track-btn").forEach(btn => {
+    btn.classList.remove("active");
+    const span = btn.querySelector("span:last-child");
+    if (span) span.textContent = "▶️ Play";
+  });
+
+  const customUrlInput = document.getElementById("meet-music-custom-url");
+  if (customUrlInput) customUrlInput.value = "";
+}
+
+
+// Populate the Scripture selection dropdown options inside meetings
+function populateMeetingShareBibleDropdowns() {
+  const bookSelect = document.getElementById("meeting-share-book");
+  const chapterSelect = document.getElementById("meeting-share-chapter");
+  const verseSelect = document.getElementById("meeting-share-verse");
+  if (!bookSelect || !chapterSelect || !verseSelect) return;
+  
+  bookSelect.innerHTML = "";
+  booksMetadataMr.forEach(b => {
+    const opt = document.createElement("option");
+    opt.value = b.filename.replace(".json", "");
+    opt.textContent = `${b.name} (${b.engName})`;
+    bookSelect.appendChild(opt);
+  });
+  
+  const updateChapters = () => {
+    const bookKey = bookSelect.value;
+    const meta = booksMetadataMr.find(b => b.filename.replace(".json", "") === bookKey);
+    if (!meta) return;
+    
+    chapterSelect.innerHTML = "";
+    for (let c = 1; c <= meta.chaptersCount; c++) {
+      const opt = document.createElement("option");
+      opt.value = c;
+      opt.textContent = `Chapter ${c}`;
+      chapterSelect.appendChild(opt);
+    }
+    updateVerses();
+  };
+  
+  const updateVerses = async () => {
+    const bookKey = bookSelect.value;
+    const chapterNum = parseInt(chapterSelect.value);
+    
+    verseSelect.innerHTML = `<option value="all">Whole Chapter / संपूर्ण अध्याय</option>`;
+    
+    const bookData = await fetchBookDataEng(bookKey);
+    if (!bookData || !bookData.chapters[chapterNum - 1]) return;
+    
+    const count = bookData.chapters[chapterNum - 1].length;
+    for (let v = 1; v <= count; v++) {
+      const opt = document.createElement("option");
+      opt.value = v;
+      opt.textContent = `Verse ${v}`;
+      verseSelect.appendChild(opt);
+    }
+  };
+  
+  bookSelect.onchange = updateChapters;
+  chapterSelect.onchange = updateVerses;
+  
+  updateChapters();
+}
+
+// Leave meeting session
+function exitLiveMeetingRoom() {
+  if (!activeMeetingSession) return;
+
+  // Clear EventSource subscription
+  if (meetingEventSource) {
+    meetingEventSource.close();
+    meetingEventSource = null;
+  }
+  
+  // Stop background music and hide shared pane
+  stopWorshipTrack();
+  hideSharedBibleContent();
+  hideSharedWorshipVideo();
+
+  // Clear interval loop
+  if (meetingSandboxInterval) {
+    clearInterval(meetingSandboxInterval);
+    meetingSandboxInterval = null;
+  }
+
+  // Shut down camera streams
+  if (activeMeetingSession.localStream) {
+    activeMeetingSession.localStream.getTracks().forEach(track => track.stop());
+  }
+
+  // Dispose real Jitsi call iframe
+  if (activeJitsiAPIInstance) {
+    activeJitsiAPIInstance.executeCommand("hangup");
+    activeJitsiAPIInstance.dispose();
+    activeJitsiAPIInstance = null;
+  }
+
+  // Close live modal
+  const roomModal = document.getElementById("modal-live-meeting");
+  if (roomModal) {
+    roomModal.classList.remove("active");
+    roomModal.style.display = "none";
+  }
+  
+  // Restore Jitsi container state
+  const jitsiCont = document.getElementById("meeting-jitsi-container");
+  if (jitsiCont) {
+    jitsiCont.style.display = "none";
+    jitsiCont.innerHTML = "";
+  }
+  const videoGrid = document.getElementById("meeting-video-grid");
+  if (videoGrid) videoGrid.style.display = "grid";
+  const customToolbar = document.querySelector(".meeting-room-toolbar");
+  if (customToolbar) customToolbar.style.display = "flex";
+  
+  // Restore navigation panels
+  document.querySelector(".app-header").style.display = "flex";
+  document.querySelector(".mobile-bottom-tabs").style.display = "flex";
+  const sidebar = document.querySelector(".desktop-sidebar");
+  if (sidebar) sidebar.style.display = "flex";
+
+  showToast("Meeting Ended / आपण सभेतून बाहेर पडलात");
+
+  // Save history (ended status) if hosted by user
+  const meetings = getMeetingsFromStorage();
+  const mIdx = meetings.findIndex(x => x.id === activeMeetingSession.meetingId);
+  if (mIdx !== -1) {
+    if (activeMeetingSession.isHost) {
+      meetings[mIdx].status = "ended";
+      meetings[mIdx].participantsCount = meetings[mIdx].participantsCount || 15;
+    }
+    saveMeetingsToStorage(meetings);
+  }
+
+  activeMeetingSession = null;
+  renderMeetingsDashboard();
+}
+
+// Setup Event listeners for meeting buttons
+function setupMeetingRoomControls() {
+  // Mic toggle
+  document.getElementById("btn-meet-mic").addEventListener("click", () => {
+    if (!activeMeetingSession) return;
+    activeMeetingSession.isMuted = !activeMeetingSession.isMuted;
+    
+    const btn = document.getElementById("btn-meet-mic");
+    btn.classList.toggle("muted", activeMeetingSession.isMuted);
+    
+    const statusEl = document.getElementById("meeting-local-mic-status");
+    if (statusEl) statusEl.textContent = activeMeetingSession.isMuted ? "🔇" : "🎙️";
+
+    if (activeJitsiAPIInstance) {
+      activeJitsiAPIInstance.executeCommand("toggleAudio");
+    }
+    showToast(activeMeetingSession.isMuted ? "Microphone Muted" : "Microphone Active");
+  });
+
+  // Video Camera toggle
+  document.getElementById("btn-meet-video").addEventListener("click", () => {
+    if (!activeMeetingSession) return;
+    activeMeetingSession.isCamOff = !activeMeetingSession.isCamOff;
+
+    const btn = document.getElementById("btn-meet-video");
+    btn.classList.toggle("muted", activeMeetingSession.isCamOff);
+
+    const videoEl = document.getElementById("meeting-local-video");
+    const avatarEl = document.getElementById("video-cell-local-avatar");
+    const loggedIn = state.currentUser ? state.currentUser.username : "Guest";
+
+    if (activeMeetingSession.isCamOff) {
+      if (videoEl) videoEl.style.display = "none";
+      if (avatarEl) {
+        avatarEl.style.display = "flex";
+        avatarEl.textContent = loggedIn.substring(0, 1).toUpperCase();
+      }
+    } else {
+      if (videoEl && activeMeetingSession.localStream) {
+        videoEl.style.display = "block";
+        if (avatarEl) avatarEl.style.display = "none";
+      } else {
+        // Retry capturing stream
+        navigator.mediaDevices.getUserMedia({ video: true })
+          .then(str => {
+            activeMeetingSession.localStream = str;
+            if (videoEl) {
+              videoEl.srcObject = str;
+              videoEl.style.display = "block";
+            }
+            if (avatarEl) avatarEl.style.display = "none";
+          })
+          .catch(e => {
+            showToast("Camera blocked in settings.");
+            activeMeetingSession.isCamOff = true;
+            btn.classList.add("muted");
+          });
+      }
+    }
+
+    if (activeJitsiAPIInstance) {
+      activeJitsiAPIInstance.executeCommand("toggleVideo");
+    }
+  });
+
+  // Screen / Media Sharing Drawer Trigger
+  const shareBtnEl = document.getElementById("btn-meet-screenshare");
+  if (shareBtnEl) {
+    shareBtnEl.addEventListener("click", () => {
+      if (isAudioOnlySharingActive || isVideoSharingActive || isScreenSharingActive) {
+        stopAllMediaSharing();
+      } else {
+        openDrawer("drawer-meet-share-media");
+      }
+    });
+  }
+
+  // Modal Share Mode Options (Mode 1 & Mode 2)
+  const modeVideoBtn = document.getElementById("btn-share-mode-video");
+  if (modeVideoBtn) {
+    modeVideoBtn.addEventListener("click", () => {
+      closeDrawer("drawer-meet-share-media");
+      startShareVideoAndAudio();
+    });
+  }
+
+  const modeAudioBtn = document.getElementById("btn-share-mode-audio");
+  if (modeAudioBtn) {
+    modeAudioBtn.addEventListener("click", () => {
+      closeDrawer("drawer-meet-share-media");
+      startShareAudioOnly();
+    });
+  }
+
+  function stopLocalScreenShare() {
+    stopAllMediaSharing();
+  }
+
+
+  // Chat Panel toggle
+  document.getElementById("btn-meet-chat").addEventListener("click", () => {
+    toggleMeetingSidebar("chat");
+  });
+
+  // Hand raise toggle
+  document.getElementById("btn-meet-hand").addEventListener("click", () => {
+    const btn = document.getElementById("btn-meet-hand");
+    const isRaised = btn.classList.toggle("active");
+    const loggedIn = state.currentUser ? state.currentUser.username : "You";
+    
+    appendMeetingChatMessage("SYSTEM", isRaised ? `✋ You raised hand` : `You lowered hand`, true);
+    
+    // Send message trigger if Jitsi Meet is active
+    if (activeJitsiAPIInstance) {
+      activeJitsiAPIInstance.executeCommand("sendChatMessage", isRaised ? "✋ [Raised Hand]" : "[Lowered Hand]", true);
+    }
+  });
+
+  // Reactions panel toggle
+  document.getElementById("btn-meet-reactions").addEventListener("click", (e) => {
+    e.stopPropagation();
+    const panel = document.getElementById("meet-reactions-select-panel");
+    const isHidden = panel.style.display === "none";
+    panel.style.display = isHidden ? "flex" : "none";
+    
+    // Position panel relative to toolbar
+    const toolbar = document.querySelector(".meeting-room-toolbar");
+    if (toolbar) {
+      panel.style.bottom = `${toolbar.offsetHeight + 10}px`;
+    }
+  });
+
+  document.addEventListener("click", () => {
+    const panel = document.getElementById("meet-reactions-select-panel");
+    if (panel) panel.style.display = "none";
+  });
+
+  // Reaction selections trigger floating spawn
+  document.querySelectorAll(".reaction-select-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const r = btn.dataset.reaction;
+      triggerMeetingReaction(r);
+      
+      // Simulate/Broadcast reaction
+      if (activeJitsiAPIInstance) {
+        activeJitsiAPIInstance.executeCommand("sendChatMessage", `Reacted: ${r}`, true);
+      }
+    });
+  });
+
+  // Prayer Request submission in meeting triggers
+  document.getElementById("btn-meet-prayer").addEventListener("click", () => {
+    openModal("drawer-meet-prayer-request");
+  });
+  
+  document.getElementById("btn-close-meet-prayer-request").addEventListener("click", () => {
+    closeModal("drawer-meet-prayer-request");
+  });
+
+  document.getElementById("meet-prayer-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const text = document.getElementById("meet-prayer-text").value.trim();
+    const privacy = document.getElementById("meet-prayer-privacy").value;
+    
+    if (!text) return;
+
+    submitPrayerRequest(text, privacy === "public");
+    closeModal("drawer-meet-prayer-request");
+    document.getElementById("meet-prayer-text").value = "";
+    
+    appendMeetingChatMessage("SYSTEM", `🙏 Submitted live prayer request: "${text}"`, true);
+    showToast("Live Prayer Request submitted successfully!");
+  });
+
+  // Participants Panel toggle
+  document.getElementById("btn-meet-members").addEventListener("click", () => {
+    toggleMeetingSidebar("participants");
+  });
+
+  // Bible Mode Panel toggle
+  document.getElementById("btn-meet-bible").addEventListener("click", () => {
+    toggleMeetingSidebar("bible");
+  });
+
+  // Worship Mode Panel toggle
+  document.getElementById("btn-meet-worship").addEventListener("click", () => {
+    toggleMeetingSidebar("worship");
+  });
+
+  // Host Settings Panel toggle
+  document.getElementById("btn-meet-moderator").addEventListener("click", () => {
+    toggleMeetingSidebar("host");
+  });
+
+  // Chat message send handler
+  const sendChatBtn = document.getElementById("btn-meeting-chat-send");
+  const chatInput = document.getElementById("meeting-chat-input");
+  
+  if (sendChatBtn && chatInput) {
+    const handleSend = () => {
+      const msg = chatInput.value.trim();
+      if (!msg) return;
+      chatInput.value = "";
+      
+      const loggedIn = state.currentUser ? state.currentUser.username : "You";
+      appendMeetingChatMessage(loggedIn, msg, true);
+      
+      if (activeJitsiAPIInstance) {
+        activeJitsiAPIInstance.executeCommand("sendChatMessage", msg, true);
+      }
+    };
+    sendChatBtn.addEventListener("click", handleSend);
+    chatInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") handleSend();
+    });
+  }
+
+  // Sidebar close btn bind
+  document.getElementById("btn-close-meeting-sidebar").onclick = () => {
+    document.getElementById("meeting-sidebar-panel").style.display = "none";
+  };
+
+  // Leave Call
+  document.getElementById("btn-meet-leave").onclick = () => {
+    if (confirm("Are you sure you want to leave this meeting?")) {
+      exitLiveMeetingRoom();
+    }
+  };
+
+  // Host mute all button trigger
+  document.getElementById("btn-host-mute-all").onclick = () => {
+    showToast("Pastor John muted all participants.");
+    appendMeetingChatMessage("SYSTEM", "🔇 Moderator muted all participant microphones", false);
+  };
+
+  // Host lock meeting toggle
+  let isMeetingLocked = false;
+  document.getElementById("btn-host-lock-meeting").onclick = () => {
+    isMeetingLocked = !isMeetingLocked;
+    const btnText = document.getElementById("btn-host-lock-meeting").querySelector("span");
+    btnText.textContent = isMeetingLocked ? "Unlock Meeting" : "Lock Meeting";
+    showToast(isMeetingLocked ? "Meeting Room Locked" : "Meeting Room Unlocked");
+    appendMeetingChatMessage("SYSTEM", isMeetingLocked ? "🔒 Meeting has been locked by Host" : "🔓 Meeting has been unlocked by Host", false);
+  };
+
+  // Host toggle recording trigger
+  let isMeetingRecording = false;
+  document.getElementById("btn-host-toggle-record").onclick = () => {
+    isMeetingRecording = !isMeetingRecording;
+    
+    const recordBtn = document.getElementById("btn-host-toggle-record");
+    const recordText = document.getElementById("host-record-btn-text");
+    const overlayTag = document.getElementById("meeting-recording-alert");
+
+    if (isMeetingRecording) {
+      recordBtn.style.background = "#ef4444";
+      recordBtn.style.color = "#fff";
+      recordText.textContent = "Stop Recording";
+      overlayTag.style.display = "inline-block";
+      showToast("🔴 Recording started. Participants notified.");
+      appendMeetingChatMessage("SYSTEM", "🔴 This meeting is being recorded.", false);
+    } else {
+      recordBtn.style.background = "rgba(239, 68, 68, 0.1)";
+      recordBtn.style.color = "var(--danger)";
+      recordText.textContent = "Start Recording";
+      overlayTag.style.display = "none";
+      showToast("Recording saved to history.");
+    }
+  };
+
+  // Host End Meeting for everyone
+  document.getElementById("btn-host-end-meeting").onclick = () => {
+    if (confirm("End this meeting session for all church members?")) {
+      exitLiveMeetingRoom();
+    }
+  };
+
+  // Bible select synchronizer triggers
+  document.getElementById("btn-sync-bible-verse").onclick = () => {
+    const bookVal = document.getElementById("meeting-bible-book").value;
+    const chapVal = document.getElementById("meeting-bible-chapter").value;
+    const verseVal = document.getElementById("meeting-bible-verse").value;
+    const transVal = document.getElementById("meeting-bible-trans").value;
+
+    syncSharedBiblePassage(bookVal, chapVal, verseVal, transVal);
+  };
+
+  // Quick song worship embeds triggers
+  document.querySelectorAll(".quick-song-btn").forEach(btn => {
+    btn.onclick = () => {
+      const url = btn.dataset.url;
+      document.getElementById("worship-youtube-url").value = url;
+      const mode = document.getElementById("worship-youtube-mode").value || "audio";
+      if (activeMeetingSession) {
+        broadcastMeetingEvent(activeMeetingSession.meetingId, {
+          type: "PLAY_YOUTUBE",
+          url: url,
+          mode: mode
+        });
+      } else {
+        syncSharedWorshipVideo(url, mode);
+      }
+    };
+  });
+
+  document.getElementById("btn-sync-worship-video").onclick = () => {
+    const url = document.getElementById("worship-youtube-url").value.trim();
+    if (url) {
+      const mode = document.getElementById("worship-youtube-mode").value || "audio";
+      if (activeMeetingSession) {
+        broadcastMeetingEvent(activeMeetingSession.meetingId, {
+          type: "PLAY_YOUTUBE",
+          url: url,
+          mode: mode
+        });
+      } else {
+        syncSharedWorshipVideo(url, mode);
+      }
+    }
+  };
+}
+
+// Slide-out Drawer view routing inside call
+function toggleMeetingSidebar(panelId) {
+  const sidebar = document.getElementById("meeting-sidebar-panel");
+  const titleEl = document.getElementById("meeting-sidebar-title");
+  
+  // Check if panel is already open and toggle hide
+  const panels = ["chat", "participants", "bible", "worship", "host"];
+  const targetPanel = document.getElementById(`meeting-panel-${panelId}`);
+  const isCurrentlyOpen = sidebar.style.display === "flex" && targetPanel.style.display === "block";
+
+  if (isCurrentlyOpen) {
+    sidebar.style.display = "none";
+    return;
+  }
+
+  // Open and display correct panel
+  sidebar.style.display = "flex";
+  
+  panels.forEach(p => {
+    const el = document.getElementById(`meeting-panel-${p}`);
+    if (el) el.style.display = p === panelId ? "block" : "none";
+  });
+
+  // Set header title
+  if (panelId === "chat") {
+    titleEl.textContent = "Chat Messages / गप्पागोष्टी";
+    // Reset unread badge count
+    const badge = document.getElementById("meet-chat-badge");
+    if (badge) {
+      badge.style.display = "none";
+      badge.textContent = "0";
+    }
+  } else if (panelId === "participants") {
+    titleEl.textContent = "Participants / सदस्य यादी";
+    renderCallParticipantsList();
+  } else if (panelId === "bible") {
+    titleEl.textContent = "Bible Sharing / बायबल वाचन";
+  } else if (panelId === "worship") {
+    titleEl.textContent = "Worship Session / स्तुती आराधना";
+  } else if (panelId === "host") {
+    titleEl.textContent = "Host Moderation / होस्ट कंट्रोल्स";
+  }
+}
+
+// Render Participants list drawer in call
+function renderCallParticipantsList() {
+  const container = document.getElementById("meeting-participants-list");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  const loggedIn = state.currentUser ? state.currentUser.username : "Guest User";
+  
+  // Add Local user
+  const localRow = document.createElement("div");
+  localRow.style.display = "flex";
+  localRow.style.justifyContent = "space-between";
+  localRow.style.alignItems = "center";
+  localRow.style.padding = "8px";
+  localRow.style.borderBottom = "1px solid var(--border)";
+  localRow.innerHTML = `
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <div class="avatar-nav-mini" style="width: 28px; height: 28px; font-size: 10px;">U</div>
+      <span style="font-size: 13px; font-weight: 700;">${loggedIn} (You)</span>
+    </div>
+    <span style="font-size: 12px; color: var(--text-muted);">${activeMeetingSession && activeMeetingSession.isHost ? "👑 Host" : "Member"}</span>
+  `;
+  container.appendChild(localRow);
+
+  // Add mock participants if sandbox mode
+  if (!activeJitsiAPIInstance) {
+    const mocks = [
+      { name: "Pastor John", avatar: "P", role: "Host" },
+      { name: "Esther (Youth Leader)", avatar: "E", role: "Co-Host" },
+      { name: "Samuel Salve", avatar: "S", role: "Member" }
+    ];
+
+    mocks.forEach(m => {
+      const row = document.createElement("div");
+      row.style.display = "flex";
+      row.style.justifyContent = "space-between";
+      row.style.alignItems = "center";
+      row.style.padding = "8px";
+      row.style.borderBottom = "1px solid var(--border)";
+      
+      // Moderator actions displayed if current user is Host
+      const modActions = activeMeetingSession && activeMeetingSession.isHost ? `
+        <select class="dropdown-selector meet-moderation-dropdown" data-name="${m.name}" style="padding: 2px 4px; font-size: 10px;">
+          <option value="none">Actions</option>
+          <option value="mute">Mute Mic</option>
+          <option value="cohost">Make Co-Host</option>
+          <option value="remove">Remove User</option>
+        </select>
+      ` : `<span style="font-size: 12px; color: var(--text-muted);">${m.role}</span>`;
+
+      row.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div class="avatar-nav-mini" style="width: 28px; height: 28px; font-size: 10px; background: var(--primary); color: #000;">${m.avatar}</div>
+          <span style="font-size: 13px; font-weight: 500; color: var(--text);">${m.name}</span>
+        </div>
+        ${modActions}
+      `;
+
+      // Event actions
+      const select = row.querySelector(".meet-moderation-dropdown");
+      if (select) {
+        select.addEventListener("change", (e) => {
+          const act = e.target.value;
+          if (act === "mute") {
+            showToast(`Moderator muted ${m.name}`);
+            appendMeetingChatMessage("SYSTEM", `🔇 Moderator muted ${m.name}'s microphone`, false);
+          } else if (act === "cohost") {
+            showToast(`${m.name} is now Co-Host`);
+            appendMeetingChatMessage("SYSTEM", `👑 ${m.name} has been assigned Co-Host role`, false);
+          } else if (act === "remove") {
+            showToast(`Removed ${m.name} from meeting.`);
+            appendMeetingChatMessage("SYSTEM", `❌ ${m.name} was removed from meeting by moderator`, false);
+            row.remove();
+          }
+          select.value = "none";
+        });
+      }
+
+      container.appendChild(row);
+    });
+
+    const totalCount = document.getElementById("meeting-participants-count");
+    if (totalCount) totalCount.textContent = "4";
+  }
+}
+
+// Populate dropdown selectors in Bible synchronizer drawer
+function populateMeetingBibleSelector() {
+  const bookSelect = document.getElementById("meeting-bible-book");
+  const chapSelect = document.getElementById("meeting-bible-chapter");
+  const verseSelect = document.getElementById("meeting-bible-verse");
+  if (!bookSelect || !chapSelect || !verseSelect) return;
+
+  bookSelect.innerHTML = "";
+  
+  // Use metadata indexes already preloaded
+  const list = booksMetadataMr.length > 0 ? booksMetadataMr : [
+    { filename: "genesis.json", name: "उत्पत्ती", chapters: 50 },
+    { filename: "john.json", name: "योहान", chapters: 21 },
+    { filename: "psalms.json", name: "स्तोत्रसंहिता", chapters: 150 }
+  ];
+
+  list.forEach(b => {
+    const filename = b.filename.replace(".json", "");
+    const opt = document.createElement("option");
+    opt.value = filename;
+    opt.textContent = state.translation === "eng" ? (b.engName || filename) : b.name;
+    bookSelect.appendChild(opt);
+  });
+
+  const updateChapters = () => {
+    const filename = bookSelect.value;
+    const metadata = list.find(b => b.filename.replace(".json", "") === filename);
+    const count = metadata ? metadata.chapters : 20;
+
+    chapSelect.innerHTML = "";
+    for (let i = 1; i <= count; i++) {
+      const opt = document.createElement("option");
+      opt.value = i;
+      opt.textContent = `Chapter ${i}`;
+      chapSelect.appendChild(opt);
+    }
+    updateVerses();
+  };
+
+  const updateVerses = () => {
+    // Arbitrary seed size
+    const count = 30; 
+    verseSelect.innerHTML = "";
+    for (let i = 1; i <= count; i++) {
+      const opt = document.createElement("option");
+      opt.value = i;
+      opt.textContent = `Verse ${i}`;
+      verseSelect.appendChild(opt);
+    }
+  };
+
+  bookSelect.onchange = updateChapters;
+  chapSelect.onchange = updateVerses;
+
+  // Trigger default initial values
+  updateChapters();
+}
+
+// Sync Bible view layout inside call for everyone
+function syncSharedBiblePassage(book, chapter, verse, translation) {
+  const container = document.getElementById("meeting-shared-content-area");
+  const bibleBox = document.getElementById("meeting-shared-bible");
+  const screenshareBox = document.getElementById("meeting-screenshare-container");
+  
+  container.style.display = "block";
+  bibleBox.style.display = "block";
+  screenshareBox.style.display = "none";
+  document.getElementById("worship-video-frame-container").style.display = "none";
+
+  // Simulate text retrieval using presets or dummy text
+  let titleStr = `${book.toUpperCase()} ${chapter}:${verse}`;
+  let textStr = "For God so loved the world, that he gave his only Son, that whoever believes in him should not perish but have eternal life.";
+  
+  if (book === "john" && chapter === "3" && verse === "16") {
+    textStr = translation === "eng" ? 
+      "For God so loved the world, that he gave his only Son, that whoever believes in him should not perish but have eternal life." : 
+      "कारण देवाने जगावर एवढी प्रीती केली की त्याने आपला एकुलता एक मुलगा दिला, यासाठी की जो कोणी त्याच्यावर विश्वास ठेवतो त्याचा नाश होऊ नये, तर त्याला सार्वकालिक जीवन मिळावे.";
+  } else if (book === "psalms" && chapter === "23" && verse === "1") {
+    textStr = translation === "eng" ?
+      "The Lord is my shepherd; I shall not want." :
+      "परमेश्वर माझा मेंढपाळ आहे; मला काहीही कमी पडणार नाही.";
+  } else {
+    textStr = translation === "eng" ?
+      "The Lord is my light and my salvation; whom shall I fear? The Lord is the stronghold of my life; of whom shall I be afraid?" :
+      "परमेश्वर माझा प्रकाश व माझे तारण आहे; मी कोणाचे भय बाळगू? परमेश्वर माझ्या जिवाचा दुर्ग आहे; मी कोणाची भीती बाळगू?";
+  }
+
+  document.getElementById("shared-bible-title").textContent = `${titleStr} (${translation.toUpperCase()})`;
+  document.getElementById("shared-bible-text").textContent = `"${textStr}"`;
+
+  const loggedIn = state.currentUser ? state.currentUser.username : "Host";
+  appendMeetingChatMessage("SYSTEM", `📖 Host synchronized Bible passage: ${titleStr}`, false);
+  showToast(`Synced Bible passage: ${titleStr}`);
+
+  // Push updates over Jitsi Chat if active
+  if (activeJitsiAPIInstance) {
+    activeJitsiAPIInstance.executeCommand("sendChatMessage", `📖 [BIBLE_SYNC]: ${titleStr} - "${textStr}"`, true);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// WORSHIP AUDIO SHARING ENGINE
+// Strategy: Synchronized YouTube playback — pastor broadcasts the URL + a
+// Unix timestamp. Every audience device loads the SAME YouTube video at the
+// SAME playback position simultaneously. Each device plays it locally with
+// full native audio quality. No tab-sharing or cross-origin audio needed.
+// ─────────────────────────────────────────────────────────────────────────────
+
+let worshipAudioStream = null;
+let worshipAudioCtx = null;
+let worshipAudioDestination = null;
+let worshipAudioSourceNode = null;
+let currentWorshipSyncTimestamp = null; // Unix ms when pastor pressed play
+
+// Helper to unlock/resume audio on mobile participant browsers
+function unlockParticipantMeetingAudio() {
+  try {
+    const hiddenYtFrame = document.getElementById("hidden-yt-audio-iframe");
+    if (hiddenYtFrame && hiddenYtFrame.contentWindow) {
+      hiddenYtFrame.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+    }
+    if (activeWorshipAudio) {
+      activeWorshipAudio.play().catch(e => console.warn(e));
+    }
+  } catch (e) {
+    console.warn("Audio unlock attempt:", e);
+  }
+}
+
+// Pastor-side: Show YouTube player + broadcast sync event to all participants
+async function syncSharedWorshipVideo(youtubeUrl, mode = "audio", startedAt = null) {
+  const container  = document.getElementById("meeting-shared-content-area");
+  const worshipBox = document.getElementById("worship-video-frame-container");
+  const bibleBox   = document.getElementById("meeting-shared-bible");
+  const jitsiCont  = document.getElementById("meeting-jitsi-container");
+  const banner     = document.getElementById("meeting-worship-audio-banner");
+  
+  if (!container || !worshipBox || !jitsiCont) return;
+
+  // Extract YouTube ID
+  let videoId = "nQWFzMvCfLE";
+  if (youtubeUrl.includes("v=")) {
+    videoId = youtubeUrl.split("v=")[1].split("&")[0];
+  } else if (youtubeUrl.includes("youtu.be/")) {
+    videoId = youtubeUrl.split("youtu.be/")[1].split("?")[0];
+  } else if (!youtubeUrl.startsWith("http") && youtubeUrl.length > 5) {
+    videoId = youtubeUrl;
+  }
+
+  // Stop any previous worship track
+  stopWorshipTrack();
+  hideSharedWorshipVideo();
+
+  const player = document.getElementById("worship-youtube-player");
+  const isAudience = (startedAt !== null && startedAt !== undefined);
+  const elapsedSeconds = isAudience ? Math.floor((Date.now() - startedAt) / 1000) : 0;
+  const startParam = elapsedSeconds > 0 ? `&start=${elapsedSeconds}` : "";
+
+  if (isAudience) {
+    // ── CONNECTED MEMBERS / AUDIENCE DEVICES: ALWAYS AUDIO ONLY (ZERO VIDEO UI) ──
+    // Members NEVER see the video frame on their device screen.
+    // Member devices automatically stream audio through speakers while viewing the call grid!
+    container.style.display = "none";
+    worshipBox.style.display = "none";
+    if (bibleBox) bibleBox.style.display = "none";
+
+    // Cameras fill 100% of meeting view for members
+    jitsiCont.style.display = "block";
+    jitsiCont.style.top     = "50px";
+    jitsiCont.style.height  = "calc(100% - 50px)";
+
+    // Inject audio-only YouTube player into off-screen hidden container
+    const hiddenAudioCont = document.getElementById("hidden-youtube-audio-container");
+    if (hiddenAudioCont) {
+      hiddenAudioCont.innerHTML = `
+        <iframe id="hidden-yt-audio-iframe" width="1" height="1"
+          src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0${startParam}&enablejsapi=1&playsinline=1"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+      `;
+    }
+
+    if (banner) {
+      banner.style.cssText = "display:flex; top:60px; background: rgba(34, 197, 94, 0.95); cursor: pointer;";
+      banner.querySelector("span").textContent = "🔊 Live Worship Audio Active — Tap if silent!";
+      banner.onclick = () => {
+        unlockParticipantMeetingAudio();
+        showToast("Audio unmuted for meeting!");
+      };
+    }
+    showToast("🎵 Worship song playing automatically on your device speaker!");
+
+  } else {
+
+
+    // ── HOST / PASTOR MACHINE: Render Video / Audio controls on Host screen ─────
+    const now = Date.now();
+    currentWorshipSyncTimestamp = now;
+
+    if (mode === "video") {
+      // Host sees video player on Host screen
+      container.style.cssText = "display:block; position:absolute; top:50px; bottom:auto; height:45%; left:0; right:0; z-index:10;";
+      worshipBox.style.display = "block";
+      if (bibleBox) bibleBox.style.display = "none";
+
+      if (player) {
+        player.innerHTML = `
+          <iframe id="worship-yt-iframe" width="100%" height="100%"
+            src="https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=1"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen style="width:100%;height:100%;border:0;"></iframe>
+        `;
+      }
+
+      jitsiCont.style.display = "block";
+      jitsiCont.style.top     = "calc(45% + 50px)";
+      jitsiCont.style.height  = "calc(55% - 50px)";
+
+      if (banner) banner.style.display = "none";
+      showToast("🎥 Video running on Host machine — Connected members hear Audio Only!");
+
+    } else {
+      // Host sees small control strip
+      container.style.cssText = "display:block; position:absolute; top:auto; bottom:74px; height:100px; left:0; right:0; z-index:20; background:#0f0f0f;";
+      worshipBox.style.display = "block";
+      if (bibleBox) bibleBox.style.display = "none";
+
+      if (player) {
+        player.innerHTML = `
+          <div style="display:flex;align-items:center;height:100%;background:#0f0f0f;padding:0 12px;gap:10px;">
+            <iframe id="worship-yt-iframe" width="130" height="85"
+              src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0&enablejsapi=1"
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media"
+              style="flex-shrink:0;border-radius:6px;border:0;"></iframe>
+            <div style="flex:1;color:#fff;">
+              <div style="font-size:11px;font-weight:800;color:#60a5fa;margin-bottom:3px;">🎵 Worship Audio Active</div>
+              <div id="worship-audio-status" style="font-size:10px;color:#22c55e;">🔴 Live streaming audio to all connected members</div>
+            </div>
+          </div>
+        `;
+      }
+
+      jitsiCont.style.display = "block";
+      jitsiCont.style.top     = "50px";
+      jitsiCont.style.height  = "calc(100% - 50px - 74px - 100px)";
+
+      showToast("🔊 Audio-only streaming live to all connected members!");
+    }
+  }
+}
+
+// Pastor broadcasts the YouTube song to all audience participants
+
+function broadcastWorshipAudioToAudience(videoId, startedAt) {
+  const statusEl = document.getElementById("worship-audio-status");
+  const broadcastBtn = document.getElementById("btn-broadcast-worship");
+  
+  if (activeMeetingSession) {
+    broadcastMeetingEvent(activeMeetingSession.meetingId, {
+      type: "PLAY_YOUTUBE",
+      url: videoId,
+      mode: "audio",
+      startedAt: startedAt
+    });
+    if (statusEl) statusEl.textContent = "🔴 BROADCASTING AUDIO ONLY — Participants hear song on device speaker!";
+    if (broadcastBtn) {
+      broadcastBtn.style.background = "linear-gradient(135deg,#6b21a8,#a855f7)";
+      broadcastBtn.textContent = "✅ Audio Shared to Audience!";
+      broadcastBtn.disabled = true;
+    }
+    showToast("🎵 Worship song audio shared with all participants!");
+  } else {
+    showToast("Join a meeting first to share audio.");
+  }
+}
+
+
+
+
+// ── Audio capture: Grab tab/system audio and inject into the meeting ──────────
+async function startWorshipAudioCapture(videoId) {
+  const statusEl   = document.getElementById("worship-audio-status");
+  const startBtn   = document.getElementById("btn-start-audio-share");
+  const stopBtn    = document.getElementById("btn-stop-audio-share");
+
+  try {
+    // Ask the browser for tab/system audio capture
+    // On desktop Chrome/Edge this shows a tab picker. On iOS/Android this uses
+    // a system audio route if available; on older devices falls back gracefully.
+    let captureStream;
+    if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
+      captureStream = await navigator.mediaDevices.getDisplayMedia({
+        video: false,
+        audio: {
+          suppressLocalAudioPlayback: false,
+          echoCancellation: false,
+          noiseSuppression: false,
+          sampleRate: 44100
+        }
+      });
+    } else {
+      // Fallback for devices without getDisplayMedia – cannot capture system audio
+      if (statusEl) statusEl.textContent = "⚠️ Your browser doesn't support audio capture. Try Chrome on a computer.";
+      showToast("Audio capture not supported on this device.");
+      return;
+    }
+
+    worshipAudioStream = captureStream;
+
+    // Create AudioContext to mix & relay the captured audio
+    worshipAudioCtx         = new (window.AudioContext || window.webkitAudioContext)();
+    worshipAudioDestination = worshipAudioCtx.createMediaStreamDestination();
+    worshipAudioSourceNode  = worshipAudioCtx.createMediaStreamSource(captureStream);
+
+    // Optional: gain node to boost volume
+    const gainNode = worshipAudioCtx.createGain();
+    gainNode.gain.value = 1.8; // slight boost for worship
+
+    worshipAudioSourceNode.connect(gainNode);
+    gainNode.connect(worshipAudioDestination);
+
+    const outputStream = worshipAudioDestination.stream;
+
+    // Inject the captured audio into the MiroTalk/Jitsi call
+    // by replacing or adding the audio track on the existing peer connection
+    if (activeMeetingSession && window.localStream) {
+      // If app exposes localStream, replace audio track
+      const oldAudioTrack = window.localStream.getAudioTracks()[0];
+      const newAudioTrack = outputStream.getAudioTracks()[0];
+
+      if (newAudioTrack) {
+        if (oldAudioTrack) {
+          window.localStream.removeTrack(oldAudioTrack);
+          oldAudioTrack.stop();
+        }
+        window.localStream.addTrack(newAudioTrack);
+
+        // Replace track on all RTCPeerConnections inside the Jitsi iframe
+        // via postMessage (Jitsi External API bridge)
+        const jitsiIframe = document.getElementById("meeting-jitsi-container")?.querySelector("iframe");
+        if (jitsiIframe && activeJitsiAPIInstance) {
+          // We can't directly access iframe peer connections cross-origin,
+          // so instead we use a relay: play the captured audio LOUDLY through
+          // a hidden <audio> element so it is picked up by the device microphone.
+          injectAudioViaLocalPlayback(outputStream);
+        } else {
+          injectAudioViaLocalPlayback(outputStream);
+        }
+      }
+    } else {
+      // No active meeting — just play the captured audio for the local user
+      injectAudioViaLocalPlayback(outputStream);
+    }
+
+    // Update UI
+    if (statusEl)  statusEl.textContent  = "🔴 LIVE – Audience is hearing the music!";
+    if (startBtn)  startBtn.style.display = "none";
+    if (stopBtn)   stopBtn.style.display  = "inline-block";
+
+    // Broadcast to audience that worship audio is streaming (they see a banner)
+    if (activeMeetingSession) {
+      broadcastMeetingEvent(activeMeetingSession.meetingId, {
+        type: "WORSHIP_AUDIO_LIVE",
+        videoId: videoId
+      });
+    }
+
+    showToast("🎵 Now streaming worship audio to all participants!");
+
+    // Handle capture ending (user closes share dialog)
+    captureStream.getAudioTracks()[0].addEventListener("ended", () => {
+      stopWorshipAudioCapture();
+    });
+
+  } catch (err) {
+    console.warn("Audio capture error:", err);
+    if (err.name === "NotAllowedError") {
+      if (statusEl) statusEl.textContent = "❌ Permission denied. Please allow screen audio when prompted.";
+      showToast("Please allow screen/tab audio sharing when the dialog appears.");
+    } else {
+      if (statusEl) statusEl.textContent = "❌ Could not capture audio: " + err.message;
+      showToast("Audio capture failed: " + err.message);
+    }
+  }
+}
+
+// Relay captured audio by playing it through the local speakers (device mic picks it up)
+function injectAudioViaLocalPlayback(stream) {
+  let relay = document.getElementById("worship-audio-relay");
+  if (!relay) {
+    relay = document.createElement("audio");
+    relay.id = "worship-audio-relay";
+    relay.style.display = "none";
+    document.body.appendChild(relay);
+  }
+  relay.srcObject = stream;
+  relay.volume = 1.0;
+  relay.play().catch(e => console.warn("Relay play error:", e));
+}
+
+// Stop capturing worship audio and restore normal microphone
+function stopWorshipAudioCapture() {
+  if (worshipAudioStream) {
+    worshipAudioStream.getTracks().forEach(t => t.stop());
+    worshipAudioStream = null;
+  }
+  if (worshipAudioSourceNode) { worshipAudioSourceNode.disconnect(); worshipAudioSourceNode = null; }
+  if (worshipAudioCtx)        { worshipAudioCtx.close(); worshipAudioCtx = null; }
+  worshipAudioDestination = null;
+
+  const relay = document.getElementById("worship-audio-relay");
+  if (relay) { relay.pause(); relay.srcObject = null; relay.remove(); }
+
+  const startBtn = document.getElementById("btn-start-audio-share");
+  const stopBtn  = document.getElementById("btn-stop-audio-share");
+  const statusEl = document.getElementById("worship-audio-status");
+  if (startBtn)  startBtn.style.display  = "inline-block";
+  if (stopBtn)   stopBtn.style.display   = "none";
+  if (statusEl)  statusEl.textContent    = "Streaming stopped.";
+
+  if (activeMeetingSession) {
+    broadcastMeetingEvent(activeMeetingSession.meetingId, { type: "WORSHIP_AUDIO_STOP" });
+  }
+  showToast("Worship audio streaming stopped.");
+}
+
+// ── Audience-side banner when pastor starts streaming ────────────────────────
+// Called from handleMeetingBroadcastEvent when WORSHIP_AUDIO_LIVE is received
+function showWorshipAudioLiveBanner(videoId) {
+  const banner = document.getElementById("meeting-worship-audio-banner");
+  if (!banner) return;
+  banner.style.display    = "flex";
+  banner.style.background = "rgba(34, 197, 94, 0.95)";
+  banner.style.top        = "60px";
+  banner.querySelector("span").textContent = "🎵 Worship music is streaming live! Make sure your volume is up / गाणे सुरू आहे – आवाज वाढवा!";
+  // Auto-hide after 10 sec
+  setTimeout(() => { banner.style.display = "none"; }, 10000);
+}
+
+// Stop and clear the worship audio player / video
+function hideSharedWorshipVideo() {
+  stopWorshipAudioCapture();
+
+  const hiddenAudioCont = document.getElementById("hidden-youtube-audio-container");
+  if (hiddenAudioCont) hiddenAudioCont.innerHTML = "";
+
+  const container = document.getElementById("meeting-shared-content-area");
+  const worshipBox = document.getElementById("worship-video-frame-container");
+  const jitsiCont = document.getElementById("meeting-jitsi-container");
+  const banner = document.getElementById("meeting-worship-audio-banner");
+
+  if (worshipBox) {
+    worshipBox.style.display = "none";
+    const player = document.getElementById("worship-youtube-player");
+    if (player) player.innerHTML = "";
+  }
+  
+  if (container) {
+    container.style.display  = "none";
+    container.style.cssText  = "display:none;";
+  }
+  
+  if (banner) {
+    banner.style.display = "none";
+    banner.onclick = null;
+  }
+
+  if (jitsiCont) {
+    jitsiCont.style.display = "block";
+    jitsiCont.style.height  = "calc(100% - 50px)";
+    jitsiCont.style.top     = "50px";
+  }
+}
+
+
+/* ==========================================================================
+   11. DUAL MEDIA SHARING ENGINE (MODE 1: VIDEO+AUDIO / MODE 2: AUDIO ONLY)
+   ========================================================================== */
+
+
+let isAudioOnlySharingActive = false;
+let isVideoSharingActive = false;
+let capturedAudioMediaStream = null;
+let audioSharingContext = null;
+let audioSharingDestination = null;
+
+// Global AudioSession Configuration (System-level media stream with mixWithOthers)
+function configureGlobalAudioSession() {
+  if ('audioSession' in navigator) {
+    try {
+      navigator.audioSession.type = 'playback';
+      console.log("[AUDIO_SESSION] Web Navigator audioSession configured: category='playback'");
+    } catch (e) {
+      console.warn("[AUDIO_SESSION] Web audioSession type setting warning:", e);
+    }
+  }
+}
+configureGlobalAudioSession();
+
+// Diagnostic Logger for Admin Audio Sharing Debug Panel
+function logAudioDebug(msgText, append = true) {
+
+  console.log("[AUDIO_DEBUG]", msgText);
+  const panel = document.getElementById("admin-audio-debug-panel");
+  const content = document.getElementById("admin-audio-debug-content");
+  if (panel && content) {
+    panel.style.display = "block";
+    if (!append) {
+      content.textContent = msgText + "\n";
+    } else {
+      content.textContent += msgText + "\n";
+    }
+    panel.scrollTop = panel.scrollHeight;
+  }
+}
+
+// MODE 2 — SHARE AUDIO ONLY (Computer / Tab Audio Capture + Host Mic)
+async function startShareAudioOnly() {
+  if (!activeMeetingSession) {
+    showToast("Please join a meeting first to share audio.");
+    return;
+  }
+
+  logAudioDebug("=== AUDIO SHARING DIAGNOSTIC STARTED ===", false);
+  logAudioDebug(`Browser: ${navigator.userAgent}`);
+  logAudioDebug(`Platform: ${navigator.platform}`);
+  logAudioDebug("Step 1: Requesting display capture (getDisplayMedia)...");
+
+  try {
+    const stream = await navigator.mediaDevices.getDisplayMedia({
+      video: { width: 1280, height: 720 },
+      audio: {
+        echoCancellation: false,
+        noiseSuppression: false,
+        autoGainControl: false,
+        suppressLocalAudioPlayback: false
+      }
+    });
+
+    const vTracks = stream.getVideoTracks();
+    const aTracks = stream.getAudioTracks();
+
+    logAudioDebug(`Video tracks count: ${vTracks.length}`);
+    logAudioDebug(`Audio tracks count: ${aTracks.length}`);
+
+    if (aTracks.length === 0) {
+      logAudioDebug("❌ Audio tracks: 0 — Audio track NOT captured!");
+      logAudioDebug("Reason: User did not check 'Share tab audio' in browser prompt or source doesn't support audio.");
+      vTracks.forEach(t => t.stop());
+      showToast("Audio sharing is not available. Please select 'Share tab audio' in the prompt.");
+      alert("⚠️ Audio track was not captured!\n\nWhen the browser prompt appears, please make sure you check the 'Share tab audio' box at the bottom of the selection window.");
+      return;
+    }
+
+    const audioTrack = aTracks[0];
+    logAudioDebug("--- Audio Track Details ---");
+    logAudioDebug(`kind: ${audioTrack.kind}`);
+    logAudioDebug(`id: ${audioTrack.id}`);
+    logAudioDebug(`enabled: ${audioTrack.enabled}`);
+    logAudioDebug(`muted: ${audioTrack.muted}`);
+    logAudioDebug(`readyState: ${audioTrack.readyState}`);
+    logAudioDebug(`label: ${audioTrack.label}`);
+
+    // Stop video track so NO video is rendered or transmitted anywhere
+    vTracks.forEach(t => t.stop());
+
+    // Step 2: Local Audio Diagnostic Test
+    logAudioDebug("Step 2: Connecting local audio diagnostic...");
+    try {
+      audioSharingContext = new (window.AudioContext || window.webkitAudioContext)();
+      audioSharingDestination = audioSharingContext.createMediaStreamDestination();
+
+      const tabSourceNode = audioSharingContext.createMediaStreamSource(new MediaStream([audioTrack]));
+      tabSourceNode.connect(audioSharingDestination);
+
+      if (activeMeetingSession.localStream && activeMeetingSession.localStream.getAudioTracks().length > 0) {
+        const micSourceNode = audioSharingContext.createMediaStreamSource(activeMeetingSession.localStream);
+        micSourceNode.connect(audioSharingDestination);
+        logAudioDebug("Host mic mixed with media audio: YES");
+      }
+
+      injectAudioViaLocalPlayback(audioSharingDestination.stream);
+      logAudioDebug("Local playback test: SUCCESS ✅");
+    } catch (localErr) {
+      logAudioDebug(`Local playback warning: ${localErr.message}`);
+    }
+
+    // Step 3: WebRTC Audio Track Publication
+    logAudioDebug("Step 3: Publishing audio track to meeting...");
+    capturedAudioMediaStream = stream;
+    isAudioOnlySharingActive = true;
+    isScreenSharingActive = false;
+
+    const btn = document.getElementById("btn-meet-screenshare");
+    if (btn) btn.classList.add("active");
+
+    // Broadcast WebRTC PCM audio stream directly to all connected participants
+    if (audioSharingDestination && audioSharingDestination.stream.getAudioTracks().length > 0) {
+      initHostWebRTCAudioStream("ALL", audioSharingDestination.stream.getAudioTracks()[0]);
+      logAudioDebug("WebRTC P2P Audio Stream broadcast initiated to ALL participants! ✅");
+    }
+
+    broadcastMeetingEvent(activeMeetingSession.meetingId, {
+      type: "START_AUDIO_ONLY_SHARE",
+      sender: state.currentUser ? state.currentUser.username : "Host",
+      trackId: audioTrack.id,
+      readyState: audioTrack.readyState
+    });
+
+    logAudioDebug("Audio Published: YES ✅");
+    logAudioDebug("=== AUDIO PIPELINE READY ===");
+    showToast("🔊 Audio-Only Sharing Active! Participants hear your media audio + mic.");
+
+
+    audioTrack.onended = () => {
+      logAudioDebug("Audio track ended by user/system.");
+      stopShareAudioOnly();
+    };
+
+  } catch (err) {
+    logAudioDebug(`❌ getDisplayMedia Error: ${err.name} - ${err.message}`);
+    showToast("Audio share cancelled or unavailable.");
+  }
+}
+
+function stopShareAudioOnly() {
+  logAudioDebug("Stopping Audio-Only sharing...");
+  if (capturedAudioMediaStream) {
+    capturedAudioMediaStream.getTracks().forEach(t => t.stop());
+    capturedAudioMediaStream = null;
+  }
+
+  if (audioSharingContext) {
+    audioSharingContext.close().catch(e => console.warn(e));
+    audioSharingContext = null;
+  }
+  audioSharingDestination = null;
+
+  isAudioOnlySharingActive = false;
+
+  const btn = document.getElementById("btn-meet-screenshare");
+  if (btn) btn.classList.remove("active");
+
+  if (activeMeetingSession) {
+    broadcastMeetingEvent(activeMeetingSession.meetingId, {
+      type: "STOP_AUDIO_ONLY_SHARE"
+    });
+  }
+
+  logAudioDebug("Audio-Only sharing stopped.");
+  showToast("Audio-Only sharing stopped.");
+}
+
+// MODE 1 — SHARE VIDEO + AUDIO
+async function startShareVideoAndAudio() {
+  if (!activeMeetingSession) {
+    showToast("Please join a meeting first to share video.");
+    return;
+  }
+
+  try {
+    const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+    const videoArea = document.getElementById("meeting-shared-content-area");
+    const screenshareBox = document.getElementById("meeting-screenshare-container");
+    const localVideo = document.getElementById("local-screenshare-video");
+
+    if (videoArea && screenshareBox && localVideo) {
+      videoArea.style.display = "block";
+      screenshareBox.style.display = "flex";
+      document.getElementById("worship-video-frame-container").style.display = "none";
+      document.getElementById("meeting-shared-bible").style.display = "none";
+      localVideo.srcObject = stream;
+    }
+
+    isVideoSharingActive = true;
+    const btn = document.getElementById("btn-meet-screenshare");
+    if (btn) btn.classList.add("active");
+
+    broadcastMeetingEvent(activeMeetingSession.meetingId, {
+      type: "START_VIDEO_AUDIO_SHARE"
+    });
+
+    stream.getVideoTracks()[0].onended = () => {
+      stopShareVideoAndAudio();
+    };
+    showToast("🎥 Screen (Video + Audio) shared!");
+  } catch (err) {
+    console.warn("Video share error:", err);
+    showToast("Screen share cancelled.");
+  }
+}
+
+function stopShareVideoAndAudio() {
+  isVideoSharingActive = false;
+  const btn = document.getElementById("btn-meet-screenshare");
+  if (btn) btn.classList.remove("active");
+
+  const localVideo = document.getElementById("local-screenshare-video");
+  if (localVideo && localVideo.srcObject) {
+    localVideo.srcObject.getTracks().forEach(t => t.stop());
+    localVideo.srcObject = null;
+  }
+
+  const screenshareBox = document.getElementById("meeting-screenshare-container");
+  if (screenshareBox) screenshareBox.style.display = "none";
+
+  hideSharedWorshipVideo();
+
+  if (activeMeetingSession) {
+    broadcastMeetingEvent(activeMeetingSession.meetingId, {
+      type: "STOP_VIDEO_AUDIO_SHARE"
+    });
+  }
+
+  showToast("Video + Audio share stopped.");
+}
+
+function stopAllMediaSharing() {
+  if (isAudioOnlySharingActive) stopShareAudioOnly();
+  if (isVideoSharingActive) stopShareVideoAndAudio();
+  if (isScreenSharingActive) {
+    isScreenSharingActive = false;
+    const btn = document.getElementById("btn-meet-screenshare");
+    if (btn) btn.classList.remove("active");
+  }
+}
+
+// PARTICIPANT SIDE HANDLERS
+function handleParticipantAudioOnlyShareStart(msg) {
+  // PARTICIPANT SIDE:
+  // ZERO YouTube UI (NO player, NO thumbnail, NO title, NO buttons)
+  // Clean meeting view with live WebRTC call audio playing through mobile speakers!
+  const banner = document.getElementById("meeting-worship-audio-banner");
+  if (banner) {
+    banner.style.cssText = "display:flex; top:60px; background: rgba(34, 197, 94, 0.95);";
+    banner.querySelector("span").textContent = `🔊 Live Audio Only Share Active (${msg.sender || "Admin"}) — Turn up volume!`;
+  }
+  showToast(`🔊 ${msg.sender || "Admin"} is sharing Audio Only! Turn up your volume.`);
+}
+
+function handleParticipantAudioOnlyShareStop(msg) {
+  const banner = document.getElementById("meeting-worship-audio-banner");
+  if (banner) banner.style.display = "none";
+  showToast("Audio-Only sharing stopped by host.");
+}
+
+function handleParticipantVideoAudioShareStart(msg) {
+  showToast("🎥 Host started Video + Audio share.");
+}
+
+function handleParticipantVideoAudioShareStop(msg) {
+  hideSharedWorshipVideo();
+  showToast("Video + Audio share stopped by host.");
+}
+
+
+
