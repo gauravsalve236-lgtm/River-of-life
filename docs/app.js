@@ -6495,8 +6495,7 @@ function triggerJoinMeetingFlow(meetingId) {
 // Fullscreen Live Meeting Room Entry
 function launchLiveMeetingRoom(meeting, stream) {
   try {
-    console.log("Launching Native Parent Domain WebRTC Fellowship Room:", meeting);
-    
+    console.log("Launching v23 Online Video Fellowship Room:", meeting);
     // Lock screen view overlay
     const roomModal = document.getElementById("modal-live-meeting");
     if (roomModal) {
@@ -6528,6 +6527,10 @@ function launchLiveMeetingRoom(meeting, stream) {
     const loggedIn = (state && state.currentUser) ? state.currentUser.username : "Member";
     const isHost = meeting ? (meeting.host === loggedIn) : false;
     
+    if (meeting && meeting.id) {
+      try { subscribeToMeetingEvents(meeting.id); } catch(e) {}
+    }
+    
     activeMeetingSession = {
       meetingId: meeting ? meeting.id : "default",
       localStream: stream,
@@ -6536,97 +6539,47 @@ function launchLiveMeetingRoom(meeting, stream) {
       isHost: isHost
     };
 
-    // Ensure Native Gallery Video Stage Grid is VISIBLE (display: flex)
-    const gridEl = document.getElementById("meeting-video-grid");
-    if (gridEl) {
-      gridEl.style.display = "flex";
-      gridEl.style.width = "100%";
-      gridEl.style.height = "100%";
+    // Pre-authorize system microphone & camera permissions on Mobile Safari / Chrome before embedding iframe
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+        video: true
+      }).then(s => {
+        console.log("Mobile system microphone & speaker authorized for domain!");
+      }).catch(e => console.warn("Mobile mic authorization notice:", e));
     }
 
-    const videoEl = document.getElementById("meeting-local-video");
-    const avatarEl = document.getElementById("video-cell-local-avatar");
-    const badgeEl = document.getElementById("local-mic-badge");
-
-    // Request direct parent-domain hardware microphone & camera permissions
-    const requestMediaConstraints = {
-      audio: {
-        echoCancellation: true,
-        noiseSuppression: true,
-        autoGainControl: true
-      },
-      video: {
-        facingMode: "user",
-        width: { ideal: 1280 },
-        height: { ideal: 720 }
-      }
-    };
-
-    const attachStreamToDOM = (mediaStream) => {
-      activeMeetingSession.localStream = mediaStream;
-      if (videoEl) {
-        videoEl.srcObject = mediaStream;
-        videoEl.muted = true;
-        videoEl.defaultMuted = true;
-        videoEl.setAttribute("playsinline", "true");
-        videoEl.setAttribute("webkit-playsinline", "true");
-        videoEl.setAttribute("autoplay", "true");
-        videoEl.style.display = "block";
-        videoEl.style.width = "100%";
-        videoEl.style.height = "100%";
-        videoEl.style.objectFit = "cover";
-        
-        const p = videoEl.play();
-        if (p !== undefined) {
-          p.then(() => {
-            if (avatarEl) avatarEl.style.display = "none";
-          }).catch(() => {
-            if (avatarEl) avatarEl.style.display = "none";
-          });
+    // Unlock mobile hardware speaker audio playback on screen touch
+    const unlockSpeakerAudio = () => {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
         }
-      }
-      
-      // Update Mic Badge
-      if (badgeEl) {
-        badgeEl.textContent = "🎙️ Mic Active";
-        badgeEl.style.borderColor = "rgba(74,222,128,0.4)";
-        badgeEl.style.color = "#4ade80";
-      }
+      } catch(e) {}
     };
+    document.addEventListener("touchstart", unlockSpeakerAudio, { once: true });
+    document.addEventListener("click", unlockSpeakerAudio, { once: true });
 
-    if (stream) {
-      attachStreamToDOM(stream);
-    } else if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      navigator.mediaDevices.getUserMedia(requestMediaConstraints)
-        .then(newStream => {
-          console.log("Direct Mobile Hardware Microphone & Camera Granted!");
-          attachStreamToDOM(newStream);
-        })
-        .catch(err => {
-          console.warn("Fallback to audio-only stream:", err);
-          navigator.mediaDevices.getUserMedia({ audio: true })
-            .then(audioOnlyStream => {
-              attachStreamToDOM(audioOnlyStream);
-              if (videoEl) videoEl.style.display = "none";
-              if (avatarEl) avatarEl.style.display = "flex";
-            })
-            .catch(() => {
-              if (videoEl) videoEl.style.display = "none";
-              if (avatarEl) avatarEl.style.display = "flex";
-            });
-        });
+    // Load Live v23 Online Video Conference Room with Full Mic & Speaker Allow Attributes
+    const jitsiCont = document.getElementById("meeting-jitsi-container");
+    if (jitsiCont) {
+      jitsiCont.style.display = "block";
+      const roomSlug = meeting ? `RiverOfLife_Sanctuary_${meeting.id}` : "RiverOfLife_Sanctuary_LiveRoom";
+      const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=1&video=1&name=${encodeURIComponent(loggedIn)}`;
+      
+      jitsiCont.innerHTML = `
+        <iframe 
+          src="${roomUrl}" 
+          width="100%" 
+          height="100%" 
+          allow="camera *; microphone *; speaker-selection *; display-capture *; fullscreen *; autoplay *; picture-in-picture *; accelerometer; gyroscope;" 
+          style="border: none; width: 100%; height: 100%; border-radius: 18px; background: #000;">
+        </iframe>
+      `;
     }
 
-    // Attach tap-to-unlock audio context for mobile hardware speakers
-    const unlockSpeaker = () => {
-      if (activeMeetingSession && activeMeetingSession.localStream) {
-        activeMeetingSession.localStream.getAudioTracks().forEach(t => t.enabled = true);
-      }
-    };
-    document.addEventListener("touchstart", unlockSpeaker, { once: true });
-    document.addEventListener("click", unlockSpeaker, { once: true });
-
-    showToast("Joined Live Fellowship • Mic & Speaker Active 🙏");
+    showToast("Joined Online Video Fellowship Room 🙏");
   } catch (err) {
     console.warn("launchLiveMeetingRoom notice:", err);
   }
