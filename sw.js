@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v20260817-AUDIO-MOBILE-FINAL';
+const CACHE_NAME = 'river-of-life-cache-v20260817-IPHONE-12-PERFECT';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

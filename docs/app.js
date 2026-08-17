@@ -6545,7 +6545,7 @@ function launchLiveMeetingRoom(meeting, stream) {
   // Hide static grid and show live WebRTC video room
   if (gridEl) gridEl.style.display = "none";
   
-  if (jitsiCont) {
+  if (jitsiCont) { jitsiCont.style.display = "none"; jitsiCont.innerHTML = ""; } if (false) {
     jitsiCont.style.display = "block";
     jitsiCont.style.position = "absolute";
     jitsiCont.style.top = "50px";
@@ -6993,7 +6993,7 @@ function hideSharedBibleContent() {
   const area = document.getElementById("meeting-shared-content-area");
   const jitsiCont = document.getElementById("meeting-jitsi-container");
   if (area) area.style.display = "none";
-  if (jitsiCont) {
+  if (jitsiCont) { jitsiCont.style.display = "none"; jitsiCont.innerHTML = ""; } if (false) {
     jitsiCont.style.height = "calc(100% - 50px)";
     jitsiCont.style.top = "50px";
   }
@@ -7157,7 +7157,7 @@ function exitLiveMeetingRoom() {
   
   // Restore Jitsi container state
   const jitsiCont = document.getElementById("meeting-jitsi-container");
-  if (jitsiCont) {
+  if (jitsiCont) { jitsiCont.style.display = "none"; jitsiCont.innerHTML = ""; } if (false) {
     jitsiCont.style.display = "none";
     jitsiCont.innerHTML = "";
   }
@@ -8110,7 +8110,7 @@ function hideSharedWorshipVideo() {
     banner.onclick = null;
   }
 
-  if (jitsiCont) {
+  if (jitsiCont) { jitsiCont.style.display = "none"; jitsiCont.innerHTML = ""; } if (false) {
     jitsiCont.style.display = "block";
     jitsiCont.style.height  = "calc(100% - 50px)";
     jitsiCont.style.top     = "50px";
