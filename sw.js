@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v20260817-IPHONE-12-PERFECT';
+const CACHE_NAME = 'river-of-life-cache-v20260817-LARGE-BUTTONS-PROD';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
