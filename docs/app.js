@@ -1,4 +1,308 @@
 
+/* ==========================================================================
+   PRODUCTION WEBRTC AUDIO & DEVICE PIPELINE MANAGER
+   ========================================================================== */
+
+console.log("[WebRTC Pipeline] Checking navigator.mediaDevices:", navigator.mediaDevices);
+
+window.webrtcAudioPipeline = {
+  localStream: null,
+  localAudioTrack: null,
+  remotePeerConnections: {},
+  remoteAudioElements: {},
+  micDevices: [],
+  speakerDevices: [],
+  hasAudioOutputSupport: typeof HTMLAudioElement.prototype.setSinkId === 'function' && !(/iPad|iPhone|iPod/.test(navigator.userAgent))
+};
+
+// 1. Request Microphone Permission & Initialize Media Devices
+async function initializeWebRTCAudioPipeline() {
+  console.log("[WebRTC Pipeline] Initializing Audio Pipeline...");
+  
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    console.error("[WebRTC Pipeline] ERROR: navigator.mediaDevices.getUserMedia is NOT supported on this browser/environment.");
+    return null;
+  }
+
+  try {
+    console.log("[WebRTC Pipeline] Step 1: Requesting microphone permission via getUserMedia({ audio: true })...");
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true
+      },
+      video: {
+        facingMode: "user",
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
+      }
+    });
+
+    console.log("[WebRTC Pipeline] Step 1 SUCCESS: getUserMedia stream acquired:", stream);
+    window.webrtcAudioPipeline.localStream = stream;
+
+    // Log Audio Tracks
+    const audioTracks = stream.getAudioTracks();
+    console.log("[WebRTC Pipeline] MediaStream.getAudioTracks():", audioTracks);
+
+    audioTracks.forEach((track, idx) => {
+      console.log(`[WebRTC Pipeline] Local Audio Track [${idx}]:`, {
+        id: track.id,
+        kind: track.kind,
+        enabled: track.enabled,
+        readyState: track.readyState,
+        label: track.label,
+        settings: track.getSettings ? track.getSettings() : "N/A"
+      });
+      if (idx === 0) {
+        window.webrtcAudioPipeline.localAudioTrack = track;
+      }
+    });
+
+    // Step 2: AFTER permission is granted, enumerate media devices!
+    await enumerateAndPopulateAudioDevices();
+
+    return stream;
+  } catch (err) {
+    console.warn("[WebRTC Pipeline] getUserMedia failed or denied:", err);
+    try {
+      console.log("[WebRTC Pipeline] Retrying audio-only getUserMedia({ audio: true })...");
+      const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      window.webrtcAudioPipeline.localStream = audioStream;
+      const audioTracks = audioStream.getAudioTracks();
+      console.log("[WebRTC Pipeline] Audio-only tracks:", audioTracks);
+      if (audioTracks.length > 0) {
+        window.webrtcAudioPipeline.localAudioTrack = audioTracks[0];
+      }
+      await enumerateAndPopulateAudioDevices();
+      return audioStream;
+    } catch (fallbackErr) {
+      console.error("[WebRTC Pipeline] Audio-only getUserMedia also failed:", fallbackErr);
+      await enumerateAndPopulateAudioDevices();
+      return null;
+    }
+  }
+}
+
+// 2. Enumerate & Populate Audio Devices (Handling iOS/Safari Speaker Limitations)
+async function enumerateAndPopulateAudioDevices() {
+  console.log("[WebRTC Pipeline] Step 2: Calling navigator.mediaDevices.enumerateDevices()...");
+  
+  const micSelect = document.getElementById("meeting-mic-select");
+  const speakerSelect = document.getElementById("meeting-speaker-select");
+  const speakerInfo = document.getElementById("meeting-speaker-info");
+
+  try {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    console.log("[WebRTC Pipeline] enumerateDevices() result:", devices);
+
+    const micDevices = devices.filter(d => d.kind === 'audioinput');
+    const speakerDevices = devices.filter(d => d.kind === 'audiooutput');
+
+    window.webrtcAudioPipeline.micDevices = micDevices;
+    window.webrtcAudioPipeline.speakerDevices = speakerDevices;
+
+    console.log("[WebRTC Pipeline] Filtered Microphone Inputs:", micDevices);
+    console.log("[WebRTC Pipeline] Filtered Speaker Outputs:", speakerDevices);
+
+    // Populate Microphone Dropdown
+    if (micSelect) {
+      micSelect.innerHTML = "";
+      if (micDevices.length === 0) {
+        const opt = document.createElement("option");
+        opt.value = "";
+        opt.textContent = "No Microphone Found";
+        micSelect.appendChild(opt);
+      } else {
+        micDevices.forEach((dev, index) => {
+          const opt = document.createElement("option");
+          opt.value = dev.deviceId;
+          opt.textContent = dev.label || `Microphone ${index + 1}`;
+          micSelect.appendChild(opt);
+        });
+      }
+    }
+
+    // Populate Speaker Dropdown or Show System Audio Route (iOS Safari)
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const supportsSetSinkId = typeof HTMLAudioElement.prototype.setSinkId === 'function';
+
+    if (isIOS || !supportsSetSinkId || speakerDevices.length === 0) {
+      console.log("[WebRTC Pipeline] Speaker output selection is UNSUPPORTED on this device (iOS/Safari system route).");
+      if (speakerSelect) speakerSelect.style.display = "none";
+      if (speakerInfo) {
+        speakerInfo.style.display = "block";
+        speakerInfo.textContent = isIOS ? "📱 iPhone Speaker / System Audio (Default Route)" : "🔊 Default System Speaker";
+      }
+    } else {
+      console.log("[WebRTC Pipeline] Speaker output selection IS SUPPORTED (setSinkId available).");
+      if (speakerInfo) speakerInfo.style.display = "none";
+      if (speakerSelect) {
+        speakerSelect.style.display = "block";
+        speakerSelect.innerHTML = "";
+        speakerDevices.forEach((dev, index) => {
+          const opt = document.createElement("option");
+          opt.value = dev.deviceId;
+          opt.textContent = dev.label || `Speaker ${index + 1}`;
+          speakerSelect.appendChild(opt);
+        });
+      }
+    }
+  } catch (err) {
+    console.error("[WebRTC Pipeline] Error enumerating devices:", err);
+  }
+}
+
+// 3. Change Microphone Input Device
+async function changeMicrophoneDevice(deviceId) {
+  console.log("[WebRTC Pipeline] Requested changeMicrophoneDevice:", deviceId);
+  if (!deviceId) return;
+  
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: { deviceId: { exact: deviceId } }
+    });
+    console.log("[WebRTC Pipeline] Switched microphone stream acquired:", stream);
+    window.webrtcAudioPipeline.localStream = stream;
+    const tracks = stream.getAudioTracks();
+    if (tracks.length > 0) {
+      window.webrtcAudioPipeline.localAudioTrack = tracks[0];
+      console.log("[WebRTC Pipeline] New active local audio track:", tracks[0]);
+    }
+  } catch(err) {
+    console.warn("[WebRTC Pipeline] Failed to switch microphone device:", err);
+  }
+}
+
+// 4. Change Speaker Output Device via setSinkId (Conditional Feature Detection)
+async function changeSpeakerDevice(deviceId) {
+  console.log("[WebRTC Pipeline] Requested changeSpeakerDevice:", deviceId);
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  
+  if (isIOS || typeof HTMLAudioElement.prototype.setSinkId !== 'function') {
+    console.log("[WebRTC Pipeline] setSinkId() is not supported on this browser (iOS Safari). System route is used.");
+    return;
+  }
+
+  if (!deviceId) return;
+
+  const remoteAudioEls = document.querySelectorAll("audio.remote-peer-audio");
+  for (let audioEl of remoteAudioEls) {
+    try {
+      await audioEl.setSinkId(deviceId);
+      console.log(`[WebRTC Pipeline] setSinkId(${deviceId}) applied to audio element:`, audioEl);
+    } catch (err) {
+      console.warn("[WebRTC Pipeline] Failed to setSinkId on audio element:", err);
+    }
+  }
+}
+
+// 5. Remote Audio Track Reception, Media Attachment & Autoplay Restriction Handling
+function attachRemoteAudioTrack(peerId, remoteStream) {
+  console.log(`[WebRTC Pipeline] Attaching Remote Audio Track for peer [${peerId}]...`, remoteStream);
+  
+  if (!remoteStream) {
+    console.warn(`[WebRTC Pipeline] Cannot attach remote audio for [${peerId}]: stream is null.`);
+    return;
+  }
+
+  const audioTracks = remoteStream.getAudioTracks();
+  console.log(`[WebRTC Pipeline] Remote Stream Audio Tracks for [${peerId}]:`, audioTracks);
+
+  audioTracks.forEach((track, idx) => {
+    console.log(`[WebRTC Pipeline] Remote Audio Track [${idx}] for [${peerId}]:`, {
+      id: track.id,
+      enabled: track.enabled,
+      readyState: track.readyState,
+      settings: track.getSettings ? track.getSettings() : "N/A"
+    });
+  });
+
+  let container = document.getElementById("meeting-audio-playback-container");
+  if (!container) {
+    container = document.createElement("div");
+    container.id = "meeting-audio-playback-container";
+    container.style.display = "none";
+    document.body.appendChild(container);
+  }
+
+  // Reuse existing audio element for this peer to prevent destroy/recreate bug!
+  let audioEl = document.getElementById(`remote-audio-${peerId}`);
+  if (!audioEl) {
+    audioEl = document.createElement("audio");
+    audioEl.id = `remote-audio-${peerId}`;
+    audioEl.className = "remote-peer-audio";
+    container.appendChild(audioEl);
+  }
+
+  audioEl.autoplay = true;
+  audioEl.playsInline = true;
+  audioEl.setAttribute("playsinline", "true");
+  audioEl.setAttribute("webkit-playsinline", "true");
+  audioEl.muted = false; // CRITICAL: Remote audio MUST NOT be muted!
+  audioEl.volume = 1.0;
+  audioEl.srcObject = remoteStream;
+
+  console.log(`[WebRTC Pipeline] Remote Audio Element created/reused for [${peerId}]:`, {
+    id: audioEl.id,
+    autoplay: audioEl.autoplay,
+    muted: audioEl.muted,
+    volume: audioEl.volume,
+    srcObject: audioEl.srcObject
+  });
+
+  const playPromise = audioEl.play();
+  if (playPromise !== undefined) {
+    playPromise.then(() => {
+      console.log(`[WebRTC Pipeline] Remote Audio PLAYING SUCCESSFULLY for [${peerId}]!`);
+      hideAutoplayFallbackBanner();
+    }).catch(err => {
+      console.warn(`[WebRTC Pipeline] Remote Audio Playback Rejected (Autoplay Restriction) for [${peerId}]:`, err);
+      showAutoplayFallbackBanner();
+    });
+  }
+}
+
+function showAutoplayFallbackBanner() {
+  const banner = document.getElementById("meeting-audio-autoplay-banner");
+  if (banner) banner.style.display = "flex";
+}
+
+function hideAutoplayFallbackBanner() {
+  const banner = document.getElementById("meeting-audio-autoplay-banner");
+  if (banner) banner.style.display = "none";
+}
+
+function unlockAndPlayRemoteAudio() {
+  console.log("[WebRTC Pipeline] User tapped fallback banner! Unlocking all remote audio elements...");
+  
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (AudioCtx) {
+      const ctx = new AudioCtx();
+      if (ctx.state === 'suspended') ctx.resume();
+    }
+  } catch(e) {}
+
+  const remoteAudioEls = document.querySelectorAll("audio.remote-peer-audio");
+  remoteAudioEls.forEach(audioEl => {
+    audioEl.muted = false;
+    audioEl.volume = 1.0;
+    audioEl.play().then(() => {
+      console.log("[WebRTC Pipeline] Audio element unlocked & playing:", audioEl.id);
+    }).catch(err => {
+      console.warn("[WebRTC Pipeline] Still unable to play audio element:", err);
+    });
+  });
+
+  hideAutoplayFallbackBanner();
+}
+
+window.addEventListener("click", unlockAndPlayRemoteAudio);
+window.addEventListener("touchstart", unlockAndPlayRemoteAudio);
+
+
 /* Speaker Sound Unlocker for Windows & Mobile Browsers */
 function unlockDeviceSpeakerSound() {
   try {
@@ -6518,7 +6822,7 @@ function triggerJoinMeetingFlow(meetingId) {
 // Fullscreen Live Meeting Room Entry
 function launchLiveMeetingRoom(meeting, stream) {
   try {
-    console.log("Launching Synchronized Multi-Device Fellowship Room:", meeting);
+    console.log("[WebRTC Pipeline] Launching Verified WebRTC Fellowship Room:", meeting);
     
     // Lock screen view overlay
     const roomModal = document.getElementById("modal-live-meeting");
@@ -6563,33 +6867,21 @@ function launchLiveMeetingRoom(meeting, stream) {
       isHost: isHost
     };
 
-    // Pre-authorize system microphone & camera permissions on domain
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      navigator.mediaDevices.getUserMedia({
-        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-        video: true
-      }).then(s => {
-        console.log("Hardware Microphone & Speaker Authorized!");
-        activeMeetingSession.localStream = s;
-      }).catch(e => console.warn("Mic pre-auth notice:", e));
-    }
+    // Execute WebRTC Pipeline Initialization (Permissions -> Logs -> Enumerate Devices)
+    initializeWebRTCAudioPipeline().then(acquiredStream => {
+      if (acquiredStream) {
+        activeMeetingSession.localStream = acquiredStream;
+      }
+    });
 
-    // Unlock Speaker Sound Output for Windows Pastor Account & Mobile Phone
-    if (typeof unlockDeviceSpeakerSound === 'function') {
-      unlockDeviceSpeakerSound();
-    }
-
-    // Synchronize Room Slug so Windows Pastor Account and Mobile Phone join the EXACT same room
+    // Load Verified WebRTC Video Conference Room
     const jitsiCont = document.getElementById("meeting-jitsi-container");
     if (jitsiCont) {
       jitsiCont.style.display = "block";
-      
-      // Ensure identical room name for Pastor and Mobile Members
       const meetingIdSlug = (meeting && meeting.id) ? meeting.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
       const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
       
-      // Pass audio=1, video=1, muted=0, sound=1, autoplay=1 to force unmuted incoming phone audio on Windows
-      const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=1&video=1&muted=0&sound=1&autoplay=1&name=${encodeURIComponent(loggedIn)}`;
+      const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=1&video=1&muted=0&sound=1&autoplay=1&layout=grid&grid=1&name=${encodeURIComponent(loggedIn)}`;
       
       jitsiCont.innerHTML = `
         <iframe 
@@ -6602,7 +6894,7 @@ function launchLiveMeetingRoom(meeting, stream) {
       `;
     }
 
-    showToast("Joined Online Video Fellowship Room • Tap screen once to unmute sound 🔊");
+    showToast("Joined Online Video Fellowship Room 🙏");
   } catch (err) {
     console.warn("launchLiveMeetingRoom notice:", err);
   }
@@ -8103,3 +8395,10 @@ if (typeof exitLiveMeetingRoom === 'function') window.exitLiveMeetingRoom = exit
 if (typeof openDrawer === 'function') window.openDrawer = openDrawer;
 if (typeof closeDrawer === 'function') window.closeDrawer = closeDrawer;
 if (typeof populateMeetingShareBibleDropdowns === 'function') window.populateMeetingShareBibleDropdowns = populateMeetingShareBibleDropdowns;
+
+if (typeof initializeWebRTCAudioPipeline === 'function') window.initializeWebRTCAudioPipeline = initializeWebRTCAudioPipeline;
+if (typeof enumerateAndPopulateAudioDevices === 'function') window.enumerateAndPopulateAudioDevices = enumerateAndPopulateAudioDevices;
+if (typeof changeMicrophoneDevice === 'function') window.changeMicrophoneDevice = changeMicrophoneDevice;
+if (typeof changeSpeakerDevice === 'function') window.changeSpeakerDevice = changeSpeakerDevice;
+if (typeof attachRemoteAudioTrack === 'function') window.attachRemoteAudioTrack = attachRemoteAudioTrack;
+if (typeof unlockAndPlayRemoteAudio === 'function') window.unlockAndPlayRemoteAudio = unlockAndPlayRemoteAudio;

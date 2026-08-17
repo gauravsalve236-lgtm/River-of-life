@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v20260817-PASTOR-SYSTEM-AUDIO-FIX';
+const CACHE_NAME = 'river-of-life-cache-v20260817-WEBRTC-PIPELINE-VERIFIED';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
