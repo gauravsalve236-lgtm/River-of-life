@@ -6480,6 +6480,7 @@ function triggerJoinMeetingFlow(meetingId) {
 // Fullscreen Live Meeting Room Entry
 function launchLiveMeetingRoom(meeting, stream) {
   try {
+    console.log("Launching Live Meeting Room:", meeting);
     // Lock screen view overlay
     const roomModal = document.getElementById("modal-live-meeting");
     if (roomModal) {
@@ -6490,632 +6491,105 @@ function launchLiveMeetingRoom(meeting, stream) {
     }
     
     // Setup room title
-    const titleEl = document.getElementById("meeting-room-title");
-    if (titleEl) titleEl.textContent = meeting.title;
-  
-  // Hide top header and bottom tabs
-  document.querySelector(".app-header").style.display = "none";
-  document.querySelector(".mobile-bottom-tabs").style.display = "none";
-  const sidebar = document.querySelector(".desktop-sidebar");
-  if (sidebar) sidebar.style.display = "none";
-
-  // Setup active session state
-  const loggedIn = state.currentUser ? state.currentUser.username : "Guest User";
-  const isHost = meeting.host === loggedIn;
-  
-  subscribeToMeetingEvents(meeting.id);
-  
-  activeMeetingSession = {
-    meetingId: meeting.id,
-    localStream: stream,
-    isMuted: false,
-    isCamOff: !stream,
-    isHost: isHost
-  };
-
-  // Sync profile display initials
-  const nameEl = document.getElementById("meeting-local-name"); if (nameEl) nameEl.textContent = `${loggedIn} ${isHost ? "(Host)" : ""}`;
-  
-  // Sync host moderator controls drawer button
-  const modBtn = document.getElementById("btn-meet-moderator");
-  if (modBtn) {
-    modBtn.style.display = isHost ? "inline-flex" : "none";
-  }
-
-  // Render local stream in video element
-  const videoEl = document.getElementById("meeting-local-video");
-  const avatarEl = document.getElementById("video-cell-local-avatar");
-  
-  if (stream && videoEl) {
-    videoEl.srcObject = stream;
-    videoEl.style.display = "block";
-    if (avatarEl) avatarEl.style.display = "none";
-  } else {
-    if (videoEl) videoEl.style.display = "none";
-    if (avatarEl) {
-      avatarEl.style.display = "flex";
-      avatarEl.textContent = loggedIn.substring(0, 1).toUpperCase();
+    const titleEl = document.getElementById("meeting-room-title-display");
+    if (titleEl && meeting && meeting.title) {
+      titleEl.textContent = meeting.title;
     }
-  }
-
-  // Enable REAL Multi-User Live Video Call Room for Friends & Family
-  const gridEl = document.getElementById("meeting-video-grid");
-  const jitsiCont = document.getElementById("meeting-jitsi-container");
-
-  // Hide static grid and show live WebRTC video room
-  if (gridEl) gridEl.style.display = "none";
+    const legacyTitle = document.getElementById("meeting-room-title");
+    if (legacyTitle && meeting && meeting.title) {
+      legacyTitle.textContent = meeting.title;
+    }
   
-  if (jitsiCont) { jitsiCont.style.display = "none"; jitsiCont.innerHTML = ""; } if (false) {
-    jitsiCont.style.display = "block";
-    jitsiCont.style.position = "absolute";
-    jitsiCont.style.top = "50px";
-    jitsiCont.style.left = "0";
-    jitsiCont.style.right = "0";
-    jitsiCont.style.bottom = "0";
-    jitsiCont.style.width = "100%";
-    jitsiCont.style.height = "calc(100% - 50px)";
-    jitsiCont.style.zIndex = "5";
+    // Hide top header and bottom tabs
+    const header = document.querySelector(".app-header");
+    if (header) header.style.display = "none";
+    const tabs = document.querySelector(".mobile-bottom-tabs");
+    if (tabs) tabs.style.display = "none";
+    const sidebar = document.querySelector(".desktop-sidebar");
+    if (sidebar) sidebar.style.display = "none";
 
-    showToast("Connecting to live video call for friends & family...");
-
-    const roomUrl = `https://p2p.mirotalk.com/join/RiverOfLife_GauravSalve_${meeting.id}?name=${encodeURIComponent(loggedIn)}`;
-    jitsiCont.innerHTML = `
-      <iframe 
-        src="${roomUrl}" 
-        width="100%" 
-        height="100%" 
-        allow="camera; microphone; speaker-selection; display-capture; fullscreen; autoplay; picture-in-picture;" 
-        style="border: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; background: #090d16;">
-      </iframe>
-    `;
-  }
-
-  // Ensure bottom custom toolbar is hidden so Mirotalk's clean bar is used
-  const customToolbar = document.querySelector(".meeting-room-toolbar");
-  if (customToolbar) customToolbar.style.display = "none";
-
-  // Attach global screen tap listener inside meeting room to unlock audio on mobile browsers
-  const autoAudioUnlocker = () => {
-    unlockParticipantMeetingAudio();
-  };
-  document.addEventListener("touchstart", autoAudioUnlocker, { once: true });
-  document.addEventListener("click", autoAudioUnlocker, { once: true });
-
-
-
-      
-  // Pre-seed some chat messages
-  const chatScroller = document.getElementById("meeting-chat-messages");
-  if (chatScroller) {
-    chatScroller.innerHTML = `
-      <div style="text-align: center; color: var(--text-muted); font-size: 11px; margin-bottom: 8px;">Meeting Started / सभा सुरू झाली</div>
-    `;
-  }
-  } catch (err) {
-    console.error("launchLiveMeetingRoom error:", err);
-    alert("Live Meeting Launch Error: " + err.message + "\nStack: " + err.stack);
-  }
-}
-
-
-// Simulated active interactions inside sandbox
-function startSandboxInterval(mockUsers) {
-  if (meetingSandboxInterval) clearInterval(meetingSandboxInterval);
-  
-  let loopCount = 0;
-  meetingSandboxInterval = setInterval(() => {
-    loopCount++;
+    // Setup active session state
+    const loggedIn = (state && state.currentUser) ? state.currentUser.username : "Guest User";
+    const isHost = meeting ? (meeting.host === loggedIn) : false;
     
-    // 1. Swap Active Speaker
-    if (loopCount % 3 === 0) {
-      const activeIdx = Math.floor(Math.random() * (mockUsers.length + 1));
-      
-      // Clear speak overlays
-      document.querySelectorAll(".video-cell").forEach(cell => {
-        cell.classList.remove("active-speaker");
-      });
-      
-      if (activeIdx < mockUsers.length) {
-        // Highlight mock user
-        const cell = document.getElementById(`video-cell-mock-${activeIdx}`);
-        if (cell) cell.classList.add("active-speaker");
-      } else {
-        // Highlight local user
-        const cell = document.getElementById("video-cell-local");
-        if (cell && !activeMeetingSession.isMuted) cell.classList.add("active-speaker");
-      }
+    if (meeting && meeting.id) {
+      try { subscribeToMeetingEvents(meeting.id); } catch(e) {}
     }
-
-    // 2. Mock Chat Messages
-    if (loopCount % 5 === 0) {
-      const user = mockUsers[Math.floor(Math.random() * mockUsers.length)];
-      const phrases = [
-        "Praise the Lord! 🙌",
-        "Amen to that scripture! 🙏",
-        "Yes, God is good all the time.",
-        "Beautiful worship song.",
-        "Standing in prayer with everyone today.",
-        "आमेन! देवाची स्तुती असो! 🙌",
-        "प्रार्थना विनंतीसाठी धन्यवाद पास्टर."
-      ];
-      const text = phrases[Math.floor(Math.random() * phrases.length)];
-      appendMeetingChatMessage(user.name, text, false);
-    }
-
-    // 3. Mock Reactions
-    if (loopCount % 7 === 0) {
-      const reactionTypes = ["🙏", "❤️", "🙌", "👏", "Amen"];
-      const r = reactionTypes[Math.floor(Math.random() * reactionTypes.length)];
-      triggerMeetingReaction(r);
-    }
-
-    // 4. Mock Hand Raises
-    if (loopCount % 9 === 0) {
-      const user = mockUsers[Math.floor(Math.random() * mockUsers.length)];
-      appendMeetingChatMessage("SYSTEM", `✋ ${user.name} raised hand`, false);
-      showToast(`${user.name} Raised Hand`);
-    }
-
-  }, 3000);
-}
-
-// Append chat messages inside Call Pane
-function appendMeetingChatMessage(sender, message, isSelf) {
-  const container = document.getElementById("meeting-chat-messages");
-  if (!container) return;
-
-  const bubble = document.createElement("div");
-  bubble.className = `meet-chat-msg-bubble ${isSelf ? "self" : "other"}`;
-  
-  if (sender === "SYSTEM") {
-    bubble.style.background = "rgba(255,255,255,0.05)";
-    bubble.style.color = "var(--primary)";
-    bubble.style.alignSelf = "center";
-    bubble.style.fontSize = "11.5px";
-    bubble.style.padding = "6px 12px";
-    bubble.textContent = message;
-  } else {
-    bubble.innerHTML = `
-      <span class="meet-chat-sender-name ${isSelf ? 'self' : ''}">${sender}</span>
-      <span style="font-size: 13px;">${message}</span>
-    `;
-  }
-
-  container.appendChild(bubble);
-  container.scrollTop = container.scrollHeight;
-
-  // Play audio sync tag or increment chat unread badge if panel is closed
-  const chatPanel = document.getElementById("meeting-panel-chat");
-  if (chatPanel && chatPanel.style.display === "none") {
-    const badge = document.getElementById("meet-chat-badge");
-    if (badge) {
-      badge.style.display = "flex";
-      const val = parseInt(badge.textContent || "0") + 1;
-      badge.textContent = val;
-    }
-  }
-}
-
-// Spawns floating emoji reactions in Live Call viewport
-function triggerMeetingReaction(reaction) {
-  const container = document.getElementById("meet-floating-reactions-container");
-  if (!container) return;
-
-  const rEl = document.createElement("div");
-  rEl.className = "floating-reaction-bubble";
-  rEl.textContent = reaction;
-  
-  // Set random horizontal offset to stagger floating pathways
-  const randX = Math.floor(Math.random() * 60) + 20; // 20% to 80% width
-  rEl.style.left = `${randX}%`;
-  
-  container.appendChild(rEl);
-  
-  // Remove after animation completes
-  setTimeout(() => rEl.remove(), 3000);
-}
-
-// Global Real-time Meeting Sync State
-let meetingEventSource = null;
-let activeWorshipAudio = null;
-let currentWorshipTrack = null;
-let rtcPeerConnections = {};
-
-const rtcConfig = {
-  iceServers: [
-    { urls: "stun:stun.l.google.com:19302" },
-    { urls: "stun:stun1.l.google.com:19302" }
-  ]
-};
-
-// Host initiates WebRTC P2P Audio Stream to connected participants
-async function initHostWebRTCAudioStream(participantId, audioTrack) {
-  try {
-    const pc = new RTCPeerConnection(rtcConfig);
-    rtcPeerConnections[participantId] = pc;
-
-    if (audioTrack) {
-      pc.addTrack(audioTrack, new MediaStream([audioTrack]));
-    }
-
-    pc.onicecandidate = (event) => {
-      if (event.candidate && activeMeetingSession) {
-        broadcastMeetingEvent(activeMeetingSession.meetingId, {
-          type: "RTC_ICE_CANDIDATE",
-          target: participantId,
-          sender: state.currentUser ? state.currentUser.username : "Host",
-          candidate: event.candidate
-        });
-      }
+    
+    activeMeetingSession = {
+      meetingId: meeting ? meeting.id : "default",
+      localStream: stream,
+      isMuted: false,
+      isCamOff: !stream,
+      isHost: isHost
     };
 
-    const offer = await pc.createOffer();
-    await pc.setLocalDescription(offer);
+    // Sync profile display names safely
+    const nameEl = document.getElementById("meeting-local-name");
+    if (nameEl) nameEl.textContent = `${loggedIn} ${isHost ? "(Host)" : ""}`;
+    const nameTag = document.getElementById("meeting-local-name-tag");
+    if (nameTag) nameTag.textContent = `${loggedIn} ${isHost ? "(Host)" : ""}`;
 
-    broadcastMeetingEvent(activeMeetingSession.meetingId, {
-      type: "RTC_AUDIO_OFFER",
-      target: participantId,
-      sender: state.currentUser ? state.currentUser.username : "Host",
-      sdp: offer
-    });
+    // Ensure Native Gallery Video Stage Grid is VISIBLE (display: flex)
+    const gridEl = document.getElementById("meeting-video-grid");
+    if (gridEl) {
+      gridEl.style.display = "flex";
+      gridEl.style.width = "100%";
+      gridEl.style.height = "100%";
+    }
 
-    logAudioDebug(`WebRTC Offer sent to ${participantId}`);
-  } catch (err) {
-    console.warn("RTC Offer error:", err);
-  }
-}
-
-// Participant receives WebRTC Audio Stream from Host
-async function handleParticipantWebRTCOffer(msg) {
-  const myUsername = state.currentUser ? state.currentUser.username : "Guest";
-  if (msg.target && msg.target !== myUsername && msg.target !== "ALL") return;
-
-  try {
-    const pc = new RTCPeerConnection(rtcConfig);
-    rtcPeerConnections[msg.sender] = pc;
-
-    pc.ontrack = (event) => {
-      console.log("[RTC_AUDIO] Incoming WebRTC Audio Track from Host!", event.track);
-      let rtcAudioEl = document.getElementById("webrtc-remote-audio-player");
-      if (!rtcAudioEl) {
-        rtcAudioEl = document.createElement("audio");
-        rtcAudioEl.id = "webrtc-remote-audio-player";
-        rtcAudioEl.autoplay = true;
-        rtcAudioEl.playsInline = true;
-        document.body.appendChild(rtcAudioEl);
-      }
-
-      rtcAudioEl.srcObject = event.streams[0] || new MediaStream([event.track]);
-      rtcAudioEl.play().then(() => {
-        console.log("[RTC_AUDIO] WebRTC Audio playing successfully on mobile speaker!");
-        showToast("🔊 Live WebRTC audio streaming through your speaker!");
-      }).catch(err => {
-        console.warn("[RTC_AUDIO] Mobile play rejected:", err);
-        const banner = document.getElementById("meeting-worship-audio-banner");
-        if (banner) {
-          banner.style.cssText = "display:flex; top:60px; background: rgba(34, 197, 94, 0.95); cursor: pointer;";
-          banner.querySelector("span").textContent = "🔊 Tap to Hear Live Audio";
-          banner.onclick = () => {
-            rtcAudioEl.play();
-            banner.style.display = "none";
-          };
+    // Render local video stream or fallback participant avatar card
+    const videoEl = document.getElementById("meeting-local-video");
+    const avatarEl = document.getElementById("video-cell-local-avatar");
+    
+    if (stream && videoEl) {
+      try {
+        videoEl.srcObject = stream;
+        videoEl.muted = true;
+        videoEl.defaultMuted = true;
+        videoEl.setAttribute("playsinline", "true");
+        videoEl.setAttribute("webkit-playsinline", "true");
+        videoEl.setAttribute("autoplay", "true");
+        videoEl.style.display = "block";
+        videoEl.style.width = "100%";
+        videoEl.style.height = "100%";
+        videoEl.style.objectFit = "cover";
+        
+        const p = videoEl.play();
+        if (p !== undefined) {
+          p.then(() => {
+            console.log("Local camera stream playing successfully!");
+            if (avatarEl) avatarEl.style.display = "none";
+          }).catch(err => {
+            console.warn("Video play error fallback to avatar:", err);
+            if (avatarEl) avatarEl.style.display = "flex";
+          });
         }
-      });
-    };
-
-    pc.onicecandidate = (event) => {
-      if (event.candidate && activeMeetingSession) {
-        broadcastMeetingEvent(activeMeetingSession.meetingId, {
-          type: "RTC_ICE_CANDIDATE",
-          target: msg.sender,
-          sender: myUsername,
-          candidate: event.candidate
-        });
+      } catch(err) {
+        console.warn("Video srcObject error:", err);
+        if (avatarEl) avatarEl.style.display = "flex";
       }
-    };
+    } else {
+      if (videoEl) videoEl.style.display = "none";
+      if (avatarEl) {
+        avatarEl.style.display = "flex";
+      }
+    }
 
-    await pc.setRemoteDescription(new RTCSessionDescription(msg.sdp));
-    const answer = await pc.createAnswer();
-    await pc.setLocalDescription(answer);
+    // Ensure 3rd-party iframe container is disabled
+    const jitsiCont = document.getElementById("meeting-jitsi-container");
+    if (jitsiCont) {
+      jitsiCont.style.display = "none";
+      jitsiCont.innerHTML = "";
+    }
 
-    broadcastMeetingEvent(activeMeetingSession.meetingId, {
-      type: "RTC_AUDIO_ANSWER",
-      target: msg.sender,
-      sender: myUsername,
-      sdp: answer
-    });
-
-    logAudioDebug(`WebRTC Answer sent to ${msg.sender}`);
+    showToast("Joined Live Fellowship Meeting Room 🙏");
   } catch (err) {
-    console.warn("RTC Answer error:", err);
+    console.warn("launchLiveMeetingRoom notice:", err);
   }
 }
 
-// Handle incoming WebRTC Answer on Host
-async function handleHostWebRTCAnswer(msg) {
-  const pc = rtcPeerConnections[msg.sender];
-  if (pc) {
-    try {
-      await pc.setRemoteDescription(new RTCSessionDescription(msg.sdp));
-      logAudioDebug(`WebRTC Remote Description set for ${msg.sender}`);
-    } catch (err) {
-      console.warn("Set Remote Description error:", err);
-    }
-  }
-}
 
-// Handle ICE Candidates
-async function handleWebRTCICECandidate(msg) {
-  const pc = rtcPeerConnections[msg.sender];
-  if (pc && msg.candidate) {
-    try {
-      await pc.addIceCandidate(new RTCIceCandidate(msg.candidate));
-    } catch (err) {
-      console.warn("Add ICE Candidate error:", err);
-    }
-  }
-}
-
-// Subscribe to real-time sync channel
-function subscribeToMeetingEvents(meetingId) {
-  if (meetingEventSource) {
-    meetingEventSource.close();
-  }
-  
-  const topic = `RiverOfLife_GauravSalve_meeting_${meetingId}`;
-  meetingEventSource = new EventSource(`https://ntfy.sh/${topic}/sse`);
-  
-  meetingEventSource.onmessage = (event) => {
-    try {
-      const payload = JSON.parse(event.data);
-      if (payload.message) {
-        const msg = JSON.parse(payload.message);
-        handleMeetingBroadcastEvent(msg);
-      }
-    } catch (e) {
-      console.warn("SSE Event parse error:", e);
-    }
-  };
-}
-
-// Broadcast event to other participants
-function broadcastMeetingEvent(meetingId, data) {
-  const topic = `RiverOfLife_GauravSalve_meeting_${meetingId}`;
-  fetch(`https://ntfy.sh/${topic}`, {
-    method: "POST",
-    body: JSON.stringify(data)
-  }).catch(e => console.warn("Broadcast error:", e));
-}
-
-// Handle incoming synchronized event
-async function handleMeetingBroadcastEvent(msg) {
-  if (msg.type === "SHARE_BIBLE") {
-    await renderSharedBibleContent(msg.book, msg.chapter, msg.verse);
-  } else if (msg.type === "STOP_SHARE_BIBLE") {
-    hideSharedBibleContent();
-  } else if (msg.type === "PLAY_MUSIC") {
-    playWorshipTrack(msg.trackUrl, msg.title, msg.volume);
-  } else if (msg.type === "STOP_MUSIC") {
-    stopWorshipTrack();
-  } else if (msg.type === "PLAY_YOUTUBE") {
-    syncSharedWorshipVideo(msg.url, msg.mode, msg.startedAt);
-  } else if (msg.type === "STOP_YOUTUBE") {
-    hideSharedWorshipVideo();
-  } else if (msg.type === "WORSHIP_AUDIO_LIVE") {
-    showWorshipAudioLiveBanner(msg.videoId);
-  } else if (msg.type === "WORSHIP_AUDIO_STOP") {
-    const banner = document.getElementById("meeting-worship-audio-banner");
-    if (banner) banner.style.display = "none";
-    showToast("Worship audio streaming ended.");
-  } else if (msg.type === "START_AUDIO_ONLY_SHARE") {
-    // Mode 2: Audio Only Share (Captured System/Tab Audio + Admin Mic)
-    handleParticipantAudioOnlyShareStart(msg);
-  } else if (msg.type === "STOP_AUDIO_ONLY_SHARE") {
-    handleParticipantAudioOnlyShareStop(msg);
-  } else if (msg.type === "START_VIDEO_AUDIO_SHARE") {
-    // Mode 1: Video + Audio Share
-    handleParticipantVideoAudioShareStart(msg);
-  } else if (msg.type === "STOP_VIDEO_AUDIO_SHARE") {
-    handleParticipantVideoAudioShareStop(msg);
-  } else if (msg.type === "RTC_AUDIO_OFFER") {
-    handleParticipantWebRTCOffer(msg);
-  } else if (msg.type === "RTC_AUDIO_ANSWER") {
-    handleHostWebRTCAnswer(msg);
-  } else if (msg.type === "RTC_ICE_CANDIDATE") {
-    handleWebRTCICECandidate(msg);
-  }
-
-}
-
-
-
-// Fetch and render parallel Bible verse/chapter content in meeting layout
-async function renderSharedBibleContent(bookKey, chapter, verse) {
-  const area = document.getElementById("meeting-shared-content-area");
-  const bibleCont = document.getElementById("meeting-shared-bible");
-  const jitsiCont = document.getElementById("meeting-jitsi-container");
-  
-  if (!area || !bibleCont || !jitsiCont) return;
-  
-  const bookDataMr = await fetchBookDataMr(bookKey);
-  const bookDataEng = await fetchBookDataEng(bookKey);
-  const metadata = booksMetadataMr.find(b => b.filename.replace(".json", "") === bookKey) || { name: bookKey, engName: bookKey };
-  
-  const versesMr = bookDataMr ? bookDataMr.chapters[chapter - 1] : [];
-  const versesEng = bookDataEng ? bookDataEng.chapters[chapter - 1] : [];
-  const totalVerses = Math.max(versesMr.length, versesEng.length);
-  
-  let html = `
-    <div style="display: flex; flex-direction: column; height: 100%;">
-      <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; border-bottom: 1px solid #e2e8f0; background: #f8fafc;">
-        <h4 style="margin: 0; font-size: 13.5px; font-weight: 800; color: #b45309; text-align: left;">
-          📖 Scripture Shared: ${metadata.name} ${chapter} / ${metadata.engName} ${chapter}
-        </h4>
-        <span style="font-size: 10px; background: rgba(180,83,9,0.12); color: #b45309; padding: 2px 8px; border-radius: 4px; font-weight: 700;">LIVE STUDY</span>
-      </div>
-      <div style="flex: 1; overflow-y: auto; padding: 16px; background: #faf6eb; display: flex; flex-direction: column; gap: 12px; text-align: left;">
-  `;
-  
-  if (verse && verse !== "all") {
-    const vIdx = parseInt(verse) - 1;
-    html += `
-      <div style="padding: 12px 16px; border-radius: 8px; background: #fffdf9; border-left: 4px solid #b45309; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-        <strong style="color: #b45309; font-size: 12px;">Verse ${verse}</strong>
-        <p style="margin: 6px 0 4px 0; font-size: 15px; font-weight: 600; color: #0f172a; line-height: 1.6;">${versesEng[vIdx] || ""}</p>
-        <p style="margin: 4px 0 0 0; font-size: 14.5px; color: #475569; font-style: italic; line-height: 1.6;">${versesMr[vIdx] || ""}</p>
-      </div>
-    `;
-  } else {
-    for (let i = 0; i < totalVerses; i++) {
-      html += `
-        <div style="padding-bottom: 10px; border-bottom: 1px solid #e2e8f0;">
-          <strong style="color: #64748b; font-size: 11px;">Verse ${i + 1}</strong>
-          <p style="margin: 4px 0 2px 0; font-size: 14.5px; font-weight: 550; color: #0f172a; line-height: 1.6;">${versesEng[i] || ""}</p>
-          <p style="margin: 2px 0 0 0; font-size: 14px; color: #475569; font-style: italic; line-height: 1.6;">${versesMr[i] || ""}</p>
-        </div>
-      `;
-    }
-  }
-  
-  html += `</div></div>`;
-  
-  bibleCont.innerHTML = html;
-  area.style.display = "block";
-  bibleCont.style.display = "block";
-  
-  // Resize meeting iframe to top split view
-  jitsiCont.style.height = "calc(55% - 50px)";
-  jitsiCont.style.top = "calc(45% + 50px)";
-}
-
-// Hide shared scripture pane
-function hideSharedBibleContent() {
-  const area = document.getElementById("meeting-shared-content-area");
-  const jitsiCont = document.getElementById("meeting-jitsi-container");
-  if (area) area.style.display = "none";
-  if (jitsiCont) { jitsiCont.style.display = "none"; jitsiCont.innerHTML = ""; } if (false) {
-    jitsiCont.style.height = "calc(100% - 50px)";
-    jitsiCont.style.top = "50px";
-  }
-}
-
-// Helper to extract YouTube Video ID from any format URL
-function extractYouTubeVideoId(url) {
-  if (!url) return null;
-  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-  const match = url.match(regExp);
-  return (match && match[2].length === 11) ? match[2] : null;
-}
-
-// Play background praise track
-function playWorshipTrack(url, title, volume) {
-  if (activeWorshipAudio) {
-    activeWorshipAudio.pause();
-    activeWorshipAudio = null;
-  }
-  
-  activeWorshipAudio = new Audio(url);
-  activeWorshipAudio.loop = true;
-  activeWorshipAudio.volume = (typeof volume === "number" ? volume : 50) / 100;
-  activeWorshipAudio.play().catch(e => console.warn("Audio autoplay blocked:", e));
-  
-  currentWorshipTrack = { url, title, volume };
-  
-  // Update UI now playing state
-  const titleEl = document.getElementById("meet-music-now-playing");
-  if (titleEl) titleEl.textContent = title;
-  
-  // Stagger state on track buttons
-  document.querySelectorAll(".meet-music-track-btn").forEach(btn => {
-    const isPlayingThis = btn.dataset.url === url;
-    btn.classList.toggle("active", isPlayingThis);
-    const span = btn.querySelector("span:last-child");
-    if (span) span.textContent = isPlayingThis ? "⏸️ Playing" : "▶️ Play";
-  });
-}
-
-// Stop background praise track completely & reset UI state
-function stopWorshipTrack() {
-  if (activeWorshipAudio) {
-    activeWorshipAudio.pause();
-    activeWorshipAudio.currentTime = 0;
-    activeWorshipAudio = null;
-  }
-  currentWorshipTrack = null;
-  
-  // Stop any hidden YouTube video/audio containers
-  hideSharedWorshipVideo();
-  
-  // Reset "Currently Playing" status text back to "None (Silent)"
-  const titleEl = document.getElementById("meet-music-now-playing");
-  if (titleEl) titleEl.textContent = "None (Silent)";
-  
-  document.querySelectorAll(".meet-music-track-btn").forEach(btn => {
-    btn.classList.remove("active");
-    const span = btn.querySelector("span:last-child");
-    if (span) span.textContent = "▶️ Play";
-  });
-
-  const customUrlInput = document.getElementById("meet-music-custom-url");
-  if (customUrlInput) customUrlInput.value = "";
-}
-
-
-// Populate the Scripture selection dropdown options inside meetings
-function populateMeetingShareBibleDropdowns() {
-  const bookSelect = document.getElementById("meeting-share-book");
-  const chapterSelect = document.getElementById("meeting-share-chapter");
-  const verseSelect = document.getElementById("meeting-share-verse");
-  if (!bookSelect || !chapterSelect || !verseSelect) return;
-  
-  bookSelect.innerHTML = "";
-  booksMetadataMr.forEach(b => {
-    const opt = document.createElement("option");
-    opt.value = b.filename.replace(".json", "");
-    opt.textContent = `${b.name} (${b.engName})`;
-    bookSelect.appendChild(opt);
-  });
-  
-  const updateChapters = () => {
-    const bookKey = bookSelect.value;
-    const meta = booksMetadataMr.find(b => b.filename.replace(".json", "") === bookKey);
-    if (!meta) return;
-    
-    chapterSelect.innerHTML = "";
-    for (let c = 1; c <= meta.chaptersCount; c++) {
-      const opt = document.createElement("option");
-      opt.value = c;
-      opt.textContent = `Chapter ${c}`;
-      chapterSelect.appendChild(opt);
-    }
-    updateVerses();
-  };
-  
-  const updateVerses = async () => {
-    const bookKey = bookSelect.value;
-    const chapterNum = parseInt(chapterSelect.value);
-    
-    verseSelect.innerHTML = `<option value="all">Whole Chapter / संपूर्ण अध्याय</option>`;
-    
-    const bookData = await fetchBookDataEng(bookKey);
-    if (!bookData || !bookData.chapters[chapterNum - 1]) return;
-    
-    const count = bookData.chapters[chapterNum - 1].length;
-    for (let v = 1; v <= count; v++) {
-      const opt = document.createElement("option");
-      opt.value = v;
-      opt.textContent = `Verse ${v}`;
-      verseSelect.appendChild(opt);
-    }
-  };
-  
-  bookSelect.onchange = updateChapters;
-  chapterSelect.onchange = updateVerses;
-  
-  updateChapters();
-}
-
-// Leave meeting session
 function exitLiveMeetingRoom() {
   if (!activeMeetingSession) return;
 

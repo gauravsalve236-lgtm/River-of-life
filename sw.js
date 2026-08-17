@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v20260817-HUGE-BUTTONS-PROD';
+const CACHE_NAME = 'river-of-life-cache-v20260817-LIVE-VIDEO-FIXED';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
