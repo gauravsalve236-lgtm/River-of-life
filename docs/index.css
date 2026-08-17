@@ -5340,3 +5340,78 @@ input, textarea, select, [contenteditable="true"] {
     min-width: 50px !important;
   }
 }
+
+
+/* Official Google Meet Toolbar (100% Inside Mobile Screen) */
+.google-meet-official-bar {
+  position: absolute !important;
+  bottom: calc(12px + env(safe-area-inset-bottom, 8px)) !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 4px !important;
+  width: calc(100% - 20px) !important;
+  max-width: 440px !important;
+  background: rgba(32, 33, 36, 0.96) !important;
+  backdrop-filter: blur(25px) !important;
+  -webkit-backdrop-filter: blur(25px) !important;
+  padding: 6px 8px !important;
+  border-radius: 30px !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9), 0 0 15px rgba(212, 175, 55, 0.2) !important;
+  z-index: 9999 !important;
+  box-sizing: border-box !important;
+}
+
+.gmeet-btn {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  border-radius: 50% !important;
+  background: #3c4043 !important;
+  border: none !important;
+  color: #ffffff !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  flex-shrink: 0 !important;
+  padding: 0 !important;
+}
+
+.gmeet-btn:hover, .gmeet-btn:active {
+  background: #4a4e51 !important;
+  transform: scale(1.05) !important;
+}
+
+.gmeet-btn.muted {
+  background: #ea4335 !important;
+  color: #ffffff !important;
+}
+
+.gmeet-btn.gmeet-leave-red {
+  width: 48px !important;
+  min-width: 48px !important;
+  border-radius: 20px !important;
+  background: #ea4335 !important;
+  color: #ffffff !important;
+}
+
+@media (max-width: 380px) {
+  .google-meet-official-bar {
+    padding: 5px 6px !important;
+    gap: 2px !important;
+  }
+  .gmeet-btn {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+  }
+  .gmeet-btn.gmeet-leave-red {
+    width: 44px !important;
+    min-width: 44px !important;
+  }
+}
