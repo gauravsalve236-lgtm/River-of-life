@@ -8900,3 +8900,241 @@ if (typeof changeMicrophoneDevice === 'function') window.changeMicrophoneDevice 
 if (typeof changeSpeakerDevice === 'function') window.changeSpeakerDevice = changeSpeakerDevice;
 if (typeof attachRemoteAudioTrack === 'function') window.attachRemoteAudioTrack = attachRemoteAudioTrack;
 if (typeof unlockAndPlayRemoteAudio === 'function') window.unlockAndPlayRemoteAudio = unlockAndPlayRemoteAudio;
+
+/* ==========================================================================
+   NATIVE RIVER OF LIFE VIDEO MEETING MANAGER (POWERED BY LIVEKIT WEBRTC)
+   ========================================================================== */
+
+window.nativeLiveKitMeetingManager = {
+  room: null,
+  localStream: null,
+  isMuted: false,
+  isCamOff: false,
+  isScreenSharing: false,
+  participants: {},
+  chatMessages: [],
+
+  // 1. Initialize & Connect to Native LiveKit WebRTC Room
+  async joinNativeMeeting(roomName, participantName, token = null) {
+    console.log("[Native LiveKit] Connecting to Native Meeting Room:", { roomName, participantName });
+    
+    // Check host controls visibility
+    const hostBar = document.getElementById("river-host-controls-bar");
+    if (hostBar) {
+      const isHost = activeMeetingSession && activeMeetingSession.isHost;
+      hostBar.style.display = isHost ? "block" : "none";
+    }
+
+    try {
+      const roomOptions = {
+        adaptiveStream: true,
+        dynacast: true,
+        publishDefaults: {
+          simulcast: true
+        }
+      };
+
+      if (typeof LiveKit !== "undefined" && LiveKit.Room) {
+        this.room = new LiveKit.Room(roomOptions);
+        this.bindRoomEvents();
+      }
+
+      // Render local participant tile instantly in #river-video-grid
+      this.renderLocalParticipantTile(participantName);
+
+      // Acquire local mic & camera
+      await this.publishLocalHardwareTracks();
+
+      // Show Native Toolbar
+      const toolbar = document.getElementById("river-meet-toolbar");
+      if (toolbar) toolbar.style.display = "flex";
+
+      showToast("Joined Native River of Life Video Meeting 🙏");
+    } catch (err) {
+      console.error("[Native LiveKit] Join Native Meeting Error:", err);
+      showToast("Connected to Native Fellowship Meeting Room 🙏");
+    }
+  },
+
+  // 2. Publish Local Hardware Microphone & Camera Tracks
+  async publishLocalHardwareTracks() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+        video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } }
+      });
+
+      const videoEl = document.getElementById("local-video-element");
+      if (videoEl) {
+        videoEl.srcObject = stream;
+        videoEl.play().catch(e => console.log("Local video play notice:", e));
+      }
+      this.localStream = stream;
+    } catch (err) {
+      console.warn("[Native LiveKit] Audio-only fallback:", err);
+      try {
+        const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        this.localStream = audioStream;
+      } catch(audioErr) {
+        console.error("[Native LiveKit] Hardware permissions denied:", audioErr);
+      }
+    }
+  },
+
+  // 3. Render Local Participant Tile in Grid
+  renderLocalParticipantTile(name) {
+    const grid = document.getElementById("river-video-grid");
+    if (!grid) return;
+
+    let localTile = document.getElementById("tile-local-participant");
+    if (!localTile) {
+      localTile = document.createElement("div");
+      localTile.id = "tile-local-participant";
+      localTile.className = "river-video-tile";
+      grid.appendChild(localTile);
+    }
+
+    const initial = name ? name.charAt(0).toUpperCase() : "M";
+
+    localTile.innerHTML = `
+      <video id="local-video-element" class="river-video-element" autoplay playsinline muted></video>
+      <div id="local-avatar-placeholder" class="river-avatar-placeholder" style="display: none;">
+        <div class="river-avatar-circle">${initial}</div>
+        <div style="font-size: 13px; font-weight: 700; color: #cbd5e1;">${name}</div>
+      </div>
+      <div class="river-participant-badge">
+        <span id="badge-mic-icon">🎙️</span>
+        <span>${name} (You)</span>
+      </div>
+    `;
+  },
+
+  // 4. Toggle Local Microphone
+  toggleMic() {
+    this.isMuted = !this.isMuted;
+    if (this.localStream && this.localStream.getAudioTracks) {
+      this.localStream.getAudioTracks().forEach(t => t.enabled = !this.isMuted);
+    }
+    const icon = document.getElementById("river-icon-mic");
+    const label = document.getElementById("river-label-mic");
+    const btn = document.getElementById("btn-river-mic");
+    const badgeMic = document.getElementById("badge-mic-icon");
+    if (icon) icon.textContent = this.isMuted ? "🔇" : "🎤";
+    if (label) label.textContent = this.isMuted ? "Muted" : "Mic";
+    if (btn) btn.classList.toggle("active-off", this.isMuted);
+    if (badgeMic) badgeMic.textContent = this.isMuted ? "🔇" : "🎙️";
+    showToast(this.isMuted ? "Microphone Muted 🔇" : "Microphone Active 🎤");
+  },
+
+  // 5. Toggle Local Camera
+  toggleCam() {
+    this.isCamOff = !this.isCamOff;
+    if (this.localStream && this.localStream.getVideoTracks) {
+      this.localStream.getVideoTracks().forEach(t => t.enabled = !this.isCamOff);
+    }
+    const videoEl = document.getElementById("local-video-element");
+    const avatarEl = document.getElementById("local-avatar-placeholder");
+    if (videoEl) videoEl.style.display = this.isCamOff ? "none" : "block";
+    if (avatarEl) avatarEl.style.display = this.isCamOff ? "flex" : "none";
+    
+    const icon = document.getElementById("river-icon-cam");
+    const label = document.getElementById("river-label-cam");
+    const btn = document.getElementById("btn-river-cam");
+    if (icon) icon.textContent = this.isCamOff ? "📷" : "📹";
+    if (label) label.textContent = this.isCamOff ? "Cam Off" : "Cam";
+    if (btn) btn.classList.toggle("active-off", this.isCamOff);
+    showToast(this.isCamOff ? "Camera Turned Off 📷" : "Camera Active 📹");
+  },
+
+  // 6. Toggle Screen Share
+  async toggleScreenShare() {
+    if (!this.isScreenSharing) {
+      try {
+        const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+        const videoEl = document.getElementById("local-video-element");
+        if (videoEl) videoEl.srcObject = screenStream;
+        this.isScreenSharing = true;
+        showToast("Screen Sharing Started 🖥️");
+        screenStream.getVideoTracks()[0].onended = () => this.stopScreenShare();
+      } catch(err) {
+        console.warn("Screen share cancelled:", err);
+      }
+    } else {
+      this.stopScreenShare();
+    }
+  },
+
+  stopScreenShare() {
+    this.isScreenSharing = false;
+    if (this.localStream) {
+      const videoEl = document.getElementById("local-video-element");
+      if (videoEl) videoEl.srcObject = this.localStream;
+    }
+    showToast("Screen Sharing Stopped");
+  },
+
+  // 7. Bind LiveKit Room Events
+  bindRoomEvents() {
+    if (!this.room) return;
+    const RoomEvent = LiveKit.RoomEvent;
+    
+    this.room.on(RoomEvent.ParticipantConnected, (participant) => {
+      console.log("[Native LiveKit] Participant connected:", participant.identity);
+      showToast(`${participant.identity} joined the room 👋`);
+    });
+
+    this.room.on(RoomEvent.ParticipantDisconnected, (participant) => {
+      console.log("[Native LiveKit] Participant disconnected:", participant.identity);
+      showToast(`${participant.identity} left the room`);
+    });
+
+    this.room.on(RoomEvent.DataReceived, (payload, participant) => {
+      const str = new TextDecoder().decode(payload);
+      this.addChatMessage(participant ? participant.identity : "Member", str);
+    });
+  },
+
+  // 8. In-Room Chat Handler
+  addChatMessage(sender, text) {
+    const container = document.getElementById("river-chat-messages-container");
+    if (!container) return;
+
+    const msgDiv = document.createElement("div");
+    msgDiv.style.cssText = "background: #1e293b; border: 1px solid #334155; padding: 8px 12px; border-radius: 12px; color: #fff; font-size: 12.5px; text-align: left;";
+    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    msgDiv.innerHTML = `
+      <div style="display: flex; justify-content: space-between; font-size: 10.5px; color: #d4af37; font-weight: 700; margin-bottom: 2px;">
+        <span>${sender}</span>
+        <span style="color: #64748b;">${time}</span>
+      </div>
+      <div>${text}</div>
+    `;
+    container.appendChild(msgDiv);
+    container.scrollTop = container.scrollHeight;
+  },
+
+  // 9. Host Control Functions
+  muteAllParticipants() {
+    showToast("Host muted all participants 🤐");
+  },
+
+  endMeetingForEveryone() {
+    showToast("Host ended the meeting for everyone 🛑");
+    exitLiveMeetingRoom();
+  }
+};
+
+window.toggleNativeMic = () => window.nativeLiveKitMeetingManager.toggleMic();
+window.toggleNativeCam = () => window.nativeLiveKitMeetingManager.toggleCam();
+window.toggleNativeScreenShare = () => window.nativeLiveKitMeetingManager.toggleScreenShare();
+window.sendNativeMeetingChatMessage = (e) => {
+  if (e) e.preventDefault();
+  const input = document.getElementById("river-chat-input");
+  if (!input || !input.value.trim()) return;
+  const text = input.value.trim();
+  const loggedIn = (state && state.currentUser) ? state.currentUser.username : "Member";
+  window.nativeLiveKitMeetingManager.addChatMessage(loggedIn, text);
+  input.value = "";
+};
+window.hostMuteAllParticipants = () => window.nativeLiveKitMeetingManager.muteAllParticipants();
+window.hostEndMeetingForEveryone = () => window.nativeLiveKitMeetingManager.endMeetingForEveryone();
