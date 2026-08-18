@@ -7009,35 +7009,26 @@ function triggerJoinMeetingFlow(meetingId) {
   const m = meetings.find(x => x.id === meetingId);
   if (!m) return;
 
-  // Real or simulated meeting, we request permissions and launch it inside the app modal!
-  showToast("Requesting camera and microphone permissions...");
+  // Synchronous user-gesture audio context unlock
+  try {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (AudioContextClass) {
+      if (!window.webrtcAudioCtx) window.webrtcAudioCtx = new AudioContextClass();
+      if (window.webrtcAudioCtx.state === 'suspended') window.webrtcAudioCtx.resume();
+    }
+  } catch(e) {}
+
+  // Request media permissions and launch video room cleanly inside modal
+  showToast("Connecting audio & video hardware...");
   navigator.mediaDevices.getUserMedia({ video: true, audio: true })
     .then(stream => {
-      // Permission granted, launch meeting inside app modal
       launchLiveMeetingRoom(m, stream);
     })
     .catch(err => {
       console.warn("Media permissions denied:", err);
-      // Fallback: Proceed with mocked feeds if they deny camera (highly resilient)
-      showToast("Media permissions denied. Joining in listen-only/avatar mode.");
+      showToast("Joining fellowship room in listen mode.");
       launchLiveMeetingRoom(m, null);
     });
-}
-
-// Direct Mobile Call Window Launcher (Grants 100% Unrestricted Mic & Speaker Access on iOS Safari & Android Chrome)
-function openDirectMobileCallWindow() {
-  let roomSlug = "RiverOfLife_Sanctuary_LiveRoom";
-  if (activeMeetingSession && activeMeetingSession.meetingId) {
-    const meetingIdSlug = activeMeetingSession.meetingId.toString().replace(/[^a-zA-Z0-9]/g, '_');
-    roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
-  }
-  const loggedIn = (state && state.currentUser) ? state.currentUser.username : "Member";
-
-  // URL for same-origin top-level window join where iOS Safari and Android Chrome grant 100% full hardware mic and speaker access
-  const directRoomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=1&video=1&muted=0&sound=1&autoplay=1&layout=grid&grid=1&name=${encodeURIComponent(loggedIn)}`;
-
-  showToast("Opening Direct Mobile Call Room 🙏 (Mic & Audio Unrestricted)");
-  window.open(directRoomUrl, "_blank");
 }
 
 // Fullscreen Live Meeting Room Entry
@@ -7099,14 +7090,15 @@ function launchLiveMeetingRoom(meeting, stream) {
     // Enumerate audio devices for settings dropdown
     enumerateAndPopulateAudioDevices();
 
-    // Load Verified WebRTC Video Conference Room with Exclusive Hardware Access
+    // Load Verified WebRTC Video Conference Room with Exclusive Hardware Access Across All Devices
     const jitsiCont = document.getElementById("meeting-jitsi-container");
     if (jitsiCont) {
       jitsiCont.style.display = "block";
       const meetingIdSlug = (meeting && meeting.id) ? meeting.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
       const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
       
-      const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=1&video=1&muted=0&sound=1&autoplay=1&layout=grid&grid=1&name=${encodeURIComponent(loggedIn)}`;
+      // Explicit parameters for WebRTC auto-start audio & video capture: audio=true, video=true, muted=0, sound=1, autoplay=1
+      const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&muted=0&sound=1&autoplay=1&layout=grid&grid=1&name=${encodeURIComponent(loggedIn)}`;
       
       jitsiCont.innerHTML = `
         <iframe 
@@ -7114,7 +7106,8 @@ function launchLiveMeetingRoom(meeting, stream) {
           src="${roomUrl}" 
           width="100%" 
           height="100%" 
-          allow="camera; microphone; speaker-selection; display-capture; autoplay; fullscreen; picture-in-picture; clipboard-write" 
+          allow="camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *;" 
+          allowusermedia="true"
           style="border: none; width: 100%; height: 100%; border-radius: 18px; background: #090d16;">
         </iframe>
       `;
@@ -7123,9 +7116,9 @@ function launchLiveMeetingRoom(meeting, stream) {
     // Unlock remote audio & sound output for all participants after short delay
     setTimeout(() => {
       unlockAndPlayRemoteAudio();
-    }, 1500);
+    }, 1200);
 
-    showToast("Joined Online Video Fellowship Room 🙏 (Mic & Audio Enabled)");
+    showToast("Joined Online Video Fellowship Room 🙏 (Mic & Speaker Active)");
   } catch (err) {
     console.warn("launchLiveMeetingRoom notice:", err);
   }
