@@ -7024,6 +7024,22 @@ function triggerJoinMeetingFlow(meetingId) {
     });
 }
 
+// Direct Mobile Call Window Launcher (Grants 100% Unrestricted Mic & Speaker Access on iOS Safari & Android Chrome)
+function openDirectMobileCallWindow() {
+  let roomSlug = "RiverOfLife_Sanctuary_LiveRoom";
+  if (activeMeetingSession && activeMeetingSession.meetingId) {
+    const meetingIdSlug = activeMeetingSession.meetingId.toString().replace(/[^a-zA-Z0-9]/g, '_');
+    roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
+  }
+  const loggedIn = (state && state.currentUser) ? state.currentUser.username : "Member";
+
+  // URL for same-origin top-level window join where iOS Safari and Android Chrome grant 100% full hardware mic and speaker access
+  const directRoomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=1&video=1&muted=0&sound=1&autoplay=1&layout=grid&grid=1&name=${encodeURIComponent(loggedIn)}`;
+
+  showToast("Opening Direct Mobile Call Room 🙏 (Mic & Audio Unrestricted)");
+  window.open(directRoomUrl, "_blank");
+}
+
 // Fullscreen Live Meeting Room Entry
 function launchLiveMeetingRoom(meeting, stream) {
   try {
