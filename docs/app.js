@@ -7034,15 +7034,7 @@ function triggerJoinMeetingFlow(meetingId) {
 // Fullscreen Live Meeting Room Entry
 function launchLiveMeetingRoom(meeting, stream) {
   try {
-    console.log("[WebRTC Pipeline] Launching Verified WebRTC Fellowship Room:", meeting);
-
-    // Release any temporary parent frame media tracks so hardware mic is not locked when iframe initializes
-    if (stream && stream.getTracks) {
-      stream.getTracks().forEach(t => t.stop());
-    }
-    if (activeMeetingSession && activeMeetingSession.localStream && activeMeetingSession.localStream.getTracks) {
-      activeMeetingSession.localStream.getTracks().forEach(t => t.stop());
-    }
+    console.log("Launching Live Fellowship Room:", meeting);
     
     // Lock screen view overlay
     const roomModal = document.getElementById("modal-live-meeting");
@@ -7081,24 +7073,20 @@ function launchLiveMeetingRoom(meeting, stream) {
     
     activeMeetingSession = {
       meetingId: meeting ? meeting.id : "default",
-      localStream: null,
+      localStream: stream,
       isMuted: false,
       isCamOff: false,
       isHost: isHost
     };
 
-    // Enumerate audio devices for settings dropdown
-    enumerateAndPopulateAudioDevices();
-
-    // Load Verified WebRTC Video Conference Room with Exclusive Hardware Access Across All Devices
+    // Load Verified WebRTC Video Conference Room
     const jitsiCont = document.getElementById("meeting-jitsi-container");
     if (jitsiCont) {
       jitsiCont.style.display = "block";
       const meetingIdSlug = (meeting && meeting.id) ? meeting.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
       const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
       
-      // Explicit parameters for WebRTC auto-start audio & video capture: audio=true, video=true, muted=0, sound=1, autoplay=1
-      const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&muted=0&sound=1&autoplay=1&layout=grid&grid=1&name=${encodeURIComponent(loggedIn)}`;
+      const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=1&video=1&name=${encodeURIComponent(loggedIn)}`;
       
       jitsiCont.innerHTML = `
         <iframe 
@@ -7106,19 +7094,13 @@ function launchLiveMeetingRoom(meeting, stream) {
           src="${roomUrl}" 
           width="100%" 
           height="100%" 
-          allow="camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *;" 
-          allowusermedia="true"
+          allow="camera *; microphone *; speaker-selection *; display-capture *; fullscreen *; autoplay *; picture-in-picture *; accelerometer; gyroscope;" 
           style="border: none; width: 100%; height: 100%; border-radius: 18px; background: #090d16;">
         </iframe>
       `;
     }
 
-    // Unlock remote audio & sound output for all participants after short delay
-    setTimeout(() => {
-      unlockAndPlayRemoteAudio();
-    }, 1200);
-
-    showToast("Joined Online Video Fellowship Room 🙏 (Mic & Speaker Active)");
+    showToast("Joined Online Video Fellowship Room 🙏");
   } catch (err) {
     console.warn("launchLiveMeetingRoom notice:", err);
   }
