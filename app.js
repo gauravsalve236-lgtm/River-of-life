@@ -7439,11 +7439,23 @@ function exitLiveMeetingRoom() {
       jitsiCont.style.display = "none";
     }
 
-    // Stop all local camera and microphone media tracks
-    if (window.nativeLiveKitMeetingManager && window.nativeLiveKitMeetingManager.localStream) {
+    // Stop all local camera and microphone media tracks & purge room presence
+    if (window.nativeLiveKitMeetingManager) {
       try {
-        window.nativeLiveKitMeetingManager.localStream.getTracks().forEach(track => track.stop());
+        if (typeof window.nativeLiveKitMeetingManager.leaveRoomPresence === 'function') {
+          window.nativeLiveKitMeetingManager.leaveRoomPresence();
+        }
+        if (window.nativeLiveKitMeetingManager.localStream) {
+          window.nativeLiveKitMeetingManager.localStream.getTracks().forEach(track => track.stop());
+        }
       } catch(e) {}
+    }
+    if (window.activeJitsiAPIInstance) {
+      try {
+        window.activeJitsiAPIInstance.executeCommand("hangup");
+        window.activeJitsiAPIInstance.dispose();
+      } catch(e) {}
+      window.activeJitsiAPIInstance = null;
     }
     if (activeMeetingSession && activeMeetingSession.localStream) {
       try {
@@ -8985,7 +8997,7 @@ window.nativeLiveKitMeetingManager = {
             disableDeepLinking: true,
             prejoinPageEnabled: false,
             enableWelcomePage: false,
-            p2p: { enabled: true }
+            p2p: { enabled: false } // Force Jitsi SFU Relay for guaranteed cross-device video on 4G/5G/Wi-Fi
           },
           interfaceConfigOverwrite: {
             TOOLBAR_BUTTONS: [], // We use our MS Teams / Google Meet floating control toolbar!
@@ -9027,13 +9039,47 @@ window.nativeLiveKitMeetingManager = {
       await this.publishLocalHardwareTracks();
     }
 
-    // Setup Real-time Multi-Device Participant Sync (Android + iPhone + Windows)
+    // Setup Real-time Multi-Device Participant Sync & Heartbeat
+    this.cleanStalePresenceEntries(targetRoom);
     this.setupMultiDeviceSync(targetRoom, this.deviceId, displayName);
     this.setupGlobalCloudRelay(targetRoom, this.deviceId, displayName);
+    this.startHeartbeat(targetRoom);
 
     // Show Native Teams / Google Meet Toolbar
     const toolbar = document.getElementById("river-meet-toolbar");
     if (toolbar) toolbar.style.display = "flex";
+  },
+
+  cleanStalePresenceEntries(roomId) {
+    try {
+      const key = `river_room_presence_${roomId}`;
+      const now = Date.now();
+      let members = JSON.parse(localStorage.getItem(key) || "[]");
+      members = members.filter(m => m.id === this.deviceId || (now - (m.lastSeen || 0) < 25000));
+      localStorage.setItem(key, JSON.stringify(members));
+    } catch(e) {}
+  },
+
+  startHeartbeat(roomId) {
+    if (this.heartbeatTimer) clearInterval(this.heartbeatTimer);
+    this.heartbeatTimer = setInterval(() => {
+      if (this.roomId && this.deviceId) {
+        this.registerStoragePresence(this.roomId, this.deviceId, this.username);
+        this.cleanStalePresenceEntries(this.roomId);
+      }
+    }, 10000);
+  },
+
+  leaveRoomPresence() {
+    try {
+      if (this.heartbeatTimer) clearInterval(this.heartbeatTimer);
+      if (this.roomId && this.deviceId) {
+        const key = `river_room_presence_${this.roomId}`;
+        let members = JSON.parse(localStorage.getItem(key) || "[]");
+        members = members.filter(m => m.id !== this.deviceId);
+        localStorage.setItem(key, JSON.stringify(members));
+      }
+    } catch(e) {}
   },
 
   // Real-time Multi-Device Sync Engine (Android + iPhone + Windows Cross-Platform Presence)
