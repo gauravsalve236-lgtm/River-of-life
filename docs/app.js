@@ -8963,13 +8963,16 @@ window.nativeLiveKitMeetingManager = {
       }
 
       const targetRoom = roomName || 'River_Sanctuary_Global_Room';
+      const deviceType = (typeof getDeviceTypeTag === 'function') ? getDeviceTypeTag() : 'Device';
+      this.deviceId = `dev_${deviceType}_${Math.random().toString(36).substring(7)}`;
+      const displayName = `${participantName || 'Member'} (${deviceType})`;
 
       // Render local participant tile instantly in #river-video-grid
-      this.renderLocalParticipantTile(participantName);
+      this.renderLocalParticipantTile(displayName);
 
       // Setup Real-time Multi-Device Participant Sync (Android + iPhone + Windows)
-      this.setupMultiDeviceSync(targetRoom, participantName);
-      this.setupGlobalCloudRelay(targetRoom, participantName);
+      this.setupMultiDeviceSync(targetRoom, this.deviceId, displayName);
+      this.setupGlobalCloudRelay(targetRoom, this.deviceId, displayName);
 
       // Acquire local mic & camera
       await this.publishLocalHardwareTracks();
@@ -8978,16 +8981,17 @@ window.nativeLiveKitMeetingManager = {
       const toolbar = document.getElementById("river-meet-toolbar");
       if (toolbar) toolbar.style.display = "flex";
 
-      showToast("Joined River of Life Fellowship Meeting 🙏");
+      showToast(`Joined Fellowship Meeting as ${displayName} 🙏`);
     } catch (err) {
       console.error("[Native LiveKit] Join Native Meeting Error:", err);
       showToast("Connected to Fellowship Meeting Room 🙏");
     }
   },
 
-  // Real-time Multi-Device Sync Engine (Android + Windows Cross-Platform Presence)
-  setupMultiDeviceSync(roomId, username) {
+  // Real-time Multi-Device Sync Engine (Android + iPhone + Windows Cross-Platform Presence)
+  setupMultiDeviceSync(roomId, deviceId, username) {
     this.roomId = roomId;
+    this.deviceId = deviceId;
     this.username = username;
 
     try {
@@ -8995,7 +8999,7 @@ window.nativeLiveKitMeetingManager = {
         if (this.syncChannel) try { this.syncChannel.close(); } catch(e) {}
         this.syncChannel = new BroadcastChannel(`river_room_sync_${roomId}`);
         this.syncChannel.onmessage = (e) => this.handleSyncMessage(e.data);
-        this.syncChannel.postMessage({ type: "JOIN", name: username, timestamp: Date.now() });
+        this.syncChannel.postMessage({ type: "JOIN", id: deviceId, name: username, timestamp: Date.now() });
       }
     } catch(e) {}
 
@@ -9007,15 +9011,19 @@ window.nativeLiveKitMeetingManager = {
     window.removeEventListener("storage", this.storageHandler);
     window.addEventListener("storage", this.storageHandler);
     
-    this.registerStoragePresence(roomId, username);
+    this.registerStoragePresence(roomId, deviceId, username);
   },
 
-  registerStoragePresence(roomId, username) {
+  registerStoragePresence(roomId, deviceId, username) {
     try {
       const key = `river_room_presence_${roomId}`;
       let members = JSON.parse(localStorage.getItem(key) || "[]");
-      if (!members.some(m => m.name === username)) {
-        members.push({ name: username, joinedAt: Date.now() });
+      const existingIdx = members.findIndex(m => m.id === deviceId);
+      if (existingIdx >= 0) {
+        members[existingIdx].lastSeen = Date.now();
+        members[existingIdx].name = username;
+      } else {
+        members.push({ id: deviceId, name: username, joinedAt: Date.now(), lastSeen: Date.now() });
       }
       localStorage.setItem(key, JSON.stringify(members));
       this.syncMembersFromStorage(roomId);
@@ -9033,13 +9041,13 @@ window.nativeLiveKitMeetingManager = {
       if (badgeCount) badgeCount.textContent = Math.max(1, members.length);
 
       members.forEach((m) => {
-        if (m.name !== this.username) {
-          const tileId = `tile-remote-${m.name.replace(/[^a-zA-Z0-9]/g, '_')}`;
+        if (m.id !== this.deviceId) {
+          const tileId = `tile-remote-${m.id.replace(/[^a-zA-Z0-9]/g, '_')}`;
           if (!document.getElementById(tileId)) {
             const remoteTile = document.createElement("div");
             remoteTile.id = tileId;
             remoteTile.className = "river-video-tile";
-            const initial = m.name.charAt(0).toUpperCase();
+            const initial = m.name ? m.name.charAt(0).toUpperCase() : 'M';
             remoteTile.innerHTML = `
               <div class="river-avatar-placeholder" style="display: flex;">
                 <div class="river-avatar-circle" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: #fff;">${initial}</div>
@@ -9059,19 +9067,19 @@ window.nativeLiveKitMeetingManager = {
 
   handleSyncMessage(data) {
     if (!data) return;
-    if (data.type === "JOIN" && data.name !== this.username) {
-      showToast(`${data.name} joined the meeting 👋`);
-      this.registerStoragePresence(this.roomId, data.name);
+    if (data.type === "JOIN" && data.id !== this.deviceId) {
+      showToast(`${data.name} joined meeting 👋`);
+      this.registerStoragePresence(this.roomId, data.id, data.name);
       if (this.syncChannel) {
-        this.syncChannel.postMessage({ type: "PRESENCE", name: this.username });
+        this.syncChannel.postMessage({ type: "PRESENCE", id: this.deviceId, name: this.username });
       }
-    } else if (data.type === "PRESENCE" && data.name !== this.username) {
-      this.registerStoragePresence(this.roomId, data.name);
+    } else if (data.type === "PRESENCE" && data.id !== this.deviceId) {
+      this.registerStoragePresence(this.roomId, data.id, data.name);
     }
   },
 
   // Global Cross-Device WebSockets Cloud Relay (iPhone + Android + Windows)
-  setupGlobalCloudRelay(roomName, username) {
+  setupGlobalCloudRelay(roomName, deviceId, username) {
     const cleanRoom = (roomName || 'River_Sanctuary_Global_Room').replace(/[^a-zA-Z0-9]/g, '_');
     const cleanUser = (username || 'Member').replace(/[^a-zA-Z0-9]/g, '_');
 
@@ -9091,6 +9099,7 @@ window.nativeLiveKitMeetingManager = {
           client.subscribe(`river_of_life/room/${cleanRoom}`, { qos: 0 });
           client.publish(`river_of_life/room/${cleanRoom}`, JSON.stringify({
             type: "USER_JOINED",
+            id: deviceId,
             name: username,
             timestamp: Date.now()
           }));
@@ -9099,16 +9108,17 @@ window.nativeLiveKitMeetingManager = {
         client.on('message', (topic, payload) => {
           try {
             const data = JSON.parse(payload.toString());
-            if (data && data.name && data.name !== username) {
+            if (data && data.id && data.id !== deviceId) {
               if (data.type === "USER_JOINED") {
                 showToast(`${data.name} joined meeting 👋`);
-                this.registerStoragePresence(cleanRoom, data.name);
+                this.registerStoragePresence(cleanRoom, data.id, data.name);
                 client.publish(`river_of_life/room/${cleanRoom}`, JSON.stringify({
                   type: "PRESENCE",
+                  id: deviceId,
                   name: username
                 }));
               } else if (data.type === "PRESENCE") {
-                this.registerStoragePresence(cleanRoom, data.name);
+                this.registerStoragePresence(cleanRoom, data.id, data.name);
               }
             }
           } catch(e) {}
@@ -9121,27 +9131,45 @@ window.nativeLiveKitMeetingManager = {
     }
   },
 
-  // 2. Publish Local Hardware Microphone & Camera Tracks
+  // 2. Publish Local Hardware Microphone & Camera Tracks (Android + iOS Progressive Camera Fallback)
   async publishLocalHardwareTracks() {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-        video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } }
-      });
+    let stream = null;
 
-      const videoEl = document.getElementById("local-video-element");
-      if (videoEl) {
-        videoEl.srcObject = stream;
-        videoEl.play().catch(e => console.log("Local video play notice:", e));
-      }
-      this.localStream = stream;
-    } catch (err) {
-      console.warn("[Native LiveKit] Audio-only fallback:", err);
+    // Step 1: Front camera + audio (Android & iOS)
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+        video: { facingMode: "user" }
+      });
+    } catch(e1) {
+      // Step 2: Basic video + audio without facingMode constraint
       try {
-        const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        this.localStream = audioStream;
-      } catch(audioErr) {
-        console.error("[Native LiveKit] Hardware permissions denied:", audioErr);
+        stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+      } catch(e2) {
+        // Step 3: Audio only fallback
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        } catch(e3) {
+          console.error("Hardware permissions denied on device:", e3);
+        }
+      }
+    }
+
+    if (stream) {
+      this.localStream = stream;
+      const videoEl = document.getElementById("local-video-element");
+      const avatarEl = document.getElementById("local-avatar-placeholder");
+      if (videoEl && stream.getVideoTracks().length > 0) {
+        videoEl.srcObject = stream;
+        videoEl.setAttribute("playsinline", "true");
+        videoEl.setAttribute("webkit-playsinline", "true");
+        videoEl.setAttribute("autoplay", "true");
+        videoEl.muted = true;
+        videoEl.style.display = "block";
+        if (avatarEl) avatarEl.style.display = "none";
+        videoEl.play().catch(e => console.log("Video play notice:", e));
+      } else if (avatarEl) {
+        avatarEl.style.display = "flex";
       }
     }
   },
