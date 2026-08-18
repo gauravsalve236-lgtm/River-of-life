@@ -198,6 +198,110 @@ async function changeSpeakerDevice(deviceId) {
   }
 }
 
+// 4b. Global Audio & Microphone Unlock for Host & Participants
+function unlockAndPlayRemoteAudio() {
+  console.log("[WebRTC Pipeline] Unlocking Audio Context and Remote Audio Streams...");
+  
+  // Hide autoplay banner if visible
+  const banner = document.getElementById("meeting-audio-autoplay-banner");
+  if (banner) banner.style.display = "none";
+
+  // Resume Web Audio Context if suspended
+  try {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (AudioContextClass) {
+      if (!window.webrtcAudioCtx) {
+        window.webrtcAudioCtx = new AudioContextClass();
+      }
+      if (window.webrtcAudioCtx.state === 'suspended') {
+        window.webrtcAudioCtx.resume();
+      }
+    }
+  } catch(e) {
+    console.warn("[WebRTC Pipeline] AudioContext resume notice:", e);
+  }
+
+  // Unmute all remote audio and video elements
+  const audioEls = document.querySelectorAll("audio, video");
+  audioEls.forEach(el => {
+    try {
+      el.muted = false;
+      el.volume = 1.0;
+      if (el.paused) {
+        const playPromise = el.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(err => console.warn("[WebRTC Pipeline] Play error on element:", err));
+        }
+      }
+    } catch(e) {}
+  });
+
+  showToast("🎙️ Microphone & Audio Output Unmuted for All!");
+}
+
+// 4c. Interactive Mic & Speaker Diagnostic Test
+async function testMicrophoneAndSpeakerPipeline() {
+  const statusLabel = document.getElementById("meeting-mic-status-label");
+  const fillBar = document.getElementById("meeting-mic-level-bar-fill");
+  
+  if (statusLabel) statusLabel.textContent = "Testing Mic...";
+  
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    if (statusLabel) statusLabel.textContent = "Mic Active 🎙️";
+    
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (AudioContextClass) {
+      const audioCtx = new AudioContextClass();
+      const source = audioCtx.createMediaStreamSource(stream);
+      const analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 64;
+      source.connect(analyser);
+      
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+      let startTime = Date.now();
+      
+      const updateMeter = () => {
+        analyser.getByteFrequencyData(dataArray);
+        let sum = 0;
+        for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
+        let avg = sum / dataArray.length;
+        let pct = Math.min(100, Math.round((avg / 128) * 100));
+        
+        if (fillBar) fillBar.style.width = `${Math.max(5, pct)}%`;
+        
+        if (Date.now() - startTime < 4000) {
+          requestAnimationFrame(updateMeter);
+        } else {
+          stream.getTracks().forEach(t => t.stop());
+          audioCtx.close();
+          if (fillBar) fillBar.style.width = "0%";
+          if (statusLabel) statusLabel.textContent = "Mic OK ✅";
+        }
+      };
+      updateMeter();
+    }
+    
+    // Play test audio tone for speaker output check
+    const synthCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = synthCtx.createOscillator();
+    const gain = synthCtx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(523.25, synthCtx.currentTime); // C5 tone
+    gain.gain.setValueAtTime(0.1, synthCtx.currentTime);
+    osc.connect(gain);
+    gain.connect(synthCtx.destination);
+    osc.start();
+    osc.stop(synthCtx.currentTime + 0.4);
+    
+    showToast("🔊 Mic input active & Speaker tone played!");
+  } catch (err) {
+    console.error("[WebRTC Pipeline] Mic/Speaker test error:", err);
+    if (statusLabel) statusLabel.textContent = "Mic Blocked ⚠️";
+    showToast("Microphone permission denied or device busy.");
+  }
+}
+
 // 5. Remote Audio Track Reception, Media Attachment & Autoplay Restriction Handling
 function attachRemoteAudioTrack(peerId, remoteStream) {
   console.log(`[WebRTC Pipeline] Attaching Remote Audio Track for peer [${peerId}]...`, remoteStream);
@@ -6924,6 +7028,14 @@ function triggerJoinMeetingFlow(meetingId) {
 function launchLiveMeetingRoom(meeting, stream) {
   try {
     console.log("[WebRTC Pipeline] Launching Verified WebRTC Fellowship Room:", meeting);
+
+    // Release any temporary parent frame media tracks so hardware mic is not locked when iframe initializes
+    if (stream && stream.getTracks) {
+      stream.getTracks().forEach(t => t.stop());
+    }
+    if (activeMeetingSession && activeMeetingSession.localStream && activeMeetingSession.localStream.getTracks) {
+      activeMeetingSession.localStream.getTracks().forEach(t => t.stop());
+    }
     
     // Lock screen view overlay
     const roomModal = document.getElementById("modal-live-meeting");
@@ -6962,20 +7074,16 @@ function launchLiveMeetingRoom(meeting, stream) {
     
     activeMeetingSession = {
       meetingId: meeting ? meeting.id : "default",
-      localStream: stream,
+      localStream: null,
       isMuted: false,
       isCamOff: false,
       isHost: isHost
     };
 
-    // Execute WebRTC Pipeline Initialization (Permissions -> Logs -> Enumerate Devices)
-    initializeWebRTCAudioPipeline().then(acquiredStream => {
-      if (acquiredStream) {
-        activeMeetingSession.localStream = acquiredStream;
-      }
-    });
+    // Enumerate audio devices for settings dropdown
+    enumerateAndPopulateAudioDevices();
 
-    // Load Verified WebRTC Video Conference Room
+    // Load Verified WebRTC Video Conference Room with Exclusive Hardware Access
     const jitsiCont = document.getElementById("meeting-jitsi-container");
     if (jitsiCont) {
       jitsiCont.style.display = "block";
@@ -6986,16 +7094,22 @@ function launchLiveMeetingRoom(meeting, stream) {
       
       jitsiCont.innerHTML = `
         <iframe 
+          id="webrtc-room-iframe"
           src="${roomUrl}" 
           width="100%" 
           height="100%" 
-          allow="camera *; microphone *; speaker-selection *; display-capture *; fullscreen *; autoplay *; picture-in-picture *; accelerometer; gyroscope;" 
+          allow="camera; microphone; speaker-selection; display-capture; autoplay; fullscreen; picture-in-picture; clipboard-write" 
           style="border: none; width: 100%; height: 100%; border-radius: 18px; background: #090d16;">
         </iframe>
       `;
     }
 
-    showToast("Joined Online Video Fellowship Room 🙏");
+    // Unlock remote audio & sound output for all participants after short delay
+    setTimeout(() => {
+      unlockAndPlayRemoteAudio();
+    }, 1500);
+
+    showToast("Joined Online Video Fellowship Room 🙏 (Mic & Audio Enabled)");
   } catch (err) {
     console.warn("launchLiveMeetingRoom notice:", err);
   }
