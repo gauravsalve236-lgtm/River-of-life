@@ -9224,17 +9224,19 @@ window.nativeLiveKitMeetingManager = {
       grid.appendChild(localTile);
     }
 
+    localTile.style.cssText = "position: relative; width: 100%; height: 100%; min-height: 280px; background: #303134; border-radius: 16px; overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08);";
+
     const initial = name ? name.charAt(0).toUpperCase() : "M";
 
     localTile.innerHTML = `
-      <video id="local-video-element" class="river-video-element" autoplay playsinline muted></video>
-      <div id="local-avatar-placeholder" class="river-avatar-placeholder" style="display: none;">
-        <div class="river-avatar-circle">${initial}</div>
-        <div style="font-size: 13px; font-weight: 700; color: #cbd5e1;">${name}</div>
+      <video id="local-video-element" class="river-video-element" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover; border-radius: 16px;"></video>
+      <div id="local-avatar-placeholder" class="river-avatar-placeholder" style="display: none; flex-direction: column; align-items: center; justify-content: center; gap: 12px;">
+        <div class="river-avatar-circle" style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #fff; font-size: 32px; font-weight: 800; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(245,158,11,0.4);">${initial}</div>
+        <div style="font-size: 15px; font-weight: 700; color: #f8fafc;">${name}</div>
       </div>
-      <div class="river-participant-badge">
+      <div class="river-participant-badge" style="position: absolute; bottom: 14px; left: 14px; background: rgba(0, 0, 0, 0.65); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); padding: 6px 14px; border-radius: 20px; color: #fff; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 6px; border: 1px solid rgba(255,255,255,0.1); z-index: 10;">
         <span id="badge-mic-icon">🎙️</span>
-        <span>${name} (You)</span>
+        <span>${name}</span>
       </div>
     `;
   },
