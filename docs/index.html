@@ -191,6 +191,9 @@
                     <button class="vod-nav-btn" id="btn-vod-prev" title="Yesterday's Verse">
                       <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg> Previous
                     </button>
+                    <button class="vod-nav-btn" id="btn-vod-listen" title="Listen to Verse">
+                      <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg> Listen
+                    </button>
                     <button class="vod-nav-btn" id="btn-vod-read">
                       Read Chapter
                     </button>
@@ -1243,16 +1246,27 @@
 
       <!-- Floating playbar capsule above the mobile tab bar / bottom desktop page -->
       <div id="floating-audio-playbar" class="floating-playbar-container">
-        <button id="playbar-btn-prev" class="playbar-control-btn" aria-label="Previous Verse">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
-        </button>
-        <button id="playbar-btn-play" class="playbar-play-circle" aria-label="Play / Pause">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" id="playbar-icon-svg"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-        </button>
-        <button id="playbar-btn-next" class="playbar-control-btn" aria-label="Next Verse">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
-        </button>
-        <button id="playbar-btn-close-widget" class="playbar-control-btn close" aria-label="Close Player">&times;</button>
+        <div class="playbar-info-column">
+          <div class="audio-equalizer-anim" id="playbar-equalizer" title="Playing Audio">
+            <span class="eq-bar eq-bar-1"></span>
+            <span class="eq-bar eq-bar-2"></span>
+            <span class="eq-bar eq-bar-3"></span>
+          </div>
+          <span id="playbar-verse-indicator" class="playbar-verse-text">Narrating Scripture...</span>
+        </div>
+        <div class="playbar-controls-group">
+          <button id="playbar-btn-prev" class="playbar-control-btn" aria-label="Previous Verse" title="Previous Verse">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          </button>
+          <button id="playbar-btn-play" class="playbar-play-circle" aria-label="Play / Pause">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" id="playbar-icon-svg"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+          </button>
+          <button id="playbar-btn-next" class="playbar-control-btn" aria-label="Next Verse" title="Next Verse">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
+          <button id="playbar-btn-speed" class="playbar-speed-pill" title="Playback Speed">1.0x</button>
+          <button id="playbar-btn-close-widget" class="playbar-control-btn close" aria-label="Close Player">&times;</button>
+        </div>
         
         <div class="playbar-progress-line-bg">
           <div id="playbar-progress-line" class="playbar-progress-line-fill" style="width: 0%"></div>

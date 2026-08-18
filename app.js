@@ -1889,6 +1889,26 @@ function speakPlaybarVerse(index) {
   const activeEl = document.querySelector(`.verse-row[data-verse-id="${verse.key}"]`);
   if (activeEl) activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
   
+  // Update floating playbar verse indicator text
+  const indicatorEl = document.getElementById("playbar-verse-indicator");
+  if (indicatorEl) {
+    const total = audioState.versesToRead.length;
+    if (verse && verse.key === "vod_verse") {
+      indicatorEl.textContent = "🔊 Daily Bible Verse";
+    } else if (verse && verse.key) {
+      const parts = verse.key.split("_");
+      if (parts.length >= 3) {
+        const bMeta = booksMetadataMr.find(b => b.filename.replace(".json", "") === parts[0]);
+        const bName = (state.translation === "eng" && bMeta) ? bMeta.engName : (bMeta ? bMeta.name : parts[0]);
+        indicatorEl.textContent = `${bName} ${parts[1]}:${parts[2]} (${index + 1}/${total})`;
+      } else {
+        indicatorEl.textContent = `Verse ${index + 1} of ${total}`;
+      }
+    } else {
+      indicatorEl.textContent = `Verse ${index + 1} of ${total}`;
+    }
+  }
+
   // Set play icon to paused lines
   document.getElementById("playbar-icon-svg").innerHTML = `<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>`;
   
@@ -1984,6 +2004,51 @@ function stopSpeechNarration() {
   
   document.querySelectorAll(".verse-row").forEach(v => v.classList.remove("tts-reading"));
   document.getElementById("floating-audio-playbar").classList.remove("active");
+}
+
+function startSpeechNarrationFromVerse(verseNum) {
+  const targetIndex = Math.max(0, parseInt(verseNum) - 1);
+  if (!audioState.versesToRead || audioState.versesToRead.length === 0) {
+    startSpeechNarration();
+    return;
+  }
+  if (audioState.versesToRead && targetIndex < audioState.versesToRead.length) {
+    audioState.isPlaying = true;
+    document.getElementById("floating-audio-playbar").classList.add("active");
+    speakPlaybarVerse(targetIndex);
+  } else {
+    startSpeechNarration();
+  }
+}
+
+function playDailyVerseAudio() {
+  const vodTextEl = document.getElementById("home-vod-text");
+  const vodRefEl = document.getElementById("home-vod-ref");
+  if (!vodTextEl) return;
+
+  const rawText = vodTextEl.textContent.replace(/["']/g, '');
+  const refText = vodRefEl ? vodRefEl.textContent : "Daily Verse";
+
+  if (audioPlayerInstance) {
+    audioPlayerInstance.pause();
+    audioPlayerInstance = null;
+  }
+  speechSynthesis.cancel();
+
+  showToast(`🔊 Listening: ${refText}`);
+
+  audioState.versesToRead = [{
+    key: "vod_verse",
+    text: `${refText}. ${rawText}`
+  }];
+  audioState.currentVerseIndex = 0;
+  audioState.isPlaying = true;
+
+  const speedPill = document.getElementById("playbar-btn-speed");
+  if (speedPill) speedPill.textContent = `${audioState.speed || 1.0}x`;
+
+  document.getElementById("floating-audio-playbar").classList.add("active");
+  speakPlaybarVerse(0);
 }
 
 // Global Audio Processing Variables for Web Audio API
@@ -3513,8 +3578,20 @@ function setupEventListeners() {
   document.getElementById("btn-action-share").addEventListener("click", openShareCardCreator);
   document.getElementById("btn-action-speak").addEventListener("click", () => {
     closeAllDrawers();
-    openModal("modal-audio-settings");
+    if (selectedVerseMeta && selectedVerseMeta.verse) {
+      startSpeechNarrationFromVerse(selectedVerseMeta.verse);
+    } else {
+      openModal("modal-audio-settings");
+    }
   });
+
+  const vodListenBtn = document.getElementById("btn-vod-listen");
+  if (vodListenBtn) {
+    vodListenBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      playDailyVerseAudio();
+    });
+  }
   
   // Card share creator buttons
   document.querySelectorAll(".grad-dot").forEach(choice => {
@@ -3600,6 +3677,30 @@ function setupEventListeners() {
   document.getElementById("playbar-btn-play").addEventListener("click", togglePlaybarSpeech);
   document.getElementById("playbar-btn-close-widget").addEventListener("click", stopSpeechNarration);
   
+  const speedPillBtn = document.getElementById("playbar-btn-speed");
+  if (speedPillBtn) {
+    speedPillBtn.addEventListener("click", () => {
+      const speeds = [1.0, 1.25, 1.5, 2.0, 0.75];
+      let currIdx = speeds.indexOf(audioState.speed || 1.0);
+      if (currIdx === -1) currIdx = 0;
+      const nextSpeed = speeds[(currIdx + 1) % speeds.length];
+      audioState.speed = nextSpeed;
+      speedPillBtn.textContent = `${nextSpeed}x`;
+      const slider = document.getElementById("tts-speed-slider");
+      if (slider) slider.value = nextSpeed;
+      const valDisp = document.getElementById("tts-speed-val");
+      if (valDisp) valDisp.textContent = `${nextSpeed}x`;
+      
+      if (audioPlayerInstance) {
+        audioPlayerInstance.playbackRate = nextSpeed;
+      } else if (audioState.isPlaying && speechSynthesis.speaking) {
+        speechSynthesis.cancel();
+        speakPlaybarVerse(audioState.currentVerseIndex);
+      }
+      showToast(`Speed set to ${nextSpeed}x`);
+    });
+  }
+
   document.getElementById("playbar-btn-prev").addEventListener("click", () => {
     if (audioPlayerInstance) {
       audioPlayerInstance.currentTime = Math.max(0, audioPlayerInstance.currentTime - 10);
