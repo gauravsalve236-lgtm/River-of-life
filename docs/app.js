@@ -7025,10 +7025,24 @@ function triggerJoinMeetingFlow(meetingId) {
     }
   } catch(e) {}
 
+  const loggedIn = (state && state.currentUser) ? state.currentUser.username : "Member";
+  const meetingIdSlug = (m && m.id) ? m.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
+  const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
+  const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&autojoin=true&p2p=true&codec=opus&layout=grid&grid=1&name=${encodeURIComponent(loggedIn)}`;
+
+  // Detect iOS (iPhone/iPad) to bypass WebKit iframe microphone blocking and popup blocker
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if (isIOS) {
+    logAudioDebug("iOS Device detected. Directing to native top-level call window...", { roomUrl });
+    showToast("Opening iOS Video Room (Mic & Speaker Active) 🙏");
+    window.location.href = roomUrl;
+    return;
+  }
+
   logAudioDebug("getUserMedia started for meeting join...", { meetingId });
   showToast("Requesting Microphone & Camera access...");
   
-  // Explicitly request audio FIRST to force mobile browsers (iOS Safari / Android Chrome) to display Microphone Permission Dialog
+  // Explicitly request audio FIRST to force mobile browsers (Android Chrome / Desktop) to display Microphone Permission Dialog
   navigator.mediaDevices.getUserMedia({ audio: true })
     .then(audioStream => {
       logAudioDebug("Microphone permission granted by user!", {
