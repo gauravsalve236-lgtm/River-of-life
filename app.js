@@ -7116,7 +7116,8 @@ function launchLiveMeetingRoom(meeting, stream) {
       const meetingIdSlug = (meeting && meeting.id) ? meeting.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
       const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
       
-      const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&muted=0&sound=1&autoplay=1&layout=grid&grid=1&name=${encodeURIComponent(loggedIn)}`;
+      // Auto-configure default camera & mic parameters: audio=true&video=true&mic=true&cam=true&muted=false&sound=true&autojoin=true
+      const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&autojoin=true&layout=grid&grid=1&name=${encodeURIComponent(loggedIn)}`;
       
       jitsiCont.innerHTML = `
         <iframe 
@@ -7130,7 +7131,7 @@ function launchLiveMeetingRoom(meeting, stream) {
         </iframe>
       `;
 
-      logAudioDebug("WebRTC Room iframe mounted successfully.", {
+      logAudioDebug("WebRTC Room iframe mounted with default camera and mic auto-configured.", {
         roomUrl,
         allowPermissions: "camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; accelerometer; gyroscope;",
         allowusermedia: "true"
