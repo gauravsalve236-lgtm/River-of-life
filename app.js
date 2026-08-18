@@ -6859,6 +6859,46 @@ function initMeetings() {
   renderMeetingsDashboard();
 }
 
+// Persistent User Registry Database for Profiles & Invitations
+function getRegisteredUserDatabase() {
+  const defaultMembers = [
+    { id: "usr_1", username: "Pastor John", email: "pastorjohn@riveroflife.org", role: "Pastor", isPastor: true },
+    { id: "usr_2", username: "Pastor Sunil", email: "sunil@riveroflife.org", role: "Pastor", isPastor: true },
+    { id: "usr_3", username: "Leader Samuel", email: "samuel@riveroflife.org", role: "Leader", isLeader: true },
+    { id: "usr_4", username: "Sister Sarah", email: "sarah@riveroflife.org", role: "Member" },
+    { id: "usr_5", username: "Gaurav Salve", email: "gaurav@riveroflife.org", role: "Member" },
+    { id: "usr_6", username: "Ruth Shinde", email: "ruth@riveroflife.org", role: "Member" }
+  ];
+
+  try {
+    const stored = localStorage.getItem("rol_registered_users");
+    if (!stored) {
+      localStorage.setItem("rol_registered_users", JSON.stringify(defaultMembers));
+      return defaultMembers;
+    }
+    const parsed = JSON.parse(stored);
+    return (Array.isArray(parsed) && parsed.length > 0) ? parsed : defaultMembers;
+  } catch (e) {
+    return defaultMembers;
+  }
+}
+
+function saveUserToDatabase(userObj) {
+  if (!userObj || !userObj.username) return;
+  const db = getRegisteredUserDatabase();
+  const existing = db.find(u => u.username.toLowerCase() === userObj.username.toLowerCase());
+  if (!existing) {
+    db.push({
+      id: "usr_" + Date.now(),
+      username: userObj.username,
+      email: userObj.email || `${userObj.username.toLowerCase().replace(/\s+/g, '')}@riveroflife.org`,
+      role: userObj.role || "Member",
+      createdAt: Date.now()
+    });
+    localStorage.setItem("rol_registered_users", JSON.stringify(db));
+  }
+}
+
 // Populate Hosts, Co-Hosts, and Invitees in Schedule Drawer
 function populateScheduleHostsDropdown() {
   const hostSelect = document.getElementById("meeting-host");
@@ -6868,12 +6908,11 @@ function populateScheduleHostsDropdown() {
   hostSelect.innerHTML = "";
   inviteList.innerHTML = "";
 
-  // Set default selection to logged-in user
+  const allMembers = getRegisteredUserDatabase();
   const loggedIn = state.currentUser ? state.currentUser.username : "Guest User";
   
   // Fill Hosts dropdown
-  CHURCH_MEMBERS.forEach(member => {
-    // Only pastors/leaders or the logged-in user can host
+  allMembers.forEach(member => {
     const canHost = member.isPastor || member.isLeader || member.username === loggedIn;
     if (canHost) {
       const opt = document.createElement("option");
@@ -6887,15 +6926,15 @@ function populateScheduleHostsDropdown() {
   });
 
   // Fill Invitees checklist
-  CHURCH_MEMBERS.forEach((member, idx) => {
+  allMembers.forEach((member, idx) => {
     if (member.username !== loggedIn) {
       const row = document.createElement("div");
-      row.style.display = "flex";
-      row.style.alignItems = "center";
-      row.style.gap = "8px";
+      row.style.cssText = "display: flex; align-items: center; gap: 8px; padding: 4px 6px; border-radius: 6px; background: rgba(255,255,255,0.04);";
       row.innerHTML = `
-        <input type="checkbox" id="invitee_${idx}" value="${member.username}" style="width: 14px; height: 14px; accent-color: var(--primary);">
-        <label for="invitee_${idx}" style="font-size: 13px; cursor: pointer; color: var(--text); font-weight: 500;">${member.username}</label>
+        <input type="checkbox" id="invitee_${idx}" value="${member.username}" style="width: 15px; height: 15px; accent-color: var(--primary);">
+        <label for="invitee_${idx}" style="font-size: 13px; cursor: pointer; color: var(--text); font-weight: 600;">
+          ${member.username} <span style="font-size: 11px; color: var(--text-muted);">(${member.role || 'Member'})</span>
+        </label>
       `;
       inviteList.appendChild(row);
     }
@@ -6920,10 +6959,10 @@ function createNewMeeting() {
     return;
   }
 
-  // Count invited members
+  // Collect invited members
   const inviteList = document.getElementById("meeting-invitees-list");
   const checkedBoxes = inviteList.querySelectorAll("input[type='checkbox']:checked");
-  const invitedCount = checkedBoxes.length;
+  const invitedUsers = Array.from(checkedBoxes).map(cb => cb.value);
 
   const meetings = getMeetingsFromStorage();
 
@@ -6943,7 +6982,8 @@ function createNewMeeting() {
     maxParticipants: maxVal || "Unlimited",
     status: "scheduled",
     participantsCount: 0,
-    invitedCount,
+    invitedCount: invitedUsers.length,
+    invitedUsers: invitedUsers,
     createdAt: Date.now()
   };
 
