@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v27-RESTORED-STABLE';
+const CACHE_NAME = 'river-of-life-cache-v27-SHARE-HUB-FINAL';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

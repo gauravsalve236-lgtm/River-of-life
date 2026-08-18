@@ -9178,3 +9178,87 @@ window.sendNativeMeetingChatMessage = (e) => {
 };
 window.hostMuteAllParticipants = () => window.nativeLiveKitMeetingManager.muteAllParticipants();
 window.hostEndMeetingForEveryone = () => window.nativeLiveKitMeetingManager.endMeetingForEveryone();
+
+// Direct Meeting Exit without review prompts
+window.exitLiveMeetingRoomDirectly = function() {
+  try {
+    if (window.activeJitsiAPIInstance) {
+      try { window.activeJitsiAPIInstance.dispose(); } catch(e) {}
+    }
+  } catch(e) {}
+  
+  const modal = document.getElementById("modal-live-meeting");
+  if (modal) {
+    modal.classList.remove("active");
+    setTimeout(() => { modal.style.display = "none"; }, 300);
+  }
+  
+  // Show top header and mobile bottom tabs
+  const header = document.querySelector(".app-header");
+  if (header) header.style.display = "flex";
+  const tabs = document.querySelector(".mobile-bottom-tabs");
+  if (tabs) tabs.style.display = "flex";
+  
+  showToast("Left meeting 🙏");
+};
+
+// Share YouTube Video or Audio URL in Meeting
+window.shareYouTubeOrAudioLink = function() {
+  const urlInput = document.getElementById("meet-youtube-url-input");
+  if (!urlInput || !urlInput.value.trim()) {
+    showToast("Please enter a YouTube video or Audio URL.");
+    return;
+  }
+  const url = urlInput.value.trim();
+  closeDrawer("drawer-meet-share-hub");
+  showToast(`Sharing video/audio track: ${url} 📺`);
+  
+  if (window.activeJitsiAPIInstance && window.activeJitsiAPIInstance.executeCommand) {
+    try {
+      window.activeJitsiAPIInstance.executeCommand('startShareVideo', url);
+    } catch(e) {}
+  }
+};
+
+// Share Bible Chapter/Verse in Meeting
+window.shareBibleVerseToMeeting = function() {
+  const verseSelect = document.getElementById("meet-share-bible-book");
+  const selectedVerse = verseSelect ? verseSelect.value : "John 3:16";
+  closeDrawer("drawer-meet-share-hub");
+  showToast(`Broadcasting ${selectedVerse} to meeting 🙏`);
+  
+  const loggedIn = (state && state.currentUser) ? state.currentUser.username : "Member";
+  if (window.nativeLiveKitMeetingManager) {
+    window.nativeLiveKitMeetingManager.addChatMessage("📖 BIBLE BROADCAST", `${loggedIn} shared ${selectedVerse}`);
+  }
+};
+
+// Copy Meeting Invite Link Helper
+window.copyMeetingInviteLink = function() {
+  const link = `${window.location.origin}${window.location.pathname}#/meetings?room=River_Sanctuary_Main_Fellowship`;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(link).then(() => {
+      showToast("Meeting invite link copied to clipboard! 📋");
+    }).catch(() => {
+      fallbackCopyInviteLink(link);
+    });
+  } else {
+    fallbackCopyInviteLink(link);
+  }
+};
+
+function fallbackCopyInviteLink(text) {
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.style.position = "fixed";
+  textarea.style.opacity = "0";
+  document.body.appendChild(textarea);
+  textarea.select();
+  try {
+    document.execCommand('copy');
+    showToast("Meeting invite link copied! 📋");
+  } catch (err) {
+    showToast(`Invite Link: ${text}`);
+  }
+  document.body.removeChild(textarea);
+}
