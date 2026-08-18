@@ -9189,9 +9189,11 @@ document.addEventListener("DOMContentLoaded", function() {
       const isVisible = meetingModal.style.display !== "none" && meetingModal.style.display !== "";
       if (isVisible) {
         bottomTabs.style.setProperty("display", "none", "important");
+        bottomTabs.classList.add("hidden-in-meeting");
         document.body.classList.add("meeting-modal-open");
       } else {
         bottomTabs.style.display = "flex";
+        bottomTabs.classList.remove("hidden-in-meeting");
         document.body.classList.remove("meeting-modal-open");
       }
     });
@@ -9208,17 +9210,21 @@ window.exitLiveMeetingRoomDirectly = function() {
   } catch(e) {}
   
   document.body.classList.remove("meeting-modal-open");
+  const tabs = document.querySelector(".mobile-bottom-tabs");
+  if (tabs) {
+    tabs.classList.remove("hidden-in-meeting");
+    tabs.style.display = "flex";
+  }
+
   const modal = document.getElementById("modal-live-meeting");
   if (modal) {
     modal.classList.remove("active");
     modal.style.display = "none";
   }
   
-  // Show top header and mobile bottom tabs
+  // Show top header
   const header = document.querySelector(".app-header");
   if (header) header.style.display = "flex";
-  const tabs = document.querySelector(".mobile-bottom-tabs");
-  if (tabs) tabs.style.display = "flex";
   
   showToast("Left meeting 🙏");
 };

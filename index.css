@@ -5759,7 +5759,7 @@ input, textarea, select, [contenteditable="true"] {
   }
 }
 
-/* Responsive Mobile Bottom Navigation Bar (100% Crisp Labels on iPhone & Android) */
+/* Responsive Mobile Bottom Navigation Bar (iPhone Safe Area & Equal 1/6th Layout) */
 .mobile-bottom-tabs {
   position: fixed !important;
   bottom: 0 !important;
@@ -5767,22 +5767,28 @@ input, textarea, select, [contenteditable="true"] {
   right: 0 !important;
   width: 100vw !important;
   max-width: 100vw !important;
-  height: 60px !important;
+  height: 68px !important;
+  min-height: 68px !important;
   box-sizing: border-box !important;
-  background-color: rgba(var(--bg-rgb), 0.98) !important;
+  background-color: var(--bg-content) !important;
   backdrop-filter: blur(24px) !important;
   -webkit-backdrop-filter: blur(24px) !important;
   border-top: 1px solid var(--border) !important;
   display: flex !important;
-  justify-content: space-around !important;
+  flex-direction: row !important;
+  justify-content: space-between !important;
   align-items: center !important;
-  padding: 4px 2px calc(4px + env(safe-area-inset-bottom, 0px)) 2px !important;
+  padding: 4px 2px calc(14px + env(safe-area-inset-bottom, 0px)) 2px !important;
   z-index: 1000 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
 }
 
 .mobile-bottom-tabs .tab-btn {
-  flex: 1 1 0 !important;
+  flex: 1 1 0% !important;
   min-width: 0 !important;
+  max-width: 16.66% !important;
+  height: 100% !important;
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
@@ -5790,9 +5796,11 @@ input, textarea, select, [contenteditable="true"] {
   background: transparent !important;
   border: none !important;
   padding: 2px 0 !important;
+  margin: 0 !important;
   color: var(--text-muted) !important;
   cursor: pointer !important;
-  transition: all 0.15s ease !important;
+  box-sizing: border-box !important;
+  transition: color 0.15s ease !important;
 }
 
 .mobile-bottom-tabs .tab-btn.active {
@@ -5801,36 +5809,58 @@ input, textarea, select, [contenteditable="true"] {
 }
 
 .mobile-bottom-tabs .tab-btn svg {
-  width: 22px !important;
-  height: 22px !important;
-  margin-bottom: 2px !important;
+  width: 20px !important;
+  height: 20px !important;
+  min-width: 20px !important;
+  min-height: 20px !important;
+  margin: 0 0 2px 0 !important;
   flex-shrink: 0 !important;
 }
 
 .mobile-bottom-tabs .tab-btn .tab-label {
-  font-size: 10.5px !important;
-  font-family: var(--font-ui) !important;
+  font-size: 10px !important;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
   font-weight: 700 !important;
   white-space: nowrap !important;
   overflow: visible !important;
-  text-overflow: clip !important;
-  line-height: 1.1 !important;
+  line-height: 1 !important;
   text-align: center !important;
-  max-width: 100% !important;
+  letter-spacing: -0.2px !important;
   color: currentColor !important;
   margin: 0 !important;
   padding: 0 !important;
+  width: 100% !important;
 }
 
-/* 100% HIDE Mobile Bottom Navigation Bar in Meeting Rooms */
+/* 100% HARD HIDE Mobile Bottom Navigation Bar in Meeting Rooms */
 body:has(#modal-live-meeting[style*="display: block"]),
 body:has(#modal-live-meeting[style*="display: flex"]),
 body:has(#modal-live-meeting.active),
 body.meeting-modal-open .mobile-bottom-tabs,
 .meeting-modal-open .mobile-bottom-tabs,
-#modal-live-meeting:not([style*="display: none"]) ~ .mobile-bottom-tabs {
+#modal-live-meeting:not([style*="display: none"]) ~ .mobile-bottom-tabs,
+.mobile-bottom-tabs.hidden-in-meeting {
   display: none !important;
   opacity: 0 !important;
   pointer-events: none !important;
   visibility: hidden !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Ensure Teams floating toolbar is ALWAYS on top in meeting room */
+#river-meet-toolbar {
+  z-index: 999999 !important;
+  position: absolute !important;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+}
+
+/* Crop any internal iframe toolbars */
+#meeting-jitsi-container iframe#webrtc-room-iframe {
+  height: calc(100% + 40px) !important;
+  margin-bottom: -40px !important;
 }

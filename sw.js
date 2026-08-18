@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v27-TEAMS-SINGLE-TOOLBAR';
+const CACHE_NAME = 'river-of-life-cache-v27-PERFECT-MOBILE-NAV-AND-SINGLE-TOOLBAR';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
