@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v26-RESTORED-FINAL';
+const CACHE_NAME = 'river-of-life-cache-v27-RESTORED-STABLE';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
