@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v27-WINDOWS-BLANK-SCREEN-FIXED';
+const CACHE_NAME = 'river-of-life-cache-v27-MS-TEAMS-MOBILE-CALL-UI';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

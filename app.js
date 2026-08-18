@@ -9070,6 +9070,15 @@ window.nativeLiveKitMeetingManager = {
     if (label) label.textContent = this.isMuted ? "Muted" : "Mic";
     if (btn) btn.classList.toggle("active-off", this.isMuted);
     if (badgeMic) badgeMic.textContent = this.isMuted ? "🔇" : "🎙️";
+
+    const teamsMicBox = document.getElementById("teams-btn-mic-box");
+    const teamsMicLbl = document.getElementById("teams-lbl-mic");
+    if (teamsMicBox) {
+      teamsMicBox.textContent = this.isMuted ? "🔇" : "🎙️";
+      teamsMicBox.style.background = this.isMuted ? "#ef4444" : "rgba(255,255,255,0.08)";
+    }
+    if (teamsMicLbl) teamsMicLbl.textContent = this.isMuted ? "Mic off" : "Mic on";
+
     showToast(this.isMuted ? "Microphone Muted 🔇" : "Microphone Active 🎤");
   },
 
@@ -9090,6 +9099,15 @@ window.nativeLiveKitMeetingManager = {
     if (icon) icon.textContent = this.isCamOff ? "📷" : "📹";
     if (label) label.textContent = this.isCamOff ? "Cam Off" : "Cam";
     if (btn) btn.classList.toggle("active-off", this.isCamOff);
+
+    const teamsCamBox = document.getElementById("teams-btn-cam-box");
+    const teamsCamLbl = document.getElementById("teams-lbl-cam");
+    if (teamsCamBox) {
+      teamsCamBox.textContent = this.isCamOff ? "📷" : "📹";
+      teamsCamBox.style.background = this.isCamOff ? "rgba(255,255,255,0.08)" : "#3b82f6";
+    }
+    if (teamsCamLbl) teamsCamLbl.textContent = this.isCamOff ? "Video off" : "Video on";
+
     showToast(this.isCamOff ? "Camera Turned Off 📷" : "Camera Active 📹");
   },
 

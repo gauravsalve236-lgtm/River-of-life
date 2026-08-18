@@ -20,8 +20,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   
-  <!-- Main Stylesheet (Cache-Busted for Version 27 Windows Blank Screen Fix) -->
-  <link rel="stylesheet" href="index.css?v=27_WINDOWS_BLANK_SCREEN_FIXED">
+  <!-- Main Stylesheet (Cache-Busted for Version 27 MS Teams Mobile Call UI) -->
+  <link rel="stylesheet" href="index.css?v=27_MS_TEAMS_MOBILE_CALL_UI">
 
   <!-- Official LiveKit WebRTC Client SDK -->
   <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.0.8/dist/livekit-client.umd.min.js"></script>
@@ -2026,63 +2026,111 @@
       </div>
     </div>
 
-    <!-- Fullscreen Live Meeting Room Modal -->
-    <div id="modal-live-meeting" class="app-view meeting-modal-overlay" style="display: none; position: fixed; inset: 0; top: 0; left: 0; right: 0; bottom: 0; width: 100vw; height: 100dvh; height: -webkit-fill-available; background: #17181b; color: #fff; z-index: 999999; overflow: hidden; box-sizing: border-box;">
-      <div class="meeting-room-container" style="position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; box-sizing: border-box; background: #17181b;">
+    <!-- Fullscreen MS Teams Style Live Meeting Room Modal -->
+    <div id="modal-live-meeting" class="app-view meeting-modal-overlay" style="display: none; position: fixed; inset: 0; top: 0; left: 0; right: 0; bottom: 0; width: 100vw; height: 100dvh; height: -webkit-fill-available; background: #111318; color: #fff; z-index: 999999; overflow: hidden; box-sizing: border-box;">
+      <div class="meeting-room-container" style="position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; box-sizing: border-box; background: #111318;">
         
-        <!-- Sleek Title Topbar (Single Toolbar Design) -->
-        <div class="meeting-room-topbar" style="height: 44px; min-height: 44px; flex-shrink: 0; background: rgba(23, 24, 27, 0.95); border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: space-between; padding: 0 14px; z-index: 100; box-sizing: border-box;">
-          <div style="display: flex; align-items: center; gap: 8px; overflow: hidden; flex: 1;">
-            <span style="background: rgba(34, 197, 94, 0.2); border: 1px solid #22c55e; color: #4ade80; font-size: 10.5px; font-weight: 800; padding: 3px 8px; border-radius: 12px; display: flex; align-items: center; gap: 4px; flex-shrink: 0;">
-              <span style="width: 6px; height: 6px; background: #22c55e; border-radius: 50%; display: inline-block;"></span> LIVE
-            </span>
-            <h3 id="meeting-room-title-display" style="font-family: var(--font-ui); font-size: 14px; font-weight: 800; color: #fff; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">River of Life Meeting</h3>
+        <!-- Teams Sleek Header Bar -->
+        <div class="teams-top-header" style="height: 52px; min-height: 52px; flex-shrink: 0; background: rgba(17, 19, 24, 0.95); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; z-index: 100; box-sizing: border-box; border-bottom: 1px solid rgba(255,255,255,0.06);">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <button onclick="exitLiveMeetingRoomDirectly()" style="background: none; border: none; color: #fff; font-size: 24px; cursor: pointer; padding: 0; display: flex; align-items: center;">&lsaquo;</button>
+            <div style="display: flex; flex-direction: column; text-align: left;">
+              <span id="meeting-room-title-display" style="font-family: var(--font-ui); font-size: 14px; font-weight: 700; color: #fff;">River Sanctuary Meeting</span>
+              <span id="teams-call-timer" style="font-size: 11px; color: #94a3b8; font-weight: 600;">00:09</span>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <button onclick="openDrawer('drawer-meet-chat')" style="background: none; border: none; color: #fff; font-size: 18px; cursor: pointer; position: relative;" title="Chat">
+              💬
+              <span id="teams-chat-unread-dot" style="display: none; position: absolute; top: -2px; right: -2px; width: 7px; height: 7px; background: #ef4444; border-radius: 50%;"></span>
+            </button>
+            <button onclick="openDrawer('drawer-meet-participants')" style="background: none; border: none; color: #fff; font-size: 18px; cursor: pointer;" title="Participants">
+              👥
+            </button>
           </div>
         </div>
 
-        <!-- Native River of Life Video Conference Stage Container -->
-        <div id="river-native-meeting-stage" style="flex: 1; width: 100%; min-height: 0; position: relative; overflow: hidden; display: flex; flex-direction: column; background: #090d16; box-sizing: border-box;">
+        <!-- Center Video & Avatar Stage -->
+        <div id="river-native-meeting-stage" style="flex: 1; width: 100%; min-height: 0; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0b0c10; box-sizing: border-box;">
           
-          <!-- Native Video Tile Grid -->
-          <div id="river-video-grid" class="river-video-grid">
-            <!-- Dynamically populated with .river-video-tile elements -->
+          <!-- Native Video Tile Grid (Responsive Teams Grid) -->
+          <div id="river-video-grid" class="river-video-grid" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; position: relative; z-index: 2;">
+            <!-- Single active speaker center avatar or video grid -->
+            <div class="teams-single-avatar-card" style="display: flex; flex-direction: column; align-items: center; gap: 16px;">
+              <div style="position: relative; width: 130px; height: 130px; border-radius: 50%; padding: 4px; background: linear-gradient(135deg, #6366f1, #a855f7); box-shadow: 0 0 30px rgba(168, 85, 247, 0.3);">
+                <div style="width: 100%; height: 100%; border-radius: 50%; background: #1e1b4b; display: flex; align-items: center; justify-content: center; font-size: 42px; font-weight: 800; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.5);" id="teams-center-avatar">
+                  ✝️
+                </div>
+              </div>
+              <span id="teams-center-speaker-name" style="font-size: 17px; font-weight: 700; color: #f8fafc; letter-spacing: 0.2px;">Pastor John / River Sanctuary</span>
+            </div>
           </div>
 
-          <!-- Native Floating Control Toolbar (Audio Icon Removed) -->
-          <div id="river-meet-toolbar" class="river-meet-toolbar">
-            <button id="btn-river-mic" class="river-tool-btn" onclick="toggleNativeMic()" title="Toggle Microphone">
-              <span class="tool-icon" id="river-icon-mic">🎤</span>
-              <span class="tool-label" id="river-label-mic">Mic</span>
-            </button>
-
-            <button id="btn-river-cam" class="river-tool-btn" onclick="toggleNativeCam()" title="Toggle Camera">
-              <span class="tool-icon" id="river-icon-cam">📹</span>
-              <span class="tool-label" id="river-label-cam">Cam</span>
-            </button>
-
-            <button id="btn-river-participants" class="river-tool-btn" onclick="openDrawer('drawer-meet-participants')" title="Participants Roster">
-              <span class="tool-icon">👥</span>
-              <span class="tool-label" id="river-participant-count-badge">1</span>
-            </button>
-
-            <button id="btn-river-chat" class="river-tool-btn" onclick="openDrawer('drawer-meet-chat')" title="Meeting Chat">
-              <span class="tool-icon">💬</span>
-              <span class="tool-label">Chat</span>
-            </button>
-
-            <button id="btn-river-screenshare" class="river-tool-btn" onclick="openDrawer('drawer-meet-share-hub')" title="Share YouTube, Music & Bible Verses">
-              <span class="tool-icon" id="river-icon-share">🖥️</span>
-              <span class="tool-label">Share</span>
-            </button>
-
-            <button id="btn-river-leave" class="river-tool-btn danger" onclick="exitLiveMeetingRoomDirectly()" title="Leave Meeting">
-              <span class="tool-icon">🚪</span>
-              <span class="tool-label">Leave</span>
-            </button>
-          </div>
-
-          <!-- Embedded Fallback Iframe Container for compatibility -->
+          <!-- Embedded Fallback Iframe Container -->
           <div id="meeting-jitsi-container" style="display: none; width: 100%; height: 100%; position: absolute; inset: 0; z-index: 5;"></div>
+        </div>
+
+        <!-- MS Teams Style Dark Control Card Panel at Bottom -->
+        <div class="teams-control-card-panel" style="flex-shrink: 0; background: #111318; padding: 12px 16px calc(16px + env(safe-area-inset-bottom, 0px)) 16px; z-index: 100; box-sizing: border-box; width: 100%;">
+          <div style="background: #1c1e24; border-radius: 24px; padding: 16px 12px 12px 12px; border: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; gap: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+            
+            <!-- Teams 3x2 Controls Grid -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px 8px; text-align: center;">
+              <!-- 1. Mic -->
+              <button onclick="toggleNativeMic()" class="teams-grid-btn" style="background: none; border: none; color: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                <div style="width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; font-size: 20px;" id="teams-btn-mic-box">
+                  🎙️
+                </div>
+                <span style="font-size: 11px; color: #cbd5e1; font-weight: 600;" id="teams-lbl-mic">Mic on</span>
+              </button>
+
+              <!-- 2. Video -->
+              <button onclick="toggleNativeCam()" class="teams-grid-btn" style="background: none; border: none; color: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                <div style="width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; font-size: 20px;" id="teams-btn-cam-box">
+                  📹
+                </div>
+                <span style="font-size: 11px; color: #cbd5e1; font-weight: 600;" id="teams-lbl-cam">Video off</span>
+              </button>
+
+              <!-- 3. Speaker / Audio -->
+              <button onclick="openDrawer('drawer-meet-audio-settings')" class="teams-grid-btn" style="background: none; border: none; color: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                <div style="width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                  🔊
+                </div>
+                <span style="font-size: 11px; color: #cbd5e1; font-weight: 600;">Speaker</span>
+              </button>
+
+              <!-- 4. Bible Scripture -->
+              <button onclick="openDrawer('drawer-meet-share-hub')" class="teams-grid-btn" style="background: none; border: none; color: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                <div style="width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                  📖
+                </div>
+                <span style="font-size: 11px; color: #cbd5e1; font-weight: 600;">Bible</span>
+              </button>
+
+              <!-- 5. Worship Music -->
+              <button onclick="openDrawer('drawer-meet-share-hub')" class="teams-grid-btn" style="background: none; border: none; color: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                <div style="width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                  🎵
+                </div>
+                <span style="font-size: 11px; color: #cbd5e1; font-weight: 600;">Worship</span>
+              </button>
+
+              <!-- 6. More Options -->
+              <button onclick="openDrawer('drawer-teams-more-options')" class="teams-grid-btn" style="background: none; border: none; color: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                <div style="width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                  •••
+                </div>
+                <span style="font-size: 11px; color: #cbd5e1; font-weight: 600;">More</span>
+              </button>
+            </div>
+
+            <!-- Teams Red End Call Button -->
+            <button onclick="exitLiveMeetingRoomDirectly()" style="width: 100%; height: 46px; border-radius: 23px; background: #c53030; color: #fff; font-size: 14px; font-weight: 700; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 14px rgba(197, 48, 48, 0.4);">
+              <span style="font-size: 18px;">📞</span> End call
+            </button>
+
+          </div>
         </div>
 
       </div>
@@ -2133,6 +2181,64 @@
             </div>
             <button onclick="copyMeetingInviteLink()" class="btn-primary-mini" style="padding: 8px 14px; font-weight: 700; background: #22c55e; color: #fff; border: none; border-radius: 8px; cursor: pointer;">
               Copy Link
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- MS Teams Style "More Options" Sheet Drawer -->
+    <div id="drawer-teams-more-options" class="drawer-overlay">
+      <div class="ios-drawer-sheet" style="max-height: 80%; background: #181a20; color: #fff; border-top-left-radius: 24px; border-top-right-radius: 24px;">
+        <div class="drawer-header-row" style="border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 14px;">
+          <div class="grabber-bar" style="background: rgba(255,255,255,0.2);"></div>
+          <h3 style="color: #fff; font-size: 16px;">Meeting Options</h3>
+          <button class="close-drawer-btn" onclick="closeDrawer('drawer-teams-more-options')" style="color: #fff;">&times;</button>
+        </div>
+        
+        <div class="drawer-body-settings" style="padding: 16px; display: flex; flex-direction: column; gap: 20px;">
+          
+          <!-- Top Row 4 Actions (Teams Style: Chat, People, Share, Views) -->
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; text-align: center;">
+            <button onclick="closeDrawer('drawer-teams-more-options'); openDrawer('drawer-meet-chat');" style="background: #252830; border: none; border-radius: 12px; padding: 12px 6px; color: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+              <span style="font-size: 20px;">💬</span>
+              <span style="font-size: 11px; color: #cbd5e1; font-weight: 600;">Chat</span>
+            </button>
+            <button onclick="closeDrawer('drawer-teams-more-options'); openDrawer('drawer-meet-participants');" style="background: #252830; border: none; border-radius: 12px; padding: 12px 6px; color: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+              <span style="font-size: 20px;">👥</span>
+              <span style="font-size: 11px; color: #cbd5e1; font-weight: 600;">People</span>
+            </button>
+            <button onclick="closeDrawer('drawer-teams-more-options'); openDrawer('drawer-meet-share-hub');" style="background: #252830; border: none; border-radius: 12px; padding: 12px 6px; color: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+              <span style="font-size: 20px;">📤</span>
+              <span style="font-size: 11px; color: #cbd5e1; font-weight: 600;">Share</span>
+            </button>
+            <button onclick="closeDrawer('drawer-teams-more-options'); showToast('Grid view active');" style="background: #252830; border: none; border-radius: 12px; padding: 12px 6px; color: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+              <span style="font-size: 20px;">🔲</span>
+              <span style="font-size: 11px; color: #cbd5e1; font-weight: 600;">Views</span>
+            </button>
+          </div>
+
+          <!-- List Options (Teams Style List Items) -->
+          <div style="display: flex; flex-direction: column; gap: 4px; text-align: left;">
+            <button onclick="closeDrawer('drawer-teams-more-options'); openDrawer('drawer-meet-share-hub');" style="background: none; border: none; padding: 14px; color: #f8fafc; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 14px; cursor: pointer; border-radius: 10px;">
+              <span style="font-size: 18px;">📖</span> Share Bible Chapters & Verses
+            </button>
+
+            <button onclick="closeDrawer('drawer-teams-more-options'); openDrawer('drawer-meet-share-hub');" style="background: none; border: none; padding: 14px; color: #f8fafc; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 14px; cursor: pointer; border-radius: 10px;">
+              <span style="font-size: 18px;">🎵</span> Stream Worship Audio & Music
+            </button>
+
+            <button onclick="closeDrawer('drawer-teams-more-options'); openDrawer('drawer-meet-audio-settings');" style="background: none; border: none; padding: 14px; color: #f8fafc; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 14px; cursor: pointer; border-radius: 10px;">
+              <span style="font-size: 18px;">🔊</span> Speaker & Microphone Settings
+            </button>
+
+            <button onclick="closeDrawer('drawer-teams-more-options'); openDrawer('drawer-meet-prayer-request');" style="background: none; border: none; padding: 14px; color: #f8fafc; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 14px; cursor: pointer; border-radius: 10px;">
+              <span style="font-size: 18px;">🙏</span> Submit Live Prayer Request
+            </button>
+
+            <button onclick="closeDrawer('drawer-teams-more-options'); copyMeetingInviteLink();" style="background: none; border: none; padding: 14px; color: #f8fafc; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 14px; cursor: pointer; border-radius: 10px;">
+              <span style="font-size: 18px;">📋</span> Copy Meeting Invitation Link
             </button>
           </div>
 
@@ -2430,8 +2536,8 @@
       <span id="toast-message">Copied to clipboard!</span>
     </div>
 
-  <!-- App Main Logic (Cache-Busted for Version 27 Windows Blank Screen Fix) -->
-  <script src="app.js?v=27_WINDOWS_BLANK_SCREEN_FIXED"></script>
+  <!-- App Main Logic (Cache-Busted for Version 27 MS Teams Mobile Call UI) -->
+  <script src="app.js?v=27_MS_TEAMS_MOBILE_CALL_UI"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 2.5s no matter what
