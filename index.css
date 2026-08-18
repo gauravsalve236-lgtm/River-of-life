@@ -5839,3 +5839,12 @@ input, textarea, select, [contenteditable="true"] {
   white-space: nowrap !important;
   border-radius: 20px !important;
 }
+
+/* Hide Mobile Bottom Navigation Bar completely when inside full-screen Live Meeting Room */
+body:has(#modal-live-meeting[style*="display: flex"]),
+body:has(#modal-live-meeting[style*="display: block"]),
+body.meeting-modal-open .mobile-bottom-tabs,
+#modal-live-meeting:not([style*="display: none"]) ~ .mobile-bottom-tabs,
+#modal-live-meeting.active ~ .mobile-bottom-tabs {
+  display: none !important;
+}

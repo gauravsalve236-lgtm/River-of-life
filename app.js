@@ -9179,6 +9179,26 @@ window.sendNativeMeetingChatMessage = (e) => {
 window.hostMuteAllParticipants = () => window.nativeLiveKitMeetingManager.muteAllParticipants();
 window.hostEndMeetingForEveryone = () => window.nativeLiveKitMeetingManager.endMeetingForEveryone();
 
+// MutationObserver to auto-hide mobile bottom tabs during live meetings
+document.addEventListener("DOMContentLoaded", function() {
+  const meetingModal = document.getElementById("modal-live-meeting");
+  const bottomTabs = document.querySelector(".mobile-bottom-tabs");
+  
+  if (meetingModal && bottomTabs) {
+    const observer = new MutationObserver(() => {
+      const isVisible = meetingModal.style.display !== "none" && meetingModal.style.display !== "";
+      if (isVisible) {
+        bottomTabs.style.setProperty("display", "none", "important");
+        document.body.classList.add("meeting-modal-open");
+      } else {
+        bottomTabs.style.display = "flex";
+        document.body.classList.remove("meeting-modal-open");
+      }
+    });
+    observer.observe(meetingModal, { attributes: true, attributeFilter: ["style", "class"] });
+  }
+});
+
 // Direct Meeting Exit without review prompts
 window.exitLiveMeetingRoomDirectly = function() {
   try {
@@ -9187,10 +9207,11 @@ window.exitLiveMeetingRoomDirectly = function() {
     }
   } catch(e) {}
   
+  document.body.classList.remove("meeting-modal-open");
   const modal = document.getElementById("modal-live-meeting");
   if (modal) {
     modal.classList.remove("active");
-    setTimeout(() => { modal.style.display = "none"; }, 300);
+    modal.style.display = "none";
   }
   
   // Show top header and mobile bottom tabs
