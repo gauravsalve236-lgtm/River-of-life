@@ -20,8 +20,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   
-  <!-- Main Stylesheet (Cache-Busted for Version 27 Teams Mobile Call UI Forced) -->
-  <link rel="stylesheet" href="index.css?v=27_TEAMS_MOBILE_CALL_UI_FORCED">
+  <!-- Main Stylesheet (Cache-Busted for Version 27 Force iOS Teams Call UI) -->
+  <link rel="stylesheet" href="index.css?v=27_FORCE_IOS_TEAMS_CALL_UI">
 
   <!-- Official LiveKit WebRTC Client SDK -->
   <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.0.8/dist/livekit-client.umd.min.js"></script>
@@ -2536,8 +2536,28 @@
       <span id="toast-message">Copied to clipboard!</span>
     </div>
 
-  <!-- App Main Logic (Cache-Busted for Version 27 Teams Mobile Call UI Forced) -->
-  <script src="app.js?v=27_TEAMS_MOBILE_CALL_UI_FORCED"></script>
+  <script>
+    // Force unregister old service worker cache on mobile devices
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for(let registration of registrations) {
+          registration.unregister();
+        }
+      });
+    }
+    if ('caches' in window) {
+      caches.keys().then(function(names) {
+        for (let name of names) {
+          if (!name.includes('v27_FORCE_IOS_TEAMS_CALL_UI')) {
+            caches.delete(name);
+          }
+        }
+      });
+    }
+  </script>
+
+  <!-- App Main Logic (Cache-Busted for Version 27 Force iOS Teams Call UI) -->
+  <script src="app.js?v=27_FORCE_IOS_TEAMS_CALL_UI"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 2.5s no matter what

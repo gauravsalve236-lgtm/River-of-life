@@ -7405,16 +7405,6 @@ function launchLiveMeetingRoom(meeting, stream) {
         }
       } catch(e) {}
 
-      // Detect iOS (iPhone/iPad) to bypass WebKit iframe microphone blocking
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-      if (isIOS) {
-        logAudioDebug("iOS Device detected (Apple WebKit Iframe Restriction). Launching native top-level call window...");
-        showToast("Opening iOS Video Room (Mic & Speaker Active) 🙏");
-        try {
-          window.open(roomUrl, "_blank");
-        } catch(e) {}
-      }
-
       jitsiCont.innerHTML = `
         <iframe 
           id="webrtc-room-iframe"
