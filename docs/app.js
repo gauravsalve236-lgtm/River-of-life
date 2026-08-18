@@ -7,13 +7,222 @@ function logAudioDebug(action, details = {}) {
   console.log(`[Audio] ${action}`, details);
 }
 
+function logAudioDebug(action, details = {}) {
+  console.log(`[Audio] ${action}`, details);
+}
+
 function logIOSAudio(action, details = {}) {
-  console.log(`[iOS Audio] ${action}`, details);
+  console.log(`[iOS-AUDIO] ${action}`, details);
 }
 
 function logIOSMic(action, details = {}) {
-  console.log(`[iOS Mic] ${action}`, details);
+  console.log(`[iOS-AUDIO] [Mic] ${action}`, details);
 }
+
+window.iosAudioDiagnosticResults = {
+  microphone: "PENDING",
+  microphoneLevel: "PENDING",
+  audioSender: "PENDING",
+  remoteAudioReceiver: "PENDING",
+  ontrack: "PENDING",
+  remoteAudioElement: "PENDING",
+  audioPlay: "PENDING",
+  audioContext: "unknown",
+  userGestureUnlock: "PENDING",
+  speakerOutput: "PENDING",
+  webrtcConnection: "PENDING",
+  exactError: "None",
+  firstFailedStep: "None"
+};
+
+async function runIOSAudioDiagnostics() {
+  console.log("==========================================================================");
+  console.log("             RUNNING COMPLETE iOS AUDIO RUNTIME DIAGNOSTIC                ");
+  console.log("==========================================================================");
+  
+  // DIAGNOSTIC 11 — PAGE / PWA ENVIRONMENT
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+  const env = isIOS ? (isStandalone ? "iOS Home Screen / Standalone PWA" : "iOS Safari Browser") : "Desktop / Non-iOS Browser";
+  logIOSAudio(`ENVIRONMENT: ${env}`);
+
+  // DIAGNOSTIC 10 — AUDIO OUTPUT
+  const setSinkIdSupported = ('setSinkId' in HTMLMediaElement.prototype);
+  logIOSAudio(`setSinkId supported: ${setSinkIdSupported}`);
+  if (!setSinkIdSupported) {
+    logIOSAudio("using system/default iOS audio output");
+    window.iosAudioDiagnosticResults.speakerOutput = "PASS (Using System Audio Output)";
+  } else {
+    window.iosAudioDiagnosticResults.speakerOutput = "PASS (setSinkId Available)";
+  }
+
+  // DIAGNOSTIC 8 — AUDIO CONTEXT
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (AudioCtx) {
+      if (!window.webrtcAudioCtx) window.webrtcAudioCtx = new AudioCtx();
+      logIOSAudio(`AudioContext state: ${window.webrtcAudioCtx.state}`);
+      window.iosAudioDiagnosticResults.audioContext = window.webrtcAudioCtx.state;
+    } else {
+      logIOSAudio("AudioContext unavailable on this browser");
+      window.iosAudioDiagnosticResults.audioContext = "unavailable";
+    }
+  } catch(e) {
+    logIOSAudio(`AudioContext error: ${e.message}`);
+    window.iosAudioDiagnosticResults.audioContext = "error";
+  }
+
+  // DIAGNOSTIC 1 — LOCAL MICROPHONE
+  logIOSAudio("getUserMedia START");
+  let localStream = null;
+  try {
+    localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    logIOSAudio("getUserMedia SUCCESS");
+    window.iosAudioDiagnosticResults.microphone = "PASS";
+    
+    const tracks = localStream.getAudioTracks();
+    logIOSAudio(`audio tracks count: ${tracks.length}`);
+    if (tracks.length > 0) {
+      const t = tracks[0];
+      logIOSAudio(`track id: ${t.id}`);
+      logIOSAudio(`track enabled: ${t.enabled}`);
+      logIOSAudio(`track muted: ${t.muted}`);
+      logIOSAudio(`track readyState: ${t.readyState}`);
+    }
+
+    // DIAGNOSTIC 2 — LOCAL MICROPHONE LEVEL
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) {
+        const ctx = new AudioCtx();
+        if (ctx.state === 'suspended') await ctx.resume();
+        const source = ctx.createMediaStreamSource(localStream);
+        const analyser = ctx.createAnalyser();
+        analyser.fftSize = 256;
+        source.connect(analyser);
+        const dataArray = new Uint8Array(analyser.frequencyBinCount);
+        
+        await new Promise(r => setTimeout(r, 400));
+        analyser.getByteFrequencyData(dataArray);
+        let sum = 0;
+        for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
+        const avg = sum / dataArray.length;
+        
+        if (avg > 0) {
+          logIOSAudio(`microphone level detected: YES (average amplitude: ${Math.round(avg)})`);
+          window.iosAudioDiagnosticResults.microphoneLevel = "PASS";
+        } else {
+          logIOSAudio("microphone level detected: NO (0 amplitude)");
+          window.iosAudioDiagnosticResults.microphoneLevel = "FAIL (Silent / 0 Level)";
+        }
+      }
+    } catch(levelErr) {
+      logIOSAudio(`microphone level analysis error: ${levelErr.message}`);
+      window.iosAudioDiagnosticResults.microphoneLevel = "FAIL (" + levelErr.message + ")";
+    }
+
+  } catch(err) {
+    logIOSAudio("getUserMedia FAILED");
+    logIOSAudio(`name: ${err.name}`);
+    logIOSAudio(`message: ${err.message}`);
+    logIOSAudio(`constraint: ${err.constraint || "N/A"}`);
+    window.iosAudioDiagnosticResults.microphone = "FAIL";
+    window.iosAudioDiagnosticResults.exactError = `${err.name}: ${err.message}`;
+    if (window.iosAudioDiagnosticResults.firstFailedStep === "None") {
+      window.iosAudioDiagnosticResults.firstFailedStep = "MICROPHONE";
+    }
+  }
+
+  // DIAGNOSTIC 3 & 4 — WEBRTC SENDER & RECEIVER & CONNECTION STATUS
+  if (window.webrtcAudioPipeline && window.webrtcAudioPipeline.remotePeerConnections) {
+    const pcs = Object.values(window.webrtcAudioPipeline.remotePeerConnections);
+    logIOSAudio(`Peer connections count: ${pcs.length}`);
+    if (pcs.length === 0) {
+      logIOSAudio("No active RTCPeerConnection found in parent pipeline yet.");
+    } else {
+      pcs.forEach((pc, idx) => {
+        logIOSAudio(`[PC ${idx}] connectionState: ${pc.connectionState}`);
+        logIOSAudio(`[PC ${idx}] iceConnectionState: ${pc.iceConnectionState}`);
+        logIOSAudio(`[PC ${idx}] signalingState: ${pc.signalingState}`);
+        window.iosAudioDiagnosticResults.webrtcConnection = pc.connectionState === 'connected' ? "PASS" : pc.connectionState;
+
+        // DIAGNOSTIC 3 — SENDER
+        const senders = pc.getSenders ? pc.getSenders() : [];
+        logIOSAudio(`[PC ${idx}] senders count: ${senders.length}`);
+        let hasAudioSender = false;
+        senders.forEach(s => {
+          if (s.track) {
+            logIOSAudio(`[Sender] kind: ${s.track.kind}, id: ${s.track.id}, enabled: ${s.track.enabled}, muted: ${s.track.muted}, readyState: ${s.track.readyState}`);
+            if (s.track.kind === 'audio' && s.track.enabled && s.track.readyState === 'live') {
+              hasAudioSender = true;
+            }
+          }
+        });
+        window.iosAudioDiagnosticResults.audioSender = hasAudioSender ? "PASS" : "FAIL (No live audio sender)";
+
+        // DIAGNOSTIC 4 — RECEIVER
+        const receivers = pc.getReceivers ? pc.getReceivers() : [];
+        logIOSAudio(`[PC ${idx}] receivers count: ${receivers.length}`);
+        let hasAudioReceiver = false;
+        receivers.forEach(r => {
+          if (r.track) {
+            logIOSAudio(`[Receiver] kind: ${r.track.kind}, readyState: ${r.track.readyState}`);
+            if (r.track.kind === 'audio' && r.track.readyState === 'live') {
+              hasAudioReceiver = true;
+            }
+          }
+        });
+        window.iosAudioDiagnosticResults.remoteAudioReceiver = hasAudioReceiver ? "PASS" : "FAIL (No live audio receiver)";
+      });
+    }
+  }
+
+  // DIAGNOSTIC 6 & 7 — REMOTE AUDIO ELEMENT & PLAYBACK
+  const remoteEls = document.querySelectorAll("audio.remote-peer-audio");
+  logIOSAudio(`Remote audio elements found: ${remoteEls.length}`);
+  if (remoteEls.length > 0) {
+    remoteEls.forEach(audioEl => {
+      logIOSAudio("audio element created");
+      logIOSAudio(`srcObject assigned: ${!!audioEl.srcObject}`);
+      logIOSAudio(`autoplay: ${audioEl.autoplay}`);
+      logIOSAudio(`playsInline: ${audioEl.playsInline}`);
+      logIOSAudio(`muted: ${audioEl.muted}`);
+      logIOSAudio(`volume: ${audioEl.volume}`);
+      logIOSAudio(`paused: ${audioEl.paused}`);
+      logIOSAudio(`readyState: ${audioEl.readyState}`);
+      window.iosAudioDiagnosticResults.remoteAudioElement = (audioEl.srcObject && audioEl.playsInline && !audioEl.muted) ? "PASS" : "FAIL";
+
+      // Test Play
+      audioEl.play().then(() => {
+        logIOSAudio("PLAY SUCCESS");
+        window.iosAudioDiagnosticResults.audioPlay = "PASS";
+      }).catch(err => {
+        logIOSAudio("PLAY FAILED");
+        logIOSAudio(`name: ${err.name}`);
+        logIOSAudio(`message: ${err.message}`);
+        window.iosAudioDiagnosticResults.audioPlay = `FAIL (${err.name}: ${err.message})`;
+        window.iosAudioDiagnosticResults.exactError = `${err.name}: ${err.message}`;
+        if (window.iosAudioDiagnosticResults.firstFailedStep === "None") {
+          window.iosAudioDiagnosticResults.firstFailedStep = "PLAYBACK";
+        }
+      });
+    });
+  }
+
+  // Clean up test stream
+  if (localStream && localStream.getTracks) {
+    localStream.getTracks().forEach(t => t.stop());
+  }
+
+  console.log("==========================================================================");
+  console.log("             iOS AUDIO DIAGNOSTIC SUMMARY RESULT                          ");
+  console.log(JSON.stringify(window.iosAudioDiagnosticResults, null, 2));
+  console.log("==========================================================================");
+
+  return window.iosAudioDiagnosticResults;
+}
+
+window.runIOSAudioDiagnostics = runIOSAudioDiagnostics;
 
 logAudioDebug("Checking navigator.mediaDevices:", { supported: !!navigator.mediaDevices });
 
