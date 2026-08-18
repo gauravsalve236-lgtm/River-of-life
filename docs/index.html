@@ -20,8 +20,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   
-  <!-- Main Stylesheet (Cache-Busted for Version 27 Enlarged Mobile Tabs) -->
-  <link rel="stylesheet" href="index.css?v=27_ENLARGED_MOBILE_TABS">
+  <!-- Main Stylesheet (Cache-Busted for Version 27 Lifted Tabs) -->
+  <link rel="stylesheet" href="index.css?v=27_SINGLE_TOOLBAR_LIFTED_TABS">
 
   <!-- Official LiveKit WebRTC Client SDK -->
   <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.0.8/dist/livekit-client.umd.min.js"></script>
@@ -2030,18 +2030,13 @@
     <div id="modal-live-meeting" class="app-view meeting-modal-overlay" style="display: none; position: fixed; inset: 0; top: 0; left: 0; right: 0; bottom: 0; width: 100vw; height: 100dvh; height: -webkit-fill-available; background: #17181b; color: #fff; z-index: 999999; overflow: hidden; box-sizing: border-box;">
       <div class="meeting-room-container" style="position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; box-sizing: border-box; background: #17181b;">
         
-        <!-- Clean Navigation Header -->
-        <div class="meeting-room-topbar" style="height: 48px; min-height: 48px; flex-shrink: 0; background: rgba(23, 24, 27, 0.95); border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: space-between; padding: 0 10px; z-index: 100; box-sizing: border-box;">
-          <div style="display: flex; align-items: center; gap: 6px; overflow: hidden; flex: 1;">
-            <span style="background: rgba(34, 197, 94, 0.2); border: 1px solid #22c55e; color: #4ade80; font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 12px; display: flex; align-items: center; gap: 4px; flex-shrink: 0;">
+        <!-- Sleek Title Topbar (Single Toolbar Design) -->
+        <div class="meeting-room-topbar" style="height: 44px; min-height: 44px; flex-shrink: 0; background: rgba(23, 24, 27, 0.95); border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: space-between; padding: 0 14px; z-index: 100; box-sizing: border-box;">
+          <div style="display: flex; align-items: center; gap: 8px; overflow: hidden; flex: 1;">
+            <span style="background: rgba(34, 197, 94, 0.2); border: 1px solid #22c55e; color: #4ade80; font-size: 10.5px; font-weight: 800; padding: 3px 8px; border-radius: 12px; display: flex; align-items: center; gap: 4px; flex-shrink: 0;">
               <span style="width: 6px; height: 6px; background: #22c55e; border-radius: 50%; display: inline-block;"></span> LIVE
             </span>
-            <h3 id="meeting-room-title-display" style="font-family: var(--font-ui); font-size: 13.5px; font-weight: 800; color: #fff; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">River of Life Meeting</h3>
-          </div>
-          <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
-            <button id="btn-meeting-audio-settings" onclick="openDrawer('drawer-meet-audio-settings')" style="padding: 6px 12px; border-radius: 18px; font-size: 11px; font-weight: 700; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #fff; cursor: pointer; display: flex; align-items: center; gap: 4px;">
-              ⚙️ <span>Audio</span>
-            </button>
+            <h3 id="meeting-room-title-display" style="font-family: var(--font-ui); font-size: 14px; font-weight: 800; color: #fff; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">River of Life Meeting</h3>
           </div>
         </div>
 
@@ -2435,8 +2430,8 @@
       <span id="toast-message">Copied to clipboard!</span>
     </div>
 
-  <!-- App Main Logic (Cache-Busted for Version 27 Enlarged Mobile Tabs) -->
-  <script src="app.js?v=27_ENLARGED_MOBILE_TABS"></script>
+  <!-- App Main Logic (Cache-Busted for Version 27 Lifted Tabs) -->
+  <script src="app.js?v=27_SINGLE_TOOLBAR_LIFTED_TABS"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 2.5s no matter what

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v27-ENLARGED-MOBILE-TABS';
+const CACHE_NAME = 'river-of-life-cache-v27-SINGLE-TOOLBAR-LIFTED-TABS';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
