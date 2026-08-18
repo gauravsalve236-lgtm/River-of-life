@@ -7384,44 +7384,16 @@ function launchLiveMeetingRoom(meeting, stream) {
       isHost: isHost
     };
 
-    // Load Verified WebRTC Video Conference Room with Exclusive Hardware Access for All Participants
+    // Launch Native LiveKit Video Room (Rendering grid tile + 5-icon toolbar)
     const jitsiCont = document.getElementById("meeting-jitsi-container");
     if (jitsiCont) {
-      jitsiCont.style.display = "block";
-      const meetingIdSlug = (meeting && meeting.id) ? meeting.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
-      const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
-      
-      // Low-latency Opus P2P parameters for zero audio delay on Android & Desktop: audio=true&video=true&mic=true&cam=true&muted=false&sound=true&autojoin=true&p2p=true&codec=opus
-      const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&autojoin=true&p2p=true&codec=opus&layout=grid&grid=1&name=${encodeURIComponent(loggedIn)}`;
-      
-      // Detect iOS (iPhone/iPad) to bypass WebKit iframe microphone blocking
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-      if (isIOS) {
-        logAudioDebug("iOS Device detected (Apple WebKit Iframe Restriction). Launching native top-level call window...");
-        showToast("Opening iOS Video Room (Mic & Speaker Active) 🙏");
-        try {
-          window.open(roomUrl, "_blank");
-        } catch(e) {}
-      }
+      jitsiCont.style.display = "none";
+      jitsiCont.innerHTML = "";
+    }
 
-      jitsiCont.innerHTML = `
-        <iframe 
-          id="webrtc-room-iframe"
-          src="${roomUrl}" 
-          width="100%" 
-          height="100%" 
-          allow="camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; accelerometer; gyroscope;" 
-          allowusermedia="true"
-          style="border: none; width: 100%; height: 100%; border-radius: 18px; background: #090d16;">
-        </iframe>
-      `;
-
-      logAudioDebug("WebRTC Room iframe mounted with low-latency Opus audio parameters.", {
-        roomUrl,
-        isIOS,
-        allowPermissions: "camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; accelerometer; gyroscope;",
-        allowusermedia: "true"
-      });
+    const meetingIdSlug = (meeting && meeting.id) ? meeting.id.toString() : 'ROL-Sanctuary';
+    if (window.nativeLiveKitMeetingManager) {
+      window.nativeLiveKitMeetingManager.joinNativeMeeting(meetingIdSlug, loggedIn);
     }
 
     // Auto-enumerate devices for settings drawer
@@ -7468,6 +7440,11 @@ function exitLiveMeetingRoom() {
     }
 
     // Stop all local camera and microphone media tracks
+    if (window.nativeLiveKitMeetingManager && window.nativeLiveKitMeetingManager.localStream) {
+      try {
+        window.nativeLiveKitMeetingManager.localStream.getTracks().forEach(track => track.stop());
+      } catch(e) {}
+    }
     if (activeMeetingSession && activeMeetingSession.localStream) {
       try {
         activeMeetingSession.localStream.getTracks().forEach(track => track.stop());
@@ -7475,7 +7452,13 @@ function exitLiveMeetingRoom() {
     }
     activeMeetingSession = null;
 
-    showToast("Exited fellowship meeting room");
+    // Switch back to Meetings tab home page
+    window.location.hash = "#/meetings";
+    if (typeof switchTab === 'function') {
+      switchTab("meetings");
+    }
+
+    showToast("Left fellowship meeting room 🙏");
   } catch (err) {
     console.warn("exitLiveMeetingRoom notice:", err);
   }
