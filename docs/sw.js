@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v27-AUDIO-ICON-REMOVED';
+const CACHE_NAME = 'river-of-life-cache-v27-ENLARGED-MOBILE-TABS';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
