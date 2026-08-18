@@ -7271,11 +7271,10 @@ function generateICSFile(meeting) {
   showToast("Calendar File (.ics) downloaded!");
 }
 
-// Trigger Joining Flow (Camera preview checks)
+// Trigger Joining Flow (Native HD Google Meet 2x2 Video Room)
 function triggerJoinMeetingFlow(meetingId) {
   const meetings = getMeetingsFromStorage();
   const m = meetings.find(x => x.id === meetingId);
-  if (!m) return;
 
   // Synchronous user-gesture audio context unlock
   try {
@@ -7286,51 +7285,8 @@ function triggerJoinMeetingFlow(meetingId) {
     }
   } catch(e) {}
 
-  const loggedIn = (state && state.currentUser) ? state.currentUser.username : "Member";
-  const meetingIdSlug = (m && m.id) ? m.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
-  const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
-  const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&autojoin=true&p2p=true&codec=opus&layout=grid&grid=1&name=${encodeURIComponent(loggedIn)}`;
-
-  // Detect iOS (iPhone/iPad) to bypass WebKit iframe microphone blocking and popup blocker
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  if (isIOS) {
-    logAudioDebug("iOS Device detected. Directing to native top-level call window...", { roomUrl });
-    showToast("Opening iOS Video Room (Mic & Speaker Active) 🙏");
-    window.location.href = roomUrl;
-    return;
-  }
-
-  logAudioDebug("getUserMedia started for meeting join...", { meetingId });
-  showToast("Requesting Microphone & Camera access...");
-  
-  // Explicitly request audio FIRST to force mobile browsers (Android Chrome / Desktop) to display Microphone Permission Dialog
-  navigator.mediaDevices.getUserMedia({ audio: true })
-    .then(audioStream => {
-      logAudioDebug("Microphone permission granted by user!", {
-        audioTracks: audioStream.getAudioTracks().map(t => ({ id: t.id, label: t.label, enabled: t.enabled, readyState: t.readyState }))
-      });
-
-      // Stop parent frame pre-check tracks so hardware mic device lock is released before iframe initialization
-      if (audioStream && audioStream.getTracks) {
-        audioStream.getTracks().forEach(t => t.stop());
-        logAudioDebug("Parent frame audio tracks released for exclusive iframe hardware capture.");
-      }
-
-      // Also attempt joint video request
-      navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-        .then(fullStream => {
-          if (fullStream && fullStream.getTracks) fullStream.getTracks().forEach(t => t.stop());
-          launchLiveMeetingRoom(m, null);
-        })
-        .catch(() => {
-          launchLiveMeetingRoom(m, null);
-        });
-    })
-    .catch(err => {
-      logAudioDebug("Microphone permission denied or unavailable on mobile:", err);
-      showToast("Microphone permission denied. Joining in listen mode.");
-      launchLiveMeetingRoom(m, null);
-    });
+  // Directly launch Native HD Google Meet Stage inside River of Life App
+  launchLiveMeetingRoom(m, null);
 }
 
 // Fullscreen Live Meeting Room Entry
