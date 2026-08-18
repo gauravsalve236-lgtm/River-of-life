@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v20260817-WEBRTC-PIPELINE-VERIFIED';
+const CACHE_NAME = 'river-of-life-cache-v26-RESTORED-FINAL';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
