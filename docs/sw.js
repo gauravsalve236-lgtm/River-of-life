@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v27-HIDE-BOTTOM-TABS-IN-MEETING';
+const CACHE_NAME = 'river-of-life-cache-v27-TEAMS-SINGLE-TOOLBAR';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
