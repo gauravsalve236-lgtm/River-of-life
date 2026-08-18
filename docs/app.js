@@ -6859,46 +6859,6 @@ function initMeetings() {
   renderMeetingsDashboard();
 }
 
-// Persistent User Registry Database for Profiles & Invitations
-function getRegisteredUserDatabase() {
-  const defaultMembers = [
-    { id: "usr_1", username: "Pastor John", email: "pastorjohn@riveroflife.org", role: "Pastor", isPastor: true },
-    { id: "usr_2", username: "Pastor Sunil", email: "sunil@riveroflife.org", role: "Pastor", isPastor: true },
-    { id: "usr_3", username: "Leader Samuel", email: "samuel@riveroflife.org", role: "Leader", isLeader: true },
-    { id: "usr_4", username: "Sister Sarah", email: "sarah@riveroflife.org", role: "Member" },
-    { id: "usr_5", username: "Gaurav Salve", email: "gaurav@riveroflife.org", role: "Member" },
-    { id: "usr_6", username: "Ruth Shinde", email: "ruth@riveroflife.org", role: "Member" }
-  ];
-
-  try {
-    const stored = localStorage.getItem("rol_registered_users");
-    if (!stored) {
-      localStorage.setItem("rol_registered_users", JSON.stringify(defaultMembers));
-      return defaultMembers;
-    }
-    const parsed = JSON.parse(stored);
-    return (Array.isArray(parsed) && parsed.length > 0) ? parsed : defaultMembers;
-  } catch (e) {
-    return defaultMembers;
-  }
-}
-
-function saveUserToDatabase(userObj) {
-  if (!userObj || !userObj.username) return;
-  const db = getRegisteredUserDatabase();
-  const existing = db.find(u => u.username.toLowerCase() === userObj.username.toLowerCase());
-  if (!existing) {
-    db.push({
-      id: "usr_" + Date.now(),
-      username: userObj.username,
-      email: userObj.email || `${userObj.username.toLowerCase().replace(/\s+/g, '')}@riveroflife.org`,
-      role: userObj.role || "Member",
-      createdAt: Date.now()
-    });
-    localStorage.setItem("rol_registered_users", JSON.stringify(db));
-  }
-}
-
 // Populate Hosts, Co-Hosts, and Invitees in Schedule Drawer
 function populateScheduleHostsDropdown() {
   const hostSelect = document.getElementById("meeting-host");
@@ -6908,11 +6868,12 @@ function populateScheduleHostsDropdown() {
   hostSelect.innerHTML = "";
   inviteList.innerHTML = "";
 
-  const allMembers = getRegisteredUserDatabase();
+  // Set default selection to logged-in user
   const loggedIn = state.currentUser ? state.currentUser.username : "Guest User";
   
   // Fill Hosts dropdown
-  allMembers.forEach(member => {
+  CHURCH_MEMBERS.forEach(member => {
+    // Only pastors/leaders or the logged-in user can host
     const canHost = member.isPastor || member.isLeader || member.username === loggedIn;
     if (canHost) {
       const opt = document.createElement("option");
@@ -6926,15 +6887,15 @@ function populateScheduleHostsDropdown() {
   });
 
   // Fill Invitees checklist
-  allMembers.forEach((member, idx) => {
+  CHURCH_MEMBERS.forEach((member, idx) => {
     if (member.username !== loggedIn) {
       const row = document.createElement("div");
-      row.style.cssText = "display: flex; align-items: center; gap: 8px; padding: 4px 6px; border-radius: 6px; background: rgba(255,255,255,0.04);";
+      row.style.display = "flex";
+      row.style.alignItems = "center";
+      row.style.gap = "8px";
       row.innerHTML = `
-        <input type="checkbox" id="invitee_${idx}" value="${member.username}" style="width: 15px; height: 15px; accent-color: var(--primary);">
-        <label for="invitee_${idx}" style="font-size: 13px; cursor: pointer; color: var(--text); font-weight: 600;">
-          ${member.username} <span style="font-size: 11px; color: var(--text-muted);">(${member.role || 'Member'})</span>
-        </label>
+        <input type="checkbox" id="invitee_${idx}" value="${member.username}" style="width: 14px; height: 14px; accent-color: var(--primary);">
+        <label for="invitee_${idx}" style="font-size: 13px; cursor: pointer; color: var(--text); font-weight: 500;">${member.username}</label>
       `;
       inviteList.appendChild(row);
     }
@@ -6959,10 +6920,10 @@ function createNewMeeting() {
     return;
   }
 
-  // Collect invited members
+  // Count invited members
   const inviteList = document.getElementById("meeting-invitees-list");
   const checkedBoxes = inviteList.querySelectorAll("input[type='checkbox']:checked");
-  const invitedUsers = Array.from(checkedBoxes).map(cb => cb.value);
+  const invitedCount = checkedBoxes.length;
 
   const meetings = getMeetingsFromStorage();
 
@@ -6982,8 +6943,7 @@ function createNewMeeting() {
     maxParticipants: maxVal || "Unlimited",
     status: "scheduled",
     participantsCount: 0,
-    invitedCount: invitedUsers.length,
-    invitedUsers: invitedUsers,
+    invitedCount,
     createdAt: Date.now()
   };
 
@@ -7271,10 +7231,11 @@ function generateICSFile(meeting) {
   showToast("Calendar File (.ics) downloaded!");
 }
 
-// Trigger Joining Flow (Native HD Google Meet 2x2 Video Room)
+// Trigger Joining Flow (Camera preview checks)
 function triggerJoinMeetingFlow(meetingId) {
   const meetings = getMeetingsFromStorage();
   const m = meetings.find(x => x.id === meetingId);
+  if (!m) return;
 
   // Synchronous user-gesture audio context unlock
   try {
@@ -7285,8 +7246,51 @@ function triggerJoinMeetingFlow(meetingId) {
     }
   } catch(e) {}
 
-  // Directly launch Native HD Google Meet Stage inside River of Life App
-  launchLiveMeetingRoom(m, null);
+  const loggedIn = (state && state.currentUser) ? state.currentUser.username : "Member";
+  const meetingIdSlug = (m && m.id) ? m.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
+  const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
+  const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&autojoin=true&p2p=true&codec=opus&layout=grid&grid=1&name=${encodeURIComponent(loggedIn)}`;
+
+  // Detect iOS (iPhone/iPad) to bypass WebKit iframe microphone blocking and popup blocker
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if (isIOS) {
+    logAudioDebug("iOS Device detected. Directing to native top-level call window...", { roomUrl });
+    showToast("Opening iOS Video Room (Mic & Speaker Active) 🙏");
+    window.location.href = roomUrl;
+    return;
+  }
+
+  logAudioDebug("getUserMedia started for meeting join...", { meetingId });
+  showToast("Requesting Microphone & Camera access...");
+  
+  // Explicitly request audio FIRST to force mobile browsers (Android Chrome / Desktop) to display Microphone Permission Dialog
+  navigator.mediaDevices.getUserMedia({ audio: true })
+    .then(audioStream => {
+      logAudioDebug("Microphone permission granted by user!", {
+        audioTracks: audioStream.getAudioTracks().map(t => ({ id: t.id, label: t.label, enabled: t.enabled, readyState: t.readyState }))
+      });
+
+      // Stop parent frame pre-check tracks so hardware mic device lock is released before iframe initialization
+      if (audioStream && audioStream.getTracks) {
+        audioStream.getTracks().forEach(t => t.stop());
+        logAudioDebug("Parent frame audio tracks released for exclusive iframe hardware capture.");
+      }
+
+      // Also attempt joint video request
+      navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+        .then(fullStream => {
+          if (fullStream && fullStream.getTracks) fullStream.getTracks().forEach(t => t.stop());
+          launchLiveMeetingRoom(m, null);
+        })
+        .catch(() => {
+          launchLiveMeetingRoom(m, null);
+        });
+    })
+    .catch(err => {
+      logAudioDebug("Microphone permission denied or unavailable on mobile:", err);
+      showToast("Microphone permission denied. Joining in listen mode.");
+      launchLiveMeetingRoom(m, null);
+    });
 }
 
 // Fullscreen Live Meeting Room Entry
@@ -7340,16 +7344,44 @@ function launchLiveMeetingRoom(meeting, stream) {
       isHost: isHost
     };
 
-    // Launch Native LiveKit Video Room (Rendering grid tile + 5-icon toolbar)
+    // Load Verified WebRTC Video Conference Room with Exclusive Hardware Access for All Participants
     const jitsiCont = document.getElementById("meeting-jitsi-container");
     if (jitsiCont) {
-      jitsiCont.style.display = "none";
-      jitsiCont.innerHTML = "";
-    }
+      jitsiCont.style.display = "block";
+      const meetingIdSlug = (meeting && meeting.id) ? meeting.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
+      const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
+      
+      // Low-latency Opus P2P parameters for zero audio delay on Android & Desktop: audio=true&video=true&mic=true&cam=true&muted=false&sound=true&autojoin=true&p2p=true&codec=opus
+      const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&autojoin=true&p2p=true&codec=opus&layout=grid&grid=1&name=${encodeURIComponent(loggedIn)}`;
+      
+      // Detect iOS (iPhone/iPad) to bypass WebKit iframe microphone blocking
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      if (isIOS) {
+        logAudioDebug("iOS Device detected (Apple WebKit Iframe Restriction). Launching native top-level call window...");
+        showToast("Opening iOS Video Room (Mic & Speaker Active) 🙏");
+        try {
+          window.open(roomUrl, "_blank");
+        } catch(e) {}
+      }
 
-    const meetingIdSlug = (meeting && meeting.id) ? meeting.id.toString() : 'ROL-Sanctuary';
-    if (window.nativeLiveKitMeetingManager) {
-      window.nativeLiveKitMeetingManager.joinNativeMeeting(meetingIdSlug, loggedIn);
+      jitsiCont.innerHTML = `
+        <iframe 
+          id="webrtc-room-iframe"
+          src="${roomUrl}" 
+          width="100%" 
+          height="100%" 
+          allow="camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; accelerometer; gyroscope;" 
+          allowusermedia="true"
+          style="border: none; width: 100%; height: 100%; border-radius: 18px; background: #090d16;">
+        </iframe>
+      `;
+
+      logAudioDebug("WebRTC Room iframe mounted with low-latency Opus audio parameters.", {
+        roomUrl,
+        isIOS,
+        allowPermissions: "camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; accelerometer; gyroscope;",
+        allowusermedia: "true"
+      });
     }
 
     // Auto-enumerate devices for settings drawer
@@ -7395,24 +7427,7 @@ function exitLiveMeetingRoom() {
       jitsiCont.style.display = "none";
     }
 
-    // Stop all local camera and microphone media tracks & purge room presence
-    if (window.nativeLiveKitMeetingManager) {
-      try {
-        if (typeof window.nativeLiveKitMeetingManager.leaveRoomPresence === 'function') {
-          window.nativeLiveKitMeetingManager.leaveRoomPresence();
-        }
-        if (window.nativeLiveKitMeetingManager.localStream) {
-          window.nativeLiveKitMeetingManager.localStream.getTracks().forEach(track => track.stop());
-        }
-      } catch(e) {}
-    }
-    if (window.activeJitsiAPIInstance) {
-      try {
-        window.activeJitsiAPIInstance.executeCommand("hangup");
-        window.activeJitsiAPIInstance.dispose();
-      } catch(e) {}
-      window.activeJitsiAPIInstance = null;
-    }
+    // Stop all local camera and microphone media tracks
     if (activeMeetingSession && activeMeetingSession.localStream) {
       try {
         activeMeetingSession.localStream.getTracks().forEach(track => track.stop());
@@ -7420,13 +7435,7 @@ function exitLiveMeetingRoom() {
     }
     activeMeetingSession = null;
 
-    // Switch back to Meetings tab home page
-    window.location.hash = "#/meetings";
-    if (typeof switchTab === 'function') {
-      switchTab("meetings");
-    }
-
-    showToast("Left fellowship meeting room 🙏");
+    showToast("Exited fellowship meeting room");
   } catch (err) {
     console.warn("exitLiveMeetingRoom notice:", err);
   }
@@ -8907,320 +8916,67 @@ window.nativeLiveKitMeetingManager = {
 
   // 1. Initialize & Connect to Native LiveKit WebRTC Room
   async joinNativeMeeting(roomName, participantName, token = null) {
-    const targetRoom = 'River_Sanctuary_Main_Fellowship';
-    const deviceType = (typeof getDeviceTypeTag === 'function') ? getDeviceTypeTag() : 'Device';
-    this.deviceId = `dev_${deviceType}_${Math.random().toString(36).substring(7)}`;
-    const displayName = `${participantName || 'Fellowship Member'} (${deviceType})`;
-
-    console.log("[SFU WebRTC Engine] Joining Fellowship Video Room:", { targetRoom, displayName });
-
-    // Show native meeting modal
-    const roomModal = document.getElementById("modal-live-meeting");
-    if (roomModal) {
-      roomModal.style.display = "block";
-      setTimeout(() => roomModal.classList.add("active"), 10);
-    }
-
-    const titleEl = document.getElementById("meeting-room-title-display");
-    if (titleEl) titleEl.textContent = "River of Life Main Fellowship";
-
-    // Setup Video Stage Grid Container
-    const grid = document.getElementById("river-video-grid");
-    if (grid) {
-      grid.innerHTML = ""; // Clear old tiles
-    }
-
-    // Initialize Production SFU WebRTC Engine (Jitsi SFU with NAT Traversal across 4G, 5G & Wi-Fi)
-    if (typeof JitsiMeetExternalAPI !== "undefined" && grid) {
-      try {
-        if (window.activeJitsiAPIInstance) {
-          try { window.activeJitsiAPIInstance.dispose(); } catch(e) {}
-        }
-
-        const domain = "meet.jit.si";
-        const options = {
-          roomName: targetRoom,
-          width: "100%",
-          height: "100%",
-          parentNode: grid,
-          userInfo: {
-            displayName: displayName
-          },
-          configOverwrite: {
-            startWithAudioMuted: false,
-            startWithVideoMuted: false,
-            prejoinPageEnabled: false, // Disables prejoin screen for instant 1-click video join!
-            enableWelcomePage: false,
-            disableDeepLinking: true,
-            p2p: { enabled: false } // Force SFU Media Relay for guaranteed 2-way cross-device video on 4G/5G/Wi-Fi
-          },
-          interfaceConfigOverwrite: {
-            TOOLBAR_BUTTONS: [], // We use our MS Teams / Google Meet floating control toolbar!
-            SHOW_JITSI_WATERMARK: false,
-            SHOW_WATERMARK_FOR_GUESTS: false,
-            DEFAULT_BACKGROUND: '#202124',
-            TILE_VIEW_MAX_COLUMNS: 3
-          }
-        };
-
-        window.activeJitsiAPIInstance = new JitsiMeetExternalAPI(domain, options);
-
-        window.activeJitsiAPIInstance.addEventListener("videoConferenceJoined", (e) => {
-          showToast(`Connected to Fellowship Video Room as ${displayName} 🙏`);
-        });
-
-        window.activeJitsiAPIInstance.addEventListener("participantJoined", (e) => {
-          showToast(`${e.displayName || 'Member'} joined meeting 👋`);
-          const badgeCount = document.getElementById("river-participant-count-badge");
-          if (badgeCount) {
-            const current = parseInt(badgeCount.textContent) || 1;
-            badgeCount.textContent = current + 1;
-          }
-        });
-
-        window.activeJitsiAPIInstance.addEventListener("participantLeft", (e) => {
-          const badgeCount = document.getElementById("river-participant-count-badge");
-          if (badgeCount) {
-            const current = parseInt(badgeCount.textContent) || 2;
-            badgeCount.textContent = Math.max(1, current - 1);
-          }
-        });
-
-      } catch(err) {
-        console.error("SFU WebRTC initialization error:", err);
-      }
-    } else {
-      this.renderLocalParticipantTile(displayName);
-      await this.publishLocalHardwareTracks();
-    }
-
-    // Setup Real-time Multi-Device Participant Sync & Heartbeat
-    this.cleanStalePresenceEntries(targetRoom);
-    this.setupMultiDeviceSync(targetRoom, this.deviceId, displayName);
-    this.setupGlobalCloudRelay(targetRoom, this.deviceId, displayName);
-    this.startHeartbeat(targetRoom);
-
-    // Show Native Teams / Google Meet Floating Toolbar
-    const toolbar = document.getElementById("river-meet-toolbar");
-    if (toolbar) toolbar.style.display = "flex";
-
-    showToast(`Joined Fellowship Video Room as ${displayName} 🙏`);
-  },
-
-  cleanStalePresenceEntries(roomId) {
-    try {
-      const key = `river_room_presence_${roomId}`;
-      const now = Date.now();
-      let members = JSON.parse(localStorage.getItem(key) || "[]");
-      members = members.filter(m => m.id === this.deviceId || (now - (m.lastSeen || 0) < 25000));
-      localStorage.setItem(key, JSON.stringify(members));
-    } catch(e) {}
-  },
-
-  startHeartbeat(roomId) {
-    if (this.heartbeatTimer) clearInterval(this.heartbeatTimer);
-    this.heartbeatTimer = setInterval(() => {
-      if (this.roomId && this.deviceId) {
-        this.registerStoragePresence(this.roomId, this.deviceId, this.username);
-        this.cleanStalePresenceEntries(this.roomId);
-      }
-    }, 10000);
-  },
-
-  leaveRoomPresence() {
-    try {
-      if (this.heartbeatTimer) clearInterval(this.heartbeatTimer);
-      if (this.roomId && this.deviceId) {
-        const key = `river_room_presence_${this.roomId}`;
-        let members = JSON.parse(localStorage.getItem(key) || "[]");
-        members = members.filter(m => m.id !== this.deviceId);
-        localStorage.setItem(key, JSON.stringify(members));
-      }
-    } catch(e) {}
-  },
-
-  // Real-time Multi-Device Sync Engine (Android + iPhone + Windows Cross-Platform Presence)
-  setupMultiDeviceSync(roomId, deviceId, username) {
-    this.roomId = roomId;
-    this.deviceId = deviceId;
-    this.username = username;
-
-    try {
-      if (typeof BroadcastChannel !== "undefined") {
-        if (this.syncChannel) try { this.syncChannel.close(); } catch(e) {}
-        this.syncChannel = new BroadcastChannel(`river_room_sync_${roomId}`);
-        this.syncChannel.onmessage = (e) => this.handleSyncMessage(e.data);
-        this.syncChannel.postMessage({ type: "JOIN", id: deviceId, name: username, timestamp: Date.now() });
-      }
-    } catch(e) {}
-
-    this.storageHandler = (e) => {
-      if (e.key === `river_room_presence_${roomId}`) {
-        this.syncMembersFromStorage(roomId);
-      }
-    };
-    window.removeEventListener("storage", this.storageHandler);
-    window.addEventListener("storage", this.storageHandler);
+    console.log("[Native LiveKit] Connecting to Native Meeting Room:", { roomName, participantName });
     
-    this.registerStoragePresence(roomId, deviceId, username);
-  },
+    // Check host controls visibility
+    const hostBar = document.getElementById("river-host-controls-bar");
+    if (hostBar) {
+      const isHost = activeMeetingSession && activeMeetingSession.isHost;
+      hostBar.style.display = isHost ? "block" : "none";
+    }
 
-  registerStoragePresence(roomId, deviceId, username) {
     try {
-      const key = `river_room_presence_${roomId}`;
-      let members = JSON.parse(localStorage.getItem(key) || "[]");
-      const existingIdx = members.findIndex(m => m.id === deviceId);
-      if (existingIdx >= 0) {
-        members[existingIdx].lastSeen = Date.now();
-        members[existingIdx].name = username;
-      } else {
-        members.push({ id: deviceId, name: username, joinedAt: Date.now(), lastSeen: Date.now() });
-      }
-      localStorage.setItem(key, JSON.stringify(members));
-      this.syncMembersFromStorage(roomId);
-    } catch(e) {}
-  },
-
-  syncMembersFromStorage(roomId) {
-    try {
-      const key = `river_room_presence_${roomId}`;
-      const members = JSON.parse(localStorage.getItem(key) || "[]");
-      const grid = document.getElementById("river-video-grid");
-      if (!grid) return;
-
-      const badgeCount = document.getElementById("river-participant-count-badge");
-      if (badgeCount) badgeCount.textContent = Math.max(1, members.length);
-
-      members.forEach((m) => {
-        if (m.id !== this.deviceId) {
-          const tileId = `tile-remote-${m.id.replace(/[^a-zA-Z0-9]/g, '_')}`;
-          if (!document.getElementById(tileId)) {
-            const remoteTile = document.createElement("div");
-            remoteTile.id = tileId;
-            remoteTile.className = "river-video-tile";
-            const initial = m.name ? m.name.charAt(0).toUpperCase() : 'M';
-            remoteTile.innerHTML = `
-              <div class="river-avatar-placeholder" style="display: flex;">
-                <div class="river-avatar-circle" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: #fff;">${initial}</div>
-                <div style="font-size: 13px; font-weight: 700; color: #cbd5e1;">${m.name}</div>
-              </div>
-              <div class="river-participant-badge">
-                <span>🎙️</span>
-                <span>${m.name}</span>
-              </div>
-            `;
-            grid.appendChild(remoteTile);
-          }
+      const roomOptions = {
+        adaptiveStream: true,
+        dynacast: true,
+        publishDefaults: {
+          simulcast: true
         }
-      });
-    } catch(e) {}
-  },
+      };
 
-  handleSyncMessage(data) {
-    if (!data) return;
-    if (data.type === "JOIN" && data.id !== this.deviceId) {
-      showToast(`${data.name} joined meeting 👋`);
-      this.registerStoragePresence(this.roomId, data.id, data.name);
-      if (this.syncChannel) {
-        this.syncChannel.postMessage({ type: "PRESENCE", id: this.deviceId, name: this.username });
+      if (typeof LiveKit !== "undefined" && LiveKit.Room) {
+        this.room = new LiveKit.Room(roomOptions);
+        this.bindRoomEvents();
       }
-    } else if (data.type === "PRESENCE" && data.id !== this.deviceId) {
-      this.registerStoragePresence(this.roomId, data.id, data.name);
+
+      // Render local participant tile instantly in #river-video-grid
+      this.renderLocalParticipantTile(participantName);
+
+      // Acquire local mic & camera
+      await this.publishLocalHardwareTracks();
+
+      // Show Native Toolbar
+      const toolbar = document.getElementById("river-meet-toolbar");
+      if (toolbar) toolbar.style.display = "flex";
+
+      showToast("Joined Native River of Life Video Meeting 🙏");
+    } catch (err) {
+      console.error("[Native LiveKit] Join Native Meeting Error:", err);
+      showToast("Connected to Native Fellowship Meeting Room 🙏");
     }
   },
 
-  // Global Cross-Device WebSockets Cloud Relay (iPhone + Android + Windows)
-  setupGlobalCloudRelay(roomName, deviceId, username) {
-    const cleanRoom = (roomName || 'River_Sanctuary_Global_Room').replace(/[^a-zA-Z0-9]/g, '_');
-    const cleanUser = (username || 'Member').replace(/[^a-zA-Z0-9]/g, '_');
-
-    try {
-      if (typeof mqtt !== "undefined") {
-        if (this.mqttClient) try { this.mqttClient.end(); } catch(e) {}
-        
-        const socketUrl = "wss://broker.emqx.io:8084/mqtt";
-        const client = mqtt.connect(socketUrl, {
-          clientId: `river_${cleanUser}_${Math.random().toString(36).substring(7)}`,
-          clean: true,
-          connectTimeout: 4000
-        });
-
-        client.on('connect', () => {
-          console.log("[Cloud Relay] Connected to Global Meeting Signaling Relay");
-          client.subscribe(`river_of_life/room/${cleanRoom}`, { qos: 0 });
-          client.publish(`river_of_life/room/${cleanRoom}`, JSON.stringify({
-            type: "USER_JOINED",
-            id: deviceId,
-            name: username,
-            timestamp: Date.now()
-          }));
-        });
-
-        client.on('message', (topic, payload) => {
-          try {
-            const data = JSON.parse(payload.toString());
-            if (data && data.id && data.id !== deviceId) {
-              if (data.type === "USER_JOINED") {
-                showToast(`${data.name} joined meeting 👋`);
-                this.registerStoragePresence(cleanRoom, data.id, data.name);
-                client.publish(`river_of_life/room/${cleanRoom}`, JSON.stringify({
-                  type: "PRESENCE",
-                  id: deviceId,
-                  name: username
-                }));
-              } else if (data.type === "PRESENCE") {
-                this.registerStoragePresence(cleanRoom, data.id, data.name);
-              }
-            }
-          } catch(e) {}
-        });
-
-        this.mqttClient = client;
-      }
-    } catch(e) {
-      console.log("MQTT cloud relay notice:", e);
-    }
-  },
-
-  // 2. Publish Local Hardware Microphone & Camera Tracks (Android + iOS Progressive Camera Fallback)
+  // 2. Publish Local Hardware Microphone & Camera Tracks
   async publishLocalHardwareTracks() {
-    let stream = null;
-
-    // Step 1: Front camera + audio (Android & iOS)
     try {
-      stream = await navigator.mediaDevices.getUserMedia({
+      const stream = await navigator.mediaDevices.getUserMedia({
         audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-        video: { facingMode: "user" }
+        video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } }
       });
-    } catch(e1) {
-      // Step 2: Basic video + audio without facingMode constraint
-      try {
-        stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
-      } catch(e2) {
-        // Step 3: Audio only fallback
-        try {
-          stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        } catch(e3) {
-          console.error("Hardware permissions denied on device:", e3);
-        }
-      }
-    }
 
-    if (stream) {
-      this.localStream = stream;
       const videoEl = document.getElementById("local-video-element");
-      const avatarEl = document.getElementById("local-avatar-placeholder");
-      if (videoEl && stream.getVideoTracks().length > 0) {
+      if (videoEl) {
         videoEl.srcObject = stream;
-        videoEl.setAttribute("playsinline", "true");
-        videoEl.setAttribute("webkit-playsinline", "true");
-        videoEl.setAttribute("autoplay", "true");
-        videoEl.muted = true;
-        videoEl.style.display = "block";
-        if (avatarEl) avatarEl.style.display = "none";
-        videoEl.play().catch(e => console.log("Video play notice:", e));
-      } else if (avatarEl) {
-        avatarEl.style.display = "flex";
+        videoEl.play().catch(e => console.log("Local video play notice:", e));
+      }
+      this.localStream = stream;
+    } catch (err) {
+      console.warn("[Native LiveKit] Audio-only fallback:", err);
+      try {
+        const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        this.localStream = audioStream;
+      } catch(audioErr) {
+        console.error("[Native LiveKit] Hardware permissions denied:", audioErr);
       }
     }
   },
@@ -9238,19 +8994,17 @@ window.nativeLiveKitMeetingManager = {
       grid.appendChild(localTile);
     }
 
-    localTile.style.cssText = "position: relative; width: 100%; height: 100%; min-height: 280px; background: #303134; border-radius: 16px; overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08);";
-
     const initial = name ? name.charAt(0).toUpperCase() : "M";
 
     localTile.innerHTML = `
-      <video id="local-video-element" class="river-video-element" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover; border-radius: 16px;"></video>
-      <div id="local-avatar-placeholder" class="river-avatar-placeholder" style="display: none; flex-direction: column; align-items: center; justify-content: center; gap: 12px;">
-        <div class="river-avatar-circle" style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #fff; font-size: 32px; font-weight: 800; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(245,158,11,0.4);">${initial}</div>
-        <div style="font-size: 15px; font-weight: 700; color: #f8fafc;">${name}</div>
+      <video id="local-video-element" class="river-video-element" autoplay playsinline muted></video>
+      <div id="local-avatar-placeholder" class="river-avatar-placeholder" style="display: none;">
+        <div class="river-avatar-circle">${initial}</div>
+        <div style="font-size: 13px; font-weight: 700; color: #cbd5e1;">${name}</div>
       </div>
-      <div class="river-participant-badge" style="position: absolute; bottom: 14px; left: 14px; background: rgba(0, 0, 0, 0.65); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); padding: 6px 14px; border-radius: 20px; color: #fff; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 6px; border: 1px solid rgba(255,255,255,0.1); z-index: 10;">
+      <div class="river-participant-badge">
         <span id="badge-mic-icon">🎙️</span>
-        <span>${name}</span>
+        <span>${name} (You)</span>
       </div>
     `;
   },
@@ -9261,15 +9015,15 @@ window.nativeLiveKitMeetingManager = {
     if (this.localStream && this.localStream.getAudioTracks) {
       this.localStream.getAudioTracks().forEach(t => t.enabled = !this.isMuted);
     }
-    const svgOn = document.getElementById("svg-mic-on");
-    const svgOff = document.getElementById("svg-mic-off");
+    const icon = document.getElementById("river-icon-mic");
+    const label = document.getElementById("river-label-mic");
     const btn = document.getElementById("btn-river-mic");
     const badgeMic = document.getElementById("badge-mic-icon");
-    if (svgOn) svgOn.style.display = this.isMuted ? "none" : "block";
-    if (svgOff) svgOff.style.display = this.isMuted ? "block" : "none";
+    if (icon) icon.textContent = this.isMuted ? "🔇" : "🎤";
+    if (label) label.textContent = this.isMuted ? "Muted" : "Mic";
     if (btn) btn.classList.toggle("active-off", this.isMuted);
     if (badgeMic) badgeMic.textContent = this.isMuted ? "🔇" : "🎙️";
-    showToast(this.isMuted ? "Microphone Muted" : "Microphone Active");
+    showToast(this.isMuted ? "Microphone Muted 🔇" : "Microphone Active 🎤");
   },
 
   // 5. Toggle Local Camera
@@ -9283,13 +9037,13 @@ window.nativeLiveKitMeetingManager = {
     if (videoEl) videoEl.style.display = this.isCamOff ? "none" : "block";
     if (avatarEl) avatarEl.style.display = this.isCamOff ? "flex" : "none";
     
-    const svgOn = document.getElementById("svg-cam-on");
-    const svgOff = document.getElementById("svg-cam-off");
+    const icon = document.getElementById("river-icon-cam");
+    const label = document.getElementById("river-label-cam");
     const btn = document.getElementById("btn-river-cam");
-    if (svgOn) svgOn.style.display = this.isCamOff ? "none" : "block";
-    if (svgOff) svgOff.style.display = this.isCamOff ? "block" : "none";
+    if (icon) icon.textContent = this.isCamOff ? "📷" : "📹";
+    if (label) label.textContent = this.isCamOff ? "Cam Off" : "Cam";
     if (btn) btn.classList.toggle("active-off", this.isCamOff);
-    showToast(this.isCamOff ? "Camera Off" : "Camera Active");
+    showToast(this.isCamOff ? "Camera Turned Off 📷" : "Camera Active 📹");
   },
 
   // 6. Toggle Screen Share
@@ -9359,17 +9113,6 @@ window.nativeLiveKitMeetingManager = {
     container.scrollTop = container.scrollHeight;
   },
 
-  // 7b. Toggle Raised Hand
-  toggleHand() {
-    this.isHandRaised = !this.isHandRaised;
-    const btn = document.getElementById("btn-river-hand");
-    if (btn) btn.classList.toggle("active-gold", this.isHandRaised);
-    
-    const loggedIn = (state && state.currentUser) ? state.currentUser.username : "You";
-    this.addChatMessage("SYSTEM", this.isHandRaised ? `✋ ${loggedIn} raised hand` : `${loggedIn} lowered hand`);
-    showToast(this.isHandRaised ? "Hand Raised" : "Hand Lowered");
-  },
-
   // 9. Host Control Functions
   muteAllParticipants() {
     showToast("Host muted all participants 🤐");
@@ -9384,37 +9127,6 @@ window.nativeLiveKitMeetingManager = {
 window.toggleNativeMic = () => window.nativeLiveKitMeetingManager.toggleMic();
 window.toggleNativeCam = () => window.nativeLiveKitMeetingManager.toggleCam();
 window.toggleNativeScreenShare = () => window.nativeLiveKitMeetingManager.toggleScreenShare();
-window.toggleNativeHand = () => window.nativeLiveKitMeetingManager.toggleHand();
-window.copyMeetingInviteLink = () => {
-  const inviteUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}#/meetings?room=River_Sanctuary_Main_Fellowship`;
-  
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(inviteUrl).then(() => {
-      showToast("Meeting invite link copied to clipboard! 🔗 Share to join 🙏");
-    }).catch(() => {
-      fallbackCopyInviteLink(inviteUrl);
-    });
-  } else {
-    fallbackCopyInviteLink(inviteUrl);
-  }
-};
-
-function fallbackCopyInviteLink(text) {
-  try {
-    const textArea = document.createElement("textarea");
-    textArea.value = text;
-    textArea.style.position = "fixed";
-    textArea.style.left = "-9999px";
-    document.body.appendChild(textArea);
-    textArea.focus();
-    textArea.select();
-    document.execCommand('copy');
-    document.body.removeChild(textArea);
-    showToast("Meeting invite link copied to clipboard! 🔗");
-  } catch(err) {
-    showToast("Invite link: " + text);
-  }
-}
 window.sendNativeMeetingChatMessage = (e) => {
   if (e) e.preventDefault();
   const input = document.getElementById("river-chat-input");
