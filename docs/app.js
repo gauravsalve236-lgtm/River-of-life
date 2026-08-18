@@ -7,6 +7,14 @@ function logAudioDebug(action, details = {}) {
   console.log(`[Audio] ${action}`, details);
 }
 
+function logIOSAudio(action, details = {}) {
+  console.log(`[iOS Audio] ${action}`, details);
+}
+
+function logIOSMic(action, details = {}) {
+  console.log(`[iOS Mic] ${action}`, details);
+}
+
 logAudioDebug("Checking navigator.mediaDevices:", { supported: !!navigator.mediaDevices });
 
 window.webrtcAudioPipeline = {
@@ -16,7 +24,7 @@ window.webrtcAudioPipeline = {
   remoteAudioElements: {},
   micDevices: [],
   speakerDevices: [],
-  hasAudioOutputSupport: typeof HTMLAudioElement.prototype.setSinkId === 'function' && !(/iPad|iPhone|iPod/.test(navigator.userAgent))
+  hasAudioOutputSupport: ('setSinkId' in HTMLMediaElement.prototype)
 };
 
 // 1. Request Microphone Permission & Initialize Media Devices
@@ -308,20 +316,21 @@ async function testMicrophoneAndSpeakerPipeline() {
 
 // 5. Remote Audio Track Reception, Media Attachment & Autoplay Restriction Handling
 function attachRemoteAudioTrack(peerId, remoteStream) {
-  console.log(`[WebRTC Pipeline] Attaching Remote Audio Track for peer [${peerId}]...`, remoteStream);
+  logIOSAudio("Attaching Remote Audio Track for peer", { peerId, remoteStream });
   
   if (!remoteStream) {
-    console.warn(`[WebRTC Pipeline] Cannot attach remote audio for [${peerId}]: stream is null.`);
+    logIOSAudio("Cannot attach remote audio: stream is null", { peerId });
     return;
   }
 
   const audioTracks = remoteStream.getAudioTracks();
-  console.log(`[WebRTC Pipeline] Remote Stream Audio Tracks for [${peerId}]:`, audioTracks);
+  logIOSAudio("Remote Stream Audio Tracks", { peerId, trackCount: audioTracks.length });
 
   audioTracks.forEach((track, idx) => {
-    console.log(`[WebRTC Pipeline] Remote Audio Track [${idx}] for [${peerId}]:`, {
+    logIOSAudio(`Remote Audio Track [${idx}] for peer [${peerId}]`, {
       id: track.id,
       enabled: track.enabled,
+      muted: track.muted,
       readyState: track.readyState,
       settings: track.getSettings ? track.getSettings() : "N/A"
     });
@@ -352,21 +361,22 @@ function attachRemoteAudioTrack(peerId, remoteStream) {
   audioEl.volume = 1.0;
   audioEl.srcObject = remoteStream;
 
-  console.log(`[WebRTC Pipeline] Remote Audio Element created/reused for [${peerId}]:`, {
+  logIOSAudio("Remote Audio Element configured for peer", {
     id: audioEl.id,
-    autoplay: audioEl.autoplay,
     muted: audioEl.muted,
     volume: audioEl.volume,
+    paused: audioEl.paused,
+    readyState: audioEl.readyState,
     srcObject: audioEl.srcObject
   });
 
   const playPromise = audioEl.play();
   if (playPromise !== undefined) {
     playPromise.then(() => {
-      console.log(`[WebRTC Pipeline] Remote Audio PLAYING SUCCESSFULLY for [${peerId}]!`);
+      logIOSAudio("Remote Audio PLAYING SUCCESSFULLY for peer", { peerId });
       hideAutoplayFallbackBanner();
     }).catch(err => {
-      console.warn(`[WebRTC Pipeline] Remote Audio Playback Rejected (Autoplay Restriction) for [${peerId}]:`, err);
+      logIOSAudio("Playback blocked by iOS autoplay restrictions", { peerId, error: err });
       showAutoplayFallbackBanner();
     });
   }
@@ -383,24 +393,26 @@ function hideAutoplayFallbackBanner() {
 }
 
 function unlockAndPlayRemoteAudio() {
-  console.log("[WebRTC Pipeline] User tapped fallback banner! Unlocking all remote audio elements...");
+  logIOSAudio("User gesture triggered audio unlock!");
   
   try {
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
     if (AudioCtx) {
-      const ctx = new AudioCtx();
-      if (ctx.state === 'suspended') ctx.resume();
+      if (!window.webrtcAudioCtx) window.webrtcAudioCtx = new AudioCtx();
+      if (window.webrtcAudioCtx.state === 'suspended') window.webrtcAudioCtx.resume();
     }
-  } catch(e) {}
+  } catch(e) {
+    logIOSAudio("AudioContext resume notice:", e);
+  }
 
   const remoteAudioEls = document.querySelectorAll("audio.remote-peer-audio");
   remoteAudioEls.forEach(audioEl => {
     audioEl.muted = false;
     audioEl.volume = 1.0;
     audioEl.play().then(() => {
-      console.log("[WebRTC Pipeline] Audio element unlocked & playing:", audioEl.id);
+      logIOSAudio("Audio element unlocked & playing", { id: audioEl.id });
     }).catch(err => {
-      console.warn("[WebRTC Pipeline] Still unable to play audio element:", err);
+      logIOSAudio("Playback blocked on audio element:", { id: audioEl.id, error: err });
     });
   });
 
