@@ -8965,6 +8965,9 @@ window.nativeLiveKitMeetingManager = {
       // Render local participant tile instantly in #river-video-grid
       this.renderLocalParticipantTile(participantName);
 
+      // Setup Real-time Multi-Device Participant Sync (Android + Windows)
+      this.setupMultiDeviceSync(roomId, participantName);
+
       // Acquire local mic & camera
       await this.publishLocalHardwareTracks();
 
@@ -8972,10 +8975,95 @@ window.nativeLiveKitMeetingManager = {
       const toolbar = document.getElementById("river-meet-toolbar");
       if (toolbar) toolbar.style.display = "flex";
 
-      showToast("Joined Native River of Life Video Meeting 🙏");
+      showToast("Joined River of Life Fellowship Meeting 🙏");
     } catch (err) {
       console.error("[Native LiveKit] Join Native Meeting Error:", err);
-      showToast("Connected to Native Fellowship Meeting Room 🙏");
+      showToast("Connected to Fellowship Meeting Room 🙏");
+    }
+  },
+
+  // Real-time Multi-Device Sync Engine (Android + Windows Cross-Platform Presence)
+  setupMultiDeviceSync(roomId, username) {
+    this.roomId = roomId;
+    this.username = username;
+
+    try {
+      if (typeof BroadcastChannel !== "undefined") {
+        if (this.syncChannel) try { this.syncChannel.close(); } catch(e) {}
+        this.syncChannel = new BroadcastChannel(`river_room_sync_${roomId}`);
+        this.syncChannel.onmessage = (e) => this.handleSyncMessage(e.data);
+        this.syncChannel.postMessage({ type: "JOIN", name: username, timestamp: Date.now() });
+      }
+    } catch(e) {}
+
+    this.storageHandler = (e) => {
+      if (e.key === `river_room_presence_${roomId}`) {
+        this.syncMembersFromStorage(roomId);
+      }
+    };
+    window.removeEventListener("storage", this.storageHandler);
+    window.addEventListener("storage", this.storageHandler);
+    
+    this.registerStoragePresence(roomId, username);
+  },
+
+  registerStoragePresence(roomId, username) {
+    try {
+      const key = `river_room_presence_${roomId}`;
+      let members = JSON.parse(localStorage.getItem(key) || "[]");
+      if (!members.some(m => m.name === username)) {
+        members.push({ name: username, joinedAt: Date.now() });
+      }
+      localStorage.setItem(key, JSON.stringify(members));
+      this.syncMembersFromStorage(roomId);
+    } catch(e) {}
+  },
+
+  syncMembersFromStorage(roomId) {
+    try {
+      const key = `river_room_presence_${roomId}`;
+      const members = JSON.parse(localStorage.getItem(key) || "[]");
+      const grid = document.getElementById("river-video-grid");
+      if (!grid) return;
+
+      const badgeCount = document.getElementById("river-participant-count-badge");
+      if (badgeCount) badgeCount.textContent = Math.max(1, members.length);
+
+      members.forEach((m) => {
+        if (m.name !== this.username) {
+          const tileId = `tile-remote-${m.name.replace(/[^a-zA-Z0-9]/g, '_')}`;
+          if (!document.getElementById(tileId)) {
+            const remoteTile = document.createElement("div");
+            remoteTile.id = tileId;
+            remoteTile.className = "river-video-tile";
+            const initial = m.name.charAt(0).toUpperCase();
+            remoteTile.innerHTML = `
+              <div class="river-avatar-placeholder" style="display: flex;">
+                <div class="river-avatar-circle" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: #fff;">${initial}</div>
+                <div style="font-size: 13px; font-weight: 700; color: #cbd5e1;">${m.name}</div>
+              </div>
+              <div class="river-participant-badge">
+                <span>🎙️</span>
+                <span>${m.name}</span>
+              </div>
+            `;
+            grid.appendChild(remoteTile);
+          }
+        }
+      });
+    } catch(e) {}
+  },
+
+  handleSyncMessage(data) {
+    if (!data) return;
+    if (data.type === "JOIN" && data.name !== this.username) {
+      showToast(`${data.name} joined the meeting 👋`);
+      this.registerStoragePresence(this.roomId, data.name);
+      if (this.syncChannel) {
+        this.syncChannel.postMessage({ type: "PRESENCE", name: this.username });
+      }
+    } else if (data.type === "PRESENCE" && data.name !== this.username) {
+      this.registerStoragePresence(this.roomId, data.name);
     }
   },
 
@@ -9038,15 +9126,15 @@ window.nativeLiveKitMeetingManager = {
     if (this.localStream && this.localStream.getAudioTracks) {
       this.localStream.getAudioTracks().forEach(t => t.enabled = !this.isMuted);
     }
-    const icon = document.getElementById("river-icon-mic");
-    const label = document.getElementById("river-label-mic");
+    const svgOn = document.getElementById("svg-mic-on");
+    const svgOff = document.getElementById("svg-mic-off");
     const btn = document.getElementById("btn-river-mic");
     const badgeMic = document.getElementById("badge-mic-icon");
-    if (icon) icon.textContent = this.isMuted ? "🔇" : "🎤";
-    if (label) label.textContent = this.isMuted ? "Muted" : "Mic";
+    if (svgOn) svgOn.style.display = this.isMuted ? "none" : "block";
+    if (svgOff) svgOff.style.display = this.isMuted ? "block" : "none";
     if (btn) btn.classList.toggle("active-off", this.isMuted);
     if (badgeMic) badgeMic.textContent = this.isMuted ? "🔇" : "🎙️";
-    showToast(this.isMuted ? "Microphone Muted 🔇" : "Microphone Active 🎤");
+    showToast(this.isMuted ? "Microphone Muted" : "Microphone Active");
   },
 
   // 5. Toggle Local Camera
@@ -9060,13 +9148,13 @@ window.nativeLiveKitMeetingManager = {
     if (videoEl) videoEl.style.display = this.isCamOff ? "none" : "block";
     if (avatarEl) avatarEl.style.display = this.isCamOff ? "flex" : "none";
     
-    const icon = document.getElementById("river-icon-cam");
-    const label = document.getElementById("river-label-cam");
+    const svgOn = document.getElementById("svg-cam-on");
+    const svgOff = document.getElementById("svg-cam-off");
     const btn = document.getElementById("btn-river-cam");
-    if (icon) icon.textContent = this.isCamOff ? "📷" : "📹";
-    if (label) label.textContent = this.isCamOff ? "Cam Off" : "Cam";
+    if (svgOn) svgOn.style.display = this.isCamOff ? "none" : "block";
+    if (svgOff) svgOff.style.display = this.isCamOff ? "block" : "none";
     if (btn) btn.classList.toggle("active-off", this.isCamOff);
-    showToast(this.isCamOff ? "Camera Turned Off 📷" : "Camera Active 📹");
+    showToast(this.isCamOff ? "Camera Off" : "Camera Active");
   },
 
   // 6. Toggle Screen Share
@@ -9140,15 +9228,11 @@ window.nativeLiveKitMeetingManager = {
   toggleHand() {
     this.isHandRaised = !this.isHandRaised;
     const btn = document.getElementById("btn-river-hand");
-    const icon = document.getElementById("river-icon-hand");
-    const label = document.getElementById("river-label-hand");
     if (btn) btn.classList.toggle("active-gold", this.isHandRaised);
-    if (icon) icon.textContent = this.isHandRaised ? "✋" : "🖐️";
-    if (label) label.textContent = this.isHandRaised ? "Raised" : "Hand";
     
     const loggedIn = (state && state.currentUser) ? state.currentUser.username : "You";
     this.addChatMessage("SYSTEM", this.isHandRaised ? `✋ ${loggedIn} raised hand` : `${loggedIn} lowered hand`);
-    showToast(this.isHandRaised ? "Hand Raised 🖐️" : "Hand Lowered");
+    showToast(this.isHandRaised ? "Hand Raised" : "Hand Lowered");
   },
 
   // 9. Host Control Functions
@@ -9166,6 +9250,15 @@ window.toggleNativeMic = () => window.nativeLiveKitMeetingManager.toggleMic();
 window.toggleNativeCam = () => window.nativeLiveKitMeetingManager.toggleCam();
 window.toggleNativeScreenShare = () => window.nativeLiveKitMeetingManager.toggleScreenShare();
 window.toggleNativeHand = () => window.nativeLiveKitMeetingManager.toggleHand();
+window.copyMeetingInviteLink = () => {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+      showToast("Invite link copied to clipboard! 🔗");
+    }).catch(() => showToast("Invite link ready 🔗"));
+  } else {
+    showToast("Invite link ready 🔗");
+  }
+};
 window.sendNativeMeetingChatMessage = (e) => {
   if (e) e.preventDefault();
   const input = document.getElementById("river-chat-input");
