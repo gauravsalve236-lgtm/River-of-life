@@ -9153,6 +9153,21 @@ window.nativeLiveKitMeetingManager = {
     container.scrollTop = container.scrollHeight;
   },
 
+  // 7b. Toggle Raised Hand
+  toggleHand() {
+    this.isHandRaised = !this.isHandRaised;
+    const btn = document.getElementById("btn-river-hand");
+    const icon = document.getElementById("river-icon-hand");
+    const label = document.getElementById("river-label-hand");
+    if (btn) btn.classList.toggle("active-gold", this.isHandRaised);
+    if (icon) icon.textContent = this.isHandRaised ? "✋" : "🖐️";
+    if (label) label.textContent = this.isHandRaised ? "Raised" : "Hand";
+    
+    const loggedIn = (state && state.currentUser) ? state.currentUser.username : "You";
+    this.addChatMessage("SYSTEM", this.isHandRaised ? `✋ ${loggedIn} raised hand` : `${loggedIn} lowered hand`);
+    showToast(this.isHandRaised ? "Hand Raised 🖐️" : "Hand Lowered");
+  },
+
   // 9. Host Control Functions
   muteAllParticipants() {
     showToast("Host muted all participants 🤐");
@@ -9167,6 +9182,7 @@ window.nativeLiveKitMeetingManager = {
 window.toggleNativeMic = () => window.nativeLiveKitMeetingManager.toggleMic();
 window.toggleNativeCam = () => window.nativeLiveKitMeetingManager.toggleCam();
 window.toggleNativeScreenShare = () => window.nativeLiveKitMeetingManager.toggleScreenShare();
+window.toggleNativeHand = () => window.nativeLiveKitMeetingManager.toggleHand();
 window.sendNativeMeetingChatMessage = (e) => {
   if (e) e.preventDefault();
   const input = document.getElementById("river-chat-input");

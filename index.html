@@ -2056,7 +2056,7 @@
             <!-- Dynamically populated with .river-video-tile elements -->
           </div>
 
-          <!-- Native Floating Control Toolbar -->
+          <!-- Native Floating Control Toolbar (Google Meet / Teams Style) -->
           <div id="river-meet-toolbar" class="river-meet-toolbar">
             <button id="btn-river-mic" class="river-tool-btn" onclick="toggleNativeMic()" title="Toggle Microphone">
               <span class="tool-icon" id="river-icon-mic">🎤</span>
@@ -2068,24 +2068,19 @@
               <span class="tool-label" id="river-label-cam">Cam</span>
             </button>
 
-            <button id="btn-river-audio-settings" class="river-tool-btn" onclick="openDrawer('drawer-meet-audio-settings')" title="Audio Output Settings">
-              <span class="tool-icon">🔊</span>
-              <span class="tool-label">Audio</span>
-            </button>
-
-            <button id="btn-river-participants" class="river-tool-btn" onclick="openDrawer('drawer-meet-participants')" title="Participants Roster">
-              <span class="tool-icon">👥</span>
-              <span class="tool-label" id="river-participant-count-badge">1</span>
-            </button>
-
-            <button id="btn-river-chat" class="river-tool-btn" onclick="openDrawer('drawer-meet-chat')" title="Meeting Chat">
-              <span class="tool-icon">💬</span>
-              <span class="tool-label">Chat</span>
-            </button>
-
             <button id="btn-river-screenshare" class="river-tool-btn" onclick="toggleNativeScreenShare()" title="Share Screen">
               <span class="tool-icon" id="river-icon-share">🖥️</span>
               <span class="tool-label">Share</span>
+            </button>
+
+            <button id="btn-river-hand" class="river-tool-btn" onclick="toggleNativeHand()" title="Raise Hand">
+              <span class="tool-icon" id="river-icon-hand">✋</span>
+              <span class="tool-label" id="river-label-hand">Hand</span>
+            </button>
+
+            <button id="btn-river-more" class="river-tool-btn" onclick="openDrawer('drawer-meet-more')" title="More Options">
+              <span class="tool-icon">⋮</span>
+              <span class="tool-label">More</span>
             </button>
 
             <button id="btn-river-leave" class="river-tool-btn danger" onclick="exitLiveMeetingRoom()" title="Leave Meeting">
@@ -2183,6 +2178,44 @@
               Send
             </button>
           </form>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Meeting More Options (⋮) Drawer -->
+    <div id="drawer-meet-more" class="drawer-overlay" style="z-index: 2550;">
+      <div class="ios-drawer-sheet" style="max-height: 60%; background: #0f172a; color: #fff;">
+        <div class="drawer-header-row" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+          <div class="grabber-bar"></div>
+          <h3 style="color: #fff;">⚙️ Meeting Options</h3>
+          <button class="close-drawer-btn" onclick="closeDrawer('drawer-meet-more')" style="color: #fff;">&times;</button>
+        </div>
+        <div class="drawer-body-settings" style="padding: 16px; display: flex; flex-direction: column; gap: 12px; text-align: left;">
+          
+          <button onclick="closeDrawer('drawer-meet-more'); openDrawer('drawer-meet-participants');" style="display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 14px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: #fff; font-size: 14px; font-weight: 700; cursor: pointer; text-align: left;">
+            <span style="font-size: 20px;">👥</span>
+            <div style="flex: 1;">
+              <div>Participants Roster / सदस्य यादी</div>
+              <div style="font-size: 11px; color: #94a3b8; font-weight: 500;">View joined members & host controls</div>
+            </div>
+          </button>
+
+          <button onclick="closeDrawer('drawer-meet-more'); openDrawer('drawer-meet-chat');" style="display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 14px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: #fff; font-size: 14px; font-weight: 700; cursor: pointer; text-align: left;">
+            <span style="font-size: 20px;">💬</span>
+            <div style="flex: 1;">
+              <div>In-Room Chat / गप्पा</div>
+              <div style="font-size: 11px; color: #94a3b8; font-weight: 500;">Send live text messages to meeting</div>
+            </div>
+          </button>
+
+          <button onclick="closeDrawer('drawer-meet-more'); openDrawer('drawer-meet-audio-settings');" style="display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 14px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: #fff; font-size: 14px; font-weight: 700; cursor: pointer; text-align: left;">
+            <span style="font-size: 20px;">🔊</span>
+            <div style="flex: 1;">
+              <div>Audio Settings / आवाज सेटिंग्स</div>
+              <div style="font-size: 11px; color: #94a3b8; font-weight: 500;">Microphone input & speaker output selection</div>
+            </div>
+          </button>
 
         </div>
       </div>
