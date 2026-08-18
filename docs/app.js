@@ -3,7 +3,11 @@
    PRODUCTION WEBRTC AUDIO & DEVICE PIPELINE MANAGER
    ========================================================================== */
 
-console.log("[WebRTC Pipeline] Checking navigator.mediaDevices:", navigator.mediaDevices);
+function logAudioDebug(action, details = {}) {
+  console.log(`[Audio] ${action}`, details);
+}
+
+logAudioDebug("Checking navigator.mediaDevices:", { supported: !!navigator.mediaDevices });
 
 window.webrtcAudioPipeline = {
   localStream: null,
@@ -17,15 +21,15 @@ window.webrtcAudioPipeline = {
 
 // 1. Request Microphone Permission & Initialize Media Devices
 async function initializeWebRTCAudioPipeline() {
-  console.log("[WebRTC Pipeline] Initializing Audio Pipeline...");
+  logAudioDebug("getUserMedia started...");
   
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    console.error("[WebRTC Pipeline] ERROR: navigator.mediaDevices.getUserMedia is NOT supported on this browser/environment.");
+    logAudioDebug("ERROR: navigator.mediaDevices.getUserMedia is NOT supported on this browser/environment.");
     return null;
   }
 
   try {
-    console.log("[WebRTC Pipeline] Step 1: Requesting microphone permission via getUserMedia({ audio: true })...");
+    logAudioDebug("Requesting microphone permission via getUserMedia({ audio: true })...");
     const stream = await navigator.mediaDevices.getUserMedia({
       audio: {
         echoCancellation: true,
@@ -39,15 +43,15 @@ async function initializeWebRTCAudioPipeline() {
       }
     });
 
-    console.log("[WebRTC Pipeline] Step 1 SUCCESS: getUserMedia stream acquired:", stream);
+    logAudioDebug("Microphone permission granted successfully:", { streamId: stream.id });
     window.webrtcAudioPipeline.localStream = stream;
 
     // Log Audio Tracks
     const audioTracks = stream.getAudioTracks();
-    console.log("[WebRTC Pipeline] MediaStream.getAudioTracks():", audioTracks);
+    logAudioDebug("Local audio tracks acquired:", audioTracks);
 
     audioTracks.forEach((track, idx) => {
-      console.log(`[WebRTC Pipeline] Local Audio Track [${idx}]:`, {
+      logAudioDebug(`Local audio track [${idx}]:`, {
         id: track.id,
         kind: track.kind,
         enabled: track.enabled,
@@ -4503,6 +4507,9 @@ function setupEventListeners() {
 function openDrawer(id) {
   const overlay = document.getElementById(id);
   if (overlay) overlay.classList.add("active");
+  if (id === "drawer-meet-audio-settings" && typeof enumerateAndPopulateAudioDevices === "function") {
+    enumerateAndPopulateAudioDevices();
+  }
 }
 
 function closeDrawer(id) {
@@ -7018,14 +7025,25 @@ function triggerJoinMeetingFlow(meetingId) {
     }
   } catch(e) {}
 
-  // Request media permissions and launch video room cleanly inside modal
+  logAudioDebug("getUserMedia started for meeting join...", { meetingId });
   showToast("Connecting audio & video hardware...");
+  
   navigator.mediaDevices.getUserMedia({ video: true, audio: true })
     .then(stream => {
-      launchLiveMeetingRoom(m, stream);
+      logAudioDebug("Microphone permission granted for participant.", {
+        audioTracks: stream.getAudioTracks().map(t => ({ id: t.id, label: t.label, enabled: t.enabled, readyState: t.readyState }))
+      });
+
+      // Stop parent frame pre-check tracks so hardware mic device lock is released before iframe initialization
+      if (stream && stream.getTracks) {
+        stream.getTracks().forEach(t => t.stop());
+        logAudioDebug("Parent frame pre-check tracks stopped to give WebRTC room exclusive hardware access.");
+      }
+
+      launchLiveMeetingRoom(m, null);
     })
     .catch(err => {
-      console.warn("Media permissions denied:", err);
+      logAudioDebug("Microphone permission denied or unavailable:", err);
       showToast("Joining fellowship room in listen mode.");
       launchLiveMeetingRoom(m, null);
     });
@@ -7034,7 +7052,14 @@ function triggerJoinMeetingFlow(meetingId) {
 // Fullscreen Live Meeting Room Entry
 function launchLiveMeetingRoom(meeting, stream) {
   try {
-    console.log("Launching Live Fellowship Room:", meeting);
+    const loggedIn = (state && state.currentUser) ? state.currentUser.username : "Member";
+    const isHost = meeting ? (meeting.host === loggedIn) : false;
+
+    logAudioDebug("Publishing microphone track & entering meeting room...", {
+      meetingId: meeting ? meeting.id : "default",
+      isHost: isHost,
+      participant: loggedIn
+    });
     
     // Lock screen view overlay
     const roomModal = document.getElementById("modal-live-meeting");
@@ -7062,10 +7087,6 @@ function launchLiveMeetingRoom(meeting, stream) {
     if (tabs) tabs.style.display = "none";
     const sidebar = document.querySelector(".desktop-sidebar");
     if (sidebar) sidebar.style.display = "none";
-
-    // Setup active session state
-    const loggedIn = (state && state.currentUser) ? state.currentUser.username : "Member";
-    const isHost = meeting ? (meeting.host === loggedIn) : false;
     
     if (meeting && meeting.id) {
       try { subscribeToMeetingEvents(meeting.id); } catch(e) {}
@@ -7079,14 +7100,14 @@ function launchLiveMeetingRoom(meeting, stream) {
       isHost: isHost
     };
 
-    // Load Verified WebRTC Video Conference Room
+    // Load Verified WebRTC Video Conference Room with Exclusive Hardware Access for All Participants
     const jitsiCont = document.getElementById("meeting-jitsi-container");
     if (jitsiCont) {
       jitsiCont.style.display = "block";
       const meetingIdSlug = (meeting && meeting.id) ? meeting.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
       const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
       
-      const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=1&video=1&name=${encodeURIComponent(loggedIn)}`;
+      const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&muted=0&sound=1&autoplay=1&layout=grid&grid=1&name=${encodeURIComponent(loggedIn)}`;
       
       jitsiCont.innerHTML = `
         <iframe 
@@ -7094,15 +7115,30 @@ function launchLiveMeetingRoom(meeting, stream) {
           src="${roomUrl}" 
           width="100%" 
           height="100%" 
-          allow="camera *; microphone *; speaker-selection *; display-capture *; fullscreen *; autoplay *; picture-in-picture *; accelerometer; gyroscope;" 
+          allow="camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; accelerometer; gyroscope;" 
+          allowusermedia="true"
           style="border: none; width: 100%; height: 100%; border-radius: 18px; background: #090d16;">
         </iframe>
       `;
+
+      logAudioDebug("WebRTC Room iframe mounted successfully.", {
+        roomUrl,
+        allowPermissions: "camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; accelerometer; gyroscope;",
+        allowusermedia: "true"
+      });
     }
 
-    showToast("Joined Online Video Fellowship Room 🙏");
+    // Auto-enumerate devices for settings drawer
+    enumerateAndPopulateAudioDevices();
+
+    // Trigger audio autoplay unlock
+    setTimeout(() => {
+      unlockAndPlayRemoteAudio();
+    }, 1000);
+
+    showToast("Joined Online Video Fellowship Room 🙏 (Mic & Speaker Active)");
   } catch (err) {
-    console.warn("launchLiveMeetingRoom notice:", err);
+    logAudioDebug("launchLiveMeetingRoom notice:", err);
   }
 }
 
