@@ -8912,7 +8912,7 @@ window.nativeLiveKitMeetingManager = {
     this.deviceId = `dev_${deviceType}_${Math.random().toString(36).substring(7)}`;
     const displayName = `${participantName || 'Fellowship Member'} (${deviceType})`;
 
-    console.log("[Native WebRTC Engine] Joining Fellowship Meeting Room:", { targetRoom, displayName });
+    console.log("[SFU WebRTC Engine] Joining Fellowship Video Room:", { targetRoom, displayName });
 
     // Show native meeting modal
     const roomModal = document.getElementById("modal-live-meeting");
@@ -8924,23 +8924,81 @@ window.nativeLiveKitMeetingManager = {
     const titleEl = document.getElementById("meeting-room-title-display");
     if (titleEl) titleEl.textContent = "River of Life Main Fellowship";
 
-    // Setup Native Video Stage Grid Container
+    // Setup Video Stage Grid Container
     const grid = document.getElementById("river-video-grid");
     if (grid) {
       grid.innerHTML = ""; // Clear old tiles
     }
 
-    // Render Local Participant Tile in Grid
-    this.renderLocalParticipantTile(displayName);
+    // Initialize Production SFU WebRTC Engine (Jitsi SFU with NAT Traversal across 4G, 5G & Wi-Fi)
+    if (typeof JitsiMeetExternalAPI !== "undefined" && grid) {
+      try {
+        if (window.activeJitsiAPIInstance) {
+          try { window.activeJitsiAPIInstance.dispose(); } catch(e) {}
+        }
+
+        const domain = "meet.jit.si";
+        const options = {
+          roomName: targetRoom,
+          width: "100%",
+          height: "100%",
+          parentNode: grid,
+          userInfo: {
+            displayName: displayName
+          },
+          configOverwrite: {
+            startWithAudioMuted: false,
+            startWithVideoMuted: false,
+            prejoinPageEnabled: false, // Disables prejoin screen for instant 1-click video join!
+            enableWelcomePage: false,
+            disableDeepLinking: true,
+            p2p: { enabled: false } // Force SFU Media Relay for guaranteed 2-way cross-device video on 4G/5G/Wi-Fi
+          },
+          interfaceConfigOverwrite: {
+            TOOLBAR_BUTTONS: [], // We use our MS Teams / Google Meet floating control toolbar!
+            SHOW_JITSI_WATERMARK: false,
+            SHOW_WATERMARK_FOR_GUESTS: false,
+            DEFAULT_BACKGROUND: '#202124',
+            TILE_VIEW_MAX_COLUMNS: 3
+          }
+        };
+
+        window.activeJitsiAPIInstance = new JitsiMeetExternalAPI(domain, options);
+
+        window.activeJitsiAPIInstance.addEventListener("videoConferenceJoined", (e) => {
+          showToast(`Connected to Fellowship Video Room as ${displayName} 🙏`);
+        });
+
+        window.activeJitsiAPIInstance.addEventListener("participantJoined", (e) => {
+          showToast(`${e.displayName || 'Member'} joined meeting 👋`);
+          const badgeCount = document.getElementById("river-participant-count-badge");
+          if (badgeCount) {
+            const current = parseInt(badgeCount.textContent) || 1;
+            badgeCount.textContent = current + 1;
+          }
+        });
+
+        window.activeJitsiAPIInstance.addEventListener("participantLeft", (e) => {
+          const badgeCount = document.getElementById("river-participant-count-badge");
+          if (badgeCount) {
+            const current = parseInt(badgeCount.textContent) || 2;
+            badgeCount.textContent = Math.max(1, current - 1);
+          }
+        });
+
+      } catch(err) {
+        console.error("SFU WebRTC initialization error:", err);
+      }
+    } else {
+      this.renderLocalParticipantTile(displayName);
+      await this.publishLocalHardwareTracks();
+    }
 
     // Setup Real-time Multi-Device Participant Sync & Heartbeat
     this.cleanStalePresenceEntries(targetRoom);
     this.setupMultiDeviceSync(targetRoom, this.deviceId, displayName);
     this.setupGlobalCloudRelay(targetRoom, this.deviceId, displayName);
     this.startHeartbeat(targetRoom);
-
-    // Acquire Local Mic & Camera Tracks
-    await this.publishLocalHardwareTracks();
 
     // Show Native Teams / Google Meet Floating Toolbar
     const toolbar = document.getElementById("river-meet-toolbar");
