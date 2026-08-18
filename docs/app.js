@@ -7345,25 +7345,29 @@ function launchLiveMeetingRoom(meeting, stream) {
       participant: loggedIn
     });
     
-    // Lock screen view overlay
+    // Lock screen view overlay (MS Teams Mobile View)
     const roomModal = document.getElementById("modal-live-meeting");
     if (roomModal) {
-      roomModal.style.display = "block";
+      roomModal.style.display = "flex";
       setTimeout(() => {
         roomModal.classList.add("active");
       }, 10);
     }
     
-    // Setup room title
+    // Setup room title & speaker display name
     const titleEl = document.getElementById("meeting-room-title-display");
     if (titleEl && meeting && meeting.title) {
       titleEl.textContent = meeting.title;
     }
-    const legacyTitle = document.getElementById("meeting-room-title");
-    if (legacyTitle && meeting && meeting.title) {
-      legacyTitle.textContent = meeting.title;
+    const speakerEl = document.getElementById("teams-center-speaker-name");
+    if (speakerEl) {
+      speakerEl.textContent = loggedIn ? `${loggedIn} (River Sanctuary)` : "River Sanctuary Worship";
     }
-  
+    const avatarEl = document.getElementById("teams-center-avatar");
+    if (avatarEl && loggedIn) {
+      avatarEl.textContent = loggedIn.charAt(0).toUpperCase();
+    }
+
     // Hide top header and bottom tabs
     const header = document.querySelector(".app-header");
     if (header) header.style.display = "none";
@@ -7387,14 +7391,14 @@ function launchLiveMeetingRoom(meeting, stream) {
     // Load Verified WebRTC Video Conference Room with Exclusive Hardware Access for All Participants
     const jitsiCont = document.getElementById("meeting-jitsi-container");
     if (jitsiCont) {
-      jitsiCont.style.display = "block";
+      jitsiCont.style.display = "none"; // Keep native MS Teams Mobile Stage & Controls 100% visible!
       const meetingIdSlug = (meeting && meeting.id) ? meeting.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
       const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
       
       // Low-latency Opus P2P parameters for zero audio delay on Android & Desktop
       const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&autojoin=true&p2p=true&codec=opus&layout=grid&grid=1&name=${encodeURIComponent(loggedIn)}`;
       
-      // Initialize Native LiveKit Video Tiles as reliable fallback
+      // Initialize Native LiveKit Video Tiles
       try {
         if (window.nativeLiveKitMeetingManager && window.nativeLiveKitMeetingManager.joinNativeMeeting) {
           window.nativeLiveKitMeetingManager.joinNativeMeeting(roomSlug, loggedIn);

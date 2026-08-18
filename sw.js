@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v27-MS-TEAMS-MOBILE-CALL-UI';
+const CACHE_NAME = 'river-of-life-cache-v27-TEAMS-MOBILE-CALL-UI-FORCED';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

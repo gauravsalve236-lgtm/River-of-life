@@ -5870,9 +5870,51 @@ body.meeting-modal-open .mobile-bottom-tabs,
 #modal-live-meeting,
 .meeting-room-container,
 #river-native-meeting-stage,
-#river-video-grid,
-#meeting-jitsi-container {
-  background-color: #090d16 !important;
-  background: #090d16 !important;
+#river-video-grid {
+  background-color: #111318 !important;
+  background: #111318 !important;
   color: #ffffff !important;
+}
+
+/* MS Teams Mobile Call View & Control Panel Styling */
+#modal-live-meeting[style*="display: block"],
+#modal-live-meeting[style*="display: flex"],
+#modal-live-meeting.active {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+}
+
+.meeting-room-container {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  height: 100% !important;
+  width: 100% !important;
+  background: #111318 !important;
+}
+
+#river-native-meeting-stage {
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+  background: #0b0c10 !important;
+}
+
+.teams-control-card-panel {
+  width: 100% !important;
+  background: #111318 !important;
+  padding: 12px 16px calc(16px + env(safe-area-inset-bottom, 0px)) 16px !important;
+  box-sizing: border-box !important;
+  z-index: 100 !important;
+}
+
+.teams-grid-btn {
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+.teams-grid-btn:active {
+  transform: scale(0.94);
 }
