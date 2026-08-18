@@ -7116,9 +7116,19 @@ function launchLiveMeetingRoom(meeting, stream) {
       const meetingIdSlug = (meeting && meeting.id) ? meeting.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
       const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
       
-      // Auto-configure default camera & mic parameters: audio=true&video=true&mic=true&cam=true&muted=false&sound=true&autojoin=true
-      const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&autojoin=true&layout=grid&grid=1&name=${encodeURIComponent(loggedIn)}`;
+      // Low-latency Opus P2P parameters for zero audio delay on Android & Desktop: audio=true&video=true&mic=true&cam=true&muted=false&sound=true&autojoin=true&p2p=true&codec=opus
+      const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&autojoin=true&p2p=true&codec=opus&layout=grid&grid=1&name=${encodeURIComponent(loggedIn)}`;
       
+      // Detect iOS (iPhone/iPad) to bypass WebKit iframe microphone blocking
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      if (isIOS) {
+        logAudioDebug("iOS Device detected (Apple WebKit Iframe Restriction). Launching native top-level call window...");
+        showToast("Opening iOS Video Room (Mic & Speaker Active) 🙏");
+        try {
+          window.open(roomUrl, "_blank");
+        } catch(e) {}
+      }
+
       jitsiCont.innerHTML = `
         <iframe 
           id="webrtc-room-iframe"
@@ -7131,8 +7141,9 @@ function launchLiveMeetingRoom(meeting, stream) {
         </iframe>
       `;
 
-      logAudioDebug("WebRTC Room iframe mounted with default camera and mic auto-configured.", {
+      logAudioDebug("WebRTC Room iframe mounted with low-latency Opus audio parameters.", {
         roomUrl,
+        isIOS,
         allowPermissions: "camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; accelerometer; gyroscope;",
         allowusermedia: "true"
       });
