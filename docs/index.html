@@ -20,8 +20,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   
-  <!-- Main Stylesheet (Cache-Busted for Version 27 Share Hub) -->
-  <link rel="stylesheet" href="index.css?v=27_SHARE_HUB_FINAL">
+  <!-- Main Stylesheet (Cache-Busted for Version 27 Audio Icon Removal) -->
+  <link rel="stylesheet" href="index.css?v=27_AUDIO_ICON_REMOVED">
 
   <!-- Official LiveKit WebRTC Client SDK -->
   <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.0.8/dist/livekit-client.umd.min.js"></script>
@@ -2053,7 +2053,7 @@
             <!-- Dynamically populated with .river-video-tile elements -->
           </div>
 
-          <!-- Native Floating Control Toolbar (Clean: Mic, Cam, People, Chat, Share, End Call) -->
+          <!-- Native Floating Control Toolbar (Audio Icon Removed) -->
           <div id="river-meet-toolbar" class="river-meet-toolbar">
             <button id="btn-river-mic" class="river-tool-btn" onclick="toggleNativeMic()" title="Toggle Microphone">
               <span class="tool-icon" id="river-icon-mic">🎤</span>
@@ -2076,13 +2076,13 @@
             </button>
 
             <button id="btn-river-screenshare" class="river-tool-btn" onclick="openDrawer('drawer-meet-share-hub')" title="Share YouTube, Music & Bible Verses">
-              <span class="tool-icon" id="river-icon-share">📤</span>
+              <span class="tool-icon" id="river-icon-share">🖥️</span>
               <span class="tool-label">Share</span>
             </button>
 
-            <button id="btn-river-leave" class="river-tool-btn danger gmeet-leave-red" onclick="exitLiveMeetingRoomDirectly()" title="End Call / Leave Meeting">
-              <span class="tool-icon">📞</span>
-              <span class="tool-label">End Call</span>
+            <button id="btn-river-leave" class="river-tool-btn danger" onclick="exitLiveMeetingRoomDirectly()" title="Leave Meeting">
+              <span class="tool-icon">🚪</span>
+              <span class="tool-label">Leave</span>
             </button>
           </div>
 
@@ -2435,8 +2435,8 @@
       <span id="toast-message">Copied to clipboard!</span>
     </div>
 
-  <!-- App Main Logic (Cache-Busted for Version 27 Share Hub) -->
-  <script src="app.js?v=27_SHARE_HUB_FINAL"></script>
+  <!-- App Main Logic (Cache-Busted for Version 27 Audio Icon Removal) -->
+  <script src="app.js?v=27_AUDIO_ICON_REMOVED"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 2.5s no matter what

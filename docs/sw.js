@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v27-SHARE-HUB-FINAL';
+const CACHE_NAME = 'river-of-life-cache-v27-AUDIO-ICON-REMOVED';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
