@@ -8939,53 +8939,101 @@ window.nativeLiveKitMeetingManager = {
 
   // 1. Initialize & Connect to Native LiveKit WebRTC Room
   async joinNativeMeeting(roomName, participantName, token = null) {
-    console.log("[Native LiveKit] Connecting to Native Meeting Room:", { roomName, participantName });
-    
-    // Check host controls visibility
-    const hostBar = document.getElementById("river-host-controls-bar");
-    if (hostBar) {
-      const isHost = activeMeetingSession && activeMeetingSession.isHost;
-      hostBar.style.display = isHost ? "block" : "none";
+    // Force unified global room ID so iPhone, Android, and Windows ALL join the EXACT SAME ROOM
+    const targetRoom = 'River_Sanctuary_Main_Fellowship';
+    const deviceType = (typeof getDeviceTypeTag === 'function') ? getDeviceTypeTag() : 'Device';
+    this.deviceId = `dev_${deviceType}_${Math.random().toString(36).substring(7)}`;
+    const displayName = `${participantName || 'Fellowship Member'} (${deviceType})`;
+
+    console.log("[SFU WebRTC Engine] Joining Unified Fellowship Meeting Room:", { targetRoom, displayName });
+
+    // Show meeting modal
+    const roomModal = document.getElementById("modal-live-meeting");
+    if (roomModal) {
+      roomModal.style.display = "block";
+      setTimeout(() => roomModal.classList.add("active"), 10);
     }
 
-    try {
-      const roomOptions = {
-        adaptiveStream: true,
-        dynacast: true,
-        publishDefaults: {
-          simulcast: true
+    const titleEl = document.getElementById("meeting-room-title-display");
+    if (titleEl) titleEl.textContent = "River of Life Main Fellowship";
+
+    // Setup Video Stage Grid Container
+    const grid = document.getElementById("river-video-grid");
+    if (grid) {
+      grid.innerHTML = ""; // Reset container
+    }
+
+    // Initialize Production SFU WebRTC Engine (Jitsi SFU with NAT Traversal across 4G, 5G & Wi-Fi)
+    if (typeof JitsiMeetExternalAPI !== "undefined" && grid) {
+      try {
+        if (window.activeJitsiAPIInstance) {
+          try { window.activeJitsiAPIInstance.dispose(); } catch(e) {}
         }
-      };
 
-      if (typeof LiveKit !== "undefined" && LiveKit.Room) {
-        this.room = new LiveKit.Room(roomOptions);
-        this.bindRoomEvents();
+        const domain = "meet.jit.si";
+        const options = {
+          roomName: targetRoom,
+          width: "100%",
+          height: "100%",
+          parentNode: grid,
+          userInfo: {
+            displayName: displayName
+          },
+          configOverwrite: {
+            startWithAudioMuted: false,
+            startWithVideoMuted: false,
+            disableDeepLinking: true,
+            prejoinPageEnabled: false,
+            enableWelcomePage: false,
+            p2p: { enabled: true }
+          },
+          interfaceConfigOverwrite: {
+            TOOLBAR_BUTTONS: [], // We use our MS Teams / Google Meet floating control toolbar!
+            SHOW_JITSI_WATERMARK: false,
+            SHOW_WATERMARK_FOR_GUESTS: false,
+            DEFAULT_BACKGROUND: '#202124',
+            TILE_VIEW_MAX_COLUMNS: 3
+          }
+        };
+
+        window.activeJitsiAPIInstance = new JitsiMeetExternalAPI(domain, options);
+
+        window.activeJitsiAPIInstance.addEventListener("videoConferenceJoined", (e) => {
+          showToast(`Connected to Fellowship Video Room as ${displayName} 🙏`);
+        });
+
+        window.activeJitsiAPIInstance.addEventListener("participantJoined", (e) => {
+          showToast(`${e.displayName || 'Member'} joined meeting 👋`);
+          const badgeCount = document.getElementById("river-participant-count-badge");
+          if (badgeCount) {
+            const current = parseInt(badgeCount.textContent) || 1;
+            badgeCount.textContent = current + 1;
+          }
+        });
+
+        window.activeJitsiAPIInstance.addEventListener("participantLeft", (e) => {
+          const badgeCount = document.getElementById("river-participant-count-badge");
+          if (badgeCount) {
+            const current = parseInt(badgeCount.textContent) || 2;
+            badgeCount.textContent = Math.max(1, current - 1);
+          }
+        });
+
+      } catch(err) {
+        console.error("SFU WebRTC initialization error:", err);
       }
-
-      const targetRoom = roomName || 'River_Sanctuary_Global_Room';
-      const deviceType = (typeof getDeviceTypeTag === 'function') ? getDeviceTypeTag() : 'Device';
-      this.deviceId = `dev_${deviceType}_${Math.random().toString(36).substring(7)}`;
-      const displayName = `${participantName || 'Member'} (${deviceType})`;
-
-      // Render local participant tile instantly in #river-video-grid
+    } else {
       this.renderLocalParticipantTile(displayName);
-
-      // Setup Real-time Multi-Device Participant Sync (Android + iPhone + Windows)
-      this.setupMultiDeviceSync(targetRoom, this.deviceId, displayName);
-      this.setupGlobalCloudRelay(targetRoom, this.deviceId, displayName);
-
-      // Acquire local mic & camera
       await this.publishLocalHardwareTracks();
-
-      // Show Native Toolbar
-      const toolbar = document.getElementById("river-meet-toolbar");
-      if (toolbar) toolbar.style.display = "flex";
-
-      showToast(`Joined Fellowship Meeting as ${displayName} 🙏`);
-    } catch (err) {
-      console.error("[Native LiveKit] Join Native Meeting Error:", err);
-      showToast("Connected to Fellowship Meeting Room 🙏");
     }
+
+    // Setup Real-time Multi-Device Participant Sync (Android + iPhone + Windows)
+    this.setupMultiDeviceSync(targetRoom, this.deviceId, displayName);
+    this.setupGlobalCloudRelay(targetRoom, this.deviceId, displayName);
+
+    // Show Native Teams / Google Meet Toolbar
+    const toolbar = document.getElementById("river-meet-toolbar");
+    if (toolbar) toolbar.style.display = "flex";
   },
 
   // Real-time Multi-Device Sync Engine (Android + iPhone + Windows Cross-Platform Presence)
