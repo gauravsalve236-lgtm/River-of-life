@@ -7026,25 +7026,34 @@ function triggerJoinMeetingFlow(meetingId) {
   } catch(e) {}
 
   logAudioDebug("getUserMedia started for meeting join...", { meetingId });
-  showToast("Connecting audio & video hardware...");
+  showToast("Requesting Microphone & Camera access...");
   
-  navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-    .then(stream => {
-      logAudioDebug("Microphone permission granted for participant.", {
-        audioTracks: stream.getAudioTracks().map(t => ({ id: t.id, label: t.label, enabled: t.enabled, readyState: t.readyState }))
+  // Explicitly request audio FIRST to force mobile browsers (iOS Safari / Android Chrome) to display Microphone Permission Dialog
+  navigator.mediaDevices.getUserMedia({ audio: true })
+    .then(audioStream => {
+      logAudioDebug("Microphone permission granted by user!", {
+        audioTracks: audioStream.getAudioTracks().map(t => ({ id: t.id, label: t.label, enabled: t.enabled, readyState: t.readyState }))
       });
 
       // Stop parent frame pre-check tracks so hardware mic device lock is released before iframe initialization
-      if (stream && stream.getTracks) {
-        stream.getTracks().forEach(t => t.stop());
-        logAudioDebug("Parent frame pre-check tracks stopped to give WebRTC room exclusive hardware access.");
+      if (audioStream && audioStream.getTracks) {
+        audioStream.getTracks().forEach(t => t.stop());
+        logAudioDebug("Parent frame audio tracks released for exclusive iframe hardware capture.");
       }
 
-      launchLiveMeetingRoom(m, null);
+      // Also attempt joint video request
+      navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+        .then(fullStream => {
+          if (fullStream && fullStream.getTracks) fullStream.getTracks().forEach(t => t.stop());
+          launchLiveMeetingRoom(m, null);
+        })
+        .catch(() => {
+          launchLiveMeetingRoom(m, null);
+        });
     })
     .catch(err => {
-      logAudioDebug("Microphone permission denied or unavailable:", err);
-      showToast("Joining fellowship room in listen mode.");
+      logAudioDebug("Microphone permission denied or unavailable on mobile:", err);
+      showToast("Microphone permission denied. Joining in listen mode.");
       launchLiveMeetingRoom(m, null);
     });
 }
