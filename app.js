@@ -7391,9 +7391,16 @@ function launchLiveMeetingRoom(meeting, stream) {
       const meetingIdSlug = (meeting && meeting.id) ? meeting.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
       const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
       
-      // Low-latency Opus P2P parameters for zero audio delay on Android & Desktop: audio=true&video=true&mic=true&cam=true&muted=false&sound=true&autojoin=true&p2p=true&codec=opus
+      // Low-latency Opus P2P parameters for zero audio delay on Android & Desktop
       const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&autojoin=true&p2p=true&codec=opus&layout=grid&grid=1&name=${encodeURIComponent(loggedIn)}`;
       
+      // Initialize Native LiveKit Video Tiles as reliable fallback
+      try {
+        if (window.nativeLiveKitMeetingManager && window.nativeLiveKitMeetingManager.joinNativeMeeting) {
+          window.nativeLiveKitMeetingManager.joinNativeMeeting(roomSlug, loggedIn);
+        }
+      } catch(e) {}
+
       // Detect iOS (iPhone/iPad) to bypass WebKit iframe microphone blocking
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
       if (isIOS) {
@@ -7412,15 +7419,15 @@ function launchLiveMeetingRoom(meeting, stream) {
           height="100%" 
           allow="camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; accelerometer; gyroscope;" 
           allowusermedia="true"
-          style="border: none; width: 100%; height: 100%; border-radius: 18px; background: #090d16;">
+          style="border: none; width: 100%; height: 100%; border-radius: 18px; background: #090d16;"
+          onerror="this.parentElement.style.display='none';"
+        >
         </iframe>
       `;
 
       logAudioDebug("WebRTC Room iframe mounted with low-latency Opus audio parameters.", {
         roomUrl,
-        isIOS,
-        allowPermissions: "camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; accelerometer; gyroscope;",
-        allowusermedia: "true"
+        isIOS
       });
     }
 

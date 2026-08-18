@@ -5863,4 +5863,16 @@ body.meeting-modal-open .mobile-bottom-tabs,
 #meeting-jitsi-container iframe#webrtc-room-iframe {
   height: calc(100% + 40px) !important;
   margin-bottom: -40px !important;
+  background-color: #090d16 !important;
+}
+
+/* Fail-Safe Dark Theme for Meeting Room Modal (Prevents Blank White Screen on Windows & Mobile) */
+#modal-live-meeting,
+.meeting-room-container,
+#river-native-meeting-stage,
+#river-video-grid,
+#meeting-jitsi-container {
+  background-color: #090d16 !important;
+  background: #090d16 !important;
+  color: #ffffff !important;
 }
