@@ -8962,11 +8962,14 @@ window.nativeLiveKitMeetingManager = {
         this.bindRoomEvents();
       }
 
+      const targetRoom = roomName || 'River_Sanctuary_Global_Room';
+
       // Render local participant tile instantly in #river-video-grid
       this.renderLocalParticipantTile(participantName);
 
-      // Setup Real-time Multi-Device Participant Sync (Android + Windows)
-      this.setupMultiDeviceSync(roomId, participantName);
+      // Setup Real-time Multi-Device Participant Sync (Android + iPhone + Windows)
+      this.setupMultiDeviceSync(targetRoom, participantName);
+      this.setupGlobalCloudRelay(targetRoom, participantName);
 
       // Acquire local mic & camera
       await this.publishLocalHardwareTracks();
@@ -9064,6 +9067,57 @@ window.nativeLiveKitMeetingManager = {
       }
     } else if (data.type === "PRESENCE" && data.name !== this.username) {
       this.registerStoragePresence(this.roomId, data.name);
+    }
+  },
+
+  // Global Cross-Device WebSockets Cloud Relay (iPhone + Android + Windows)
+  setupGlobalCloudRelay(roomName, username) {
+    const cleanRoom = (roomName || 'River_Sanctuary_Global_Room').replace(/[^a-zA-Z0-9]/g, '_');
+    const cleanUser = (username || 'Member').replace(/[^a-zA-Z0-9]/g, '_');
+
+    try {
+      if (typeof mqtt !== "undefined") {
+        if (this.mqttClient) try { this.mqttClient.end(); } catch(e) {}
+        
+        const socketUrl = "wss://broker.emqx.io:8084/mqtt";
+        const client = mqtt.connect(socketUrl, {
+          clientId: `river_${cleanUser}_${Math.random().toString(36).substring(7)}`,
+          clean: true,
+          connectTimeout: 4000
+        });
+
+        client.on('connect', () => {
+          console.log("[Cloud Relay] Connected to Global Meeting Signaling Relay");
+          client.subscribe(`river_of_life/room/${cleanRoom}`, { qos: 0 });
+          client.publish(`river_of_life/room/${cleanRoom}`, JSON.stringify({
+            type: "USER_JOINED",
+            name: username,
+            timestamp: Date.now()
+          }));
+        });
+
+        client.on('message', (topic, payload) => {
+          try {
+            const data = JSON.parse(payload.toString());
+            if (data && data.name && data.name !== username) {
+              if (data.type === "USER_JOINED") {
+                showToast(`${data.name} joined meeting 👋`);
+                this.registerStoragePresence(cleanRoom, data.name);
+                client.publish(`river_of_life/room/${cleanRoom}`, JSON.stringify({
+                  type: "PRESENCE",
+                  name: username
+                }));
+              } else if (data.type === "PRESENCE") {
+                this.registerStoragePresence(cleanRoom, data.name);
+              }
+            }
+          } catch(e) {}
+        });
+
+        this.mqttClient = client;
+      }
+    } catch(e) {
+      console.log("MQTT cloud relay notice:", e);
     }
   },
 
