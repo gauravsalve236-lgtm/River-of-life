@@ -1,0 +1,171 @@
+name: Fix meeting room
+
+on:
+  push:
+    paths-ignore:
+      - '.github/workflows/fix-meeting-room.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch-meeting-room:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Patch meeting room
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          path = Path('app.js')
+          text = path.read_text(encoding='utf-8')
+
+          start = text.find('function launchLiveMeetingRoom(meeting, stream) {')
+          end = text.find('\n\nfunction exitLiveMeetingRoom', start)
+          if start < 0 or end < 0:
+              raise SystemExit('Could not locate launchLiveMeetingRoom block')
+
+          replacement = r'''function launchLiveMeetingRoom(meeting, stream) {
+  try {
+    const loggedIn = (state && state.currentUser) ? state.currentUser.username : "Member";
+    const isHost = meeting ? (meeting.host === loggedIn) : false;
+    const meetingIdSlug = meeting && meeting.id ? String(meeting.id).replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
+    const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
+    const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&autojoin=true&p2p=true&codec=opus&layout=grid&grid=1&name=${encodeURIComponent(loggedIn)}`;
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+    logAudioDebug("Opening real meeting room", { meetingId: meeting ? meeting.id : 'default', roomSlug, participant: loggedIn, isHost });
+
+    // iOS/Safari needs the meeting provider at top level for reliable camera/microphone permissions.
+    if (isIOS) {
+      showToast("Opening secure video meeting room… 🙏");
+      window.location.href = roomUrl;
+      return;
+    }
+
+    const roomModal = document.getElementById("modal-live-meeting");
+    const jitsiCont = document.getElementById("meeting-jitsi-container");
+    if (!roomModal || !jitsiCont) {
+      window.open(roomUrl, '_blank', 'noopener,noreferrer');
+      return;
+    }
+
+    roomModal.style.display = "flex";
+    roomModal.classList.add("active");
+
+    const titleEl = document.getElementById("meeting-room-title-display");
+    if (titleEl) titleEl.textContent = meeting && meeting.title ? meeting.title : "River of Life Prayer Meeting";
+
+    const speakerEl = document.getElementById("teams-center-speaker-name");
+    if (speakerEl) speakerEl.textContent = `${loggedIn} • Live Meeting`;
+
+    // Use the actual MiroTalk room inside the meeting surface. The previous code only
+    // painted a local avatar/fake participant list and never connected a real call.
+    jitsiCont.innerHTML = "";
+    jitsiCont.style.cssText = "position:absolute;inset:0;display:block!important;width:100%;height:100%;z-index:50;background:#000;overflow:hidden;";
+
+    const iframe = document.createElement('iframe');
+    iframe.id = 'river-live-meeting-frame';
+    iframe.src = roomUrl;
+    iframe.allow = 'camera; microphone; autoplay; fullscreen; display-capture; speaker-selection';
+    iframe.allowFullscreen = true;
+    iframe.setAttribute('allowtransparency', 'true');
+    iframe.style.cssText = 'width:100%;height:100%;border:0;display:block;background:#000;';
+    jitsiCont.appendChild(iframe);
+
+    // Keep our app-level session in sync for Bible sharing/chat controls.
+    if (activeMeetingSession && activeMeetingSession.localStream && activeMeetingSession.localStream !== stream) {
+      try { activeMeetingSession.localStream.getTracks().forEach(t => t.stop()); } catch (_) {}
+    }
+    activeMeetingSession = {
+      meetingId: meeting ? meeting.id : "default",
+      localStream: stream || null,
+      isMuted: false,
+      isCamOff: false,
+      isHost,
+      roomUrl,
+      roomSlug,
+      provider: 'mirotalk'
+    };
+
+    // The real provider owns participant tiles. Our Participants panel should not
+    // fabricate members while a real room is active.
+    renderCallParticipantsList();
+    enumerateAndPopulateAudioDevices();
+
+    // Hide duplicate app chrome while the provider is visible.
+    const header = document.querySelector('.app-header');
+    const tabs = document.querySelector('.mobile-bottom-tabs');
+    const sidebar = document.querySelector('.desktop-sidebar');
+    if (header) header.style.display = 'none';
+    if (tabs) tabs.style.display = 'none';
+    if (sidebar) sidebar.style.display = 'none';
+
+    showToast("Connected to live meeting. Participants, camera, mic and meeting controls are now provided by the real room. 🙏");
+  } catch (err) {
+    console.error('[Meeting] Failed to open live room:', err);
+    showToast('Could not open the live meeting. Opening the meeting in a new tab…');
+    try {
+      const loggedIn = (state && state.currentUser) ? state.currentUser.username : 'Member';
+      const slug = meeting && meeting.id ? String(meeting.id).replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
+      const fallbackUrl = `https://p2p.mirotalk.com/join/RiverOfLife_Sanctuary_${slug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&autojoin=true&p2p=true&codec=opus&layout=grid&grid=1&name=${encodeURIComponent(loggedIn)}`;
+      window.open(fallbackUrl, '_blank', 'noopener,noreferrer');
+    } catch (_) {}
+  }
+}'''
+
+          text = text[:start] + replacement + text[end:]
+
+          # Replace the fake participant list with a truthful app-level status row.
+          pstart = text.find('function renderCallParticipantsList() {')
+          pend = text.find('\n\n// Populate dropdown selectors in Bible synchronizer drawer', pstart)
+          if pstart >= 0 and pend >= 0:
+              participant_replacement = r'''function renderCallParticipantsList() {
+  const container = document.getElementById("meeting-participants-list");
+  if (!container) return;
+
+  container.innerHTML = "";
+  const loggedIn = state.currentUser ? state.currentUser.username : "Guest User";
+  const isRealRoom = !!(activeMeetingSession && activeMeetingSession.provider === 'mirotalk');
+
+  const row = document.createElement('div');
+  row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:12px;border-bottom:1px solid var(--border);';
+  row.innerHTML = `
+    <div class="avatar-nav-mini" style="width:34px;height:34px;font-size:12px;background:var(--primary);color:#000;">${(loggedIn || 'G').charAt(0).toUpperCase()}</div>
+    <div style="flex:1;">
+      <div style="font-size:13px;font-weight:800;color:var(--text);">${loggedIn} (You)</div>
+      <div style="font-size:10px;color:var(--text-muted);">${activeMeetingSession && activeMeetingSession.isHost ? '👑 Host' : 'Member'} • ${isRealRoom ? 'Live room connected' : 'Not connected'}</div>
+    </div>
+    <span style="font-size:11px;color:#22c55e;font-weight:800;">● LIVE</span>
+  `;
+  container.appendChild(row);
+
+  const note = document.createElement('div');
+  note.style.cssText = 'margin:12px 0;padding:12px;border:1px solid var(--border);border-radius:12px;background:var(--bg-content);font-size:11px;line-height:1.5;color:var(--text-muted);';
+  note.innerHTML = isRealRoom
+    ? '👥 <strong style="color:var(--text);">Live participants are shown inside the meeting room.</strong><br>Use the Participants button in the video meeting to see everyone currently connected.'
+    : 'Join a live meeting to see real participants.';
+  container.appendChild(note);
+
+  const totalCount = document.getElementById("meeting-participants-count");
+  if (totalCount) totalCount.textContent = isRealRoom ? 'Live' : '0';
+}'''
+              text = text[:pstart] + participant_replacement + text[pend:]
+
+          path.write_text(text, encoding='utf-8')
+          print('Meeting room patch applied.')
+
+      - name: Commit patch
+        run: |
+          git config user.name "River of Life Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add app.js
+          git diff --cached --quiet && echo "No changes needed" && exit 0
+          git commit -m "Fix live meeting room and participant rendering"
+          git push
