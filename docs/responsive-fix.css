@@ -1,0 +1,52 @@
+/* River of Life v62 — desktop composition fix
+   Fixes the Windows/laptop layout shown in live testing while keeping phone layouts fluid. */
+
+/* Never let the application canvas become wider than the viewport. */
+html,body,#app{width:100%;max-width:100%;overflow-x:hidden}
+.main-layout-container,.content-view-viewport{min-width:0;max-width:100%}
+
+/* Desktop/laptop navigation: use the real sidebar, not the phone bottom navigation. */
+@media (min-width:900px){
+  .desktop-sidebar{display:flex!important;visibility:visible!important;flex:0 0 220px;width:220px;min-width:220px;max-width:220px}
+  .main-layout-container{min-width:0;width:auto;max-width:calc(100vw - 220px)}
+
+  /* Cover common names used by the legacy mobile bottom navigation. */
+  .mobile-bottom-nav,.mobile-bottom-bar,.bottom-nav,.bottom-tab-bar,.mobile-tab-bar,.app-bottom-nav,.mobile-navigation,.mobile-nav-bar,
+  [id*="bottom-nav"],[id*="bottom-tab"],[class*="bottom-nav"],[class*="bottom-tab"]{display:none!important}
+
+  .content-view-viewport{width:100%;min-width:0;max-width:100%}
+  .view-scroll-content{width:100%;max-width:1380px;margin:0 auto;padding-left:28px;padding-right:28px;overflow-x:hidden}
+
+  /* The old Home grid creates a giant empty left column on wide Windows screens.
+     Use a clean stacked canvas until each Home card has its own responsive placement. */
+  #view-home .view-scroll-content{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:20px!important}
+  #view-home .view-scroll-content>*{width:100%!important;max-width:100%!important;min-width:0!important;min-height:0!important;height:auto!important;grid-column:auto!important}
+  #view-home .vod-display-card{max-height:430px;min-height:300px}
+  #view-home iframe,#view-home video,#view-home img{max-height:100%;object-fit:cover}
+
+  /* Keep long card rows inside the content width. */
+  #view-home .guided-section,#view-home .home-grid,#view-home .touchpoints-section{width:100%;max-width:100%}
+  .plans-subnav-row{max-width:100%;overflow-x:auto}
+}
+
+/* Smaller laptop / tablet landscape. */
+@media (min-width:900px) and (max-width:1199px){
+  .desktop-sidebar{flex-basis:180px;width:180px;min-width:180px;max-width:180px}
+  .main-layout-container{max-width:calc(100vw - 180px)}
+  .view-scroll-content{padding-left:20px;padding-right:20px}
+  .greeting-text{font-size:26px}
+}
+
+/* Phones/tablets: the mobile bottom navigation remains available. */
+@media (max-width:899px){
+  .desktop-sidebar{display:none!important}
+  .main-layout-container{width:100%;max-width:100%}
+  #view-home .view-scroll-content{display:block!important;width:100%;max-width:100%}
+  #view-home .view-scroll-content>*{width:100%!important;max-width:100%!important;min-width:0!important}
+}
+
+/* Touch devices: avoid accidental horizontal expansion from labels. */
+@media (pointer:coarse){
+  body *{max-width:100%}
+  img,video,iframe{height:auto}
+}
