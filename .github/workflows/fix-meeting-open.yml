@@ -1,0 +1,56 @@
+name: Fix meeting open
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/fix-meeting-open.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Replace embedded meeting iframe with top-level room navigation
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('app.js')
+          s = p.read_text(encoding='utf-8')
+          old = '''    // Use the actual MiroTalk room inside the meeting surface. The previous code only
+    // painted a local avatar/fake participant list and never connected a real call.
+    jitsiCont.innerHTML = "";
+    jitsiCont.style.cssText = "position:absolute;inset:0;display:block!important;width:100%;height:100%;z-index:50;background:#000;overflow:hidden;";
+
+    const iframe = document.createElement('iframe');
+    iframe.id = 'river-live-meeting-frame';
+    iframe.src = roomUrl;
+    iframe.allow = 'camera; microphone; autoplay; fullscreen; display-capture; speaker-selection';
+    iframe.allowFullscreen = true;
+    iframe.setAttribute('allowtransparency', 'true');
+    iframe.style.cssText = 'width:100%;height:100%;border:0;display:block;background:#000;';
+    jitsiCont.appendChild(iframe);
+'''
+          new = '''    // Do not embed MiroTalk in an iframe. The provider can block framing and
+    // leave a white screen. Open it as the top-level page for reliable media access.
+    showToast("Opening the live meeting… 🙏");
+    window.location.href = roomUrl;
+    return;
+'''
+          if old not in s:
+              raise SystemExit('Expected iframe block was not found')
+          p.write_text(s.replace(old, new, 1), encoding='utf-8')
+          print('White-screen meeting fix applied.')
+
+      - name: Commit
+        run: |
+          git config user.name "River of Life Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add app.js
+          git diff --cached --quiet && echo "No changes" && exit 0
+          git commit -m "Fix white screen when joining meeting"
+          git push
