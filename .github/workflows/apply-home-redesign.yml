@@ -1,0 +1,39 @@
+name: Apply River of Life Home Redesign
+
+on:
+  push:
+    paths:
+      - 'assets/river-home-redesign.css'
+      - '.github/workflows/apply-home-redesign.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  wire-home-theme:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Import home redesign into existing stylesheet
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('index.css')
+          text = p.read_text(encoding='utf-8')
+          imp = '@import url("assets/river-home-redesign.css?v=20260819");'
+          if imp not in text:
+              p.write_text(imp + '\n' + text, encoding='utf-8')
+              print('Home redesign imported.')
+          else:
+              print('Home redesign already imported.')
+      - name: Commit
+        run: |
+          git config user.name "River of Life Design Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add index.css
+          git diff --cached --quiet && exit 0
+          git commit -m "Apply premium River of Life home redesign"
+          git push
