@@ -1,0 +1,228 @@
+/* ================================================================
+   RIVER OF LIFE — Premium Brand Theme
+   Visual direction: flowing water + warm light + scripture typography
+   No meeting selectors are intentionally changed here.
+   ================================================================ */
+
+:root {
+  --rol-navy: #0b1f33;
+  --rol-blue: #155e75;
+  --rol-teal: #0f766e;
+  --rol-aqua: #38bdf8;
+  --rol-gold: #d6a84f;
+  --rol-cream: #fffdf7;
+  --rol-sand: #f7f2e8;
+  --rol-ink: #122033;
+  --rol-muted: #667085;
+  --rol-radius-xl: 28px;
+  --rol-radius-lg: 22px;
+  --rol-radius-md: 16px;
+  --rol-shadow: 0 14px 45px rgba(11,31,51,.10);
+}
+
+/* Brand light theme: calm, premium, readable rather than bright white. */
+.ios-theme-light {
+  --bg: #f6f9fb;
+  --bg-content: #ffffff;
+  --bg-rgb: 246,249,251;
+  --drawer-bg: #ffffff;
+  --text: var(--rol-ink);
+  --text-muted: #667085;
+  --primary: var(--rol-gold);
+  --primary-light: rgba(214,168,79,.13);
+  --border: #e5e9ee;
+  --border-rgb: 229,233,238;
+  --pill-bg: #eef4f7;
+  --sidebar-hover: #f1f6f8;
+}
+
+body {
+  background:
+    radial-gradient(circle at 90% 0%, rgba(56,189,248,.08), transparent 28%),
+    radial-gradient(circle at 0% 30%, rgba(214,168,79,.07), transparent 26%),
+    var(--bg);
+}
+
+/* Header */
+.app-header {
+  height: 68px;
+  background: rgba(246,249,251,.88);
+  border-bottom-color: rgba(229,233,238,.85);
+}
+
+#static-header-title {
+  color: var(--rol-navy);
+  letter-spacing: -.6px;
+}
+
+/* Home canvas */
+#view-home .view-scroll-content {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 24px 24px 120px;
+}
+
+#view-home .home-search-container {
+  margin-bottom: 18px;
+}
+
+#view-home .home-search-bar {
+  height: 48px;
+  border-radius: 16px;
+  border: 1px solid #e1e8ed;
+  background: rgba(255,255,255,.86);
+  box-shadow: 0 5px 18px rgba(11,31,51,.05);
+  font-family: var(--font-ui);
+  font-size: 14px;
+}
+
+/* Existing welcome card becomes the brand hero. */
+#view-home .welcome-header-card {
+  position: relative;
+  overflow: hidden;
+  margin: 0 0 18px;
+  padding: 24px;
+  min-height: 142px;
+  border-radius: var(--rol-radius-xl);
+  color: #fff;
+  background:
+    radial-gradient(circle at 85% 20%, rgba(56,189,248,.28), transparent 28%),
+    radial-gradient(circle at 10% 100%, rgba(214,168,79,.24), transparent 30%),
+    linear-gradient(135deg, #092238 0%, #12445d 58%, #116b72 100%);
+  box-shadow: 0 18px 45px rgba(11,31,51,.20);
+}
+
+#view-home .welcome-header-card::after {
+  content: "";
+  position: absolute;
+  right: -55px;
+  bottom: -75px;
+  width: 220px;
+  height: 150px;
+  border: 2px solid rgba(255,255,255,.14);
+  border-radius: 50%;
+  transform: rotate(-12deg);
+}
+
+#view-home .date-label {
+  color: rgba(255,255,255,.70);
+  letter-spacing: 1.2px;
+}
+
+#view-home .greeting-text {
+  color: #fff;
+  font-size: clamp(24px, 4vw, 32px);
+}
+
+#view-home .streak-pill {
+  position: relative;
+  z-index: 2;
+  background: rgba(255,255,255,.13);
+  border: 1px solid rgba(255,255,255,.16);
+  color: #fff;
+  backdrop-filter: blur(12px);
+}
+
+/* Verse of the day: signature River of Life card. */
+#view-home .vod-display-card {
+  min-height: 300px;
+  margin-bottom: 22px;
+  border-radius: var(--rol-radius-xl);
+  border: 1px solid rgba(255,255,255,.10);
+  box-shadow: var(--rol-shadow);
+}
+
+#view-home .vod-display-card::before {
+  content: "✦  VERSE OF THE DAY";
+  position: absolute;
+  top: 18px;
+  left: 20px;
+  z-index: 3;
+  padding: 7px 11px;
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(9,34,56,.36);
+  border: 1px solid rgba(255,255,255,.16);
+  backdrop-filter: blur(12px);
+  font: 800 10px/1 var(--font-ui);
+  letter-spacing: 1.15px;
+}
+
+#view-home .vod-text {
+  max-width: 760px;
+  font-size: clamp(20px, 3vw, 27px);
+  line-height: 1.55;
+  text-wrap: balance;
+}
+
+#view-home .vod-citation {
+  color: rgba(255,255,255,.92);
+}
+
+/* Content cards */
+#view-home .guided-meditation-card,
+#view-home .settings-card-group,
+#view-home .home-action-card,
+#view-home .feature-card {
+  border-radius: var(--rol-radius-lg) !important;
+  border-color: #e4e9ed !important;
+  box-shadow: 0 8px 28px rgba(11,31,51,.055);
+}
+
+#view-home .guided-meditation-card:hover,
+#view-home .settings-card-group:hover,
+#view-home .home-action-card:hover,
+#view-home .feature-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 32px rgba(11,31,51,.09);
+}
+
+#view-home .section-title-label {
+  color: #5d6b78;
+  letter-spacing: 1.3px;
+  font-size: 11px;
+}
+
+/* Gold buttons become the primary brand action. */
+#view-home .btn-primary-mini,
+#view-home button.btn-primary,
+#view-home .primary-action {
+  border-radius: 13px !important;
+  font-family: var(--font-ui);
+  font-weight: 800;
+  letter-spacing: .1px;
+  box-shadow: 0 7px 18px rgba(214,168,79,.18);
+}
+
+/* Desktop: premium two-column home composition where existing grid elements exist. */
+@media (min-width: 900px) {
+  #view-home .view-scroll-content { padding: 30px 38px 80px; }
+  #view-home .vod-display-card { min-height: 330px; }
+}
+
+/* Mobile-first: thumb-friendly, uncluttered, no content hidden behind navigation. */
+@media (max-width: 700px) {
+  .app-header { height: 60px; padding: 0 12px; }
+  #static-header-title { font-size: 18px; }
+  #view-home .view-scroll-content { padding: 14px 14px 118px; }
+  #view-home .home-search-bar { height: 46px; font-size: 13px; }
+  #view-home .welcome-header-card { min-height: 132px; padding: 20px; border-radius: 22px; }
+  #view-home .greeting-text { font-size: 24px; }
+  #view-home .vod-display-card { min-height: 310px; padding: 20px; border-radius: 22px; }
+  #view-home .vod-text { font-size: 20px; line-height: 1.55; }
+  #view-home .vod-social-row { gap: 12px; flex-wrap: wrap; }
+  #view-home .settings-card-group { margin-left: 0 !important; margin-right: 0 !important; }
+  #view-home .guided-meditation-card { padding: 17px; }
+}
+
+@media (max-width: 380px) {
+  #view-home .view-scroll-content { padding-left: 10px; padding-right: 10px; }
+  #view-home .welcome-header-card { padding: 17px; }
+  #view-home .vod-display-card { min-height: 290px; padding: 17px; }
+  #view-home .vod-text { font-size: 18px; }
+}
+
+/* Accessibility: reduce motion when requested. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}
