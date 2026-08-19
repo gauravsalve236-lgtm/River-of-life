@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v61-UNCONDITIONAL-CACHE-WIPE';
+const CACHE_NAME = 'river-of-life-cache-v62-TEAMS-MULTI-USER-GALLERY-GRID';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

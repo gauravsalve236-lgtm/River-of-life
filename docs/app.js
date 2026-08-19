@@ -7353,6 +7353,14 @@ function launchLiveMeetingRoom(meeting, stream) {
     // Attach local video stream or display avatar card
     const localVideoEl = document.getElementById("meeting-local-video");
     const avatarCardEl = document.getElementById("teams-center-avatar-card");
+    const localUserAvatar = document.getElementById("teams-user-avatar");
+    if (localUserAvatar && loggedIn) {
+      localUserAvatar.textContent = loggedIn.substring(0, 2).toUpperCase();
+    }
+    const localUserName = document.getElementById("teams-local-user-name");
+    if (localUserName && loggedIn) {
+      localUserName.textContent = `${loggedIn} (You)`;
+    }
 
     if (stream && stream.getVideoTracks().length > 0 && localVideoEl) {
       localVideoEl.srcObject = stream;
