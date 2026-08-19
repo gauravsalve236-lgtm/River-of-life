@@ -1,0 +1,96 @@
+/* River of Life v60 — additive premium UI layer
+   Intentionally overrides the existing UI without replacing the legacy design system. */
+:root{
+  --rol-ink:#0f172a;
+  --rol-muted:#64748b;
+  --rol-paper:#ffffff;
+  --rol-surface:#f8fafc;
+  --rol-border:#e2e8f0;
+  --rol-gold:#c89020;
+  --rol-gold-soft:#fff7df;
+  --rol-river:#0f766e;
+  --rol-river-soft:#e8f7f4;
+  --rol-radius:20px;
+}
+
+body{background:var(--rol-surface)}
+#app{background:linear-gradient(180deg,#fbfcfe 0%,#f5f8fb 100%)}
+.app-header{height:68px;padding:0 22px;background:rgba(255,255,255,.82);border-bottom:1px solid rgba(148,163,184,.18);box-shadow:0 4px 20px rgba(15,23,42,.04)}
+.header-selector-capsule,.selector-btn{border-radius:14px;box-shadow:0 4px 14px rgba(15,23,42,.05)}
+.header-icon-btn{border-radius:12px;color:#64748b}
+.header-icon-btn:hover{background:#f1f5f9;color:#0f172a}
+
+.view-scroll-content{max-width:1320px;margin:0 auto;padding:28px 28px 120px}
+.welcome-header-card{margin-bottom:20px}
+.greeting-text{font-size:30px;line-height:1.05;letter-spacing:-.7px;color:var(--rol-ink)}
+.date-label{letter-spacing:1.2px;color:#7c8da3}
+
+/* Shared premium surfaces */
+.settings-card-group,.profile-card,.auth-card,.guided-meditation-card,.suggested-plans-card,.touchpoints-tags-card,.bible-quiz-promo-card,.profile-badges-card-new,.profile-streak-card-new,.profile-church-btn-card{
+  border-radius:var(--rol-radius)!important;
+  border:1px solid rgba(148,163,184,.20)!important;
+  box-shadow:0 10px 28px rgba(15,23,42,.06)!important;
+}
+.settings-card-group,.profile-card,.auth-card{background:rgba(255,255,255,.92)!important}
+
+.btn-primary-block,.btn-primary-mini{border-radius:13px!important;background:linear-gradient(135deg,#d7a83b 0%,#bd8412 100%)!important;border:none!important;box-shadow:0 8px 18px rgba(189,132,18,.22)!important;color:#fff!important}
+.btn-secondary-mini,.profile-pill-btn{border-radius:12px!important}
+
+/* Home cards */
+.vod-display-card{min-height:320px;border-radius:26px;box-shadow:0 20px 42px rgba(15,23,42,.16);margin-bottom:24px}
+.vod-display-card .vod-text{font-size:22px;max-width:760px}
+.vod-pill-tag{border-radius:999px;padding:6px 12px;letter-spacing:.5px}
+
+/* Meetings hub */
+#view-meetings .welcome-header-card{background:linear-gradient(135deg,#103b39 0%,#0f766e 55%,#175e8f 100%);border-radius:24px;padding:22px 24px;color:#fff;box-shadow:0 18px 34px rgba(15,118,110,.18)}
+#view-meetings .welcome-header-card .greeting-text,#view-meetings .welcome-header-card .date-label{color:#fff}
+#view-meetings .plans-subnav-row{padding:5px;background:#fff;border:1px solid var(--rol-border);border-radius:16px;box-shadow:0 8px 20px rgba(15,23,42,.05)}
+#view-meetings .plans-subnav-btn{border:0;border-radius:11px;padding:11px 14px;font-weight:800;color:#64748b;background:transparent;transition:.2s ease}
+#view-meetings .plans-subnav-btn.active{background:#0f766e;color:#fff;box-shadow:0 6px 14px rgba(15,118,110,.2)}
+#meetings-live-list>*,#meetings-upcoming-list>*,#meetings-my-list>*,#meetings-past-list>*{border-radius:18px!important;border:1px solid var(--rol-border)!important;box-shadow:0 9px 24px rgba(15,23,42,.05)!important;background:#fff!important}
+
+/* Native meeting room */
+#modal-live-meeting{background:#0b1117!important}
+#modal-live-meeting .meeting-room-container{background:radial-gradient(circle at top,#13212a 0%,#0b1117 42%,#080d12 100%)!important}
+#modal-live-meeting .teams-top-header{height:64px!important;background:rgba(8,13,18,.86)!important;backdrop-filter:blur(18px);border-bottom:1px solid rgba(255,255,255,.08)!important}
+#modal-live-meeting .teams-control-card-panel{background:linear-gradient(180deg,rgba(8,13,18,.15),rgba(8,13,18,.95))!important;padding-top:14px!important}
+#modal-live-meeting .teams-control-card-panel>div{max-width:900px;margin:0 auto;background:rgba(23,31,39,.92)!important;border:1px solid rgba(255,255,255,.08)!important;border-radius:26px!important;box-shadow:0 18px 45px rgba(0,0,0,.45)!important}
+#river-native-meeting-stage{background:transparent!important}
+#river-video-grid{gap:14px!important;padding:18px!important}
+.river-video-tile,.meeting-participant-tile{border-radius:18px!important;overflow:hidden;box-shadow:0 14px 30px rgba(0,0,0,.26);border:1px solid rgba(255,255,255,.09)}
+.teams-grid-btn{transition:transform .18s ease,background .18s ease}
+.teams-grid-btn:hover{transform:translateY(-2px)}
+.teams-grid-btn>div{border:1px solid rgba(255,255,255,.08)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
+
+/* Prayer */
+#view-prayers .settings-card-group{margin-bottom:18px}
+#view-prayers .settings-group-label{color:#0f766e!important}
+#prayer-form textarea,#prayer-form select{border-radius:14px!important;border:1px solid #dce4ea!important;background:#fbfdfe!important}
+
+/* Bible reader */
+#view-reader .reader-pane-left{background:#fff;border:1px solid var(--rol-border);border-radius:22px;box-shadow:0 10px 28px rgba(15,23,42,.04);overflow:hidden}
+#view-reader .verses-text-layout{max-width:860px;margin:0 auto}
+#view-reader .chapter-info-badge{background:linear-gradient(135deg,#f7fbfa,#f3f7fb);border:1px solid #dfe9ea;border-radius:18px}
+#view-reader .verse-block,.verse-text,.verse-content{line-height:1.9}
+
+/* Mobile */
+@media (max-width:760px){
+  .app-header{height:58px;padding:0 12px}
+  .view-scroll-content{padding:18px 14px 105px}
+  .greeting-text{font-size:24px}
+  .vod-display-card{min-height:300px;border-radius:22px;padding:20px}
+  #view-meetings .welcome-header-card{padding:18px;border-radius:20px}
+  #view-meetings .plans-subnav-row{overflow-x:auto;scrollbar-width:none}
+  #view-meetings .plans-subnav-btn{font-size:11px;padding:10px 11px;min-width:112px}
+  #modal-live-meeting .teams-top-header{height:58px!important;padding:0 12px!important}
+  #modal-live-meeting .teams-control-card-panel{padding:8px 10px calc(12px + env(safe-area-inset-bottom,0px))!important}
+  #modal-live-meeting .teams-control-card-panel>div{border-radius:22px!important;padding:12px 8px 10px!important}
+  #modal-live-meeting .teams-grid-btn>div{width:42px!important;height:42px!important}
+  #modal-live-meeting .teams-grid-btn span{font-size:10px!important}
+}
+
+@media (min-width:1000px){
+  #view-home .view-scroll-content{display:grid;grid-template-columns:minmax(0,2fr) minmax(280px,1fr);gap:22px;align-content:start}
+  #view-home .view-scroll-content>*{min-width:0}
+  #view-home .welcome-header-card,#view-home .vod-display-card{grid-column:1/-1}
+}
