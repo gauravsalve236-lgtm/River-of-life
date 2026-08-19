@@ -1,0 +1,244 @@
+/* River of Life v64 — final live prayer meeting presentation layer */
+
+/* Global meeting surface */
+#modal-live-meeting,
+#modal-live-meeting .meeting-room-container,
+#modal-live-meeting .meeting-room,
+#modal-live-meeting [class*="meeting-room"]{
+  background:#071018!important;
+  color:#f8fafc!important;
+}
+
+#modal-live-meeting{
+  position:fixed!important;
+  inset:0!important;
+  width:100vw!important;
+  height:100dvh!important;
+  z-index:5000!important;
+  overflow:hidden!important;
+}
+
+#modal-live-meeting .meeting-room-container{
+  display:flex!important;
+  flex-direction:column!important;
+  width:100%!important;
+  height:100%!important;
+  min-width:0!important;
+  min-height:0!important;
+  overflow:hidden!important;
+  background:
+    radial-gradient(circle at 50% -15%,rgba(15,118,110,.30),transparent 34%),
+    linear-gradient(180deg,#0b1620 0%,#071018 58%,#050a0f 100%)!important;
+}
+
+/* Header */
+#modal-live-meeting .teams-top-header,
+#modal-live-meeting [class*="top-header"]{
+  position:relative!important;
+  flex:0 0 64px!important;
+  height:64px!important;
+  min-height:64px!important;
+  display:flex!important;
+  align-items:center!important;
+  padding:0 18px!important;
+  background:rgba(7,16,24,.86)!important;
+  border-bottom:1px solid rgba(255,255,255,.08)!important;
+  box-shadow:0 10px 30px rgba(0,0,0,.20)!important;
+  backdrop-filter:blur(22px)!important;
+  -webkit-backdrop-filter:blur(22px)!important;
+  z-index:100!important;
+}
+
+/* Gallery area */
+#modal-live-meeting #river-native-meeting-stage,
+#modal-live-meeting #river-video-stage,
+#modal-live-meeting [id*="meeting-stage"],
+#modal-live-meeting [class*="meeting-stage"]{
+  flex:1 1 auto!important;
+  min-width:0!important;
+  min-height:0!important;
+  width:100%!important;
+  overflow:hidden!important;
+  position:relative!important;
+  background:transparent!important;
+}
+
+#modal-live-meeting #river-video-grid,
+#modal-live-meeting [id*="video-grid"],
+#modal-live-meeting [class*="video-grid"]{
+  width:100%!important;
+  height:100%!important;
+  min-width:0!important;
+  min-height:0!important;
+  padding:18px!important;
+  gap:14px!important;
+  display:grid!important;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr))!important;
+  grid-auto-rows:minmax(150px,1fr)!important;
+  align-content:center!important;
+  overflow:auto!important;
+}
+
+#modal-live-meeting #river-video-grid > *,
+#modal-live-meeting [id*="video-grid"] > *,
+#modal-live-meeting [class*="video-grid"] > *,
+#modal-live-meeting .river-video-tile,
+#modal-live-meeting .meeting-participant-tile,
+#modal-live-meeting [class*="participant-tile"]{
+  min-width:0!important;
+  min-height:0!important;
+  width:100%!important;
+  height:100%!important;
+  aspect-ratio:16/10!important;
+  max-height:100%!important;
+  border-radius:22px!important;
+  overflow:hidden!important;
+  position:relative!important;
+  background:linear-gradient(180deg,#16232d,#0f1921)!important;
+  border:1px solid rgba(255,255,255,.12)!important;
+  box-shadow:0 14px 36px rgba(0,0,0,.32)!important;
+}
+
+#modal-live-meeting #river-video-grid > *:hover,
+#modal-live-meeting .river-video-tile:hover,
+#modal-live-meeting .meeting-participant-tile:hover{
+  border-color:rgba(255,255,255,.20)!important;
+  transform:translateY(-1px)!important;
+}
+
+#modal-live-meeting #river-video-grid video,
+#modal-live-meeting .river-video-tile video,
+#modal-live-meeting .meeting-participant-tile video,
+#modal-live-meeting video{
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
+  border-radius:inherit!important;
+}
+
+/* Active speaker / dominant tile */
+#modal-live-meeting #river-video-grid > .active-speaker,
+#modal-live-meeting #river-video-grid > .speaker-active,
+#modal-live-meeting .active-speaker,
+#modal-live-meeting .speaker-active{
+  grid-column:span 2!important;
+  grid-row:span 2!important;
+  border-color:rgba(216,170,58,.60)!important;
+  box-shadow:0 18px 46px rgba(0,0,0,.38),0 0 0 1px rgba(216,170,58,.20)!important;
+}
+
+/* Bottom control dock */
+#modal-live-meeting .teams-control-card-panel,
+#modal-live-meeting [class*="control-card-panel"]{
+  position:relative!important;
+  flex:0 0 auto!important;
+  width:100%!important;
+  padding:14px 18px calc(14px + env(safe-area-inset-bottom,0px))!important;
+  background:linear-gradient(180deg,rgba(7,16,24,.10),rgba(5,10,15,.96) 30%)!important;
+  border:0!important;
+  z-index:120!important;
+}
+
+#modal-live-meeting .teams-control-card-panel > div,
+#modal-live-meeting [class*="control-card-panel"] > div{
+  width:min(100%,1040px)!important;
+  min-height:72px!important;
+  margin:0 auto!important;
+  padding:10px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:8px!important;
+  flex-wrap:wrap!important;
+  background:rgba(19,29,38,.94)!important;
+  border:1px solid rgba(255,255,255,.10)!important;
+  border-radius:24px!important;
+  box-shadow:0 24px 60px rgba(0,0,0,.45)!important;
+  backdrop-filter:blur(20px)!important;
+  -webkit-backdrop-filter:blur(20px)!important;
+}
+
+#modal-live-meeting .teams-grid-btn,
+#modal-live-meeting button[class*="control"]{
+  min-width:56px!important;
+  min-height:56px!important;
+  border-radius:18px!important;
+}
+
+#modal-live-meeting .teams-grid-btn > div{
+  width:48px!important;
+  height:48px!important;
+  border-radius:16px!important;
+  background:rgba(255,255,255,.08)!important;
+  border:1px solid rgba(255,255,255,.08)!important;
+}
+
+/* Share-related controls */
+#modal-live-meeting [data-share-source],
+#modal-live-meeting .share-source-btn,
+#modal-live-meeting .meeting-share-btn,
+#modal-live-meeting [id*="share"] button{
+  border-radius:15px!important;
+  min-height:46px!important;
+  padding:10px 14px!important;
+  background:rgba(255,255,255,.08)!important;
+  border:1px solid rgba(255,255,255,.10)!important;
+  color:#f8fafc!important;
+  font-weight:800!important;
+}
+
+#modal-live-meeting [data-share-source].active,
+#modal-live-meeting .share-source-btn.active,
+#modal-live-meeting .meeting-share-btn.active{
+  background:#0f766e!important;
+  border-color:rgba(94,234,212,.28)!important;
+}
+
+/* Shared scripture/media surfaces */
+#modal-live-meeting .meeting-share-panel,
+#modal-live-meeting .scripture-share-panel,
+#modal-live-meeting .shared-content-panel,
+#modal-live-meeting .media-share-panel,
+#modal-live-meeting [class*="share-panel"],
+#modal-live-meeting [class*="shared-content"]{
+  width:min(92vw,920px)!important;
+  max-height:min(74vh,760px)!important;
+  overflow:auto!important;
+  border-radius:24px!important;
+  background:rgba(12,22,30,.98)!important;
+  border:1px solid rgba(255,255,255,.11)!important;
+  box-shadow:0 30px 80px rgba(0,0,0,.52)!important;
+}
+
+/* Responsive desktop */
+@media (min-width:1200px){
+  #modal-live-meeting #river-video-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+}
+
+/* Responsive tablet */
+@media (min-width:600px) and (max-width:1199px){
+  #modal-live-meeting #river-video-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;padding:12px!important;gap:12px!important}
+}
+
+/* Responsive phone */
+@media (max-width:599px){
+  #modal-live-meeting .teams-top-header{flex-basis:56px!important;height:56px!important;min-height:56px!important;padding:0 10px!important}
+  #modal-live-meeting #river-video-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-auto-rows:minmax(102px,1fr)!important;gap:8px!important;padding:8px!important;align-content:stretch!important}
+  #modal-live-meeting #river-video-grid > .active-speaker,
+  #modal-live-meeting #river-video-grid > .speaker-active,
+  #modal-live-meeting .active-speaker,
+  #modal-live-meeting .speaker-active{grid-column:1 / -1!important;grid-row:auto!important}
+  #modal-live-meeting .teams-control-card-panel,
+  #modal-live-meeting [class*="control-card-panel"]{position:absolute!important;left:0!important;right:0!important;bottom:0!important;padding:7px 7px calc(7px + env(safe-area-inset-bottom,0px))!important;background:linear-gradient(180deg,transparent,rgba(4,8,12,.96) 34%)!important}
+  #modal-live-meeting .teams-control-card-panel > div,
+  #modal-live-meeting [class*="control-card-panel"] > div{width:100%!important;min-height:64px!important;justify-content:flex-start!important;flex-wrap:nowrap!important;overflow-x:auto!important;scrollbar-width:none!important;border-radius:20px!important;padding:8px!important;gap:6px!important}
+  #modal-live-meeting .teams-control-card-panel > div::-webkit-scrollbar{display:none}
+  #modal-live-meeting .teams-grid-btn{flex:0 0 auto!important;min-width:50px!important;min-height:50px!important}
+  #modal-live-meeting .teams-grid-btn > div{width:42px!important;height:42px!important}
+}
+
+@media (max-width:390px){
+  #modal-live-meeting #river-video-grid{grid-auto-rows:minmax(92px,1fr)!important;gap:6px!important;padding:6px!important}
+  #modal-live-meeting .teams-grid-btn{min-width:46px!important}
+  #modal-live-meeting .teams-grid-btn > div{width:38px!important;height:38px!important}
+}
