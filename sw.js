@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v27-FORCE-IOS-TEAMS-CALL-UI';
+const CACHE_NAME = 'river-of-life-cache-v27-FIXED-NULL-CHECKS-v55';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
