@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v69-FORCE-CACHE-RELOAD-WHITE-SCREEN-FIX';
+const CACHE_NAME = 'river-of-life-cache-v70-RESTORED-VERSION-28-BACKUP';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
