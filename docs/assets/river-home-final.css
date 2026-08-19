@@ -1,0 +1,174 @@
+/* River of Life — Home Final Theme
+   Loaded after index.css so Home renderer gets its own layout.
+   Home-only styles. Does not style meetings/WebRTC. */
+
+.rol-home-final,
+.rol-home-final * { box-sizing: border-box; }
+
+.rol-home-final {
+  --rol-ink: #172033;
+  --rol-muted: #687386;
+  --rol-soft: #f4f7fb;
+  --rol-card: #ffffff;
+  --rol-border: rgba(25, 42, 70, .09);
+  --rol-primary: #2457d6;
+  --rol-primary-dark: #183b98;
+  --rol-accent: #d9a441;
+  --rol-shadow: 0 14px 40px rgba(27, 48, 83, .09);
+  width: 100%;
+  min-height: 100vh;
+  padding: 0 0 48px;
+  margin: 0;
+  color: var(--rol-ink);
+  background: linear-gradient(180deg, #f8fbff 0%, #f5f7fb 48%, #ffffff 100%);
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  overflow-x: hidden;
+}
+
+.rol-home-final button {
+  font: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.rol-home-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  width: 100%;
+  min-height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 14px clamp(18px, 4vw, 52px);
+  background: rgba(255,255,255,.94);
+  border-bottom: 1px solid var(--rol-border);
+  box-shadow: 0 5px 24px rgba(20,35,60,.05);
+  backdrop-filter: blur(18px);
+}
+
+.rol-brand { display:flex; align-items:center; gap:12px; min-width:0; }
+.rol-logo-mark {
+  width: 44px; height:44px; flex:0 0 44px; border-radius:14px;
+  display:grid; place-items:center; color:#fff; font-size:22px;
+  background: linear-gradient(145deg, #2d67e7, #173a97);
+  box-shadow: 0 8px 18px rgba(36,87,214,.22);
+}
+.rol-brand-text { display:flex; flex-direction:column; min-width:0; }
+.rol-brand-text strong { font-family: Outfit, Inter, sans-serif; font-size:20px; line-height:1.1; letter-spacing:-.02em; }
+.rol-brand-text small { margin-top:4px; color:var(--rol-muted); font-size:11px; letter-spacing:.03em; }
+.rol-header-actions { display:flex; gap:8px; }
+.rol-header-button {
+  width:42px; height:42px; border:1px solid var(--rol-border); border-radius:13px;
+  background:#fff; color:var(--rol-ink); cursor:pointer; display:grid; place-items:center;
+  font-size:18px; transition:transform .18s ease, box-shadow .18s ease;
+}
+.rol-header-button:hover { transform:translateY(-2px); box-shadow:0 8px 20px rgba(20,35,60,.09); }
+
+.rol-home-final > section,
+.rol-home-final > .rol-last-updated {
+  width: min(1180px, calc(100% - 32px));
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.rol-welcome {
+  position:relative; min-height:235px; margin-top:24px !important; padding:34px 38px;
+  display:flex; align-items:center; justify-content:space-between; overflow:hidden;
+  border-radius:30px;
+  background: radial-gradient(circle at 90% 20%, rgba(255,255,255,.2), transparent 28%),
+              linear-gradient(135deg, #163b98 0%, #2457d6 58%, #4382e8 100%);
+  color:#fff; box-shadow:0 22px 50px rgba(26,67,153,.18);
+}
+.rol-welcome::after { content:""; position:absolute; width:280px; height:280px; right:-80px; bottom:-150px; border:1px solid rgba(255,255,255,.14); border-radius:50%; box-shadow:0 0 0 32px rgba(255,255,255,.04), 0 0 0 64px rgba(255,255,255,.025); }
+.rol-welcome-content { position:relative; z-index:2; max-width:760px; }
+.rol-welcome-label { font-size:11px; font-weight:800; letter-spacing:.16em; opacity:.76; }
+.rol-welcome h1 { margin:10px 0 8px; font-family:Outfit,Inter,sans-serif; font-size:clamp(28px,4vw,46px); line-height:1.05; letter-spacing:-.035em; }
+.rol-welcome p { margin:0; font-size:14px; opacity:.82; }
+.rol-welcome .rol-welcome-subtitle { margin-top:8px; font-size:16px; opacity:.96; }
+.rol-cross-water { position:relative; z-index:2; width:170px; height:170px; display:grid; place-items:center; }
+.rol-cross { position:relative; z-index:3; color:rgba(255,255,255,.95); font-size:74px; text-shadow:0 8px 24px rgba(0,0,0,.18); }
+.rol-water-rings { position:absolute; inset:12px; border:1px solid rgba(255,255,255,.22); border-radius:50%; }
+.rol-water-rings span { position:absolute; inset:24px; border:1px solid rgba(255,255,255,.17); border-radius:50%; }
+.rol-water-rings span:nth-child(2) { inset:48px; }
+.rol-water-rings span:nth-child(3) { inset:68px; }
+
+.rol-verse-card {
+  position:relative; margin-top:22px !important; padding:34px 38px 26px;
+  border:1px solid rgba(36,87,214,.10); border-radius:26px; background:#fff;
+  box-shadow:var(--rol-shadow); overflow:hidden;
+}
+.rol-verse-card::before { content:""; position:absolute; top:0; left:0; right:0; height:4px; background:linear-gradient(90deg,#2457d6,#d9a441,#2457d6); }
+.rol-eyebrow { color:var(--rol-primary); font-size:11px; font-weight:800; letter-spacing:.15em; }
+.rol-verse-card blockquote { margin:20px 0 14px; max-width:980px; font-family:Lora,Georgia,serif; font-size:clamp(22px,3vw,34px); line-height:1.5; letter-spacing:-.015em; color:#202b3f; }
+.rol-reference { font-size:14px; font-weight:700; color:#59667a; }
+.rol-verse-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:22px; }
+.rol-verse-actions button { border:1px solid var(--rol-border); background:#f7f9fc; color:#273247; border-radius:12px; padding:10px 15px; font-weight:700; cursor:pointer; }
+.rol-verse-actions button:hover { background:#eef3ff; border-color:rgba(36,87,214,.22); color:var(--rol-primary-dark); }
+
+.rol-home-section { margin-top:34px !important; }
+.rol-section-heading { display:flex; align-items:end; justify-content:space-between; gap:16px; margin-bottom:14px; }
+.rol-section-kicker { display:block; margin-bottom:5px; color:var(--rol-primary); font-size:10px; font-weight:800; letter-spacing:.16em; }
+.rol-section-title { margin:0; font-family:Outfit,Inter,sans-serif; font-size:19px; line-height:1.1; letter-spacing:-.02em; }
+.rol-section-note { color:var(--rol-muted); font-size:12px; }
+
+.rol-actions-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; }
+.rol-action-card {
+  position:relative; min-height:155px; padding:20px; text-align:left; border:1px solid var(--rol-border); border-radius:20px;
+  background:#fff; box-shadow:0 8px 24px rgba(27,48,83,.055); cursor:pointer;
+  display:flex; flex-direction:column; align-items:flex-start; transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.rol-action-card:hover { transform:translateY(-4px); box-shadow:0 16px 32px rgba(27,48,83,.11); border-color:rgba(36,87,214,.2); }
+.rol-action-icon { width:48px; height:48px; display:grid; place-items:center; border-radius:15px; background:#eef3ff; font-size:25px; margin-bottom:16px; }
+.rol-action-card strong { font-size:16px; }
+.rol-action-card small { margin-top:5px; color:var(--rol-muted); font-size:12px; line-height:1.4; }
+.rol-action-arrow { position:absolute; top:19px; right:18px; color:#a2adbd; font-size:17px; }
+
+.rol-journey-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+.rol-journey-card { width:100%; min-height:98px; padding:18px 20px; display:flex; align-items:center; gap:16px; text-align:left; border:1px solid var(--rol-border); border-radius:20px; background:#fff; box-shadow:0 8px 24px rgba(27,48,83,.05); cursor:pointer; }
+.rol-journey-card:hover { border-color:rgba(36,87,214,.2); box-shadow:0 14px 28px rgba(27,48,83,.09); }
+.rol-journey-icon { width:50px; height:50px; flex:0 0 50px; display:grid; place-items:center; border-radius:15px; background:#f1f5ff; font-size:25px; }
+.rol-journey-content { flex:1; min-width:0; }
+.rol-journey-content p { margin:0; font-size:15px; font-weight:800; }
+.rol-journey-content small { display:block; margin-top:5px; color:var(--rol-muted); font-size:12px; }
+.rol-journey-card b { color:var(--rol-primary); font-size:22px; }
+
+.rol-home-message { margin-top:24px !important; padding:20px 22px; display:flex; align-items:center; gap:16px; border:1px solid rgba(217,164,65,.22); border-radius:20px; background:linear-gradient(135deg,#fffaf0,#fff); box-shadow:0 8px 24px rgba(100,70,20,.05); }
+.rol-home-message > div:first-child { width:46px; height:46px; display:grid; place-items:center; flex:0 0 46px; border-radius:14px; background:#fff1cf; font-size:22px; }
+.rol-home-message strong { font-size:14px; }
+.rol-home-message p { margin:4px 0 0; color:var(--rol-muted); font-size:12px; }
+.rol-last-updated { padding:24px 0 4px; text-align:center; color:#9aa4b2; font-size:11px; }
+
+@media (max-width: 850px) {
+  .rol-home-header { min-height:68px; padding:11px 16px; }
+  .rol-brand-text small { display:none; }
+  .rol-home-final > section,
+  .rol-home-final > .rol-last-updated { width:calc(100% - 24px); }
+  .rol-welcome { min-height:210px; padding:28px 24px; border-radius:24px; }
+  .rol-cross-water { width:120px; height:120px; }
+  .rol-cross { font-size:58px; }
+  .rol-actions-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+
+@media (max-width: 560px) {
+  .rol-home-final { padding-bottom:32px; }
+  .rol-welcome { margin-top:12px !important; padding:24px 20px; min-height:190px; }
+  .rol-welcome h1 { font-size:29px; }
+  .rol-welcome p { font-size:13px; }
+  .rol-cross-water { position:absolute; right:-16px; bottom:-12px; opacity:.8; width:130px; height:130px; }
+  .rol-verse-card { margin-top:14px !important; padding:27px 20px 20px; border-radius:20px; }
+  .rol-verse-card blockquote { font-size:21px; line-height:1.45; }
+  .rol-home-section { margin-top:27px !important; }
+  .rol-actions-grid { gap:10px; }
+  .rol-action-card { min-height:140px; padding:16px; border-radius:17px; }
+  .rol-action-icon { width:42px; height:42px; margin-bottom:12px; font-size:22px; }
+  .rol-action-card strong { font-size:14px; }
+  .rol-action-card small { font-size:11px; }
+  .rol-journey-grid { grid-template-columns:1fr; gap:10px; }
+  .rol-journey-card { min-height:86px; padding:14px; }
+  .rol-home-message { margin-top:18px !important; padding:16px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rol-action-card, .rol-header-button { transition:none; }
+}
