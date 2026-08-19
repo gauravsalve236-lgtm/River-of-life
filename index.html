@@ -6,21 +6,28 @@
   <title>River of Life - Marathi & English Bible</title>
   
   <script>
-    // Force immediate purge of any stale PWA Service Worker cache
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(function(registrations) {
-        for (let registration of registrations) {
-          registration.unregister();
+    // Force immediate hard purge of all stale Service Workers and CacheStorage
+    (function() {
+      const CURRENT_VER = "v69_FORCE_CACHE_RELOAD_WHITE_SCREEN_FIX";
+      if (localStorage.getItem("rol_app_ver") !== CURRENT_VER) {
+        localStorage.setItem("rol_app_ver", CURRENT_VER);
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(function(registrations) {
+            for (let registration of registrations) {
+              registration.unregister();
+            }
+          });
         }
-      });
-      if ('caches' in window) {
-        caches.keys().then(function(names) {
-          for (let name of names) {
-            caches.delete(name);
-          }
-        });
+        if ('caches' in window) {
+          caches.keys().then(function(names) {
+            for (let name of names) {
+              caches.delete(name);
+            }
+          });
+        }
+        window.location.reload(true);
       }
-    }
+    })();
   </script>
   
   <!-- Web App Capabilities & Icons -->
@@ -38,8 +45,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   
-  <!-- Main Stylesheet (Cache-Busted for Version 68 Safe Modal Overlay Display) -->
-  <link rel="stylesheet" href="index.css?v=68_SAFE_MODAL_OVERLAY_DISPLAY">
+  <!-- Main Stylesheet (Cache-Busted for Version 69 Force Cache Reload White Screen Fix) -->
+  <link rel="stylesheet" href="index.css?v=69_FORCE_CACHE_RELOAD_WHITE_SCREEN_FIX">
 
   <!-- Official LiveKit WebRTC Client SDK -->
   <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.0.8/dist/livekit-client.umd.min.js"></script>
@@ -2626,8 +2633,8 @@
     }
   </script>
 
-  <!-- App Main Logic (Cache-Busted for Version 68 Safe Modal Overlay Display) -->
-  <script src="app.js?v=68_SAFE_MODAL_OVERLAY_DISPLAY"></script>
+  <!-- App Main Logic (Cache-Busted for Version 69 Force Cache Reload White Screen Fix) -->
+  <script src="app.js?v=69_FORCE_CACHE_RELOAD_WHITE_SCREEN_FIX"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 2.5s no matter what

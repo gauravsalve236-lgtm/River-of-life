@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v68-SAFE-MODAL-OVERLAY-DISPLAY';
+const CACHE_NAME = 'river-of-life-cache-v69-FORCE-CACHE-RELOAD-WHITE-SCREEN-FIX';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
