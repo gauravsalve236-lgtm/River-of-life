@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v60-VISIBILITY-VISIBLE-FIX';
+const CACHE_NAME = 'river-of-life-cache-v61-UNCONDITIONAL-CACHE-WIPE';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

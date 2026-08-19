@@ -38,8 +38,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   
-  <!-- Main Stylesheet (Cache-Busted for Version 60 Visibility Visible Fix) -->
-  <link rel="stylesheet" href="index.css?v=60_VISIBILITY_VISIBLE_FIX">
+  <!-- Main Stylesheet (Cache-Busted for Version 61 Unconditional Cache Wipe) -->
+  <link rel="stylesheet" href="index.css?v=61_UNCONDITIONAL_CACHE_WIPE">
 
   <!-- Official LiveKit WebRTC Client SDK -->
   <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.0.8/dist/livekit-client.umd.min.js"></script>
@@ -2555,7 +2555,7 @@
     </div>
 
   <script>
-    // Force unregister old service worker cache on mobile devices
+    // Force unregister old service worker and purge ALL caches unconditionally
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(function(registrations) {
         for(let registration of registrations) {
@@ -2566,16 +2566,14 @@
     if ('caches' in window) {
       caches.keys().then(function(names) {
         for (let name of names) {
-          if (!name.includes('v27_FORCE_IOS_TEAMS_CALL_UI')) {
-            caches.delete(name);
-          }
+          caches.delete(name);
         }
       });
     }
   </script>
 
-  <!-- App Main Logic (Cache-Busted for Version 60 Visibility Visible Fix) -->
-  <script src="app.js?v=60_VISIBILITY_VISIBLE_FIX"></script>
+  <!-- App Main Logic (Cache-Busted for Version 61 Unconditional Cache Wipe) -->
+  <script src="app.js?v=61_UNCONDITIONAL_CACHE_WIPE"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 2.5s no matter what
