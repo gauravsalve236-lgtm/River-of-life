@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v64-DISMISS-OVERLAYS-BEFORE-JOIN';
+const CACHE_NAME = 'river-of-life-cache-v65-INSTANT-STAGE-LAUNCH';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

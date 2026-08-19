@@ -7295,22 +7295,29 @@ function triggerJoinMeetingFlow(meetingId) {
 
   showToast("Entering Online Video Fellowship Room 🙏");
 
+  // Instantly open meeting room gallery grid stage
+  launchLiveMeetingRoom(m, null);
+
+  // Asynchronously request camera & mic stream and update local tile
   if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
     navigator.mediaDevices.getUserMedia({ video: true, audio: true })
       .then(fullStream => {
-        launchLiveMeetingRoom(m, fullStream);
+        const localVideoEl = document.getElementById("meeting-local-video");
+        const avatarCardEl = document.getElementById("teams-center-avatar-card");
+        if (localVideoEl) {
+          localVideoEl.srcObject = fullStream;
+          localVideoEl.style.display = "block";
+          if (avatarCardEl) avatarCardEl.style.display = "none";
+        }
+        if (activeMeetingSession) activeMeetingSession.localStream = fullStream;
       })
       .catch(err => {
         navigator.mediaDevices.getUserMedia({ audio: true })
           .then(audioStream => {
-            launchLiveMeetingRoom(m, audioStream);
+            if (activeMeetingSession) activeMeetingSession.localStream = audioStream;
           })
-          .catch(audioErr => {
-            launchLiveMeetingRoom(m, null);
-          });
+          .catch(audioErr => {});
       });
-  } else {
-    launchLiveMeetingRoom(m, null);
   }
 }
 
