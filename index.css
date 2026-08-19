@@ -5883,12 +5883,16 @@ body.meeting-modal-open .mobile-bottom-tabs,
 #modal-live-meeting[style*="display: flex"],
 #modal-live-meeting[style*="display:block"] {
   display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
   flex-direction: column !important;
   justify-content: space-between !important;
 }
 
 #modal-live-meeting:not(.active):not([style*="display: flex"]) {
   display: none !important;
+  visibility: hidden !important;
 }
 
 .meeting-room-container {
