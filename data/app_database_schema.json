@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "purpose": "River of Life shared application data model",
+  "collections": {
+    "users": {
+      "id": "uuid",
+      "fullName": "string",
+      "email": "string",
+      "phone": "string|null",
+      "photoUrl": "string|null",
+      "language": "en|mr|both",
+      "createdAt": "timestamp",
+      "lastLoginAt": "timestamp",
+      "preferences": {"dailyVerseEnabled":"boolean","dailyVerseLanguage":"en|mr|both","notificationsEnabled":"boolean"},
+      "stats": {"quizAttempts":"number","quizBestScore":"number","versesSaved":"number"}
+    },
+    "userProfiles": {"userId":"uuid","displayName":"string","bio":"string|null","church":"string|null","city":"string|null","role":"member|host|admin"},
+    "quizAttempts": {"id":"uuid","userId":"uuid","quizId":"string","score":"number","total":"number","completedAt":"timestamp"},
+    "quizQuestionHistory": {"id":"uuid","userId":"uuid","questionId":"string","shownAt":"timestamp","answeredCorrectly":"boolean"},
+    "dailyVerses": {"id":"string","date":"YYYY-MM-DD","reference":"string","english":"string","marathi":"string|null","shareText":"string|null"},
+    "savedVerses": {"id":"uuid","userId":"uuid","verseId":"string","savedAt":"timestamp"},
+    "prayerRequests": {"id":"uuid","userId":"uuid","title":"string","request":"string","status":"open|answered|archived","createdAt":"timestamp"},
+    "meetings": {"id":"uuid","hostId":"uuid","title":"string","description":"string|null","startAt":"timestamp","endAt":"timestamp","status":"scheduled|live|completed|cancelled","invitedUserIds":"uuid[]","createdAt":"timestamp","updatedAt":"timestamp"},
+    "notifications": {"id":"uuid","userId":"uuid","type":"meeting|prayer|verse|system","title":"string","body":"string","read":"boolean","createdAt":"timestamp"}
+  },
+  "security": {
+    "passwords": "never store passwords in this application database; use a managed authentication provider",
+    "users": "authenticated users may read/update their own profile and personal records",
+    "meetings": "hosts may manage their own meetings; invited users may read invited meetings",
+    "admin": "admin-only access for global management"
+  }
+}
