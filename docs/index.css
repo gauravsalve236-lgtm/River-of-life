@@ -5867,22 +5867,28 @@ body.meeting-modal-open .mobile-bottom-tabs,
 }
 
 /* Fail-Safe Dark Theme for Meeting Room Modal (Prevents Blank White Screen on Windows & Mobile) */
-#modal-live-meeting,
-.meeting-room-container,
-#river-native-meeting-stage,
-#river-video-grid {
+#modal-live-meeting {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100dvh !important;
   background-color: #111318 !important;
   background: #111318 !important;
   color: #ffffff !important;
+  z-index: 999999 !important;
+  overflow: hidden !important;
 }
 
-/* MS Teams Mobile Call View & Control Panel Styling */
-#modal-live-meeting[style*="display: block"],
+#modal-live-meeting.active,
 #modal-live-meeting[style*="display: flex"],
-#modal-live-meeting.active {
+#modal-live-meeting[style*="display:block"] {
   display: flex !important;
   flex-direction: column !important;
   justify-content: space-between !important;
+}
+
+#modal-live-meeting:not(.active):not([style*="display: flex"]) {
+  display: none !important;
 }
 
 .meeting-room-container {

@@ -7291,15 +7291,6 @@ function triggerJoinMeetingFlow(meetingId) {
   const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
   const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&autojoin=true&p2p=true&codec=opus&layout=grid&grid=1&name=${encodeURIComponent(loggedIn)}`;
 
-  // Detect iOS (iPhone/iPad) to bypass WebKit iframe microphone blocking and popup blocker
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  if (isIOS) {
-    logAudioDebug("iOS Device detected. Directing to native top-level call window...", { roomUrl });
-    showToast("Opening iOS Video Room (Mic & Speaker Active) 🙏");
-    window.location.href = roomUrl;
-    return;
-  }
-
   logAudioDebug("getUserMedia started for meeting join...", { meetingId });
   showToast("Requesting Microphone & Camera access...");
   
@@ -7340,10 +7331,9 @@ function launchLiveMeetingRoom(meeting, stream) {
     // Lock screen view overlay (MS Teams Mobile View)
     const roomModal = document.getElementById("modal-live-meeting");
     if (roomModal) {
-      roomModal.style.display = "flex";
-      setTimeout(() => {
-        roomModal.classList.add("active");
-      }, 10);
+      roomModal.style.setProperty("display", "flex", "important");
+      roomModal.classList.add("active");
+      document.body.classList.add("meeting-modal-open");
     }
     
     // Setup room title & speaker display name

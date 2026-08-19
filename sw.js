@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v58-PURGE-PWA-SW';
+const CACHE_NAME = 'river-of-life-cache-v59-FIXED-MODAL-WHITE-SCREEN';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
