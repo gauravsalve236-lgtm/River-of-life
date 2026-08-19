@@ -15,25 +15,26 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Inject redesign stylesheet into GitHub Pages
+      - name: Inject responsive redesign stylesheets into GitHub Pages
         shell: bash
         run: |
           set -euo pipefail
           target="docs/index.html"
-          marker='redesign.css?v=60_ROL_PREMIUM'
+          marker='responsive.css?v=61_ROL_RESPONSIVE'
           if grep -q "$marker" "$target"; then
-            echo "Redesign already injected."
+            echo "Responsive redesign already injected."
             exit 0
           fi
           python - <<'PY'
           from pathlib import Path
           p = Path('docs/index.html')
           s = p.read_text(encoding='utf-8')
-          needle = '<link rel="stylesheet" href="index.css?v=58_PURGE_PWA_SW">'
-          replacement = needle + '\n  <link rel="stylesheet" href="redesign.css?v=60_ROL_PREMIUM">'
-          if needle not in s:
-              raise SystemExit('Target stylesheet tag not found; refusing to modify index.html')
-          p.write_text(s.replace(needle, replacement, 1), encoding='utf-8')
+          redesign = '<link rel="stylesheet" href="redesign.css?v=60_ROL_PREMIUM">'
+          responsive = '<link rel="stylesheet" href="responsive.css?v=61_ROL_RESPONSIVE">'
+          if redesign not in s:
+              raise SystemExit('Existing redesign stylesheet tag not found; refusing to modify index.html')
+          s = s.replace(redesign, redesign + '\n  ' + responsive, 1)
+          p.write_text(s, encoding='utf-8')
           PY
 
       - name: Commit published page change
@@ -47,5 +48,5 @@ jobs:
             echo 'No changes to commit.'
             exit 0
           fi
-          git commit -m 'Publish River of Life premium redesign [redesign-publish]'
+          git commit -m 'Publish River of Life responsive layout [redesign-publish]'
           git push
