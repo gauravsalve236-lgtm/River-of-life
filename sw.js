@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v27-FIXED-NULL-CHECKS-v55';
+const CACHE_NAME = 'river-of-life-cache-v56-NATIVE-VIDEO-STAGE';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

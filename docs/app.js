@@ -7303,33 +7303,25 @@ function triggerJoinMeetingFlow(meetingId) {
   logAudioDebug("getUserMedia started for meeting join...", { meetingId });
   showToast("Requesting Microphone & Camera access...");
   
-  // Explicitly request audio FIRST to force mobile browsers (Android Chrome / Desktop) to display Microphone Permission Dialog
-  navigator.mediaDevices.getUserMedia({ audio: true })
-    .then(audioStream => {
-      logAudioDebug("Microphone permission granted by user!", {
-        audioTracks: audioStream.getAudioTracks().map(t => ({ id: t.id, label: t.label, enabled: t.enabled, readyState: t.readyState }))
+  navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+    .then(fullStream => {
+      logAudioDebug("Microphone & Camera permission granted!", {
+        audioTracks: fullStream.getAudioTracks().length,
+        videoTracks: fullStream.getVideoTracks().length
       });
-
-      // Stop parent frame pre-check tracks so hardware mic device lock is released before iframe initialization
-      if (audioStream && audioStream.getTracks) {
-        audioStream.getTracks().forEach(t => t.stop());
-        logAudioDebug("Parent frame audio tracks released for exclusive iframe hardware capture.");
-      }
-
-      // Also attempt joint video request
-      navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-        .then(fullStream => {
-          if (fullStream && fullStream.getTracks) fullStream.getTracks().forEach(t => t.stop());
-          launchLiveMeetingRoom(m, null);
-        })
-        .catch(() => {
-          launchLiveMeetingRoom(m, null);
-        });
+      launchLiveMeetingRoom(m, fullStream);
     })
     .catch(err => {
-      logAudioDebug("Microphone permission denied or unavailable on mobile:", err);
-      showToast("Microphone permission denied. Joining in listen mode.");
-      launchLiveMeetingRoom(m, null);
+      logAudioDebug("Camera access denied or unavailable, trying audio-only...", err);
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(audioStream => {
+          launchLiveMeetingRoom(m, audioStream);
+        })
+        .catch(audioErr => {
+          logAudioDebug("Microphone permission denied or unavailable on mobile:", audioErr);
+          showToast("Microphone permission denied. Joining in listen mode.");
+          launchLiveMeetingRoom(m, null);
+        });
     });
 }
 
@@ -7368,6 +7360,19 @@ function launchLiveMeetingRoom(meeting, stream) {
       avatarEl.textContent = loggedIn.charAt(0).toUpperCase();
     }
 
+    // Attach local video stream or display avatar card
+    const localVideoEl = document.getElementById("meeting-local-video");
+    const avatarCardEl = document.getElementById("teams-center-avatar-card");
+
+    if (stream && stream.getVideoTracks().length > 0 && localVideoEl) {
+      localVideoEl.srcObject = stream;
+      localVideoEl.style.display = "block";
+      if (avatarCardEl) avatarCardEl.style.display = "none";
+    } else {
+      if (localVideoEl) localVideoEl.style.display = "none";
+      if (avatarCardEl) avatarCardEl.style.display = "flex";
+    }
+
     // Hide top header and bottom tabs
     const header = document.querySelector(".app-header");
     if (header) header.style.display = "none";
@@ -7387,43 +7392,6 @@ function launchLiveMeetingRoom(meeting, stream) {
       isCamOff: false,
       isHost: isHost
     };
-
-    // Load Verified WebRTC Video Conference Room with Exclusive Hardware Access for All Participants
-    const jitsiCont = document.getElementById("meeting-jitsi-container");
-    if (jitsiCont) {
-      jitsiCont.style.display = "none"; // Keep native MS Teams Mobile Stage & Controls 100% visible!
-      const meetingIdSlug = (meeting && meeting.id) ? meeting.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
-      const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
-      
-      // Low-latency Opus P2P parameters for zero audio delay on Android & Desktop
-      const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&autojoin=true&p2p=true&codec=opus&layout=grid&grid=1&name=${encodeURIComponent(loggedIn)}`;
-      
-      // Initialize Native LiveKit Video Tiles
-      try {
-        if (window.nativeLiveKitMeetingManager && window.nativeLiveKitMeetingManager.joinNativeMeeting) {
-          window.nativeLiveKitMeetingManager.joinNativeMeeting(roomSlug, loggedIn);
-        }
-      } catch(e) {}
-
-      jitsiCont.innerHTML = `
-        <iframe 
-          id="webrtc-room-iframe"
-          src="${roomUrl}" 
-          width="100%" 
-          height="100%" 
-          allow="camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; accelerometer; gyroscope;" 
-          allowusermedia="true"
-          style="border: none; width: 100%; height: 100%; border-radius: 18px; background: #090d16;"
-          onerror="this.parentElement.style.display='none';"
-        >
-        </iframe>
-      `;
-
-      logAudioDebug("WebRTC Room iframe mounted with low-latency Opus audio parameters.", {
-        roomUrl,
-        isIOS
-      });
-    }
 
     // Auto-enumerate devices for settings drawer
     enumerateAndPopulateAudioDevices();

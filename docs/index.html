@@ -2054,9 +2054,12 @@
         <div id="river-native-meeting-stage" style="flex: 1; width: 100%; min-height: 0; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0b0c10; box-sizing: border-box;">
           
           <!-- Native Video Tile Grid (Responsive Teams Grid) -->
-          <div id="river-video-grid" class="river-video-grid" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; position: relative; z-index: 2;">
-            <!-- Single active speaker center avatar or video grid -->
-            <div class="teams-single-avatar-card" style="display: flex; flex-direction: column; align-items: center; gap: 16px;">
+          <div id="river-video-grid" class="river-video-grid" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; position: relative; z-index: 2; padding: 16px; box-sizing: border-box;">
+            <!-- Live Local Camera Feed Video Element -->
+            <video id="meeting-local-video" autoplay playsinline muted style="display: none; width: 100%; height: 100%; max-height: 100%; object-fit: cover; border-radius: 16px; background: #000;"></video>
+            
+            <!-- Teams Avatar Stage Card (Displayed when camera is off or audio-only) -->
+            <div id="teams-center-avatar-card" class="teams-single-avatar-card" style="display: flex; flex-direction: column; align-items: center; gap: 16px;">
               <div style="position: relative; width: 130px; height: 130px; border-radius: 50%; padding: 4px; background: linear-gradient(135deg, #6366f1, #a855f7); box-shadow: 0 0 30px rgba(168, 85, 247, 0.3);">
                 <div style="width: 100%; height: 100%; border-radius: 50%; background: #1e1b4b; display: flex; align-items: center; justify-content: center; font-size: 42px; font-weight: 800; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.5);" id="teams-center-avatar">
                   ✝️
@@ -2065,9 +2068,6 @@
               <span id="teams-center-speaker-name" style="font-size: 17px; font-weight: 700; color: #f8fafc; letter-spacing: 0.2px;">Pastor John / River Sanctuary</span>
             </div>
           </div>
-
-          <!-- Embedded Fallback Iframe Container -->
-          <div id="meeting-jitsi-container" style="display: none; width: 100%; height: 100%; position: absolute; inset: 0; z-index: 5;"></div>
         </div>
 
         <!-- MS Teams Style Dark Control Card Panel at Bottom -->
@@ -2557,7 +2557,7 @@
   </script>
 
   <!-- App Main Logic (Cache-Busted for Version 27 Force iOS Teams Call UI) -->
-  <script src="app.js?v=27_FIXED_NULL_CHECKS_v55"></script>
+  <script src="app.js?v=56_NATIVE_VIDEO_STAGE"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 2.5s no matter what
