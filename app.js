@@ -7273,6 +7273,7 @@ function generateICSFile(meeting) {
 
 // Trigger Joining Flow (Camera preview checks)
 function triggerJoinMeetingFlow(meetingId) {
+  try { closeAllDrawers(); } catch(e) {}
   const meetings = getMeetingsFromStorage();
   let m = meetings.find(x => x.id === meetingId || x.id == meetingId);
   if (!m) {
