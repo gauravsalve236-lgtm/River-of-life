@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bg_dark">#0B0F19</color>
+    <color name="card_bg">#1E293B</color>
+    <color name="primary_dark">#0F172A</color>
+    <color name="primary_gold">#FFD700</color>
+    <string name="app_name">River of Life Bible</string>
+    <style name="Theme.RiverOfLife" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/primary_gold</item>
+        <item name="colorPrimaryVariant">@color/primary_dark</item>
+        <item name="colorOnPrimary">#000000</item>
+        <item name="android:windowBackground">@color/bg_dark</item>
+        <item name="android:statusBarColor">@color/bg_dark</item>
+    </style>
+</resources>

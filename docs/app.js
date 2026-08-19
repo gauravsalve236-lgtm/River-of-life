@@ -7485,67 +7485,68 @@ function exitLiveMeetingRoom() {
 
 function setupMeetingRoomControls() {
   // Mic toggle
-  document.getElementById("btn-meet-mic").addEventListener("click", () => {
-    if (!activeMeetingSession) activeMeetingSession = { isMuted: false, isCamOff: false };
-    activeMeetingSession.isMuted = !activeMeetingSession.isMuted;
-    
-    const btn = document.getElementById("btn-meet-mic");
-    btn.classList.toggle("muted", activeMeetingSession.isMuted);
-    
-    const statusEl = document.getElementById("meeting-local-mic-status");
-    if (statusEl) statusEl.textContent = activeMeetingSession.isMuted ? "🔇" : "🎙️";
+  const btnMic = document.getElementById("btn-meet-mic");
+  if (btnMic) {
+    btnMic.addEventListener("click", () => {
+      if (!activeMeetingSession) activeMeetingSession = { isMuted: false, isCamOff: false };
+      activeMeetingSession.isMuted = !activeMeetingSession.isMuted;
+      btnMic.classList.toggle("muted", activeMeetingSession.isMuted);
+      
+      const statusEl = document.getElementById("meeting-local-mic-status");
+      if (statusEl) statusEl.textContent = activeMeetingSession.isMuted ? "🔇" : "🎙️";
 
-    if (activeJitsiAPIInstance) {
-      activeJitsiAPIInstance.executeCommand("toggleAudio");
-    }
-    showToast(activeMeetingSession.isMuted ? "Microphone Muted" : "Microphone Active");
-  });
+      if (activeJitsiAPIInstance) {
+        activeJitsiAPIInstance.executeCommand("toggleAudio");
+      }
+      showToast(activeMeetingSession.isMuted ? "Microphone Muted" : "Microphone Active");
+    });
+  }
 
   // Video Camera toggle
-  document.getElementById("btn-meet-video").addEventListener("click", () => {
-    if (!activeMeetingSession) activeMeetingSession = { isMuted: false, isCamOff: false };
-    activeMeetingSession.isCamOff = !activeMeetingSession.isCamOff;
+  const btnVideo = document.getElementById("btn-meet-video");
+  if (btnVideo) {
+    btnVideo.addEventListener("click", () => {
+      if (!activeMeetingSession) activeMeetingSession = { isMuted: false, isCamOff: false };
+      activeMeetingSession.isCamOff = !activeMeetingSession.isCamOff;
+      btnVideo.classList.toggle("muted", activeMeetingSession.isCamOff);
 
-    const btn = document.getElementById("btn-meet-video");
-    btn.classList.toggle("muted", activeMeetingSession.isCamOff);
+      const videoEl = document.getElementById("meeting-local-video");
+      const avatarEl = document.getElementById("video-cell-local-avatar");
+      const loggedIn = state.currentUser ? state.currentUser.username : "Guest";
 
-    const videoEl = document.getElementById("meeting-local-video");
-    const avatarEl = document.getElementById("video-cell-local-avatar");
-    const loggedIn = state.currentUser ? state.currentUser.username : "Guest";
-
-    if (activeMeetingSession.isCamOff) {
-      if (videoEl) videoEl.style.display = "none";
-      if (avatarEl) {
-        avatarEl.style.display = "flex";
-        avatarEl.textContent = loggedIn.substring(0, 1).toUpperCase();
-      }
-    } else {
-      if (videoEl && activeMeetingSession.localStream) {
-        videoEl.style.display = "block";
-        if (avatarEl) avatarEl.style.display = "none";
+      if (activeMeetingSession.isCamOff) {
+        if (videoEl) videoEl.style.display = "none";
+        if (avatarEl) {
+          avatarEl.style.display = "flex";
+          avatarEl.textContent = loggedIn.substring(0, 1).toUpperCase();
+        }
       } else {
-        // Retry capturing stream
-        navigator.mediaDevices.getUserMedia({ video: true })
-          .then(str => {
-            activeMeetingSession.localStream = str;
-            if (videoEl) {
-              videoEl.srcObject = str;
-              videoEl.style.display = "block";
-            }
-            if (avatarEl) avatarEl.style.display = "none";
-          })
-          .catch(e => {
-            showToast("Camera blocked in settings.");
-            activeMeetingSession.isCamOff = true;
-            btn.classList.add("muted");
-          });
+        if (videoEl && activeMeetingSession.localStream) {
+          videoEl.style.display = "block";
+          if (avatarEl) avatarEl.style.display = "none";
+        } else {
+          navigator.mediaDevices.getUserMedia({ video: true })
+            .then(str => {
+              activeMeetingSession.localStream = str;
+              if (videoEl) {
+                videoEl.srcObject = str;
+                videoEl.style.display = "block";
+              }
+              if (avatarEl) avatarEl.style.display = "none";
+            })
+            .catch(e => {
+              showToast("Camera blocked in settings.");
+              activeMeetingSession.isCamOff = true;
+              btnVideo.classList.add("muted");
+            });
+        }
       }
-    }
 
-    if (activeJitsiAPIInstance) {
-      activeJitsiAPIInstance.executeCommand("toggleVideo");
-    }
-  });
+      if (activeJitsiAPIInstance) {
+        activeJitsiAPIInstance.executeCommand("toggleVideo");
+      }
+    });
+  }
 
   // Screen / Media Sharing Drawer Trigger
   const shareBtnEl = document.getElementById("btn-meet-screenshare");
@@ -7576,43 +7577,42 @@ function setupMeetingRoomControls() {
     });
   }
 
-  function stopLocalScreenShare() {
-    stopAllMediaSharing();
+  // Chat Panel toggle
+  const btnChat = document.getElementById("btn-meet-chat");
+  if (btnChat) {
+    btnChat.addEventListener("click", () => {
+      toggleMeetingSidebar("chat");
+    });
   }
 
-
-  // Chat Panel toggle
-  document.getElementById("btn-meet-chat").addEventListener("click", () => {
-    toggleMeetingSidebar("chat");
-  });
-
   // Hand raise toggle
-  document.getElementById("btn-meet-hand").addEventListener("click", () => {
-    const btn = document.getElementById("btn-meet-hand");
-    const isRaised = btn.classList.toggle("active");
-    const loggedIn = state.currentUser ? state.currentUser.username : "You";
-    
-    appendMeetingChatMessage("SYSTEM", isRaised ? `✋ You raised hand` : `You lowered hand`, true);
-    
-    // Send message trigger if Jitsi Meet is active
-    if (activeJitsiAPIInstance) {
-      activeJitsiAPIInstance.executeCommand("sendChatMessage", isRaised ? "✋ [Raised Hand]" : "[Lowered Hand]", true);
-    }
-  });
+  const btnHand = document.getElementById("btn-meet-hand");
+  if (btnHand) {
+    btnHand.addEventListener("click", () => {
+      const isRaised = btnHand.classList.toggle("active");
+      appendMeetingChatMessage("SYSTEM", isRaised ? `✋ You raised hand` : `You lowered hand`, true);
+      if (activeJitsiAPIInstance) {
+        activeJitsiAPIInstance.executeCommand("sendChatMessage", isRaised ? "✋ [Raised Hand]" : "[Lowered Hand]", true);
+      }
+    });
+  }
 
   // Reactions panel toggle
-  document.getElementById("btn-meet-reactions").addEventListener("click", (e) => {
-    e.stopPropagation();
-    const panel = document.getElementById("meet-reactions-select-panel");
-    const isHidden = panel.style.display === "none";
-    panel.style.display = isHidden ? "flex" : "none";
-    
-    // Position panel relative to toolbar
-    const toolbar = document.querySelector(".meeting-room-toolbar");
-    if (toolbar) {
-      panel.style.bottom = `${toolbar.offsetHeight + 10}px`;
-    }
-  });
+  const btnReactions = document.getElementById("btn-meet-reactions");
+  if (btnReactions) {
+    btnReactions.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const panel = document.getElementById("meet-reactions-select-panel");
+      if (panel) {
+        const isHidden = panel.style.display === "none";
+        panel.style.display = isHidden ? "flex" : "none";
+        const toolbar = document.querySelector(".meeting-room-toolbar");
+        if (toolbar) {
+          panel.style.bottom = `${toolbar.offsetHeight + 10}px`;
+        }
+      }
+    });
+  }
 
   document.addEventListener("click", () => {
     const panel = document.getElementById("meet-reactions-select-panel");
@@ -7624,8 +7624,6 @@ function setupMeetingRoomControls() {
     btn.addEventListener("click", () => {
       const r = btn.dataset.reaction;
       triggerMeetingReaction(r);
-      
-      // Simulate/Broadcast reaction
       if (activeJitsiAPIInstance) {
         activeJitsiAPIInstance.executeCommand("sendChatMessage", `Reacted: ${r}`, true);
       }
@@ -7633,48 +7631,71 @@ function setupMeetingRoomControls() {
   });
 
   // Prayer Request submission in meeting triggers
-  document.getElementById("btn-meet-prayer").addEventListener("click", () => {
-    openModal("drawer-meet-prayer-request");
-  });
+  const btnPrayer = document.getElementById("btn-meet-prayer");
+  if (btnPrayer) {
+    btnPrayer.addEventListener("click", () => {
+      openModal("drawer-meet-prayer-request");
+    });
+  }
   
-  document.getElementById("btn-close-meet-prayer-request").addEventListener("click", () => {
-    closeModal("drawer-meet-prayer-request");
-  });
+  const btnClosePrayer = document.getElementById("btn-close-meet-prayer-request");
+  if (btnClosePrayer) {
+    btnClosePrayer.addEventListener("click", () => {
+      closeModal("drawer-meet-prayer-request");
+    });
+  }
 
-  document.getElementById("meet-prayer-form").addEventListener("submit", (e) => {
-    e.preventDefault();
-    const text = document.getElementById("meet-prayer-text").value.trim();
-    const privacy = document.getElementById("meet-prayer-privacy").value;
-    
-    if (!text) return;
+  const formPrayer = document.getElementById("meet-prayer-form");
+  if (formPrayer) {
+    formPrayer.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const textEl = document.getElementById("meet-prayer-text");
+      const privEl = document.getElementById("meet-prayer-privacy");
+      const text = textEl ? textEl.value.trim() : "";
+      const privacy = privEl ? privEl.value : "public";
+      
+      if (!text) return;
 
-    submitPrayerRequest(text, privacy === "public");
-    closeModal("drawer-meet-prayer-request");
-    document.getElementById("meet-prayer-text").value = "";
-    
-    appendMeetingChatMessage("SYSTEM", `🙏 Submitted live prayer request: "${text}"`, true);
-    showToast("Live Prayer Request submitted successfully!");
-  });
+      submitPrayerRequest(text, privacy === "public");
+      closeModal("drawer-meet-prayer-request");
+      if (textEl) textEl.value = "";
+      
+      appendMeetingChatMessage("SYSTEM", `🙏 Submitted live prayer request: "${text}"`, true);
+      showToast("Live Prayer Request submitted successfully!");
+    });
+  }
 
   // Participants Panel toggle
-  document.getElementById("btn-meet-members").addEventListener("click", () => {
-    toggleMeetingSidebar("participants");
-  });
+  const btnMembers = document.getElementById("btn-meet-members");
+  if (btnMembers) {
+    btnMembers.addEventListener("click", () => {
+      toggleMeetingSidebar("participants");
+    });
+  }
 
   // Bible Mode Panel toggle
-  document.getElementById("btn-meet-bible").addEventListener("click", () => {
-    toggleMeetingSidebar("bible");
-  });
+  const btnBible = document.getElementById("btn-meet-bible");
+  if (btnBible) {
+    btnBible.addEventListener("click", () => {
+      toggleMeetingSidebar("bible");
+    });
+  }
 
   // Worship Mode Panel toggle
-  document.getElementById("btn-meet-worship").addEventListener("click", () => {
-    toggleMeetingSidebar("worship");
-  });
+  const btnWorship = document.getElementById("btn-meet-worship");
+  if (btnWorship) {
+    btnWorship.addEventListener("click", () => {
+      toggleMeetingSidebar("worship");
+    });
+  }
 
   // Host Settings Panel toggle
-  document.getElementById("btn-meet-moderator").addEventListener("click", () => {
-    toggleMeetingSidebar("host");
-  });
+  const btnModerator = document.getElementById("btn-meet-moderator");
+  if (btnModerator) {
+    btnModerator.addEventListener("click", () => {
+      toggleMeetingSidebar("host");
+    });
+  }
 
   // Chat message send handler
   const sendChatBtn = document.getElementById("btn-meeting-chat-send");
@@ -7700,81 +7721,108 @@ function setupMeetingRoomControls() {
   }
 
   // Sidebar close btn bind
-  document.getElementById("btn-close-meeting-sidebar").onclick = () => {
-    document.getElementById("meeting-sidebar-panel").style.display = "none";
-  };
+  const btnCloseSidebar = document.getElementById("btn-close-meeting-sidebar");
+  if (btnCloseSidebar) {
+    btnCloseSidebar.onclick = () => {
+      const sidebarPanel = document.getElementById("meeting-sidebar-panel");
+      if (sidebarPanel) sidebarPanel.style.display = "none";
+    };
+  }
 
   // Leave Call
-  document.getElementById("btn-meet-leave").onclick = () => {
-    if (confirm("Are you sure you want to leave this meeting?")) {
-      exitLiveMeetingRoom();
-    }
-  };
+  const btnLeave = document.getElementById("btn-meet-leave");
+  if (btnLeave) {
+    btnLeave.onclick = () => {
+      if (confirm("Are you sure you want to leave this meeting?")) {
+        exitLiveMeetingRoom();
+      }
+    };
+  }
 
   // Host mute all button trigger
-  document.getElementById("btn-host-mute-all").onclick = () => {
-    showToast("Pastor John muted all participants.");
-    appendMeetingChatMessage("SYSTEM", "🔇 Moderator muted all participant microphones", false);
-  };
+  const btnHostMuteAll = document.getElementById("btn-host-mute-all");
+  if (btnHostMuteAll) {
+    btnHostMuteAll.onclick = () => {
+      showToast("Pastor John muted all participants.");
+      appendMeetingChatMessage("SYSTEM", "🔇 Moderator muted all participant microphones", false);
+    };
+  }
 
   // Host lock meeting toggle
   let isMeetingLocked = false;
-  document.getElementById("btn-host-lock-meeting").onclick = () => {
-    isMeetingLocked = !isMeetingLocked;
-    const btnText = document.getElementById("btn-host-lock-meeting").querySelector("span");
-    btnText.textContent = isMeetingLocked ? "Unlock Meeting" : "Lock Meeting";
-    showToast(isMeetingLocked ? "Meeting Room Locked" : "Meeting Room Unlocked");
-    appendMeetingChatMessage("SYSTEM", isMeetingLocked ? "🔒 Meeting has been locked by Host" : "🔓 Meeting has been unlocked by Host", false);
-  };
+  const btnHostLock = document.getElementById("btn-host-lock-meeting");
+  if (btnHostLock) {
+    btnHostLock.onclick = () => {
+      isMeetingLocked = !isMeetingLocked;
+      const btnText = btnHostLock.querySelector("span");
+      if (btnText) btnText.textContent = isMeetingLocked ? "Unlock Meeting" : "Lock Meeting";
+      showToast(isMeetingLocked ? "Meeting Room Locked" : "Meeting Room Unlocked");
+      appendMeetingChatMessage("SYSTEM", isMeetingLocked ? "🔒 Meeting has been locked by Host" : "🔓 Meeting has been unlocked by Host", false);
+    };
+  }
 
   // Host toggle recording trigger
   let isMeetingRecording = false;
-  document.getElementById("btn-host-toggle-record").onclick = () => {
-    isMeetingRecording = !isMeetingRecording;
-    
-    const recordBtn = document.getElementById("btn-host-toggle-record");
-    const recordText = document.getElementById("host-record-btn-text");
-    const overlayTag = document.getElementById("meeting-recording-alert");
+  const btnHostRecord = document.getElementById("btn-host-toggle-record");
+  if (btnHostRecord) {
+    btnHostRecord.onclick = () => {
+      isMeetingRecording = !isMeetingRecording;
+      const recordText = document.getElementById("host-record-btn-text");
+      const overlayTag = document.getElementById("meeting-recording-alert");
 
-    if (isMeetingRecording) {
-      recordBtn.style.background = "#ef4444";
-      recordBtn.style.color = "#fff";
-      recordText.textContent = "Stop Recording";
-      overlayTag.style.display = "inline-block";
-      showToast("🔴 Recording started. Participants notified.");
-      appendMeetingChatMessage("SYSTEM", "🔴 This meeting is being recorded.", false);
-    } else {
-      recordBtn.style.background = "rgba(239, 68, 68, 0.1)";
-      recordBtn.style.color = "var(--danger)";
-      recordText.textContent = "Start Recording";
-      overlayTag.style.display = "none";
-      showToast("Recording saved to history.");
-    }
-  };
+      if (isMeetingRecording) {
+        btnHostRecord.style.background = "#ef4444";
+        btnHostRecord.style.color = "#fff";
+        if (recordText) recordText.textContent = "Stop Recording";
+        if (overlayTag) overlayTag.style.display = "inline-block";
+        showToast("🔴 Recording started. Participants notified.");
+        appendMeetingChatMessage("SYSTEM", "🔴 This meeting is being recorded.", false);
+      } else {
+        btnHostRecord.style.background = "rgba(239, 68, 68, 0.1)";
+        btnHostRecord.style.color = "var(--danger)";
+        if (recordText) recordText.textContent = "Start Recording";
+        if (overlayTag) overlayTag.style.display = "none";
+        showToast("Recording saved to history.");
+      }
+    };
+  }
 
   // Host End Meeting for everyone
-  document.getElementById("btn-host-end-meeting").onclick = () => {
-    if (confirm("End this meeting session for all church members?")) {
-      exitLiveMeetingRoom();
-    }
-  };
+  const btnHostEnd = document.getElementById("btn-host-end-meeting");
+  if (btnHostEnd) {
+    btnHostEnd.onclick = () => {
+      if (confirm("End this meeting session for all church members?")) {
+        exitLiveMeetingRoom();
+      }
+    };
+  }
 
   // Bible select synchronizer triggers
-  document.getElementById("btn-sync-bible-verse").onclick = () => {
-    const bookVal = document.getElementById("meeting-bible-book").value;
-    const chapVal = document.getElementById("meeting-bible-chapter").value;
-    const verseVal = document.getElementById("meeting-bible-verse").value;
-    const transVal = document.getElementById("meeting-bible-trans").value;
+  const btnSyncBible = document.getElementById("btn-sync-bible-verse");
+  if (btnSyncBible) {
+    btnSyncBible.onclick = () => {
+      const bookEl = document.getElementById("meeting-bible-book");
+      const chapEl = document.getElementById("meeting-bible-chapter");
+      const verseEl = document.getElementById("meeting-bible-verse");
+      const transEl = document.getElementById("meeting-bible-trans");
 
-    syncSharedBiblePassage(bookVal, chapVal, verseVal, transVal);
-  };
+      const bookVal = bookEl ? bookEl.value : "GEN";
+      const chapVal = chapEl ? chapEl.value : "1";
+      const verseVal = verseEl ? verseEl.value : "1";
+      const transVal = transEl ? transEl.value : "MARVBSI";
+
+      syncSharedBiblePassage(bookVal, chapVal, verseVal, transVal);
+    };
+  }
 
   // Quick song worship embeds triggers
   document.querySelectorAll(".quick-song-btn").forEach(btn => {
     btn.onclick = () => {
       const url = btn.dataset.url;
-      document.getElementById("worship-youtube-url").value = url;
-      const mode = document.getElementById("worship-youtube-mode").value || "audio";
+      const urlInput = document.getElementById("worship-youtube-url");
+      const modeEl = document.getElementById("worship-youtube-mode");
+      if (urlInput) urlInput.value = url;
+      const mode = modeEl ? modeEl.value || "audio" : "audio";
       if (activeMeetingSession) {
         broadcastMeetingEvent(activeMeetingSession.meetingId, {
           type: "PLAY_YOUTUBE",
@@ -7787,21 +7835,26 @@ function setupMeetingRoomControls() {
     };
   });
 
-  document.getElementById("btn-sync-worship-video").onclick = () => {
-    const url = document.getElementById("worship-youtube-url").value.trim();
-    if (url) {
-      const mode = document.getElementById("worship-youtube-mode").value || "audio";
-      if (activeMeetingSession) {
-        broadcastMeetingEvent(activeMeetingSession.meetingId, {
-          type: "PLAY_YOUTUBE",
-          url: url,
-          mode: mode
-        });
-      } else {
-        syncSharedWorshipVideo(url, mode);
+  const btnSyncWorship = document.getElementById("btn-sync-worship-video");
+  if (btnSyncWorship) {
+    btnSyncWorship.onclick = () => {
+      const urlInput = document.getElementById("worship-youtube-url");
+      const modeEl = document.getElementById("worship-youtube-mode");
+      const url = urlInput ? urlInput.value.trim() : "";
+      if (url) {
+        const mode = modeEl ? modeEl.value || "audio" : "audio";
+        if (activeMeetingSession) {
+          broadcastMeetingEvent(activeMeetingSession.meetingId, {
+            type: "PLAY_YOUTUBE",
+            url: url,
+            mode: mode
+          });
+        } else {
+          syncSharedWorshipVideo(url, mode);
+        }
       }
-    }
-  };
+    };
+  }
 }
 
 // Slide-out Drawer view routing inside call
