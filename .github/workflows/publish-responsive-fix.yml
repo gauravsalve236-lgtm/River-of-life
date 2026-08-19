@@ -1,0 +1,51 @@
+name: Publish River of Life responsive desktop fix
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  inject-fix:
+    if: "!contains(github.event.head_commit.message, '[responsive-fix-publish]')"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Inject desktop composition fix
+        shell: bash
+        run: |
+          set -euo pipefail
+          target="docs/index.html"
+          marker='responsive-fix.css?v=62_ROL_DESKTOP_FIX'
+          if grep -q "$marker" "$target"; then
+            echo "Responsive desktop fix already injected."
+            exit 0
+          fi
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('docs/index.html')
+          s = p.read_text(encoding='utf-8')
+          anchor = '<link rel="stylesheet" href="responsive.css?v=61_ROL_RESPONSIVE">'
+          fix = '<link rel="stylesheet" href="responsive-fix.css?v=62_ROL_DESKTOP_FIX">'
+          if anchor not in s:
+              raise SystemExit('Responsive stylesheet tag not found; refusing to modify index.html')
+          p.write_text(s.replace(anchor, anchor + '\n  ' + fix, 1), encoding='utf-8')
+          PY
+
+      - name: Commit published fix
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/index.html
+          if git diff --cached --quiet; then
+            echo 'No changes to commit.'
+            exit 0
+          fi
+          git commit -m 'Publish River of Life desktop responsive fix [responsive-fix-publish]'
+          git push
