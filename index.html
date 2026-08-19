@@ -21,8 +21,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- Main Stylesheet -->
-  <!-- Main Stylesheet (Cache-Busted for Version 73 Single Bottom Menu Body Has Fix) -->
-  <link rel="stylesheet" href="index.css?v=73_SINGLE_BOTTOM_MENU_BODY_HAS_FIX">
+  <!-- Main Stylesheet (Cache-Busted for Version 74 Removed Floating Meeting Toolbar) -->
+  <link rel="stylesheet" href="index.css?v=74_REMOVED_FLOATING_MEETING_TOOLBAR">
 
   <!-- Official LiveKit WebRTC Client SDK -->
   <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.0.8/dist/livekit-client.umd.min.js"></script>
@@ -2043,8 +2043,8 @@
             <button id="btn-meeting-audio-settings" onclick="openDrawer('drawer-meet-audio-settings')" style="padding: 6px 12px; border-radius: 18px; font-size: 11px; font-weight: 700; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #fff; cursor: pointer; display: flex; align-items: center; gap: 4px;">
               ⚙️ <span>Audio</span>
             </button>
-            <button id="btn-meeting-leave-top" onclick="exitLiveMeetingRoom()" style="padding: 6px 14px; border-radius: 18px; font-size: 11px; font-weight: 800; background: #dc2626; border: 1px solid #ef4444; color: #fff; cursor: pointer; display: flex; align-items: center; gap: 4px;" title="Leave Meeting">
-              🚪 <span>Leave</span>
+            <button id="btn-meeting-leave-top" onclick="exitLiveMeetingRoom()" style="padding: 7px 14px; border-radius: 18px; font-size: 12px; font-weight: 800; background: linear-gradient(135deg, #dc2626, #ef4444); border: none; color: #fff; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(239,68,68,0.4);" title="End Meeting">
+              <span>🚪 End Call / सभा सोडा</span>
             </button>
           </div>
         </div>
@@ -2055,39 +2055,6 @@
           <!-- Native Video Tile Grid -->
           <div id="river-video-grid" class="river-video-grid">
             <!-- Dynamically populated with .river-video-tile elements -->
-          </div>
-
-          <!-- Native Floating Control Toolbar (Google Meet / Teams Style) -->
-          <div id="river-meet-toolbar" class="river-meet-toolbar">
-            <button id="btn-river-mic" class="river-tool-btn" onclick="toggleNativeMic()" title="Toggle Microphone">
-              <span class="tool-icon" id="river-icon-mic">🎤</span>
-              <span class="tool-label" id="river-label-mic">Mic</span>
-            </button>
-
-            <button id="btn-river-cam" class="river-tool-btn" onclick="toggleNativeCam()" title="Toggle Camera">
-              <span class="tool-icon" id="river-icon-cam">📹</span>
-              <span class="tool-label" id="river-label-cam">Cam</span>
-            </button>
-
-            <button id="btn-river-screenshare" class="river-tool-btn" onclick="toggleNativeScreenShare()" title="Share Screen">
-              <span class="tool-icon" id="river-icon-share">🖥️</span>
-              <span class="tool-label">Share</span>
-            </button>
-
-            <button id="btn-river-hand" class="river-tool-btn" onclick="toggleNativeHand()" title="Raise Hand">
-              <span class="tool-icon" id="river-icon-hand">✋</span>
-              <span class="tool-label" id="river-label-hand">Hand</span>
-            </button>
-
-            <button id="btn-river-more" class="river-tool-btn" onclick="openDrawer('drawer-meet-more')" title="More Options">
-              <span class="tool-icon">⋮</span>
-              <span class="tool-label">More</span>
-            </button>
-
-            <button id="btn-river-leave" class="river-tool-btn danger" onclick="exitLiveMeetingRoom()" title="Leave Meeting">
-              <span class="tool-icon">🚪</span>
-              <span class="tool-label">Leave</span>
-            </button>
           </div>
 
           <!-- Embedded Fallback Iframe Container for compatibility -->
@@ -2425,8 +2392,8 @@
       <span id="toast-message">Copied to clipboard!</span>
     </div>
 
-  <!-- App Main Logic (Cache-Busted for Version 73 Single Bottom Menu Body Has Fix) -->
-  <script src="app.js?v=73_SINGLE_BOTTOM_MENU_BODY_HAS_FIX"></script>
+  <!-- App Main Logic (Cache-Busted for Version 74 Removed Floating Meeting Toolbar) -->
+  <script src="app.js?v=74_REMOVED_FLOATING_MEETING_TOOLBAR"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 2.5s no matter what

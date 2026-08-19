@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v73-SINGLE-BOTTOM-MENU-BODY-HAS-FIX';
+const CACHE_NAME = 'river-of-life-cache-v74-REMOVED-FLOATING-MEETING-TOOLBAR';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
