@@ -1,0 +1,42 @@
+name: Apply River of Life brand theme
+
+on:
+  push:
+    paths:
+      - 'assets/river-of-life-theme.css'
+      - '.github/workflows/apply-brand-theme.yml'
+      - 'data/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply-theme:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Inject theme import into index.css
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('index.css')
+          text = p.read_text(encoding='utf-8')
+          imp = '@import url("assets/river-of-life-theme.css?v=1");'
+          if imp not in text:
+              p.write_text(imp + '\n\n' + text, encoding='utf-8')
+              print('Theme import added.')
+          else:
+              print('Theme already present.')
+
+      - name: Commit theme wiring
+        run: |
+          git config user.name "River of Life Design Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add index.css
+          git diff --cached --quiet && exit 0
+          git commit -m "Apply River of Life premium home theme"
+          git push
