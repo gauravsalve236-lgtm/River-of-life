@@ -5795,3 +5795,17 @@ input, textarea, select, [contenteditable="true"] {
   opacity: 0 !important;
   pointer-events: none !important;
 }
+
+/* Hard Hide Mobile Bottom Tabs inside active Meeting Room Modal (Prevents Double Bottom Bar) */
+body.meeting-modal-open .mobile-bottom-tabs,
+body:has(#modal-live-meeting.active) .mobile-bottom-tabs,
+#modal-live-meeting.active ~ .mobile-bottom-tabs {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}

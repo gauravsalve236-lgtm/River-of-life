@@ -7348,10 +7348,8 @@ function launchLiveMeetingRoom(meeting, stream) {
     // Lock screen view overlay
     const roomModal = document.getElementById("modal-live-meeting");
     if (roomModal) {
-      roomModal.style.display = "block";
-      setTimeout(() => {
-        roomModal.classList.add("active");
-      }, 10);
+      roomModal.classList.add("active");
+      document.body.classList.add("meeting-modal-open");
     }
     
     // Setup room title
@@ -7435,22 +7433,12 @@ function exitLiveMeetingRoom() {
   try {
     console.log("Exiting Live Fellowship Meeting Room...");
     
-    // Hide Modal Overlay
+    // Hide Modal Overlay & Restore Body Class
     const roomModal = document.getElementById("modal-live-meeting");
     if (roomModal) {
       roomModal.classList.remove("active");
-      setTimeout(() => {
-        roomModal.style.display = "none";
-      }, 200);
+      document.body.classList.remove("meeting-modal-open");
     }
-    
-    // Restore Top App Header and Mobile Bottom Tabs
-    const header = document.querySelector(".app-header");
-    if (header) header.style.display = "flex";
-    const tabs = document.querySelector(".mobile-bottom-tabs");
-    if (tabs) tabs.style.display = "flex";
-    const sidebar = document.querySelector(".desktop-sidebar");
-    if (sidebar) sidebar.style.display = "flex";
 
     // Cleanly terminate Video Room Iframe
     const jitsiCont = document.getElementById("meeting-jitsi-container");
