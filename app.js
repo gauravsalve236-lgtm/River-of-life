@@ -7375,14 +7375,6 @@ function launchLiveMeetingRoom(meeting, stream) {
       if (avatarCardEl) avatarCardEl.style.display = "flex";
     }
 
-    // Hide top header and bottom tabs
-    const header = document.querySelector(".app-header");
-    if (header) header.style.display = "none";
-    const tabs = document.querySelector(".mobile-bottom-tabs");
-    if (tabs) tabs.style.display = "none";
-    const sidebar = document.querySelector(".desktop-sidebar");
-    if (sidebar) sidebar.style.display = "none";
-    
     if (meeting && meeting.id) {
       try { subscribeToMeetingEvents(meeting.id); } catch(e) {}
     }
@@ -7418,18 +7410,8 @@ function exitLiveMeetingRoom() {
     const roomModal = document.getElementById("modal-live-meeting");
     if (roomModal) {
       roomModal.classList.remove("active");
-      setTimeout(() => {
-        roomModal.style.display = "none";
-      }, 200);
+      document.body.classList.remove("meeting-modal-open");
     }
-    
-    // Restore Top App Header and Mobile Bottom Tabs
-    const header = document.querySelector(".app-header");
-    if (header) header.style.display = "flex";
-    const tabs = document.querySelector(".mobile-bottom-tabs");
-    if (tabs) tabs.style.display = "flex";
-    const sidebar = document.querySelector(".desktop-sidebar");
-    if (sidebar) sidebar.style.display = "flex";
 
     // Cleanly terminate Video Room Iframe
     const jitsiCont = document.getElementById("meeting-jitsi-container");
