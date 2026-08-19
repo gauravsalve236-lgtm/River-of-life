@@ -7345,29 +7345,25 @@ function launchLiveMeetingRoom(meeting, stream) {
       participant: loggedIn
     });
     
-    // Lock screen view overlay (MS Teams Mobile View)
+    // Lock screen view overlay
     const roomModal = document.getElementById("modal-live-meeting");
     if (roomModal) {
-      roomModal.style.display = "flex";
+      roomModal.style.display = "block";
       setTimeout(() => {
         roomModal.classList.add("active");
       }, 10);
     }
     
-    // Setup room title & speaker display name
+    // Setup room title
     const titleEl = document.getElementById("meeting-room-title-display");
     if (titleEl && meeting && meeting.title) {
       titleEl.textContent = meeting.title;
     }
-    const speakerEl = document.getElementById("teams-center-speaker-name");
-    if (speakerEl) {
-      speakerEl.textContent = loggedIn ? `${loggedIn} (River Sanctuary)` : "River Sanctuary Worship";
+    const legacyTitle = document.getElementById("meeting-room-title");
+    if (legacyTitle && meeting && meeting.title) {
+      legacyTitle.textContent = meeting.title;
     }
-    const avatarEl = document.getElementById("teams-center-avatar");
-    if (avatarEl && loggedIn) {
-      avatarEl.textContent = loggedIn.charAt(0).toUpperCase();
-    }
-
+  
     // Hide top header and bottom tabs
     const header = document.querySelector(".app-header");
     if (header) header.style.display = "none";
@@ -7391,19 +7387,22 @@ function launchLiveMeetingRoom(meeting, stream) {
     // Load Verified WebRTC Video Conference Room with Exclusive Hardware Access for All Participants
     const jitsiCont = document.getElementById("meeting-jitsi-container");
     if (jitsiCont) {
-      jitsiCont.style.display = "none"; // Keep native MS Teams Mobile Stage & Controls 100% visible!
+      jitsiCont.style.display = "block";
       const meetingIdSlug = (meeting && meeting.id) ? meeting.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
       const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
       
-      // Low-latency Opus P2P parameters for zero audio delay on Android & Desktop
+      // Low-latency Opus P2P parameters for zero audio delay on Android & Desktop: audio=true&video=true&mic=true&cam=true&muted=false&sound=true&autojoin=true&p2p=true&codec=opus
       const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&autojoin=true&p2p=true&codec=opus&layout=grid&grid=1&name=${encodeURIComponent(loggedIn)}`;
       
-      // Initialize Native LiveKit Video Tiles
-      try {
-        if (window.nativeLiveKitMeetingManager && window.nativeLiveKitMeetingManager.joinNativeMeeting) {
-          window.nativeLiveKitMeetingManager.joinNativeMeeting(roomSlug, loggedIn);
-        }
-      } catch(e) {}
+      // Detect iOS (iPhone/iPad) to bypass WebKit iframe microphone blocking
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      if (isIOS) {
+        logAudioDebug("iOS Device detected (Apple WebKit Iframe Restriction). Launching native top-level call window...");
+        showToast("Opening iOS Video Room (Mic & Speaker Active) 🙏");
+        try {
+          window.open(roomUrl, "_blank");
+        } catch(e) {}
+      }
 
       jitsiCont.innerHTML = `
         <iframe 
@@ -7413,15 +7412,15 @@ function launchLiveMeetingRoom(meeting, stream) {
           height="100%" 
           allow="camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; accelerometer; gyroscope;" 
           allowusermedia="true"
-          style="border: none; width: 100%; height: 100%; border-radius: 18px; background: #090d16;"
-          onerror="this.parentElement.style.display='none';"
-        >
+          style="border: none; width: 100%; height: 100%; border-radius: 18px; background: #090d16;">
         </iframe>
       `;
 
       logAudioDebug("WebRTC Room iframe mounted with low-latency Opus audio parameters.", {
         roomUrl,
-        isIOS
+        isIOS,
+        allowPermissions: "camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; accelerometer; gyroscope;",
+        allowusermedia: "true"
       });
     }
 
@@ -9064,15 +9063,6 @@ window.nativeLiveKitMeetingManager = {
     if (label) label.textContent = this.isMuted ? "Muted" : "Mic";
     if (btn) btn.classList.toggle("active-off", this.isMuted);
     if (badgeMic) badgeMic.textContent = this.isMuted ? "🔇" : "🎙️";
-
-    const teamsMicBox = document.getElementById("teams-btn-mic-box");
-    const teamsMicLbl = document.getElementById("teams-lbl-mic");
-    if (teamsMicBox) {
-      teamsMicBox.textContent = this.isMuted ? "🔇" : "🎙️";
-      teamsMicBox.style.background = this.isMuted ? "#ef4444" : "rgba(255,255,255,0.08)";
-    }
-    if (teamsMicLbl) teamsMicLbl.textContent = this.isMuted ? "Mic off" : "Mic on";
-
     showToast(this.isMuted ? "Microphone Muted 🔇" : "Microphone Active 🎤");
   },
 
@@ -9093,15 +9083,6 @@ window.nativeLiveKitMeetingManager = {
     if (icon) icon.textContent = this.isCamOff ? "📷" : "📹";
     if (label) label.textContent = this.isCamOff ? "Cam Off" : "Cam";
     if (btn) btn.classList.toggle("active-off", this.isCamOff);
-
-    const teamsCamBox = document.getElementById("teams-btn-cam-box");
-    const teamsCamLbl = document.getElementById("teams-lbl-cam");
-    if (teamsCamBox) {
-      teamsCamBox.textContent = this.isCamOff ? "📷" : "📹";
-      teamsCamBox.style.background = this.isCamOff ? "rgba(255,255,255,0.08)" : "#3b82f6";
-    }
-    if (teamsCamLbl) teamsCamLbl.textContent = this.isCamOff ? "Video off" : "Video on";
-
     showToast(this.isCamOff ? "Camera Turned Off 📷" : "Camera Active 📹");
   },
 
@@ -9172,6 +9153,21 @@ window.nativeLiveKitMeetingManager = {
     container.scrollTop = container.scrollHeight;
   },
 
+  // 7b. Toggle Raised Hand
+  toggleHand() {
+    this.isHandRaised = !this.isHandRaised;
+    const btn = document.getElementById("btn-river-hand");
+    const icon = document.getElementById("river-icon-hand");
+    const label = document.getElementById("river-label-hand");
+    if (btn) btn.classList.toggle("active-gold", this.isHandRaised);
+    if (icon) icon.textContent = this.isHandRaised ? "✋" : "🖐️";
+    if (label) label.textContent = this.isHandRaised ? "Raised" : "Hand";
+    
+    const loggedIn = (state && state.currentUser) ? state.currentUser.username : "You";
+    this.addChatMessage("SYSTEM", this.isHandRaised ? `✋ ${loggedIn} raised hand` : `${loggedIn} lowered hand`);
+    showToast(this.isHandRaised ? "Hand Raised 🖐️" : "Hand Lowered");
+  },
+
   // 9. Host Control Functions
   muteAllParticipants() {
     showToast("Host muted all participants 🤐");
@@ -9186,6 +9182,7 @@ window.nativeLiveKitMeetingManager = {
 window.toggleNativeMic = () => window.nativeLiveKitMeetingManager.toggleMic();
 window.toggleNativeCam = () => window.nativeLiveKitMeetingManager.toggleCam();
 window.toggleNativeScreenShare = () => window.nativeLiveKitMeetingManager.toggleScreenShare();
+window.toggleNativeHand = () => window.nativeLiveKitMeetingManager.toggleHand();
 window.sendNativeMeetingChatMessage = (e) => {
   if (e) e.preventDefault();
   const input = document.getElementById("river-chat-input");
@@ -9197,114 +9194,3 @@ window.sendNativeMeetingChatMessage = (e) => {
 };
 window.hostMuteAllParticipants = () => window.nativeLiveKitMeetingManager.muteAllParticipants();
 window.hostEndMeetingForEveryone = () => window.nativeLiveKitMeetingManager.endMeetingForEveryone();
-
-// MutationObserver to auto-hide mobile bottom tabs during live meetings
-document.addEventListener("DOMContentLoaded", function() {
-  const meetingModal = document.getElementById("modal-live-meeting");
-  const bottomTabs = document.querySelector(".mobile-bottom-tabs");
-  
-  if (meetingModal && bottomTabs) {
-    const observer = new MutationObserver(() => {
-      const isVisible = meetingModal.style.display !== "none" && meetingModal.style.display !== "";
-      if (isVisible) {
-        bottomTabs.style.setProperty("display", "none", "important");
-        bottomTabs.classList.add("hidden-in-meeting");
-        document.body.classList.add("meeting-modal-open");
-      } else {
-        bottomTabs.style.display = "flex";
-        bottomTabs.classList.remove("hidden-in-meeting");
-        document.body.classList.remove("meeting-modal-open");
-      }
-    });
-    observer.observe(meetingModal, { attributes: true, attributeFilter: ["style", "class"] });
-  }
-});
-
-// Direct Meeting Exit without review prompts
-window.exitLiveMeetingRoomDirectly = function() {
-  try {
-    if (window.activeJitsiAPIInstance) {
-      try { window.activeJitsiAPIInstance.dispose(); } catch(e) {}
-    }
-  } catch(e) {}
-  
-  document.body.classList.remove("meeting-modal-open");
-  const tabs = document.querySelector(".mobile-bottom-tabs");
-  if (tabs) {
-    tabs.classList.remove("hidden-in-meeting");
-    tabs.style.display = "flex";
-  }
-
-  const modal = document.getElementById("modal-live-meeting");
-  if (modal) {
-    modal.classList.remove("active");
-    modal.style.display = "none";
-  }
-  
-  // Show top header
-  const header = document.querySelector(".app-header");
-  if (header) header.style.display = "flex";
-  
-  showToast("Left meeting 🙏");
-};
-
-// Share YouTube Video or Audio URL in Meeting
-window.shareYouTubeOrAudioLink = function() {
-  const urlInput = document.getElementById("meet-youtube-url-input");
-  if (!urlInput || !urlInput.value.trim()) {
-    showToast("Please enter a YouTube video or Audio URL.");
-    return;
-  }
-  const url = urlInput.value.trim();
-  closeDrawer("drawer-meet-share-hub");
-  showToast(`Sharing video/audio track: ${url} 📺`);
-  
-  if (window.activeJitsiAPIInstance && window.activeJitsiAPIInstance.executeCommand) {
-    try {
-      window.activeJitsiAPIInstance.executeCommand('startShareVideo', url);
-    } catch(e) {}
-  }
-};
-
-// Share Bible Chapter/Verse in Meeting
-window.shareBibleVerseToMeeting = function() {
-  const verseSelect = document.getElementById("meet-share-bible-book");
-  const selectedVerse = verseSelect ? verseSelect.value : "John 3:16";
-  closeDrawer("drawer-meet-share-hub");
-  showToast(`Broadcasting ${selectedVerse} to meeting 🙏`);
-  
-  const loggedIn = (state && state.currentUser) ? state.currentUser.username : "Member";
-  if (window.nativeLiveKitMeetingManager) {
-    window.nativeLiveKitMeetingManager.addChatMessage("📖 BIBLE BROADCAST", `${loggedIn} shared ${selectedVerse}`);
-  }
-};
-
-// Copy Meeting Invite Link Helper
-window.copyMeetingInviteLink = function() {
-  const link = `${window.location.origin}${window.location.pathname}#/meetings?room=River_Sanctuary_Main_Fellowship`;
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(link).then(() => {
-      showToast("Meeting invite link copied to clipboard! 📋");
-    }).catch(() => {
-      fallbackCopyInviteLink(link);
-    });
-  } else {
-    fallbackCopyInviteLink(link);
-  }
-};
-
-function fallbackCopyInviteLink(text) {
-  const textarea = document.createElement("textarea");
-  textarea.value = text;
-  textarea.style.position = "fixed";
-  textarea.style.opacity = "0";
-  document.body.appendChild(textarea);
-  textarea.select();
-  try {
-    document.execCommand('copy');
-    showToast("Meeting invite link copied! 📋");
-  } catch (err) {
-    showToast(`Invite Link: ${text}`);
-  }
-  document.body.removeChild(textarea);
-}
