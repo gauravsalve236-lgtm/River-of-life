@@ -1,0 +1,134 @@
+/* River of Life v61 — responsive layout layer
+   Makes the existing app adapt to desktop, laptop, tablet, Android and iPhone sizes. */
+
+html,body{width:100%;min-width:0;overflow-x:hidden}
+body{min-height:100dvh}
+#app,.main-layout-container,.content-view-viewport{width:100%;max-width:100vw;min-width:0}
+.main-layout-container{flex:1;min-width:0}
+.app-view,.app-view.active{max-width:100%;min-width:0}
+.view-scroll-content{width:100%;max-width:1320px;margin:0 auto;min-width:0;overflow-x:hidden;padding-left:clamp(14px,3vw,32px);padding-right:clamp(14px,3vw,32px)}
+
+/* Prevent flex/grid children from forcing horizontal overflow. */
+.main-layout-container>* , .view-scroll-content>* , .header-left>* , .header-center>* , .header-right>*{min-width:0;max-width:100%}
+.header-selector-capsule{max-width:100%;overflow:hidden}
+.capsule-text-btn{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* Desktop / laptop: use the available width instead of fixed content dimensions. */
+@media (min-width:900px){
+  .desktop-sidebar{display:flex!important;flex:0 0 220px;width:220px;min-width:220px;height:100%;overflow:hidden;flex-direction:column;background:rgba(255,255,255,.94);border-right:1px solid rgba(148,163,184,.18)}
+  .sidebar-nav{overflow-y:auto;overflow-x:hidden}
+  .content-view-viewport{min-width:0}
+  .view-scroll-content{max-width:1320px}
+}
+
+@media (min-width:900px) and (max-width:1199px){
+  .desktop-sidebar{flex-basis:180px;width:180px;min-width:180px}
+  .desktop-sidebar .nav-item{padding:11px 12px;font-size:13px}
+  .view-scroll-content{padding-top:22px;padding-bottom:100px}
+  .greeting-text{font-size:27px}
+}
+
+@media (min-width:1200px){
+  .view-scroll-content{padding-top:30px;padding-bottom:110px}
+}
+
+/* Tablet: compact top bar and flexible cards. */
+@media (min-width:600px) and (max-width:899px){
+  .desktop-sidebar{display:none!important}
+  .view-scroll-content{padding-top:22px;padding-bottom:100px}
+  .app-header{height:62px;padding:0 16px}
+  .header-icon-btn{width:38px;height:38px}
+  .vod-display-card{min-height:280px}
+  .settings-card-group,.profile-card,.guided-meditation-card{width:100%;max-width:100%}
+}
+
+/* Phones: stack everything vertically and keep all controls reachable. */
+@media (max-width:599px){
+  .desktop-sidebar{display:none!important}
+  .main-layout-container{height:100dvh}
+  .app-header{height:58px;min-height:58px;padding:0 10px;position:relative}
+  .content-view-viewport{height:calc(100dvh - 58px)}
+  .view-scroll-content{padding:16px 12px calc(88px + env(safe-area-inset-bottom,0px));}
+
+  .header-left,.header-right{gap:4px}
+  .header-center{min-width:0;overflow:hidden}
+  .header-selector-capsule{height:36px;padding:2px 4px;max-width:56vw}
+  .capsule-icon-btn,.capsule-text-btn{font-size:12px;padding:6px 8px}
+  .header-icon-btn{width:36px;height:36px}
+
+  .welcome-header-card{display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+  .greeting-text{font-size:24px;line-height:1.15}
+  .date-label{font-size:11px}
+  .streak-pill{align-self:flex-start}
+
+  .vod-display-card{min-height:280px;padding:18px;border-radius:20px}
+  .vod-display-card .vod-text{font-size:19px;line-height:1.5}
+  .vod-social-row{gap:12px;flex-wrap:wrap}
+
+  /* Generic rows become horizontal scrollers instead of overflowing the viewport. */
+  .plans-subnav-row,.chip-row,.filter-row,.tabs-row{max-width:100%;overflow-x:auto;overflow-y:hidden;flex-wrap:nowrap!important;scrollbar-width:none}
+  .plans-subnav-row::-webkit-scrollbar,.chip-row::-webkit-scrollbar,.filter-row::-webkit-scrollbar,.tabs-row::-webkit-scrollbar{display:none}
+  .plans-subnav-btn{flex:0 0 auto}
+
+  /* Cards and forms */
+  .settings-card-group,.profile-card,.auth-card,.guided-meditation-card,.suggested-plans-card,.touchpoints-tags-card,.bible-quiz-promo-card,.profile-badges-card-new,.profile-streak-card-new,.profile-church-btn-card{width:100%;max-width:100%}
+  input,select,textarea,button{max-width:100%}
+  #prayer-form textarea,#prayer-form select{width:100%}
+
+  /* Bible reader */
+  #view-reader .verses-text-layout{max-width:none;width:100%}
+  #view-reader .reader-pane-left{width:100%;max-width:100%;border-radius:18px}
+  #view-reader .verse-block,#view-reader .verse-text,#view-reader .verse-content{font-size:clamp(17px,4.5vw,21px);line-height:1.85;overflow-wrap:anywhere}
+
+  /* Home grid must become one clean column on phones. */
+  #view-home .view-scroll-content{display:block!important}
+  #view-home .view-scroll-content>*{width:100%;max-width:100%}
+
+  /* Meeting room controls: keep the bottom control rail inside the safe area. */
+  #modal-live-meeting{inset:0!important;width:100vw!important;height:100dvh!important;max-width:100vw!important;max-height:100dvh!important}
+  #modal-live-meeting .meeting-room-container{width:100%;height:100%;min-width:0}
+  #modal-live-meeting .teams-top-header{height:56px!important;min-height:56px!important;padding:0 10px!important;gap:8px}
+  #modal-live-meeting .teams-control-card-panel{position:absolute!important;left:0;right:0;bottom:0;padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px))!important;z-index:30}
+  #modal-live-meeting .teams-control-card-panel>div{width:100%;max-width:none!important;margin:0!important;border-radius:20px!important;padding:9px 6px!important;overflow-x:auto}
+  #modal-live-meeting .teams-grid-btn{flex:0 0 auto!important}
+  #modal-live-meeting .teams-grid-btn>div{width:42px!important;height:42px!important}
+  #modal-live-meeting .teams-grid-btn span{font-size:9px!important;white-space:nowrap}
+  #river-native-meeting-stage{position:absolute!important;inset:56px 0 86px 0!important;min-height:0!important}
+  #river-video-grid{width:100%!important;height:100%!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:minmax(0,1fr);gap:8px!important;padding:8px!important;overflow:auto!important;align-content:stretch}
+  .river-video-tile,.meeting-participant-tile{min-width:0;min-height:0;border-radius:14px!important}
+}
+
+/* Narrow iPhone / Android widths. */
+@media (max-width:390px){
+  .view-scroll-content{padding-left:10px;padding-right:10px}
+  .header-selector-capsule{max-width:52vw}
+  .capsule-icon-btn,.capsule-text-btn{padding-left:6px;padding-right:6px;font-size:11px}
+  .greeting-text{font-size:22px}
+  .vod-display-card{min-height:255px;padding:15px}
+  .vod-display-card .vod-text{font-size:17px}
+  #modal-live-meeting .teams-grid-btn>div{width:38px!important;height:38px!important}
+  #modal-live-meeting .teams-grid-btn span{font-size:8px!important}
+}
+
+/* Landscape phones: maximize meeting stage without sacrificing controls. */
+@media (max-width:900px) and (orientation:landscape){
+  .app-header{height:50px;min-height:50px}
+  .content-view-viewport{height:calc(100dvh - 50px)}
+  .view-scroll-content{padding-bottom:76px}
+  #modal-live-meeting .teams-top-header{height:48px!important;min-height:48px!important}
+  #river-native-meeting-stage{inset:48px 0 72px 0!important}
+}
+
+/* Meeting controls: never allow an overflowing row on any device. */
+#modal-live-meeting .teams-control-card-panel>div{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px}
+@media (max-width:599px){#modal-live-meeting .teams-control-card-panel>div{justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}#modal-live-meeting .teams-control-card-panel>div::-webkit-scrollbar{display:none}}
+
+/* Accessibility / touch targets */
+@media (pointer:coarse){
+  button,a,input,select,textarea{min-height:42px}
+  .header-icon-btn{min-width:42px;min-height:42px}
+}
+
+/* Prevent long Marathi/English strings from creating horizontal overflow. */
+body *,button,input,select,textarea{overflow-wrap:anywhere}
+img,video,iframe,svg{max-width:100%}
