@@ -6463,7 +6463,7 @@ function getMeetingsFromStorage() {
   try {
     let meetings = JSON.parse(localStorage.getItem("river_of_life_meetings"));
     
-    if (!meetings) {
+    if (!meetings || !Array.isArray(meetings) || meetings.length === 0) {
       const today = new Date();
       const formatDate = (d) => d.toISOString().split('T')[0];
       

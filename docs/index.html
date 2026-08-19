@@ -38,8 +38,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   
-  <!-- Main Stylesheet (Cache-Busted for Version 66 Pure CSS Active Modal Launch) -->
-  <link rel="stylesheet" href="index.css?v=66_PURE_CSS_ACTIVE_MODAL_LAUNCH">
+  <!-- Main Stylesheet (Cache-Busted for Version 67 Permanent Live Hero Banner) -->
+  <link rel="stylesheet" href="index.css?v=67_PERMANENT_LIVE_HERO_BANNER">
 
   <!-- Official LiveKit WebRTC Client SDK -->
   <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.0.8/dist/livekit-client.umd.min.js"></script>
@@ -854,6 +854,20 @@
               </div>
               <button id="btn-schedule-meeting-trigger" class="btn-primary-mini" style="display: none; margin: 0; padding: 10px 16px; border-radius: 12px; font-weight: 700; align-self: center;">
                 + Schedule / सभा आयोजित करा
+              </button>
+            </div>
+
+            <!-- Live Instant Join Hero Banner -->
+            <div style="background: linear-gradient(135deg, rgba(22,163,74,0.15), rgba(34,197,94,0.25)); border: 1.5px solid rgba(34,197,94,0.5); border-radius: 20px; padding: 18px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; gap: 14px; box-shadow: 0 8px 24px rgba(34,197,94,0.15);">
+              <div style="display: flex; flex-direction: column; gap: 4px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="background: #22c55e; color: #fff; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 800;">🔴 LIVE ROOM</span>
+                  <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Sanctuary Worship</span>
+                </div>
+                <h3 style="font-size: 16px; font-weight: 800; margin: 0; color: var(--text);">River Sanctuary Fellowship / थेट उपासना</h3>
+              </div>
+              <button onclick="triggerJoinMeetingFlow('meeting_1')" class="btn-primary-mini" style="background: linear-gradient(135deg, #16a34a, #22c55e); color: #fff; border: none; padding: 12px 20px; border-radius: 14px; font-weight: 800; cursor: pointer; white-space: nowrap; box-shadow: 0 4px 14px rgba(34,197,94,0.4);">
+                🎥 Join Now
               </button>
             </div>
 
@@ -2612,8 +2626,8 @@
     }
   </script>
 
-  <!-- App Main Logic (Cache-Busted for Version 66 Pure CSS Active Modal Launch) -->
-  <script src="app.js?v=66_PURE_CSS_ACTIVE_MODAL_LAUNCH"></script>
+  <!-- App Main Logic (Cache-Busted for Version 67 Permanent Live Hero Banner) -->
+  <script src="app.js?v=67_PERMANENT_LIVE_HERO_BANNER"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 2.5s no matter what

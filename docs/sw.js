@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v66-PURE-CSS-ACTIVE-MODAL-LAUNCH';
+const CACHE_NAME = 'river-of-life-cache-v67-PERMANENT-LIVE-HERO-BANNER';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
