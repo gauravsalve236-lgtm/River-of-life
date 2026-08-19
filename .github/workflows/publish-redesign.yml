@@ -1,0 +1,51 @@
+name: Publish River of Life redesign
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  inject-redesign:
+    if: "!contains(github.event.head_commit.message, '[redesign-publish]')"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Inject redesign stylesheet into GitHub Pages
+        shell: bash
+        run: |
+          set -euo pipefail
+          target="docs/index.html"
+          marker='redesign.css?v=60_ROL_PREMIUM'
+          if grep -q "$marker" "$target"; then
+            echo "Redesign already injected."
+            exit 0
+          fi
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('docs/index.html')
+          s = p.read_text(encoding='utf-8')
+          needle = '<link rel="stylesheet" href="index.css?v=58_PURGE_PWA_SW">'
+          replacement = needle + '\n  <link rel="stylesheet" href="redesign.css?v=60_ROL_PREMIUM">'
+          if needle not in s:
+              raise SystemExit('Target stylesheet tag not found; refusing to modify index.html')
+          p.write_text(s.replace(needle, replacement, 1), encoding='utf-8')
+          PY
+
+      - name: Commit published page change
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/index.html
+          if git diff --cached --quiet; then
+            echo 'No changes to commit.'
+            exit 0
+          fi
+          git commit -m 'Publish River of Life premium redesign [redesign-publish]'
+          git push
