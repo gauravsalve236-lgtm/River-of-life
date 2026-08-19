@@ -7274,8 +7274,14 @@ function generateICSFile(meeting) {
 // Trigger Joining Flow (Camera preview checks)
 function triggerJoinMeetingFlow(meetingId) {
   const meetings = getMeetingsFromStorage();
-  const m = meetings.find(x => x.id === meetingId);
-  if (!m) return;
+  let m = meetings.find(x => x.id === meetingId || x.id == meetingId);
+  if (!m) {
+    m = {
+      id: meetingId || "ROL_Sanctuary_Live",
+      title: "River Sanctuary Worship Fellowship",
+      host: "Pastor John"
+    };
+  }
 
   // Synchronous user-gesture audio context unlock
   try {
@@ -7286,34 +7292,25 @@ function triggerJoinMeetingFlow(meetingId) {
     }
   } catch(e) {}
 
-  const loggedIn = (state && state.currentUser) ? state.currentUser.username : "Member";
-  const meetingIdSlug = (m && m.id) ? m.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
-  const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
-  const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&autojoin=true&p2p=true&codec=opus&layout=grid&grid=1&name=${encodeURIComponent(loggedIn)}`;
+  showToast("Entering Online Video Fellowship Room 🙏");
 
-  logAudioDebug("getUserMedia started for meeting join...", { meetingId });
-  showToast("Requesting Microphone & Camera access...");
-  
-  navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-    .then(fullStream => {
-      logAudioDebug("Microphone & Camera permission granted!", {
-        audioTracks: fullStream.getAudioTracks().length,
-        videoTracks: fullStream.getVideoTracks().length
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+      .then(fullStream => {
+        launchLiveMeetingRoom(m, fullStream);
+      })
+      .catch(err => {
+        navigator.mediaDevices.getUserMedia({ audio: true })
+          .then(audioStream => {
+            launchLiveMeetingRoom(m, audioStream);
+          })
+          .catch(audioErr => {
+            launchLiveMeetingRoom(m, null);
+          });
       });
-      launchLiveMeetingRoom(m, fullStream);
-    })
-    .catch(err => {
-      logAudioDebug("Camera access denied or unavailable, trying audio-only...", err);
-      navigator.mediaDevices.getUserMedia({ audio: true })
-        .then(audioStream => {
-          launchLiveMeetingRoom(m, audioStream);
-        })
-        .catch(audioErr => {
-          logAudioDebug("Microphone permission denied or unavailable on mobile:", audioErr);
-          showToast("Microphone permission denied. Joining in listen mode.");
-          launchLiveMeetingRoom(m, null);
-        });
-    });
+  } else {
+    launchLiveMeetingRoom(m, null);
+  }
 }
 
 // Fullscreen Live Meeting Room Entry

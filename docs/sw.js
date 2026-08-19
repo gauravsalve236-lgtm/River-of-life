@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v62-TEAMS-MULTI-USER-GALLERY-GRID';
+const CACHE_NAME = 'river-of-life-cache-v63-SAFE-MEETING-JOIN-FALLBACK';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
