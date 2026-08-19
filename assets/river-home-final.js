@@ -1,10 +1,18 @@
-/* River of Life — Authoritative Home Renderer
-   Home only. Meeting / WebRTC / Prayer Meeting routes are untouched.
-*/
+/* ============================================================
+   RIVER OF LIFE — FINAL HOME RENDERER
+   ============================================================
+   Home page only.
+   Does NOT modify Meetings / WebRTC / Prayer Meeting logic.
+   ============================================================ */
+
 (function () {
   'use strict';
 
   const app = () => document.getElementById('app');
+
+  /* ------------------------------------------------------------
+     ROUTES
+     ------------------------------------------------------------ */
 
   const HOME_HASHES = new Set([
     '',
@@ -24,35 +32,36 @@
     '#/profile',
     '#/settings',
     '#/church',
-    '#/events'
+    '#/events',
+    '#/plans',
+    '#/discover',
+    '#/you',
+    '#/reader'
   ];
 
   function isHome() {
-    const hash = (location.hash || '').toLowerCase().trim();
+    const hash = (window.location.hash || '').toLowerCase().trim();
 
-    if (HOME_HASHES.has(hash)) return true;
+    if (HOME_HASHES.has(hash)) {
+      return true;
+    }
 
     if (
       NON_HOME_PREFIXES.some(
-        p => hash === p || hash.startsWith(p + '/')
+        prefix =>
+          hash === prefix ||
+          hash.startsWith(prefix + '/')
       )
     ) {
       return false;
     }
 
-    return (
-      hash === '' ||
-      hash === '#' ||
-      hash === '#/' ||
-      hash === '#/home' ||
-      hash === '#/today' ||
-      hash === '#/dashboard'
-    );
+    return false;
   }
 
-  /* ---------------------------------------------------------
+  /* ------------------------------------------------------------
      USER
-  --------------------------------------------------------- */
+     ------------------------------------------------------------ */
 
   function getUserName() {
     const candidates = [
@@ -68,40 +77,51 @@
 
         if (!raw) continue;
 
-        const u = JSON.parse(raw);
+        const user = JSON.parse(raw);
 
         const name =
-          u.fullName ||
-          u.name ||
-          u.displayName ||
-          u.firstName;
+          user.fullName ||
+          user.name ||
+          user.displayName ||
+          user.firstName;
 
         if (name) {
-          return String(name).trim().split(/\s+/)[0];
+          return String(name)
+            .trim()
+            .split(/\s+/)[0];
         }
-      } catch (_) {}
+      } catch (error) {
+        console.warn(
+          'River Home: unable to read user:',
+          key
+        );
+      }
     }
 
     return 'Friend';
   }
 
-  /* ---------------------------------------------------------
-     TIME / GREETING
-  --------------------------------------------------------- */
+  /* ------------------------------------------------------------
+     GREETING
+     ------------------------------------------------------------ */
 
   function getGreeting() {
     const hour = new Date().getHours();
 
-    if (hour < 12) return 'Good morning';
+    if (hour < 12) {
+      return 'Good morning';
+    }
 
-    if (hour < 17) return 'Good afternoon';
+    if (hour < 17) {
+      return 'Good afternoon';
+    }
 
     return 'Good evening';
   }
 
-  /* ---------------------------------------------------------
-     DAILY VERSE
-  --------------------------------------------------------- */
+  /* ------------------------------------------------------------
+     DAILY BIBLE VERSES
+     ------------------------------------------------------------ */
 
   const verses = [
     [
@@ -159,58 +179,68 @@
     [
       'For nothing will be impossible with God.',
       'Luke 1:37'
+    ],
+    [
+      'The LORD is good, a stronghold in the day of trouble; he knows those who take refuge in him.',
+      'Nahum 1:7'
+    ],
+    [
+      'I have set the LORD always before me; because he is at my right hand, I shall not be shaken.',
+      'Psalm 16:8'
+    ],
+    [
+      'The joy of the LORD is your strength.',
+      'Nehemiah 8:10'
+    ],
+    [
+      'Those who wait for the LORD shall renew their strength.',
+      'Isaiah 40:31'
+    ],
+    [
+      'The LORD bless you and keep you.',
+      'Numbers 6:24'
+    ],
+    [
+      'Let all that you do be done in love.',
+      '1 Corinthians 16:14'
+    ],
+    [
+      'Above all else, guard your heart, for everything you do flows from it.',
+      'Proverbs 4:23'
+    ],
+    [
+      'The LORD will fight for you; you need only to be still.',
+      'Exodus 14:14'
     ]
   ];
 
   function todayVerse() {
-    const d = new Date();
+    const date = new Date();
 
-    const day = Math.floor(
+    const dayNumber = Math.floor(
       Date.UTC(
-        d.getFullYear(),
-        d.getMonth(),
-        d.getDate()
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate()
       ) / 86400000
     );
 
-    return verses[Math.abs(day) % verses.length];
+    return verses[
+      Math.abs(dayNumber) % verses.length
+    ];
   }
 
-  /* ---------------------------------------------------------
+  /* ------------------------------------------------------------
      NAVIGATION
-  --------------------------------------------------------- */
+     ------------------------------------------------------------ */
 
   function go(hash) {
-    location.hash = hash;
+    window.location.hash = hash;
   }
 
-  /* ---------------------------------------------------------
-     SHARE VERSE
-  --------------------------------------------------------- */
-
-  window.rolShareVerse = function () {
-    const [verse, reference] = todayVerse();
-
-    const text =
-      `🙏 Daily Bible Verse\n\n` +
-      `“${verse}”\n` +
-      `— ${reference}\n\n` +
-      `River of Life`;
-
-    const whatsappUrl =
-      'https://wa.me/?text=' +
-      encodeURIComponent(text);
-
-    window.open(
-      whatsappUrl,
-      '_blank',
-      'noopener,noreferrer'
-    );
-  };
-
-  /* ---------------------------------------------------------
-     SAVE VERSE
-  --------------------------------------------------------- */
+  /* ------------------------------------------------------------
+     SAVE DAILY VERSE
+     ------------------------------------------------------------ */
 
   window.rolSaveDailyVerse = function () {
     const [verse, reference] = todayVerse();
@@ -219,36 +249,73 @@
       localStorage.setItem(
         'riverSavedDailyVerse',
         JSON.stringify({
-          verse,
-          reference,
+          verse: verse,
+          reference: reference,
           savedAt: new Date().toISOString()
         })
       );
 
-      if (typeof window.showToast === 'function') {
+      if (
+        typeof window.showToast === 'function'
+      ) {
         window.showToast('Verse saved');
       } else {
         alert('Verse saved');
       }
     } catch (error) {
-      console.warn('Unable to save verse:', error);
+      console.error(
+        'River Home: save verse failed',
+        error
+      );
     }
   };
 
-  /* ---------------------------------------------------------
-     HOME RENDERER
-  --------------------------------------------------------- */
+  /* ------------------------------------------------------------
+     SHARE TO WHATSAPP
+     ------------------------------------------------------------ */
+
+  window.rolShareVerse = function () {
+    const [verse, reference] = todayVerse();
+
+    const text =
+      '🙏 Daily Bible Verse\n\n' +
+      '“' +
+      verse +
+      '”\n' +
+      '— ' +
+      reference +
+      '\n\n' +
+      'River of Life';
+
+    const url =
+      'https://wa.me/?text=' +
+      encodeURIComponent(text);
+
+    window.open(
+      url,
+      '_blank',
+      'noopener,noreferrer'
+    );
+  };
+
+  /* ------------------------------------------------------------
+     HOME HTML
+     ------------------------------------------------------------ */
 
   function renderHome() {
-    if (!isHome()) return false;
+    if (!isHome()) {
+      return false;
+    }
 
     const root = app();
 
-    if (!root) return false;
+    if (!root) {
+      return false;
+    }
 
     const [verse, reference] = todayVerse();
 
-    const name = getUserName();
+    const userName = getUserName();
 
     const greeting = getGreeting();
 
@@ -259,7 +326,6 @@
       >
 
         <!-- HEADER -->
-
         <header class="rol-home-header">
 
           <div class="rol-brand">
@@ -272,10 +338,15 @@
             </div>
 
             <div class="rol-brand-text">
-              <strong>River of Life</strong>
+
+              <strong>
+                River of Life
+              </strong>
+
               <small>
                 Bible • Prayer • Community
               </small>
+
             </div>
 
           </div>
@@ -287,7 +358,9 @@
               aria-label="Notifications"
               onclick="
                 window.dispatchEvent(
-                  new CustomEvent('openNotifications')
+                  new CustomEvent(
+                    'openNotifications'
+                  )
                 )
               "
             >
@@ -297,7 +370,10 @@
             <button
               type="button"
               aria-label="Profile"
-              onclick="location.hash='#/profile'"
+              onclick="
+                window.location.hash =
+                  '#/profile'
+              "
             >
               👤
             </button>
@@ -308,7 +384,6 @@
 
 
         <!-- WELCOME -->
-
         <section class="rol-welcome">
 
           <div class="rol-welcome-content">
@@ -318,7 +393,7 @@
             </span>
 
             <h1>
-              ${greeting}, ${name}
+              ${greeting}, ${userName}
             </h1>
 
             <p>
@@ -338,7 +413,6 @@
 
 
         <!-- VERSE OF THE DAY -->
-
         <section
           class="rol-verse-card"
           aria-label="Verse of the Day"
@@ -360,17 +434,20 @@
 
             <button
               type="button"
-              onclick="window.rolSaveDailyVerse()"
+              onclick="
+                window.rolSaveDailyVerse()
+              "
             >
               ♡ Save
             </button>
 
             <button
               type="button"
-              onclick="window.rolShareVerse()"
+              onclick="
+                window.rolShareVerse()
+              "
             >
-              <span>↗</span>
-              Share WhatsApp
+              ↗ Share WhatsApp
             </button>
 
           </div>
@@ -379,7 +456,6 @@
 
 
         <!-- QUICK ACTIONS -->
-
         <section class="rol-home-section">
 
           <div class="rol-section-heading">
@@ -394,9 +470,14 @@
 
             <button
               type="button"
-              onclick="location.hash='#/bible'"
+              onclick="
+                go('#/bible')
+              "
             >
-              <span class="rol-action-icon">
+
+              <span
+                class="rol-action-icon"
+              >
                 📖
               </span>
 
@@ -407,14 +488,20 @@
               <small>
                 Read the Word
               </small>
+
             </button>
 
 
             <button
               type="button"
-              onclick="location.hash='#/prayer'"
+              onclick="
+                go('#/prayer')
+              "
             >
-              <span class="rol-action-icon">
+
+              <span
+                class="rol-action-icon"
+              >
                 🙏
               </span>
 
@@ -425,14 +512,20 @@
               <small>
                 Pray & connect
               </small>
+
             </button>
 
 
             <button
               type="button"
-              onclick="location.hash='#/quiz'"
+              onclick="
+                go('#/quiz')
+              "
             >
-              <span class="rol-action-icon">
+
+              <span
+                class="rol-action-icon"
+              >
                 🧠
               </span>
 
@@ -443,14 +536,20 @@
               <small>
                 Test your knowledge
               </small>
+
             </button>
 
 
             <button
               type="button"
-              onclick="location.hash='#/meetings'"
+              onclick="
+                go('#/meetings')
+              "
             >
-              <span class="rol-action-icon">
+
+              <span
+                class="rol-action-icon"
+              >
                 🎥
               </span>
 
@@ -461,6 +560,7 @@
               <small>
                 Join prayer meetings
               </small>
+
             </button>
 
           </div>
@@ -468,8 +568,7 @@
         </section>
 
 
-        <!-- CONTINUE JOURNEY -->
-
+        <!-- CONTINUE YOUR JOURNEY -->
         <section class="rol-home-section">
 
           <div class="rol-section-heading">
@@ -484,19 +583,24 @@
 
           </div>
 
-
           <div class="rol-journey-grid">
 
             <button
               type="button"
-              onclick="location.hash='#/bible'"
+              onclick="
+                go('#/bible')
+              "
             >
 
-              <div class="rol-journey-icon">
+              <div
+                class="rol-journey-icon"
+              >
                 📖
               </div>
 
-              <div class="rol-journey-content">
+              <div
+                class="rol-journey-content"
+              >
 
                 <p>
                   Continue Reading
@@ -517,14 +621,20 @@
 
             <button
               type="button"
-              onclick="location.hash='#/quiz'"
+              onclick="
+                go('#/quiz')
+              "
             >
 
-              <div class="rol-journey-icon">
+              <div
+                class="rol-journey-icon"
+              >
                 🧠
               </div>
 
-              <div class="rol-journey-content">
+              <div
+                class="rol-journey-content"
+              >
 
                 <p>
                   Take a Bible Quiz
@@ -548,14 +658,14 @@
 
 
         <!-- DAILY MESSAGE -->
-
         <section class="rol-home-message">
 
-          <div>
-            <span>🙏</span>
+          <div class="rol-home-message-icon">
+            🙏
           </div>
 
           <div>
+
             <strong>
               Take a moment with God
             </strong>
@@ -564,11 +674,13 @@
               Read His Word, pray, and grow
               in faith every day.
             </p>
+
           </div>
 
         </section>
 
 
+        <!-- FOOTER -->
         <div class="rol-last-updated">
           River of Life • Your daily walk with God
         </div>
@@ -581,50 +693,70 @@
     return true;
   }
 
-  /* ---------------------------------------------------------
+  /* ------------------------------------------------------------
+     EXPOSE RENDERER TO APP.JS
+     ------------------------------------------------------------ */
+
+  window.renderRiverHomeFinal = renderHome;
+
+  /* ------------------------------------------------------------
      BOOT
-  --------------------------------------------------------- */
+     ------------------------------------------------------------ */
 
   function boot() {
-
-    if (!isHome()) return;
+    if (!isHome()) {
+      return;
+    }
 
     const root = app();
 
     if (!root) {
-      setTimeout(boot, 100);
+      setTimeout(
+        boot,
+        100
+      );
+
       return;
     }
 
     renderHome();
   }
 
-  /* ---------------------------------------------------------
-     ROUTE CHANGE
-  --------------------------------------------------------- */
+  /* ------------------------------------------------------------
+     ROUTE CHANGES
+     ------------------------------------------------------------ */
 
-  let lastHash = location.hash;
+  let lastHash =
+    window.location.hash;
 
   window.addEventListener(
     'hashchange',
     function () {
 
-      const now = location.hash;
+      const currentHash =
+        window.location.hash;
 
-      if (now === lastHash) return;
+      if (
+        currentHash === lastHash
+      ) {
+        return;
+      }
 
-      lastHash = now;
+      lastHash = currentHash;
 
       if (isHome()) {
-        setTimeout(boot, 50);
+        setTimeout(
+          boot,
+          50
+        );
       }
 
     }
   );
 
-  /* ---------------------------------------------------------
+  /* ------------------------------------------------------------
      START
-  --------------------------------------------------------- */
+     ------------------------------------------------------------ */
 
   function start() {
 
@@ -632,19 +764,24 @@
 
     const root = app();
 
-    if (!root) return;
+    if (!root) {
+      return;
+    }
 
     const observer =
-      new MutationObserver(function () {
+      new MutationObserver(
+        function () {
 
-        if (
-          isHome() &&
-          root.dataset.rolAuthoritativeHome !== '1'
-        ) {
-          renderHome();
+          if (
+            isHome() &&
+            root.dataset
+              .rolAuthoritativeHome !== '1'
+          ) {
+            renderHome();
+          }
+
         }
-
-      });
+      );
 
     observer.observe(
       root,
@@ -654,22 +791,24 @@
     );
   }
 
+  /* ------------------------------------------------------------
+     INITIALIZE
+     ------------------------------------------------------------ */
+
   if (
-    document.readyState === 'loading'
+    document.readyState ===
+    'loading'
   ) {
+
     document.addEventListener(
       'DOMContentLoaded',
       start
     );
+
   } else {
+
     start();
+
   }
 
 })();
-window.addEventListener('load', function () {
-  setTimeout(function () {
-    if (isHome()) {
-      renderHome();
-    }
-  }, 800);
-});
