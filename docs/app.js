@@ -7364,14 +7364,6 @@ function launchLiveMeetingRoom(meeting, stream) {
       legacyTitle.textContent = meeting.title;
     }
   
-    // Hide top header and bottom tabs
-    const header = document.querySelector(".app-header");
-    if (header) header.style.display = "none";
-    const tabs = document.querySelector(".mobile-bottom-tabs");
-    if (tabs) tabs.style.display = "none";
-    const sidebar = document.querySelector(".desktop-sidebar");
-    if (sidebar) sidebar.style.display = "none";
-    
     if (meeting && meeting.id) {
       try { subscribeToMeetingEvents(meeting.id); } catch(e) {}
     }

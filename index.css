@@ -5761,3 +5761,37 @@ input, textarea, select, [contenteditable="true"] {
     min-width: 54px !important;
   }
 }
+
+/* Fail-Safe Modal Overlay Rules for Meeting Stage */
+#modal-live-meeting {
+  position: fixed !important;
+  inset: 0 !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100dvh !important;
+  background-color: #17181b !important;
+  background: #17181b !important;
+  color: #ffffff !important;
+  z-index: 999999 !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+
+#modal-live-meeting.active {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+}
+
+#modal-live-meeting:not(.active) {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}

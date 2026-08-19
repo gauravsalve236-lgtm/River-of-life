@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v70-RESTORED-VERSION-28-BACKUP';
+const CACHE_NAME = 'river-of-life-cache-v71-REMOVE-APP-VIEW-FROM-MODAL-FIX';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
