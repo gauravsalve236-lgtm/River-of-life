@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v72-SINGLE-WORKING-BOTTOM-MENU';
+const CACHE_NAME = 'river-of-life-cache-v73-SINGLE-BOTTOM-MENU-BODY-HAS-FIX';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
