@@ -15,25 +15,33 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Inject responsive redesign stylesheets into GitHub Pages
+      - name: Ensure all live UI stylesheets are loaded
         shell: bash
         run: |
           set -euo pipefail
           target="docs/index.html"
-          marker='responsive.css?v=61_ROL_RESPONSIVE'
-          if grep -q "$marker" "$target"; then
-            echo "Responsive redesign already injected."
-            exit 0
-          fi
           python - <<'PY'
           from pathlib import Path
           p = Path('docs/index.html')
           s = p.read_text(encoding='utf-8')
-          redesign = '<link rel="stylesheet" href="redesign.css?v=60_ROL_PREMIUM">'
-          responsive = '<link rel="stylesheet" href="responsive.css?v=61_ROL_RESPONSIVE">'
-          if redesign not in s:
-              raise SystemExit('Existing redesign stylesheet tag not found; refusing to modify index.html')
-          s = s.replace(redesign, redesign + '\n  ' + responsive, 1)
+          marker = '<link rel="stylesheet" href="meeting-live-v64.css?v=64_ROL_MEETING">'
+          if marker in s:
+              print('All live UI stylesheets already injected.')
+              raise SystemExit(0)
+          styles = [
+              '<link rel="stylesheet" href="redesign.css?v=60_ROL_PREMIUM">',
+              '<link rel="stylesheet" href="responsive.css?v=61_ROL_RESPONSIVE">',
+              '<link rel="stylesheet" href="responsive-fix.css?v=62_ROL_DESKTOP_FIX">',
+              '<link rel="stylesheet" href="ui-polish.css?v=63_ROL_UI_POLISH">',
+              marker,
+          ]
+          missing = [tag for tag in styles if tag not in s]
+          if missing:
+              anchor = '<link rel="stylesheet" href="index.css?v=58_PURGE_PWA_SW">'
+              if anchor not in s:
+                  raise SystemExit('Main stylesheet anchor not found; refusing to modify index.html')
+              injection = anchor + '\n  ' + '\n  '.join(missing)
+              s = s.replace(anchor, injection, 1)
           p.write_text(s, encoding='utf-8')
           PY
 
@@ -48,5 +56,5 @@ jobs:
             echo 'No changes to commit.'
             exit 0
           fi
-          git commit -m 'Publish River of Life responsive layout [redesign-publish]'
+          git commit -m 'Publish River of Life final UI layers [redesign-publish]'
           git push
