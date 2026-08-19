@@ -666,3 +666,10 @@
   }
 
 })();
+window.addEventListener('load', function () {
+  setTimeout(function () {
+    if (isHome()) {
+      renderHome();
+    }
+  }, 800);
+});
