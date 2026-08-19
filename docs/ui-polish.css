@@ -1,0 +1,262 @@
+/* River of Life v63 — mobile navigation + meeting room polish */
+
+/* --------------------------------------------------------------------------
+   MOBILE BOTTOM NAVIGATION
+   The helper script assigns .rol-mobile-nav to the existing generated nav.
+   -------------------------------------------------------------------------- */
+.rol-mobile-nav{
+  display:flex!important;
+  align-items:stretch!important;
+  justify-content:space-around!important;
+  gap:2px!important;
+  position:fixed!important;
+  left:0!important;
+  right:0!important;
+  bottom:0!important;
+  width:100%!important;
+  min-height:76px!important;
+  padding:7px 8px calc(7px + env(safe-area-inset-bottom,0px))!important;
+  background:rgba(255,255,255,.96)!important;
+  border-top:1px solid rgba(148,163,184,.22)!important;
+  box-shadow:0 -10px 30px rgba(15,23,42,.10)!important;
+  backdrop-filter:blur(22px)!important;
+  -webkit-backdrop-filter:blur(22px)!important;
+  z-index:1000!important;
+}
+.rol-mobile-nav > *{
+  flex:1 1 0!important;
+  min-width:0!important;
+  max-width:none!important;
+  min-height:62px!important;
+  padding:7px 3px 6px!important;
+  border:0!important;
+  border-radius:16px!important;
+  background:transparent!important;
+  color:#64748b!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:4px!important;
+  font-family:var(--font-ui)!important;
+  font-size:10px!important;
+  font-weight:800!important;
+  line-height:1.1!important;
+  text-align:center!important;
+  overflow:visible!important;
+}
+.rol-mobile-nav > * svg,
+.rol-mobile-nav > * img{
+  width:25px!important;
+  height:25px!important;
+  flex:0 0 25px!important;
+}
+.rol-mobile-nav > * .nav-label,
+.rol-mobile-nav > * span{
+  display:block!important;
+  max-width:100%!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+.rol-mobile-nav > *.active,
+.rol-mobile-nav > *[aria-current="page"]{
+  color:#c58b14!important;
+  background:linear-gradient(180deg,rgba(245,201,88,.20),rgba(245,201,88,.06))!important;
+}
+.rol-mobile-nav > *.active svg,
+.rol-mobile-nav > *[aria-current="page"] svg{
+  filter:drop-shadow(0 2px 4px rgba(197,139,20,.18));
+}
+
+@media (max-width:360px){
+  .rol-mobile-nav{padding-left:4px!important;padding-right:4px!important}
+  .rol-mobile-nav > *{font-size:9px!important;gap:3px!important;padding-left:1px!important;padding-right:1px!important}
+  .rol-mobile-nav > * svg,.rol-mobile-nav > * img{width:23px!important;height:23px!important;flex-basis:23px!important}
+}
+
+@media (min-width:600px){
+  .rol-mobile-nav{display:none!important}
+}
+
+/* --------------------------------------------------------------------------
+   PRAYER MEETING ROOM
+   Responsive gallery for desktop, tablet, Android and iPhone.
+   -------------------------------------------------------------------------- */
+#modal-live-meeting{
+  overscroll-behavior:none!important;
+}
+#modal-live-meeting .meeting-room-container{
+  width:100%!important;
+  height:100%!important;
+  min-width:0!important;
+  min-height:0!important;
+  display:flex!important;
+  flex-direction:column!important;
+  overflow:hidden!important;
+}
+#modal-live-meeting .teams-top-header{
+  flex:0 0 auto!important;
+  min-width:0!important;
+  z-index:40!important;
+}
+#modal-live-meeting .teams-top-header > *{min-width:0!important}
+#river-native-meeting-stage{
+  flex:1 1 auto!important;
+  min-width:0!important;
+  min-height:0!important;
+  width:100%!important;
+  overflow:hidden!important;
+}
+#river-video-grid{
+  width:100%!important;
+  height:100%!important;
+  min-width:0!important;
+  min-height:0!important;
+  display:grid!important;
+  grid-template-columns:repeat(auto-fit,minmax(230px,1fr))!important;
+  grid-auto-rows:minmax(150px,1fr)!important;
+  gap:14px!important;
+  padding:16px!important;
+  overflow:auto!important;
+  align-content:center!important;
+}
+.river-video-tile,
+.meeting-participant-tile{
+  min-width:0!important;
+  min-height:0!important;
+  width:100%!important;
+  height:100%!important;
+  aspect-ratio:16/10!important;
+  max-height:100%!important;
+  border-radius:20px!important;
+  overflow:hidden!important;
+  background:#111922!important;
+  border:1px solid rgba(255,255,255,.10)!important;
+  box-shadow:0 12px 34px rgba(0,0,0,.30)!important;
+}
+.river-video-tile video,
+.meeting-participant-tile video{
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
+}
+
+/* Active-speaker friendly sizing: one tile can naturally dominate if the app
+   adds the .active-speaker class. */
+#river-video-grid > .active-speaker,
+#river-video-grid > .speaker-active{
+  grid-column:span 2!important;
+  grid-row:span 2!important;
+}
+
+/* Shared Bible/content surface inside meetings */
+#modal-live-meeting .meeting-share-panel,
+#modal-live-meeting .scripture-share-panel,
+#modal-live-meeting .shared-content-panel,
+#modal-live-meeting .media-share-panel{
+  max-width:min(92vw,900px)!important;
+  border-radius:22px!important;
+  border:1px solid rgba(255,255,255,.10)!important;
+  background:rgba(18,27,35,.96)!important;
+  box-shadow:0 22px 60px rgba(0,0,0,.45)!important;
+  backdrop-filter:blur(18px)!important;
+  -webkit-backdrop-filter:blur(18px)!important;
+}
+
+/* Meeting controls become a compact, thumb-friendly dock. */
+#modal-live-meeting .teams-control-card-panel{
+  flex:0 0 auto!important;
+  z-index:50!important;
+}
+#modal-live-meeting .teams-control-card-panel > div{
+  max-width:980px!important;
+  margin:0 auto!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:8px!important;
+  flex-wrap:wrap!important;
+}
+#modal-live-meeting .teams-grid-btn{
+  min-width:52px!important;
+  min-height:52px!important;
+  border-radius:16px!important;
+}
+#modal-live-meeting .teams-grid-btn > div{
+  width:48px!important;
+  height:48px!important;
+  border-radius:15px!important;
+}
+
+/* Mobile meeting gallery */
+@media (max-width:599px){
+  #modal-live-meeting .teams-top-header{height:56px!important;min-height:56px!important}
+  #river-native-meeting-stage{flex:1 1 auto!important}
+  #river-video-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    grid-auto-rows:minmax(110px,1fr)!important;
+    gap:8px!important;
+    padding:8px!important;
+    align-content:stretch!important;
+  }
+  .river-video-tile,.meeting-participant-tile{border-radius:14px!important}
+  #river-video-grid > .active-speaker,
+  #river-video-grid > .speaker-active{
+    grid-column:1 / -1!important;
+    grid-row:auto!important;
+  }
+  #modal-live-meeting .teams-control-card-panel{
+    position:absolute!important;
+    left:0!important;
+    right:0!important;
+    bottom:0!important;
+    padding:7px 7px calc(7px + env(safe-area-inset-bottom,0px))!important;
+    background:linear-gradient(180deg,transparent,rgba(4,8,12,.94) 35%)!important;
+  }
+  #modal-live-meeting .teams-control-card-panel > div{
+    width:100%!important;
+    max-width:none!important;
+    justify-content:flex-start!important;
+    flex-wrap:nowrap!important;
+    overflow-x:auto!important;
+    scrollbar-width:none!important;
+    padding:8px!important;
+    border-radius:20px!important;
+  }
+  #modal-live-meeting .teams-control-card-panel > div::-webkit-scrollbar{display:none}
+  #modal-live-meeting .teams-grid-btn{flex:0 0 auto!important}
+  #modal-live-meeting .teams-grid-btn > div{width:44px!important;height:44px!important}
+}
+
+@media (max-width:390px){
+  #river-video-grid{grid-auto-rows:minmax(96px,1fr)!important;gap:6px!important;padding:6px!important}
+  #modal-live-meeting .teams-grid-btn{min-width:46px!important}
+  #modal-live-meeting .teams-grid-btn > div{width:40px!important;height:40px!important}
+}
+
+/* Tablet */
+@media (min-width:600px) and (max-width:1199px){
+  #river-video-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+
+/* Large desktop */
+@media (min-width:1200px){
+  #river-video-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+}
+
+/* Share-source controls: make screen / Bible / audio sources feel like one
+   consistent interaction family wherever the existing app exposes them. */
+#modal-live-meeting [data-share-source],
+#modal-live-meeting .share-source-btn,
+#modal-live-meeting .meeting-share-btn{
+  border-radius:14px!important;
+  min-height:46px!important;
+  padding:10px 14px!important;
+  font-weight:800!important;
+}
+#modal-live-meeting .share-source-btn.active,
+#modal-live-meeting [data-share-source].active{
+  background:#0f766e!important;
+  color:#fff!important;
+}
