@@ -5814,3 +5814,286 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
   padding: 0 !important;
   margin: 0 !important;
 }
+
+/* =========================================================
+   RIVER OF LIFE — HOME REDESIGN
+   ========================================================= */
+
+.river-home {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 24px 20px 120px;
+    box-sizing: border-box;
+}
+
+.river-home-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+}
+
+.river-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.river-logo {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    object-fit: cover;
+}
+
+.river-brand-name {
+    font-family: Outfit, sans-serif;
+    font-size: 21px;
+    font-weight: 800;
+    color: #123c69;
+}
+
+.river-brand-subtitle {
+    font-size: 12px;
+    color: #718096;
+}
+
+.river-header-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.river-icon-btn {
+    width: 42px;
+    height: 42px;
+    border: 0;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 5px 18px rgba(0,0,0,.08);
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.river-welcome {
+    margin-bottom: 24px;
+}
+
+.river-greeting {
+    font-family: Outfit, sans-serif;
+    font-size: clamp(27px,4vw,38px);
+    font-weight: 800;
+    color: #123c69;
+}
+
+.river-tagline {
+    margin-top: 7px;
+    color: #66758a;
+    font-size: 15px;
+}
+
+.river-verse-card {
+    padding: 27px;
+    margin-bottom: 30px;
+    border-radius: 24px;
+    color: #fff;
+    background: linear-gradient(
+        135deg,
+        #123c69,
+        #087f8c,
+        #12a88f
+    );
+    box-shadow: 0 15px 35px rgba(18,60,105,.20);
+}
+
+.river-verse-label {
+    color: #f6d77a;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .12em;
+    margin-bottom: 18px;
+}
+
+.river-verse-text {
+    font-family: Lora,serif;
+    font-size: clamp(21px,3vw,31px);
+    line-height: 1.45;
+}
+
+.river-verse-reference {
+    margin-top: 14px;
+    font-size: 14px;
+    font-weight: 700;
+    opacity: .85;
+}
+
+.river-verse-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 22px;
+}
+
+.river-verse-actions button {
+    border: 0;
+    border-radius: 12px;
+    padding: 10px 15px;
+    background: rgba(255,255,255,.16);
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.river-section {
+    margin-bottom: 30px;
+}
+
+.river-section-title {
+    margin-bottom: 14px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .12em;
+    color: #64748b;
+}
+
+.river-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    gap: 14px;
+}
+
+.river-action-card {
+    min-height: 145px;
+    padding: 20px;
+    border: 1px solid rgba(148,163,184,.16);
+    border-radius: 20px;
+    background: #fff;
+    text-align: left;
+    cursor: pointer;
+    box-shadow: 0 8px 25px rgba(15,23,42,.06);
+    transition: transform .2s ease,box-shadow .2s ease;
+}
+
+.river-action-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 30px rgba(15,23,42,.10);
+}
+
+.river-action-icon {
+    display: block;
+    font-size: 30px;
+    margin-bottom: 17px;
+}
+
+.river-action-title {
+    display: block;
+    font-family: Outfit,sans-serif;
+    font-size: 17px;
+    font-weight: 800;
+    color: #123c69;
+}
+
+.river-action-subtitle {
+    display: block;
+    margin-top: 5px;
+    font-size: 12px;
+    color: #7a8797;
+}
+
+.river-journey-card {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 10px;
+    padding: 16px;
+    border: 1px solid rgba(148,163,184,.15);
+    border-radius: 17px;
+    background: #fff;
+    text-align: left;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(15,23,42,.05);
+}
+
+.river-journey-icon {
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border-radius: 13px;
+    background: #e6f7f5;
+    font-size: 21px;
+}
+
+.river-journey-content {
+    flex: 1;
+}
+
+.river-journey-title {
+    font-weight: 800;
+    color: #123c69;
+}
+
+.river-journey-subtitle {
+    margin-top: 3px;
+    font-size: 12px;
+    color: #7a8797;
+}
+
+.river-journey-arrow {
+    font-size: 20px;
+    color: #0c9b91;
+}
+
+/* MOBILE */
+
+@media (max-width:700px) {
+
+    .river-home {
+        padding: 18px 14px 100px;
+    }
+
+    .river-home-header {
+        margin-bottom: 22px;
+    }
+
+    .river-brand-name {
+        font-size: 18px;
+    }
+
+    .river-logo {
+        width: 42px;
+        height: 42px;
+    }
+
+    .river-greeting {
+        font-size: 27px;
+    }
+
+    .river-verse-card {
+        padding: 21px;
+        border-radius: 20px;
+    }
+
+    .river-verse-text {
+        font-size: 20px;
+    }
+
+    .river-actions-grid {
+        grid-template-columns: repeat(2,1fr);
+        gap: 10px;
+    }
+
+    .river-action-card {
+        min-height: 125px;
+        padding: 15px;
+    }
+
+    .river-action-icon {
+        font-size: 27px;
+        margin-bottom: 12px;
+    }
+
+    .river-action-title {
+        font-size: 15px;
+    }
+}
