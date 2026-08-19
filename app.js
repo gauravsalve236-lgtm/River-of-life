@@ -1118,8 +1118,12 @@ function switchTab(rawRoute) {
     if (route === "you") {
       renderYouProfile();
     } else if (route === "home") {
-      renderDailyDevotion();
-    } else if (route === "plans") {
+  if (typeof window.renderRiverHomeFinal === "function") {
+    window.renderRiverHomeFinal();
+  } else {
+    renderDailyDevotion();
+  }
+} else if (route === "plans") {
       renderReadingPlansTab();
     } else if (route === "prayers") {
       renderPrayersScreen();
