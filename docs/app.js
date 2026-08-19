@@ -7336,7 +7336,6 @@ function launchLiveMeetingRoom(meeting, stream) {
     // Lock screen view overlay (MS Teams Mobile View)
     const roomModal = document.getElementById("modal-live-meeting");
     if (roomModal) {
-      roomModal.style.setProperty("display", "flex", "important");
       roomModal.classList.add("active");
       document.body.classList.add("meeting-modal-open");
     }
