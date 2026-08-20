@@ -1,5 +1,6 @@
 /* ================================================================
-   RIVER OF LIFE — Premium Brand Theme (Light Mode)
+   RIVER OF LIFE — Premium Brand Theme
+   Visual direction: flowing water + warm light + scripture typography
    ================================================================ */
 
 :root {
@@ -18,6 +19,7 @@
   --rol-shadow: 0 14px 45px rgba(11,31,51,.10);
 }
 
+/* Brand light theme: calm, premium, readable rather than bright white. */
 .ios-theme-light {
   --bg: #f6f9fb;
   --bg-content: #ffffff;
@@ -31,42 +33,50 @@
   --border-rgb: 229,233,238;
   --pill-bg: #eef4f7;
   --sidebar-hover: #f1f6f8;
-  background-color: var(--bg);
-  color: var(--text);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  min-height: 100vh;
+}
+
+body {
+  background:
+    radial-gradient(circle at 90% 0%, rgba(56,189,248,.08), transparent 28%),
+    radial-gradient(circle at 0% 30%, rgba(214,168,79,.07), transparent 26%),
+    var(--bg);
 }
 
 /* Header */
 .app-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   height: 68px;
-  padding: 0 20px;
-  background: rgba(246,249,251,.95);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--border);
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  background: rgba(246,249,251,.88);
+  border-bottom-color: rgba(229,233,238,.85);
 }
 
 #static-header-title {
   color: var(--rol-navy);
   letter-spacing: -.6px;
-  font-weight: 700;
 }
 
 /* Home canvas */
-.rol-home .view-scroll-content {
+#view-home .view-scroll-content {
   max-width: 1180px;
   margin: 0 auto;
   padding: 24px 24px 120px;
 }
 
-/* Welcome Hero Card */
-.rol-home .welcome-header-card {
+#view-home .home-search-container {
+  margin-bottom: 18px;
+}
+
+#view-home .home-search-bar {
+  height: 48px;
+  border-radius: 16px;
+  border: 1px solid #e1e8ed;
+  background: rgba(255,255,255,.86);
+  box-shadow: 0 5px 18px rgba(11,31,51,.05);
+  font-family: var(--font-ui);
+  font-size: 14px;
+}
+
+/* Existing welcome card becomes the brand hero. */
+#view-home .welcome-header-card {
   position: relative;
   overflow: hidden;
   margin: 0 0 18px;
@@ -81,175 +91,123 @@
   box-shadow: 0 18px 45px rgba(11,31,51,.20);
 }
 
-.rol-home .date-label {
+#view-home .welcome-header-card::after {
+  content: "";
+  position: absolute;
+  right: -55px;
+  bottom: -75px;
+  width: 220px;
+  height: 150px;
+  border: 2px solid rgba(255,255,255,.14);
+  border-radius: 50%;
+  transform: rotate(-12deg);
+}
+
+#view-home .date-label {
   color: rgba(255,255,255,.70);
   letter-spacing: 1.2px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  margin: 0 0 4px 0;
 }
 
-.rol-home .greeting-text {
+#view-home .greeting-text {
   color: #fff;
-  font-size: clamp(22px, 3.5vw, 28px);
-  margin: 0 0 6px 0;
+  font-size: clamp(24px, 4vw, 32px);
 }
 
-/* Verse of the Day Card */
-.rol-home .vod-display-card {
+#view-home .streak-pill {
   position: relative;
-  min-height: 220px;
+  z-index: 2;
+  background: rgba(255,255,255,.13);
+  border: 1px solid rgba(255,255,255,.16);
+  color: #fff;
+  backdrop-filter: blur(12px);
+}
+
+/* Verse of the day: signature River of Life card. */
+#view-home .vod-display-card {
+  min-height: 300px;
   margin-bottom: 22px;
-  padding: 28px 24px;
   border-radius: var(--rol-radius-xl);
   border: 1px solid rgba(255,255,255,.10);
   box-shadow: var(--rol-shadow);
-  color: #fff;
-  background: linear-gradient(135deg, #0b1f33 0%, #155e75 100%);
 }
 
-.rol-home .vod-display-card::before {
+#view-home .vod-display-card::before {
   content: "✦  VERSE OF THE DAY";
-  display: inline-block;
-  margin-bottom: 14px;
-  padding: 6px 12px;
+  position: absolute;
+  top: 18px;
+  left: 20px;
+  z-index: 3;
+  padding: 7px 11px;
   border-radius: 999px;
   color: #fff;
-  background: rgba(255,255,255,.15);
-  border: 1px solid rgba(255,255,255,.2);
+  background: rgba(9,34,56,.36);
+  border: 1px solid rgba(255,255,255,.16);
   backdrop-filter: blur(12px);
-  font-size: 10px;
-  font-weight: 800;
+  font: 800 10px/1 var(--font-ui);
   letter-spacing: 1.15px;
 }
 
-.rol-home .vod-text {
+#view-home .vod-text {
   max-width: 760px;
-  font-size: clamp(18px, 2.5vw, 24px);
+  font-size: clamp(20px, 3vw, 27px);
   line-height: 1.55;
-  margin: 0 0 12px 0;
+  text-wrap: balance;
 }
 
-.rol-home .vod-citation {
-  color: rgba(255,255,255,.90);
-  font-weight: 600;
-  font-size: 0.95rem;
-  margin-bottom: 16px;
+#view-home .vod-citation {
+  color: rgba(255,255,255,.92);
 }
 
-/* Content cards & Grids */
-.rol-home .home-action-card {
-  background: var(--bg-content);
-  border-radius: var(--rol-radius-lg);
-  border: 1px solid var(--border);
-  padding: 18px;
-  text-align: left;
-  cursor: pointer;
-  box-shadow: 0 8px 28px rgba(11,31,51,.04);
-  transition: transform 0.2s, box-shadow 0.2s;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+/* Content cards */
+#view-home .guided-meditation-card,
+#view-home .settings-card-group,
+#view-home .home-action-card,
+#view-home .feature-card {
+  border-radius: var(--rol-radius-lg) !important;
+  border-color: #e4e9ed !important;
+  box-shadow: 0 8px 28px rgba(11,31,51,.055);
 }
 
-.rol-home .home-action-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 14px 32px rgba(11,31,51,.08);
+#view-home .section-title-label {
+  color: #5d6b78;
+  letter-spacing: 1.3px;
+  font-size: 11px;
 }
 
-.rol-home .rol-actions-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 14px;
+/* Gold buttons become the primary brand action. */
+#view-home .btn-primary-mini,
+#view-home button.btn-primary,
+#view-home .primary-action {
+  border-radius: 13px !important;
+  font-family: var(--font-ui);
+  font-weight: 800;
+  letter-spacing: .1px;
+  box-shadow: 0 7px 18px rgba(214,168,79,.18);
 }
 
-.rol-home .rol-section-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 12px;
+/* --- MASTER LIGHT THEME FORCE OVERRIDES FOR APP.JS DYNAMIC INJECTION --- */
+#app.ios-theme-light {
+  background-color: #f6f9fb !important;
+  color: #122033 !important;
 }
 
-.rol-home .rol-section-head h2 {
-  font-size: 1.1rem;
-  color: var(--rol-navy);
-  margin: 0;
-}
-
-.rol-home .rol-section-head span {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-}
-
-/* Action buttons */
-.rol-gold-btn {
-  background: var(--rol-gold);
-  color: #fff;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  box-shadow: 0 4px 14px rgba(214,168,79,.25);
-}
-
-.rol-outline-btn {
-  background: rgba(255,255,255,.1);
-  color: #fff;
-  border: 1px solid rgba(255,255,255,.3);
-  padding: 8px 16px;
-  border-radius: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  backdrop-filter: blur(8px);
-}
-
-.icon-btn {
-  background: var(--pill-bg);
-  border: 1px solid var(--border);
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 1rem;
-}
-
-@media (max-width: 700px) {
-  .rol-home .view-scroll-content { padding: 16px 16px 100px; }
-  .rol-home .rol-actions-grid { grid-template-columns: 1fr; }
-   /* --- Force Light Theme Overrides for App.js Layout --- */
-body, html {
-  background-color: #f8fafc !important;
-  color: #1e293b !important;
-}
-
-/* Main content wrapper background */
-#app, .app-container, [data-view="home"] {
-  background-color: #f8fafc !important;
-  color: #1e293b !important;
-}
-
-/* Make search bar clean and light */
-input[type="text"], .home-search-bar {
+#app.ios-theme-light .welcome-header-card,
+#app.ios-theme-light .vod-display-card,
+#app.ios-theme-light .home-action-card,
+#app.ios-theme-light [class*="card"] {
   background-color: #ffffff !important;
-  color: #1e293b !important;
-  border: 1px solid #e2e8f0 !important;
+  color: #122033 !important;
+  border-color: #e5e9ee !important;
+  box-shadow: 0 8px 28px rgba(11,31,51,0.05) !important;
 }
 
-/* Convert dark cards into clean white/light professional cards */
-.welcome-card, .vod-display-card, .home-action-card, .touchpoints-card {
-  background: #ffffff !important;
-  color: #1e293b !important;
-  border: 1px solid #e2e8f0 !important;
-  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.05) !important;
+#app.ios-theme-light .welcome-header-card *,
+#app.ios-theme-light .vod-display-card *,
+#app.ios-theme-light .home-action-card * {
+  color: #122033 !important;
 }
 
-/* Keep text readable inside cards */
-.welcome-card h1, .welcome-card h2, .welcome-card p,
-.vod-display-card blockquote, .vod-display-card p {
-  color: #1e293b !important;
-}
+#app.ios-theme-light .welcome-header-card .date-label,
+#app.ios-theme-light .vod-display-card .vod-citation {
+  color: #667085 !important;
 }
