@@ -1,14 +1,111 @@
 (() => {
-  const app=()=>document.getElementById('app');
-  const isHome=()=>{const h=location.hash||'#/';return h==='#'||h==='#/'||h==='#/home'||h==='#/today'||h==='';};
-  const getName=()=>{for(const k of ['user','currentUser','loggedInUser','riverUser','userProfile']){try{const v=JSON.parse(localStorage.getItem(k));if(v&&(v.name||v.fullName||v.displayName))return v.name||v.fullName||v.displayName;}catch(_){}const s=localStorage.getItem(k);if(s&&s.length<80&&!s.startsWith('{'))return s;}return'Friend';};
-  const go=p=>location.hash=p;
-  const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  async function verse(){try{const r=await fetch('data/daily_bible_verses.json',{cache:'no-store'});const d=await r.json();const day=Math.floor(Date.now()/86400000);return d.verses[day%d.verses.length];}catch(_){return{reference:'Psalm 23:1',english:'The LORD is my shepherd; I shall not want.'};}}
-  function share(v){const t=`🙏 Daily Bible Verse\n\n“${v.english}”\n— ${v.reference}\n\nRiver of Life`;window.open(`https://wa.me/?text=${encodeURIComponent(t)}`,'_blank','noopener');}
-  async function render(){if(!isHome())return;const root=app();if(!root||root.querySelector('.rol-home'))return;const v=await verse();if(!isHome())return;root.innerHTML=`<main class="rol-home" aria-label="River of Life Home"><header class="rol-topbar"><div class="rol-brand"><div class="rol-mark">✝</div><div><strong>River of Life</strong><span>Bible • Prayer • Community</span></div></div><div class="rol-top-actions"><button aria-label="Notifications">🔔</button><button aria-label="Profile" data-go="#/profile">👤</button></div></header><section class="rol-welcome"><div><p class="rol-eyebrow">WELCOME BACK</p><h1>Good morning, ${esc(getName())}</h1><p>Walk with God today.</p></div><div class="rol-cross-water">✝</div></section><section class="rol-verse-card"><div class="rol-verse-label">✦ VERSE OF THE DAY</div><blockquote>“${esc(v.english)}”</blockquote><div class="rol-reference">— ${esc(v.reference)}</div><div class="rol-verse-actions"><button class="rol-outline" data-save>♡ Save</button><button class="rol-gold" data-share>Share to WhatsApp</button></div></section><section><div class="rol-section-head"><h2>Quick Actions</h2><span>Start your journey</span></div><div class="rol-actions-grid"><button data-go="#/bible"><span>📖</span><strong>Bible</strong><small>Read Scripture</small></button><button data-go="#/prayer"><span>🙏</span><strong>Prayer</strong><small>Pray & request</small></button><button data-go="#/quiz"><span>🧠</span><strong>Bible Quiz</strong><small>Test your knowledge</small></button><button data-go="#/meetings"><span>🎥</span><strong>Meetings</strong><small>Join prayer meeting</small></button></div></section><section class="rol-journey"><div class="rol-section-head"><h2>Continue Your Journey</h2><span>Keep growing</span></div><div class="rol-journey-grid"><button data-go="#/bible"><span class="rol-journey-icon">📖</span><div><strong>Read the Bible</strong><small>Spend a few minutes with God's Word.</small></div><b>›</b></button><button data-go="#/quiz"><span class="rol-journey-icon">🧠</span><div><strong>Take a Bible Quiz</strong><small>Learn something new today.</small></div><b>›</b></button></div></section><footer class="rol-footer"><div class="rol-mark">✝</div><strong>River of Life</strong><p>Let His Word be a lamp to your path.</p></footer></main>`;root.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go)));root.querySelector('[data-share]')?.addEventListener('click',()=>share(v));root.querySelector('[data-save]')?.addEventListener('click',e=>{localStorage.setItem(`rol-saved-verse-${v.reference}`,JSON.stringify(v));e.currentTarget.textContent='♥ Saved';});}
-  function routeChanged(){setTimeout(render,30);}
-  window.addEventListener('hashchange',routeChanged);
-  window.addEventListener('DOMContentLoaded',()=>{setTimeout(render,150);const root=app();if(root){new MutationObserver(()=>{if(isHome()&&!root.querySelector('.rol-home'))render();}).observe(root,{childList:true});}});
-  setTimeout(render,500);
+  const app = () => document.getElementById('app');
+  const isHome = () => { const h = location.hash || '#/'; return h === '#' || h === '#/' || h === '#/home' || h === '#/today' || h === ''; };
+  const getName = () => { for (const k of ['user', 'currentUser', 'loggedInUser', 'riverUser', 'userProfile']) { try { const v = JSON.parse(localStorage.getItem(k)); if (v && (v.name || v.fullName || v.displayName)) return v.name || v.fullName || v.displayName; } catch (_) {} const s = localStorage.getItem(k); if (s && s.length < 80 && !s.startsWith('{')) return s; } return 'Friend'; };
+  const go = p => location.hash = p;
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  
+  async function verse() {
+    try {
+      const r = await fetch('data/daily_bible_verses.json', { cache: 'no-store' });
+      const d = await r.json();
+      const day = Math.floor(Date.now() / 86400000);
+      return d.verses[day % d.verses.length];
+    } catch (_) {
+      return { reference: 'Psalm 23:1', english: 'The LORD is my shepherd; I shall not want.' };
+    }
+  }
+
+  async function render() {
+    if (!isHome()) return;
+    const root = app();
+    if (!root || root.querySelector('.rol-home')) return;
+    const v = await verse();
+    if (!isHome()) return;
+
+    root.innerHTML = `
+      <main class="rol-home ios-theme-light" aria-label="River of Life Home">
+        <header class="app-header">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <img src="assets/river-logo.png" alt="Logo" style="width:38px; height:38px; object-fit:contain; border-radius:8px;">
+            <div id="static-header-title" style="font-size: 1.1rem;">River of Life</div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button aria-label="Notifications" class="icon-btn">🔔</button>
+            <button aria-label="Profile" data-go="#/profile" class="icon-btn">👤</button>
+          </div>
+        </header>
+
+        <div class="view-scroll-content">
+          <!-- Welcome Hero Card -->
+          <section class="welcome-header-card">
+            <p class="date-label">WELCOME BACK</p>
+            <h1 class="greeting-text">Good morning, ${esc(getName())}</h1>
+            <p style="margin:0; opacity:0.85;">Walk with God today.</p>
+          </section>
+
+          <!-- Verse of the Day Card -->
+          <section class="vod-display-card">
+            <div class="vod-text">“${esc(v.english)}”</div>
+            <div class="vod-citation">— ${esc(v.reference)}</div>
+            <div style="display:flex; gap:10px;">
+              <button class="rol-outline-btn" data-save>♡ Save</button>
+              <button class="rol-gold-btn" data-share>Share to WhatsApp</button>
+            </div>
+          </section>
+
+          <!-- Quick Actions -->
+          <section style="margin-top: 24px;">
+            <div class="rol-section-head">
+              <h2>Quick Actions</h2>
+              <span>Start your journey</span>
+            </div>
+            <div class="rol-actions-grid">
+              <button data-go="#/bible" class="home-action-card">
+                <span style="font-size: 22px;">📖</span>
+                <strong style="margin-top:4px; color:var(--rol-navy);">Bible</strong>
+                <small style="color:var(--text-muted);">Read Scripture</small>
+              </button>
+              <button data-go="#/prayer" class="home-action-card">
+                <span style="font-size: 22px;">🙏</span>
+                <strong style="margin-top:4px; color:var(--rol-navy);">Prayer</strong>
+                <small style="color:var(--text-muted);">Pray & request</small>
+              </button>
+              <button data-go="#/quiz" class="home-action-card">
+                <span style="font-size: 22px;">🧠</span>
+                <strong style="margin-top:4px; color:var(--rol-navy);">Bible Quiz</strong>
+                <small style="color:var(--text-muted);">Test knowledge</small>
+              </button>
+              <button data-go="#/meetings" class="home-action-card">
+                <span style="font-size: 22px;">🎥</span>
+                <strong style="margin-top:4px; color:var(--rol-navy);">Meetings</strong>
+                <small style="color:var(--text-muted);">Join prayer meeting</small>
+              </button>
+            </div>
+          </section>
+        </div>
+      </main>
+    `;
+
+    root.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => go(b.dataset.go)));
+    root.querySelector('[data-share]')?.addEventListener('click', () => {
+      const t = `🙏 Daily Bible Verse\n\n“${v.english}”\n— ${v.reference}\n\nRiver of Life`;
+      window.open(`https://wa.me/?text=${encodeURIComponent(t)}`, '_blank', 'noopener');
+    });
+    root.querySelector('[data-save]')?.addEventListener('click', e => {
+      localStorage.setItem(`rol-saved-verse-${v.reference}`, JSON.stringify(v));
+      e.currentTarget.textContent = '♥ Saved';
+    });
+  }
+
+  function routeChanged() { setTimeout(render, 30); }
+  window.addEventListener('hashchange', routeChanged);
+  window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(render, 150);
+    const root = app();
+    if (root) {
+      new MutationObserver(() => { if (isHome() && !root.querySelector('.rol-home')) render(); }).observe(root, { childList: true });
+    }
+  });
+  setTimeout(render, 500);
 })();
