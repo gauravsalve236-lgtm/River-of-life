@@ -1,34 +1,54 @@
-/* =========================================================
-   RIVER OF LIFE — SELECTED WHITE HOME DESIGN
-   ========================================================= */
+/* ==========================================================
+   RIVER OF LIFE - WHITE PREMIUM AUTHORITY THEME
+   ========================================================== */
+
+:root {
+  --rol-bg: #f8fafc;
+  --rol-surface: #ffffff;
+  --rol-text-primary: #0f172a;
+  --rol-text-secondary: #475569;
+  --rol-text-muted: #64748b;
+  --rol-primary: #0284c7;
+  --rol-primary-hover: #0369a1;
+  --rol-teal: #0d9488;
+  --rol-border: #e2e8f0;
+  --rol-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --rol-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+  --rol-radius: 16px;
+  --rol-radius-sm: 12px;
+}
+
+body, html {
+  background-color: var(--rol-bg);
+  color: var(--rol-text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
 
 .rol-authority-home {
+  background-color: var(--rol-bg);
   min-height: 100vh;
-  width: 100%;
+  padding: 16px 16px 40px 16px;
   box-sizing: border-box;
-  padding: 20px 18px 120px;
-  background:
-    radial-gradient(circle at 5% 0%, rgba(22,139,135,.07), transparent 28%),
-    radial-gradient(circle at 95% 5%, rgba(201,154,61,.08), transparent 24%),
-    #f8faf9;
-  color: #142b3f;
-  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .rol-authority-shell {
-  width: 100%;
-  max-width: 1120px;
+  max-width: 480px;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 /* HEADER */
-
 .rol-authority-header {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  gap: 15px;
-  margin-bottom: 18px;
+  align-items: center;
+  background: var(--rol-surface);
+  padding: 12px 16px;
+  border-radius: var(--rol-radius);
+  box-shadow: var(--rol-shadow);
+  border: 1px solid var(--rol-border);
 }
 
 .rol-authority-brand {
@@ -38,368 +58,243 @@
 }
 
 .rol-authority-logo {
-  width: 58px;
-  height: 58px;
+  width: 38px;
+  height: 38px;
   object-fit: contain;
-  padding: 5px;
-  background: #ffffff;
-  border-radius: 17px;
-  border: 1px solid #e4ebe8;
-  box-shadow: 0 8px 22px rgba(20,43,63,.10);
+}
+
+.rol-authority-brand div {
+  display: flex;
+  flex-direction: column;
 }
 
 .rol-authority-brand strong {
-  display: block;
-  color: #102a43;
-  font-size: 20px;
+  font-size: 0.95rem;
+  letter-spacing: 0.5px;
+  color: var(--rol-text-primary);
   font-weight: 800;
 }
 
 .rol-authority-brand small {
-  display: block;
-  margin-top: 4px;
-  color: #71808c;
-  font-size: 11px;
+  font-size: 0.65rem;
+  color: var(--rol-teal);
+  font-weight: 700;
+  letter-spacing: 0.5px;
 }
 
 .rol-authority-actions {
   display: flex;
+  align-items: center;
   gap: 8px;
 }
 
-.rol-authority-icon {
-  width: 42px;
-  height: 42px;
-  border: 1px solid #e1e9e6;
-  border-radius: 14px;
-  background: #ffffff;
-  box-shadow: 0 6px 18px rgba(20,43,63,.07);
-  cursor: pointer;
-  font-size: 17px;
-}
-
-/* HERO */
-
-.rol-authority-hero {
-  position: relative;
-  overflow: hidden;
-  margin-bottom: 20px;
-  padding: 32px;
-  border-radius: 28px;
-  background: #ffffff;
-  border: 1px solid #e3ebe8;
-  box-shadow: 0 15px 38px rgba(20,43,63,.08);
-}
-
-.rol-authority-hero::after {
-  content: "";
-  position: absolute;
-  right: -100px;
-  bottom: -150px;
-  width: 330px;
-  height: 330px;
+.rol-authority-icon, .rol-authority-profile-btn {
+  background: #f1f5f9;
+  border: 1px solid var(--rol-border);
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    rgba(22,139,135,.14),
-    rgba(22,139,135,.04) 50%,
-    transparent 72%
-  );
-}
-
-.rol-authority-hero-inner {
-  position: relative;
-  z-index: 2;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 25px;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1rem;
+}
+
+.rol-authority-icon:hover, .rol-authority-profile-btn:hover {
+  background: #e2e8f0;
+}
+
+/* HERO WELCOME */
+.rol-authority-hero {
+  background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
+  border: 1px solid #bae6fd;
+  border-radius: var(--rol-radius);
+  padding: 24px;
+  box-shadow: var(--rol-shadow);
 }
 
 .rol-authority-kicker {
-  color: #168b87;
-  font-size: 11px;
-  font-weight: 900;
-  letter-spacing: .18em;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--rol-primary);
+  letter-spacing: 1px;
+  margin-bottom: 4px;
 }
 
 .rol-authority-hero h1 {
-  margin: 9px 0 8px;
-  color: #102a43;
-  font-size: clamp(30px, 5vw, 46px);
-  line-height: 1.08;
-  letter-spacing: -.04em;
-  font-weight: 850;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--rol-text-primary);
+  margin: 0 0 6px 0;
 }
 
 .rol-authority-hero p {
+  font-size: 0.9rem;
+  color: var(--rol-text-secondary);
   margin: 0;
-  color: #687a86;
-  font-size: 15px;
 }
 
-.rol-authority-hero-logo {
-  width: 125px;
-  height: 125px;
-  object-fit: contain;
-  filter: drop-shadow(0 12px 22px rgba(20,43,63,.12));
-}
-
-/* VERSE */
-
+/* VERSE OF THE DAY CARD */
 .rol-authority-verse {
-  margin-bottom: 25px;
-  padding: 27px;
-  border-radius: 24px;
-  background: linear-gradient(145deg,#fffdf8,#faf3e2);
-  border: 1px solid #ead9ae;
-  box-shadow: 0 11px 30px rgba(20,43,63,.07);
+  background: var(--rol-surface);
+  border: 1px solid var(--rol-border);
+  border-radius: var(--rol-radius);
+  padding: 20px;
+  box-shadow: var(--rol-shadow);
 }
 
 .rol-authority-verse .label {
-  color: #9a7420;
-  font-size: 11px;
-  font-weight: 900;
-  letter-spacing: .14em;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--rol-teal);
+  margin-bottom: 8px;
 }
 
 .rol-authority-verse blockquote {
-  margin: 13px 0 9px;
-  color: #17364d;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(21px, 3vw, 29px);
-  line-height: 1.45;
+  font-size: 1.05rem;
+  line-height: 1.5;
+  color: var(--rol-text-primary);
   font-style: italic;
-  font-weight: 600;
+  margin: 0 0 8px 0;
 }
 
 .rol-authority-verse .ref {
-  color: #687a86;
-  font-size: 13px;
-  font-weight: 800;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--rol-text-muted);
+  margin-bottom: 16px;
 }
 
 .rol-authority-actions-row {
   display: flex;
-  gap: 9px;
-  margin-top: 18px;
+  gap: 10px;
 }
 
 .rol-authority-btn {
-  padding: 11px 16px;
-  border-radius: 12px;
-  border: 1px solid #dce6e3;
-  background: #ffffff;
-  color: #155e8c;
-  font-weight: 800;
+  flex: 1;
+  background: #f1f5f9;
+  border: 1px solid var(--rol-border);
+  color: var(--rol-text-primary);
+  padding: 10px 16px;
+  border-radius: 24px;
+  font-weight: 600;
+  font-size: 0.85rem;
   cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.rol-authority-btn:hover {
+  background: #e2e8f0;
 }
 
 .rol-authority-btn.primary {
-  background: #168b87;
+  background: var(--rol-primary);
+  border-color: var(--rol-primary);
   color: #ffffff;
-  border-color: #168b87;
 }
 
-/* SECTION */
+.rol-authority-btn.primary:hover {
+  background: var(--rol-primary-hover);
+}
 
+/* SECTION TITLES */
 .rol-authority-section-title {
-  margin: 0 0 12px;
-  color: #173c57;
-  font-size: 13px;
-  font-weight: 900;
-  letter-spacing: .11em;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--rol-text-primary);
+  margin: 10px 0 4px 4px;
+  letter-spacing: 0.3px;
 }
 
-/* QUICK ACTIONS */
-
-.rol-authority-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 13px;
-  margin-bottom: 25px;
-}
-
-.rol-authority-card {
-  min-height: 135px;
-  padding: 18px;
-  text-align: left;
-  border: 1px solid #e3ebe8;
-  border-radius: 21px;
-  background: #ffffff;
-  box-shadow: 0 9px 25px rgba(20,43,63,.065);
-  cursor: pointer;
-  transition: transform .2s ease, box-shadow .2s ease;
-}
-
-.rol-authority-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 16px 32px rgba(20,43,63,.11);
-}
-
-.rol-authority-card .ico {
-  width: 48px;
-  height: 48px;
-  display: grid;
-  place-items: center;
-  margin-bottom: 12px;
-  border-radius: 15px;
-  background: #edf7f5;
-  font-size: 24px;
-}
-
-.rol-authority-card strong {
-  display: block;
-  color: #142b3f;
-  font-size: 16px;
-}
-
-.rol-authority-card span {
-  display: block;
-  margin-top: 4px;
-  color: #71808c;
-  font-size: 11px;
-}
-
-/* JOURNEY */
-
+/* JOURNEY / CONTINUE READING */
 .rol-authority-journey {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .rol-authority-journey-card {
-  position: relative;
-  padding: 19px;
-  text-align: left;
-  border: 1px solid #e3ebe8;
-  border-radius: 20px;
-  background: #ffffff;
-  box-shadow: 0 8px 24px rgba(20,43,63,.06);
-  cursor: pointer;
-}
-
-.rol-authority-journey-card strong {
-  display: block;
-  margin: 8px 0 4px;
-  color: #142b3f;
-}
-
-.rol-authority-journey-card span {
-  color: #71808c;
-  font-size: 12px;
-}
-
-.rol-authority-arrow {
-  position: absolute;
-  top: 50%;
-  right: 18px;
-  color: #168b87;
-  font-size: 27px;
-}
-
-/* MESSAGE */
-
-.rol-authority-message {
   display: flex;
   align-items: center;
-  gap: 14px;
-  margin-top: 24px;
-  padding: 19px;
-  border: 1px solid rgba(22,139,135,.12);
-  border-radius: 20px;
-  background: linear-gradient(135deg,#eef7f6,#ffffff);
+  gap: 16px;
+  background: var(--rol-surface);
+  border: 1px solid var(--rol-border);
+  border-radius: var(--rol-radius);
+  padding: 16px;
+  width: 100%;
+  cursor: pointer;
+  box-shadow: var(--rol-shadow);
+  transition: all 0.2s ease;
+  text-align: left;
 }
 
-.rol-authority-message .ico {
-  width: 44px;
-  height: 44px;
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
+.rol-authority-journey-card:hover {
+  border-color: var(--rol-primary);
+  box-shadow: var(--rol-shadow-lg);
+}
+
+.rol-authority-journey-card .ico {
+  font-size: 1.5rem;
+  background: #e0f2fe;
+  width: 48px;
+  height: 48px;
   border-radius: 14px;
-  background: #ffffff;
-  font-size: 21px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
-.rol-authority-message strong {
-  color: #173c57;
-  font-size: 14px;
+/* QUICK ACCESS GRID */
+.rol-authority-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
 }
 
-.rol-authority-message p {
-  margin: 3px 0 0;
-  color: #71808c;
-  font-size: 12px;
+.rol-authority-card {
+  background: var(--rol-surface);
+  border: 1px solid var(--rol-border);
+  border-radius: var(--rol-radius-sm);
+  padding: 14px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: var(--rol-shadow);
+  transition: all 0.2s ease;
 }
 
-/* MOBILE */
+.rol-authority-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--rol-primary);
+}
 
-@media (max-width: 760px) {
+.rol-authority-card .ico {
+  font-size: 1.3rem;
+  margin-bottom: 6px;
+  background: #f0fdf4;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-  .rol-authority-home {
-    padding: 12px 14px 100px;
-  }
+.rol-authority-card strong {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--rol-text-primary);
+  display: block;
+  margin-bottom: 2px;
+}
 
-  .rol-authority-header {
-    margin-bottom: 13px;
-  }
-
-  .rol-authority-logo {
-    width: 48px;
-    height: 48px;
-  }
-
-  .rol-authority-brand strong {
-    font-size: 18px;
-  }
-
-  .rol-authority-hero {
-    padding: 23px;
-    border-radius: 23px;
-  }
-
-  .rol-authority-hero-inner {
-    gap: 10px;
-  }
-
-  .rol-authority-hero-logo {
-    width: 80px;
-    height: 80px;
-  }
-
-  .rol-authority-hero h1 {
-    font-size: 29px;
-  }
-
-  .rol-authority-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-  }
-
-  .rol-authority-card {
-    min-height: 115px;
-    padding: 15px;
-    border-radius: 18px;
-  }
-
-  .rol-authority-card .ico {
-    width: 42px;
-    height: 42px;
-    margin-bottom: 8px;
-  }
-
-  .rol-authority-journey {
-    grid-template-columns: 1fr;
-  }
-
-  .rol-authority-actions-row {
-    flex-wrap: wrap;
-  }
-
-  .rol-authority-btn {
-    flex: 1;
-    min-width: 120px;
-  }
+.rol-authority-card span {
+  font-size: 0.62rem;
+  color: var(--rol-text-muted);
 }
