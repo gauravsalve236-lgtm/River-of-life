@@ -20,15 +20,6 @@
       mark.appendChild(img);
     }
 
-    var welcome=root.querySelector('.rol-welcome');
-    if(welcome && !welcome.querySelector('.rol-welcome-brand')){
-      var badge=document.createElement('div');
-      badge.className='rol-welcome-brand';
-      badge.setAttribute('aria-hidden','true');
-      badge.innerHTML='<img src="'+LOGO+'" alt="">';
-      welcome.appendChild(badge);
-    }
-
     root.classList.add('rol-branded-home');
   }
 
