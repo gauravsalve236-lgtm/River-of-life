@@ -1,244 +1,240 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="mr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>River of Life - जीवन नदी बायबल</title>
-  
-  <!-- Apple PWA Meta Tags -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
-  
-  <style>
-    :root {
-      --primary: #2563eb;
-      --primary-light: #eff6ff;
-      --bg: #f8fafc;
-      --card-bg: #ffffff;
-      --text: #0f172a;
-      --text-muted: #64748b;
-      --border: #e2e8f0;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>River of Life - जीवन नदी बायबल</title>
+    <style>
+        :root {
+          --primary-color: #2563eb;     /* Vibrant, inspiring royal blue */
+          --primary-light: #eff6ff;     /* Soft icy blue tint */
+          --accent-gold: #d97706;       /* Warm amber/gold accent */
+          --text-main: #1e293b;         /* Deep charcoal for crisp reading */
+          --text-muted: #64748b;        /* Soft slate gray for subtext */
+          --bg-app: #f8fafc;            /* Clean light background canvas */
+          --bg-card: #ffffff;           /* Pure white for cards */
+          --border-light: #e2e8f0;      /* Subtle border line */
+          --shadow-subtle: 0 4px 20px rgba(37, 99, 235, 0.05);
+          --radius-card: 16px;
+        }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
-    body { background-color: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; padding-bottom: 90px; }
+        body {
+          background-color: var(--bg-app);
+          color: var(--text-main);
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+          margin: 0;
+          padding: 0;
+          padding-bottom: 90px; /* Space for bottom navigation */
+        }
 
-    .app-container { max-width: 480px; margin: 0 auto; padding: 16px; }
+        .app-container {
+          max-width: 600px;
+          margin: 0 auto;
+        }
 
-    /* Top Brand Bar */
-    .brand-header {
-      background: var(--card-bg);
-      padding: 14px 18px;
-      border-radius: 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border: 1px solid var(--border);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-      margin-bottom: 16px;
-    }
-    .brand-info { display: flex; align-items: center; gap: 12px; }
-    .brand-logo { width: 42px; height: 42px; border-radius: 12px; object-fit: cover; box-shadow: 0 2px 6px rgba(37,99,235,0.2); }
-    .brand-title h1 { font-size: 15px; font-weight: 800; color: var(--text); letter-spacing: -0.3px; }
-    .brand-title p { font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
-    .icon-btn { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text); font-size: 16px; }
+        /* Header Styles */
+        .brand-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 16px 20px;
+          background: var(--bg-card);
+          border-bottom: 1px solid var(--border-light);
+          position: sticky;
+          top: 0;
+          z-index: 100;
+        }
 
-    /* Welcome Greeting Card */
-    .welcome-card {
-      background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-      border: 1px solid #bfdbfe;
-      border-radius: 16px;
-      padding: 16px 20px;
-      margin-bottom: 16px;
-    }
-    .welcome-card span { font-size: 11px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; }
-    .welcome-card h2 { font-size: 18px; font-weight: 800; color: #1e3a8a; margin-top: 2px; }
-    .welcome-card p { font-size: 13px; color: #3b82f6; margin-top: 4px; }
+        .brand-info {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
 
-    /* Daily Scripture Card */
-    .scripture-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
-      margin-bottom: 16px;
-    }
-    .scripture-header { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: var(--primary); margin-bottom: 10px; text-transform: uppercase; }
-    .scripture-text { font-family: 'Lora', serif; font-size: 16px; font-style: italic; line-height: 1.6; color: var(--text); margin-bottom: 8px; }
-    .scripture-ref { font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 16px; display: block; }
-    
-    .scripture-actions { display: flex; gap: 10px; }
-    .btn-action { flex: 1; padding: 10px; border-radius: 10px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; border: 1px solid var(--border); }
-    .btn-save { background: var(--bg); color: var(--text); }
-    .btn-whatsapp { background: #25d366; color: #fff; border-color: #25d366; box-shadow: 0 2px 4px rgba(37,211,102,0.2); }
+        .brand-logo {
+          width: 42px;
+          height: 42px;
+          object-fit: contain;
+          border-radius: 10px;
+          background: var(--primary-light);
+          padding: 4px;
+        }
 
-    /* Continue Reading Bar */
-    .continue-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 14px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 20px;
-    }
-    .continue-info { display: flex; align-items: center; gap: 12px; }
-    .continue-icon { width: 40px; height: 40px; border-radius: 10px; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: bold; }
-    .continue-details h4 { font-size: 14px; font-weight: 700; color: var(--text); }
-    .continue-details p { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
-    .btn-continue { background: var(--primary); color: #fff; border: none; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; }
+        .brand-title h1 {
+          font-size: 1.1rem;
+          font-weight: 700;
+          margin: 0;
+          color: var(--text-main);
+        }
 
-    /* Quick Access Grid */
-    .section-title { font-size: 14px; font-weight: 800; color: var(--text); margin-bottom: 12px; }
-    .grid-menu { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
-    .grid-item { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 14px 8px; text-align: center; cursor: pointer; transition: transform 0.1s; }
-    .grid-item:active { transform: scale(0.96); }
-    .grid-icon { font-size: 20px; margin-bottom: 6px; }
-    .grid-label { font-size: 11px; font-weight: 700; color: var(--text); }
+        .brand-title p {
+          font-size: 0.8rem;
+          color: var(--text-muted);
+          margin: 0;
+        }
 
-    /* Live Meeting Card */
-    .meeting-card {
-      background: #0f172a;
-      color: #fff;
-      border-radius: 16px;
-      padding: 18px;
-    }
-    .meeting-badge { background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.4); font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 20px; text-transform: uppercase; }
-    .meeting-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    .meeting-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
-    .meeting-card p { font-size: 12px; color: #94a3b8; margin-bottom: 14px; }
-    .btn-join { width: 100%; background: var(--primary); color: #fff; border: none; padding: 10px; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer; }
+        .icon-btn {
+          background: var(--primary-light);
+          border: none;
+          width: 38px;
+          height: 38px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          color: var(--primary-color);
+          transition: background 0.2s;
+        }
 
-    /* Bottom Navigation Bar */
-    .bottom-nav {
-      position: fixed; bottom: 0; left: 0; right: 0; background: var(--card-bg);
-      border-top: 1px solid var(--border); display: flex; justify-content: space-around;
-      padding: 8px 0; z-index: 1000; max-width: 480px; margin: 0 auto;
-    }
-    .nav-link { background: none; border: none; display: flex; flex-direction: column; align-items: center; gap: 2px; color: var(--text-muted); font-size: 10px; font-weight: 600; cursor: pointer; flex: 1; }
-    .nav-link.active { color: var(--primary); }
-    .nav-link svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2.2; }
-  </style>
+        .icon-btn:hover {
+          background: #dbeafe;
+        }
+
+        /* Cards Layout */
+        .welcome-card, .scripture-card {
+          background: var(--bg-card);
+          border-radius: var(--radius-card);
+          padding: 22px;
+          margin: 16px;
+          box-shadow: var(--shadow-subtle);
+          border: 1px solid var(--border-light);
+        }
+
+        .welcome-card span {
+          font-size: 0.8rem;
+          color: var(--primary-color);
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .welcome-card h2 {
+          font-size: 1.4rem;
+          color: var(--text-main);
+          margin: 6px 0 4px 0;
+        }
+
+        .welcome-card p {
+          color: var(--text-muted);
+          font-size: 0.95rem;
+          margin: 0;
+        }
+
+        .scripture-header {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 0.85rem;
+          color: var(--primary-color);
+          font-weight: 600;
+          margin-bottom: 10px;
+        }
+
+        .scripture-card p {
+          font-size: 1.05rem;
+          line-height: 1.5;
+          color: var(--text-main);
+          margin: 0;
+        }
+
+        /* Bottom Navigation Bar */
+        .bottom-nav {
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          background: var(--bg-card);
+          display: flex;
+          justify-content: space-around;
+          padding: 10px 0 14px 0;
+          border-top: 1px solid var(--border-light);
+          z-index: 1000;
+        }
+
+        .nav-item {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-decoration: none;
+          color: var(--text-muted);
+          font-size: 0.75rem;
+          font-weight: 500;
+          gap: 4px;
+          transition: color 0.2s;
+        }
+
+        .nav-item svg {
+          width: 22px;
+          height: 22px;
+          stroke: var(--text-muted);
+          fill: none;
+          stroke-width: 2;
+          stroke-linecap: round;
+          stroke-linejoin: round;
+        }
+
+        .nav-item.active {
+          color: var(--primary-color);
+        }
+
+        .nav-item.active svg {
+          stroke: var(--primary-color);
+        }
+    </style>
 </head>
 <body>
 
-  <div class="app-container">
-    <!-- Header with New Logo -->
-    <header class="brand-header">
-      <div class="brand-info">
-        <img src="assets/river-logo.png" alt="River of Life Logo" class="brand-logo">
-        <div class="brand-title">
-          <h1>River of Life</h1>
-          <p>जीवन नदी बायबल</p>
-        </div>
-      </div>
-      <div class="brand-actions">
-        <button class="icon-btn" aria-label="Notifications">🔔</button>
-      </div>
-    </header>
+    <div class="app-container">
+        <!-- Header with New Logo -->
+        <header class="brand-header">
+            <div class="brand-info">
+                <img src="assets/river-logo.png" alt="River of Life Logo" class="brand-logo">
+                <div class="brand-title">
+                    <h1>River of Life</h1>
+                    <p>जीवन नदी बायबल</p>
+                </div>
+            </div>
+            <div class="brand-actions">
+                <button class="icon-btn" aria-label="Notifications">🔔</button>
+            </div>
+        </header>
 
-    <!-- Welcome Greeting -->
-    <div class="welcome-card">
-      <span>Welcome Back</span>
-      <h2>शुभ सकाळ, गौरव 👋</h2>
-      <p>Keep walking in His grace today.</p>
+        <!-- Welcome Greeting -->
+        <section class="welcome-card">
+            <span>Welcome Back</span>
+            <h2>शुभ सकाळ, गौरव 👋</h2>
+            <p>Keep walking in His grace today.</p>
+        </section>
+
+        <!-- Daily Scripture Card -->
+        <section class="scripture-card">
+            <div class="scripture-header">
+                <span>📖 Today's Scripture • आजचे वचन</span>
+            </div>
+            <p>"तुझे वचन माझ्या पायास दिवा व माझ्या मार्गावर प्रकाश आहे." - स्तोत्र १११:१०</p>
+        </section>
     </div>
 
-    <!-- Daily Scripture (Bible Society Marathi) -->
-    <div class="scripture-card">
-      <div class="scripture-header">
-        <span>📖</span> Today's Scripture • आजचे वचन
-      </div>
-      <blockquote class="scripture-text">
-        "परमेश्वर हा माझा पाळला आहे; मला काहीची कमतरता असणार नाही."
-      </blockquote>
-      <span class="scripture-ref">स्तोत्र २३:१ (पवित्र शास्त्र - मराठी बायबल सोसायटी)</span>
-      
-      <div class="scripture-actions">
-        <button class="btn-action btn-save" onclick="alert('Verse saved to your bookmarks!')">🤍 Save</button>
-        <button class="btn-action btn-whatsapp" onclick="window.open('https://api.whatsapp.com/send?text=परमेश्वर%20हा%20माझा%20पाळला%20आहे;%20मला%20काहीची%20कमतरता%20असणार%20नाही.%20-%20स्तोत्र%20२३:१', '_blank')">💬 Share WhatsApp</button>
-      </div>
-    </div>
-
-    <!-- Continue Reading -->
-    <div class="continue-card">
-      <div class="continue-info">
-        <div class="continue-icon">📖</div>
-        <div class="continue-details">
-          <h4>योहान अध्याय ३</h4>
-          <p>Last read: Verse 16</p>
-        </div>
-      </div>
-      <button class="btn-continue" onclick="alert('Opening John Chapter 3...')">Continue &rarr;</button>
-    </div>
-
-    <!-- Quick Access Grid -->
-    <div class="section-title">Quick Access / मुख्य पर्याय</div>
-    <div class="grid-menu">
-      <div class="grid-item" onclick="alert('Opening Bible Reader...')">
-        <div class="grid-icon">📖</div>
-        <div class="grid-label">Bible</div>
-      </div>
-      <div class="grid-item" onclick="alert('Opening Prayer Meetings...')">
-        <div class="grid-icon">🎙️</div>
-        <div class="grid-label">Meetings</div>
-      </div>
-      <div class="grid-item" onclick="alert('Opening Prayer Requests...')">
-        <div class="grid-icon">🙏</div>
-        <div class="grid-label">Prayers</div>
-      </div>
-      <div class="grid-item" onclick="alert('Opening Churches Directory...')">
-        <div class="grid-icon">⛪</div>
-        <div class="grid-label">Churches</div>
-      </div>
-    </div>
-
-    <!-- Upcoming Prayer Meeting -->
-    <div class="section-title">Live Fellowship / प्रार्थना सभा</div>
-    <div class="meeting-card">
-      <div class="meeting-header">
-        <h3>Evening Prayer & Worship</h3>
-        <span class="meeting-badge">Live Soon</span>
-      </div>
-      <p>📅 Today, 8:00 PM | 🌐 Online WebRTC Meetingroom</p>
-      <button class="btn-join" onclick="alert('Connecting to LiveKit Room...')">Join Meeting / सहभागी व्हा</button>
-    </div>
-  </div>
-
-  <!-- Bottom Navigation -->
-  <nav class="bottom-nav">
-    <button class="nav-link active">
-      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-      Today
-    </button>
-    <button class="nav-link" onclick="alert('Bible Section')">
-      <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
-      Bible
-    </button>
-    <button class="nav-link" onclick="alert('Meetings Section')">
-      <svg viewBox="0 0 24 24"><path d="M23 7l-7 5 7 5V7z"></path><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
-      Meetings
-    </button>
-    <button class="nav-link" onclick="alert('Prayers Section')">
-      <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-      Prayers
-    </button>
-  </nav>
-
-  <!-- Conflicting External Scripts Removed/Commented Out -->
-  <!--
-  <script src="app.js"></script>
-  <script src="assets/river-home-final.js?v=20260820-1"></script>
-  <script src="assets/river-pull-to-refresh.js?v=20260820-1"></script>
-  <script src="assets/river-home-authority.js?v=20260820-1"></script>
-  -->
+    <!-- Sleek Bottom Navigation Menu -->
+    <nav class="bottom-nav">
+      <a href="#" class="nav-item active">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+        <span>Home</span>
+      </a>
+      <a href="#" class="nav-item">
+        <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+        <span>Bible</span>
+      </a>
+      <a href="#" class="nav-item">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        <span>Daily</span>
+      </a>
+      <a href="#" class="nav-item">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        <span>Profile</span>
+      </a>
+    </nav>
 
 </body>
 </html>
