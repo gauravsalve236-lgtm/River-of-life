@@ -1,0 +1,27 @@
+/* River of Life — branded visual layer. Safe additive styles only. */
+.rol-logo-mark{width:48px!important;height:48px!important;padding:0!important;border-radius:15px!important;background:#fff!important;overflow:hidden;display:grid!important;place-items:center;box-shadow:0 8px 24px rgba(11,35,64,.14),0 0 0 1px rgba(201,155,53,.18)!important;position:relative}
+.rol-logo-mark img{width:100%;height:100%;display:block;object-fit:cover}
+.rol-brand strong{font-family:Georgia,'Times New Roman',serif!important;letter-spacing:.01em}
+.rol-brand small{letter-spacing:.04em!important}
+.rol-welcome{isolation:isolate!important;min-height:170px!important;background:linear-gradient(135deg,#062b3d 0%,#0a5065 52%,#087f7b 100%)!important;box-shadow:0 22px 52px rgba(6,43,61,.22)!important}
+.rol-welcome:before{content:"";position:absolute;inset:-40%;background:radial-gradient(circle at 70% 30%,rgba(240,199,91,.25),transparent 25%),radial-gradient(circle at 20% 90%,rgba(56,203,220,.18),transparent 28%);animation:rolGlow 9s ease-in-out infinite alternate;pointer-events:none;z-index:-1}
+.rol-welcome:after{content:"";position:absolute;left:-10%;right:-10%;bottom:-70px;height:130px;background:repeating-radial-gradient(ellipse at 50% 0,rgba(255,255,255,.16) 0 2px,transparent 3px 22px);opacity:.35;animation:rolWater 8s linear infinite;pointer-events:none;z-index:-1}
+.rol-welcome-content{position:relative;z-index:2}
+.rol-welcome-label{color:#f4d27a!important}
+.rol-welcome h1{font-family:Georgia,'Times New Roman',serif!important;font-weight:700!important}
+.rol-welcome p{font-size:14px!important}
+.rol-cross-water{width:128px;height:128px!important;margin-right:4px!important;display:grid!important;place-items:center;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.18);border-radius:50%;box-shadow:inset 0 0 30px rgba(255,255,255,.06),0 0 35px rgba(240,199,91,.08);font-size:0!important;animation:rolFloat 4.5s ease-in-out infinite}
+.rol-cross-water:before{content:"";width:106px;height:106px;background:url('./river-of-life-logo.svg') center/cover no-repeat;filter:drop-shadow(0 5px 12px rgba(0,0,0,.18));border-radius:22px;animation:rolPulse 3.8s ease-in-out infinite}
+.rol-verse-card{position:relative;overflow:hidden!important}
+.rol-verse-card:before{content:"";position:absolute;right:-50px;top:-55px;width:170px;height:170px;border-radius:50%;border:1px solid rgba(201,155,53,.22);box-shadow:0 0 0 22px rgba(201,155,53,.035),0 0 0 44px rgba(201,155,53,.025);pointer-events:none}
+.rol-actions-grid button,.rol-journey-grid button,.rol-home-message{transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease!important}
+.rol-actions-grid button:hover,.rol-journey-grid button:hover,.rol-home-message:hover{transform:translateY(-4px)!important;box-shadow:0 16px 34px rgba(11,35,64,.12)!important;border-color:rgba(20,129,122,.22)!important}
+.rol-actions-grid button:hover .rol-action-icon{transform:scale(1.08) rotate(-2deg)}
+.rol-action-icon{transition:transform .22s ease;display:inline-block}
+.rol-last-updated{font-family:Georgia,'Times New Roman',serif!important}
+@keyframes rolGlow{from{transform:translate3d(-2%,0,0) scale(1)}to{transform:translate3d(3%,2%,0) scale(1.08)}}
+@keyframes rolWater{from{transform:translateX(-3%)}to{transform:translateX(3%)}}
+@keyframes rolFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes rolPulse{0%,100%{transform:scale(.97);opacity:.94}50%{transform:scale(1);opacity:1}}
+@media(max-width:720px){.rol-logo-mark{width:44px!important;height:44px!important}.rol-welcome{min-height:145px!important}.rol-cross-water{width:92px;height:92px!important}.rol-cross-water:before{width:78px;height:78px}.rol-brand small{font-size:9px!important}}
+@media(prefers-reduced-motion:reduce){.rol-welcome:before,.rol-welcome:after,.rol-cross-water,.rol-cross-water:before{animation:none!important}.rol-actions-grid button,.rol-journey-grid button,.rol-home-message{transition:none!important}}
