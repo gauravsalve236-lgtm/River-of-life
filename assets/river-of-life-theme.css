@@ -220,4 +220,36 @@
 @media (max-width: 700px) {
   .rol-home .view-scroll-content { padding: 16px 16px 100px; }
   .rol-home .rol-actions-grid { grid-template-columns: 1fr; }
+   /* --- Force Light Theme Overrides for App.js Layout --- */
+body, html {
+  background-color: #f8fafc !important;
+  color: #1e293b !important;
+}
+
+/* Main content wrapper background */
+#app, .app-container, [data-view="home"] {
+  background-color: #f8fafc !important;
+  color: #1e293b !important;
+}
+
+/* Make search bar clean and light */
+input[type="text"], .home-search-bar {
+  background-color: #ffffff !important;
+  color: #1e293b !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+/* Convert dark cards into clean white/light professional cards */
+.welcome-card, .vod-display-card, .home-action-card, .touchpoints-card {
+  background: #ffffff !important;
+  color: #1e293b !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.05) !important;
+}
+
+/* Keep text readable inside cards */
+.welcome-card h1, .welcome-card h2, .welcome-card p,
+.vod-display-card blockquote, .vod-display-card p {
+  color: #1e293b !important;
+}
 }
