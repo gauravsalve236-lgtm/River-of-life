@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+<title id="title">River of Life logo</title><desc id="desc">A cross above flowing river water, framed by leaves and a golden arc.</desc>
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fffdf7"/><stop offset="1" stop-color="#f3f1e9"/></linearGradient>
+  <linearGradient id="water" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0d506a"/><stop offset=".45" stop-color="#008f9f"/><stop offset="1" stop-color="#063a55"/></linearGradient>
+  <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f4d27a"/><stop offset=".5" stop-color="#c99428"/><stop offset="1" stop-color="#f0c75b"/></linearGradient>
+  <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#0b2340" flood-opacity=".16"/></filter>
+</defs>
+<rect x="8" y="8" width="496" height="496" rx="92" fill="url(#bg)" filter="url(#shadow)"/>
+<path d="M145 215 C178 84 349 54 424 153" fill="none" stroke="url(#gold)" stroke-width="18" stroke-linecap="round"/>
+<path d="M250 96h38v84h61v38h-61v84h-38v-84h-61v-38h61z" fill="#073d53"/>
+<path d="M274 275 C252 305 218 320 198 343 C174 370 178 395 215 411 C253 428 315 424 347 397 C369 379 361 357 333 344 C305 331 289 315 302 294 C311 280 300 270 274 275Z" fill="url(#water)"/>
+<path d="M285 302 C268 324 235 340 220 356 C205 372 211 383 234 391 C262 400 308 397 332 379" fill="none" stroke="#e9fbfa" stroke-width="9" stroke-linecap="round" opacity=".9"/>
+<path d="M299 322 C287 338 261 350 250 362 C240 373 246 380 263 384" fill="none" stroke="#56cfe0" stroke-width="6" stroke-linecap="round" opacity=".9"/>
+<path d="M178 416 C154 398 142 369 143 342 C144 318 155 294 174 277" fill="none" stroke="#23744f" stroke-width="11" stroke-linecap="round"/>
+<g fill="#168b63">
+  <path d="M161 372c-31-5-43-22-42-44 25-2 42 13 42 44Z"/>
+  <path d="M153 335c-27-13-35-34-27-54 24 7 34 25 27 54Z"/>
+  <path d="M157 297c-17-20-16-40-2-54 18 13 22 31 2 54Z"/>
+  <path d="M171 399c-25 1-39-12-42-30 22-5 38 5 42 30Z"/>
+  <path d="M170 270c-5-24 4-42 21-51 11 21 5 38-21 51Z"/>
+</g>
+<path d="M166 433 C222 452 325 447 380 412" fill="none" stroke="#c89b35" stroke-width="6" stroke-linecap="round" opacity=".75"/>
+</svg>
