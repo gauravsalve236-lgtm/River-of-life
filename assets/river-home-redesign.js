@@ -27,8 +27,8 @@
       <main class="rol-home ios-theme-light" aria-label="River of Life Home">
         <header class="app-header">
           <div style="display:flex; align-items:center; gap:12px;">
-            <img src="assets/river-logo.png" alt="Logo" style="width:38px; height:38px; object-fit:contain; border-radius:8px;">
-            <div id="static-header-title" style="font-size: 1.1rem;">River of Life</div>
+            <img src="assets/icons/icon-192.png" alt="Logo" style="width:38px; height:38px; object-fit:contain; border-radius:8px;" onerror="this.src='assets/river-logo.png'">
+            <div id="static-header-title" style="font-size: 1.1rem; font-weight: 700;">River of Life</div>
           </div>
           <div style="display:flex; gap:8px;">
             <button aria-label="Notifications" class="icon-btn">🔔</button>
@@ -57,7 +57,7 @@
           <!-- Quick Actions -->
           <section style="margin-top: 24px;">
             <div class="rol-section-head">
-              <h2>Quick Actions</h2>
+              <h2>Quick Access</h2>
               <span>Start your journey</span>
             </div>
             <div class="rol-actions-grid">
@@ -66,20 +66,20 @@
                 <strong style="margin-top:4px; color:var(--rol-navy);">Bible</strong>
                 <small style="color:var(--text-muted);">Read Scripture</small>
               </button>
-              <button data-go="#/prayer" class="home-action-card">
-                <span style="font-size: 22px;">🙏</span>
-                <strong style="margin-top:4px; color:var(--rol-navy);">Prayer</strong>
-                <small style="color:var(--text-muted);">Pray & request</small>
-              </button>
-              <button data-go="#/quiz" class="home-action-card">
-                <span style="font-size: 22px;">🧠</span>
-                <strong style="margin-top:4px; color:var(--rol-navy);">Bible Quiz</strong>
-                <small style="color:var(--text-muted);">Test knowledge</small>
-              </button>
               <button data-go="#/meetings" class="home-action-card">
                 <span style="font-size: 22px;">🎥</span>
-                <strong style="margin-top:4px; color:var(--rol-navy);">Meetings</strong>
-                <small style="color:var(--text-muted);">Join prayer meeting</small>
+                <strong style="margin-top:4px; color:var(--rol-navy);">Prayer Mtg</strong>
+                <small style="color:var(--text-muted);">Join live meeting</small>
+              </button>
+              <button data-go="#/prayers" class="home-action-card">
+                <span style="font-size: 22px;">🙏</span>
+                <strong style="margin-top:4px; color:var(--rol-navy);">Requests</strong>
+                <small style="color:var(--text-muted);">Share needs</small>
+              </button>
+              <button data-go="#/churches" class="home-action-card">
+                <span style="font-size: 22px;">⛪</span>
+                <strong style="margin-top:4px; color:var(--rol-navy);">Churches</strong>
+                <small style="color:var(--text-muted);">Find fellowship</small>
               </button>
             </div>
           </section>
