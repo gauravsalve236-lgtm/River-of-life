@@ -21,8 +21,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- Main Stylesheet -->
-  <!-- Main Stylesheet (Cache-Busted for Version 74 Removed Floating Meeting Toolbar) -->
-  <link rel="stylesheet" href="index.css?v=74_REMOVED_FLOATING_MEETING_TOOLBAR">
+  <!-- Main Stylesheet (Cache-Busted for Version 75 Pull To Refresh & Anti Flicker) -->
+  <link rel="stylesheet" href="index.css?v=75_PULL_TO_REFRESH_AND_ANTI_FLICKER">
 
   <!-- Official LiveKit WebRTC Client SDK -->
   <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.0.8/dist/livekit-client.umd.min.js"></script>
@@ -147,7 +147,19 @@
         
         <!-- VIEW 1: TODAY / HOME VIEW (Redesigned Grid Layout) -->
         <section id="view-home" class="app-view active">
-          <div class="view-scroll-content">
+          <div class="view-scroll-content" id="home-view-scroll-content">
+            <!-- Native Mobile Pull To Refresh Indicator -->
+            <div id="pull-to-refresh-container" class="pull-to-refresh-wrapper">
+              <div class="pull-to-refresh-icon-box">
+                <svg id="pull-refresh-svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M23 4v6h-6"></path>
+                  <path d="M1 20v-6h6"></path>
+                  <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                </svg>
+              </div>
+              <span id="pull-refresh-text" class="pull-refresh-label">Pull to refresh / रिफ्रेश करण्यासाठी ओढा</span>
+            </div>
+
             <!-- Search bar at top center -->
             <div class="home-search-container">
               <input type="text" id="home-search-trigger-input" class="home-search-bar" placeholder="Search Bible, Topics, or Questions" readonly>
@@ -2392,8 +2404,8 @@
       <span id="toast-message">Copied to clipboard!</span>
     </div>
 
-  <!-- App Main Logic (Cache-Busted for Version 74 Removed Floating Meeting Toolbar) -->
-  <script src="app.js?v=74_REMOVED_FLOATING_MEETING_TOOLBAR"></script>
+  <!-- App Main Logic (Cache-Busted for Version 75 Pull To Refresh & Anti Flicker) -->
+  <script src="app.js?v=75_PULL_TO_REFRESH_AND_ANTI_FLICKER"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 2.5s no matter what

@@ -9174,3 +9174,108 @@ window.sendNativeMeetingChatMessage = (e) => {
 };
 window.hostMuteAllParticipants = () => window.nativeLiveKitMeetingManager.muteAllParticipants();
 window.hostEndMeetingForEveryone = () => window.nativeLiveKitMeetingManager.endMeetingForEveryone();
+
+// Native Touch Pull-To-Refresh for Mobile Devices on Home Page
+function initPullToRefresh() {
+  const container = document.getElementById("home-view-scroll-content");
+  const refreshIndicator = document.getElementById("pull-to-refresh-container");
+  const refreshSvg = document.getElementById("pull-refresh-svg");
+  const refreshText = document.getElementById("pull-refresh-text");
+  if (!container || !refreshIndicator) return;
+
+  let startY = 0;
+  let currentY = 0;
+  let isPulling = false;
+  let isRefreshing = false;
+  const PULL_THRESHOLD = 65;
+
+  container.addEventListener("touchstart", (e) => {
+    if (container.scrollTop <= 0 && e.touches.length === 1) {
+      startY = e.touches[0].clientY;
+      isPulling = true;
+    } else {
+      isPulling = false;
+    }
+  }, { passive: true });
+
+  container.addEventListener("touchmove", (e) => {
+    if (!isPulling || isRefreshing) return;
+    currentY = e.touches[0].clientY;
+    const diffY = currentY - startY;
+
+    if (diffY > 0 && container.scrollTop <= 0) {
+      const pullDist = Math.min(diffY * 0.45, 85);
+      refreshIndicator.style.height = `${pullDist}px`;
+      refreshIndicator.style.opacity = `${Math.min(pullDist / PULL_THRESHOLD, 1)}`;
+      refreshIndicator.classList.add("pulling");
+
+      if (refreshSvg) {
+        refreshSvg.style.transform = `rotate(${pullDist * 4}deg)`;
+      }
+
+      if (pullDist >= PULL_THRESHOLD) {
+        if (refreshText) refreshText.textContent = "Release to refresh / रिफ्रेश करा";
+      } else {
+        if (refreshText) refreshText.textContent = "Pull to refresh / रिफ्रेश करण्यासाठी ओढा";
+      }
+    }
+  }, { passive: true });
+
+  const handlePullEnd = () => {
+    if (!isPulling || isRefreshing) return;
+    const diffY = currentY - startY;
+    const pullDist = diffY * 0.45;
+
+    if (pullDist >= PULL_THRESHOLD && container.scrollTop <= 0) {
+      isRefreshing = true;
+      refreshIndicator.style.height = "48px";
+      refreshIndicator.classList.add("refreshing");
+      if (refreshText) refreshText.textContent = "Refreshing... / रिफ्रेश होत आहे...";
+
+      setTimeout(() => {
+        try {
+          if (typeof renderDailyDevotion === "function") renderDailyDevotion();
+          if (typeof renderMeetingsDashboard === "function") renderMeetingsDashboard();
+        } catch(e) {}
+        
+        showToast("Home view refreshed 🕊️ / मुख्य पृष्ठ रिफ्रेश झाले");
+        
+        setTimeout(() => {
+          refreshIndicator.style.height = "0px";
+          refreshIndicator.style.opacity = "0";
+          refreshIndicator.classList.remove("pulling", "refreshing");
+          if (refreshSvg) refreshSvg.style.transform = "none";
+          isRefreshing = false;
+          isPulling = false;
+        }, 300);
+      }, 700);
+    } else {
+      refreshIndicator.style.height = "0px";
+      refreshIndicator.style.opacity = "0";
+      refreshIndicator.classList.remove("pulling");
+      if (refreshSvg) refreshSvg.style.transform = "none";
+      isPulling = false;
+    }
+  };
+
+  container.addEventListener("touchend", handlePullEnd, { passive: true });
+  container.addEventListener("touchcancel", handlePullEnd, { passive: true });
+}
+
+// Global PostMessage Listener for Instant Direct Leave (No Popup Dialogs)
+window.addEventListener("message", (event) => {
+  try {
+    if (!event.data) return;
+    const d = typeof event.data === "string" ? JSON.parse(event.data) : event.data;
+    if (d && (d.type === "leave" || d.action === "leave" || d.event === "leave" || d.type === "endCall" || d.type === "closeRoom")) {
+      exitLiveMeetingRoom();
+    }
+  } catch(e) {}
+});
+
+// Initialize Pull-To-Refresh when DOM is ready
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initPullToRefresh);
+} else {
+  initPullToRefresh();
+}

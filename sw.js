@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v74-REMOVED-FLOATING-MEETING-TOOLBAR';
+const CACHE_NAME = 'river-of-life-cache-v75-PULL-TO-REFRESH-AND-ANTI-FLICKER';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

@@ -4749,19 +4749,20 @@ input, textarea, select, [contenteditable="true"] {
 
 .splash-logo-wrapper {
   position: relative;
-  width: 110px;
-  height: 110px;
-  margin-bottom: 20px;
+  width: 72px;
+  height: 72px;
+  margin-bottom: 16px;
 }
 
 .splash-logo {
   width: 100%;
   height: 100%;
-  border-radius: 24px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+  border-radius: 18px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
   animation: floatLogo 4s ease-in-out infinite;
   position: relative;
   z-index: 2;
+  object-fit: contain;
 }
 
 .splash-logo-glow {
@@ -5810,4 +5811,56 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
   min-height: 0 !important;
   padding: 0 !important;
   margin: 0 !important;
+}
+
+/* Anti-Flicker Hardware Acceleration Rules */
+.app-view, .meeting-modal-overlay, .splash-screen {
+  backface-visibility: hidden !important;
+  -webkit-backface-visibility: hidden !important;
+  transform: translateZ(0) !important;
+  -webkit-transform: translateZ(0) !important;
+}
+
+/* Native Pull To Refresh Styles */
+.pull-to-refresh-wrapper {
+  height: 0;
+  opacity: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: height 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.2s ease;
+  margin-bottom: 0;
+  color: var(--primary);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 700;
+  will-change: height, opacity;
+}
+
+.pull-to-refresh-wrapper.pulling {
+  opacity: 1;
+}
+
+.pull-to-refresh-icon-box {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+
+.pull-to-refresh-wrapper.refreshing .pull-to-refresh-icon-box svg {
+  animation: spinRefresh 0.8s linear infinite;
+}
+
+@keyframes spinRefresh {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
