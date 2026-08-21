@@ -6072,3 +6072,31 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
 .share-whatsapp-btn:hover {
   transform: translateY(-2px);
 }
+
+/* Universal Card Bounds & Text Overflow Protection */
+.brand-hero-welcome-card,
+.daily-verse-card,
+.touchpoint-hope-card,
+.community-share-card,
+.settings-card-group,
+.resilient-banner-card,
+.bible-quiz-promo-card,
+.touchpoints-tags-card,
+.suggested-plans-card {
+  box-sizing: border-box !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+}
+
+.brand-hero-welcome-card h2,
+.brand-hero-welcome-card p,
+.daily-verse-card blockquote,
+.community-share-card h4,
+.community-share-card p {
+  box-sizing: border-box !important;
+  max-width: 100% !important;
+  word-break: break-word !important;
+  overflow-wrap: anywhere !important;
+}

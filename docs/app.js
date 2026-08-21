@@ -9280,3 +9280,61 @@ if (document.readyState === "loading") {
 } else {
   initPullToRefresh();
 }
+
+// Global Pastoral Prayer Request Form Handlers
+window.openPrayerRequestForm = function() {
+  const modal = document.getElementById("modal-prayer-request");
+  if (modal) {
+    modal.style.display = "flex";
+    if (state && state.currentUser) {
+      const nameInput = document.getElementById("prayer-req-fullname");
+      const emailInput = document.getElementById("prayer-req-email");
+      if (nameInput && !nameInput.value) nameInput.value = state.currentUser.username;
+      if (emailInput && !emailInput.value) emailInput.value = state.currentUser.email || "";
+    }
+  }
+};
+
+window.closePrayerRequestForm = function() {
+  const modal = document.getElementById("modal-prayer-request");
+  if (modal) modal.style.display = "none";
+};
+
+window.submitPastoralPrayerRequest = function(e) {
+  if (e) e.preventDefault();
+  const fullName = document.getElementById("prayer-req-fullname")?.value.trim();
+  const email = document.getElementById("prayer-req-email")?.value.trim();
+  const phone = document.getElementById("prayer-req-phone")?.value.trim() || "N/A";
+  const requestDetails = document.getElementById("prayer-req-details")?.value.trim();
+  const sharingLevel = document.querySelector('input[name="prayer_sharing_level"]:checked')?.value || "private";
+  const wantsFollowup = document.getElementById("prayer-req-followup")?.checked || false;
+
+  if (!fullName || !email || !requestDetails) {
+    showToast("Please fill in all required fields / कृपया आवश्यक माहिती भरा");
+    return;
+  }
+
+  const newPrayer = {
+    id: "prayer_" + Date.now(),
+    fullName: fullName,
+    email: email,
+    phone: phone,
+    requestDetails: requestDetails,
+    sharingLevel: sharingLevel,
+    wantsFollowup: wantsFollowup,
+    date: new Date().toLocaleDateString(),
+    timestamp: Date.now()
+  };
+
+  try {
+    let savedPrayers = JSON.parse(localStorage.getItem("rol_prayer_requests") || "[]");
+    savedPrayers.unshift(newPrayer);
+    localStorage.setItem("rol_prayer_requests", JSON.stringify(savedPrayers));
+  } catch(err) {}
+
+  showToast("Prayer request sent to Pastoral Team! 🕊️ / प्रार्थना पाठवली");
+  closePrayerRequestForm();
+
+  const detailsField = document.getElementById("prayer-req-details");
+  if (detailsField) detailsField.value = "";
+};

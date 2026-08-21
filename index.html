@@ -8,7 +8,7 @@
   <script>
     // Force immediate hard purge of all stale Service Workers and CacheStorage
     (function() {
-      const CURRENT_VER = "v77_HIGH_RES_LOGO_TOP_RIGHT_AUTH_COMMUNITY_SHARE";
+      const CURRENT_VER = "v78_PASTORAL_PRAYER_FORM_AND_CLEAN_AVATAR";
       if (localStorage.getItem("rol_app_ver") !== CURRENT_VER) {
         localStorage.setItem("rol_app_ver", CURRENT_VER);
         if ('serviceWorker' in navigator) {
@@ -45,8 +45,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- Main Stylesheet -->
-  <!-- Main Stylesheet (Cache-Busted for Version 77 High Res Logo Top Right Auth Community Share) -->
-  <link rel="stylesheet" href="index.css?v=77_HIGH_RES_LOGO_TOP_RIGHT_AUTH_COMMUNITY_SHARE">
+  <!-- Main Stylesheet (Cache-Busted for Version 78 Pastoral Prayer Form & Clean Avatar) -->
+  <link rel="stylesheet" href="index.css?v=78_PASTORAL_PRAYER_FORM_AND_CLEAN_AVATAR">
 
   <!-- Official LiveKit WebRTC Client SDK -->
   <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.0.8/dist/livekit-client.umd.min.js"></script>
@@ -193,9 +193,9 @@
               <span id="pull-refresh-text" class="pull-refresh-label">Pull to refresh / रिफ्रेश करण्यासाठी ओढा</span>
             </div>
 
-            <!-- River of Life Brand Hero Card (Logo Aesthetic) -->
+            <!-- River of Life Brand Hero Card -->
             <div class="brand-hero-welcome-card">
-              <div class="hero-card-left">
+              <div class="hero-card-left" style="width: 100%;">
                 <span class="hero-date-badge">
                   <span class="pulse-dot"></span> <span id="home-hero-date-str">Today | आजचे मनन</span>
                 </span>
@@ -208,10 +208,10 @@
                   <button class="hero-btn secondary-green" onclick="switchTab('meetings')">
                     🎥 Join Live Room
                   </button>
+                  <button class="hero-btn secondary-gold" onclick="openPrayerRequestForm()" style="background: rgba(223, 169, 56, 0.2); border: 1px solid rgba(223, 169, 56, 0.4); color: #dfa938;">
+                    🙏 Prayer Request / प्रार्थना
+                  </button>
                 </div>
-              </div>
-              <div class="hero-card-right">
-                <img src="assets/icons/app-logo.png" alt="River of Life Logo" class="hero-brand-logo-img">
               </div>
             </div>
 
@@ -2040,6 +2040,94 @@
       </div>
     </div>
 
+    <!-- Complete Pastoral Prayer Request Form Modal -->
+    <div id="modal-prayer-request" class="meeting-modal-overlay" style="display: none; align-items: center; justify-content: center; z-index: 10000; padding: 16px;">
+      <div style="max-width: 560px; width: 100%; max-height: 90vh; background: var(--surface); color: var(--text); border-radius: 20px; border: 1.5px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.4); display: flex; flex-direction: column; overflow: hidden; margin: auto; position: relative;">
+        
+        <!-- Modal Header -->
+        <div style="padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, rgba(39, 58, 37, 0.95), rgba(22, 33, 20, 0.98)); color: #fff;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 22px;">🙏</span>
+            <div>
+              <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #fff;">Prayer Request Form / प्रार्थना विनंती</h3>
+              <span style="font-size: 11px; color: rgba(255,255,255,0.75);">River of Life Pastoral Prayer Team</span>
+            </div>
+          </div>
+          <button onclick="closePrayerRequestForm()" style="background: rgba(255,255,255,0.15); border: none; color: #fff; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center;">✕</button>
+        </div>
+
+        <!-- Modal Body Form -->
+        <form id="form-pastoral-prayer-request" onsubmit="submitPastoralPrayerRequest(event)" style="padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; text-align: left;">
+          
+          <p style="font-size: 13px; color: var(--text-muted); margin: 0 0 4px 0; line-height: 1.5;">
+            Thank you for trusting us with your prayer request. Please fill out the details below so that our team can support you in prayer.
+          </p>
+
+          <!-- Contact Information Section -->
+          <div style="background: var(--bg); padding: 14px; border-radius: 12px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 12px;">
+            <strong style="font-size: 12px; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px;">Contact Information / संपर्क माहिती</strong>
+            
+            <div>
+              <label style="font-size: 12.5px; font-weight: 700; color: var(--text); display: block; margin-bottom: 4px;">Full Name *</label>
+              <input type="text" id="prayer-req-fullname" required class="dropdown-selector" style="width: 100%; box-sizing: border-box;" placeholder="Enter your full name">
+            </div>
+
+            <div>
+              <label style="font-size: 12.5px; font-weight: 700; color: var(--text); display: block; margin-bottom: 4px;">Email Address *</label>
+              <input type="email" id="prayer-req-email" required class="dropdown-selector" style="width: 100%; box-sizing: border-box;" placeholder="name@example.com">
+            </div>
+
+            <div>
+              <label style="font-size: 12.5px; font-weight: 700; color: var(--text); display: block; margin-bottom: 4px;">Phone Number (Optional)</label>
+              <input type="tel" id="prayer-req-phone" class="dropdown-selector" style="width: 100%; box-sizing: border-box;" placeholder="+91 98765 43210">
+            </div>
+          </div>
+
+          <!-- Request Details Section -->
+          <div style="background: var(--bg); padding: 14px; border-radius: 12px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px;">
+            <strong style="font-size: 12px; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px;">Request Details / प्रार्थनेचा विषय *</strong>
+            <label style="font-size: 12px; color: var(--text-muted);">Please provide a brief description of the situation or need you would like us to pray for.</label>
+            <textarea id="prayer-req-details" required rows="4" class="dropdown-selector" style="width: 100%; box-sizing: border-box; resize: vertical;" placeholder="Write your prayer request here... (उदा. आरोग्यासाठी प्रार्थना, कुटुंबातील शांती...)"></textarea>
+          </div>
+
+          <!-- Privacy & Sharing Preferences -->
+          <div style="background: var(--bg); padding: 14px; border-radius: 12px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px;">
+            <strong style="font-size: 12px; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px;">Privacy & Sharing Preferences</strong>
+            
+            <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; color: var(--text); cursor: pointer;">
+              <input type="radio" name="prayer_sharing_level" value="private" checked style="margin-top: 2px;">
+              <span>Keep this request private (for the pastoral/prayer team only).</span>
+            </label>
+
+            <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; color: var(--text); cursor: pointer;">
+              <input type="radio" name="prayer_sharing_level" value="chain" style="margin-top: 2px;">
+              <span>Share this request with the church prayer chain/group.</span>
+            </label>
+
+            <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; color: var(--text); cursor: pointer;">
+              <input type="radio" name="prayer_sharing_level" value="anonymous" style="margin-top: 2px;">
+              <span>Keep this request anonymous (do not share my name).</span>
+            </label>
+          </div>
+
+          <!-- Follow-up Preference -->
+          <div style="background: var(--bg); padding: 14px; border-radius: 12px; border: 1px solid var(--border);">
+            <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; color: var(--text); cursor: pointer; margin: 0;">
+              <input type="checkbox" id="prayer-req-followup" style="margin-top: 2px;">
+              <span style="font-weight: 600;">I would like a member of the prayer team to contact me regarding this request.</span>
+            </label>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" class="btn-primary-block" style="padding: 14px; font-size: 14px; font-weight: 800; border-radius: 12px; background: linear-gradient(135deg, #dfa938 0%, #c99328 100%); border: none; color: #172116; cursor: pointer; box-shadow: 0 4px 16px rgba(223, 169, 56, 0.35);">
+            🙏 Submit Prayer Request / प्रार्थना विनंती पाठवा
+          </button>
+
+        </form>
+
+      </div>
+    </div>
+
     <!-- Meeting Details Drawer -->
     <div id="drawer-meeting-details" class="drawer-overlay">
       <div class="ios-drawer-sheet" style="max-height: 80%;">
@@ -2450,8 +2538,8 @@
       <span id="toast-message">Copied to clipboard!</span>
     </div>
 
-  <!-- App Main Logic (Cache-Busted for Version 77 High Res Logo Top Right Auth Community Share) -->
-  <script src="app.js?v=77_HIGH_RES_LOGO_TOP_RIGHT_AUTH_COMMUNITY_SHARE"></script>
+  <!-- App Main Logic (Cache-Busted for Version 78 Pastoral Prayer Form & Clean Avatar) -->
+  <script src="app.js?v=78_PASTORAL_PRAYER_FORM_AND_CLEAN_AVATAR"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 2.5s no matter what
