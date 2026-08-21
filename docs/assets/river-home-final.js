@@ -1,6 +1,8 @@
 (function(){
   'use strict';
   var HOME = new Set(['', '#', '#/', '#/home', '#/today', '#/dashboard']);
+  var LOGO = 'assets/icons/river-logo.png?v=20260821-logo-v2';
+  var LOGO_FALLBACK = 'assets/icons/icon-192.png?v=20260821-logo-fallback';
   function isHome() { return HOME.has((location.hash || '').toLowerCase().trim()); }
   function mount() { var v = document.getElementById('view-home'); return v ? v.querySelector('.view-scroll-content') : null; }
   function user() {
@@ -10,11 +12,12 @@
     return 'Gaurav';
   }
   function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
+  function logoImg(cls,alt,extra){ return '<img class="'+cls+'" src="'+LOGO+'" alt="'+alt+'" onerror="this.onerror=null;this.src=\''+LOGO_FALLBACK+'\';"'+(extra||'')+'>'; }
   function verse() {
     var a=[['Your word is a lamp to my feet and a light to my path.','Psalm 119:105'],['The LORD is my shepherd; I shall not want.','Psalm 23:1'],['Trust in the LORD with all your heart, and do not lean on your own understanding.','Proverbs 3:5'],['God is our refuge and strength, a very present help in trouble.','Psalm 46:1']];
     var d=new Date(),n=Math.floor(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/86400000); return a[Math.abs(n)%a.length];
   }
-  function loadCss(){if(document.getElementById('rol-selected-home-css'))return;var l=document.createElement('link');l.id='rol-selected-home-css';l.rel='stylesheet';l.href='assets/river-home-authority.css?v=20260821-logo-v1';document.head.appendChild(l);}
+  function loadCss(){if(document.getElementById('rol-selected-home-css'))return;var l=document.createElement('link');l.id='rol-selected-home-css';l.rel='stylesheet';l.href='assets/river-home-authority.css?v=20260821-home-v3';document.head.appendChild(l);}
   function render(){
     if(!isHome())return; var m=mount(); if(!m)return; loadCss();
     var d=verse(),h=new Date().getHours(),g=h<12?'Good morning':h<17?'Good afternoon':'Good evening',n=user();
@@ -23,15 +26,15 @@
         <div class="rol-authority-shell">
           <header class="rol-authority-header">
             <div class="rol-authority-brand">
-              <img class="rol-authority-logo" src="assets/icons/river-logo.png?v=20260821-logo-v1" alt="River of Life logo">
+              ${logoImg('rol-authority-logo','River of Life logo')}
               <div><strong>RIVER OF LIFE</strong><small>READ • PRAY • GROW • SERVE</small></div>
             </div>
             <div class="rol-authority-actions">
               <button class="rol-authority-icon" aria-label="Notifications" onclick="typeof showToast==='function'?showToast('No new notifications'):alert('No new notifications')">🔔</button>
-              <button class="rol-authority-profile-btn" aria-label="Profile" onclick="location.hash='#/you'"><img src="assets/icons/river-logo.png?v=20260821-logo-v1" alt="Profile" style="width:28px;height:28px;border-radius:50%;object-fit:contain;background:#fff;" /></button>
+              <button class="rol-authority-profile-btn" aria-label="Profile" onclick="location.hash='#/you'">${logoImg('rol-profile-logo','Profile',' style="width:28px;height:28px;border-radius:50%;object-fit:contain;background:#fff;"')}</button>
             </div>
           </header>
-          <section class="rol-authority-hero"><div class="rol-authority-hero-inner"><div><div class="rol-authority-kicker">WELCOME BACK</div><h1>${g}, ${esc(n)} 👋</h1><p>So glad you're here. Keep walking in His grace!</p></div><img class="rol-authority-hero-logo" src="assets/icons/river-logo.png?v=20260821-logo-v1" alt="River of Life logo"></div></section>
+          <section class="rol-authority-hero"><div class="rol-authority-hero-inner"><div><div class="rol-authority-kicker">WELCOME BACK</div><h1>${g}, ${esc(n)} 👋</h1><p>So glad you're here. Keep walking in His grace!</p></div>${logoImg('rol-authority-hero-logo','River of Life logo')}</div></section>
           <section class="rol-authority-verse"><div class="label">📖 Today's Scripture</div><blockquote>“${esc(d[0])}”</blockquote><div class="ref">— ${esc(d[1])}</div><div class="rol-authority-actions-row"><button class="rol-authority-btn" onclick="localStorage.setItem('riverSavedDailyVerse',JSON.stringify({verse:${JSON.stringify(d[0])},reference:${JSON.stringify(d[1])},savedAt:new Date().toISOString()}));typeof showToast==='function'?showToast('Verse saved'):alert('Verse saved')">♡ Save</button><button class="rol-authority-btn primary" onclick="window.open('https://wa.me/?text='+encodeURIComponent('🙏 Daily Bible Verse\\n\\n“'+${JSON.stringify(d[0])}+'”\\n— '+${JSON.stringify(d[1])}+'\\n\\nRiver of Life'),'_blank')">↗ Share WhatsApp</button></div></section>
           <h2 class="rol-authority-section-title">Continue Reading</h2>
           <section class="rol-authority-journey"><button class="rol-authority-journey-card" onclick="location.hash='#/reader'"><div class="ico">📖</div><div style="text-align:left;flex:1;"><strong style="display:block;font-size:1rem;color:#0f172a;">John</strong><span style="font-size:.855rem;color:#64748b;">Chapter 3 • Last read: Verse 16</span></div><span class="rol-authority-btn primary" style="padding:6px 14px;font-size:.85rem;border-radius:20px;">Continue ›</span></button></section>
