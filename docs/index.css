@@ -5864,3 +5864,149 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+/* Brand Hero Welcome Card & Logo Theme Enhancements */
+.brand-hero-welcome-card {
+  margin: 12px 16px 16px 16px;
+  padding: 20px 24px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(39, 58, 37, 0.95) 0%, rgba(22, 33, 20, 0.98) 100%);
+  border: 1px solid rgba(223, 169, 56, 0.35);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  position: relative;
+  overflow: hidden;
+  color: #ffffff;
+}
+
+.brand-hero-welcome-card::before {
+  content: '';
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 180px;
+  height: 180px;
+  background: radial-gradient(circle, rgba(223, 169, 56, 0.25) 0%, rgba(223, 169, 56, 0) 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.hero-card-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  z-index: 2;
+}
+
+.hero-date-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #dfa938;
+  background: rgba(223, 169, 56, 0.15);
+  border: 1px solid rgba(223, 169, 56, 0.3);
+  padding: 4px 10px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+
+.pulse-dot {
+  width: 6px;
+  height: 6px;
+  background: #22c55e;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #22c55e;
+  display: inline-block;
+}
+
+.hero-welcome-title {
+  font-family: var(--font-display, 'Outfit', sans-serif);
+  font-size: 22px;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 4px 0;
+  line-height: 1.2;
+}
+
+.hero-welcome-subtitle {
+  font-size: 12.5px;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0 0 16px 0;
+  line-height: 1.4;
+}
+
+.hero-action-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.hero-btn {
+  padding: 9px 16px;
+  border-radius: 12px;
+  font-size: 12.5px;
+  font-weight: 800;
+  font-family: var(--font-ui);
+  cursor: pointer;
+  border: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hero-btn:hover, .hero-btn:active {
+  transform: translateY(-2px);
+}
+
+.hero-btn.primary-gold {
+  background: linear-gradient(135deg, #dfa938 0%, #c99328 100%);
+  color: #172116;
+  box-shadow: 0 4px 14px rgba(223, 169, 56, 0.35);
+}
+
+.hero-btn.secondary-green {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+}
+
+.hero-card-right {
+  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
+}
+
+.hero-brand-logo-img {
+  width: 90px;
+  height: 90px;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.4));
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 6px;
+}
+
+@media (max-width: 480px) {
+  .brand-hero-welcome-card {
+    padding: 16px;
+    margin: 8px 12px 14px 12px;
+  }
+  .hero-brand-logo-img {
+    width: 72px;
+    height: 72px;
+  }
+  .hero-welcome-title {
+    font-size: 19px;
+  }
+}

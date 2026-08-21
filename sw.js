@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v75-PULL-TO-REFRESH-AND-ANTI-FLICKER';
+const CACHE_NAME = 'river-of-life-cache-v76-NEW-LOGO-AND-HERO-DESIGN';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
