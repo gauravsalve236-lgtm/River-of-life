@@ -26,6 +26,12 @@
 
   <!-- Official LiveKit WebRTC Client SDK -->
   <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.0.8/dist/livekit-client.umd.min.js"></script>
+
+  <style id="rol-home-stability-preload">
+    /* Prevent the legacy splash and Home shell from painting before the final renderer. */
+    #splash-screen { display: none !important; opacity: 0 !important; visibility: hidden !important; }
+    #app { visibility: hidden; }
+  </style>
 </head>
 <body>
   
@@ -2406,6 +2412,7 @@
     }, 2500);
   </script>
  <script src="assets/river-home-final.js?v=20260820-1"></script>
+ <script src="assets/river-home-stability.js?v=20260821-1"></script>
 </body>
 </html>
 
