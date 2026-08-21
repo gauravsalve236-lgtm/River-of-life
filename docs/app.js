@@ -5969,37 +5969,38 @@ function initAuthAndPrayers() {
 
 // Update Authentication UI elements across Home page banner and Header bar
 function updateAuthUI() {
-  const homeBannerText = document.getElementById("home-auth-banner-text");
-  const homeBannerBtn = document.getElementById("home-auth-banner-btn");
-  
   const headerIconLoggedOut = document.getElementById("header-auth-icon-loggedout");
   const headerAvatar = document.getElementById("header-auth-avatar");
-  
+  const staticAuthLabel = document.getElementById("static-auth-label");
+  const staticAuthAvatar = document.getElementById("static-auth-avatar");
+
   if (state.currentUser) {
-    // Logged In
-    if (homeBannerText) {
-      homeBannerText.innerHTML = `Welcome back, <strong>${state.currentUser.username}</strong>! Your readings and quiz points are synced.`;
-    }
-    if (homeBannerBtn) {
-      homeBannerBtn.textContent = "Log Out / बाहेर पडा";
-    }
+    // Logged In State
+    const firstInitial = state.currentUser.username ? state.currentUser.username.substring(0, 1).toUpperCase() : "U";
     
     if (headerIconLoggedOut) headerIconLoggedOut.style.display = "none";
     if (headerAvatar) {
       headerAvatar.style.display = "flex";
-      headerAvatar.textContent = state.currentUser.username.substring(0, 1).toUpperCase();
+      headerAvatar.textContent = firstInitial;
+    }
+
+    if (staticAuthLabel) staticAuthLabel.textContent = state.currentUser.username;
+    if (staticAuthAvatar) {
+      staticAuthAvatar.textContent = firstInitial;
+      staticAuthAvatar.style.background = "#22c55e";
+      staticAuthAvatar.style.color = "#ffffff";
     }
   } else {
-    // Logged Out
-    if (homeBannerText) {
-      homeBannerText.textContent = "Sign in to save your highlights, quiz points & submit prayer requests.";
-    }
-    if (homeBannerBtn) {
-      homeBannerBtn.textContent = "Sign In / लॉगिन";
-    }
-    
+    // Logged Out State
     if (headerIconLoggedOut) headerIconLoggedOut.style.display = "block";
     if (headerAvatar) headerAvatar.style.display = "none";
+
+    if (staticAuthLabel) staticAuthLabel.textContent = "Sign In";
+    if (staticAuthAvatar) {
+      staticAuthAvatar.textContent = "👤";
+      staticAuthAvatar.style.background = "var(--primary)";
+      staticAuthAvatar.style.color = "#172116";
+    }
   }
 }
 

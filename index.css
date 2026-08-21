@@ -6010,3 +6010,65 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
     font-size: 19px;
   }
 }
+
+/* Community Share Card at bottom of Home View */
+.community-share-card {
+  margin: 16px 0;
+  padding: 20px 24px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(37, 211, 102, 0.12) 0%, rgba(37, 211, 102, 0.04) 100%);
+  border: 1px solid rgba(37, 211, 102, 0.3);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.share-card-left {
+  flex: 1;
+  min-width: 220px;
+  text-align: left;
+}
+
+.share-badge {
+  font-size: 10.5px;
+  font-weight: 800;
+  color: #25d366;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.share-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text);
+  margin: 4px 0 2px 0;
+}
+
+.share-subtitle {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.share-whatsapp-btn {
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 800;
+  background: #25d366;
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 14px rgba(37, 211, 102, 0.35);
+  transition: transform 0.2s ease;
+}
+
+.share-whatsapp-btn:hover {
+  transform: translateY(-2px);
+}

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v76-NEW-LOGO-AND-HERO-DESIGN';
+const CACHE_NAME = 'river-of-life-cache-v77-HIGH-RES-LOGO-TOP-RIGHT-AUTH-COMMUNITY-SHARE';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
