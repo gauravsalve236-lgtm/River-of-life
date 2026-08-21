@@ -1,0 +1,52 @@
+name: Apply River of Life Home Stability
+
+on:
+  push:
+    paths:
+      - 'assets/river-home-stability.js'
+      - '.github/workflows/apply-home-stability.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  wire-home-stability:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Wire stability layer into published docs app
+        shell: python
+        run: |
+          from pathlib import Path
+
+          p = Path('docs/index.html')
+          text = p.read_text(encoding='utf-8')
+
+          preload = '''\n  <style id="rol-home-stability-preload">\n    /* Prevent the legacy splash and Home shell from painting before the final renderer. */\n    #splash-screen { display: none !important; opacity: 0 !important; visibility: hidden !important; }\n    #app { visibility: hidden; }\n  </style>\n'''
+
+          if 'id="rol-home-stability-preload"' not in text:
+              text = text.replace('</head>', preload + '</head>', 1)
+
+          stability_tag = '<script src="assets/river-home-stability.js?v=20260821-1"></script>'
+          final_tag = '<script src="assets/river-home-final.js?v=20260820-1"></script>'
+
+          if stability_tag not in text:
+              if final_tag in text:
+                  text = text.replace(final_tag, final_tag + '\n ' + stability_tag, 1)
+              else:
+                  text = text.replace('</body>', ' ' + stability_tag + '\n</body>', 1)
+
+          p.write_text(text, encoding='utf-8')
+
+      - name: Commit wiring
+        run: |
+          git config user.name "River of Life Design Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add docs/index.html
+          git diff --cached --quiet && exit 0
+          git commit -m "Apply Home stability wiring"
+          git push
