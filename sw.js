@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v78-PASTORAL-PRAYER-FORM-AND-CLEAN-AVATAR';
+const CACHE_NAME = 'river-of-life-cache-v79-NEWLY-FITTED-LOGO-STANDARDS';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
