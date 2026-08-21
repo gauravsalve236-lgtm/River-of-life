@@ -5,6 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>River of Life - Marathi & English Bible</title>
   
+  <script>
+    // Force immediate hard purge of all stale Service Workers and CacheStorage
+    (function() {
+      const CURRENT_VER = "v75_PULL_TO_REFRESH_AND_ANTI_FLICKER";
+      if (localStorage.getItem("rol_app_ver") !== CURRENT_VER) {
+        localStorage.setItem("rol_app_ver", CURRENT_VER);
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(function(registrations) {
+            for (let registration of registrations) {
+              registration.unregister();
+            }
+          });
+        }
+        if ('caches' in window) {
+          caches.keys().then(function(names) {
+            for (let name of names) {
+              caches.delete(name);
+            }
+          });
+        }
+      }
+    })();
+  </script>
+  
   <!-- Web App Capabilities & Icons -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -1987,7 +2011,7 @@
               </div>
             </div>
             <button type="submit" id="btn-create-meeting-submit" class="btn-primary-block" style="margin-top: 10px; padding: 12px;">
-              <span>CREATE PRAYER MEETING / सभा आयोजित करा</span>
+              <script>const CURRENT_VER = "v75_PULL_TO_REFRESH_AND_ANTI_FLICKER";</script><span>CREATE PRAYER MEETING / सभा आयोजित करा</span>
             </button>
           </form>
         </div>
