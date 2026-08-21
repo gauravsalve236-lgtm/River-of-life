@@ -27,7 +27,7 @@
       <main class="rol-home ios-theme-light" aria-label="River of Life Home">
         <header class="app-header">
           <div style="display:flex; align-items:center; gap:12px;">
-            <img src="assets/icons/icon-192.png" alt="Logo" style="width:38px; height:38px; object-fit:contain; border-radius:8px;" onerror="this.src='assets/river-logo.png'">
+            <img src="assets/icons/river-logo.png" alt="Logo" style="width:38px; height:38px; object-fit:contain; border-radius:8px;" onerror="this.src='assets/river-logo.png'">
             <div id="static-header-title" style="font-size: 1.1rem; font-weight: 700;">River of Life</div>
           </div>
           <div style="display:flex; gap:8px;">
