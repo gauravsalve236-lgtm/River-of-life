@@ -8,7 +8,7 @@
   <script>
     // Force immediate hard purge of all stale Service Workers and CacheStorage
     (function() {
-      const CURRENT_VER = "v79_NEWLY_FITTED_LOGO_STANDARDS";
+      const CURRENT_VER = "v80_SETTINGS_DRAWER_PROFILES_CLEAN_HOME";
       if (localStorage.getItem("rol_app_ver") !== CURRENT_VER) {
         localStorage.setItem("rol_app_ver", CURRENT_VER);
         if ('serviceWorker' in navigator) {
@@ -45,8 +45,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- Main Stylesheet -->
-  <!-- Main Stylesheet (Cache-Busted for Version 79 Newly Fitted Logo Standards) -->
-  <link rel="stylesheet" href="index.css?v=79_NEWLY_FITTED_LOGO_STANDARDS">
+  <!-- Main Stylesheet (Cache-Busted for Version 80 Settings Drawer Profiles Clean Home) -->
+  <link rel="stylesheet" href="index.css?v=80_SETTINGS_DRAWER_PROFILES_CLEAN_HOME">
 
   <!-- Official LiveKit WebRTC Client SDK -->
   <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.0.8/dist/livekit-client.umd.min.js"></script>
@@ -2533,13 +2533,107 @@
         </div>
       </div>
     </div>
+    <!-- Account, Profile, Settings & More Options Drawer -->
+    <div id="drawer-account-settings" class="drawer-overlay" style="z-index: 9999;">
+      <div class="ios-drawer-sheet" style="max-height: 85%; background: var(--surface); color: var(--text);">
+        <div class="drawer-header-row" style="border-bottom: 1px solid var(--border); padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;">
+          <div class="grabber-bar"></div>
+          <h3 style="margin: 0; font-size: 17px; font-weight: 800; color: var(--text);">⚙️ Account & Settings / प्रोफाइल आणि सेटिंग्स</h3>
+          <button class="close-drawer-btn" onclick="closeDrawer('drawer-account-settings')" style="background: none; border: none; font-size: 20px; color: var(--text); cursor: pointer;">&times;</button>
+        </div>
+        <div class="drawer-body-settings" style="padding: 20px; display: flex; flex-direction: column; gap: 16px; text-align: left; overflow-y: auto;">
+          
+          <!-- User Profile & Status Card -->
+          <div style="background: linear-gradient(135deg, rgba(39, 58, 37, 0.95), rgba(22, 33, 20, 0.98)); color: #fff; padding: 18px; border-radius: 16px; border: 1px solid rgba(223, 169, 56, 0.35); display: flex; align-items: center; justify-content: space-between; gap: 14px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div id="drawer-profile-avatar" style="width: 48px; height: 48px; border-radius: 50%; background: #22c55e; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; border: 2px solid #dfa938;">P</div>
+              <div>
+                <h4 id="drawer-profile-username" style="margin: 0 0 2px 0; font-size: 16px; font-weight: 800; color: #fff;">Pastor P</h4>
+                <span id="drawer-profile-email" style="font-size: 12px; color: rgba(255,255,255,0.75);">pastor@riveroflife.org</span>
+              </div>
+            </div>
+            <button id="drawer-auth-action-btn" onclick="toggleDrawerAuth()" style="padding: 8px 14px; border-radius: 20px; font-size: 12px; font-weight: 800; background: #dfa938; border: none; color: #172116; cursor: pointer;">
+              Sign Out
+            </button>
+          </div>
+
+          <!-- Section 1: Quick Actions & Sharing -->
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <strong style="font-size: 11px; text-transform: uppercase; color: var(--primary); letter-spacing: 0.5px;">Quick Actions & Fellowship</strong>
+            
+            <button onclick="closeDrawer('drawer-account-settings'); openPrayerRequestForm();" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-size: 13.5px; font-weight: 700; cursor: pointer; text-align: left;">
+              <span style="font-size: 18px;">🙏</span>
+              <div style="flex: 1;">
+                <div>Submit Prayer Request / प्रार्थना विनंती</div>
+                <div style="font-size: 11px; color: var(--text-muted); font-weight: 500;">Send confidential request to pastoral team</div>
+              </div>
+            </button>
+
+            <button id="btn-drawer-whatsapp-share" onclick="try { if (window.shareAppViaWhatsApp) window.shareAppViaWhatsApp(); else showToast('App link copied to clipboard!'); } catch(e){}" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background: rgba(37, 211, 102, 0.1); border: 1px solid rgba(37, 211, 102, 0.3); color: #25d366; font-size: 13.5px; font-weight: 700; cursor: pointer; text-align: left;">
+              <span style="font-size: 18px;">💬</span>
+              <div style="flex: 1;">
+                <div>Invite Friends & Family / मित्रांना आमंत्रित करा</div>
+                <div style="font-size: 11px; color: var(--text-muted); font-weight: 500;">Share River of Life Bible app on WhatsApp</div>
+              </div>
+            </button>
+          </div>
+
+          <!-- Section 2: App Customization Settings -->
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <strong style="font-size: 11px; text-transform: uppercase; color: var(--primary); letter-spacing: 0.5px;">App Preferences & Translation</strong>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; border-radius: 12px; background: var(--bg); border: 1px solid var(--border);">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 18px;">🌐</span>
+                <span style="font-size: 13.5px; font-weight: 700; color: var(--text);">Bible Language / भाषा</span>
+              </div>
+              <select id="drawer-language-select" class="dropdown-selector" style="padding: 6px 10px; font-size: 12px;">
+                <option value="mr" selected>मराठी (Marathi)</option>
+                <option value="en">English (NLT / KJV)</option>
+              </select>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; border-radius: 12px; background: var(--bg); border: 1px solid var(--border);">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 18px;">🌙</span>
+                <span style="font-size: 13.5px; font-weight: 700; color: var(--text);">Dark Mode / डार्क मोड</span>
+              </div>
+              <input type="checkbox" id="drawer-theme-toggle" style="width: 18px; height: 18px; accent-color: #dfa938; cursor: pointer;">
+            </div>
+          </div>
+
+          <!-- Section 3: Information & Help -->
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <strong style="font-size: 11px; text-transform: uppercase; color: var(--primary); letter-spacing: 0.5px;">About & Support</strong>
+
+            <button onclick="showToast('River of Life Bible App v80 • Built for Fellowship 🕊️');" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-size: 13.5px; font-weight: 700; cursor: pointer; text-align: left;">
+              <span style="font-size: 18px;">ℹ️</span>
+              <div style="flex: 1;">
+                <div>About River of Life / ॲप बद्दल</div>
+                <div style="font-size: 11px; color: var(--text-muted); font-weight: 500;">Version 80 (2323 Working Application)</div>
+              </div>
+            </button>
+
+            <button onclick="showToast('Pastoral Support: contact@riveroflife.org 📞');" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-size: 13.5px; font-weight: 700; cursor: pointer; text-align: left;">
+              <span style="font-size: 18px;">❓</span>
+              <div style="flex: 1;">
+                <div>Help & Pastoral Support / मदत</div>
+                <div style="font-size: 11px; color: var(--text-muted); font-weight: 500;">Contact church pastoral team</div>
+              </div>
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
     <!-- Toast Notification Overlay -->
     <div id="toast-notification" class="app-toast">
       <span id="toast-message">Copied to clipboard!</span>
     </div>
 
-  <!-- App Main Logic (Cache-Busted for Version 79 Newly Fitted Logo Standards) -->
-  <script src="app.js?v=79_NEWLY_FITTED_LOGO_STANDARDS"></script>
+  <!-- App Main Logic (Cache-Busted for Version 80 Settings Drawer Profiles Clean Home) -->
+  <script src="app.js?v=80_SETTINGS_DRAWER_PROFILES_CLEAN_HOME"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 2.5s no matter what

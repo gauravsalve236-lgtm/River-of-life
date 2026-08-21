@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v79-NEWLY-FITTED-LOGO-STANDARDS';
+const CACHE_NAME = 'river-of-life-cache-v80-SETTINGS-DRAWER-PROFILES-CLEAN-HOME';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

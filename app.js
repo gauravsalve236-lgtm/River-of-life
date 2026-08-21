@@ -5974,6 +5974,11 @@ function updateAuthUI() {
   const staticAuthLabel = document.getElementById("static-auth-label");
   const staticAuthAvatar = document.getElementById("static-auth-avatar");
 
+  const drawerAvatar = document.getElementById("drawer-profile-avatar");
+  const drawerUsername = document.getElementById("drawer-profile-username");
+  const drawerEmail = document.getElementById("drawer-profile-email");
+  const drawerAuthBtn = document.getElementById("drawer-auth-action-btn");
+
   if (state.currentUser) {
     // Logged In State
     const firstInitial = state.currentUser.username ? state.currentUser.username.substring(0, 1).toUpperCase() : "U";
@@ -5990,6 +5995,11 @@ function updateAuthUI() {
       staticAuthAvatar.style.background = "#22c55e";
       staticAuthAvatar.style.color = "#ffffff";
     }
+
+    if (drawerAvatar) drawerAvatar.textContent = firstInitial;
+    if (drawerUsername) drawerUsername.textContent = state.currentUser.username;
+    if (drawerEmail) drawerEmail.textContent = state.currentUser.email || "Registered User";
+    if (drawerAuthBtn) drawerAuthBtn.textContent = "Sign Out / बाहेर पडा";
   } else {
     // Logged Out State
     if (headerIconLoggedOut) headerIconLoggedOut.style.display = "block";
@@ -6001,8 +6011,29 @@ function updateAuthUI() {
       staticAuthAvatar.style.background = "var(--primary)";
       staticAuthAvatar.style.color = "#172116";
     }
+
+    if (drawerAvatar) drawerAvatar.textContent = "👤";
+    if (drawerUsername) drawerUsername.textContent = "Guest User / अभ्यागत";
+    if (drawerEmail) drawerEmail.textContent = "Not signed in";
+    if (drawerAuthBtn) drawerAuthBtn.textContent = "Sign In / लॉगिन";
   }
 }
+
+window.toggleDrawerAuth = function() {
+  if (state.currentUser) {
+    state.currentUser = null;
+    try { localStorage.removeItem("rol_current_user"); } catch(e){}
+    showToast("Signed out successfully / बाहेर पडलात");
+  } else {
+    const username = prompt("Enter your Name / आपले नाव प्रविष्ट करा:", "Pastor P");
+    if (username) {
+      state.currentUser = { username: username, email: username.toLowerCase().replace(/\s+/g, '') + "@riveroflife.org" };
+      try { localStorage.setItem("rol_current_user", JSON.stringify(state.currentUser)); } catch(e){}
+      showToast("Signed in as " + username + " 🕊️");
+    }
+  }
+  updateAuthUI();
+};
 
 /* ==========================================================================
    Premium Feature Implementations & Data Stores
