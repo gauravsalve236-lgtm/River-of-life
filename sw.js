@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v80-SETTINGS-DRAWER-PROFILES-CLEAN-HOME';
+const CACHE_NAME = 'river-of-life-cache-v81-PHONE-EMAIL-AUTHENTICATION-AND-DATASOURCE';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

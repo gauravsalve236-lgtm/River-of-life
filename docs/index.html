@@ -8,7 +8,7 @@
   <script>
     // Force immediate hard purge of all stale Service Workers and CacheStorage
     (function() {
-      const CURRENT_VER = "v80_SETTINGS_DRAWER_PROFILES_CLEAN_HOME";
+      const CURRENT_VER = "v81_PHONE_EMAIL_AUTHENTICATION_AND_DATASOURCE";
       if (localStorage.getItem("rol_app_ver") !== CURRENT_VER) {
         localStorage.setItem("rol_app_ver", CURRENT_VER);
         if ('serviceWorker' in navigator) {
@@ -45,8 +45,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- Main Stylesheet -->
-  <!-- Main Stylesheet (Cache-Busted for Version 80 Settings Drawer Profiles Clean Home) -->
-  <link rel="stylesheet" href="index.css?v=80_SETTINGS_DRAWER_PROFILES_CLEAN_HOME">
+  <!-- Main Stylesheet (Cache-Busted for Version 81 Phone Email Authentication & Datasource) -->
+  <link rel="stylesheet" href="index.css?v=81_PHONE_EMAIL_AUTHENTICATION_AND_DATASOURCE">
 
   <!-- Official LiveKit WebRTC Client SDK -->
   <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.0.8/dist/livekit-client.umd.min.js"></script>
@@ -2533,6 +2533,63 @@
         </div>
       </div>
     </div>
+    <!-- Premium Sign In / Sign Up Modal (Phone or Email Authentication) -->
+    <div id="modal-auth-login" class="meeting-modal-overlay" style="display: none; align-items: center; justify-content: center; z-index: 10005; padding: 16px;">
+      <div style="max-width: 440px; width: 100%; background: var(--surface); color: var(--text); border-radius: 20px; border: 1.5px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.5); display: flex; flex-direction: column; overflow: hidden; margin: auto; position: relative;">
+        
+        <!-- Modal Header -->
+        <div style="padding: 18px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, rgba(39, 58, 37, 0.95), rgba(22, 33, 20, 0.98)); color: #fff;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <img src="assets/icons/app-logo.png" alt="Logo" style="width: 32px; height: 32px; border-radius: 8px; object-fit: contain; background: #fff; padding: 2px;">
+            <div>
+              <h3 id="auth-modal-title" style="margin: 0; font-size: 16px; font-weight: 800; color: #fff;">Sign In / लॉगिन करा</h3>
+              <span style="font-size: 11px; color: rgba(255,255,255,0.75);">River of Life Fellowship Account</span>
+            </div>
+          </div>
+          <button onclick="closeAuthModal()" style="background: rgba(255,255,255,0.15); border: none; color: #fff; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center;">✕</button>
+        </div>
+
+        <!-- Modal Body Form -->
+        <form id="form-auth-login" onsubmit="handleAuthSubmit(event)" style="padding: 20px; display: flex; flex-direction: column; gap: 14px; text-align: left;">
+          
+          <!-- Identifier Input (Phone or Email) -->
+          <div>
+            <label style="font-size: 12.5px; font-weight: 700; color: var(--text); display: block; margin-bottom: 4px;">Phone Number or Email Address *</label>
+            <input type="text" id="auth-input-identifier" required class="dropdown-selector" style="width: 100%; box-sizing: border-box;" placeholder="Enter Phone (+91...) or Email Address">
+          </div>
+
+          <!-- Full Name / Display Name Input -->
+          <div>
+            <label style="font-size: 12.5px; font-weight: 700; color: var(--text); display: block; margin-bottom: 4px;">Full Name / आपले नाव *</label>
+            <input type="text" id="auth-input-fullname" required class="dropdown-selector" style="width: 100%; box-sizing: border-box;" placeholder="Enter your full name (e.g. Pastor P)">
+          </div>
+
+          <!-- Password / Passcode Input -->
+          <div>
+            <label style="font-size: 12.5px; font-weight: 700; color: var(--text); display: block; margin-bottom: 4px;">Passcode / पासवर्ड (Opt.)</label>
+            <input type="password" id="auth-input-password" class="dropdown-selector" style="width: 100%; box-sizing: border-box;" placeholder="Enter your secret passcode">
+          </div>
+
+          <!-- Remember Me Checkbox -->
+          <label style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text); cursor: pointer;">
+            <input type="checkbox" id="auth-checkbox-remember" checked style="accent-color: #dfa938;">
+            <span>Remember my login on this device</span>
+          </label>
+
+          <!-- Submit Action Button -->
+          <button type="submit" class="btn-primary-block" style="padding: 14px; font-size: 14px; font-weight: 800; border-radius: 12px; background: linear-gradient(135deg, #dfa938 0%, #c99328 100%); border: none; color: #172116; cursor: pointer; box-shadow: 0 4px 16px rgba(223, 169, 56, 0.35); margin-top: 6px;">
+            🔑 Continue to Account / खात्यात प्रवेश करा
+          </button>
+
+          <p style="font-size: 11.5px; color: var(--text-muted); text-align: center; margin: 4px 0 0 0; line-height: 1.4;">
+            Your progress, highlights, quiz scores, and prayer requests will be securely saved & synced.
+          </p>
+
+        </form>
+
+      </div>
+    </div>
+
     <!-- Account, Profile, Settings & More Options Drawer -->
     <div id="drawer-account-settings" class="drawer-overlay" style="z-index: 9999;">
       <div class="ios-drawer-sheet" style="max-height: 85%; background: var(--surface); color: var(--text);">
@@ -2543,18 +2600,37 @@
         </div>
         <div class="drawer-body-settings" style="padding: 20px; display: flex; flex-direction: column; gap: 16px; text-align: left; overflow-y: auto;">
           
-          <!-- User Profile & Status Card -->
-          <div style="background: linear-gradient(135deg, rgba(39, 58, 37, 0.95), rgba(22, 33, 20, 0.98)); color: #fff; padding: 18px; border-radius: 16px; border: 1px solid rgba(223, 169, 56, 0.35); display: flex; align-items: center; justify-content: space-between; gap: 14px;">
-            <div style="display: flex; align-items: center; gap: 12px;">
-              <div id="drawer-profile-avatar" style="width: 48px; height: 48px; border-radius: 50%; background: #22c55e; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; border: 2px solid #dfa938;">P</div>
-              <div>
-                <h4 id="drawer-profile-username" style="margin: 0 0 2px 0; font-size: 16px; font-weight: 800; color: #fff;">Pastor P</h4>
-                <span id="drawer-profile-email" style="font-size: 12px; color: rgba(255,255,255,0.75);">pastor@riveroflife.org</span>
-              </div>
+          <!-- Logged Out Welcome Card -->
+          <div id="drawer-card-loggedout" style="background: linear-gradient(135deg, rgba(39, 58, 37, 0.95), rgba(22, 33, 20, 0.98)); color: #fff; padding: 20px; border-radius: 16px; border: 1.5px solid rgba(223, 169, 56, 0.4); text-align: center; display: flex; flex-direction: column; align-items: center; gap: 12px;">
+            <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(223, 169, 56, 0.2); border: 2px solid #dfa938; color: #dfa938; display: flex; align-items: center; justify-content: center; font-size: 24px;">👤</div>
+            <div>
+              <h4 style="margin: 0 0 4px 0; font-size: 17px; font-weight: 800; color: #fff;">Welcome to River of Life 🕊️</h4>
+              <p style="margin: 0; font-size: 12.5px; color: rgba(255,255,255,0.8); line-height: 1.4;">Sign in with your Phone Number or Email to sync highlights, quiz points, and prayer requests.</p>
             </div>
-            <button id="drawer-auth-action-btn" onclick="toggleDrawerAuth()" style="padding: 8px 14px; border-radius: 20px; font-size: 12px; font-weight: 800; background: #dfa938; border: none; color: #172116; cursor: pointer;">
-              Sign Out
+            <button onclick="closeDrawer('drawer-account-settings'); openAuthModal();" style="width: 100%; padding: 12px; border-radius: 12px; font-size: 13.5px; font-weight: 800; background: linear-gradient(135deg, #dfa938 0%, #c99328 100%); border: none; color: #172116; cursor: pointer; box-shadow: 0 4px 14px rgba(223, 169, 56, 0.35);">
+              🔑 Sign In / Sign Up / लॉगिन करा
             </button>
+          </div>
+
+          <!-- Logged In Profile Card -->
+          <div id="drawer-card-loggedin" style="display: none; background: linear-gradient(135deg, rgba(39, 58, 37, 0.95), rgba(22, 33, 20, 0.98)); color: #fff; padding: 18px; border-radius: 16px; border: 1.5px solid rgba(223, 169, 56, 0.4); flex-direction: column; gap: 14px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 14px;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div id="drawer-profile-avatar" style="width: 48px; height: 48px; border-radius: 50%; background: #22c55e; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; border: 2px solid #dfa938;">P</div>
+                <div>
+                  <h4 id="drawer-profile-username" style="margin: 0 0 2px 0; font-size: 16px; font-weight: 800; color: #fff;">Pastor P</h4>
+                  <span id="drawer-profile-email" style="font-size: 12px; color: rgba(255,255,255,0.75);">pastor@riveroflife.org</span>
+                </div>
+              </div>
+              <span class="user-role-badge" style="background: rgba(34, 197, 94, 0.2); border: 1px solid #22c55e; color: #4ade80; font-size: 10px; font-weight: 800; padding: 4px 8px; border-radius: 12px;">ACTIVE MEMBER</span>
+            </div>
+
+            <div style="border-top: 1px solid rgba(255,255,255,0.12); padding-top: 10px; display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 12px; color: rgba(255,255,255,0.8);">Account Data Synced ☁️</span>
+              <button onclick="toggleDrawerAuth()" style="padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 800; background: rgba(239,68,68,0.2); border: 1px solid rgba(239,68,68,0.4); color: #f87171; cursor: pointer;">
+                Sign Out / बाहेर पडा
+              </button>
+            </div>
           </div>
 
           <!-- Section 1: Quick Actions & Sharing -->
@@ -2632,8 +2708,8 @@
       <span id="toast-message">Copied to clipboard!</span>
     </div>
 
-  <!-- App Main Logic (Cache-Busted for Version 80 Settings Drawer Profiles Clean Home) -->
-  <script src="app.js?v=80_SETTINGS_DRAWER_PROFILES_CLEAN_HOME"></script>
+  <!-- App Main Logic (Cache-Busted for Version 81 Phone Email Authentication & Datasource) -->
+  <script src="app.js?v=81_PHONE_EMAIL_AUTHENTICATION_AND_DATASOURCE"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 2.5s no matter what

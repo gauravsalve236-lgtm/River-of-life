@@ -5968,16 +5968,76 @@ function initAuthAndPrayers() {
 }
 
 // Update Authentication UI elements across Home page banner and Header bar
+// Auth Modal & DataSource Handlers
+window.openAuthModal = function() {
+  const modal = document.getElementById("modal-auth-login");
+  if (modal) modal.style.display = "flex";
+};
+
+window.closeAuthModal = function() {
+  const modal = document.getElementById("modal-auth-login");
+  if (modal) modal.style.display = "none";
+};
+
+window.handleAuthSubmit = function(e) {
+  if (e) e.preventDefault();
+  const identifier = document.getElementById("auth-input-identifier")?.value.trim();
+  const fullName = document.getElementById("auth-input-fullname")?.value.trim();
+  const password = document.getElementById("auth-input-password")?.value.trim() || "";
+  const remember = document.getElementById("auth-checkbox-remember")?.checked || true;
+
+  if (!identifier || !fullName) {
+    showToast("Please enter Phone/Email and Name / नाव व संपर्क माहिती भरा");
+    return;
+  }
+
+  // Datasource lookup in localStorage (rol_user_database)
+  let userDb = [];
+  try {
+    userDb = JSON.parse(localStorage.getItem("rol_user_database") || "[]");
+  } catch(err) { userDb = []; }
+
+  let user = userDb.find(u => u.identifier.toLowerCase() === identifier.toLowerCase());
+  if (user) {
+    user.username = fullName;
+    user.lastLogin = Date.now();
+  } else {
+    user = {
+      id: "usr_" + Date.now(),
+      identifier: identifier,
+      username: fullName,
+      created: Date.now(),
+      quizPoints: 0,
+      highlights: [],
+      prayerRequests: []
+    };
+    userDb.push(user);
+  }
+
+  try {
+    localStorage.setItem("rol_user_database", JSON.stringify(userDb));
+    if (remember) {
+      localStorage.setItem("rol_current_user", JSON.stringify(user));
+    }
+  } catch(err) {}
+
+  state.currentUser = user;
+  updateAuthUI();
+  closeAuthModal();
+  showToast("Welcome, " + user.username + "! Data synced ☁️");
+};
+
 function updateAuthUI() {
   const headerIconLoggedOut = document.getElementById("header-auth-icon-loggedout");
   const headerAvatar = document.getElementById("header-auth-avatar");
   const staticAuthLabel = document.getElementById("static-auth-label");
   const staticAuthAvatar = document.getElementById("static-auth-avatar");
 
+  const cardLoggedOut = document.getElementById("drawer-card-loggedout");
+  const cardLoggedIn = document.getElementById("drawer-card-loggedin");
   const drawerAvatar = document.getElementById("drawer-profile-avatar");
   const drawerUsername = document.getElementById("drawer-profile-username");
   const drawerEmail = document.getElementById("drawer-profile-email");
-  const drawerAuthBtn = document.getElementById("drawer-auth-action-btn");
 
   if (state.currentUser) {
     // Logged In State
@@ -5996,26 +6056,26 @@ function updateAuthUI() {
       staticAuthAvatar.style.color = "#ffffff";
     }
 
+    if (cardLoggedOut) cardLoggedOut.style.display = "none";
+    if (cardLoggedIn) cardLoggedIn.style.display = "flex";
+
     if (drawerAvatar) drawerAvatar.textContent = firstInitial;
     if (drawerUsername) drawerUsername.textContent = state.currentUser.username;
-    if (drawerEmail) drawerEmail.textContent = state.currentUser.email || "Registered User";
-    if (drawerAuthBtn) drawerAuthBtn.textContent = "Sign Out / बाहेर पडा";
+    if (drawerEmail) drawerEmail.textContent = state.currentUser.identifier || state.currentUser.email || "Registered Member";
   } else {
     // Logged Out State
     if (headerIconLoggedOut) headerIconLoggedOut.style.display = "block";
     if (headerAvatar) headerAvatar.style.display = "none";
 
-    if (staticAuthLabel) staticAuthLabel.textContent = "Sign In";
+    if (staticAuthLabel) staticAuthLabel.textContent = "Account";
     if (staticAuthAvatar) {
       staticAuthAvatar.textContent = "👤";
       staticAuthAvatar.style.background = "var(--primary)";
       staticAuthAvatar.style.color = "#172116";
     }
 
-    if (drawerAvatar) drawerAvatar.textContent = "👤";
-    if (drawerUsername) drawerUsername.textContent = "Guest User / अभ्यागत";
-    if (drawerEmail) drawerEmail.textContent = "Not signed in";
-    if (drawerAuthBtn) drawerAuthBtn.textContent = "Sign In / लॉगिन";
+    if (cardLoggedOut) cardLoggedOut.style.display = "flex";
+    if (cardLoggedIn) cardLoggedIn.style.display = "none";
   }
 }
 
@@ -6024,15 +6084,11 @@ window.toggleDrawerAuth = function() {
     state.currentUser = null;
     try { localStorage.removeItem("rol_current_user"); } catch(e){}
     showToast("Signed out successfully / बाहेर पडलात");
+    updateAuthUI();
   } else {
-    const username = prompt("Enter your Name / आपले नाव प्रविष्ट करा:", "Pastor P");
-    if (username) {
-      state.currentUser = { username: username, email: username.toLowerCase().replace(/\s+/g, '') + "@riveroflife.org" };
-      try { localStorage.setItem("rol_current_user", JSON.stringify(state.currentUser)); } catch(e){}
-      showToast("Signed in as " + username + " 🕊️");
-    }
+    closeDrawer("drawer-account-settings");
+    openAuthModal();
   }
-  updateAuthUI();
 };
 
 /* ==========================================================================
