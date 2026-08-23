@@ -7579,34 +7579,6 @@ function launchLiveMeetingRoom(meeting, customRoomUrl) {
   }
 }
 
-    const jitsiCont = document.getElementById("meeting-jitsi-container");
-    if (jitsiCont) {
-      jitsiCont.style.display = "block";
-      jitsiCont.innerHTML = `
-        <iframe 
-          id="webrtc-room-iframe"
-          src="${roomUrl}" 
-          width="100%" 
-          height="100%" 
-          allow="camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; accelerometer; gyroscope; microphone; camera; autoplay;" 
-          allowusermedia="true"
-          playsinline="true"
-          webkit-playsinline="true"
-          style="border: none; width: 100%; height: 100%; border-radius: 18px; background: #090d16;">
-        </iframe>
-      `;
-
-      logAudioDebug("Native WebRTC Room iframe mounted inside app window with optimal grid layout.", { roomUrl });
-    }
-
-    enumerateAndPopulateAudioDevices();
-    setTimeout(() => { unlockAndPlayRemoteAudio(); }, 1000);
-    showToast("Joined Live Fellowship Room 🙏");
-  } catch (err) {
-    logAudioDebug("launchLiveMeetingRoom notice:", err);
-  }
-}
-
 function exitLiveMeetingRoom() {
   try {
     console.log("Exiting Live Fellowship Meeting Room...");

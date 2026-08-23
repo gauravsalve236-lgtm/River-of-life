@@ -53,8 +53,8 @@
 </head>
 <body>
   
-  <!-- Splash Screen Overlay -->
-  <div id="splash-screen" class="splash-screen">
+  <!-- Splash Screen Overlay (1-Tap Dismiss & Non-Blocking Pointer) -->
+  <div id="splash-screen" class="splash-screen" onclick="dismissSplashScreen()">
     <div class="splash-river-bg">
       <svg class="splash-wave-svg" viewBox="0 0 1440 320" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
         <path class="wave-p1" d="M0,96L48,112C96,128,192,160,288,186.7C384,213,480,235,576,213.3C672,192,768,128,864,122.7C960,117,1056,171,1152,186.7C1248,203,1344,181,1392,170.7L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
@@ -3083,17 +3083,20 @@
     </div>
 
   <!-- App Main Logic (Cache-Busted for Version 83 Extended Splash Verse & Logo Theme) -->
-  <script src="app.js?v=119_CSS_OVERLAY_DISPLAY_POINTER_FIX"></script>
+  <script src="app.js?v=120_FIX_SYNTAX_ERROR_AND_NULL_POINTER_CLICK_FREEZE"></script>
 
   <script>
-    // Fallback Safety: Guarantee splash screen is hidden within 4.5s no matter what
-    setTimeout(function() {
+    window.dismissSplashScreen = function() {
       var splash = document.getElementById("splash-screen");
       if (splash && splash.style.display !== "none") {
         splash.classList.add("fade-out");
-        setTimeout(function() { splash.style.display = "none"; }, 500);
+        splash.style.pointerEvents = "none";
+        setTimeout(function() { splash.style.display = "none"; }, 400);
       }
-    }, 4500);
+    };
+
+    // Guarantee splash screen vanishes within 1.5s max
+    setTimeout(dismissSplashScreen, 1500);
   </script>
 </body>
 </html>

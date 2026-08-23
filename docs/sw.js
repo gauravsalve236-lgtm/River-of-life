@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v119-CSS-OVERLAY-DISPLAY-POINTER-FIX';
+const CACHE_NAME = 'river-of-life-cache-v120-FIX-SYNTAX-ERROR-AND-NULL-POINTER-CLICK-FREEZE';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
