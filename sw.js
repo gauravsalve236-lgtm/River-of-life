@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v120-FIX-SYNTAX-ERROR-AND-NULL-POINTER-CLICK-FREEZE';
+const CACHE_NAME = 'river-of-life-cache-v125-PURGE-ALL-CACHE-RESTORE-BACKUP-19f46a3';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
@@ -6,17 +6,10 @@ self.addEventListener('install', (event) => {
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cache) => {
-          if (cache !== CACHE_NAME) {
-            return caches.delete(cache);
-          }
-        })
-      );
-    })
+    caches.keys().then((keys) => {
+      return Promise.all(keys.map((k) => caches.delete(k)));
+    }).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
 self.addEventListener('fetch', (event) => {

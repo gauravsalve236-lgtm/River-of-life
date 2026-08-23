@@ -4729,9 +4729,7 @@ function setupEventListeners() {
    ========================================================================== */
 function openDrawer(id) {
   const overlay = document.getElementById(id);
-  if (overlay) {
-    overlay.classList.add("active");
-  }
+  if (overlay) overlay.classList.add("active");
   if (id === "drawer-meet-audio-settings" && typeof enumerateAndPopulateAudioDevices === "function") {
     enumerateAndPopulateAudioDevices();
   }
@@ -4739,15 +4737,11 @@ function openDrawer(id) {
 
 function closeDrawer(id) {
   const overlay = document.getElementById(id);
-  if (overlay) {
-    overlay.classList.remove("active");
-  }
+  if (overlay) overlay.classList.remove("active");
 }
 
 function closeAllDrawers() {
-  document.querySelectorAll(".drawer-overlay").forEach(overlay => {
-    overlay.classList.remove("active");
-  });
+  document.querySelectorAll(".drawer-overlay").forEach(overlay => overlay.classList.remove("active"));
   document.querySelectorAll(".verse-row").forEach(v => v.classList.remove("selected-pulse"));
 }
 
@@ -4769,6 +4763,7 @@ window.closeModal = function(id) {
   const overlay = document.getElementById(id);
   if (overlay) {
     overlay.classList.remove("active");
+    overlay.style.display = "none";
   }
 };
 function closeModal(id) {
@@ -7430,28 +7425,7 @@ function generateICSFile(meeting) {
   showToast("Calendar File (.ics) downloaded!");
 }
 
-// Explicit Android & Oppo System Hardware Permission Request
-function requestAndroidCameraMicPermissions() {
-  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-    showToast("Requesting Camera & Microphone Permission... 🎙️📹");
-    navigator.mediaDevices.getUserMedia({ audio: true, video: true })
-      .then(stream => {
-        showToast("✅ Camera & Mic Permission Granted!");
-        if (stream && stream.getTracks) stream.getTracks().forEach(t => t.stop());
-        const banner = document.getElementById("android-perm-banner");
-        if (banner) banner.style.display = "none";
-      })
-      .catch(err => {
-        logAudioDebug("requestAndroidCameraMicPermissions error:", err);
-        showToast("Opening Permission Help Guide...");
-        openDrawer("drawer-oppo-mic-help");
-      });
-  } else {
-    openDrawer("drawer-oppo-mic-help");
-  }
-}
-
-// Trigger Joining Flow (100% Reliable Google Chrome & Mobile WebRTC Access)
+// Trigger Joining Flow (100% Mobile Hardware Access & Minimal 5 Controls)
 function triggerJoinMeetingFlow(meetingId) {
   const meetings = getMeetingsFromStorage();
   const m = meetings.find(x => x.id === meetingId);
@@ -7471,84 +7445,106 @@ function triggerJoinMeetingFlow(meetingId) {
   const meetingIdSlug = (m && m.id) ? m.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
   const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
   
-  // Best Responsive Grid View, Minimal 5 Toolbar Buttons (mic, cam, share, hand, leave), 100% Force Unmuted Audio & Video
-  const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=1&video=1&mic=1&cam=1&muted=0&sound=1&speaker=1&autojoin=1&p2p=1&codec=vp8&layout=grid&grid=1&mesh=true&aspect=16:9&name=${encodeURIComponent(uniqueParticipantName)}&buttons=mic,cam,share,hand,leave&topbar=false&header=false&logo=false&survey=false&redirect=false&invite=false&welcome=false&chat=false&settings=false&theme=dark`;
+  // Best Responsive Grid View, Minimal 5 Toolbar Buttons (mic, cam, share, hand, leave), and Exclusive Hardware Permission
+  const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&speaker=true&autojoin=true&p2p=true&codec=vp8&layout=grid&grid=1&mesh=true&aspect=16:9&name=${encodeURIComponent(uniqueParticipantName)}&buttons=mic,cam,share,hand,leave&topbar=false&header=false&logo=false&survey=false&redirect=false&invite=false&welcome=false&chat=false&settings=false&theme=dark`;
 
-  logAudioDebug("Join meeting flow initiated...", { meetingId, roomUrl });
-  showToast("Opening Live Video Meeting Room... 🎙️📹");
-
-  // Detect Oppo, ColorOS, Realme, Vivo, Xiaomi, Android & iOS Mobile Devices
-  const isOppoOrAndroid = /OPPO|ColorOS|CPH|PPCM|PBEM|PCLM|PEAM|PDEM|PDAM|RMX|Android/i.test(navigator.userAgent);
-  const isMobileDevice = isOppoOrAndroid || /iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  
-  if (isMobileDevice) {
-    logAudioDebug("Oppo / Android / iOS Mobile Device detected. Activating ColorOS system hardware permission...", { roomUrl });
-    showToast("Opening Video Room — Tap ALLOW on Mic & Cam popup 🎙️📹");
-
-    // Pre-trigger getUserMedia on user touch gesture to activate Oppo ColorOS system permission prompt
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      navigator.mediaDevices.getUserMedia({ audio: true, video: true })
-        .then(stream => {
-          logAudioDebug("Oppo / Android permission granted! Releasing test tracks for video room...");
-          if (stream && stream.getTracks) {
-            stream.getTracks().forEach(t => t.stop());
-          }
-          window.location.href = roomUrl;
-        })
-        .catch(err => {
-          logAudioDebug("Oppo getUserMedia fallback launch:", err);
-          // Try audio only fallback
-          navigator.mediaDevices.getUserMedia({ audio: true })
-            .then(aStream => {
-              if (aStream && aStream.getTracks) aStream.getTracks().forEach(t => t.stop());
-              window.location.href = roomUrl;
-            })
-            .catch(() => {
-              window.location.href = roomUrl;
-            });
-        });
-    } else {
-      window.location.href = roomUrl;
-    }
+  // Detect iOS (iPhone/iPad) to launch native call window where Safari triggers microphone permission prompt
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if (isIOS) {
+    logAudioDebug("iOS Device detected. Directing to native call window...", { roomUrl });
+    showToast("Opening iOS Video Room (Mic & Camera Active) 🙏");
+    window.location.href = roomUrl;
     return;
   }
 
-  // On Desktop Chrome / Firefox / Safari: Launch fullscreen in-app overlay AND guarantee iframe loading
-  launchLiveMeetingRoom(m, roomUrl);
+  logAudioDebug("getUserMedia started for mobile Android join...", { meetingId });
+  showToast("Activating Microphone & Camera... 🎙️📹");
+  
+  // For Android & Desktop: Pre-request permission on parent gesture, then IMMEDIATELY stop parent tracks to release hardware lock for iframe
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    navigator.mediaDevices.getUserMedia({ audio: true, video: true })
+      .then(stream => {
+        logAudioDebug("Parent window hardware permission granted! Releasing parent tracks for iframe...");
+        if (stream && stream.getTracks) {
+          stream.getTracks().forEach(t => t.stop());
+        }
+        launchLiveMeetingRoom(m, null);
+      })
+      .catch(err => {
+        logAudioDebug("Parent getUserMedia audio/video notice (trying audio fallback):", err);
+        navigator.mediaDevices.getUserMedia({ audio: true })
+          .then(audioStream => {
+            if (audioStream && audioStream.getTracks) {
+              audioStream.getTracks().forEach(t => t.stop());
+            }
+            launchLiveMeetingRoom(m, null);
+          })
+          .catch(() => {
+            launchLiveMeetingRoom(m, null);
+          });
+      });
+  } else {
+    launchLiveMeetingRoom(m, null);
+  }
 }
 
-// Fullscreen Native Live Meeting Room Entry (Guaranteed Video Display & Fallback)
-function launchLiveMeetingRoom(meeting, customRoomUrl) {
+// Fullscreen Native Live Meeting Room Entry (Best Grid View & Minimum Controls)
+function launchLiveMeetingRoom(meeting, stream) {
   try {
     const userBaseName = (state && state.currentUser && state.currentUser.username) ? state.currentUser.username : "Member";
     const uniqueParticipantName = `${userBaseName}_${Math.floor(100 + Math.random() * 900)}`;
     const isHost = meeting ? (meeting.host === userBaseName) : false;
 
-    const meetingIdSlug = (meeting && meeting.id) ? meeting.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
-    const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
+    logAudioDebug("Entering native meeting room with best grid view...", {
+      meetingId: meeting ? meeting.id : "default",
+      isHost: isHost,
+      participant: uniqueParticipantName
+    });
     
-    const roomUrl = customRoomUrl || `https://p2p.mirotalk.com/join/${roomSlug}?audio=1&video=1&mic=1&cam=1&muted=0&sound=1&speaker=1&autojoin=1&p2p=1&codec=vp8&layout=grid&grid=1&mesh=true&aspect=16:9&name=${encodeURIComponent(uniqueParticipantName)}&buttons=mic,cam,share,hand,leave&topbar=false&header=false&logo=false&survey=false&redirect=false&invite=false&welcome=false&chat=false&settings=false&theme=dark`;
-
-    // Ensure screen lock overlay displays with max z-index
+    // Lock screen view overlay
     const roomModal = document.getElementById("modal-live-meeting");
     if (roomModal) {
       roomModal.style.display = "flex";
-      roomModal.style.zIndex = "999999";
       roomModal.classList.add("active");
       document.body.classList.add("meeting-modal-open");
     }
-
+    
+    // Setup room title
+    const titleEl = document.getElementById("meeting-room-title-display");
+    if (titleEl && meeting && meeting.title) {
+      titleEl.textContent = meeting.title;
+    }
+    const legacyTitle = document.getElementById("meeting-room-title");
+    if (legacyTitle && meeting && meeting.title) {
+      legacyTitle.textContent = meeting.title;
+    }
+  
     if (meeting && meeting.id) {
       try { subscribeToMeetingEvents(meeting.id); } catch(e) {}
     }
     
     activeMeetingSession = {
       meetingId: meeting ? meeting.id : "default",
-      localStream: null,
+      localStream: stream,
       isMuted: false,
       isCamOff: false,
       isHost: isHost
     };
+
+    const meetingIdSlug = (meeting && meeting.id) ? meeting.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
+    const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
+    
+    // Best Grid View Layout & Minimum 5 Controls (mic, cam, share, hand, leave)
+    const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&speaker=true&autojoin=true&p2p=true&codec=vp8&layout=grid&grid=1&mesh=true&aspect=16:9&name=${encodeURIComponent(uniqueParticipantName)}&buttons=mic,cam,share,hand,leave&topbar=false&header=false&logo=false&survey=false&redirect=false&invite=false&welcome=false&chat=false&settings=false&theme=dark`;
+
+    // Detect iOS (iPhone/iPad) to bypass WebKit iframe microphone blocking
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (isIOS) {
+      logAudioDebug("iOS Device detected (Apple WebKit Iframe Restriction). Launching native top-level call window...");
+      showToast("Opening iOS Video Room (Mic & Speaker Active) 🙏");
+      window.location.href = roomUrl;
+      return;
+    }
 
     const jitsiCont = document.getElementById("meeting-jitsi-container");
     if (jitsiCont) {
@@ -7563,19 +7559,18 @@ function launchLiveMeetingRoom(meeting, customRoomUrl) {
           allowusermedia="true"
           playsinline="true"
           webkit-playsinline="true"
-          style="border: none; width: 100%; height: 100%; background: #090d16;">
+          style="border: none; width: 100%; height: 100%; border-radius: 18px; background: #090d16;">
         </iframe>
       `;
 
-      logAudioDebug("Native WebRTC Room iframe mounted inside app window.", { roomUrl });
+      logAudioDebug("Native WebRTC Room iframe mounted inside app window with optimal grid layout.", { roomUrl });
     }
 
+    enumerateAndPopulateAudioDevices();
+    setTimeout(() => { unlockAndPlayRemoteAudio(); }, 1000);
     showToast("Joined Live Fellowship Room 🙏");
   } catch (err) {
-    logAudioDebug("launchLiveMeetingRoom error fallback:", err);
-    if (customRoomUrl) {
-      window.location.href = customRoomUrl;
-    }
+    logAudioDebug("launchLiveMeetingRoom notice:", err);
   }
 }
 

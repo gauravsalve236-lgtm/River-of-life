@@ -1,23 +1,12 @@
 {
   "name": "River of Life",
   "short_name": "River of Life",
-  "description": "Bilingual Marathi & English Bible with split-screen study commentary, prayer meeting video calls, and personal notes.",
+  "description": "Bilingual Marathi & English Bible with split-screen study commentary and personal journaling notes.",
   "start_url": "./index.html",
   "display": "standalone",
-  "display_override": [
-    "standalone",
-    "minimal-ui",
-    "window-controls-overlay"
-  ],
-  "background_color": "#0f172a",
-  "theme_color": "#0f172a",
+  "background_color": "#f8fafc",
+  "theme_color": "#f8fafc",
   "orientation": "portrait-primary",
-  "permissions": [
-    "camera",
-    "microphone",
-    "audio-capture",
-    "video-capture"
-  ],
   "icons": [
     {
       "src": "assets/icons/icon-192.png?v=20260823-logo2",
