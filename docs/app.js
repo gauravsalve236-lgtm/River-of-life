@@ -7451,11 +7451,39 @@ function triggerJoinMeetingFlow(meetingId) {
   logAudioDebug("Join meeting flow initiated...", { meetingId, roomUrl });
   showToast("Opening Live Video Meeting Room... 🎙️📹");
 
-  // Detect Mobile Devices or Browser environments requiring direct window launch
-  const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  // Detect Oppo, ColorOS, Realme, Vivo, Xiaomi, Android & iOS Mobile Devices
+  const isOppoOrAndroid = /OPPO|ColorOS|CPH|PPCM|PBEM|PCLM|PEAM|PDEM|PDAM|RMX|Android/i.test(navigator.userAgent);
+  const isMobileDevice = isOppoOrAndroid || /iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   
   if (isMobileDevice) {
-    window.location.href = roomUrl;
+    logAudioDebug("Oppo / Android / iOS Mobile Device detected. Activating ColorOS system hardware permission...", { roomUrl });
+    showToast("Opening Video Room — Tap ALLOW on Mic & Cam popup 🎙️📹");
+
+    // Pre-trigger getUserMedia on user touch gesture to activate Oppo ColorOS system permission prompt
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ audio: true, video: true })
+        .then(stream => {
+          logAudioDebug("Oppo / Android permission granted! Releasing test tracks for video room...");
+          if (stream && stream.getTracks) {
+            stream.getTracks().forEach(t => t.stop());
+          }
+          window.location.href = roomUrl;
+        })
+        .catch(err => {
+          logAudioDebug("Oppo getUserMedia fallback launch:", err);
+          // Try audio only fallback
+          navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(aStream => {
+              if (aStream && aStream.getTracks) aStream.getTracks().forEach(t => t.stop());
+              window.location.href = roomUrl;
+            })
+            .catch(() => {
+              window.location.href = roomUrl;
+            });
+        });
+    } else {
+      window.location.href = roomUrl;
+    }
     return;
   }
 

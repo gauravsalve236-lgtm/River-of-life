@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v113-DESKTOP-CHROME-GUARANTEED-STAGE-VIEW';
+const CACHE_NAME = 'river-of-life-cache-v114-OPPO-COLOROS-SYSTEM-HARDWARE-PERMISSION-TRIGGER';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
