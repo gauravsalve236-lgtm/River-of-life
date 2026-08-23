@@ -922,14 +922,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (splash) splash.style.display = "none";
   }
 
-  // Safety fallback: Ensure splash screen is hidden within 2.5s no matter what
+  // Safety fallback: Ensure splash screen is hidden within 4.5s no matter what
   setTimeout(() => {
     const splash = document.getElementById("splash-screen");
     if (splash && splash.style.display !== "none") {
       splash.classList.add("fade-out");
       setTimeout(() => { splash.style.display = "none"; }, 500);
     }
-  }, 2500);
+  }, 4500);
 
   // 2. Wrap all app initializations in safe try/catch blocks
   try {
@@ -6124,8 +6124,8 @@ function initSplashAndNotifications() {
     splash.addEventListener("click", dismissNow);
   }
 
-  // Fast auto-dismiss splash screen after 1.2 seconds
-  setTimeout(dismissNow, 1200);
+  // Auto-dismiss splash screen after 3.5 seconds to allow comfortable reading of daily verse & logo design
+  setTimeout(dismissNow, 3500);
 }
 
 

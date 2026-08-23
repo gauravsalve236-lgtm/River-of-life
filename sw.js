@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v82-LOGO-THEME';
+const CACHE_NAME = 'river-of-life-cache-v83-EXTENDED-SPLASH';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
