@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v117-FIX-HTML-SYNTAX-FREEZE-AND-ANDROID-PERMISSIONS';
+const CACHE_NAME = 'river-of-life-cache-v118-FIX-MOBILE-ANDROID-TOUCH-POINTER-EVENTS';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
