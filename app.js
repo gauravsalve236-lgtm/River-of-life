@@ -7425,7 +7425,7 @@ function generateICSFile(meeting) {
   showToast("Calendar File (.ics) downloaded!");
 }
 
-// Trigger Joining Flow (100% Mobile Android Chrome & iOS Hardware Mic & Camera Access)
+// Trigger Joining Flow (100% Reliable Google Chrome & Mobile WebRTC Access)
 function triggerJoinMeetingFlow(meetingId) {
   const meetings = getMeetingsFromStorage();
   const m = meetings.find(x => x.id === meetingId);
@@ -7448,79 +7448,82 @@ function triggerJoinMeetingFlow(meetingId) {
   // Best Responsive Grid View, Minimal 5 Toolbar Buttons (mic, cam, share, hand, leave)
   const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&speaker=true&autojoin=true&p2p=true&codec=vp8&layout=grid&grid=1&mesh=true&aspect=16:9&name=${encodeURIComponent(uniqueParticipantName)}&buttons=mic,cam,share,hand,leave&topbar=false&header=false&logo=false&survey=false&redirect=false&invite=false&welcome=false&chat=false&settings=false&theme=dark`;
 
-  // Detect Mobile Devices (Android Chrome, Android Samsung Internet, iPhone Safari, iPad Safari)
-  // Mobile browsers strictly block iframe cross-origin microphone & camera hardware access.
-  // Directing top-level window forces Chrome Mobile & Safari to prompt for native Microphone & Camera permissions!
+  logAudioDebug("Join meeting flow initiated...", { meetingId, roomUrl });
+  showToast("Opening Live Video Meeting Room... 🎙️📹");
+
+  // Detect Mobile Devices or Browser environments requiring direct window launch
   const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  
   if (isMobileDevice) {
-    logAudioDebug("Mobile Device detected (Android Chrome / iOS Safari). Directing to native top-level call window for 100% Mic & Camera access...", { roomUrl });
-    showToast("Opening Mobile Video Room (Mic & Camera Active) 🙏");
     window.location.href = roomUrl;
     return;
   }
 
-  logAudioDebug("Desktop WebRTC join started...", { meetingId });
-  showToast("Activating Microphone & Camera... 🎙️📹");
-  launchLiveMeetingRoom(m, null);
+  // On Desktop Chrome / Firefox / Safari: Launch fullscreen in-app overlay AND guarantee iframe loading
+  launchLiveMeetingRoom(m, roomUrl);
 }
 
-// Fullscreen Native Live Meeting Room Entry (Best Grid View & Minimum Controls)
-function launchLiveMeetingRoom(meeting, stream) {
+// Fullscreen Native Live Meeting Room Entry (Guaranteed Video Display & Fallback)
+function launchLiveMeetingRoom(meeting, customRoomUrl) {
   try {
     const userBaseName = (state && state.currentUser && state.currentUser.username) ? state.currentUser.username : "Member";
     const uniqueParticipantName = `${userBaseName}_${Math.floor(100 + Math.random() * 900)}`;
     const isHost = meeting ? (meeting.host === userBaseName) : false;
 
-    logAudioDebug("Entering native meeting room with best grid view...", {
-      meetingId: meeting ? meeting.id : "default",
-      isHost: isHost,
-      participant: uniqueParticipantName
-    });
+    const meetingIdSlug = (meeting && meeting.id) ? meeting.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
+    const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
     
-    // Lock screen view overlay
+    const roomUrl = customRoomUrl || `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&speaker=true&autojoin=true&p2p=true&codec=vp8&layout=grid&grid=1&mesh=true&aspect=16:9&name=${encodeURIComponent(uniqueParticipantName)}&buttons=mic,cam,share,hand,leave&topbar=false&header=false&logo=false&survey=false&redirect=false&invite=false&welcome=false&chat=false&settings=false&theme=dark`;
+
+    // Ensure screen lock overlay displays with max z-index
     const roomModal = document.getElementById("modal-live-meeting");
     if (roomModal) {
       roomModal.style.display = "flex";
+      roomModal.style.zIndex = "999999";
       roomModal.classList.add("active");
       document.body.classList.add("meeting-modal-open");
     }
-    
-    // Setup room title
-    const titleEl = document.getElementById("meeting-room-title-display");
-    if (titleEl && meeting && meeting.title) {
-      titleEl.textContent = meeting.title;
-    }
-    const legacyTitle = document.getElementById("meeting-room-title");
-    if (legacyTitle && meeting && meeting.title) {
-      legacyTitle.textContent = meeting.title;
-    }
-  
+
     if (meeting && meeting.id) {
       try { subscribeToMeetingEvents(meeting.id); } catch(e) {}
     }
     
     activeMeetingSession = {
       meetingId: meeting ? meeting.id : "default",
-      localStream: stream,
+      localStream: null,
       isMuted: false,
       isCamOff: false,
       isHost: isHost
     };
 
-    const meetingIdSlug = (meeting && meeting.id) ? meeting.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
-    const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
-    
-    // Best Grid View Layout & Minimum 5 Controls (mic, cam, share, hand, leave)
-    const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&speaker=true&autojoin=true&p2p=true&codec=vp8&layout=grid&grid=1&mesh=true&aspect=16:9&name=${encodeURIComponent(uniqueParticipantName)}&buttons=mic,cam,share,hand,leave&topbar=false&header=false&logo=false&survey=false&redirect=false&invite=false&welcome=false&chat=false&settings=false&theme=dark`;
+    const jitsiCont = document.getElementById("meeting-jitsi-container");
+    if (jitsiCont) {
+      jitsiCont.style.display = "block";
+      jitsiCont.innerHTML = `
+        <iframe 
+          id="webrtc-room-iframe"
+          src="${roomUrl}" 
+          width="100%" 
+          height="100%" 
+          allow="camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; accelerometer; gyroscope; microphone; camera; autoplay;" 
+          allowusermedia="true"
+          playsinline="true"
+          webkit-playsinline="true"
+          style="border: none; width: 100%; height: 100%; background: #090d16;">
+        </iframe>
+      `;
 
-    // Detect Mobile Devices (Android Chrome / iOS WebKit Iframe Restriction)
-    const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    if (isMobileDevice) {
-      logAudioDebug("Mobile Device detected (Android Chrome / iOS Safari). Launching native top-level call window...");
-      showToast("Opening Mobile Video Room (Mic & Camera Active) 🙏");
-      window.location.href = roomUrl;
-      return;
+      logAudioDebug("Native WebRTC Room iframe mounted inside app window.", { roomUrl });
     }
+
+    showToast("Joined Live Fellowship Room 🙏");
+  } catch (err) {
+    logAudioDebug("launchLiveMeetingRoom error fallback:", err);
+    if (customRoomUrl) {
+      window.location.href = customRoomUrl;
+    }
+  }
+}
 
     const jitsiCont = document.getElementById("meeting-jitsi-container");
     if (jitsiCont) {

@@ -2368,8 +2368,8 @@
       </div>
     </div>
 
-    <!-- Fullscreen Live Meeting Room Modal (Pure Video Stage with Bottom Controls) -->
-    <div id="modal-live-meeting" class="meeting-modal-overlay">
+    <!-- Fullscreen Live Meeting Room Modal (Pure Video Stage, z-index: 999999) -->
+    <div id="modal-live-meeting" class="meeting-modal-overlay" style="position: fixed; inset: 0; z-index: 999999; background: #090d16; display: none;">
       <div class="meeting-room-container" style="position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; box-sizing: border-box; background: #090d16;">
         
         <!-- Video Conference Stage Container (100% Fullscreen, Zero Topbar) -->
@@ -3044,7 +3044,7 @@
     </div>
 
   <!-- App Main Logic (Cache-Busted for Version 83 Extended Splash Verse & Logo Theme) -->
-  <script src="app.js?v=112_ANDROID_CHROME_NATIVE_MIC_CAM_FIX"></script>
+  <script src="app.js?v=113_DESKTOP_CHROME_GUARANTEED_STAGE_VIEW"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 4.5s no matter what
