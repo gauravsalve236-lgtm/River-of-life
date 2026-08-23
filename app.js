@@ -1125,6 +1125,8 @@ function switchTab(rawRoute) {
       renderPrayersScreen();
     } else if (route === "meetings") {
       renderMeetingsDashboard();
+    } else if (route === "hymnal") {
+      if (window.renderHymnList && window.MARATHI_HYMNAL) window.renderHymnList(window.MARATHI_HYMNAL);
     }
   } else {
     // Fallback to home view if route is unmapped
@@ -9617,6 +9619,10 @@ window.MARATHI_HYMNAL = [
   { id: 4, number: 4, title_mr: "महान तुझे प्रेम, महान तुझी दया", title_en: "Great is Your Mercy", category: "उपकारस्तुती (Thanksgiving)", lyrics_mr: "१. महान तुझे प्रेम, महान तुझी दया,\nप्रभो तुझ्या चरणी मी नतमस्तक होतो आता.\n\n(ध्रुवपद)\nहाल्लेलूया हाल्लेलूया गाईन मी तुझी स्तुती,\nआयुष्यभर करीन मी तुझीच भक्ती." }
 ];
 
+setTimeout(function() {
+  if (window.renderHymnList) window.renderHymnList(window.MARATHI_HYMNAL);
+}, 200);
+
 window.openHymnalViewer = function() {
   const modal = document.getElementById("modal-hymnal-hub");
   if (!modal) return;
@@ -9626,10 +9632,11 @@ window.openHymnalViewer = function() {
 };
 
 window.renderHymnList = function(hymns) {
-  const container = document.getElementById("hymn-list-container");
-  if (!container) return;
+  if (!hymns || !Array.isArray(hymns)) hymns = window.MARATHI_HYMNAL || [];
+  const modalContainer = document.getElementById("hymn-list-container");
+  const pageContainer = document.getElementById("hymn-page-list-container");
   
-  container.innerHTML = hymns.map(h => `
+  const html = hymns.map(h => `
     <div onclick="openHymnDetail(${h.id})" style="background: var(--bg); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; margin-bottom: 10px; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
       <div style="text-align: left;">
         <span style="font-size: 11px; font-weight: 800; color: var(--primary); text-transform: uppercase;">गीत क्र. ${h.number} • ${h.category}</span>
@@ -9639,6 +9646,9 @@ window.renderHymnList = function(hymns) {
       <span style="font-size: 18px; color: var(--primary);">🎶</span>
     </div>
   `).join('');
+  
+  if (modalContainer) modalContainer.innerHTML = html;
+  if (pageContainer) pageContainer.innerHTML = html;
 };
 
 window.filterHymns = function(query) {

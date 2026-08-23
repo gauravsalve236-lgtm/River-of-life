@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v84-MULTI-CHURCH-PLATFORM';
+const CACHE_NAME = 'river-of-life-cache-v85-CLEAN-BOTTOM-MENU';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
