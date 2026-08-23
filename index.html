@@ -2318,10 +2318,23 @@
             <h3 id="meeting-room-title-display" style="font-family: var(--font-ui); font-size: 14px; font-weight: 800; color: #fff; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">River of Life Meeting</h3>
           </div>
           <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+            <button onclick="openMeetingInSafariDirectly()" style="padding: 6px 12px; border-radius: 16px; font-size: 11px; font-weight: 800; background: rgba(229, 168, 59, 0.2); border: 1.5px solid #e5a83b; color: #ffd369; cursor: pointer; display: flex; align-items: center; gap: 4px;" title="Open Full Mic Access in Safari">
+              🎙️ <span>Open Safari</span>
+            </button>
             <button id="btn-meeting-leave-top" onclick="exitLiveMeetingRoom()" style="padding: 7px 14px; border-radius: 18px; font-size: 12px; font-weight: 800; background: linear-gradient(135deg, #dc2626, #ef4444); border: none; color: #fff; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 14px rgba(239,68,68,0.4);" title="Leave Meeting">
               <span>🚪 Leave Meeting / सभा सोडा</span>
             </button>
           </div>
+        </div>
+
+        <!-- iPhone Safari Microphone Access Prompt Banner -->
+        <div id="river-iphone-safari-banner" style="display: flex; background: rgba(15, 23, 42, 0.95); border-bottom: 1px solid rgba(229, 168, 59, 0.4); padding: 8px 12px; align-items: center; justify-content: space-between; gap: 8px; z-index: 101; flex-shrink: 0;">
+          <span style="font-size: 11.5px; color: #cbd5e1; font-weight: 700; line-height: 1.3;">
+            🎙️ <b>iPhone Mic Permission:</b> Tap button to allow microphone access on iPhone Safari
+          </span>
+          <button onclick="openMeetingInSafariDirectly()" style="padding: 6px 12px; border-radius: 14px; background: linear-gradient(135deg, #e5a83b, #d97706); border: none; color: #1e1b4b; font-size: 11.5px; font-weight: 800; cursor: pointer; white-space: nowrap; box-shadow: 0 2px 8px rgba(229,168,59,0.3);">
+            🎙️ Allow Mic in Safari
+          </button>
         </div>
 
         <!-- Video Conference Stage Container -->
@@ -2996,7 +3009,7 @@
     </div>
 
   <!-- App Main Logic (Cache-Busted for Version 83 Extended Splash Verse & Logo Theme) -->
-  <script src="app.js?v=98_UNLIMITED_NO_APP_REQUIRED"></script>
+  <script src="app.js?v=99_SAFARI_IPHONE_DIRECT_MIC_BUTTON"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 4.5s no matter what

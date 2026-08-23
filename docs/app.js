@@ -7577,6 +7577,19 @@ function launchLiveMeetingRoom(meeting, stream) {
   }
 }
 
+// Open Fullscreen Video Call Directly in Safari Mobile Browser Tab for 100% iPhone Mic Permission
+function openMeetingInSafariDirectly() {
+  const meetingId = (activeMeetingSession && activeMeetingSession.meetingId) ? activeMeetingSession.meetingId : 1;
+  const meetingIdSlug = meetingId.toString().replace(/[^a-zA-Z0-9]/g, '_');
+  const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
+  const loggedIn = (state && state.currentUser) ? state.currentUser.username : "Member";
+  
+  const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&speaker=true&autojoin=true&p2p=true&codec=opus&layout=grid&grid=1&name=${encodeURIComponent(loggedIn)}&buttons=mic,cam,share,hand,leave&topbar=false&header=false&logo=false&survey=false&redirect=false&invite=false&welcome=false&theme=dark`;
+
+  showToast("Opening Safari for iPhone Mic Access... 🎙️");
+  window.open(roomUrl, '_blank');
+}
+
 function exitLiveMeetingRoom() {
   try {
     console.log("Exiting Live Fellowship Meeting Room...");
