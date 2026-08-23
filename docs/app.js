@@ -7366,7 +7366,7 @@ function generateICSFile(meeting) {
   showToast("Calendar File (.ics) downloaded!");
 }
 
-// Trigger Joining Flow (Backup 2323 Verified Engine)
+// Trigger Joining Flow (Backup 2323 Verified Engine with Unique Participant Names)
 function triggerJoinMeetingFlow(meetingId) {
   const meetings = getMeetingsFromStorage();
   const m = meetings.find(x => x.id === meetingId);
@@ -7381,14 +7381,15 @@ function triggerJoinMeetingFlow(meetingId) {
     }
   } catch(e) {}
 
-  const loggedIn = (state && state.currentUser) ? state.currentUser.username : "Member";
+  const userBaseName = (state && state.currentUser && state.currentUser.username) ? state.currentUser.username : "Member";
+  const uniqueParticipantName = `${userBaseName}_${Math.floor(100 + Math.random() * 900)}`;
   const meetingIdSlug = (m && m.id) ? m.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
   const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
   
-  // Clean 2323 Mirotalk URL with EXACT 5 controls (mic, cam, share, hand, leave) & No landing popups
-  const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&speaker=true&autojoin=true&p2p=true&codec=opus&layout=grid&grid=1&name=${encodeURIComponent(loggedIn)}&buttons=mic,cam,share,hand,leave&topbar=false&header=false&logo=false&survey=false&redirect=false&invite=false&welcome=false&theme=dark`;
+  // Clean 2323 Mirotalk URL with EXACT 5 controls (mic, cam, share, hand, leave) & Unique Participant Name
+  const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&speaker=true&autojoin=true&p2p=true&codec=opus&layout=grid&grid=1&name=${encodeURIComponent(uniqueParticipantName)}&buttons=mic,cam,share,hand,leave&topbar=false&header=false&logo=false&survey=false&redirect=false&invite=false&welcome=false&theme=dark`;
 
-  // Detect iOS (iPhone/iPad) to bypass WebKit iframe microphone blocking and popup blocker
+  // Detect iOS (iPhone/iPad) to launch native top-level call window where Safari triggers microphone permission prompt
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   if (isIOS) {
     logAudioDebug("iOS Device detected. Directing to native top-level call window...", { roomUrl });
@@ -7424,16 +7425,17 @@ function triggerJoinMeetingFlow(meetingId) {
   }
 }
 
-// Fullscreen Native Live Meeting Room Entry (Backup 2323 Engine)
+// Fullscreen Native Live Meeting Room Entry (Backup 2323 Engine with Unique Participant Names)
 function launchLiveMeetingRoom(meeting, stream) {
   try {
-    const loggedIn = (state && state.currentUser) ? state.currentUser.username : "Member";
-    const isHost = meeting ? (meeting.host === loggedIn) : false;
+    const userBaseName = (state && state.currentUser && state.currentUser.username) ? state.currentUser.username : "Member";
+    const uniqueParticipantName = `${userBaseName}_${Math.floor(100 + Math.random() * 900)}`;
+    const isHost = meeting ? (meeting.host === userBaseName) : false;
 
     logAudioDebug("Entering native meeting room...", {
       meetingId: meeting ? meeting.id : "default",
       isHost: isHost,
-      participant: loggedIn
+      participant: uniqueParticipantName
     });
     
     // Lock screen view overlay
@@ -7469,7 +7471,7 @@ function launchLiveMeetingRoom(meeting, stream) {
     const meetingIdSlug = (meeting && meeting.id) ? meeting.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
     const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
     
-    const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&speaker=true&autojoin=true&p2p=true&codec=opus&layout=grid&grid=1&name=${encodeURIComponent(loggedIn)}&buttons=mic,cam,share,hand,leave&topbar=false&header=false&logo=false&survey=false&redirect=false&invite=false&welcome=false&theme=dark`;
+    const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&speaker=true&autojoin=true&p2p=true&codec=opus&layout=grid&grid=1&name=${encodeURIComponent(uniqueParticipantName)}&buttons=mic,cam,share,hand,leave&topbar=false&header=false&logo=false&survey=false&redirect=false&invite=false&welcome=false&theme=dark`;
 
     // Detect iOS (iPhone/iPad) to bypass WebKit iframe microphone blocking
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
