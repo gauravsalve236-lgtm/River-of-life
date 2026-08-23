@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v104-SIMPLE-BOOLEAN-SAFARI-MIC-CAM-PROMPT';
+const CACHE_NAME = 'river-of-life-cache-v105-IPHONE-MIC-ACTIVATOR-TOUCH-UNCLOAK';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

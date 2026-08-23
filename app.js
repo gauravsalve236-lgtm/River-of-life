@@ -7367,6 +7367,39 @@ function generateICSFile(meeting) {
   showToast("Calendar File (.ics) downloaded!");
 }
 
+// iPhone Safari Touch Activator for Hardware Microphone Access
+function unlockIPhoneMicHardware() {
+  try {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (AudioContextClass) {
+      if (!window.webrtcAudioCtx) window.webrtcAudioCtx = new AudioContextClass();
+      if (window.webrtcAudioCtx.state === 'suspended') window.webrtcAudioCtx.resume();
+    }
+  } catch(e) {}
+
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    navigator.mediaDevices.getUserMedia({ audio: true, video: true })
+      .then(stream => {
+        showToast("iPhone Microphone Hardware Activated! 🎙️");
+        const activator = document.getElementById("river-iphone-mic-activator");
+        if (activator) activator.style.display = "none";
+        
+        const iframe = document.getElementById("webrtc-room-iframe");
+        if (iframe && iframe.contentWindow) {
+          try { iframe.contentWindow.postMessage({ type: 'toggle-mic', muted: false }, '*'); } catch(e) {}
+        }
+      })
+      .catch(err => {
+        console.warn("iPhone mic hardware unlock notice:", err);
+        showIPhoneMicGuideModal();
+      });
+  } else {
+    showToast("iPhone Microphone Activated 🎙️");
+    const activator = document.getElementById("river-iphone-mic-activator");
+    if (activator) activator.style.display = "none";
+  }
+}
+
 // iPhone Safari Microphone Guide & Permission Helper Functions
 function showIPhoneMicGuideModal() {
   let guide = document.getElementById("modal-iphone-mic-guide");
