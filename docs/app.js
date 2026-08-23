@@ -7407,6 +7407,99 @@ function triggerJoinMeetingFlow(meetingId) {
   }
 }
 
+// Explicit Mobile Microphone Permission Request Trigger
+function requestMobileMicPermissionExplicitly() {
+  const banner = document.getElementById("river-mic-permission-banner");
+  showToast("Requesting Mobile Microphone Access... 🎙️");
+  
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    navigator.mediaDevices.getUserMedia({ audio: true, video: true })
+      .then(stream => {
+        showToast("Microphone Permission Granted! 🎙️");
+        if (banner) banner.style.display = "none";
+        if (activeMeetingSession) activeMeetingSession.localStream = stream;
+      })
+      .catch(err => {
+        showToast("Please tap Allow when browser prompts for microphone 🙏");
+        console.warn("Explicit mic request notice:", err);
+      });
+  }
+}
+
+// Native Toggle Mic (Mute / Unmute) via Custom Large App Button
+function toggleNativeMeetingMic() {
+  if (!activeMeetingSession) activeMeetingSession = { isMuted: false };
+  activeMeetingSession.isMuted = !activeMeetingSession.isMuted;
+
+  const btn = document.getElementById("btn-native-mic-toggle");
+  const icon = document.getElementById("native-mic-icon");
+  const text = document.getElementById("native-mic-text");
+
+  const iframe = document.getElementById("webrtc-room-iframe");
+  if (iframe && iframe.contentWindow) {
+    try {
+      iframe.contentWindow.postMessage({ type: 'toggle-mic', muted: activeMeetingSession.isMuted }, '*');
+    } catch(e) {}
+  }
+
+  if (activeMeetingSession.isMuted) {
+    if (btn) {
+      btn.style.background = "rgba(239, 68, 68, 0.25)";
+      btn.style.borderColor = "#ef4444";
+      btn.style.color = "#f87171";
+    }
+    if (icon) icon.textContent = "🔇";
+    if (text) text.textContent = "Muted";
+    showToast("Microphone Muted 🔇");
+  } else {
+    if (btn) {
+      btn.style.background = "rgba(34, 197, 94, 0.2)";
+      btn.style.borderColor = "#22c55e";
+      btn.style.color = "#4ade80";
+    }
+    if (icon) icon.textContent = "🎙️";
+    if (text) text.textContent = "Mic On";
+    showToast("Microphone Active 🎙️");
+  }
+}
+
+// Native Toggle Video Cam via Custom Large App Button
+function toggleNativeMeetingCam() {
+  if (!activeMeetingSession) activeMeetingSession = { isCamOff: false };
+  activeMeetingSession.isCamOff = !activeMeetingSession.isCamOff;
+
+  const btn = document.getElementById("btn-native-cam-toggle");
+  const icon = document.getElementById("native-cam-icon");
+  const text = document.getElementById("native-cam-text");
+
+  const iframe = document.getElementById("webrtc-room-iframe");
+  if (iframe && iframe.contentWindow) {
+    try {
+      iframe.contentWindow.postMessage({ type: 'toggle-cam', camOff: activeMeetingSession.isCamOff }, '*');
+    } catch(e) {}
+  }
+
+  if (activeMeetingSession.isCamOff) {
+    if (btn) {
+      btn.style.background = "rgba(239, 68, 68, 0.25)";
+      btn.style.borderColor = "#ef4444";
+      btn.style.color = "#f87171";
+    }
+    if (icon) icon.textContent = "📷";
+    if (text) text.textContent = "Cam Off";
+    showToast("Camera Disabled 📷");
+  } else {
+    if (btn) {
+      btn.style.background = "rgba(34, 197, 94, 0.2)";
+      btn.style.borderColor = "#22c55e";
+      btn.style.color = "#4ade80";
+    }
+    if (icon) icon.textContent = "📹";
+    if (text) text.textContent = "Video";
+    showToast("Camera Active 📹");
+  }
+}
+
 // Fullscreen Native In-App Live Meeting Room Entry
 function launchLiveMeetingRoom(meeting, stream) {
   try {
@@ -7427,6 +7520,13 @@ function launchLiveMeetingRoom(meeting, stream) {
       document.body.classList.add("meeting-modal-open");
     }
     
+    // Check if mic permission banner should be shown
+    const micBanner = document.getElementById("river-mic-permission-banner");
+    if (micBanner) {
+      // Hide banner if stream is active, show if permissions needed
+      micBanner.style.display = stream ? "none" : "flex";
+    }
+
     // Setup room title
     const titleEl = document.getElementById("meeting-room-title-display");
     if (titleEl && meeting && meeting.title) {
@@ -7449,15 +7549,15 @@ function launchLiveMeetingRoom(meeting, stream) {
       isHost: isHost
     };
 
-    // Load Streamlined WebRTC Room with Active Mobile Microphone & Essential Controls Only
+    // Load Streamlined WebRTC Room with Active Mobile Microphone & Large In-App Control Bar
     const jitsiCont = document.getElementById("meeting-jitsi-container");
     if (jitsiCont) {
       jitsiCont.style.display = "block";
       const meetingIdSlug = (meeting && meeting.id) ? meeting.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
       const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
       
-      // Verified Active Microphone URL Flags: audio=true&video=true&mic=true&cam=true&muted=false&sound=true&speaker=true&autojoin=true&p2p=true&codec=opus
-      const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&speaker=true&autojoin=true&p2p=true&codec=opus&layout=grid&grid=1&name=${encodeURIComponent(loggedIn)}&buttons=mic,cam,chat,leave&topbar=false&header=false&logo=false&survey=false&redirect=false&theme=dark`;
+      // buttons=false removes tiny iframe buttons so app's large native buttons control the call
+      const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&speaker=true&autojoin=true&p2p=true&codec=opus&layout=grid&grid=1&name=${encodeURIComponent(loggedIn)}&buttons=false&topbar=false&header=false&logo=false&survey=false&redirect=false&theme=dark`;
 
       jitsiCont.innerHTML = `
         <iframe 
