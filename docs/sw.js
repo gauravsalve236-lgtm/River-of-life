@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v82-MEETING-CONTROLS';
+const CACHE_NAME = 'river-of-life-cache-v82-LOGO-THEME';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

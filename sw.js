@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v81-PHONE-EMAIL-AUTHENTICATION-AND-DATASOURCE';
+const CACHE_NAME = 'river-of-life-cache-v82-LOGO-THEME';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

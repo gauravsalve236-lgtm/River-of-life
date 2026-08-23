@@ -23,72 +23,76 @@
   display: none !important;
 }
 
-/* Theme 1: Slate Midnight (Dark Mode - Default) */
+/* Theme 1: River Midnight Sanctuary (Dark Mode - Default) */
 .ios-theme-dark {
-  --bg: #0f172a;           /* Dark Slate */
-  --bg-content: #1e293b;   /* Card Slate */
-  --bg-rgb: 15, 23, 42;
-  --drawer-bg: #1e293b;
-  --text: #f8fafc;
-  --text-muted: #94a3b8;
-  --primary: #fbbf24;      /* Gold accent */
-  --primary-light: rgba(251, 191, 36, 0.15);
-  --border: #334155;
-  --border-rgb: 51, 65, 85;
-  --pill-bg: #334155;
+  --bg: #071d20;           /* Deep Ocean Cyan-Teal Slate */
+  --bg-content: #0d2c31;   /* Rich Teal Card */
+  --bg-rgb: 7, 29, 32;
+  --drawer-bg: #0b2529;
+  --text: #f0fdfd;
+  --text-muted: #85b0b6;
+  --primary: #e5a83b;      /* Logo Holy Gold Accent */
+  --primary-light: rgba(229, 168, 59, 0.18);
+  --river-teal: #0e757d;   /* Logo Primary Teal */
+  --river-aqua: #1bb5be;   /* Logo Aqua Glow */
+  --border: #184b52;
+  --border-rgb: 24, 75, 82;
+  --pill-bg: #144047;
   --danger: #f87171;
-  --sidebar-hover: #334155;
+  --sidebar-hover: #144047;
 }
 
-/* Theme 2: Pure Light */
+/* Theme 2: River Pure Light */
 .ios-theme-light {
-  --bg: #f8fafc;
-  --bg-content: #ffffff;
-  --bg-rgb: 248, 250, 252;
+  --bg: #faf8f2;           /* Soft Ivory Cream */
+  --bg-content: #ffffff;   /* Pure White Cards */
+  --bg-rgb: 250, 248, 242;
   --drawer-bg: #ffffff;
-  --text: #0f172a;
-  --text-muted: #64748b;
-  --primary: #d97706;      /* Amber / gold */
-  --primary-light: rgba(217, 119, 6, 0.1);
-  --border: #e2e8f0;
-  --border-rgb: 226, 232, 240;
-  --pill-bg: #f1f5f9;
+  --text: #08292d;         /* Deep River Slate Text */
+  --text-muted: #53757a;
+  --primary: #0e757d;      /* Logo River Teal Primary */
+  --primary-light: rgba(14, 117, 125, 0.12);
+  --river-teal: #0e757d;
+  --river-gold: #d99522;   /* Logo Gold Accent */
+  --border: #e2ded0;
+  --border-rgb: 226, 222, 208;
+  --pill-bg: #f0ebd9;
   --danger: #ef4444;
-  --sidebar-hover: #f1f5f9;
+  --sidebar-hover: #f0ebd9;
 }
 
-/* Theme 3: Warm Sepia */
+/* Theme 3: Warm River Sepia */
 .ios-theme-sepia {
-  --bg: #fdf6e3;
-  --bg-content: #f4ecd8;
-  --bg-rgb: 253, 246, 227;
-  --drawer-bg: #f4ecd8;
-  --text: #586e75;
-  --text-muted: #839496;
-  --primary: #b58900;
-  --primary-light: rgba(181, 137, 0, 0.1);
-  --border: #decfa6;
-  --border-rgb: 222, 207, 166;
-  --pill-bg: #eeddb2;
+  --bg: #f8f3e5;           /* Bible Parchment */
+  --bg-content: #ede4d0;
+  --bg-rgb: 248, 243, 229;
+  --drawer-bg: #ede4d0;
+  --text: #09373d;
+  --text-muted: #648286;
+  --primary: #c68a1a;
+  --primary-light: rgba(198, 138, 26, 0.12);
+  --border: #dcd1ba;
+  --border-rgb: 220, 209, 186;
+  --pill-bg: #e2d6bc;
   --danger: #dc322f;
-  --sidebar-hover: #eeddb2;
+  --sidebar-hover: #e2d6bc;
 }
 
-/* Theme 4: Sage Olive */
+/* Theme 4: River Sanctuary Emerald */
 .ios-theme-olive {
-  --bg: #f4f6f0;
-  --bg-content: #e2e7d8;
-  --bg-rgb: 244, 246, 240;
-  --drawer-bg: #e2e7d8;
-  --text: #2f3e22;
-  --text-muted: #607052;
-  --primary: #6b8e23;
-  --primary-light: rgba(107, 142, 35, 0.1);
-  --border: #cad1bd;
-  --border-rgb: 202, 209, 189;
-  --pill-bg: #d4dcb8;
-  --danger: #b22222;
-  --sidebar-hover: #d4dcb8;
+  --bg: #062326;
+  --bg-content: #0a3338;
+  --bg-rgb: 6, 35, 38;
+  --drawer-bg: #092e33;
+  --text: #f0fdfd;
+  --text-muted: #7caab0;
+  --primary: #1bb5be;
+  --primary-light: rgba(27, 181, 190, 0.15);
+  --border: #134e54;
+  --border-rgb: 19, 78, 84;
+  --pill-bg: #104449;
+  --danger: #f87171;
+  --sidebar-hover: #104449;
 }
 
 /* Base Styles */
@@ -5868,11 +5872,11 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
 /* Brand Hero Welcome Card & Logo Theme Enhancements */
 .brand-hero-welcome-card {
   margin: 12px 16px 16px 16px;
-  padding: 20px 24px;
+  padding: 22px 24px;
   border-radius: 20px;
-  background: linear-gradient(135deg, rgba(39, 58, 37, 0.95) 0%, rgba(22, 33, 20, 0.98) 100%);
-  border: 1px solid rgba(223, 169, 56, 0.35);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  background: linear-gradient(135deg, #05262a 0%, #0e757d 55%, #159ba5 100%);
+  border: 1.5px solid rgba(229, 168, 59, 0.45);
+  box-shadow: 0 12px 36px rgba(4, 21, 23, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.18);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -5885,11 +5889,11 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
 .brand-hero-welcome-card::before {
   content: '';
   position: absolute;
-  top: -50px;
-  right: -50px;
-  width: 180px;
-  height: 180px;
-  background: radial-gradient(circle, rgba(223, 169, 56, 0.25) 0%, rgba(223, 169, 56, 0) 70%);
+  top: -60px;
+  right: -60px;
+  width: 220px;
+  height: 220px;
+  background: radial-gradient(circle, rgba(229, 168, 59, 0.3) 0%, rgba(27, 181, 190, 0.12) 50%, rgba(0, 0, 0, 0) 75%);
   border-radius: 50%;
   pointer-events: none;
 }
@@ -5909,9 +5913,9 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
   gap: 6px;
   font-size: 11px;
   font-weight: 800;
-  color: #dfa938;
-  background: rgba(223, 169, 56, 0.15);
-  border: 1px solid rgba(223, 169, 56, 0.3);
+  color: #ffd369;
+  background: rgba(229, 168, 59, 0.18);
+  border: 1px solid rgba(229, 168, 59, 0.4);
   padding: 4px 10px;
   border-radius: 20px;
   text-transform: uppercase;
@@ -5930,16 +5934,17 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
 
 .hero-welcome-title {
   font-family: var(--font-display, 'Outfit', sans-serif);
-  font-size: 22px;
+  font-size: 23px;
   font-weight: 800;
   color: #ffffff;
   margin: 0 0 4px 0;
   line-height: 1.2;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .hero-welcome-subtitle {
-  font-size: 12.5px;
-  color: rgba(255, 255, 255, 0.8);
+  font-size: 13px;
+  color: rgba(240, 253, 253, 0.9);
   margin: 0 0 16px 0;
   line-height: 1.4;
 }
@@ -5951,7 +5956,7 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
 }
 
 .hero-btn {
-  padding: 9px 16px;
+  padding: 9.5px 17px;
   border-radius: 12px;
   font-size: 12.5px;
   font-weight: 800;
@@ -5969,15 +5974,15 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
 }
 
 .hero-btn.primary-gold {
-  background: linear-gradient(135deg, #dfa938 0%, #c99328 100%);
-  color: #172116;
-  box-shadow: 0 4px 14px rgba(223, 169, 56, 0.35);
+  background: linear-gradient(135deg, #e5a83b 0%, #d99522 100%);
+  color: #062024;
+  box-shadow: 0 4px 16px rgba(229, 168, 59, 0.45);
 }
 
 .hero-btn.secondary-green {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(27, 181, 190, 0.18);
   color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(27, 181, 190, 0.45);
   backdrop-filter: blur(10px);
 }
 
