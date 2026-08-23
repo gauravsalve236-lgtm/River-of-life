@@ -5844,15 +5844,15 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
   z-index: 10005 !important;
 }
 
-/* Multi-Church Platform Modal Card Dialog Container & High-Contrast Light/Dark Modes */
+/* Multi-Church Platform Modal Card Dialog Container & High-Contrast Multi-Theme Styling */
 .platform-modal-card {
   max-width: 480px;
   width: 90vw;
-  background: var(--surface, #ffffff) !important;
-  color: var(--text, #0f172a) !important;
+  background: var(--bg-content, #ffffff) !important;
+  color: var(--text, #08292d) !important;
   border-radius: 20px !important;
   border: 1.5px solid var(--border, #cbd5e1) !important;
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.65) !important;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.75) !important;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -5863,16 +5863,16 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
 
 .platform-modal-header {
   padding: 16px 20px !important;
-  border-bottom: 1px solid var(--border, #e2e8f0) !important;
+  border-bottom: 1px solid var(--border, #cbd5e1) !important;
   display: flex !important;
   justify-content: space-between !important;
   align-items: center !important;
-  background: var(--surface, #ffffff) !important;
+  background: var(--bg-content, #ffffff) !important;
 }
 
 .platform-modal-header h3 {
   margin: 0 !important;
-  font-size: 17px !important;
+  font-size: 17.5px !important;
   font-weight: 800 !important;
   color: var(--primary, #0e757d) !important;
 }
@@ -5881,9 +5881,9 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
   width: 36px !important;
   height: 36px !important;
   border-radius: 50% !important;
-  background: rgba(15, 23, 42, 0.08) !important;
-  color: #0f172a !important;
-  border: 1px solid rgba(0, 0, 0, 0.15) !important;
+  background: var(--pill-bg, rgba(0, 0, 0, 0.1)) !important;
+  color: var(--text, #08292d) !important;
+  border: 1px solid var(--border, rgba(0, 0, 0, 0.15)) !important;
   font-size: 22px !important;
   font-weight: bold !important;
   line-height: 1 !important;
@@ -5896,63 +5896,95 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
 }
 
 .platform-modal-close:hover {
-  background: rgba(15, 23, 42, 0.2) !important;
+  background: rgba(229, 168, 59, 0.25) !important;
   transform: scale(1.08) !important;
 }
 
 .platform-modal-footer {
   padding: 12px 16px !important;
-  border-top: 1px solid var(--border, #e2e8f0) !important;
-  background: var(--bg, #f8fafc) !important;
+  border-top: 1px solid var(--border, #cbd5e1) !important;
+  background: var(--bg, #faf8f2) !important;
   text-align: center !important;
 }
 
 .btn-modal-close-footer {
   width: 100% !important;
-  padding: 10px !important;
+  padding: 11px !important;
   border-radius: 12px !important;
   font-weight: 800 !important;
-  font-size: 13px !important;
-  background: rgba(239, 68, 68, 0.12) !important;
-  border: 1px solid rgba(239, 68, 68, 0.35) !important;
-  color: #ef4444 !important;
+  font-size: 13.5px !important;
+  background: rgba(239, 68, 68, 0.15) !important;
+  border: 1.5px solid rgba(239, 68, 68, 0.4) !important;
+  color: var(--danger, #ef4444) !important;
   cursor: pointer !important;
   transition: all 0.2s ease !important;
 }
 
 .btn-modal-close-footer:hover {
-  background: rgba(239, 68, 68, 0.22) !important;
+  background: rgba(239, 68, 68, 0.28) !important;
 }
 
-/* Dark Mode Modal Enhancements */
-body.dark-theme .platform-modal-card {
-  background: #0f172a !important;
-  color: #f8fafc !important;
-  border: 1.5px solid #1e293b !important;
+/* Explicit Dark Theme Support (`.ios-theme-dark` & `.ios-theme-olive`) */
+.ios-theme-dark .platform-modal-card,
+.ios-theme-olive .platform-modal-card {
+  background: #0d2c31 !important;
+  color: #f0fdfd !important;
+  border: 1.5px solid #184b52 !important;
 }
 
-body.dark-theme .platform-modal-header {
-  background: #0f172a !important;
-  border-bottom: 1px solid #1e293b !important;
+.ios-theme-dark .platform-modal-header,
+.ios-theme-olive .platform-modal-header {
+  background: #0d2c31 !important;
+  border-bottom: 1px solid #184b52 !important;
 }
 
-body.dark-theme .platform-modal-header h3 {
-  color: #ffd369 !important;
+.ios-theme-dark .platform-modal-header h3,
+.ios-theme-olive .platform-modal-header h3 {
+  color: #e5a83b !important;
 }
 
-body.dark-theme .platform-modal-close {
+.ios-theme-dark .platform-modal-close,
+.ios-theme-olive .platform-modal-close {
   background: rgba(255, 255, 255, 0.15) !important;
   color: #ffffff !important;
   border: 1px solid rgba(255, 255, 255, 0.25) !important;
 }
 
-body.dark-theme .platform-modal-close:hover {
-  background: rgba(255, 255, 255, 0.3) !important;
+.ios-theme-dark .platform-modal-footer,
+.ios-theme-olive .platform-modal-footer {
+  background: #071d20 !important;
+  border-top: 1px solid #184b52 !important;
 }
 
-body.dark-theme .platform-modal-footer {
-  background: #090d16 !important;
-  border-top: 1px solid #1e293b !important;
+/* Explicit Light Theme Support (`.ios-theme-light` & `.ios-theme-sepia`) */
+.ios-theme-light .platform-modal-card {
+  background: #ffffff !important;
+  color: #08292d !important;
+  border: 1.5px solid #e2ded0 !important;
+}
+
+.ios-theme-light .platform-modal-header {
+  background: #ffffff !important;
+  border-bottom: 1px solid #e2ded0 !important;
+}
+
+.ios-theme-light .platform-modal-header h3 {
+  color: #0e757d !important;
+}
+
+.ios-theme-sepia .platform-modal-card {
+  background: #ede4d0 !important;
+  color: #09373d !important;
+  border: 1.5px solid #dcd1ba !important;
+}
+
+.ios-theme-sepia .platform-modal-header {
+  background: #ede4d0 !important;
+  border-bottom: 1px solid #dcd1ba !important;
+}
+
+.ios-theme-sepia .platform-modal-header h3 {
+  color: #c68a1a !important;
 }
 
 

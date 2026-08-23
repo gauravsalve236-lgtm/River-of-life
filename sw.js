@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v87-MODAL-FIXES';
+const CACHE_NAME = 'river-of-life-cache-v88-THEME-CONTRAST-FIX';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
