@@ -7367,6 +7367,68 @@ function generateICSFile(meeting) {
   showToast("Calendar File (.ics) downloaded!");
 }
 
+// iPhone Safari Microphone Guide & Permission Helper Functions
+function showIPhoneMicGuideModal() {
+  let guide = document.getElementById("modal-iphone-mic-guide");
+  if (!guide) {
+    guide = document.createElement("div");
+    guide.id = "modal-iphone-mic-guide";
+    guide.className = "modal-overlay active";
+    guide.style.cssText = "position: fixed; inset: 0; z-index: 10000; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; padding: 20px;";
+    guide.innerHTML = `
+      <div style="background: linear-gradient(145deg, #1e293b, #0f172a); border: 1.5px solid #e5a83b; border-radius: 24px; padding: 24px; max-width: 360px; width: 100%; color: #fff; box-shadow: 0 12px 40px rgba(0,0,0,0.6); text-align: center;">
+        <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(229, 168, 59, 0.2); border: 2px solid #e5a83b; display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 16px auto;">
+          🎙️
+        </div>
+        <h3 style="font-size: 18px; font-weight: 800; color: #ffd369; margin-bottom: 12px;">Enable iPhone Microphone Access<br><span style="font-size: 13px; font-weight: 600; color: #cbd5e1;">आयफोनवर मायक्रोफोन सुरू करा</span></h3>
+        
+        <div style="background: rgba(255,255,255,0.05); border-radius: 16px; padding: 14px; text-align: left; font-size: 12.5px; color: #e2e8f0; line-height: 1.6; margin-bottom: 20px;">
+          <p style="margin: 0 0 8px 0;"><b>Step 1:</b> Tap the <b>aA</b> or <b>Tune (⚙️)</b> icon in Safari address bar at top/bottom.</p>
+          <p style="margin: 0 0 8px 0;"><b>Step 2:</b> Tap <b>Website Settings</b> (वेबसाइट सेटिंग).</p>
+          <p style="margin: 0 0 8px 0;"><b>Step 3:</b> Change <b>Microphone</b> to <b>ALLOW</b> (परवानगी द्या).</p>
+          <p style="margin: 0;"><b>Step 4:</b> Tap "Try Microphone Again" below!</p>
+        </div>
+
+        <button onclick="requestIPhoneMicPermissionAgain()" style="width: 100%; padding: 14px; border-radius: 18px; background: linear-gradient(135deg, #e5a83b, #d97706); border: none; color: #1e1b4b; font-size: 15px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 14px rgba(229,168,59,0.4); margin-bottom: 10px;">
+          🎙️ Try Microphone Again / पुन्हा प्रयत्न करा
+        </button>
+        <button onclick="closeIPhoneMicGuideModal()" style="width: 100%; padding: 10px; border-radius: 14px; background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #94a3b8; font-size: 13px; font-weight: 600; cursor: pointer;">
+          Close & Continue / पुढे जा
+        </button>
+      </div>
+    `;
+    document.body.appendChild(guide);
+  }
+  guide.style.display = "flex";
+}
+
+function closeIPhoneMicGuideModal() {
+  const guide = document.getElementById("modal-iphone-mic-guide");
+  if (guide) guide.style.display = "none";
+}
+
+function requestIPhoneMicPermissionAgain() {
+  closeIPhoneMicGuideModal();
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true }, video: true })
+      .then(stream => {
+        showToast("Microphone Permission Granted! 🎙️");
+        if (activeMeetingSession && activeMeetingSession.meetingId) {
+          launchLiveMeetingRoom({ id: activeMeetingSession.meetingId }, stream);
+        } else {
+          launchLiveMeetingRoom({ id: 1, title: 'River of Life Live Fellowship' }, stream);
+        }
+      })
+      .catch(err => {
+        console.warn("Retried getUserMedia notice:", err);
+        showToast("Opening call window... Please tap Allow on Safari prompt 🎙️");
+        openMeetingInSafariDirectly();
+      });
+  } else {
+    openMeetingInSafariDirectly();
+  }
+}
+
 // Trigger Joining Flow with Safari iOS Microphone Hardware Activation
 function triggerJoinMeetingFlow(meetingId) {
   const meetings = getMeetingsFromStorage();
@@ -7398,7 +7460,9 @@ function triggerJoinMeetingFlow(meetingId) {
           .then(audioStream => {
             launchLiveMeetingRoom(m, audioStream);
           })
-          .catch(() => {
+          .catch(micErr => {
+            console.warn("Microphone access blocked on iPhone Safari:", micErr);
+            showIPhoneMicGuideModal();
             launchLiveMeetingRoom(m, null);
           });
       });
@@ -7600,7 +7664,21 @@ function openMeetingInSafariDirectly() {
   const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&speaker=true&autojoin=true&p2p=true&codec=opus&layout=grid&grid=1&name=${encodeURIComponent(loggedIn)}&buttons=mic,cam,share,hand,leave&topbar=false&header=false&logo=false&survey=false&redirect=false&invite=false&welcome=false&theme=dark`;
 
   showToast("Opening Safari for iPhone Mic Access... 🎙️");
-  window.open(roomUrl, '_blank');
+  
+  // Prompt getUserMedia on parent window gesture to trigger iPhone hardware mic permission before window open
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true }, video: true })
+      .then(stream => {
+        window.open(roomUrl, '_blank');
+      })
+      .catch(err => {
+        console.warn("Direct getUserMedia notice:", err);
+        showIPhoneMicGuideModal();
+        window.open(roomUrl, '_blank');
+      });
+  } else {
+    window.open(roomUrl, '_blank');
+  }
 }
 
 function exitLiveMeetingRoom() {

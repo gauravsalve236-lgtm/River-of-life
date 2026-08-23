@@ -4,7 +4,7 @@ from playwright.sync_api import sync_playwright
 with sync_playwright() as p:
     browser = p.chromium.launch(headless=True)
     page = browser.new_page(viewport={'width': 412, 'height': 915})
-    page.goto('http://localhost:8092/index.html?v=v101_test_' + str(int(time.time())))
+    page.goto('http://localhost:8092/index.html?v=v102_test_' + str(int(time.time())))
     time.sleep(3.5)
     
     # Hide notification modal & splash screen
@@ -17,13 +17,13 @@ with sync_playwright() as p:
         const splash = document.getElementById('splash-screen');
         if (splash) splash.style.display = 'none';
         
-        // Launch live meeting room modal directly
-        if (window.launchLiveMeetingRoom) {
-            window.launchLiveMeetingRoom({ id: 1, title: 'River of Life Live Fellowship Room' }, null);
+        // Trigger iPhone Mic guide modal directly for testing
+        if (window.showIPhoneMicGuideModal) {
+            window.showIPhoneMicGuideModal();
         }
     }''')
-    time.sleep(3.5)
-    page.screenshot(path='v101_3rd_party_window_stage_verified.png')
+    time.sleep(2.5)
+    page.screenshot(path='v102_iphone_mic_guide_verified.png')
 
     browser.close()
-    print('3rd party window stage card screenshot captured cleanly!')
+    print('iPhone Mic guide modal screenshot captured cleanly!')
