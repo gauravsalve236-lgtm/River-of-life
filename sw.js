@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v89-TRANSPARENT-BIG-LOGO';
+const CACHE_NAME = 'river-of-life-cache-v90-NATIVE-INAPP-MEETINGS';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
