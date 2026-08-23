@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v90-NATIVE-INAPP-MEETINGS';
+const CACHE_NAME = 'river-of-life-cache-v91-MOBILE-MIC-ACTIVE';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
