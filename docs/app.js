@@ -9425,3 +9425,374 @@ window.submitPastoralPrayerRequest = function(e) {
   const detailsField = document.getElementById("prayer-req-details");
   if (detailsField) detailsField.value = "";
 };
+
+/* ==========================================================================
+   MULTI-CHURCH PLATFORM MODULES (9 CORE SPECIFICATIONS)
+   ========================================================================== */
+
+// --- 1. VISUAL SHARE STUDIO (Daily Verse Image Generator) ---
+window.openShareStudio = function(text, ref) {
+  const modal = document.getElementById("modal-share-studio");
+  if (!modal) return;
+  modal.style.display = "flex";
+  modal.classList.add("active");
+  
+  if (text) window._currentShareText = text;
+  if (ref) window._currentShareRef = ref;
+  
+  renderShareStudioCanvas();
+};
+
+window.closeShareStudio = function() {
+  const modal = document.getElementById("modal-share-studio");
+  if (modal) {
+    modal.style.display = "none";
+    modal.classList.remove("active");
+  }
+};
+
+window.renderShareStudioCanvas = function(preset = 'river_teal') {
+  const canvas = document.getElementById("share-studio-canvas");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  
+  canvas.width = 1080;
+  canvas.height = 1350;
+  
+  const text = window._currentShareText || "तू जलांतून चालशील तेव्हा मी तुझ्याबरोबर असेन...";
+  const ref = window._currentShareRef || "यशया ४३:२ • Isaiah 43:2";
+  
+  if (preset === 'river_teal') {
+    const grad = ctx.createLinearGradient(0, 0, 1080, 1350);
+    grad.addColorStop(0, '#052226');
+    grad.addColorStop(0.5, '#0e757d');
+    grad.addColorStop(1, '#073439');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 1080, 1350);
+    
+    ctx.fillStyle = 'rgba(27, 181, 190, 0.15)';
+    ctx.beginPath();
+    ctx.arc(900, 200, 450, 0, Math.PI * 2);
+    ctx.fill();
+  } else if (preset === 'holy_gold') {
+    const grad = ctx.createLinearGradient(0, 0, 1080, 1350);
+    grad.addColorStop(0, '#1c1505');
+    grad.addColorStop(0.6, '#3a2c0c');
+    grad.addColorStop(1, '#171104');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 1080, 1350);
+  } else {
+    const grad = ctx.createLinearGradient(0, 0, 1080, 1350);
+    grad.addColorStop(0, '#0a111a');
+    grad.addColorStop(1, '#05090e');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 1080, 1350);
+  }
+
+  ctx.strokeStyle = '#e5a83b';
+  ctx.lineWidth = 14;
+  ctx.strokeRect(50, 50, 980, 1250);
+  
+  ctx.strokeStyle = 'rgba(229, 168, 59, 0.35)';
+  ctx.lineWidth = 4;
+  ctx.strokeRect(70, 70, 940, 1210);
+
+  ctx.fillStyle = '#ffd369';
+  ctx.font = 'bold 44px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('✦  RIVER OF LIFE BIBLE  ✦', 540, 200);
+
+  ctx.fillStyle = 'rgba(229, 168, 59, 0.25)';
+  ctx.font = 'bold 160px Georgia, serif';
+  ctx.fillText('“', 540, 380);
+
+  ctx.fillStyle = '#f0fdfd';
+  ctx.font = 'bold 46px Georgia, serif';
+  
+  const words = text.split(' ');
+  let line = '';
+  let y = 500;
+  const maxWidth = 840;
+  const lineHeight = 70;
+
+  for (let n = 0; n < words.length; n++) {
+    const testLine = line + words[n] + ' ';
+    const metrics = ctx.measureText(testLine);
+    if (metrics.width > maxWidth && n > 0) {
+      ctx.fillText(line, 540, y);
+      line = words[n] + ' ';
+      y += lineHeight;
+    } else {
+      line = testLine;
+    }
+  }
+  ctx.fillText(line, 540, y);
+
+  y += 100;
+  ctx.fillStyle = '#ffd369';
+  ctx.font = 'bold 40px sans-serif';
+  ctx.fillText('— ' + ref + ' —', 540, y);
+
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+  ctx.font = '600 30px sans-serif';
+  ctx.fillText('जीवन नदी बायबल निवासस्थान • riveroflife.org', 540, 1210);
+};
+
+window.downloadShareStudioImage = function() {
+  const canvas = document.getElementById("share-studio-canvas");
+  if (!canvas) return;
+  const image = canvas.toDataURL("image/png");
+  const link = document.createElement("a");
+  link.download = "River_of_Life_Verse_" + Date.now() + ".png";
+  link.href = image;
+  link.click();
+  showToast("Image downloaded! Ready to share 📲 / इमेज सेव्ह झाली");
+};
+
+// --- 2. TOPICAL LIFE GUIDES (जीवन मार्गदर्शक) ---
+window.TOPICAL_GUIDES = {
+  anxiety: {
+    title_mr: "चिंता आणि ताणतणाव (Anxiety & Peace)",
+    title_en: "Overcoming Anxiety & Finding Peace",
+    icon: "🕊️",
+    verses: [
+      { ref_mr: "फिलिप्पैकरांस ४:६-७", ref_en: "Philippians 4:6-7", text_mr: "कशाविषयीही चिंता करू नका; तर सर्व गोष्टींत प्रार्थना व विनंती करून उपकारस्तुतीसह आपली मागणी देवाला कळवा...", text_en: "Don't worry about anything; instead, pray about everything. Tell God what you need, and thank him for all he has done." },
+      { ref_mr: "यशया ४१:१०", ref_en: "Isaiah 41:10", text_mr: "भिऊ नको, कारण मी तुझ्याबरोबर आहे; घाबरू नको, कारण मी तुझा देव आहे...", text_en: "Don't be afraid, for I am with you. Don't be discouraged, for I am your God." },
+      { ref_mr: "१ पेद्र ५:७", ref_en: "1 Peter 5:7", text_mr: "तुमची सर्व काळजी त्याच्यावर सोपवून द्या, कारण तो तुमची काळजी घेतो.", text_en: "Give all your worries and cares to God, for he cares about you." }
+    ]
+  },
+  hope: {
+    title_mr: "आशा आणि सामर्थ्य (Hope & Strength)",
+    title_en: "Hope & Divine Strength",
+    icon: "💪",
+    verses: [
+      { ref_mr: "यिर्मया २९:११", ref_en: "Jeremiah 29:11", text_mr: "कारण जे संकल्प मी तुमच्याविषयी केले आहेत ते मी जाणतो... ते संकल्प शांतीचे आहेत, संकटाचे नाहीत.", text_en: "For I know the plans I have for you... plans for peace and not for disaster, to give you a future and a hope." },
+      { ref_mr: "यशया ४०:३१", ref_en: "Isaiah 40:31", text_mr: "पण जे परमेश्वराची वाट पाहतात त्यांना नवीन सामर्थ्य प्राप्त होईल...", text_en: "But those who trust in the Lord will find new strength. They will soar high on wings like eagles." }
+    ]
+  },
+  family: {
+    title_mr: "कुटुंब आणि विवाह (Family & Marriage)",
+    title_en: "Family & Blessed Marriage",
+    icon: "👨‍👩‍👧",
+    verses: [
+      { ref_mr: "१ करिंथकरांस १३:४-७", ref_en: "1 Corinthians 13:4-7", text_mr: "प्रीती सहनशील आहे, प्रीती परोपकारी आहे; प्रीती द्वेष करत नाही...", text_en: "Love is patient and kind. Love is not jealous or boastful or proud or rude." },
+      { ref_mr: "यहोशवा २४:१५", ref_en: "Joshua 24:15", text_mr: "मी व माझे घराणे तर परमेश्वराचीच सेवा करू.", text_en: "As for me and my house, we will serve the Lord." }
+    ]
+  }
+};
+
+window.openTopicalGuide = function(topicKey) {
+  const guide = window.TOPICAL_GUIDES[topicKey];
+  if (!guide) return;
+  
+  const modal = document.getElementById("modal-topical-guide");
+  if (!modal) return;
+  
+  const titleEl = document.getElementById("topical-modal-title");
+  if (titleEl) titleEl.textContent = guide.icon + " " + guide.title_mr;
+  
+  const container = document.getElementById("topical-modal-body");
+  if (container) {
+    container.innerHTML = guide.verses.map(v => `
+      <div style="background: var(--bg); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 12px; text-align: left;">
+        <h4 style="margin: 0 0 6px 0; color: var(--primary); font-size: 15px; font-weight: 800;">${v.ref_mr} • ${v.ref_en}</h4>
+        <blockquote style="margin: 0 0 10px 0; font-family: var(--font-body); font-size: 14.5px; line-height: 1.6; color: var(--text);">"${v.text_mr}"</blockquote>
+        <p style="margin: 0; font-size: 13px; color: var(--text-muted); font-style: italic;">"${v.text_en}"</p>
+        <button onclick="closeModal('modal-topical-guide'); switchTab('reader');" style="margin-top: 10px; padding: 6px 14px; border-radius: 20px; font-size: 11.5px; font-weight: 800; background: rgba(229, 168, 59, 0.15); border: 1px solid rgba(229, 168, 59, 0.35); color: var(--primary); cursor: pointer;">
+          📖 Read Full Chapter in Bible / अध्यायात जा
+        </button>
+      </div>
+    `).join('');
+  }
+  
+  modal.style.display = "flex";
+  modal.classList.add("active");
+};
+
+// --- 3. REGIONAL CHURCH HYMNS (उपासना संगीत / Marathi Hymnal) ---
+window.MARATHI_HYMNAL = [
+  { id: 1, number: 1, title_mr: "स्तुती असो देवाला", title_en: "Praise be to God", category: "स्तुती (Praise)", lyrics_mr: "१. स्तुती असो देवाला, सर्व शक्तिमान बापाला,\nज्याने उत्पन्न केले, सर्व आकाश पृथ्वीला.\n\n(ध्रुवपद)\nगाऊया आनंदाने, गाऊया जयजयकाराने,\nप्रभू येशू राजा आहे, आपल्या समवेत आहे.\n\n२. क्रूसावर वाहिला रक्ताचा झरा,\nपाप्यांचा उद्धार करणारा देव खरा." },
+  { id: 2, number: 2, title_mr: "येशू माझे जीवन, येशू माझा प्राण", title_en: "Jesus My Life", category: "आराधना (Worship)", lyrics_mr: "१. येशू माझे जीवन, येशू माझा प्राण,\nत्याच्या चरणी अर्पितो माझे हे जीवन.\n\n(ध्रुवपद)\nमाझा देव महान आहे, माझा प्रभु जिवंत आहे,\nसदा सर्वकाळ तो माझ्या पाठीशी आहे.\n\n२. अंधकारात तो प्रकाश दाखवतो,\nसंकटात तो मार्ग काढतो." },
+  { id: 3, number: 3, title_mr: "देव माझा मेंढपाळ आहे", title_en: "The Lord is My Shepherd", category: "सांत्वन (Comfort)", lyrics_mr: "१. देव माझा मेंढपाळ आहे, मला काही उणे पडणार नाही,\nतो मला हिरव्या कुरणात बसवतो, शांत पाण्याजवळ नेतो.\n\n२. माझ्या आत्म्याला तो ताजेतवाने करतो,\nआपल्या नावासाठी मला नीतीच्या मार्गाने चालवतो." },
+  { id: 4, number: 4, title_mr: "महान तुझे प्रेम, महान तुझी दया", title_en: "Great is Your Mercy", category: "उपकारस्तुती (Thanksgiving)", lyrics_mr: "१. महान तुझे प्रेम, महान तुझी दया,\nप्रभो तुझ्या चरणी मी नतमस्तक होतो आता.\n\n(ध्रुवपद)\nहाल्लेलूया हाल्लेलूया गाईन मी तुझी स्तुती,\nआयुष्यभर करीन मी तुझीच भक्ती." }
+];
+
+window.openHymnalViewer = function() {
+  const modal = document.getElementById("modal-hymnal-hub");
+  if (!modal) return;
+  renderHymnList(window.MARATHI_HYMNAL);
+  modal.style.display = "flex";
+  modal.classList.add("active");
+};
+
+window.renderHymnList = function(hymns) {
+  const container = document.getElementById("hymn-list-container");
+  if (!container) return;
+  
+  container.innerHTML = hymns.map(h => `
+    <div onclick="openHymnDetail(${h.id})" style="background: var(--bg); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; margin-bottom: 10px; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+      <div style="text-align: left;">
+        <span style="font-size: 11px; font-weight: 800; color: var(--primary); text-transform: uppercase;">गीत क्र. ${h.number} • ${h.category}</span>
+        <h4 style="margin: 2px 0 0 0; font-size: 15px; font-weight: 800; color: var(--text);">${h.title_mr}</h4>
+        <span style="font-size: 12px; color: var(--text-muted);">${h.title_en}</span>
+      </div>
+      <span style="font-size: 18px; color: var(--primary);">🎶</span>
+    </div>
+  `).join('');
+};
+
+window.filterHymns = function(query) {
+  const q = query.toLowerCase().trim();
+  if (!q) {
+    renderHymnList(window.MARATHI_HYMNAL);
+    return;
+  }
+  const filtered = window.MARATHI_HYMNAL.filter(h => 
+    h.number.toString() === q ||
+    h.title_mr.toLowerCase().includes(q) ||
+    h.title_en.toLowerCase().includes(q) ||
+    h.category.toLowerCase().includes(q)
+  );
+  renderHymnList(filtered);
+};
+
+window.openHymnDetail = function(hymnId) {
+  const hymn = window.MARATHI_HYMNAL.find(h => h.id === hymnId);
+  if (!hymn) return;
+  
+  const modal = document.getElementById("modal-hymn-detail");
+  if (!modal) return;
+  
+  document.getElementById("hymn-detail-number").textContent = "गीत क्र. " + hymn.number + " • " + hymn.category;
+  document.getElementById("hymn-detail-title").textContent = hymn.title_mr;
+  document.getElementById("hymn-detail-lyrics").textContent = hymn.lyrics_mr;
+  
+  modal.style.display = "flex";
+  modal.classList.add("active");
+};
+
+// --- 4. BIBLE QUIZ & GAMIFIED BADGES ENGINE ---
+window.QUIZ_QUESTIONS = [
+  { q: "बायबलमधील सर्वात पहिले पुस्तक कोणते?", opts: ["उत्पत्ती (Genesis)", "निर्गम (Exodus)", "स्तोत्रसंहिता (Psalms)", "मत्तय (Matthew)"], ans: 0 },
+  { q: "दाविदाने कोणत्या दैत्याचा पराभव केला?", opts: ["शौल (Saul)", "गल्याथ (Goliath)", "सामसोन (Samson)", "हेरॉद (Herod)"], ans: 1 },
+  { q: "येशू ख्रिस्ताचा जन्म कोणत्या शहरात झाला?", opts: ["यरुशलेम", "नाझरेथ", "बेथलहेम", "काफर्णहूम"], ans: 2 },
+  { q: "पवित्र शास्त्रात एकूण किती पुस्तके आहेत?", opts: ["५०", "६६", "७२", "४०"], ans: 1 }
+];
+
+window._currentQuizIdx = 0;
+window._quizScore = 0;
+
+window.openQuizHub = function() {
+  window._currentQuizIdx = 0;
+  window._quizScore = 0;
+  
+  const modal = document.getElementById("modal-quiz-hub");
+  if (!modal) return;
+  
+  renderQuizQuestion();
+  modal.style.display = "flex";
+  modal.classList.add("active");
+};
+
+window.renderQuizQuestion = function() {
+  const qObj = window.QUIZ_QUESTIONS[window._currentQuizIdx];
+  if (!qObj) {
+    showQuizResults();
+    return;
+  }
+  
+  const progEl = document.getElementById("quiz-progress-str");
+  if (progEl) progEl.textContent = `प्रश्न ${window._currentQuizIdx + 1} / ${window.QUIZ_QUESTIONS.length}`;
+  
+  const textEl = document.getElementById("quiz-question-text");
+  if (textEl) textEl.textContent = qObj.q;
+  
+  const optsContainer = document.getElementById("quiz-options-container");
+  if (optsContainer) {
+    optsContainer.innerHTML = qObj.opts.map((opt, idx) => `
+      <button onclick="handleQuizAnswer(${idx})" style="width: 100%; padding: 14px 16px; border-radius: 12px; font-size: 14px; font-weight: 700; background: var(--bg); border: 1.5px solid var(--border); color: var(--text); cursor: pointer; text-align: left; transition: all 0.2s ease;">
+        ${String.fromCharCode(65 + idx)}. ${opt}
+      </button>
+    `).join('');
+  }
+};
+
+window.handleQuizAnswer = function(selectedIdx) {
+  const qObj = window.QUIZ_QUESTIONS[window._currentQuizIdx];
+  if (selectedIdx === qObj.ans) {
+    window._quizScore += 25;
+    showToast("बरोबर उत्तर! +25 गुण 🎉");
+  } else {
+    showToast("चुकीचे उत्तर! योग्य उत्तर: " + qObj.opts[qObj.ans]);
+  }
+  window._currentQuizIdx++;
+  setTimeout(renderQuizQuestion, 1200);
+};
+
+window.showQuizResults = function() {
+  const container = document.getElementById("quiz-options-container");
+  if (container) {
+    container.innerHTML = `
+      <div style="background: linear-gradient(135deg, rgba(229, 168, 59, 0.2), rgba(27, 181, 190, 0.2)); border: 1.5px solid #e5a83b; border-radius: 16px; padding: 20px; text-align: center;">
+        <span style="font-size: 40px;">🏆</span>
+        <h3 style="margin: 8px 0 4px 0; color: #ffd369; font-size: 20px;">अभिनंदन! क्विझ पूर्ण झाले</h3>
+        <p style="margin: 0 0 14px 0; color: var(--text); font-size: 15px; font-weight: 700;">तुमचा स्कोअर: ${window._quizScore} / 100 गुण</p>
+        <span style="display: inline-block; background: #e5a83b; color: #062024; padding: 6px 14px; border-radius: 20px; font-weight: 800; font-size: 12px; margin-bottom: 12px;">🏅 UNLOCKED BADGE: Faith Champion</span>
+        <button onclick="closeModal('modal-quiz-hub')" style="width: 100%; padding: 12px; border-radius: 12px; background: linear-gradient(135deg, #e5a83b, #d99522); border: none; color: #062024; font-weight: 800; cursor: pointer; margin-top: 10px;">
+          Done / पूर्ण
+        </button>
+      </div>
+    `;
+  }
+};
+
+// --- 5. MULTI-CHURCH DIRECTORY & PORTAL ---
+window.PARTNER_CHURCHES = [
+  { id: 'river_pune', name_mr: "जीवन नदी निवासस्थान, पुणे", name_en: "River of Life Sanctuary Pune", pastor: "Senior Pastor Sunil", phone: "+91 98765 43210", address: "Koregaon Park, Pune, Maharashtra", schedule: "रविवार सकाळी ९:०० वाजता • सुवार्ता सभा" },
+  { id: 'grace_mumbai', name_mr: "ग्रेस चॅपल, मुंबई", name_en: "Grace Chapel Mumbai", pastor: "Pastor Victor", phone: "+91 98123 45678", address: "Bandra West, Mumbai, Maharashtra", schedule: "रविवार सकाळी १०:०० वाजता • मुख्य आराधना" },
+  { id: 'emmanuel_nashik', name_mr: "इमॅन्युएल फेलोशिप, नाशिक", name_en: "Emmanuel Fellowship Nashik", pastor: "Pastor Joseph", phone: "+91 97654 32109", address: "College Road, Nashik, Maharashtra", schedule: "रविवार सकाळी ९:३० वाजता • प्रार्थना सभा" }
+];
+
+window.openChurchDirectory = function() {
+  const modal = document.getElementById("modal-church-directory");
+  if (!modal) return;
+  
+  const container = document.getElementById("church-directory-list");
+  if (container) {
+    container.innerHTML = window.PARTNER_CHURCHES.map(c => `
+      <div onclick="selectChurchPortal('${c.id}')" style="background: var(--bg); border: 1.5px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 12px; cursor: pointer; text-align: left;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h4 style="margin: 0; font-size: 16px; font-weight: 800; color: var(--primary);">${c.name_mr}</h4>
+          <span style="font-size: 11px; background: rgba(34, 197, 94, 0.15); color: #22c55e; padding: 2px 8px; border-radius: 12px; font-weight: 800;">VERIFIED CHURCH</span>
+        </div>
+        <p style="margin: 4px 0 6px 0; font-size: 13px; color: var(--text); font-weight: 700;">${c.name_en}</p>
+        <div style="font-size: 12px; color: var(--text-muted); display: flex; flex-direction: column; gap: 2px;">
+          <span>👤 ${c.pastor} • 📞 ${c.phone}</span>
+          <span>📍 ${c.address}</span>
+          <span style="color: #ffd369; font-weight: 700; margin-top: 2px;">⏰ ${c.schedule}</span>
+        </div>
+      </div>
+    `).join('');
+  }
+  
+  modal.style.display = "flex";
+  modal.classList.add("active");
+};
+
+window.selectChurchPortal = function(churchId) {
+  const church = window.PARTNER_CHURCHES.find(c => c.id === churchId);
+  if (!church) return;
+  const label = document.getElementById("static-header-title");
+  if (label) label.textContent = church.name_mr.split(',')[0];
+  showToast("Church Portal Selected: " + church.name_mr + " ⛪");
+  closeModal("modal-church-directory");
+};
+
+// --- 6. ADMIN MANAGEMENT DASHBOARD ---
+window.openAdminDashboard = function() {
+  const modal = document.getElementById("modal-admin-dashboard");
+  if (!modal) return;
+  modal.style.display = "flex";
+  modal.classList.add("active");
+};
+

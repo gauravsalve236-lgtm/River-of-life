@@ -257,6 +257,41 @@
                 </div>
               </div>
 
+              <!-- Platform Quick Action Modules Row -->
+              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px;">
+                <button onclick="openShareStudio()" style="background: linear-gradient(135deg, #0e757d 0%, #052226 100%); border: 1.5px solid #1bb5be; color: #fff; padding: 12px; border-radius: 14px; font-weight: 800; font-size: 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; box-shadow: 0 4px 12px rgba(14,117,125,0.25);">
+                  <span style="font-size: 18px;">🎨</span>
+                  <span>Share Studio</span>
+                </button>
+                <button onclick="openHymnalViewer()" style="background: linear-gradient(135deg, #3a2c0c 0%, #1c1505 100%); border: 1.5px solid #e5a83b; color: #ffd369; padding: 12px; border-radius: 14px; font-weight: 800; font-size: 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; box-shadow: 0 4px 12px rgba(229,168,59,0.25);">
+                  <span style="font-size: 18px;">🎶</span>
+                  <span>Marathi Hymns</span>
+                </button>
+                <button onclick="openQuizHub()" style="background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%); border: 1.5px solid #818cf8; color: #fff; padding: 12px; border-radius: 14px; font-weight: 800; font-size: 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; box-shadow: 0 4px 12px rgba(129,140,248,0.25);">
+                  <span style="font-size: 18px;">🏆</span>
+                  <span>Bible Quiz</span>
+                </button>
+              </div>
+
+              <!-- Topical Guides Row -->
+              <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 14px; margin-bottom: 16px; text-align: left;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                  <strong style="font-size: 13px; text-transform: uppercase; color: var(--primary); letter-spacing: 0.5px;">💡 Topical Life Guides / जीवन मार्गदर्शक</strong>
+                  <span style="font-size: 11px; color: var(--text-muted);">View Scripture</span>
+                </div>
+                <div style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px;">
+                  <button onclick="openTopicalGuide('anxiety')" style="padding: 8px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; background: var(--bg); border: 1px solid var(--border); color: var(--text); white-space: nowrap; cursor: pointer;">
+                    🕊️ Anxiety / चिंता
+                  </button>
+                  <button onclick="openTopicalGuide('hope')" style="padding: 8px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; background: var(--bg); border: 1px solid var(--border); color: var(--text); white-space: nowrap; cursor: pointer;">
+                    💪 Hope / आशा
+                  </button>
+                  <button onclick="openTopicalGuide('family')" style="padding: 8px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; background: var(--bg); border: 1px solid var(--border); color: var(--text); white-space: nowrap; cursor: pointer;">
+                    👨‍👩‍👧 Family / कुटुंब
+                  </button>
+                </div>
+              </div>
+
               <!-- Card 2: TouchPoint Hope -->
               <div class="touchpoint-hope-card" id="btn-open-touchpoint">
                 <div class="touchpoint-image-bg"></div>
@@ -2645,6 +2680,22 @@
               </div>
             </button>
 
+            <button onclick="closeDrawer('drawer-account-settings'); openChurchDirectory();" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-size: 13.5px; font-weight: 700; cursor: pointer; text-align: left;">
+              <span style="font-size: 18px;">⛪</span>
+              <div style="flex: 1;">
+                <div>Church Directory & Portals / चर्च डायरेक्टरी</div>
+                <div style="font-size: 11px; color: var(--text-muted); font-weight: 500;">Select partner church & view schedules</div>
+              </div>
+            </button>
+
+            <button onclick="closeDrawer('drawer-account-settings'); openAdminDashboard();" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background: rgba(229, 168, 59, 0.1); border: 1px solid rgba(229, 168, 59, 0.3); color: #ffd369; font-size: 13.5px; font-weight: 700; cursor: pointer; text-align: left;">
+              <span style="font-size: 18px;">🛠️</span>
+              <div style="flex: 1;">
+                <div>Admin & Pastoral Portal / अॅडमिन पोर्टल</div>
+                <div style="font-size: 11px; color: var(--text-muted); font-weight: 500;">Leader dashboard for schedules & prayers</div>
+              </div>
+            </button>
+
             <button id="btn-drawer-whatsapp-share" onclick="try { if (window.shareAppViaWhatsApp) window.shareAppViaWhatsApp(); else showToast('App link copied to clipboard!'); } catch(e){}" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background: rgba(37, 211, 102, 0.1); border: 1px solid rgba(37, 211, 102, 0.3); color: #25d366; font-size: 13.5px; font-weight: 700; cursor: pointer; text-align: left;">
               <span style="font-size: 18px;">💬</span>
               <div style="flex: 1;">
@@ -2708,8 +2759,136 @@
       <span id="toast-message">Copied to clipboard!</span>
     </div>
 
+    <!-- MULTI-CHURCH PLATFORM MODALS (9 CORE SPECIFICATIONS) -->
+
+    <!-- 1. Visual Share Studio Canvas Modal -->
+    <div id="modal-share-studio" class="meeting-modal-overlay" style="display: none; align-items: center; justify-content: center; z-index: 10010; padding: 16px;">
+      <div style="max-width: 480px; width: 100%; background: var(--surface); color: var(--text); border-radius: 20px; border: 1.5px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.5); display: flex; flex-direction: column; overflow: hidden; margin: auto;">
+        <div style="padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+          <h3 style="margin: 0; font-size: 17px; font-weight: 800;">🎨 Visual Share Studio / इमेज कार्ड</h3>
+          <button onclick="closeShareStudio()" style="background: none; border: none; font-size: 22px; color: var(--text); cursor: pointer;">&times;</button>
+        </div>
+        <div style="padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 14px; max-height: 80vh; overflow-y: auto;">
+          <canvas id="share-studio-canvas" style="width: 100%; max-width: 340px; height: auto; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 1px solid var(--border);"></canvas>
+          
+          <div style="display: flex; gap: 8px; width: 100%; justify-content: center;">
+            <button onclick="renderShareStudioCanvas('river_teal')" style="padding: 6px 12px; border-radius: 20px; font-size: 11.5px; font-weight: 800; background: #0e757d; color: #fff; border: none; cursor: pointer;">River Teal</button>
+            <button onclick="renderShareStudioCanvas('holy_gold')" style="padding: 6px 12px; border-radius: 20px; font-size: 11.5px; font-weight: 800; background: #e5a83b; color: #062024; border: none; cursor: pointer;">Holy Gold</button>
+            <button onclick="renderShareStudioCanvas('dark')" style="padding: 6px 12px; border-radius: 20px; font-size: 11.5px; font-weight: 800; background: #0a111a; color: #fff; border: none; cursor: pointer;">Sanctuary Dark</button>
+          </div>
+
+          <div style="display: flex; gap: 10px; width: 100%; margin-top: 6px;">
+            <button onclick="downloadShareStudioImage()" class="btn-primary-block" style="flex: 1; padding: 12px; font-size: 13.5px; font-weight: 800; border-radius: 12px; background: linear-gradient(135deg, #e5a83b 0%, #d99522 100%); border: none; color: #062024; cursor: pointer;">
+              📥 Download Image / सेव्ह करा
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Topical Life Guides Modal -->
+    <div id="modal-topical-guide" class="meeting-modal-overlay" style="display: none; align-items: center; justify-content: center; z-index: 10010; padding: 16px;">
+      <div style="max-width: 480px; width: 100%; background: var(--surface); color: var(--text); border-radius: 20px; border: 1.5px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.5); display: flex; flex-direction: column; overflow: hidden; margin: auto; max-height: 85vh;">
+        <div style="padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+          <h3 id="topical-modal-title" style="margin: 0; font-size: 17px; font-weight: 800;">💡 Topical Life Guide</h3>
+          <button onclick="closeModal('modal-topical-guide')" style="background: none; border: none; font-size: 22px; color: var(--text); cursor: pointer;">&times;</button>
+        </div>
+        <div id="topical-modal-body" style="padding: 16px; overflow-y: auto;">
+          <!-- Topic verses render dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Regional Marathi Hymnal Hub Modal -->
+    <div id="modal-hymnal-hub" class="meeting-modal-overlay" style="display: none; align-items: center; justify-content: center; z-index: 10010; padding: 16px;">
+      <div style="max-width: 480px; width: 100%; background: var(--surface); color: var(--text); border-radius: 20px; border: 1.5px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.5); display: flex; flex-direction: column; overflow: hidden; margin: auto; max-height: 85vh;">
+        <div style="padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+          <h3 style="margin: 0; font-size: 17px; font-weight: 800;">🎶 उपासना संगीत / Marathi Church Hymns</h3>
+          <button onclick="closeModal('modal-hymnal-hub')" style="background: none; border: none; font-size: 22px; color: var(--text); cursor: pointer;">&times;</button>
+        </div>
+        <div style="padding: 12px 16px; border-bottom: 1px solid var(--border);">
+          <input type="text" oninput="filterHymns(this.value)" class="dropdown-selector" style="width: 100%; padding: 10px;" placeholder="Search hymn number (१, २) or song title...">
+        </div>
+        <div id="hymn-list-container" style="padding: 16px; overflow-y: auto; flex: 1;">
+          <!-- Hymns list render dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Hymn Detail Lyrics Modal -->
+    <div id="modal-hymn-detail" class="meeting-modal-overlay" style="display: none; align-items: center; justify-content: center; z-index: 10015; padding: 16px;">
+      <div style="max-width: 460px; width: 100%; background: var(--surface); color: var(--text); border-radius: 20px; border: 1.5px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.5); display: flex; flex-direction: column; overflow: hidden; margin: auto; max-height: 85vh;">
+        <div style="padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <span id="hymn-detail-number" style="font-size: 11px; font-weight: 800; color: var(--primary);"></span>
+            <h3 id="hymn-detail-title" style="margin: 2px 0 0 0; font-size: 17px; font-weight: 800;"></h3>
+          </div>
+          <button onclick="closeModal('modal-hymn-detail')" style="background: none; border: none; font-size: 22px; color: var(--text); cursor: pointer;">&times;</button>
+        </div>
+        <div style="padding: 20px; overflow-y: auto;">
+          <pre id="hymn-detail-lyrics" style="white-space: pre-wrap; font-family: var(--font-body); font-size: 16px; line-height: 1.8; color: var(--text); text-align: left; margin: 0;"></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. Bible Quiz & Badge Hub Modal -->
+    <div id="modal-quiz-hub" class="meeting-modal-overlay" style="display: none; align-items: center; justify-content: center; z-index: 10010; padding: 16px;">
+      <div style="max-width: 440px; width: 100%; background: var(--surface); color: var(--text); border-radius: 20px; border: 1.5px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.5); display: flex; flex-direction: column; overflow: hidden; margin: auto; max-height: 85vh;">
+        <div style="padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <span id="quiz-progress-str" style="font-size: 11px; font-weight: 800; color: var(--primary);"></span>
+            <h3 style="margin: 2px 0 0 0; font-size: 17px; font-weight: 800;">🏆 Bible Quiz & Badges</h3>
+          </div>
+          <button onclick="closeModal('modal-quiz-hub')" style="background: none; border: none; font-size: 22px; color: var(--text); cursor: pointer;">&times;</button>
+        </div>
+        <div style="padding: 20px; display: flex; flex-direction: column; gap: 16px;">
+          <h4 id="quiz-question-text" style="margin: 0; font-size: 17px; font-weight: 800; line-height: 1.4; color: var(--text); text-align: left;"></h4>
+          <div id="quiz-options-container" style="display: flex; flex-direction: column; gap: 10px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. Multi-Church Directory Modal -->
+    <div id="modal-church-directory" class="meeting-modal-overlay" style="display: none; align-items: center; justify-content: center; z-index: 10010; padding: 16px;">
+      <div style="max-width: 480px; width: 100%; background: var(--surface); color: var(--text); border-radius: 20px; border: 1.5px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.5); display: flex; flex-direction: column; overflow: hidden; margin: auto; max-height: 85vh;">
+        <div style="padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+          <h3 style="margin: 0; font-size: 17px; font-weight: 800;">⛪ Multi-Church Directory & Portals</h3>
+          <button onclick="closeModal('modal-church-directory')" style="background: none; border: none; font-size: 22px; color: var(--text); cursor: pointer;">&times;</button>
+        </div>
+        <div id="church-directory-list" style="padding: 16px; overflow-y: auto;"></div>
+      </div>
+    </div>
+
+    <!-- 7. Admin Management Dashboard Modal -->
+    <div id="modal-admin-dashboard" class="meeting-modal-overlay" style="display: none; align-items: center; justify-content: center; z-index: 10010; padding: 16px;">
+      <div style="max-width: 480px; width: 100%; background: var(--surface); color: var(--text); border-radius: 20px; border: 1.5px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.5); display: flex; flex-direction: column; overflow: hidden; margin: auto; max-height: 85vh;">
+        <div style="padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+          <h3 style="margin: 0; font-size: 17px; font-weight: 800;">🛠️ Admin & Pastoral Dashboard</h3>
+          <button onclick="closeModal('modal-admin-dashboard')" style="background: none; border: none; font-size: 22px; color: var(--text); cursor: pointer;">&times;</button>
+        </div>
+        <div style="padding: 20px; text-align: left; display: flex; flex-direction: column; gap: 14px; overflow-y: auto;">
+          <div style="background: rgba(229, 168, 59, 0.12); border: 1px solid rgba(229, 168, 59, 0.35); padding: 14px; border-radius: 12px;">
+            <strong style="color: var(--primary); font-size: 13.5px; display: block;">Authorized Church Leader Portal</strong>
+            <span style="font-size: 12px; color: var(--text-muted);">Manage Live Prayer Meetings, Review Pastoral Requests & Announcements</span>
+          </div>
+
+          <button onclick="showToast('Create Live Meeting Link / मीटिंग तयार करा');" style="padding: 12px 16px; border-radius: 12px; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-weight: 700; font-size: 13.5px; cursor: pointer; text-align: left;">
+            📹 Add / Schedule Live Prayer Meeting
+          </button>
+          
+          <button onclick="showToast('Reviewing Private Pastoral Requests...');" style="padding: 12px 16px; border-radius: 12px; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-weight: 700; font-size: 13.5px; cursor: pointer; text-align: left;">
+            🔒 View Confidential Pastoral Requests
+          </button>
+
+          <button onclick="showToast('Publish Church Announcement...');" style="padding: 12px 16px; border-radius: 12px; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-weight: 700; font-size: 13.5px; cursor: pointer; text-align: left;">
+            📢 Broadcast Weekly Church Announcement
+          </button>
+        </div>
+      </div>
+    </div>
+
   <!-- App Main Logic (Cache-Busted for Version 83 Extended Splash Verse & Logo Theme) -->
-  <script src="app.js?v=83_EXTENDED_SPLASH_VERSE_DISPLAY"></script>
+  <script src="app.js?v=84_MULTI_CHURCH_PLATFORM"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 4.5s no matter what
