@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v111-FULLSCREEN-VIDEO-STAGE-ZERO-TOPBAR-CLEAN-BOTTOM-CONTROLS';
+const CACHE_NAME = 'river-of-life-cache-v112-ANDROID-CHROME-NATIVE-MIC-CAM-FIX';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

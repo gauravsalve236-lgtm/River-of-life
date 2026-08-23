@@ -7425,7 +7425,7 @@ function generateICSFile(meeting) {
   showToast("Calendar File (.ics) downloaded!");
 }
 
-// Trigger Joining Flow (100% Mobile Hardware Access & Minimal 5 Controls)
+// Trigger Joining Flow (100% Mobile Android Chrome & iOS Hardware Mic & Camera Access)
 function triggerJoinMeetingFlow(meetingId) {
   const meetings = getMeetingsFromStorage();
   const m = meetings.find(x => x.id === meetingId);
@@ -7445,47 +7445,23 @@ function triggerJoinMeetingFlow(meetingId) {
   const meetingIdSlug = (m && m.id) ? m.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
   const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
   
-  // Best Responsive Grid View, Minimal 5 Toolbar Buttons (mic, cam, share, hand, leave), and Exclusive Hardware Permission
+  // Best Responsive Grid View, Minimal 5 Toolbar Buttons (mic, cam, share, hand, leave)
   const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&speaker=true&autojoin=true&p2p=true&codec=vp8&layout=grid&grid=1&mesh=true&aspect=16:9&name=${encodeURIComponent(uniqueParticipantName)}&buttons=mic,cam,share,hand,leave&topbar=false&header=false&logo=false&survey=false&redirect=false&invite=false&welcome=false&chat=false&settings=false&theme=dark`;
 
-  // Detect iOS (iPhone/iPad) to launch native call window where Safari triggers microphone permission prompt
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  if (isIOS) {
-    logAudioDebug("iOS Device detected. Directing to native call window...", { roomUrl });
-    showToast("Opening iOS Video Room (Mic & Camera Active) 🙏");
+  // Detect Mobile Devices (Android Chrome, Android Samsung Internet, iPhone Safari, iPad Safari)
+  // Mobile browsers strictly block iframe cross-origin microphone & camera hardware access.
+  // Directing top-level window forces Chrome Mobile & Safari to prompt for native Microphone & Camera permissions!
+  const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if (isMobileDevice) {
+    logAudioDebug("Mobile Device detected (Android Chrome / iOS Safari). Directing to native top-level call window for 100% Mic & Camera access...", { roomUrl });
+    showToast("Opening Mobile Video Room (Mic & Camera Active) 🙏");
     window.location.href = roomUrl;
     return;
   }
 
-  logAudioDebug("getUserMedia started for mobile Android join...", { meetingId });
+  logAudioDebug("Desktop WebRTC join started...", { meetingId });
   showToast("Activating Microphone & Camera... 🎙️📹");
-  
-  // For Android & Desktop: Pre-request permission on parent gesture, then IMMEDIATELY stop parent tracks to release hardware lock for iframe
-  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-    navigator.mediaDevices.getUserMedia({ audio: true, video: true })
-      .then(stream => {
-        logAudioDebug("Parent window hardware permission granted! Releasing parent tracks for iframe...");
-        if (stream && stream.getTracks) {
-          stream.getTracks().forEach(t => t.stop());
-        }
-        launchLiveMeetingRoom(m, null);
-      })
-      .catch(err => {
-        logAudioDebug("Parent getUserMedia audio/video notice (trying audio fallback):", err);
-        navigator.mediaDevices.getUserMedia({ audio: true })
-          .then(audioStream => {
-            if (audioStream && audioStream.getTracks) {
-              audioStream.getTracks().forEach(t => t.stop());
-            }
-            launchLiveMeetingRoom(m, null);
-          })
-          .catch(() => {
-            launchLiveMeetingRoom(m, null);
-          });
-      });
-  } else {
-    launchLiveMeetingRoom(m, null);
-  }
+  launchLiveMeetingRoom(m, null);
 }
 
 // Fullscreen Native Live Meeting Room Entry (Best Grid View & Minimum Controls)
@@ -7537,11 +7513,11 @@ function launchLiveMeetingRoom(meeting, stream) {
     // Best Grid View Layout & Minimum 5 Controls (mic, cam, share, hand, leave)
     const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&speaker=true&autojoin=true&p2p=true&codec=vp8&layout=grid&grid=1&mesh=true&aspect=16:9&name=${encodeURIComponent(uniqueParticipantName)}&buttons=mic,cam,share,hand,leave&topbar=false&header=false&logo=false&survey=false&redirect=false&invite=false&welcome=false&chat=false&settings=false&theme=dark`;
 
-    // Detect iOS (iPhone/iPad) to bypass WebKit iframe microphone blocking
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    if (isIOS) {
-      logAudioDebug("iOS Device detected (Apple WebKit Iframe Restriction). Launching native top-level call window...");
-      showToast("Opening iOS Video Room (Mic & Speaker Active) 🙏");
+    // Detect Mobile Devices (Android Chrome / iOS WebKit Iframe Restriction)
+    const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (isMobileDevice) {
+      logAudioDebug("Mobile Device detected (Android Chrome / iOS Safari). Launching native top-level call window...");
+      showToast("Opening Mobile Video Room (Mic & Camera Active) 🙏");
       window.location.href = roomUrl;
       return;
     }
