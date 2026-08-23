@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v108-UNIQUE-PARTICIPANT-NAME-COLLISION-FIX';
+const CACHE_NAME = 'river-of-life-cache-v111-FULLSCREEN-VIDEO-STAGE-ZERO-TOPBAR-CLEAN-BOTTOM-CONTROLS';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

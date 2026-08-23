@@ -7193,6 +7193,7 @@ function renderMeetingsDashboard() {
         `;
       } else {
         actionButtons = `
+          <button class="btn-secondary-mini btn-edit-meet-details" data-id="${m.id}" style="padding: 6px 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-weight: 700; cursor: pointer;">✏️ Edit</button>
           <button class="btn-secondary-mini btn-view-meet-details" data-id="${m.id}">Details</button>
           <button class="btn-primary-mini btn-join-meet" data-id="${m.id}">Join / सामील व्हा</button>
         `;
@@ -7209,7 +7210,7 @@ function renderMeetingsDashboard() {
             <span>👤 Host: ${m.host}</span>
             <span>📅 ${m.date} at ${m.time}</span>
             <span>⏱️ ${m.duration} mins</span>
-            ${m.status === 'live' ? `<span>👥 ${m.participantsCount} inside</span>` : ""}
+            ${m.status === 'live' ? `<span>👥 ${m.participantsCount || 0} inside</span>` : ""}
           </div>
         </div>
         <div class="meeting-card-actions">
@@ -7218,6 +7219,14 @@ function renderMeetingsDashboard() {
       `;
 
       // Event binds
+      const editBtn = card.querySelector(".btn-edit-meet-details");
+      if (editBtn) {
+        editBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          openEditMeetingModal(m.id);
+        });
+      }
+
       const detailsBtn = card.querySelector(".btn-view-meet-details");
       if (detailsBtn) {
         detailsBtn.addEventListener("click", (e) => {
@@ -7244,6 +7253,56 @@ function renderMeetingsDashboard() {
 
       listEl.appendChild(card);
     });
+  }
+}
+
+// Open Edit Meeting Drawer Modal
+function openEditMeetingModal(meetingId) {
+  const meetings = getMeetingsFromStorage();
+  const m = meetings.find(x => x.id === meetingId);
+  if (!m) return;
+
+  document.getElementById("edit-meeting-id").value = m.id;
+  document.getElementById("edit-meeting-title").value = m.title || "";
+  document.getElementById("edit-meeting-description").value = m.description || "";
+  document.getElementById("edit-meeting-date").value = m.date || "";
+  document.getElementById("edit-meeting-time").value = m.time || "";
+  document.getElementById("edit-meeting-duration").value = m.duration || "60";
+  document.getElementById("edit-meeting-host").value = m.host || "Pastor John";
+
+  openDrawer("drawer-edit-meeting");
+}
+
+// Submit Edit Meeting Changes
+function submitEditMeeting(event) {
+  if (event) event.preventDefault();
+  const id = document.getElementById("edit-meeting-id").value;
+  const title = document.getElementById("edit-meeting-title").value.trim();
+  const desc = document.getElementById("edit-meeting-description").value.trim();
+  const date = document.getElementById("edit-meeting-date").value;
+  const time = document.getElementById("edit-meeting-time").value;
+  const duration = document.getElementById("edit-meeting-duration").value;
+  const host = document.getElementById("edit-meeting-host").value.trim();
+
+  if (!id || !title || !date || !time) {
+    showToast("Please fill in all required fields.");
+    return;
+  }
+
+  const meetings = getMeetingsFromStorage();
+  const index = meetings.findIndex(x => x.id === id);
+  if (index !== -1) {
+    meetings[index].title = title;
+    meetings[index].description = desc;
+    meetings[index].date = date;
+    meetings[index].time = time;
+    meetings[index].duration = duration;
+    meetings[index].host = host;
+    saveMeetingsToStorage(meetings);
+
+    showToast("Meeting Updated Successfully! ✍️");
+    closeAllDrawers();
+    renderMeetingsDashboard();
   }
 }
 
@@ -7366,7 +7425,7 @@ function generateICSFile(meeting) {
   showToast("Calendar File (.ics) downloaded!");
 }
 
-// Trigger Joining Flow (Backup 2323 Verified Engine with Unique Participant Names)
+// Trigger Joining Flow (100% Mobile Hardware Access & Minimal 5 Controls)
 function triggerJoinMeetingFlow(meetingId) {
   const meetings = getMeetingsFromStorage();
   const m = meetings.find(x => x.id === meetingId);
@@ -7386,53 +7445,57 @@ function triggerJoinMeetingFlow(meetingId) {
   const meetingIdSlug = (m && m.id) ? m.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
   const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
   
-  // Clean 2323 Mirotalk URL with EXACT 5 controls (mic, cam, share, hand, leave) & Unique Participant Name
-  const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&speaker=true&autojoin=true&p2p=true&codec=opus&layout=grid&grid=1&name=${encodeURIComponent(uniqueParticipantName)}&buttons=mic,cam,share,hand,leave&topbar=false&header=false&logo=false&survey=false&redirect=false&invite=false&welcome=false&theme=dark`;
+  // Best Responsive Grid View, Minimal 5 Toolbar Buttons (mic, cam, share, hand, leave), and Exclusive Hardware Permission
+  const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&speaker=true&autojoin=true&p2p=true&codec=vp8&layout=grid&grid=1&mesh=true&aspect=16:9&name=${encodeURIComponent(uniqueParticipantName)}&buttons=mic,cam,share,hand,leave&topbar=false&header=false&logo=false&survey=false&redirect=false&invite=false&welcome=false&chat=false&settings=false&theme=dark`;
 
-  // Detect iOS (iPhone/iPad) to launch native top-level call window where Safari triggers microphone permission prompt
+  // Detect iOS (iPhone/iPad) to launch native call window where Safari triggers microphone permission prompt
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   if (isIOS) {
-    logAudioDebug("iOS Device detected. Directing to native top-level call window...", { roomUrl });
-    showToast("Opening iOS Video Room (Mic & Speaker Active) 🙏");
+    logAudioDebug("iOS Device detected. Directing to native call window...", { roomUrl });
+    showToast("Opening iOS Video Room (Mic & Camera Active) 🙏");
     window.location.href = roomUrl;
     return;
   }
 
-  logAudioDebug("getUserMedia started for meeting join...", { meetingId });
-  showToast("Requesting Microphone & Camera access... 🎙️");
+  logAudioDebug("getUserMedia started for mobile Android join...", { meetingId });
+  showToast("Activating Microphone & Camera... 🎙️📹");
   
-  // Explicitly request audio FIRST on Android/Desktop to display Microphone Permission Dialog
+  // For Android & Desktop: Pre-request permission on parent gesture, then IMMEDIATELY stop parent tracks to release hardware lock for iframe
   if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-    navigator.mediaDevices.getUserMedia({ audio: true })
-      .then(audioStream => {
-        if (audioStream && audioStream.getTracks) audioStream.getTracks().forEach(t => t.stop());
-        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-          .then(fullStream => {
-            if (fullStream && fullStream.getTracks) fullStream.getTracks().forEach(t => t.stop());
+    navigator.mediaDevices.getUserMedia({ audio: true, video: true })
+      .then(stream => {
+        logAudioDebug("Parent window hardware permission granted! Releasing parent tracks for iframe...");
+        if (stream && stream.getTracks) {
+          stream.getTracks().forEach(t => t.stop());
+        }
+        launchLiveMeetingRoom(m, null);
+      })
+      .catch(err => {
+        logAudioDebug("Parent getUserMedia audio/video notice (trying audio fallback):", err);
+        navigator.mediaDevices.getUserMedia({ audio: true })
+          .then(audioStream => {
+            if (audioStream && audioStream.getTracks) {
+              audioStream.getTracks().forEach(t => t.stop());
+            }
             launchLiveMeetingRoom(m, null);
           })
           .catch(() => {
             launchLiveMeetingRoom(m, null);
           });
-      })
-      .catch(err => {
-        logAudioDebug("Microphone permission denied or unavailable on mobile:", err);
-        showToast("Microphone permission denied. Joining in listen mode.");
-        launchLiveMeetingRoom(m, null);
       });
   } else {
     launchLiveMeetingRoom(m, null);
   }
 }
 
-// Fullscreen Native Live Meeting Room Entry (Backup 2323 Engine with Unique Participant Names)
+// Fullscreen Native Live Meeting Room Entry (Best Grid View & Minimum Controls)
 function launchLiveMeetingRoom(meeting, stream) {
   try {
     const userBaseName = (state && state.currentUser && state.currentUser.username) ? state.currentUser.username : "Member";
     const uniqueParticipantName = `${userBaseName}_${Math.floor(100 + Math.random() * 900)}`;
     const isHost = meeting ? (meeting.host === userBaseName) : false;
 
-    logAudioDebug("Entering native meeting room...", {
+    logAudioDebug("Entering native meeting room with best grid view...", {
       meetingId: meeting ? meeting.id : "default",
       isHost: isHost,
       participant: uniqueParticipantName
@@ -7471,7 +7534,8 @@ function launchLiveMeetingRoom(meeting, stream) {
     const meetingIdSlug = (meeting && meeting.id) ? meeting.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
     const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
     
-    const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&speaker=true&autojoin=true&p2p=true&codec=opus&layout=grid&grid=1&name=${encodeURIComponent(uniqueParticipantName)}&buttons=mic,cam,share,hand,leave&topbar=false&header=false&logo=false&survey=false&redirect=false&invite=false&welcome=false&theme=dark`;
+    // Best Grid View Layout & Minimum 5 Controls (mic, cam, share, hand, leave)
+    const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&speaker=true&autojoin=true&p2p=true&codec=vp8&layout=grid&grid=1&mesh=true&aspect=16:9&name=${encodeURIComponent(uniqueParticipantName)}&buttons=mic,cam,share,hand,leave&topbar=false&header=false&logo=false&survey=false&redirect=false&invite=false&welcome=false&chat=false&settings=false&theme=dark`;
 
     // Detect iOS (iPhone/iPad) to bypass WebKit iframe microphone blocking
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -7493,11 +7557,13 @@ function launchLiveMeetingRoom(meeting, stream) {
           height="100%" 
           allow="camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; accelerometer; gyroscope; microphone; camera; autoplay;" 
           allowusermedia="true"
+          playsinline="true"
+          webkit-playsinline="true"
           style="border: none; width: 100%; height: 100%; border-radius: 18px; background: #090d16;">
         </iframe>
       `;
 
-      logAudioDebug("Native WebRTC Room iframe mounted inside app window.", { roomUrl });
+      logAudioDebug("Native WebRTC Room iframe mounted inside app window with optimal grid layout.", { roomUrl });
     }
 
     enumerateAndPopulateAudioDevices();
