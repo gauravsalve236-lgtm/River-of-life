@@ -7367,13 +7367,13 @@ function generateICSFile(meeting) {
   showToast("Calendar File (.ics) downloaded!");
 }
 
-// Trigger Joining Flow with Mobile Microphone Hardware Activation
+// Trigger Joining Flow with Safari iOS Microphone Hardware Activation
 function triggerJoinMeetingFlow(meetingId) {
   const meetings = getMeetingsFromStorage();
   const m = meetings.find(x => x.id === meetingId);
   if (!m) return;
 
-  // Synchronous user-gesture audio context unlock
+  // Synchronous user-gesture audio context unlock for Safari WebKit
   try {
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     if (AudioContextClass) {
@@ -7382,12 +7382,12 @@ function triggerJoinMeetingFlow(meetingId) {
     }
   } catch(e) {}
 
-  logAudioDebug("Requesting mobile microphone & camera permissions...", { meetingId });
+  logAudioDebug("Requesting mobile microphone & camera permissions for Safari...", { meetingId });
   showToast("Activating Microphone & Camera... 🎙️");
 
   // Prompt mobile browser for Microphone & Camera permissions on parent gesture
   if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-    navigator.mediaDevices.getUserMedia({ audio: true, video: true })
+    navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }, video: true })
       .then(stream => {
         logAudioDebug("Parent window Microphone & Camera permission GRANTED!");
         launchLiveMeetingRoom(m, stream);
@@ -7556,8 +7556,8 @@ function launchLiveMeetingRoom(meeting, stream) {
       const meetingIdSlug = (meeting && meeting.id) ? meeting.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
       const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
       
-      // Clean WebRTC Room URL: EXACT 5 BUTTONS ONLY (mic, camera, desktop, raisehand, hangup) & Direct Join
-      const roomUrl = `https://meet.jit.si/${roomSlug}#config.prejoinPageEnabled=false&config.prejoinConfig.enabled=false&config.startWithAudioMuted=false&config.startWithVideoMuted=false&config.requireDisplayName=false&config.toolbarButtons=["microphone","camera","desktop","raisehand","hangup"]&interfaceConfig.TOOLBAR_BUTTONS=["microphone","camera","desktop","raisehand","hangup"]&interfaceConfig.SHOW_JITSI_WATERMARK=false&interfaceConfig.SHOW_WATERMARK_FOR_GUESTS=false&interfaceConfig.MOBILE_APP_PROMO=false&userInfo.displayName=${encodeURIComponent(loggedIn)}`;
+      // Clean Mirotalk P2P WebRTC Room: EXACT 5 BUTTONS ONLY (mic, cam, share, hand, leave) & Safari iOS Audio
+      const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&speaker=true&autojoin=true&p2p=true&codec=opus&layout=grid&grid=1&name=${encodeURIComponent(loggedIn)}&buttons=mic,cam,share,hand,leave&topbar=false&header=false&logo=false&survey=false&redirect=false&invite=false&welcome=false&theme=dark`;
 
       jitsiCont.innerHTML = `
         <iframe 
@@ -7567,11 +7567,13 @@ function launchLiveMeetingRoom(meeting, stream) {
           height="100%" 
           allow="camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; accelerometer; gyroscope; microphone; camera; autoplay;" 
           allowusermedia="true"
+          playsinline="true"
+          webkit-playsinline="true"
           style="border: none; width: 100%; height: 100%; border-radius: 16px; background: #090d16;">
         </iframe>
       `;
 
-      logAudioDebug("Verified WebRTC Room iframe mounted with active microphone & 5 toolbar buttons.", { roomUrl });
+      logAudioDebug("Verified Mirotalk P2P Room iframe mounted with active microphone & 5 toolbar buttons.", { roomUrl });
     }
 
     enumerateAndPopulateAudioDevices();
