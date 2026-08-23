@@ -7425,6 +7425,27 @@ function generateICSFile(meeting) {
   showToast("Calendar File (.ics) downloaded!");
 }
 
+// Explicit Android & Oppo System Hardware Permission Request
+function requestAndroidCameraMicPermissions() {
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    showToast("Requesting Camera & Microphone Permission... 🎙️📹");
+    navigator.mediaDevices.getUserMedia({ audio: true, video: true })
+      .then(stream => {
+        showToast("✅ Camera & Mic Permission Granted!");
+        if (stream && stream.getTracks) stream.getTracks().forEach(t => t.stop());
+        const banner = document.getElementById("android-perm-banner");
+        if (banner) banner.style.display = "none";
+      })
+      .catch(err => {
+        logAudioDebug("requestAndroidCameraMicPermissions error:", err);
+        showToast("Opening Permission Help Guide...");
+        openDrawer("drawer-oppo-mic-help");
+      });
+  } else {
+    openDrawer("drawer-oppo-mic-help");
+  }
+}
+
 // Trigger Joining Flow (100% Reliable Google Chrome & Mobile WebRTC Access)
 function triggerJoinMeetingFlow(meetingId) {
   const meetings = getMeetingsFromStorage();

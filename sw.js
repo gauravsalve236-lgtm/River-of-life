@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v115-OPPO-CHROME-FORCE-UNMUTED-AUDIO-VIDEO-FIX';
+const CACHE_NAME = 'river-of-life-cache-v116-ANDROID-HARDWARE-PERMISSION-PROMPT-BANNER-FIX';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
