@@ -538,6 +538,113 @@
           </div>
         </section>
 
+        <!-- VIEW: DISCOVER HUB VIEW (शोध व डिस्कव्हर) -->
+        <section id="view-discover" class="app-view">
+          <div class="view-scroll-content" style="padding: 20px 16px; max-width: 600px; margin: 0 auto; text-align: left;">
+            
+            <!-- Header Banner -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+              <div>
+                <span style="font-size: 11px; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.8px;">EXPLORE & GROW</span>
+                <h2 style="margin: 2px 0 0 0; font-size: 22px; font-weight: 800; color: var(--text);">🔍 Discover / डिस्कव्हर</h2>
+              </div>
+              <span style="font-size: 28px;">✨</span>
+            </div>
+
+            <!-- 1. GAMIFIED BIBLE QUIZ & BADGES CARD -->
+            <div onclick="openQuizHub()" style="background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%); border: 1.5px solid #818cf8; border-radius: 18px; padding: 18px; margin-bottom: 16px; cursor: pointer; color: #fff; box-shadow: 0 6px 20px rgba(129,140,248,0.25); display: flex; align-items: center; justify-content: space-between;">
+              <div style="text-align: left;">
+                <span style="font-size: 11px; font-weight: 800; color: #a5b4fc; text-transform: uppercase; letter-spacing: 0.5px;">BIBLE TRIVIA & REWARDS</span>
+                <h3 style="margin: 4px 0 2px 0; font-size: 17px; font-weight: 800;">🏆 Bible Quiz & Badges / क्विझ व बॅजेस</h3>
+                <p style="margin: 0; font-size: 12.5px; color: #cbd5e1;">Test your Bible knowledge, earn points & unlock badges!</p>
+              </div>
+              <div style="background: rgba(255,255,255,0.1); border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; margin-left: 12px;">
+                🎯
+              </div>
+            </div>
+
+            <!-- 2. TOPICAL LIFE GUIDES SECTION -->
+            <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 16px; margin-bottom: 16px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div>
+                  <span style="font-size: 11px; font-weight: 800; color: var(--primary); text-transform: uppercase;">SCRIPTURE FOR LIFE SITUATIONS</span>
+                  <h3 style="margin: 2px 0 0 0; font-size: 16px; font-weight: 800; color: var(--text);">💡 Topical Guides / जीवन मार्गदर्शक</h3>
+                </div>
+              </div>
+              
+              <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                <div onclick="openTopicalGuide('anxiety')" style="background: var(--bg); border: 1px solid var(--border); border-radius: 14px; padding: 12px; cursor: pointer; text-align: left;">
+                  <span style="font-size: 20px;">🕊️</span>
+                  <h4 style="margin: 6px 0 2px 0; font-size: 13.5px; font-weight: 800; color: var(--text);">Anxiety / चिंता</h4>
+                  <span style="font-size: 11px; color: var(--text-muted);">Philippians 4:6-7</span>
+                </div>
+                <div onclick="openTopicalGuide('hope')" style="background: var(--bg); border: 1px solid var(--border); border-radius: 14px; padding: 12px; cursor: pointer; text-align: left;">
+                  <span style="font-size: 20px;">💪</span>
+                  <h4 style="margin: 6px 0 2px 0; font-size: 13.5px; font-weight: 800; color: var(--text);">Hope / आशा</h4>
+                  <span style="font-size: 11px; color: var(--text-muted);">Isaiah 40:31</span>
+                </div>
+                <div onclick="openTopicalGuide('family')" style="background: var(--bg); border: 1px solid var(--border); border-radius: 14px; padding: 12px; cursor: pointer; text-align: left;">
+                  <span style="font-size: 20px;">👨‍👩‍👧</span>
+                  <h4 style="margin: 6px 0 2px 0; font-size: 13.5px; font-weight: 800; color: var(--text);">Family / कुटुंब</h4>
+                  <span style="font-size: 11px; color: var(--text-muted);">Joshua 24:15</span>
+                </div>
+                <div onclick="openTopicalGuide('anxiety')" style="background: var(--bg); border: 1px solid var(--border); border-radius: 14px; padding: 12px; cursor: pointer; text-align: left;">
+                  <span style="font-size: 20px;">🌿</span>
+                  <h4 style="margin: 6px 0 2px 0; font-size: 13.5px; font-weight: 800; color: var(--text);">Peace / शांती</h4>
+                  <span style="font-size: 11px; color: var(--text-muted);">John 14:27</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. READING PLANS & SUGGESTIONS -->
+            <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 16px; margin-bottom: 16px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div>
+                  <span style="font-size: 11px; font-weight: 800; color: var(--primary); text-transform: uppercase;">DAILY DEVOTIONALS</span>
+                  <h3 style="margin: 2px 0 0 0; font-size: 16px; font-weight: 800; color: var(--text);">📅 Reading Plans & Suggestions</h3>
+                </div>
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 10px;">
+                <div onclick="switchTab('plans')" style="background: var(--bg); border: 1px solid var(--border); border-radius: 14px; padding: 12px 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+                  <div style="text-align: left;">
+                    <h4 style="margin: 0; font-size: 14px; font-weight: 800; color: var(--text);">📖 Through the New Testament in 90 Days</h4>
+                    <span style="font-size: 12px; color: var(--text-muted);">90-Day guided reading plan</span>
+                  </div>
+                  <span style="font-size: 16px; color: var(--primary);">➔</span>
+                </div>
+                <div onclick="switchTab('plans')" style="background: var(--bg); border: 1px solid var(--border); border-radius: 14px; padding: 12px 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+                  <div style="text-align: left;">
+                    <h4 style="margin: 0; font-size: 14px; font-weight: 800; color: var(--text);">🕊️ Psalms of Comfort & Praise</h4>
+                    <span style="font-size: 12px; color: var(--text-muted);">30-Day devotional journey</span>
+                  </div>
+                  <span style="font-size: 16px; color: var(--primary);">➔</span>
+                </div>
+                <div onclick="switchTab('plans')" style="background: var(--bg); border: 1px solid var(--border); border-radius: 14px; padding: 12px 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+                  <div style="text-align: left;">
+                    <h4 style="margin: 0; font-size: 14px; font-weight: 800; color: var(--text);">💡 Proverbs for Daily Wisdom</h4>
+                    <span style="font-size: 12px; color: var(--text-muted);">31 Chapters for 31 Days</span>
+                  </div>
+                  <span style="font-size: 16px; color: var(--primary);">➔</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 4. MULTI-CHURCH DIRECTORY & PORTALS CARD -->
+            <div onclick="openChurchDirectory()" style="background: linear-gradient(135deg, #0e757d 0%, #052226 100%); border: 1.5px solid #1bb5be; border-radius: 18px; padding: 18px; margin-bottom: 16px; cursor: pointer; color: #fff; box-shadow: 0 6px 20px rgba(14,117,125,0.25); display: flex; align-items: center; justify-content: space-between;">
+              <div style="text-align: left;">
+                <span style="font-size: 11px; font-weight: 800; color: #80e8f0; text-transform: uppercase; letter-spacing: 0.5px;">COMMUNITY & PORTALS</span>
+                <h3 style="margin: 4px 0 2px 0; font-size: 17px; font-weight: 800;">⛪ Multi-Church Directory / चर्च डिरेक्टरी</h3>
+                <p style="margin: 0; font-size: 12.5px; color: #e2e8f0;">Find partner churches, pastor contacts & weekly schedules.</p>
+              </div>
+              <div style="background: rgba(255,255,255,0.1); border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; margin-left: 12px;">
+                🏛️
+              </div>
+            </div>
+
+          </div>
+        </section>
+
         <!-- VIEW: REGIONAL MARATHI HYMNAL VIEW (उपासना संगीत) -->
         <section id="view-hymnal" class="app-view">
           <div class="view-scroll-content" style="padding: 20px 16px; max-width: 600px; margin: 0 auto; text-align: left;">
@@ -1303,26 +1410,30 @@
         </section>
       </main>
 
-      <!-- 3. MOBILE BOTTOM NAVIGATION TAB BAR (5 CORE TABS) -->
+      <!-- 3. MOBILE BOTTOM NAVIGATION TAB BAR (DISCOVER HUB INCLUDED) -->
       <nav class="mobile-bottom-tabs">
         <button class="tab-btn active" data-tab="home">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
           <span class="tab-label">Home</span>
         </button>
         <button class="tab-btn" data-tab="reader">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
           <span class="tab-label">Bible</span>
         </button>
+        <button class="tab-btn" data-tab="discover">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <span class="tab-label">Discover</span>
+        </button>
         <button class="tab-btn" data-tab="hymnal">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
           <span class="tab-label">Hymn</span>
         </button>
         <button class="tab-btn" data-tab="meetings">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M23 7l-7 5 7 5V7z"></path><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M23 7l-7 5 7 5V7z"></path><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
           <span class="tab-label">Prayer Meeting</span>
         </button>
         <button class="tab-btn" data-tab="you">
-          <div id="nav-you-avatar" class="avatar-circle" style="width: 22px; height: 22px; font-size: 10px; font-weight: 800; border: 1.5px solid currentColor; margin: 0 auto 2px auto; background: transparent; color: currentColor; border-radius: 50%; display: flex; align-items: center; justify-content: center; line-height: 20px;">U</div>
+          <div id="nav-you-avatar" class="avatar-circle" style="width: 20px; height: 20px; font-size: 9.5px; font-weight: 800; border: 1.5px solid currentColor; margin: 0 auto 1px auto; background: transparent; color: currentColor; border-radius: 50%; display: flex; align-items: center; justify-content: center; line-height: 18px;">U</div>
           <span class="tab-label">You</span>
         </button>
       </nav>
@@ -2874,7 +2985,7 @@
     </div>
 
   <!-- App Main Logic (Cache-Busted for Version 83 Extended Splash Verse & Logo Theme) -->
-  <script src="app.js?v=85_CLEAN_BOTTOM_MENU"></script>
+  <script src="app.js?v=86_DISCOVER_HUB"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 4.5s no matter what

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v85-CLEAN-BOTTOM-MENU';
+const CACHE_NAME = 'river-of-life-cache-v86-DISCOVER-HUB';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
