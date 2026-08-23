@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v99-SAFARI-IPHONE-DIRECT-MIC-BUTTON';
+const CACHE_NAME = 'river-of-life-cache-v101-3RD-PARTY-WINDOW-DIRECT-STAGE';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
