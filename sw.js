@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v105-IPHONE-MIC-ACTIVATOR-TOUCH-UNCLOAK';
+const CACHE_NAME = 'river-of-life-cache-v106-BACKUP-2323-MEETING-REVERT';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

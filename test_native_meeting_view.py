@@ -4,7 +4,7 @@ from playwright.sync_api import sync_playwright
 with sync_playwright() as p:
     browser = p.chromium.launch(headless=True)
     page = browser.new_page(viewport={'width': 412, 'height': 915})
-    page.goto('http://localhost:8092/index.html?v=v105_test_' + str(int(time.time())))
+    page.goto('http://localhost:8092/index.html?v=v106_test_' + str(int(time.time())))
     time.sleep(3.5)
     
     # Hide notification modal & splash screen
@@ -23,7 +23,7 @@ with sync_playwright() as p:
         }
     }''')
     time.sleep(3.5)
-    page.screenshot(path='v105_iphone_mic_activator_verified.png')
+    page.screenshot(path='v106_backup_2323_revert_verified.png')
 
     browser.close()
-    print('iPhone Mic Activator meeting room screenshot captured cleanly!')
+    print('Backup 2323 revert meeting room screenshot captured cleanly!')

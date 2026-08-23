@@ -7036,7 +7036,6 @@ function populateScheduleHostsDropdown() {
     }
   });
 }
-
 // Create new meeting
 function createNewMeeting() {
   const title = document.getElementById("meeting-title").value.trim();
@@ -7367,58 +7366,6 @@ function generateICSFile(meeting) {
   showToast("Calendar File (.ics) downloaded!");
 }
 
-// iPhone Safari Touch Activator for Hardware Microphone Access
-function unlockIPhoneMicHardware() {
-  try {
-    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-    if (AudioContextClass) {
-      if (!window.webrtcAudioCtx) window.webrtcAudioCtx = new AudioContextClass();
-      if (window.webrtcAudioCtx.state === 'suspended') window.webrtcAudioCtx.resume();
-    }
-  } catch(e) {}
-
-  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-    navigator.mediaDevices.getUserMedia({ audio: true, video: true })
-      .then(stream => {
-        showToast("iPhone Microphone Hardware Activated! 🎙️");
-        const activator = document.getElementById("river-iphone-mic-activator");
-        if (activator) activator.style.display = "none";
-        
-        const iframe = document.getElementById("webrtc-room-iframe");
-        if (iframe && iframe.contentWindow) {
-          try { iframe.contentWindow.postMessage({ type: 'toggle-mic', muted: false }, '*'); } catch(e) {}
-        }
-      })
-      .catch(err => {
-        console.warn("iPhone mic hardware unlock notice:", err);
-        showIPhoneMicGuideModal();
-      });
-  } else {
-    showToast("iPhone Microphone Activated 🎙️");
-    const activator = document.getElementById("river-iphone-mic-activator");
-    if (activator) activator.style.display = "none";
-  }
-}
-
-// iPhone Safari Microphone Guide & Permission Helper Functions
-function showIPhoneMicGuideModal() {
-  let guide = document.getElementById("modal-iphone-mic-guide");
-  if (!guide) {
-    guide = document.createElement("div");
-    guide.id = "modal-iphone-mic-guide";
-    guide.className = "modal-overlay active";
-    guide.style.cssText = "position: fixed; inset: 0; z-index: 10000; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; padding: 20px;";
-    guide.innerHTML = `
-      <div style="background: linear-gradient(145deg, #1e293b, #0f172a); border: 1.5px solid #e5a83b; border-radius: 24px; padding: 24px; max-width: 360px; width: 100%; color: #fff; box-shadow: 0 12px 40px rgba(0,0,0,0.6); text-align: center;">
-        <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(229, 168, 59, 0.2); border: 2px solid #e5a83b; display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 16px auto;">
-          🎙️
-        </div>
-        <h3 style="font-size: 18px; font-weight: 800; color: #ffd369; margin-bottom: 12px;">Enable iPhone Microphone Access<br><span style="font-size: 13px; font-weight: 600; color: #cbd5e1;">आयफोनवर मायक्रोफोन सुरू करा</span></h3>
-        
-        <div style="background: rgba(255,255,255,0.05); border-radius: 16px; padding: 14px; text-align: left; font-size: 12.5px; color: #e2e8f0; line-height: 1.6; margin-bottom: 20px;">
-          <p style="margin: 0 0 8px 0;"><b>Step 1:</b> Tap the <b>aA</b> or <b>Tune (⚙️)</b> icon in Safari address bar at top/bottom.</p>
-          <p style="margin: 0 0 8px 0;"><b>Step 2:</b> Tap <b>Website Settings</b> (वेबसाइट सेटिंग).</p>
-          <p style="margin: 0 0 8px 0;"><b>Step 3:</b> Change <b>Microphone</b> to <b>ALLOW</b> (परवानगी द्या).</p>
           <p style="margin: 0;"><b>Step 4:</b> Tap "Try Microphone Again" below!</p>
         </div>
 
@@ -7462,13 +7409,13 @@ function requestIPhoneMicPermissionAgain() {
   }
 }
 
-// Trigger Joining Flow with Simple Boolean Hardware Permission Prompts for iPhone Safari
+// Trigger Joining Flow (Backup 2323 Verified Engine)
 function triggerJoinMeetingFlow(meetingId) {
   const meetings = getMeetingsFromStorage();
   const m = meetings.find(x => x.id === meetingId);
   if (!m) return;
 
-  // Synchronous user-gesture audio context unlock for Safari WebKit
+  // Synchronous user-gesture audio context unlock
   try {
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     if (AudioContextClass) {
@@ -7477,137 +7424,59 @@ function triggerJoinMeetingFlow(meetingId) {
     }
   } catch(e) {}
 
-  logAudioDebug("Requesting mobile microphone & camera permissions for Safari...", { meetingId });
-  showToast("Activating Microphone & Camera... 🎙️");
+  const loggedIn = (state && state.currentUser) ? state.currentUser.username : "Member";
+  const meetingIdSlug = (m && m.id) ? m.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
+  const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
+  
+  // Clean 2323 Mirotalk URL with EXACT 5 controls (mic, cam, share, hand, leave) & No landing popups
+  const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&speaker=true&autojoin=true&p2p=true&codec=opus&layout=grid&grid=1&name=${encodeURIComponent(loggedIn)}&buttons=mic,cam,share,hand,leave&topbar=false&header=false&logo=false&survey=false&redirect=false&invite=false&welcome=false&theme=dark`;
 
-  // Simple boolean constraints for 100% iPhone Safari Microphone & Camera prompt
+  // Detect iOS (iPhone/iPad) to bypass WebKit iframe microphone blocking and popup blocker
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if (isIOS) {
+    logAudioDebug("iOS Device detected. Directing to native top-level call window...", { roomUrl });
+    showToast("Opening iOS Video Room (Mic & Speaker Active) 🙏");
+    window.location.href = roomUrl;
+    return;
+  }
+
+  logAudioDebug("getUserMedia started for meeting join...", { meetingId });
+  showToast("Requesting Microphone & Camera access... 🎙️");
+  
+  // Explicitly request audio FIRST on Android/Desktop to display Microphone Permission Dialog
   if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-    navigator.mediaDevices.getUserMedia({ audio: true, video: true })
-      .then(stream => {
-        logAudioDebug("Parent window Microphone & Camera permission GRANTED!");
-        launchLiveMeetingRoom(m, stream);
-      })
-      .catch(err => {
-        logAudioDebug("Parent getUserMedia audio/video notice (trying audio only):", err);
-        navigator.mediaDevices.getUserMedia({ audio: true })
-          .then(audioStream => {
-            launchLiveMeetingRoom(m, audioStream);
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(audioStream => {
+        if (audioStream && audioStream.getTracks) audioStream.getTracks().forEach(t => t.stop());
+        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+          .then(fullStream => {
+            if (fullStream && fullStream.getTracks) fullStream.getTracks().forEach(t => t.stop());
+            launchLiveMeetingRoom(m, null);
           })
-          .catch(micErr => {
-            console.warn("Microphone access blocked on iPhone Safari:", micErr);
-            showIPhoneMicGuideModal();
+          .catch(() => {
             launchLiveMeetingRoom(m, null);
           });
+      })
+      .catch(err => {
+        logAudioDebug("Microphone permission denied or unavailable on mobile:", err);
+        showToast("Microphone permission denied. Joining in listen mode.");
+        launchLiveMeetingRoom(m, null);
       });
   } else {
     launchLiveMeetingRoom(m, null);
   }
 }
 
-// Explicit Mobile Microphone Permission Request Trigger
-function requestMobileMicPermissionExplicitly() {
-  const banner = document.getElementById("river-mic-permission-banner");
-  showToast("Requesting Mobile Microphone Access... 🎙️");
-  
-  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-    navigator.mediaDevices.getUserMedia({ audio: true, video: true })
-      .then(stream => {
-        showToast("Microphone Permission Granted! 🎙️");
-        if (banner) banner.style.display = "none";
-        if (activeMeetingSession) activeMeetingSession.localStream = stream;
-      })
-      .catch(err => {
-        showToast("Please tap Allow when browser prompts for microphone 🙏");
-        console.warn("Explicit mic request notice:", err);
-      });
-  }
-}
-
-// Native Toggle Mic (Mute / Unmute) via Custom Large App Button
-function toggleNativeMeetingMic() {
-  if (!activeMeetingSession) activeMeetingSession = { isMuted: false };
-  activeMeetingSession.isMuted = !activeMeetingSession.isMuted;
-
-  const btn = document.getElementById("btn-native-mic-toggle");
-  const icon = document.getElementById("native-mic-icon");
-  const text = document.getElementById("native-mic-text");
-
-  const iframe = document.getElementById("webrtc-room-iframe");
-  if (iframe && iframe.contentWindow) {
-    try {
-      iframe.contentWindow.postMessage({ type: 'toggle-mic', muted: activeMeetingSession.isMuted }, '*');
-    } catch(e) {}
-  }
-
-  if (activeMeetingSession.isMuted) {
-    if (btn) {
-      btn.style.background = "rgba(239, 68, 68, 0.25)";
-      btn.style.borderColor = "#ef4444";
-      btn.style.color = "#f87171";
-    }
-    if (icon) icon.textContent = "🔇";
-    if (text) text.textContent = "Muted";
-    showToast("Microphone Muted 🔇");
-  } else {
-    if (btn) {
-      btn.style.background = "rgba(34, 197, 94, 0.2)";
-      btn.style.borderColor = "#22c55e";
-      btn.style.color = "#4ade80";
-    }
-    if (icon) icon.textContent = "🎙️";
-    if (text) text.textContent = "Mic On";
-    showToast("Microphone Active 🎙️");
-  }
-}
-
-// Native Toggle Video Cam via Custom Large App Button
-function toggleNativeMeetingCam() {
-  if (!activeMeetingSession) activeMeetingSession = { isCamOff: false };
-  activeMeetingSession.isCamOff = !activeMeetingSession.isCamOff;
-
-  const btn = document.getElementById("btn-native-cam-toggle");
-  const icon = document.getElementById("native-cam-icon");
-  const text = document.getElementById("native-cam-text");
-
-  const iframe = document.getElementById("webrtc-room-iframe");
-  if (iframe && iframe.contentWindow) {
-    try {
-      iframe.contentWindow.postMessage({ type: 'toggle-cam', camOff: activeMeetingSession.isCamOff }, '*');
-    } catch(e) {}
-  }
-
-  if (activeMeetingSession.isCamOff) {
-    if (btn) {
-      btn.style.background = "rgba(239, 68, 68, 0.25)";
-      btn.style.borderColor = "#ef4444";
-      btn.style.color = "#f87171";
-    }
-    if (icon) icon.textContent = "📷";
-    if (text) text.textContent = "Cam Off";
-    showToast("Camera Disabled 📷");
-  } else {
-    if (btn) {
-      btn.style.background = "rgba(34, 197, 94, 0.2)";
-      btn.style.borderColor = "#22c55e";
-      btn.style.color = "#4ade80";
-    }
-    if (icon) icon.textContent = "📹";
-    if (text) text.textContent = "Video";
-    showToast("Camera Active 📹");
-  }
-}
-
-// Fullscreen Native In-App Live Meeting Room Entry (100% Active Camera & Microphone)
+// Fullscreen Native Live Meeting Room Entry (Backup 2323 Engine)
 function launchLiveMeetingRoom(meeting, stream) {
   try {
     const loggedIn = (state && state.currentUser) ? state.currentUser.username : "Member";
-    const uniqueName = `${loggedIn}_${Math.floor(100 + Math.random() * 900)}`;
     const isHost = meeting ? (meeting.host === loggedIn) : false;
 
-    logAudioDebug("Entering native in-app meeting room with active mic & camera...", {
+    logAudioDebug("Entering native meeting room...", {
       meetingId: meeting ? meeting.id : "default",
       isHost: isHost,
-      participant: uniqueName
+      participant: loggedIn
     });
     
     // Lock screen view overlay
@@ -7643,10 +7512,17 @@ function launchLiveMeetingRoom(meeting, stream) {
     const meetingIdSlug = (meeting && meeting.id) ? meeting.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
     const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
     
-    // Clean WebRTC Call URL with EXACT 5 controls (mic, cam, share, hand, leave) & No landing popups
-    const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&speaker=true&autojoin=true&p2p=true&codec=opus&layout=grid&grid=1&name=${encodeURIComponent(uniqueName)}&buttons=mic,cam,share,hand,leave&topbar=false&header=false&logo=false&survey=false&redirect=false&invite=false&welcome=false&theme=dark`;
+    const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&speaker=true&autojoin=true&p2p=true&codec=opus&layout=grid&grid=1&name=${encodeURIComponent(loggedIn)}&buttons=mic,cam,share,hand,leave&topbar=false&header=false&logo=false&survey=false&redirect=false&invite=false&welcome=false&theme=dark`;
 
-    // Mount direct iframe stage (100% working in-app camera & microphone like Version 91)
+    // Detect iOS (iPhone/iPad) to bypass WebKit iframe microphone blocking
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (isIOS) {
+      logAudioDebug("iOS Device detected (Apple WebKit Iframe Restriction). Launching native top-level call window...");
+      showToast("Opening iOS Video Room (Mic & Speaker Active) 🙏");
+      window.location.href = roomUrl;
+      return;
+    }
+
     const jitsiCont = document.getElementById("meeting-jitsi-container");
     if (jitsiCont) {
       jitsiCont.style.display = "block";
@@ -7658,24 +7534,54 @@ function launchLiveMeetingRoom(meeting, stream) {
           height="100%" 
           allow="camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; accelerometer; gyroscope; microphone; camera; autoplay;" 
           allowusermedia="true"
-          playsinline="true"
-          webkit-playsinline="true"
-          style="border: none; width: 100%; height: 100%; border-radius: 16px; background: #090d16;">
+          style="border: none; width: 100%; height: 100%; border-radius: 18px; background: #090d16;">
         </iframe>
       `;
 
-      logAudioDebug("Native WebRTC Room iframe mounted with active microphone & camera.", { roomUrl });
+      logAudioDebug("Native WebRTC Room iframe mounted inside app window.", { roomUrl });
     }
 
     enumerateAndPopulateAudioDevices();
     setTimeout(() => { unlockAndPlayRemoteAudio(); }, 1000);
-    showToast("Joined Live Fellowship Room • Mic & Camera Active 🎙️📹");
+    showToast("Joined Live Fellowship Room 🙏");
   } catch (err) {
     logAudioDebug("launchLiveMeetingRoom notice:", err);
   }
 }
 
-// Open Fullscreen Video Call Directly in Safari Mobile Browser Tab for 100% iPhone Mic Permission
+function exitLiveMeetingRoom() {
+  try {
+    console.log("Exiting Live Fellowship Meeting Room...");
+    
+    // Hide Modal Overlay & Restore Body Class
+    const roomModal = document.getElementById("modal-live-meeting");
+    if (roomModal) {
+      roomModal.style.display = "none";
+      roomModal.classList.remove("active");
+      document.body.classList.remove("meeting-modal-open");
+    }
+
+    // Cleanly terminate Video Room Iframe
+    const jitsiCont = document.getElementById("meeting-jitsi-container");
+    if (jitsiCont) {
+      jitsiCont.innerHTML = "";
+      jitsiCont.style.display = "none";
+    }
+
+    // Stop all local camera and microphone media tracks
+    if (activeMeetingSession && activeMeetingSession.localStream) {
+      try {
+        activeMeetingSession.localStream.getTracks().forEach(track => track.stop());
+      } catch(e) {}
+    }
+    activeMeetingSession = null;
+
+    showToast("Exited fellowship meeting room");
+  } catch (err) {
+    console.warn("exitLiveMeetingRoom notice:", err);
+  }
+}
+
 function openMeetingInSafariDirectly() {
   const meetingId = (activeMeetingSession && activeMeetingSession.meetingId) ? activeMeetingSession.meetingId : 1;
   const meetingIdSlug = meetingId.toString().replace(/[^a-zA-Z0-9]/g, '_');
@@ -7684,22 +7590,8 @@ function openMeetingInSafariDirectly() {
   
   const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&speaker=true&autojoin=true&p2p=true&codec=opus&layout=grid&grid=1&name=${encodeURIComponent(loggedIn)}&buttons=mic,cam,share,hand,leave&topbar=false&header=false&logo=false&survey=false&redirect=false&invite=false&welcome=false&theme=dark`;
 
-  showToast("Opening Safari for iPhone Mic Access... 🎙️");
-  
-  // Prompt getUserMedia on parent window gesture to trigger iPhone hardware mic permission before window open
-  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-    navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true }, video: true })
-      .then(stream => {
-        window.open(roomUrl, '_blank');
-      })
-      .catch(err => {
-        console.warn("Direct getUserMedia notice:", err);
-        showIPhoneMicGuideModal();
-        window.open(roomUrl, '_blank');
-      });
-  } else {
-    window.open(roomUrl, '_blank');
-  }
+  showToast("Opening Safari Video Room... 🎙️");
+  window.location.href = roomUrl;
 }
 
 function exitLiveMeetingRoom() {
