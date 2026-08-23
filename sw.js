@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v86-DISCOVER-HUB';
+const CACHE_NAME = 'river-of-life-cache-v87-MODAL-FIXES';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

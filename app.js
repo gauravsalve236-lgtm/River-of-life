@@ -4759,9 +4759,15 @@ function openModal(id) {
   }
 }
 
-function closeModal(id) {
+window.closeModal = function(id) {
   const overlay = document.getElementById(id);
-  if (overlay) overlay.classList.remove("active");
+  if (overlay) {
+    overlay.classList.remove("active");
+    overlay.style.display = "none";
+  }
+};
+function closeModal(id) {
+  window.closeModal(id);
 }
 
 let toastTimeout = null;
@@ -9805,4 +9811,12 @@ window.openAdminDashboard = function() {
   modal.style.display = "flex";
   modal.classList.add("active");
 };
+
+// Global Backdrop Tap-To-Close Listener for All Overlays & Modals
+document.addEventListener("click", function(e) {
+  if (e.target && (e.target.classList.contains("meeting-modal-overlay") || e.target.classList.contains("drawer-overlay"))) {
+    e.target.classList.remove("active");
+    e.target.style.display = "none";
+  }
+});
 

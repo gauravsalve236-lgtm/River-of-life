@@ -2860,12 +2860,12 @@
 
     <!-- 1. Visual Share Studio Canvas Modal -->
     <div id="modal-share-studio" class="meeting-modal-overlay" style="display: none; align-items: center; justify-content: center; z-index: 10010; padding: 16px;">
-      <div style="max-width: 480px; width: 100%; background: var(--surface); color: var(--text); border-radius: 20px; border: 1.5px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.5); display: flex; flex-direction: column; overflow: hidden; margin: auto;">
-        <div style="padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
-          <h3 style="margin: 0; font-size: 17px; font-weight: 800;">🎨 Visual Share Studio / इमेज कार्ड</h3>
-          <button onclick="closeShareStudio()" style="background: none; border: none; font-size: 22px; color: var(--text); cursor: pointer;">&times;</button>
+      <div class="platform-modal-card">
+        <div class="platform-modal-header">
+          <h3>🎨 Visual Share Studio / इमेज कार्ड</h3>
+          <button onclick="closeShareStudio()" class="platform-modal-close" aria-label="Close">&times;</button>
         </div>
-        <div style="padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 14px; max-height: 80vh; overflow-y: auto;">
+        <div style="padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 14px; max-height: 75vh; overflow-y: auto;">
           <canvas id="share-studio-canvas" style="width: 100%; max-width: 340px; height: auto; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 1px solid var(--border);"></canvas>
           
           <div style="display: flex; gap: 8px; width: 100%; justify-content: center;">
@@ -2880,28 +2880,34 @@
             </button>
           </div>
         </div>
+        <div class="platform-modal-footer">
+          <button onclick="closeShareStudio()" class="btn-modal-close-footer">❌ Close / बंद करा</button>
+        </div>
       </div>
     </div>
 
     <!-- 2. Topical Life Guides Modal -->
     <div id="modal-topical-guide" class="meeting-modal-overlay" style="display: none; align-items: center; justify-content: center; z-index: 10010; padding: 16px;">
-      <div style="max-width: 480px; width: 100%; background: var(--surface); color: var(--text); border-radius: 20px; border: 1.5px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.5); display: flex; flex-direction: column; overflow: hidden; margin: auto; max-height: 85vh;">
-        <div style="padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
-          <h3 id="topical-modal-title" style="margin: 0; font-size: 17px; font-weight: 800;">💡 Topical Life Guide</h3>
-          <button onclick="closeModal('modal-topical-guide')" style="background: none; border: none; font-size: 22px; color: var(--text); cursor: pointer;">&times;</button>
+      <div class="platform-modal-card">
+        <div class="platform-modal-header">
+          <h3 id="topical-modal-title">💡 Topical Life Guide</h3>
+          <button onclick="closeModal('modal-topical-guide')" class="platform-modal-close" aria-label="Close">&times;</button>
         </div>
-        <div id="topical-modal-body" style="padding: 16px; overflow-y: auto;">
+        <div id="topical-modal-body" style="padding: 16px; overflow-y: auto; flex: 1;">
           <!-- Topic verses render dynamically -->
+        </div>
+        <div class="platform-modal-footer">
+          <button onclick="closeModal('modal-topical-guide')" class="btn-modal-close-footer">❌ Close / बंद करा</button>
         </div>
       </div>
     </div>
 
     <!-- 3. Regional Marathi Hymnal Hub Modal -->
     <div id="modal-hymnal-hub" class="meeting-modal-overlay" style="display: none; align-items: center; justify-content: center; z-index: 10010; padding: 16px;">
-      <div style="max-width: 480px; width: 100%; background: var(--surface); color: var(--text); border-radius: 20px; border: 1.5px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.5); display: flex; flex-direction: column; overflow: hidden; margin: auto; max-height: 85vh;">
-        <div style="padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
-          <h3 style="margin: 0; font-size: 17px; font-weight: 800;">🎶 उपासना संगीत / Marathi Church Hymns</h3>
-          <button onclick="closeModal('modal-hymnal-hub')" style="background: none; border: none; font-size: 22px; color: var(--text); cursor: pointer;">&times;</button>
+      <div class="platform-modal-card">
+        <div class="platform-modal-header">
+          <h3>🎶 उपासना संगीत / Marathi Church Hymns</h3>
+          <button onclick="closeModal('modal-hymnal-hub')" class="platform-modal-close" aria-label="Close">&times;</button>
         </div>
         <div style="padding: 12px 16px; border-bottom: 1px solid var(--border);">
           <input type="text" oninput="filterHymns(this.value)" class="dropdown-selector" style="width: 100%; padding: 10px;" placeholder="Search hymn number (१, २) or song title...">
@@ -2909,61 +2915,73 @@
         <div id="hymn-list-container" style="padding: 16px; overflow-y: auto; flex: 1;">
           <!-- Hymns list render dynamically -->
         </div>
+        <div class="platform-modal-footer">
+          <button onclick="closeModal('modal-hymnal-hub')" class="btn-modal-close-footer">❌ Close / बंद करा</button>
+        </div>
       </div>
     </div>
 
     <!-- 4. Hymn Detail Lyrics Modal -->
     <div id="modal-hymn-detail" class="meeting-modal-overlay" style="display: none; align-items: center; justify-content: center; z-index: 10015; padding: 16px;">
-      <div style="max-width: 460px; width: 100%; background: var(--surface); color: var(--text); border-radius: 20px; border: 1.5px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.5); display: flex; flex-direction: column; overflow: hidden; margin: auto; max-height: 85vh;">
-        <div style="padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+      <div class="platform-modal-card" style="max-width: 460px;">
+        <div class="platform-modal-header">
           <div>
             <span id="hymn-detail-number" style="font-size: 11px; font-weight: 800; color: var(--primary);"></span>
-            <h3 id="hymn-detail-title" style="margin: 2px 0 0 0; font-size: 17px; font-weight: 800;"></h3>
+            <h3 id="hymn-detail-title"></h3>
           </div>
-          <button onclick="closeModal('modal-hymn-detail')" style="background: none; border: none; font-size: 22px; color: var(--text); cursor: pointer;">&times;</button>
+          <button onclick="closeModal('modal-hymn-detail')" class="platform-modal-close" aria-label="Close">&times;</button>
         </div>
-        <div style="padding: 20px; overflow-y: auto;">
-          <pre id="hymn-detail-lyrics" style="white-space: pre-wrap; font-family: var(--font-body); font-size: 16px; line-height: 1.8; color: var(--text); text-align: left; margin: 0;"></pre>
+        <div style="padding: 20px; overflow-y: auto; flex: 1;">
+          <pre id="hymn-detail-lyrics" style="white-space: pre-wrap; font-family: var(--font-body); font-size: 15.5px; line-height: 1.8; color: var(--text); text-align: left; margin: 0;"></pre>
+        </div>
+        <div class="platform-modal-footer">
+          <button onclick="closeModal('modal-hymn-detail')" class="btn-modal-close-footer">❌ Close / बंद करा</button>
         </div>
       </div>
     </div>
 
     <!-- 5. Bible Quiz & Badge Hub Modal -->
     <div id="modal-quiz-hub" class="meeting-modal-overlay" style="display: none; align-items: center; justify-content: center; z-index: 10010; padding: 16px;">
-      <div style="max-width: 440px; width: 100%; background: var(--surface); color: var(--text); border-radius: 20px; border: 1.5px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.5); display: flex; flex-direction: column; overflow: hidden; margin: auto; max-height: 85vh;">
-        <div style="padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+      <div class="platform-modal-card" style="max-width: 440px;">
+        <div class="platform-modal-header">
           <div>
             <span id="quiz-progress-str" style="font-size: 11px; font-weight: 800; color: var(--primary);"></span>
-            <h3 style="margin: 2px 0 0 0; font-size: 17px; font-weight: 800;">🏆 Bible Quiz & Badges</h3>
+            <h3>🏆 Bible Quiz & Badges</h3>
           </div>
-          <button onclick="closeModal('modal-quiz-hub')" style="background: none; border: none; font-size: 22px; color: var(--text); cursor: pointer;">&times;</button>
+          <button onclick="closeModal('modal-quiz-hub')" class="platform-modal-close" aria-label="Close">&times;</button>
         </div>
-        <div style="padding: 20px; display: flex; flex-direction: column; gap: 16px;">
+        <div style="padding: 20px; display: flex; flex-direction: column; gap: 16px; overflow-y: auto; flex: 1;">
           <h4 id="quiz-question-text" style="margin: 0; font-size: 17px; font-weight: 800; line-height: 1.4; color: var(--text); text-align: left;"></h4>
           <div id="quiz-options-container" style="display: flex; flex-direction: column; gap: 10px;"></div>
+        </div>
+        <div class="platform-modal-footer">
+          <button onclick="closeModal('modal-quiz-hub')" class="btn-modal-close-footer">❌ Close / बंद करा</button>
         </div>
       </div>
     </div>
 
     <!-- 6. Multi-Church Directory Modal -->
     <div id="modal-church-directory" class="meeting-modal-overlay" style="display: none; align-items: center; justify-content: center; z-index: 10010; padding: 16px;">
-      <div style="max-width: 480px; width: 100%; background: var(--surface); color: var(--text); border-radius: 20px; border: 1.5px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.5); display: flex; flex-direction: column; overflow: hidden; margin: auto; max-height: 85vh;">
-        <div style="padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
-          <h3 style="margin: 0; font-size: 17px; font-weight: 800;">⛪ Multi-Church Directory & Portals</h3>
-          <button onclick="closeModal('modal-church-directory')" style="background: none; border: none; font-size: 22px; color: var(--text); cursor: pointer;">&times;</button>
+      <div class="platform-modal-card">
+        <div class="platform-modal-header">
+          <h3>⛪ Multi-Church Directory & Portals</h3>
+          <button onclick="closeModal('modal-church-directory')" class="platform-modal-close" aria-label="Close">&times;</button>
         </div>
-        <div id="church-directory-list" style="padding: 16px; overflow-y: auto;"></div>
+        <div id="church-directory-list" style="padding: 16px; overflow-y: auto; flex: 1;"></div>
+        <div class="platform-modal-footer">
+          <button onclick="closeModal('modal-church-directory')" class="btn-modal-close-footer">❌ Close / बंद करा</button>
+        </div>
       </div>
     </div>
 
     <!-- 7. Admin Management Dashboard Modal -->
     <div id="modal-admin-dashboard" class="meeting-modal-overlay" style="display: none; align-items: center; justify-content: center; z-index: 10010; padding: 16px;">
-      <div style="max-width: 480px; width: 100%; background: var(--surface); color: var(--text); border-radius: 20px; border: 1.5px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.5); display: flex; flex-direction: column; overflow: hidden; margin: auto; max-height: 85vh;">
-        <div style="padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
-          <h3 style="margin: 0; font-size: 17px; font-weight: 800;">🛠️ Admin & Pastoral Dashboard</h3>
-          <button onclick="closeModal('modal-admin-dashboard')" style="background: none; border: none; font-size: 22px; color: var(--text); cursor: pointer;">&times;</button>
+      <div class="platform-modal-card">
+        <div class="platform-modal-header">
+          <h3>🛠️ Admin & Pastoral Dashboard</h3>
+          <button onclick="closeModal('modal-admin-dashboard')" class="platform-modal-close" aria-label="Close">&times;</button>
         </div>
-        <div style="padding: 20px; text-align: left; display: flex; flex-direction: column; gap: 14px; overflow-y: auto;">
+        <div style="padding: 20px; text-align: left; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; flex: 1;">
           <div style="background: rgba(229, 168, 59, 0.12); border: 1px solid rgba(229, 168, 59, 0.35); padding: 14px; border-radius: 12px;">
             <strong style="color: var(--primary); font-size: 13.5px; display: block;">Authorized Church Leader Portal</strong>
             <span style="font-size: 12px; color: var(--text-muted);">Manage Live Prayer Meetings, Review Pastoral Requests & Announcements</span>
@@ -2981,11 +2999,14 @@
             📢 Broadcast Weekly Church Announcement
           </button>
         </div>
+        <div class="platform-modal-footer">
+          <button onclick="closeModal('modal-admin-dashboard')" class="btn-modal-close-footer">❌ Close / बंद करा</button>
+        </div>
       </div>
     </div>
 
   <!-- App Main Logic (Cache-Busted for Version 83 Extended Splash Verse & Logo Theme) -->
-  <script src="app.js?v=86_DISCOVER_HUB"></script>
+  <script src="app.js?v=87_MODAL_FIXES"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 4.5s no matter what
