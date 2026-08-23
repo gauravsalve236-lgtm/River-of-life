@@ -7410,9 +7410,9 @@ function closeIPhoneMicGuideModal() {
 function requestIPhoneMicPermissionAgain() {
   closeIPhoneMicGuideModal();
   if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-    navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true }, video: true })
+    navigator.mediaDevices.getUserMedia({ audio: true, video: true })
       .then(stream => {
-        showToast("Microphone Permission Granted! 🎙️");
+        showToast("Microphone & Camera Granted! 🎙️📹");
         if (activeMeetingSession && activeMeetingSession.meetingId) {
           launchLiveMeetingRoom({ id: activeMeetingSession.meetingId }, stream);
         } else {
@@ -7421,7 +7421,7 @@ function requestIPhoneMicPermissionAgain() {
       })
       .catch(err => {
         console.warn("Retried getUserMedia notice:", err);
-        showToast("Opening call window... Please tap Allow on Safari prompt 🎙️");
+        showToast("Please tap Allow when Safari prompts for Microphone 🎙️");
         openMeetingInSafariDirectly();
       });
   } else {
@@ -7429,7 +7429,7 @@ function requestIPhoneMicPermissionAgain() {
   }
 }
 
-// Trigger Joining Flow with Safari iOS Microphone Hardware Activation
+// Trigger Joining Flow with Simple Boolean Hardware Permission Prompts for iPhone Safari
 function triggerJoinMeetingFlow(meetingId) {
   const meetings = getMeetingsFromStorage();
   const m = meetings.find(x => x.id === meetingId);
@@ -7447,9 +7447,9 @@ function triggerJoinMeetingFlow(meetingId) {
   logAudioDebug("Requesting mobile microphone & camera permissions for Safari...", { meetingId });
   showToast("Activating Microphone & Camera... 🎙️");
 
-  // Prompt mobile browser for Microphone & Camera permissions on parent gesture
+  // Simple boolean constraints for 100% iPhone Safari Microphone & Camera prompt
   if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-    navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }, video: true })
+    navigator.mediaDevices.getUserMedia({ audio: true, video: true })
       .then(stream => {
         logAudioDebug("Parent window Microphone & Camera permission GRANTED!");
         launchLiveMeetingRoom(m, stream);

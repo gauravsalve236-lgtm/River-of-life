@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v103-VERSION-91-RESTORED-MIC-CAM-FIX';
+const CACHE_NAME = 'river-of-life-cache-v104-SIMPLE-BOOLEAN-SAFARI-MIC-CAM-PROMPT';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
