@@ -4753,34 +4753,35 @@ input, textarea, select, [contenteditable="true"] {
 
 .splash-logo-wrapper {
   position: relative;
-  width: 72px;
-  height: 72px;
-  margin-bottom: 16px;
+  width: 124px;
+  height: 124px;
+  margin-bottom: 22px;
 }
 
 .splash-logo {
   width: 100%;
   height: 100%;
-  border-radius: 18px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  border-radius: 28px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
   animation: floatLogo 4s ease-in-out infinite;
   position: relative;
   z-index: 2;
   object-fit: contain;
-  background: #ffffff;
-  padding: 4px;
-  border: 1.5px solid rgba(229, 168, 59, 0.5);
+  background: transparent !important;
+  padding: 0 !important;
+  border: none !important;
+  filter: drop-shadow(0 8px 22px rgba(0, 0, 0, 0.45));
 }
 
 .splash-logo-glow {
   position: absolute;
-  top: -15px;
-  left: -15px;
-  right: -15px;
-  bottom: -15px;
-  background: radial-gradient(circle, rgba(229, 168, 59, 0.45) 0%, rgba(229, 168, 59, 0) 70%);
+  top: -20px;
+  left: -20px;
+  right: -20px;
+  bottom: -20px;
+  background: radial-gradient(circle, rgba(229, 168, 59, 0.55) 0%, rgba(229, 168, 59, 0) 70%);
   border-radius: 50%;
-  filter: blur(10px);
+  filter: blur(14px);
   animation: pulseGlow 3s ease-in-out infinite;
   z-index: 1;
 }
@@ -6156,13 +6157,14 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
 }
 
 .hero-brand-logo-img {
-  width: 90px;
-  height: 90px;
+  width: 104px;
+  height: 104px;
   object-fit: contain;
-  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.4));
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.95);
-  padding: 6px;
+  filter: drop-shadow(0 8px 22px rgba(0, 0, 0, 0.45));
+  border-radius: 22px;
+  background: transparent !important;
+  padding: 0 !important;
+  border: none !important;
 }
 
 @media (max-width: 480px) {
@@ -6171,8 +6173,8 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
     margin: 8px 12px 14px 12px;
   }
   .hero-brand-logo-img {
-    width: 72px;
-    height: 72px;
+    width: 86px;
+    height: 86px;
   }
   .hero-welcome-title {
     font-size: 19px;

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v88-THEME-CONTRAST-FIX';
+const CACHE_NAME = 'river-of-life-cache-v89-TRANSPARENT-BIG-LOGO';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
