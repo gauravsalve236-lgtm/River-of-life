@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v116-ANDROID-HARDWARE-PERMISSION-PROMPT-BANNER-FIX';
+const CACHE_NAME = 'river-of-life-cache-v117-FIX-HTML-SYNTAX-FREEZE-AND-ANDROID-PERMISSIONS';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
