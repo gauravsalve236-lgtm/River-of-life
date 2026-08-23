@@ -4730,8 +4730,6 @@ function setupEventListeners() {
 function openDrawer(id) {
   const overlay = document.getElementById(id);
   if (overlay) {
-    overlay.style.display = "flex";
-    overlay.style.pointerEvents = "auto";
     overlay.classList.add("active");
   }
   if (id === "drawer-meet-audio-settings" && typeof enumerateAndPopulateAudioDevices === "function") {
@@ -4743,16 +4741,12 @@ function closeDrawer(id) {
   const overlay = document.getElementById(id);
   if (overlay) {
     overlay.classList.remove("active");
-    overlay.style.pointerEvents = "none";
-    overlay.style.display = "none";
   }
 }
 
 function closeAllDrawers() {
   document.querySelectorAll(".drawer-overlay").forEach(overlay => {
     overlay.classList.remove("active");
-    overlay.style.pointerEvents = "none";
-    overlay.style.display = "none";
   });
   document.querySelectorAll(".verse-row").forEach(v => v.classList.remove("selected-pulse"));
 }
@@ -4765,8 +4759,6 @@ window.closeAllDrawers = closeAllDrawers;
 function openModal(id) {
   const overlay = document.getElementById(id);
   if (overlay) {
-    overlay.style.display = "flex";
-    overlay.style.pointerEvents = "auto";
     overlay.classList.add("active");
     if (id === "modal-card-share") resetCardCreatorModal();
     if (id === "modal-audio-settings") toggleVoiceDropdownVisibility();
@@ -4777,8 +4769,6 @@ window.closeModal = function(id) {
   const overlay = document.getElementById(id);
   if (overlay) {
     overlay.classList.remove("active");
-    overlay.style.pointerEvents = "none";
-    overlay.style.display = "none";
   }
 };
 function closeModal(id) {

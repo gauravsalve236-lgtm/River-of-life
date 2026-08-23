@@ -23,6 +23,19 @@
   display: none !important;
 }
 
+/* Drawer & Modal Overlay Display & Pointer Control */
+.drawer-overlay,
+.meeting-modal-overlay {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+.drawer-overlay.active,
+.meeting-modal-overlay.active {
+  display: flex !important;
+  pointer-events: auto !important;
+}
+
 /* Theme 1: River Midnight Sanctuary (Dark Mode - Default) */
 .ios-theme-dark {
   --bg: #071d20;           /* Deep Ocean Cyan-Teal Slate */
