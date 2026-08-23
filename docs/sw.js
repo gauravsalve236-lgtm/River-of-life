@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v114-OPPO-COLOROS-SYSTEM-HARDWARE-PERMISSION-TRIGGER';
+const CACHE_NAME = 'river-of-life-cache-v115-OPPO-CHROME-FORCE-UNMUTED-AUDIO-VIDEO-FIX';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

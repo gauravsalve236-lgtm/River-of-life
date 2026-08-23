@@ -7445,8 +7445,8 @@ function triggerJoinMeetingFlow(meetingId) {
   const meetingIdSlug = (m && m.id) ? m.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
   const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
   
-  // Best Responsive Grid View, Minimal 5 Toolbar Buttons (mic, cam, share, hand, leave)
-  const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&speaker=true&autojoin=true&p2p=true&codec=vp8&layout=grid&grid=1&mesh=true&aspect=16:9&name=${encodeURIComponent(uniqueParticipantName)}&buttons=mic,cam,share,hand,leave&topbar=false&header=false&logo=false&survey=false&redirect=false&invite=false&welcome=false&chat=false&settings=false&theme=dark`;
+  // Best Responsive Grid View, Minimal 5 Toolbar Buttons (mic, cam, share, hand, leave), 100% Force Unmuted Audio & Video
+  const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=1&video=1&mic=1&cam=1&muted=0&sound=1&speaker=1&autojoin=1&p2p=1&codec=vp8&layout=grid&grid=1&mesh=true&aspect=16:9&name=${encodeURIComponent(uniqueParticipantName)}&buttons=mic,cam,share,hand,leave&topbar=false&header=false&logo=false&survey=false&redirect=false&invite=false&welcome=false&chat=false&settings=false&theme=dark`;
 
   logAudioDebug("Join meeting flow initiated...", { meetingId, roomUrl });
   showToast("Opening Live Video Meeting Room... 🎙️📹");
@@ -7501,7 +7501,7 @@ function launchLiveMeetingRoom(meeting, customRoomUrl) {
     const meetingIdSlug = (meeting && meeting.id) ? meeting.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
     const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
     
-    const roomUrl = customRoomUrl || `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&speaker=true&autojoin=true&p2p=true&codec=vp8&layout=grid&grid=1&mesh=true&aspect=16:9&name=${encodeURIComponent(uniqueParticipantName)}&buttons=mic,cam,share,hand,leave&topbar=false&header=false&logo=false&survey=false&redirect=false&invite=false&welcome=false&chat=false&settings=false&theme=dark`;
+    const roomUrl = customRoomUrl || `https://p2p.mirotalk.com/join/${roomSlug}?audio=1&video=1&mic=1&cam=1&muted=0&sound=1&speaker=1&autojoin=1&p2p=1&codec=vp8&layout=grid&grid=1&mesh=true&aspect=16:9&name=${encodeURIComponent(uniqueParticipantName)}&buttons=mic,cam,share,hand,leave&topbar=false&header=false&logo=false&survey=false&redirect=false&invite=false&welcome=false&chat=false&settings=false&theme=dark`;
 
     // Ensure screen lock overlay displays with max z-index
     const roomModal = document.getElementById("modal-live-meeting");
