@@ -7556,8 +7556,8 @@ function launchLiveMeetingRoom(meeting, stream) {
       const meetingIdSlug = (meeting && meeting.id) ? meeting.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
       const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
       
-      // buttons=false removes tiny iframe buttons so app's large native buttons control the call
-      const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&speaker=true&autojoin=true&p2p=true&codec=opus&layout=grid&grid=1&name=${encodeURIComponent(loggedIn)}&buttons=false&topbar=false&header=false&logo=false&survey=false&redirect=false&theme=dark`;
+      // Clean WebRTC Room URL: EXACT 5 BUTTONS ONLY (mic, camera, desktop, raisehand, hangup) & Direct Join
+      const roomUrl = `https://meet.jit.si/${roomSlug}#config.prejoinPageEnabled=false&config.prejoinConfig.enabled=false&config.startWithAudioMuted=false&config.startWithVideoMuted=false&config.requireDisplayName=false&config.toolbarButtons=["microphone","camera","desktop","raisehand","hangup"]&interfaceConfig.TOOLBAR_BUTTONS=["microphone","camera","desktop","raisehand","hangup"]&interfaceConfig.SHOW_JITSI_WATERMARK=false&interfaceConfig.SHOW_WATERMARK_FOR_GUESTS=false&interfaceConfig.MOBILE_APP_PROMO=false&userInfo.displayName=${encodeURIComponent(loggedIn)}`;
 
       jitsiCont.innerHTML = `
         <iframe 
@@ -7571,7 +7571,7 @@ function launchLiveMeetingRoom(meeting, stream) {
         </iframe>
       `;
 
-      logAudioDebug("Native WebRTC Room iframe mounted with active microphone hardware access.", { roomUrl });
+      logAudioDebug("Verified WebRTC Room iframe mounted with active microphone & 5 toolbar buttons.", { roomUrl });
     }
 
     enumerateAndPopulateAudioDevices();

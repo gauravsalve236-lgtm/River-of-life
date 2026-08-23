@@ -2310,7 +2310,7 @@
       <div class="meeting-room-container" style="position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; box-sizing: border-box; background: #090d16;">
         
         <!-- Clean Navigation Header -->
-        <div class="meeting-room-topbar" style="height: 52px; min-height: 52px; flex-shrink: 0; background: rgba(15, 23, 42, 0.95); border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: space-between; padding: 0 14px; z-index: 100; box-sizing: border-box;">
+        <div class="meeting-room-topbar" style="height: 50px; min-height: 50px; flex-shrink: 0; background: rgba(15, 23, 42, 0.98); border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: space-between; padding: 0 14px; z-index: 100; box-sizing: border-box;">
           <div style="display: flex; align-items: center; gap: 8px; overflow: hidden; flex: 1;">
             <span style="background: rgba(34, 197, 94, 0.2); border: 1.5px solid #22c55e; color: #4ade80; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 14px; display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
               <span style="width: 8px; height: 8px; background: #22c55e; border-radius: 50%; display: inline-block;"></span> LIVE PRAYER
@@ -2318,7 +2318,7 @@
             <h3 id="meeting-room-title-display" style="font-family: var(--font-ui); font-size: 14px; font-weight: 800; color: #fff; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">River of Life Meeting</h3>
           </div>
           <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
-            <button id="btn-meeting-leave-top" onclick="exitLiveMeetingRoom()" style="padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 800; background: linear-gradient(135deg, #dc2626, #ef4444); border: none; color: #fff; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 14px rgba(239,68,68,0.4);" title="Leave Meeting">
+            <button id="btn-meeting-leave-top" onclick="exitLiveMeetingRoom()" style="padding: 7px 14px; border-radius: 18px; font-size: 12px; font-weight: 800; background: linear-gradient(135deg, #dc2626, #ef4444); border: none; color: #fff; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 14px rgba(239,68,68,0.4);" title="Leave Meeting">
               <span>🚪 Leave Meeting / सभा सोडा</span>
             </button>
           </div>
@@ -2326,52 +2326,7 @@
 
         <!-- Video Conference Stage Container -->
         <div id="river-native-meeting-stage" style="flex: 1; width: 100%; min-height: 0; position: relative; overflow: hidden; display: flex; flex-direction: column; background: #090d16; box-sizing: border-box;">
-          
           <div id="meeting-jitsi-container" style="display: block; width: 100%; height: 100%; position: absolute; inset: 0; z-index: 5;"></div>
-
-          <!-- Explicit Mobile Microphone Activation Banner -->
-          <div id="river-mic-permission-banner" style="display: flex; position: absolute; top: 14px; left: 50%; transform: translateX(-50%); z-index: 50; width: 92%; max-width: 400px; background: rgba(15, 23, 42, 0.96); border: 1.5px solid rgba(229, 168, 59, 0.6); padding: 12px 16px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.6); backdrop-filter: blur(10px); flex-direction: column; align-items: center; text-align: center;">
-            <div style="font-size: 13px; font-weight: 800; color: #ffd369; margin-bottom: 4px;">🎙️ Enable Mobile Microphone / मायक्रोफोन चालू करा</div>
-            <div style="font-size: 11.5px; color: #cbd5e1; margin-bottom: 10px; line-height: 1.4;">Tap below to grant browser microphone permission so others can hear you in the meeting.</div>
-            <button onclick="requestMobileMicPermissionExplicitly()" style="width: 100%; padding: 11px; border-radius: 12px; background: linear-gradient(135deg, #e5a83b, #d97706); border: none; color: #1e1b4b; font-size: 13px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 12px rgba(229, 168, 59, 0.35);">
-              🎙️ Allow Microphone Access / मायक्रोफोन परवानगी द्या
-            </button>
-          </div>
-        </div>
-
-        <!-- LARGE, EASY-TO-READ NATIVE IN-APP BOTTOM CONTROL BAR -->
-        <div class="river-native-call-toolbar" style="height: 76px; min-height: 76px; flex-shrink: 0; background: rgba(15, 23, 42, 0.98); border-top: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: space-around; padding: 0 10px; z-index: 100; box-sizing: border-box;">
-          
-          <!-- Large Mic Button -->
-          <button id="btn-native-mic-toggle" onclick="toggleNativeMeetingMic()" style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 60px; height: 58px; border-radius: 16px; background: rgba(34, 197, 94, 0.2); border: 1.5px solid #22c55e; color: #4ade80; cursor: pointer; gap: 2px;">
-            <span id="native-mic-icon" style="font-size: 20px;">🎙️</span>
-            <span id="native-mic-text" style="font-size: 10px; font-weight: 800;">Mic On</span>
-          </button>
-
-          <!-- Large Camera Button -->
-          <button id="btn-native-cam-toggle" onclick="toggleNativeMeetingCam()" style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 60px; height: 58px; border-radius: 16px; background: rgba(34, 197, 94, 0.2); border: 1.5px solid #22c55e; color: #4ade80; cursor: pointer; gap: 2px;">
-            <span id="native-cam-icon" style="font-size: 20px;">📹</span>
-            <span id="native-cam-text" style="font-size: 10px; font-weight: 800;">Video</span>
-          </button>
-
-          <!-- Large Prayer Chat Button -->
-          <button id="btn-native-chat-toggle" onclick="openDrawer('drawer-meet-chat')" style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 60px; height: 58px; border-radius: 16px; background: rgba(255, 255, 255, 0.08); border: 1.5px solid rgba(255, 255, 255, 0.15); color: #fff; cursor: pointer; gap: 2px;">
-            <span style="font-size: 20px;">💬</span>
-            <span style="font-size: 10px; font-weight: 800;">Chat</span>
-          </button>
-
-          <!-- Large Members Button -->
-          <button id="btn-native-more-options" onclick="openDrawer('drawer-meet-participants')" style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 56px; height: 58px; border-radius: 16px; background: rgba(255, 255, 255, 0.08); border: 1.5px solid rgba(255, 255, 255, 0.15); color: #fff; cursor: pointer; gap: 2px;">
-            <span style="font-size: 20px;">👥</span>
-            <span style="font-size: 10px; font-weight: 800;">Members</span>
-          </button>
-
-          <!-- Big Red Leave Meeting Button -->
-          <button id="btn-native-leave-bottom" onclick="exitLiveMeetingRoom()" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 14px; height: 58px; border-radius: 16px; background: linear-gradient(135deg, #dc2626, #ef4444); border: none; color: #fff; cursor: pointer; gap: 2px; box-shadow: 0 4px 14px rgba(239,68,68,0.4);">
-            <span style="font-size: 18px;">🚪</span>
-            <span style="font-size: 11px; font-weight: 800; white-space: nowrap;">Leave Meeting</span>
-          </button>
-
         </div>
 
       </div>
@@ -3041,7 +2996,7 @@
     </div>
 
   <!-- App Main Logic (Cache-Busted for Version 83 Extended Splash Verse & Logo Theme) -->
-  <script src="app.js?v=92_LARGE_NATIVE_CALL_BAR"></script>
+  <script src="app.js?v=94_DIRECT_JOIN_5_BUTTONS"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 4.5s no matter what

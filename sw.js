@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v92-LARGE-NATIVE-CALL-BAR';
+const CACHE_NAME = 'river-of-life-cache-v94-DIRECT-JOIN-5-BUTTONS';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
