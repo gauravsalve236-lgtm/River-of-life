@@ -7500,7 +7500,7 @@ function toggleNativeMeetingCam() {
   }
 }
 
-// Fullscreen Native In-App Live Meeting Room Entry
+// Fullscreen Native In-App Live Meeting Room Entry (Unlimited Duration, No App Downloads Required)
 function launchLiveMeetingRoom(meeting, stream) {
   try {
     const loggedIn = (state && state.currentUser) ? state.currentUser.username : "Member";
@@ -7520,13 +7520,6 @@ function launchLiveMeetingRoom(meeting, stream) {
       document.body.classList.add("meeting-modal-open");
     }
     
-    // Check if mic permission banner should be shown
-    const micBanner = document.getElementById("river-mic-permission-banner");
-    if (micBanner) {
-      // Hide banner if stream is active, show if permissions needed
-      micBanner.style.display = stream ? "none" : "flex";
-    }
-
     // Setup room title
     const titleEl = document.getElementById("meeting-room-title-display");
     if (titleEl && meeting && meeting.title) {
@@ -7549,14 +7542,14 @@ function launchLiveMeetingRoom(meeting, stream) {
       isHost: isHost
     };
 
-    // Load Streamlined WebRTC Room with Active Mobile Microphone & Large In-App Control Bar
+    // Load Unlimited WebRTC Room: EXACT 5 BUTTONS ONLY (mic, cam, share, hand, leave) & No App Downloads Needed
     const jitsiCont = document.getElementById("meeting-jitsi-container");
     if (jitsiCont) {
       jitsiCont.style.display = "block";
       const meetingIdSlug = (meeting && meeting.id) ? meeting.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
       const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
       
-      // Clean Mirotalk P2P WebRTC Room: EXACT 5 BUTTONS ONLY (mic, cam, share, hand, leave) & Safari iOS Audio
+      // Verified Unlimited WebRTC URL: autojoin=true, 5 buttons only, no 5-min limits, no app download popups
       const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&speaker=true&autojoin=true&p2p=true&codec=opus&layout=grid&grid=1&name=${encodeURIComponent(loggedIn)}&buttons=mic,cam,share,hand,leave&topbar=false&header=false&logo=false&survey=false&redirect=false&invite=false&welcome=false&theme=dark`;
 
       jitsiCont.innerHTML = `
@@ -7573,12 +7566,12 @@ function launchLiveMeetingRoom(meeting, stream) {
         </iframe>
       `;
 
-      logAudioDebug("Verified Mirotalk P2P Room iframe mounted with active microphone & 5 toolbar buttons.", { roomUrl });
+      logAudioDebug("Native Unlimited WebRTC Room iframe mounted with active microphone & 5 toolbar buttons.", { roomUrl });
     }
 
     enumerateAndPopulateAudioDevices();
     setTimeout(() => { unlockAndPlayRemoteAudio(); }, 1000);
-    showToast("Joined Live Room • Mic & Speaker Active 🎙️");
+    showToast("Joined Live Room • Mic & Video Active 🎙️");
   } catch (err) {
     logAudioDebug("launchLiveMeetingRoom notice:", err);
   }

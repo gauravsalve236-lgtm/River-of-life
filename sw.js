@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v97-SAFARI-IOS-MIC-PRESET';
+const CACHE_NAME = 'river-of-life-cache-v98-UNLIMITED-NO-APP-REQUIRED';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
