@@ -7366,49 +7366,6 @@ function generateICSFile(meeting) {
   showToast("Calendar File (.ics) downloaded!");
 }
 
-          <p style="margin: 0;"><b>Step 4:</b> Tap "Try Microphone Again" below!</p>
-        </div>
-
-        <button onclick="requestIPhoneMicPermissionAgain()" style="width: 100%; padding: 14px; border-radius: 18px; background: linear-gradient(135deg, #e5a83b, #d97706); border: none; color: #1e1b4b; font-size: 15px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 14px rgba(229,168,59,0.4); margin-bottom: 10px;">
-          🎙️ Try Microphone Again / पुन्हा प्रयत्न करा
-        </button>
-        <button onclick="closeIPhoneMicGuideModal()" style="width: 100%; padding: 10px; border-radius: 14px; background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #94a3b8; font-size: 13px; font-weight: 600; cursor: pointer;">
-          Close & Continue / पुढे जा
-        </button>
-      </div>
-    `;
-    document.body.appendChild(guide);
-  }
-  guide.style.display = "flex";
-}
-
-function closeIPhoneMicGuideModal() {
-  const guide = document.getElementById("modal-iphone-mic-guide");
-  if (guide) guide.style.display = "none";
-}
-
-function requestIPhoneMicPermissionAgain() {
-  closeIPhoneMicGuideModal();
-  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-    navigator.mediaDevices.getUserMedia({ audio: true, video: true })
-      .then(stream => {
-        showToast("Microphone & Camera Granted! 🎙️📹");
-        if (activeMeetingSession && activeMeetingSession.meetingId) {
-          launchLiveMeetingRoom({ id: activeMeetingSession.meetingId }, stream);
-        } else {
-          launchLiveMeetingRoom({ id: 1, title: 'River of Life Live Fellowship' }, stream);
-        }
-      })
-      .catch(err => {
-        console.warn("Retried getUserMedia notice:", err);
-        showToast("Please tap Allow when Safari prompts for Microphone 🎙️");
-        openMeetingInSafariDirectly();
-      });
-  } else {
-    openMeetingInSafariDirectly();
-  }
-}
-
 // Trigger Joining Flow (Backup 2323 Verified Engine)
 function triggerJoinMeetingFlow(meetingId) {
   const meetings = getMeetingsFromStorage();

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v106-BACKUP-2323-MEETING-REVERT';
+const CACHE_NAME = 'river-of-life-cache-v107-CLEAN-BACKUP-2323-MEETING-PURGED-EXTRA-POPUPS';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
