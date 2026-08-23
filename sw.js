@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v102-IPHONE-SAFARI-MIC-GUIDE-PROMPT';
+const CACHE_NAME = 'river-of-life-cache-v103-VERSION-91-RESTORED-MIC-CAM-FIX';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
