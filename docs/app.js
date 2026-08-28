@@ -2149,8 +2149,8 @@ function startSpeechNarration() {
   document.getElementById("floating-audio-playbar").classList.add("active");
 
   const langCode = (state.translation === "eng") ? "en-IN" : "hi-IN";
-  const voiceSelect = document.getElementById("audio-narrator-gender-select");
-  const selectedVoiceId = voiceSelect ? voiceSelect.value : (langCode === "en-IN" ? "ratan" : "shubh");
+  const voiceSelect = document.getElementById("reader-inline-voice-select") || document.getElementById("audio-narrator-gender-select");
+  const selectedVoiceId = state.sarvamVoice || (voiceSelect ? voiceSelect.value : (langCode === "en-IN" ? "ratan" : "shubh")) || "shubh";
 
   if (window.SarvamTTS && window.SarvamTTS.queue) {
     window.SarvamTTS.queue.setListeners({
