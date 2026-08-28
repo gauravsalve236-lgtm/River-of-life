@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v84-SARVAM-BULBUL-V3-INDIAN-VOICE';
+const CACHE_NAME = 'river-of-life-cache-v85-SARVAM-VOICE-SETTINGS-UI';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

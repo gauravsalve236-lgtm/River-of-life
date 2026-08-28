@@ -3757,6 +3757,13 @@ function setupEventListeners() {
   document.getElementById("playbar-btn-play").addEventListener("click", togglePlaybarSpeech);
   document.getElementById("playbar-btn-close-widget").addEventListener("click", stopSpeechNarration);
   
+  const playbarVoiceBtn = document.getElementById("playbar-btn-voice-select");
+  if (playbarVoiceBtn) {
+    playbarVoiceBtn.addEventListener("click", () => {
+      openModal("modal-audio-settings");
+    });
+  }
+
   const speedPillBtn = document.getElementById("playbar-btn-speed");
   if (speedPillBtn) {
     speedPillBtn.addEventListener("click", () => {
@@ -3812,13 +3819,26 @@ function setupEventListeners() {
 
   // Sarvam API Key input listener in Settings Modal
   const sarvamKeyInput = document.getElementById("sarvam-api-key-input");
+  const keyStatusBadge = document.getElementById("sarvam-key-status-badge");
   if (sarvamKeyInput) {
-    sarvamKeyInput.value = (window.SarvamTTS && window.SarvamTTS.config) ? window.SarvamTTS.config.getApiKey() : (state.sarvamApiKey || "");
+    const currentKey = (window.SarvamTTS && window.SarvamTTS.config) ? window.SarvamTTS.config.getApiKey() : (state.sarvamApiKey || "");
+    sarvamKeyInput.value = currentKey;
+    if (keyStatusBadge) {
+      keyStatusBadge.textContent = currentKey ? "Key Configured" : "Key Needed";
+      keyStatusBadge.style.background = currentKey ? "rgba(34,197,94,0.15)" : "rgba(239,68,68,0.15)";
+      keyStatusBadge.style.color = currentKey ? "#22c55e" : "#ef4444";
+    }
+
     sarvamKeyInput.addEventListener("input", (e) => {
       const val = e.target.value.trim();
       state.sarvamApiKey = val;
       if (window.SarvamTTS && window.SarvamTTS.config) {
         window.SarvamTTS.config.setApiKey(val);
+      }
+      if (keyStatusBadge) {
+        keyStatusBadge.textContent = val ? "Key Configured" : "Key Needed";
+        keyStatusBadge.style.background = val ? "rgba(34,197,94,0.15)" : "rgba(239,68,68,0.15)";
+        keyStatusBadge.style.color = val ? "#22c55e" : "#ef4444";
       }
       saveStateToLocalStorage();
     });
@@ -3834,6 +3854,7 @@ function setupEventListeners() {
         window.SarvamTTS.queue.setOptions({ speaker: state.sarvamVoice });
       }
       saveStateToLocalStorage();
+      showToast(`Selected Voice: ${e.target.options[e.target.selectedIndex].text.split('(')[0]}`);
     });
   }
   

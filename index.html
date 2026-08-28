@@ -8,7 +8,7 @@
   <script>
     // Force immediate hard purge of all stale Service Workers and CacheStorage
     (function() {
-      const CURRENT_VER = "v84_SARVAM_BULBUL_V3_INDIAN_VOICE";
+      const CURRENT_VER = "v85_SARVAM_VOICE_SETTINGS_UI";
       if (localStorage.getItem("rol_app_ver") !== CURRENT_VER) {
         localStorage.setItem("rol_app_ver", CURRENT_VER);
         if ('serviceWorker' in navigator) {
@@ -44,8 +44,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   
-  <!-- Main Stylesheet (Cache-Busted for Version 84 Sarvam Bulbul V3 Indian Voice) -->
-  <link rel="stylesheet" href="index.css?v=84_SARVAM_BULBUL_V3_INDIAN_VOICE">
+  <!-- Main Stylesheet (Cache-Busted for Version 85 Sarvam Voice Settings UI) -->
+  <link rel="stylesheet" href="index.css?v=85_SARVAM_VOICE_SETTINGS_UI">
 
   <!-- Official LiveKit WebRTC Client SDK -->
   <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.0.8/dist/livekit-client.umd.min.js"></script>
@@ -1351,13 +1351,12 @@
                 <div class="settings-card-group margin-top" style="padding: 20px; border-top: 1px solid var(--border); background: var(--bg-content);">
                   <h4 class="settings-group-label" style="font-size: 13px; font-weight: 700; text-transform: uppercase; margin-bottom: 12px; color: var(--primary);">Preferences</h4>
                   
-                  <div class="settings-form-row" style="margin-bottom: 12px;">
-                    <label for="you-select-translation">Default Translation</label>
-                    <select id="you-select-translation" class="dropdown-selector" style="max-width: 180px;">
-                      <option value="mar">मराठी (MARVBSI)</option>
-                      <option value="eng">English (KJV)</option>
-                      <option value="parallel">Parallel Mode</option>
-                    </select>
+                  <div class="settings-action-row" style="margin-top: 16px; border-top: 1px solid var(--border); padding-top: 12px; display: flex; justify-content: space-between; align-items: center;">
+                    <div class="action-desc">
+                      <span style="font-weight: 700; font-size: 13.5px; color: var(--text);">🎙️ Sarvam AI Narration Voice</span>
+                      <p style="font-size: 11px; color: var(--text-muted); margin: 2px 0 0 0;">Select Indian voice (Ratan, Shubh) & setup API Key</p>
+                    </div>
+                    <button onclick="openModal('modal-audio-settings')" class="btn-primary-mini" style="background: var(--primary); color: #fff; border: none; padding: 6px 14px; border-radius: 8px; font-weight: 700; cursor: pointer;">Voice Settings</button>
                   </div>
 
                   <div class="settings-action-row" style="margin-top: 16px; border-top: 1px solid var(--border); padding-top: 12px;">
@@ -1429,7 +1428,8 @@
           <button id="playbar-btn-next" class="playbar-control-btn" aria-label="Next Verse" title="Next Verse">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
           </button>
-          <button id="playbar-btn-speed" class="playbar-speed-pill" title="Playback Speed">1.0x</button>
+          <button id="playbar-btn-voice-select" class="playbar-speed-pill" title="Change Indian Narrator Voice" style="background: rgba(229, 168, 59, 0.2); color: var(--text); border: 1px solid rgba(229, 168, 59, 0.4); font-weight: 800;">🎙️ Voice</button>
+          <button id="playbar-btn-speed" class="playbar-speed-pill" title="Playback Speed">0.92x</button>
           <button id="playbar-btn-close-widget" class="playbar-control-btn close" aria-label="Close Player">&times;</button>
         </div>
         
@@ -1499,6 +1499,12 @@
               <button class="spacing-btn" data-height="1.8">Normal</button>
               <button class="spacing-btn" data-height="2.1">Spacious</button>
             </div>
+          </div>
+          <div class="setting-item-row" style="margin-top: 10px; padding-top: 12px; border-top: 1px solid var(--border);">
+            <label>Bible Voice</label>
+            <button onclick="closeDrawer('drawer-text-settings'); openModal('modal-audio-settings');" style="background: var(--pill-bg); border: 1px solid var(--border); color: var(--primary); padding: 8px 14px; border-radius: 12px; font-size: 12.5px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+              🎙️ Sarvam Voice Settings
+            </button>
           </div>
         </div>
       </div>
@@ -1688,80 +1694,71 @@
     <div id="modal-audio-settings" class="drawer-overlay">
       <div class="ios-drawer-sheet">
         <div class="drawer-header-row">
-          <h3>Narration Settings</h3>
+          <div class="grabber-bar"></div>
+          <h3 style="display: flex; align-items: center; gap: 8px;">🎙️ Sarvam Voice Narration</h3>
           <button class="close-drawer-btn" id="btn-close-audio-settings">&times;</button>
         </div>
-        <div class="drawer-body-settings">
-          <div class="setting-item-row">
-            <label>Speech Speed</label>
-            <div class="slider-wrapper">
-              <input type="range" id="tts-speed-slider" min="0.75" max="1.50" step="0.02" value="0.92" class="speed-slider">
-              <span id="tts-speed-val">0.92x</span>
-            </div>
-          </div>
-          <div class="setting-item-row" id="audio-narrator-gender-row">
-            <label>Indian Narrator Voice</label>
-            <select id="audio-narrator-gender-select" class="dropdown-selector" style="background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 4px;">
-              <option value="ratan" selected>🧔 Ratan (Indian Male - Mature & Spiritual)</option>
-              <option value="shubh">🕊️ Shubh (Indian Male - Calm & Devotional)</option>
+        <div class="drawer-body-settings" style="display: flex; flex-direction: column; gap: 14px; padding: 16px 20px;">
+          
+          <!-- Voice Selector -->
+          <div class="setting-item-row" id="audio-narrator-gender-row" style="flex-direction: column; align-items: stretch; gap: 6px;">
+            <label style="font-weight: 700; font-size: 13.5px; color: var(--text);">Select Indian Voice / आवाज निवडा</label>
+            <select id="audio-narrator-gender-select" class="dropdown-selector" style="background: var(--bg); color: var(--text); border: 1.5px solid var(--primary); border-radius: 10px; padding: 10px; font-size: 13px; font-weight: 700; width: 100%;">
+              <option value="ratan" selected>🧔 Ratan (Indian Male - Mature & Spiritual • English)</option>
+              <option value="shubh">🕊️ Shubh (Indian Male - Calm & Devotional • Hindi/Marathi)</option>
               <option value="aditya">🎙️ Aditya (Indian Male - Deep & Warm)</option>
               <option value="aravind">📖 Aravind (Indian Male - Gentle Voice)</option>
               <option value="priya">👩 Priya (Indian Female - Warm & Soft)</option>
             </select>
           </div>
-          <div class="setting-item-row" id="audio-bg-music-row">
-            <label>Background Worship Music</label>
-            <select id="audio-bg-music-select" class="dropdown-selector" style="background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 4px;">
+
+          <!-- Speed Slider -->
+          <div class="setting-item-row" style="flex-direction: column; align-items: stretch; gap: 6px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <label style="font-weight: 700; font-size: 13px; color: var(--text);">Narration Pace / वाचन गती</label>
+              <span id="tts-speed-val" style="font-weight: 800; color: var(--primary); font-size: 13px;">0.92x (Recommended)</span>
+            </div>
+            <div class="slider-wrapper" style="width: 100%;">
+              <input type="range" id="tts-speed-slider" min="0.75" max="1.50" step="0.02" value="0.92" class="speed-slider" style="width: 100%;">
+            </div>
+            <span style="font-size: 11px; color: var(--text-muted);">Calm, measured devotional tempo for deep Bible meditation.</span>
+          </div>
+
+          <!-- Sarvam API Key -->
+          <div class="setting-item-row" id="audio-sarvam-key-row" style="flex-direction: column; align-items: stretch; gap: 6px; background: rgba(201, 138, 44, 0.08); padding: 12px; border-radius: 10px; border: 1px solid rgba(201, 138, 44, 0.3);">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <label style="font-weight: 700; font-size: 12.5px; color: var(--text);">Sarvam AI API Subscription Key</label>
+              <span id="sarvam-key-status-badge" style="font-size: 10px; font-weight: 800; color: #22c55e; background: rgba(34,197,94,0.15); padding: 2px 6px; border-radius: 8px;">Active</span>
+            </div>
+            <input type="password" id="sarvam-api-key-input" placeholder="Paste your Sarvam API Key here..." style="background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 12px; width: 100%; box-sizing: border-box;">
+            <span style="font-size: 10.5px; color: var(--text-muted);">Get your API key from <a href="https://sarvam.ai" target="_blank" style="color: var(--primary); text-decoration: underline;">sarvam.ai</a> dashboard.</span>
+          </div>
+
+          <!-- Background Music -->
+          <div class="setting-item-row" id="audio-bg-music-row" style="display: flex; justify-content: space-between; align-items: center;">
+            <label style="font-size: 13px; font-weight: 600;">Worship Music</label>
+            <select id="audio-bg-music-select" class="dropdown-selector" style="background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; font-size: 12px;">
               <option value="none" selected>None</option>
-              <option value="guitar">🎸 Soft Acoustic Worship Guitar</option>
-              <option value="piano">🎹 Peaceful Piano Instrumental</option>
-              <option value="ambient">🕊️ Ambient Holy Spirit Strings</option>
+              <option value="guitar">🎸 Acoustic Guitar</option>
+              <option value="piano">🎹 Peaceful Piano</option>
+              <option value="ambient">🕊️ Holy Spirit Strings</option>
             </select>
           </div>
-          <div class="setting-item-row" id="audio-bg-music-vol-row">
-            <label>Worship Music Vol</label>
-            <div class="slider-wrapper">
-              <input type="range" id="audio-bg-music-vol-slider" min="0" max="1" step="0.05" value="0.3" class="speed-slider">
-              <span id="audio-bg-music-vol-val">30%</span>
-            </div>
-          </div>
-          <div class="setting-item-row" id="audio-sleep-timer-row">
-            <label>Sleep Timer</label>
-            <select id="audio-sleep-timer-select" class="dropdown-selector" style="background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 4px;">
+
+          <!-- Sleep Timer -->
+          <div class="setting-item-row" id="audio-sleep-timer-row" style="display: flex; justify-content: space-between; align-items: center;">
+            <label style="font-size: 13px; font-weight: 600;">Sleep Timer</label>
+            <select id="audio-sleep-timer-select" class="dropdown-selector" style="background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; font-size: 12px;">
               <option value="off" selected>Off</option>
               <option value="15">15 Minutes</option>
               <option value="30">30 Minutes</option>
               <option value="60">60 Minutes</option>
             </select>
           </div>
-          <div class="setting-item-row" id="audio-sarvam-key-row">
-            <label>Sarvam AI Key</label>
-            <input type="password" id="sarvam-api-key-input" placeholder="Enter Sarvam API Key" style="background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; font-size: 12px; width: 60%; box-sizing: border-box;">
-          </div>
-          <div class="setting-item-row" id="audio-source-row" style="display: none;">
-            <label>Reader Type</label>
-            <select id="audio-source-select" class="dropdown-selector">
-              <option value="sarvam" selected>Sarvam AI Bulbul V3 Indian Voice</option>
-              <option value="human">Professional Human Voice</option>
-            </select>
-          </div>
-          <div class="setting-item-row" id="voice-select-row" style="display: none;">
-            <label>Speech Voice</label>
-            <select id="tts-voice-select" class="dropdown-selector">
-              <option value="default">Default System Voice</option>
-            </select>
-          </div>
-          <div class="setting-item-row" id="tone-select-row" style="display: none;">
-            <label>Voice Tone Style</label>
-            <select id="audio-tone-select" class="dropdown-selector">
-              <option value="normal">Normal Voice</option>
-              <option value="deep-bass" selected>Deep Studio Bass (Morgan Freeman Style)</option>
-              <option value="warm-resonance">Warm Resonance</option>
-            </select>
-          </div>
-          <button id="btn-start-tts-reading" class="btn-primary-block margin-top">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-            <span>Start Reading Aloud</span>
+
+          <button id="btn-start-tts-reading" class="btn-primary-block" style="margin-top: 8px; padding: 14px; border-radius: 12px; font-size: 14px; font-weight: 800; background: linear-gradient(135deg, var(--primary) 0%, #7d121b 100%); color: #ffffff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 14px rgba(158, 22, 34, 0.35);">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            <span>Start Sarvam AI Voice Narration</span>
           </button>
         </div>
       </div>
@@ -2765,7 +2762,19 @@
 
           <!-- Section 2: App Customization Settings -->
           <div style="display: flex; flex-direction: column; gap: 8px;">
-            <strong style="font-size: 11px; text-transform: uppercase; color: var(--primary); letter-spacing: 0.5px;">App Preferences & Translation</strong>
+            <strong style="font-size: 11px; text-transform: uppercase; color: var(--primary); letter-spacing: 0.5px;">App Preferences & Audio Voice</strong>
+
+            <!-- Sarvam AI Voice Settings Trigger -->
+            <button onclick="closeDrawer('drawer-account-settings'); openModal('modal-audio-settings');" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border-radius: 12px; background: linear-gradient(135deg, rgba(158, 22, 34, 0.08) 0%, rgba(201, 138, 44, 0.12) 100%); border: 1.5px solid rgba(201, 138, 44, 0.4); cursor: pointer; text-align: left;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="font-size: 20px;">🎙️</span>
+                <div>
+                  <div style="font-size: 13.5px; font-weight: 800; color: var(--text);">Sarvam AI Indian Voice Narration</div>
+                  <div style="font-size: 11px; color: var(--text-muted); font-weight: 500;">Select voice (Ratan, Shubh) & setup API key</div>
+                </div>
+              </div>
+              <span style="font-size: 11px; font-weight: 800; color: var(--primary); background: var(--pill-bg); padding: 4px 10px; border-radius: 12px; border: 1px solid var(--border);">Setup →</span>
+            </button>
 
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; border-radius: 12px; background: var(--bg); border: 1px solid var(--border);">
               <div style="display: flex; align-items: center; gap: 10px;">
@@ -2818,10 +2827,10 @@
     </div>
 
   <!-- Sarvam AI Bulbul V3 Indian Voice Narration Engine -->
-  <script src="sarvam-tts.js?v=84_SARVAM_BULBUL_V3_INDIAN_VOICE"></script>
+  <script src="sarvam-tts.js?v=85_SARVAM_VOICE_SETTINGS_UI"></script>
 
-  <!-- App Main Logic (Cache-Busted for Version 84 Sarvam Bulbul V3 Indian Voice) -->
-  <script src="app.js?v=84_SARVAM_BULBUL_V3_INDIAN_VOICE"></script>
+  <!-- App Main Logic (Cache-Busted for Version 85 Sarvam Voice Settings UI) -->
+  <script src="app.js?v=85_SARVAM_VOICE_SETTINGS_UI"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 4.5s no matter what
