@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v85-SARVAM-VOICE-SETTINGS-UI';
+const CACHE_NAME = 'river-of-life-cache-v86-INLINE-BIBLE-AUDIO-AND-CHAPTER-SELECTOR';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

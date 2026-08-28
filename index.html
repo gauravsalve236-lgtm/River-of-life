@@ -8,7 +8,7 @@
   <script>
     // Force immediate hard purge of all stale Service Workers and CacheStorage
     (function() {
-      const CURRENT_VER = "v85_SARVAM_VOICE_SETTINGS_UI";
+      const CURRENT_VER = "v86_INLINE_BIBLE_AUDIO_AND_CHAPTER_SELECTOR";
       if (localStorage.getItem("rol_app_ver") !== CURRENT_VER) {
         localStorage.setItem("rol_app_ver", CURRENT_VER);
         if ('serviceWorker' in navigator) {
@@ -44,8 +44,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   
-  <!-- Main Stylesheet (Cache-Busted for Version 85 Sarvam Voice Settings UI) -->
-  <link rel="stylesheet" href="index.css?v=85_SARVAM_VOICE_SETTINGS_UI">
+  <!-- Main Stylesheet (Cache-Busted for Version 86 Inline Bible Audio and Chapter Selector) -->
+  <link rel="stylesheet" href="index.css?v=86_INLINE_BIBLE_AUDIO_AND_CHAPTER_SELECTOR">
 
   <!-- Official LiveKit WebRTC Client SDK -->
   <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.0.8/dist/livekit-client.umd.min.js"></script>
@@ -475,10 +475,76 @@
           <!-- Column 2 (Center): Bible Scripture Pane -->
           <div class="reader-pane-left">
             <div class="verses-scroller" id="reader-scroll-container">
-              <div class="chapter-info-badge">
-                <h2 id="reader-chapter-title">शास्ते</h2>
-                <p id="reader-chapter-number">अध्याय १३</p>
+              
+              <!-- In-Page Bible Chapter Header & Sarvam Audio Controls -->
+              <div class="bible-chapter-control-header" style="max-width: 680px; margin: 0 auto 20px auto; background: var(--bg-content); border: 1px solid var(--border); border-radius: 18px; padding: 18px; box-shadow: var(--shadow-sm);">
+                <!-- Top Row: Book & Chapter Picker + Translation + Font Settings -->
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 14px; flex-wrap: wrap;">
+                  <!-- Large Clickable Book & Chapter Selector -->
+                  <button id="btn-reader-open-book-picker" class="reader-book-picker-btn" style="flex: 1; min-width: 180px; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 16px; border-radius: 12px; background: var(--pill-bg); border: 1.5px solid var(--border); color: var(--text); font-family: var(--font-ui); cursor: pointer; transition: all 0.2s ease;">
+                    <div style="display: flex; align-items: center; gap: 8px; text-align: left;">
+                      <span style="font-size: 20px;">📖</span>
+                      <div>
+                        <div id="inline-reader-book-name" style="font-size: 16px; font-weight: 800; color: var(--text); line-height: 1.2;">शास्ते १३</div>
+                        <span style="font-size: 11px; color: var(--primary); font-weight: 700;">Tap to select Book, Chapter & Verse ▾</span>
+                      </div>
+                    </div>
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                  </button>
+
+                  <!-- Translation Selector Trigger -->
+                  <button id="btn-reader-open-translation-picker" style="display: flex; align-items: center; gap: 6px; padding: 10px 14px; border-radius: 12px; background: var(--pill-bg); border: 1px solid var(--border); color: var(--text); font-size: 12.5px; font-weight: 700; cursor: pointer;">
+                    <span>🌐</span>
+                    <span id="inline-reader-translation-name">मराठी (BSI)</span>
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                  </button>
+
+                  <!-- Text Formatting Trigger -->
+                  <button id="btn-reader-open-text-settings" style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 12px; background: var(--pill-bg); border: 1px solid var(--border); color: var(--text); font-weight: 800; font-size: 15px; cursor: pointer;" title="Text & Display Settings">
+                    Aa
+                  </button>
+                </div>
+
+                <!-- Dedicated Sarvam AI Voice Narration Bar directly inside Chapter -->
+                <div class="reader-sarvam-audio-card" style="background: linear-gradient(135deg, rgba(158, 22, 34, 0.06) 0%, rgba(201, 138, 44, 0.10) 100%); border: 1.5px solid rgba(201, 138, 44, 0.35); border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <span style="font-size: 18px;">🎙️</span>
+                      <strong style="font-size: 13px; font-weight: 800; color: var(--text);">Sarvam AI Indian Voice Narration</strong>
+                    </div>
+                    <button id="btn-reader-sarvam-setup-modal" style="font-size: 11px; font-weight: 800; color: var(--primary); background: transparent; border: none; cursor: pointer; text-decoration: underline;">Voice Settings ⚙️</button>
+                  </div>
+
+                  <!-- Play Button & Voice Dropdown Row -->
+                  <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <!-- Primary Play/Listen Button -->
+                    <button id="btn-reader-inline-listen" class="btn-primary-block" style="flex: 1; min-width: 140px; margin: 0; padding: 10px 16px; border-radius: 10px; font-size: 13.5px; font-weight: 800; background: linear-gradient(135deg, var(--primary) 0%, #7d121b 100%); color: #ffffff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 3px 10px rgba(158, 22, 34, 0.3);">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" id="inline-play-icon-svg"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                      <span id="reader-inline-listen-text">Listen Chapter</span>
+                    </button>
+
+                    <!-- Voice Selector Dropdown directly on the page -->
+                    <div style="flex: 1; min-width: 160px;">
+                      <select id="reader-inline-voice-select" class="dropdown-selector" style="width: 100%; background: var(--bg); color: var(--text); border: 1.5px solid rgba(201, 138, 44, 0.5); border-radius: 10px; padding: 8px 10px; font-size: 12.5px; font-weight: 700;">
+                        <option value="ratan">🧔 Ratan (Indian Male - English)</option>
+                        <option value="shubh">🕊️ Shubh (Indian Male - Hindi/Marathi)</option>
+                        <option value="aditya">🎙️ Aditya (Deep & Warm)</option>
+                        <option value="aravind">📖 Aravind (Gentle Voice)</option>
+                        <option value="priya">👩 Priya (Warm & Soft)</option>
+                      </select>
+                    </div>
+
+                    <!-- Speed Selector -->
+                    <select id="reader-inline-speed-select" class="dropdown-selector" style="background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; font-size: 12px; font-weight: 700; max-width: 85px;">
+                      <option value="0.85">0.85x</option>
+                      <option value="0.92" selected>0.92x</option>
+                      <option value="1.0">1.00x</option>
+                      <option value="1.15">1.15x</option>
+                    </select>
+                  </div>
+                </div>
               </div>
+
               <div id="reader-verses" class="verses-text-layout">
                 <div class="loader-container">
                   <div class="ios-spinner"></div>
@@ -1510,16 +1576,24 @@
       </div>
     </div>
 
-    <!-- Book & Chapter Selector Drawer (Tecarta styled, list view on desktop) -->
+    <!-- Book & Chapter Selector Drawer (Tecarta styled, 3-step Book -> Chapter -> Verse) -->
     <div id="drawer-book-selector" class="drawer-overlay">
       <div class="ios-drawer-sheet full-height">
-        <div class="drawer-header-row">
+        <div class="drawer-header-row" style="border-bottom: none; padding-bottom: 4px;">
           <div class="grabber-bar"></div>
-          <h3 id="book-selector-header-title">Books</h3>
+          <h3 id="book-selector-header-title">Select Scripture</h3>
           <button class="close-drawer-btn">&times;</button>
         </div>
+
+        <!-- 3-Step Navigation Tabs -->
+        <div class="selector-steps-tabs" style="display: flex; gap: 8px; margin: 0 16px 12px 16px; background: var(--pill-bg); padding: 4px; border-radius: 12px; border: 1px solid var(--border);">
+          <button id="tab-step-books" class="sort-tab active" style="flex: 1; padding: 8px 6px; font-size: 12px; font-weight: 800; border-radius: 8px; border: none; cursor: pointer;">1. Book</button>
+          <button id="tab-step-chapters" class="sort-tab" style="flex: 1; padding: 8px 6px; font-size: 12px; font-weight: 800; border-radius: 8px; border: none; cursor: pointer;">2. Chapter</button>
+          <button id="tab-step-verses" class="sort-tab" style="flex: 1; padding: 8px 6px; font-size: 12px; font-weight: 800; border-radius: 8px; border: none; cursor: pointer;">3. Verse</button>
+        </div>
+
         <div class="drawer-book-selector-scroll">
-          <!-- Books Selection View -->
+          <!-- Step 1: Books Selection View -->
           <div id="selector-books-pane" class="selector-pane-view active">
             <div class="testament-block" id="section-ot-books">
               <h4 class="testament-heading">जुना करार (Old Testament)</h4>
@@ -1535,19 +1609,37 @@
             </div>
           </div>
           
-          <!-- Chapters selection view -->
+          <!-- Step 2: Chapters Selection View -->
           <div id="selector-chapters-pane" class="selector-pane-view">
-            <button id="btn-back-to-books" class="btn-back-link">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
-              <span id="selected-book-name-indicator">शास्ते</span>
-            </button>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <button id="btn-back-to-books" class="btn-back-link" style="margin: 0;">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                <span id="selected-book-name-indicator">शास्ते</span>
+              </button>
+              <span style="font-size: 11px; font-weight: 700; color: var(--text-muted);">Choose a chapter</span>
+            </div>
             <div id="chapters-number-grid" class="chapters-buttons-grid">
               <!-- Chapters list loads dynamically -->
             </div>
           </div>
+
+          <!-- Step 3: Verses Selection View -->
+          <div id="selector-verses-pane" class="selector-pane-view">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <button id="btn-back-to-chapters" class="btn-back-link" style="margin: 0;">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                <span id="selected-chapter-indicator">Chapter 13</span>
+              </button>
+              <button id="btn-open-whole-chapter" class="btn-primary-mini" style="font-size: 11px; padding: 6px 12px; border-radius: 8px;">Open Full Chapter</button>
+            </div>
+            <div id="verses-number-grid" class="chapters-buttons-grid">
+              <!-- Verses list loads dynamically -->
+            </div>
+          </div>
         </div>
+
         <!-- Sorting bar inside book selector footer -->
-        <div class="selector-sorting-footer">
+        <div class="selector-sorting-footer" id="selector-sorting-footer">
           <div class="sorting-tabs-capsule">
             <button id="btn-sort-traditional" class="sort-tab active">Traditional</button>
             <button id="btn-sort-alphabetical" class="sort-tab">Alphabetical</button>
@@ -2827,10 +2919,10 @@
     </div>
 
   <!-- Sarvam AI Bulbul V3 Indian Voice Narration Engine -->
-  <script src="sarvam-tts.js?v=85_SARVAM_VOICE_SETTINGS_UI"></script>
+  <script src="sarvam-tts.js?v=86_INLINE_BIBLE_AUDIO_AND_CHAPTER_SELECTOR"></script>
 
-  <!-- App Main Logic (Cache-Busted for Version 85 Sarvam Voice Settings UI) -->
-  <script src="app.js?v=85_SARVAM_VOICE_SETTINGS_UI"></script>
+  <!-- App Main Logic (Cache-Busted for Version 86 Inline Bible Audio and Chapter Selector) -->
+  <script src="app.js?v=86_INLINE_BIBLE_AUDIO_AND_CHAPTER_SELECTOR"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 4.5s no matter what

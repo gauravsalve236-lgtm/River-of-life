@@ -1362,6 +1362,26 @@ async function openReader(bookKey, chapterNum) {
   document.getElementById("nav-book-title").textContent = `${activeBookName} ${chapterNum}`;
   document.getElementById("reader-chapter-title").textContent = activeBookName;
   
+  // Sync In-Page Bible Chapter Header
+  const inlineBookNameEl = document.getElementById("inline-reader-book-name");
+  if (inlineBookNameEl) {
+    inlineBookNameEl.textContent = `${activeBookName} ${chapterNum}`;
+  }
+  const inlineTransEl = document.getElementById("inline-reader-translation-name");
+  if (inlineTransEl) {
+    if (state.translation === "eng") inlineTransEl.textContent = "English (NLT)";
+    else if (state.translation === "parallel") inlineTransEl.textContent = "Parallel";
+    else inlineTransEl.textContent = "मराठी (BSI)";
+  }
+  const inlineVoiceSelect = document.getElementById("reader-inline-voice-select");
+  if (inlineVoiceSelect) {
+    inlineVoiceSelect.value = state.sarvamVoice || (state.translation === "eng" ? "ratan" : "shubh");
+  }
+  const inlineSpeedSelect = document.getElementById("reader-inline-speed-select");
+  if (inlineSpeedSelect) {
+    inlineSpeedSelect.value = state.sarvamPace ? state.sarvamPace.toFixed(2) : "0.92";
+  }
+
   let subTitle = `अध्याय ${chapterNum}`;
   if (state.translation === "eng") subTitle = `Chapter ${chapterNum}`;
   else if (state.translation === "parallel") subTitle = `अध्याय ${chapterNum} • Chapter ${chapterNum}`;
@@ -1625,15 +1645,46 @@ function populateBookSelector() {
   });
 }
 
+let selectorTargetChapter = 1;
+
+function switchSelectorStep(step) {
+  const booksPane = document.getElementById("selector-books-pane");
+  const chaptersPane = document.getElementById("selector-chapters-pane");
+  const versesPane = document.getElementById("selector-verses-pane");
+  const sortingFooter = document.getElementById("selector-sorting-footer");
+
+  const tabBooks = document.getElementById("tab-step-books");
+  const tabChapters = document.getElementById("tab-step-chapters");
+  const tabVerses = document.getElementById("tab-step-verses");
+
+  [booksPane, chaptersPane, versesPane].forEach(p => p && p.classList.remove("active"));
+  [tabBooks, tabChapters, tabVerses].forEach(t => t && t.classList.remove("active"));
+
+  if (step === "books") {
+    if (booksPane) booksPane.classList.add("active");
+    if (tabBooks) tabBooks.classList.add("active");
+    if (sortingFooter) sortingFooter.style.display = "flex";
+  } else if (step === "chapters") {
+    if (chaptersPane) chaptersPane.classList.add("active");
+    if (tabChapters) tabChapters.classList.add("active");
+    if (sortingFooter) sortingFooter.style.display = "none";
+  } else if (step === "verses") {
+    if (versesPane) versesPane.classList.add("active");
+    if (tabVerses) tabVerses.classList.add("active");
+    if (sortingFooter) sortingFooter.style.display = "none";
+  }
+}
+
 function selectBookForChapterScreen(bookMeta) {
   selectorTargetBookMeta = bookMeta;
-  document.getElementById("selector-books-pane").classList.remove("active");
-  document.getElementById("selector-chapters-pane").classList.add("active");
+  switchSelectorStep("chapters");
   
   const displayBookName = (state.translation === "eng") ? bookMeta.engName : bookMeta.name;
-  document.getElementById("selected-book-name-indicator").textContent = displayBookName;
+  const bookIndicator = document.getElementById("selected-book-name-indicator");
+  if (bookIndicator) bookIndicator.textContent = displayBookName;
   
   const grid = document.getElementById("chapters-number-grid");
+  if (!grid) return;
   grid.innerHTML = "";
   
   for (let c = 1; c <= bookMeta.chaptersCount; c++) {
@@ -1641,10 +1692,51 @@ function selectBookForChapterScreen(bookMeta) {
     cBtn.className = "chapter-select-btn";
     cBtn.textContent = c;
     cBtn.addEventListener("click", () => {
-      closeAllDrawers();
-      openReader(bookMeta.filename.replace(".json", ""), c);
+      selectChapterForVerseScreen(bookMeta, c);
     });
     grid.appendChild(cBtn);
+  }
+}
+
+async function selectChapterForVerseScreen(bookMeta, chapterNum) {
+  selectorTargetBookMeta = bookMeta;
+  selectorTargetChapter = chapterNum;
+  switchSelectorStep("verses");
+
+  const displayBookName = (state.translation === "eng") ? bookMeta.engName : bookMeta.name;
+  const chapterIndicator = document.getElementById("selected-chapter-indicator");
+  if (chapterIndicator) chapterIndicator.textContent = `${displayBookName} ${chapterNum}`;
+
+  const openWholeBtn = document.getElementById("btn-open-whole-chapter");
+  if (openWholeBtn) {
+    openWholeBtn.onclick = () => {
+      closeAllDrawers();
+      openReader(bookMeta.filename.replace(".json", ""), chapterNum, 1);
+    };
+  }
+
+  const vGrid = document.getElementById("verses-number-grid");
+  if (!vGrid) return;
+  vGrid.innerHTML = `<div class="loader-container" style="grid-column: 1/-1;"><div class="ios-spinner"></div></div>`;
+
+  const bookKey = bookMeta.filename.replace(".json", "");
+  let bookData = (state.translation === "eng") ? await fetchBookDataEng(bookKey) : await fetchBookDataMr(bookKey);
+  if (!bookData) bookData = await fetchBookDataMr(bookKey);
+
+  vGrid.innerHTML = "";
+  const totalVerses = (bookData && bookData.chapters && bookData.chapters[chapterNum - 1]) 
+    ? bookData.chapters[chapterNum - 1].length 
+    : 30;
+
+  for (let v = 1; v <= totalVerses; v++) {
+    const vBtn = document.createElement("button");
+    vBtn.className = "chapter-select-btn";
+    vBtn.textContent = v;
+    vBtn.addEventListener("click", () => {
+      closeAllDrawers();
+      openReader(bookKey, chapterNum, v);
+    });
+    vGrid.appendChild(vBtn);
   }
 }
 
@@ -3616,11 +3708,104 @@ function setupEventListeners() {
     });
   }
 
+  // In-Page Bible Chapter Header & Controls
+  const btnInlineBookPicker = document.getElementById("btn-reader-open-book-picker");
+  if (btnInlineBookPicker) {
+    btnInlineBookPicker.addEventListener("click", () => {
+      openDrawer("drawer-book-selector");
+      switchSelectorStep("books");
+      populateBookSelector();
+    });
+  }
+
+  const btnInlineTransPicker = document.getElementById("btn-reader-open-translation-picker");
+  if (btnInlineTransPicker) {
+    btnInlineTransPicker.addEventListener("click", () => {
+      openDrawer("drawer-translation-selector");
+    });
+  }
+
+  const btnInlineTextSettings = document.getElementById("btn-reader-open-text-settings");
+  if (btnInlineTextSettings) {
+    btnInlineTextSettings.addEventListener("click", () => {
+      openDrawer("drawer-text-settings");
+    });
+  }
+
+  const btnInlineSarvamModal = document.getElementById("btn-reader-sarvam-setup-modal");
+  if (btnInlineSarvamModal) {
+    btnInlineSarvamModal.addEventListener("click", () => {
+      openModal("modal-audio-settings");
+    });
+  }
+
+  const btnInlineListen = document.getElementById("btn-reader-inline-listen");
+  if (btnInlineListen) {
+    btnInlineListen.addEventListener("click", () => {
+      if (audioState.isPlaying) {
+        togglePlaybarSpeech();
+      } else {
+        startSpeechNarration();
+      }
+    });
+  }
+
+  const inlineVoiceSelect = document.getElementById("reader-inline-voice-select");
+  if (inlineVoiceSelect) {
+    inlineVoiceSelect.addEventListener("change", (e) => {
+      state.sarvamVoice = e.target.value;
+      saveStateToLocalStorage();
+      const modalSelect = document.getElementById("audio-narrator-gender-select");
+      if (modalSelect) modalSelect.value = state.sarvamVoice;
+      if (window.SarvamTTS && window.SarvamTTS.queue) {
+        window.SarvamTTS.queue.setOptions({ speaker: state.sarvamVoice });
+      }
+      showToast(`Selected Voice: ${e.target.options[e.target.selectedIndex].text.split('(')[0]}`);
+    });
+  }
+
+  const inlineSpeedSelect = document.getElementById("reader-inline-speed-select");
+  if (inlineSpeedSelect) {
+    inlineSpeedSelect.addEventListener("change", (e) => {
+      const spd = parseFloat(e.target.value);
+      state.sarvamPace = spd;
+      audioState.speed = spd;
+      saveStateToLocalStorage();
+      const slider = document.getElementById("tts-speed-slider");
+      if (slider) slider.value = spd;
+      const valDisp = document.getElementById("tts-speed-val");
+      if (valDisp) valDisp.textContent = `${spd}x`;
+      if (window.SarvamTTS && window.SarvamTTS.queue && window.SarvamTTS.queue.isPlaying) {
+        window.SarvamTTS.queue.setOptions({ pace: spd });
+      }
+      showToast(`Narration speed set to ${spd}x`);
+    });
+  }
+
+  // 3-Step Book, Chapter, Verse selector step tabs
+  const tabStepBooks = document.getElementById("tab-step-books");
+  if (tabStepBooks) {
+    tabStepBooks.addEventListener("click", () => switchSelectorStep("books"));
+  }
+  const tabStepChapters = document.getElementById("tab-step-chapters");
+  if (tabStepChapters) {
+    tabStepChapters.addEventListener("click", () => {
+      if (selectorTargetBookMeta) switchSelectorStep("chapters");
+      else showToast("Please select a book first");
+    });
+  }
+  const tabStepVerses = document.getElementById("tab-step-verses");
+  if (tabStepVerses) {
+    tabStepVerses.addEventListener("click", () => {
+      if (selectorTargetBookMeta) switchSelectorStep("verses");
+      else showToast("Please select a book and chapter first");
+    });
+  }
+
   // Book select header trigger
   document.getElementById("btn-book-selector").addEventListener("click", () => {
     openDrawer("drawer-book-selector");
-    document.getElementById("selector-books-pane").classList.add("active");
-    document.getElementById("selector-chapters-pane").classList.remove("active");
+    switchSelectorStep("books");
     
     document.getElementById("btn-sort-traditional").classList.toggle("active", state.bookSort === "traditional");
     document.getElementById("btn-sort-alphabetical").classList.toggle("active", state.bookSort === "alphabetical");
@@ -3644,9 +3829,15 @@ function setupEventListeners() {
   });
   
   document.getElementById("btn-back-to-books").addEventListener("click", () => {
-    document.getElementById("selector-books-pane").classList.add("active");
-    document.getElementById("selector-chapters-pane").classList.remove("active");
+    switchSelectorStep("books");
   });
+
+  const btnBackToChapters = document.getElementById("btn-back-to-chapters");
+  if (btnBackToChapters) {
+    btnBackToChapters.addEventListener("click", () => {
+      switchSelectorStep("chapters");
+    });
+  }
   
   // Highlight pickers dots
   document.querySelectorAll(".dot-btn").forEach(dot => {
