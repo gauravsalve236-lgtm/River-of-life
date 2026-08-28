@@ -739,12 +739,11 @@ let state = {
   history: [],             // list of reading logs {ref, book, chapter, timestamp}
   streak: 1,               // daily consecutive streak counter
   userLikes: {},           // map of verse_ref -> liked boolean
-  userNotes: {},           // map of book_chapter_verse -> journal note string
-  audioTone: 'deep-bass',  // 'normal', 'deep-bass', 'warm-resonance'
-  audioSource: 'human',     // 'human' (streaming MP3), 'ai' (TTS), or 'elevenlabs' (API)
-  elevenLabsKey: ELEVENLABS_DEFAULT_KEY, // ElevenLabs API Key
-  elevenLabsVoice: 'kqVT88a5QfII1HNAEPTJ', // Declan Sage voice ID
-  quizPoints: 0,           // Total points earned
+  audioTone: 'warm-resonance',
+  audioSource: 'sarvam',     // 'sarvam' (Sarvam AI Bulbul V3 Indian Voice), 'human' (streaming MP3)
+  sarvamVoice: 'ratan',      // 'ratan' (Mature Spiritual English Indian Male), 'shubh' (Hindi/Marathi Male)
+  sarvamPace: 0.92,          // 0.92x peaceful Bible reading speed
+  sarvamApiKey: '',          // Optional Sarvam API key override
   quizHighscore: 0,        // High score in a single quiz session
   quizBadges: [],          // Unlocked badge IDs
   currentUser: null,       // Logged in user session ({ username, isPastor, email })
@@ -997,26 +996,9 @@ function loadStateFromLocalStorage() {
 
 function saveStateToLocalStorage() {
   localStorage.setItem("river_of_life_state_v2", JSON.stringify(state));
-  if (state.currentUser) {
-    try {
-      const users = JSON.parse(localStorage.getItem("river_of_life_users") || "[]");
-      const idx = users.findIndex(u => u.username.toLowerCase() === state.currentUser.username.toLowerCase());
-      if (idx !== -1) {
-        users[idx].bookmarks = state.bookmarks || [];
-        users[idx].highlights = state.highlights || {};
-        users[idx].userNotes = state.userNotes || {};
-        users[idx].quizPoints = state.quizPoints || 0;
-        users[idx].quizHighscore = state.quizHighscore || 0;
-        users[idx].quizBadges = state.quizBadges || [];
-        users[idx].createdVerseImages = state.createdVerseImages || [];
-        users[idx].churchName = state.currentUser.churchName || "";
-        users[idx].streak = state.streak || 2;
-        users[idx].photo = state.currentUser.photo || "";
-        localStorage.setItem("river_of_life_users", JSON.stringify(users));
-      }
-    } catch (e) {
-      console.error("Error saving user state:", e);
-    }
+  // Non-blocking Firestore sync for cloud persistence
+  if (state.currentUser && state.currentUser.uid) {
+    syncUserDataToFirestore(); // fire-and-forget; errors are caught inside
   }
 }
 
@@ -1932,7 +1914,7 @@ function fallbackToDirectPlay(mp3Url) {
 }
 
 /* ==========================================================================
-   Bilingual Narrator (TTS)
+   Sarvam AI Bulbul V3 Indian Voice Narrator (TTS)
    ========================================================================== */
 function startSpeechNarration() {
   closeModal("modal-audio-settings");
@@ -1942,7 +1924,12 @@ function startSpeechNarration() {
     audioPlayerInstance = null;
   }
   
-  speechSynthesis.cancel();
+  if (window.SarvamTTS && window.SarvamTTS.queue) {
+    window.SarvamTTS.queue.stop();
+  }
+  if (typeof speechSynthesis !== 'undefined') {
+    speechSynthesis.cancel();
+  }
 
   // Start background worship music if selected
   const bgMusicSelect = document.getElementById("audio-bg-music-select");
@@ -1975,9 +1962,8 @@ function startSpeechNarration() {
     const mp3Url = `https://www.wordproaudio.net/bibles/app/audio/28/${bookId}/${state.activeChapter}.mp3`;
     
     audioState.isPlaying = true;
-    audioState.speed = parseFloat(document.getElementById("tts-speed-slider").value);
+    audioState.speed = parseFloat(document.getElementById("tts-speed-slider")?.value || 0.92);
     
-    // Play directly without CORS or Web Audio filters to prevent browser playback block on iOS
     audioPlayerInstance = new Audio(mp3Url);
     audioPlayerInstance.playbackRate = audioState.speed;
     
@@ -2008,198 +1994,113 @@ function startSpeechNarration() {
     return;
   }
 
-  if (state.audioSource === "elevenlabs") {
-    const keyToUse = state.elevenLabsKey || ELEVENLABS_DEFAULT_KEY;
-    if (!keyToUse) {
-      showToast("Please enter ElevenLabs API Key in Settings");
-      closeAllDrawers();
-      window.location.hash = "#/you";
-      document.querySelectorAll(".profile-tab-btn").forEach(b => {
-        b.classList.toggle("active", b.dataset.tab === "you-settings");
-      });
-      document.querySelectorAll(".profile-tab-panel").forEach(panel => {
-        panel.classList.toggle("active", panel.id === "you-tab-content-you-settings");
-      });
-      renderYouProfile();
-      return;
-    }
-    
-    showToast("Generating ElevenLabs narration...");
-    audioState.isPlaying = true;
-    audioState.speed = parseFloat(document.getElementById("tts-speed-slider").value);
-    
-    document.getElementById("floating-audio-playbar").classList.add("active");
-    // Show spinner in playbar
-    document.getElementById("playbar-icon-svg").innerHTML = `
-      <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="38" stroke-dashoffset="19">
-        <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s" repeatCount="indefinite"/>
-      </circle>
-    `;
-    
-    const elements = document.querySelectorAll(".verse-row");
-    let versesList = [];
-    elements.forEach(el => {
-      let txt = el.dataset.text || "";
-      const cleanText = txt.replace(/[:;()[\]{}—•\-]/g, ' ').replace(/\s+/g, ' ').trim();
-      if (cleanText) versesList.push(cleanText);
-    });
-    const fullText = versesList.join(" ");
-    
-    // Use stable eleven_multilingual_v2 model for both English and Marathi/parallel 
-    // since legacy monolingual_v1 is deprecated/restricted on newer accounts
-    const modelId = "eleven_multilingual_v2";
-    
-    fetch(`https://api.elevenlabs.io/v1/text-to-speech/${state.elevenLabsVoice}`, {
-      method: "POST",
-      headers: {
-        "xi-api-key": keyToUse,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        text: fullText,
-        model_id: modelId,
-        voice_settings: {
-          stability: 0.5,
-          similarity_boost: 0.75
-        }
-      })
-    })
-    .then(async response => {
-      if (!response.ok) {
-        let errMsg = `Status ${response.status}`;
-        try {
-          const errData = await response.json();
-          if (errData && errData.detail && errData.detail.message) {
-            errMsg = errData.detail.message;
-          } else if (errData && errData.message) {
-            errMsg = errData.message;
-          }
-        } catch (_) {}
-        throw new Error(errMsg);
-      }
-      return response.blob();
-    })
-    .then(blob => {
-      if (!audioState.isPlaying) {
-        return;
-      }
-      
-      const audioUrl = URL.createObjectURL(blob);
-      audioPlayerInstance = new Audio(audioUrl);
-      audioPlayerInstance.playbackRate = audioState.speed;
-      
-      // Connect to Web Audio API context and add a GainNode to boost the volume level
-      // This increases the storytelling voice level safely (same-origin blob doesn't trigger CORS blocks)
-      try {
-        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-        if (AudioContextClass) {
-          const audioCtx = new AudioContextClass();
-          const source = audioCtx.createMediaElementSource(audioPlayerInstance);
-          const gainNode = audioCtx.createGain();
-          gainNode.gain.value = 1.8; // Boost output volume level by 80%
-          source.connect(gainNode);
-          gainNode.connect(audioCtx.destination);
-          
-          audioPlayerInstance.addEventListener('play', () => {
-            if (audioCtx.state === 'suspended') {
-              audioCtx.resume();
-            }
-          });
-        }
-      } catch (e) {
-        console.warn("Volume level boost failed, playing at normal volume:", e);
-      }
-      
-      document.getElementById("playbar-icon-svg").innerHTML = `<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>`;
-      
-      audioPlayerInstance.ontimeupdate = () => {
-        if (audioPlayerInstance && audioPlayerInstance.duration) {
-          const pct = (audioPlayerInstance.currentTime / audioPlayerInstance.duration) * 100;
-          document.getElementById("playbar-progress-line").style.width = `${pct}%`;
-        }
-      };
-      
-      audioPlayerInstance.onended = () => {
-        stopSpeechNarration();
-      };
-      
-      audioPlayerInstance.onerror = () => {
-        showToast("ElevenLabs playback error");
-        stopSpeechNarration();
-      };
-      
-      audioPlayerInstance.play().catch(err => {
-        console.warn("ElevenLabs audio playback failed:", err);
-        showToast("Playback failed or blocked by browser");
-        stopSpeechNarration();
-      });
-    })
-    .catch(err => {
-      console.warn("ElevenLabs generation failed, falling back to standard narrator:", err);
-      showToast("Premium voice unavailable. Switching to standard reader...");
-      
-      const originalSource = state.audioSource;
-      if (state.translation !== "eng") {
-        state.audioSource = "human"; // Fallback to professional human recorded Marathi male voice
-      } else {
-        state.audioSource = "ai"; // Fallback to system English male voice
-      }
-      
-      setTimeout(() => {
-        startSpeechNarration();
-        // Restore original ElevenLabs setting in background state
-        state.audioSource = originalSource;
-        saveStateToLocalStorage();
-      }, 1500);
-    });
-    
-    return;
-  }
-  
-  if (typeof speechSynthesis === 'undefined') {
-    showToast("Text-to-speech not supported");
-    return;
-  }
-  
-  const voiceSelect = document.getElementById("tts-voice-select");
-  const selectedVal = voiceSelect.value;
-  
-  if (selectedVal === "default") {
-    audioState.selectedVoice = findBestDefaultVoice(audioState.voices, state.translation);
-  } else {
-    const matching = audioState.voices.filter(v => 
-      state.translation === "eng" ? v.lang.startsWith("en") : (v.lang.startsWith("mr") || v.lang.startsWith("hi") || v.lang.startsWith("en"))
-    );
-    audioState.selectedVoice = matching[parseInt(selectedVal)];
-  }
-  
+  // Sarvam AI Bulbul V3 Indian Voice Narration
   const elements = document.querySelectorAll(".verse-row");
   if (elements.length === 0) return;
   
   audioState.versesToRead = [];
   elements.forEach(el => {
     let txt = el.dataset.text || "";
-    
-    if (state.translation === "parallel" && audioState.selectedVoice) {
-      if (audioState.selectedVoice.lang.startsWith("en")) {
-        const enDiv = el.querySelector(".verse-parallel-en");
-        if (enDiv) txt = enDiv.textContent;
-      }
+    if (state.translation === "parallel") {
+      const enDiv = el.querySelector(".verse-parallel-en");
+      if (enDiv) txt = enDiv.textContent;
     }
-    
     const cleanText = txt.replace(/[:;()[\]{}—•\-]/g, ' ').replace(/\s+/g, ' ').trim();
-    audioState.versesToRead.push({
-      key: el.dataset.verseId,
-      text: cleanText
-    });
+    if (cleanText) {
+      audioState.versesToRead.push({
+        key: el.dataset.verseId,
+        text: cleanText
+      });
+    }
   });
   
+  if (audioState.versesToRead.length === 0) return;
+
+  const speedVal = parseFloat(document.getElementById("tts-speed-slider")?.value || 0.92);
+  audioState.speed = speedVal;
   audioState.currentVerseIndex = 0;
   audioState.isPlaying = true;
-  audioState.speed = parseFloat(document.getElementById("tts-speed-slider").value);
-  
+
+  const speedPill = document.getElementById("playbar-btn-speed");
+  if (speedPill) speedPill.textContent = `${speedVal}x`;
+
   document.getElementById("floating-audio-playbar").classList.add("active");
-  speakPlaybarVerse(audioState.currentVerseIndex);
+
+  const langCode = (state.translation === "eng") ? "en-IN" : "hi-IN";
+  const voiceSelect = document.getElementById("audio-narrator-gender-select");
+  const selectedVoiceId = voiceSelect ? voiceSelect.value : (langCode === "en-IN" ? "ratan" : "shubh");
+
+  if (window.SarvamTTS && window.SarvamTTS.queue) {
+    window.SarvamTTS.queue.setListeners({
+      onVerseChange: (index, verse) => {
+        audioState.currentVerseIndex = index;
+        document.querySelectorAll(".verse-row").forEach(v => {
+          v.classList.toggle("tts-reading", v.dataset.verseId === verse.key);
+        });
+        const activeEl = document.querySelector(`.verse-row[data-verse-id="${verse.key}"]`);
+        if (activeEl) activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        const indicatorEl = document.getElementById("playbar-verse-indicator");
+        if (indicatorEl) {
+          const total = audioState.versesToRead.length;
+          if (verse && verse.key === "vod_verse") {
+            indicatorEl.textContent = "🔊 Daily Bible Verse";
+          } else if (verse && verse.key) {
+            const parts = verse.key.split("_");
+            if (parts.length >= 3) {
+              const bMeta = booksMetadataMr.find(b => b.filename.replace(".json", "") === parts[0]);
+              const bName = (state.translation === "eng" && bMeta) ? bMeta.engName : (bMeta ? bMeta.name : parts[0]);
+              indicatorEl.textContent = `${bName} ${parts[1]}:${parts[2]} (${index + 1}/${total})`;
+            } else {
+              indicatorEl.textContent = `Verse ${index + 1} of ${total}`;
+            }
+          } else {
+            indicatorEl.textContent = `Verse ${index + 1} of ${total}`;
+          }
+        }
+
+        const progress = ((index + 1) / audioState.versesToRead.length) * 100;
+        document.getElementById("playbar-progress-line").style.width = `${progress}%`;
+      },
+      onStateChange: (playbackState) => {
+        const iconSvg = document.getElementById("playbar-icon-svg");
+        if (!iconSvg) return;
+        if (playbackState === "loading") {
+          iconSvg.innerHTML = `
+            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="38" stroke-dashoffset="19">
+              <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s" repeatCount="indefinite"/>
+            </circle>
+          `;
+        } else if (playbackState === "playing") {
+          iconSvg.innerHTML = `<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>`;
+        } else {
+          iconSvg.innerHTML = `<polygon points="5 3 19 12 5 21 5 3"></polygon>`;
+        }
+      },
+      onComplete: () => {
+        stopSpeechNarration();
+      },
+      onError: (err, index, verse) => {
+        console.warn("[Sarvam TTS] Error on verse:", err);
+        if (err.message === "NO_API_KEY") {
+          showToast("Please enter Sarvam AI API key in Settings");
+          openModal("modal-audio-settings");
+        } else {
+          showToast(`Voice narration: ${err.message || 'Error'}`);
+        }
+      }
+    });
+
+    window.SarvamTTS.queue.loadVerses(audioState.versesToRead, 0, {
+      lang: langCode,
+      speaker: selectedVoiceId,
+      pace: speedVal
+    });
+
+    window.SarvamTTS.queue.play();
+  } else {
+    speakPlaybarVerse(0);
+  }
 }
 
 function speakPlaybarVerse(index) {
@@ -2209,84 +2110,9 @@ function speakPlaybarVerse(index) {
   }
   
   audioState.currentVerseIndex = index;
-  const verse = audioState.versesToRead[index];
-  
-  document.querySelectorAll(".verse-row").forEach(v => {
-    v.classList.toggle("tts-reading", v.dataset.verseId === verse.key);
-  });
-  
-  const activeEl = document.querySelector(`.verse-row[data-verse-id="${verse.key}"]`);
-  if (activeEl) activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  
-  // Update floating playbar verse indicator text
-  const indicatorEl = document.getElementById("playbar-verse-indicator");
-  if (indicatorEl) {
-    const total = audioState.versesToRead.length;
-    if (verse && verse.key === "vod_verse") {
-      indicatorEl.textContent = "🔊 Daily Bible Verse";
-    } else if (verse && verse.key) {
-      const parts = verse.key.split("_");
-      if (parts.length >= 3) {
-        const bMeta = booksMetadataMr.find(b => b.filename.replace(".json", "") === parts[0]);
-        const bName = (state.translation === "eng" && bMeta) ? bMeta.engName : (bMeta ? bMeta.name : parts[0]);
-        indicatorEl.textContent = `${bName} ${parts[1]}:${parts[2]} (${index + 1}/${total})`;
-      } else {
-        indicatorEl.textContent = `Verse ${index + 1} of ${total}`;
-      }
-    } else {
-      indicatorEl.textContent = `Verse ${index + 1} of ${total}`;
-    }
+  if (window.SarvamTTS && window.SarvamTTS.queue && window.SarvamTTS.queue.isPlaying) {
+    window.SarvamTTS.queue.jumpToVerse(index);
   }
-
-  // Set play icon to paused lines
-  document.getElementById("playbar-icon-svg").innerHTML = `<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>`;
-  
-  const progress = ((index + 1) / audioState.versesToRead.length) * 100;
-  document.getElementById("playbar-progress-line").style.width = `${progress}%`;
-  
-  const utterance = new SpeechSynthesisUtterance(verse.text);
-  if (audioState.selectedVoice) {
-    utterance.voice = audioState.selectedVoice;
-  } else if (state.translation !== "eng") {
-    const mrVoice = audioState.voices.find(v => v.lang.startsWith("mr") || v.lang.startsWith("hi"));
-    if (mrVoice) utterance.voice = mrVoice;
-  }
-  
-  let basePitch = 0.85;
-  if (state.audioTone === 'deep-bass') basePitch = 0.7;
-  else if (state.audioTone === 'warm-resonance') basePitch = 0.85;
-  else if (state.audioTone === 'normal') basePitch = 1.0;
-  
-  // Apply gender voice pitch settings
-  const genderSelect = document.getElementById("audio-narrator-gender-select");
-  const gender = genderSelect ? genderSelect.value : "male";
-  if (gender === "male") {
-    utterance.pitch = 0.7; // Deep voice
-  } else {
-    utterance.pitch = 1.15; // Soft female voice
-  }
-  utterance.rate = audioState.speed * 0.9;
-  
-  utterance.onend = () => {
-    if (audioState.isPlaying) {
-      audioState.currentVerseIndex++;
-      if (audioState.currentVerseIndex < audioState.versesToRead.length) {
-        speakPlaybarVerse(audioState.currentVerseIndex);
-      } else {
-        stopSpeechNarration();
-      }
-    }
-  };
-  
-  utterance.onerror = () => {
-    if (audioState.isPlaying) {
-      audioState.currentVerseIndex++;
-      speakPlaybarVerse(audioState.currentVerseIndex);
-    }
-  };
-  
-  audioState.activeUtterance = utterance;
-  speechSynthesis.speak(utterance);
 }
 
 function togglePlaybarSpeech() {
@@ -2300,10 +2126,13 @@ function togglePlaybarSpeech() {
       audioPlayerInstance.pause();
       document.getElementById("playbar-icon-svg").innerHTML = `<polygon points="5 3 19 12 5 21 5 3"></polygon>`;
     }
-  } else if (state.audioSource === "elevenlabs") {
-    // Cancel loading if clicked while ElevenLabs is generating
-    stopSpeechNarration();
-  } else {
+  } else if (window.SarvamTTS && window.SarvamTTS.queue) {
+    if (window.SarvamTTS.queue.isPaused) {
+      window.SarvamTTS.queue.resume();
+    } else {
+      window.SarvamTTS.queue.pause();
+    }
+  } else if (typeof speechSynthesis !== 'undefined') {
     if (speechSynthesis.paused) {
       speechSynthesis.resume();
       document.getElementById("playbar-icon-svg").innerHTML = `<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>`;
@@ -2320,7 +2149,12 @@ function stopSpeechNarration() {
     audioPlayerInstance.pause();
     audioPlayerInstance = null;
   }
-  speechSynthesis.cancel();
+  if (window.SarvamTTS && window.SarvamTTS.queue) {
+    window.SarvamTTS.queue.stop();
+  }
+  if (typeof speechSynthesis !== 'undefined') {
+    speechSynthesis.cancel();
+  }
   
   // Stop background worship music
   ambientSynthInstance.stop();
@@ -2344,7 +2178,11 @@ function startSpeechNarrationFromVerse(verseNum) {
   if (audioState.versesToRead && targetIndex < audioState.versesToRead.length) {
     audioState.isPlaying = true;
     document.getElementById("floating-audio-playbar").classList.add("active");
-    speakPlaybarVerse(targetIndex);
+    if (window.SarvamTTS && window.SarvamTTS.queue && window.SarvamTTS.queue.isPlaying) {
+      window.SarvamTTS.queue.jumpToVerse(targetIndex);
+    } else {
+      startSpeechNarration();
+    }
   } else {
     startSpeechNarration();
   }
@@ -2355,14 +2193,19 @@ function playDailyVerseAudio() {
   const vodRefEl = document.getElementById("home-vod-ref");
   if (!vodTextEl) return;
 
-  const rawText = vodTextEl.textContent.replace(/["']/g, '');
-  const refText = vodRefEl ? vodRefEl.textContent : "Daily Verse";
+  const rawText = vodTextEl.textContent.replace(/["']/g, '').trim();
+  const refText = vodRefEl ? vodRefEl.textContent.trim() : "Daily Verse";
 
   if (audioPlayerInstance) {
     audioPlayerInstance.pause();
     audioPlayerInstance = null;
   }
-  speechSynthesis.cancel();
+  if (window.SarvamTTS && window.SarvamTTS.queue) {
+    window.SarvamTTS.queue.stop();
+  }
+  if (typeof speechSynthesis !== 'undefined') {
+    speechSynthesis.cancel();
+  }
 
   showToast(`🔊 Listening: ${refText}`);
 
@@ -2373,11 +2216,58 @@ function playDailyVerseAudio() {
   audioState.currentVerseIndex = 0;
   audioState.isPlaying = true;
 
+  const speedVal = parseFloat(document.getElementById("tts-speed-slider")?.value || 0.92);
+  audioState.speed = speedVal;
+
   const speedPill = document.getElementById("playbar-btn-speed");
-  if (speedPill) speedPill.textContent = `${audioState.speed || 1.0}x`;
+  if (speedPill) speedPill.textContent = `${speedVal}x`;
 
   document.getElementById("floating-audio-playbar").classList.add("active");
-  speakPlaybarVerse(0);
+
+  const langCode = (state.translation === "eng") ? "en-IN" : "hi-IN";
+  const voiceSelect = document.getElementById("audio-narrator-gender-select");
+  const selectedVoiceId = voiceSelect ? voiceSelect.value : (langCode === "en-IN" ? "ratan" : "shubh");
+
+  if (window.SarvamTTS && window.SarvamTTS.queue) {
+    window.SarvamTTS.queue.setListeners({
+      onVerseChange: () => {
+        const indicatorEl = document.getElementById("playbar-verse-indicator");
+        if (indicatorEl) indicatorEl.textContent = `🔊 Daily Verse: ${refText}`;
+        document.getElementById("playbar-progress-line").style.width = `100%`;
+      },
+      onStateChange: (playbackState) => {
+        const iconSvg = document.getElementById("playbar-icon-svg");
+        if (!iconSvg) return;
+        if (playbackState === "loading") {
+          iconSvg.innerHTML = `
+            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="38" stroke-dashoffset="19">
+              <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s" repeatCount="indefinite"/>
+            </circle>
+          `;
+        } else if (playbackState === "playing") {
+          iconSvg.innerHTML = `<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>`;
+        } else {
+          iconSvg.innerHTML = `<polygon points="5 3 19 12 5 21 5 3"></polygon>`;
+        }
+      },
+      onComplete: () => stopSpeechNarration(),
+      onError: (err) => {
+        if (err.message === "NO_API_KEY") {
+          showToast("Please enter Sarvam AI API Key in Settings");
+          openModal("modal-audio-settings");
+        } else {
+          showToast(`Voice: ${err.message || 'Error'}`);
+        }
+      }
+    });
+
+    window.SarvamTTS.queue.loadVerses(audioState.versesToRead, 0, {
+      lang: langCode,
+      speaker: selectedVoiceId,
+      pace: speedVal
+    });
+    window.SarvamTTS.queue.play();
+  }
 }
 
 // Global Audio Processing Variables for Web Audio API
@@ -4009,8 +3899,8 @@ function setupEventListeners() {
   const speedPillBtn = document.getElementById("playbar-btn-speed");
   if (speedPillBtn) {
     speedPillBtn.addEventListener("click", () => {
-      const speeds = [1.0, 1.25, 1.5, 2.0, 0.75];
-      let currIdx = speeds.indexOf(audioState.speed || 1.0);
+      const speeds = [0.92, 1.0, 1.15, 1.25, 0.85];
+      let currIdx = speeds.indexOf(audioState.speed || 0.92);
       if (currIdx === -1) currIdx = 0;
       const nextSpeed = speeds[(currIdx + 1) % speeds.length];
       audioState.speed = nextSpeed;
@@ -4022,56 +3912,67 @@ function setupEventListeners() {
       
       if (audioPlayerInstance) {
         audioPlayerInstance.playbackRate = nextSpeed;
-      } else if (audioState.isPlaying && speechSynthesis.speaking) {
-        speechSynthesis.cancel();
-        speakPlaybarVerse(audioState.currentVerseIndex);
+      } else if (window.SarvamTTS && window.SarvamTTS.queue && window.SarvamTTS.queue.isPlaying) {
+        window.SarvamTTS.queue.setOptions({ pace: nextSpeed });
       }
-      showToast(`Speed set to ${nextSpeed}x`);
+      showToast(`Narration speed set to ${nextSpeed}x`);
     });
   }
 
   document.getElementById("playbar-btn-prev").addEventListener("click", () => {
     if (audioPlayerInstance) {
       audioPlayerInstance.currentTime = Math.max(0, audioPlayerInstance.currentTime - 10);
-    } else if (audioState.currentVerseIndex > 0) {
-      speechSynthesis.cancel();
-      audioState.currentVerseIndex--;
-      speakPlaybarVerse(audioState.currentVerseIndex);
+    } else if (window.SarvamTTS && window.SarvamTTS.queue) {
+      window.SarvamTTS.queue.previous();
     }
   });
   
   document.getElementById("playbar-btn-next").addEventListener("click", () => {
     if (audioPlayerInstance) {
       audioPlayerInstance.currentTime = Math.min(audioPlayerInstance.duration || 9999, audioPlayerInstance.currentTime + 10);
-    } else if (audioState.currentVerseIndex < audioState.versesToRead.length - 1) {
-      speechSynthesis.cancel();
-      audioState.currentVerseIndex++;
-      speakPlaybarVerse(audioState.currentVerseIndex);
+    } else if (window.SarvamTTS && window.SarvamTTS.queue) {
+      window.SarvamTTS.queue.next();
     }
   });
   
   const speedSlider = document.getElementById("tts-speed-slider");
-  speedSlider.addEventListener("input", (e) => {
-    const val = parseFloat(e.target.value).toFixed(2);
-    document.getElementById("tts-speed-val").textContent = `${val}x`;
-    audioState.speed = parseFloat(val);
-    if (audioPlayerInstance) {
-      audioPlayerInstance.playbackRate = audioState.speed;
-    } else if (audioState.isPlaying && speechSynthesis.speaking) {
-      speechSynthesis.cancel();
-      speakPlaybarVerse(audioState.currentVerseIndex);
-    }
-  });
-  
-  const toneSelect = document.getElementById("audio-tone-select");
-  if (toneSelect) {
-    toneSelect.value = state.audioTone || 'deep-bass';
-    toneSelect.addEventListener("change", () => {
-      updateAudioToneSettings();
-      if (audioState.isPlaying && !audioPlayerInstance) {
-        speechSynthesis.cancel();
-        speakPlaybarVerse(audioState.currentVerseIndex);
+  if (speedSlider) {
+    speedSlider.addEventListener("input", (e) => {
+      const val = parseFloat(e.target.value).toFixed(2);
+      document.getElementById("tts-speed-val").textContent = `${val}x`;
+      audioState.speed = parseFloat(val);
+      if (audioPlayerInstance) {
+        audioPlayerInstance.playbackRate = audioState.speed;
+      } else if (window.SarvamTTS && window.SarvamTTS.queue) {
+        window.SarvamTTS.queue.setOptions({ pace: audioState.speed });
       }
+    });
+  }
+
+  // Sarvam API Key input listener in Settings Modal
+  const sarvamKeyInput = document.getElementById("sarvam-api-key-input");
+  if (sarvamKeyInput) {
+    sarvamKeyInput.value = (window.SarvamTTS && window.SarvamTTS.config) ? window.SarvamTTS.config.getApiKey() : (state.sarvamApiKey || "");
+    sarvamKeyInput.addEventListener("input", (e) => {
+      const val = e.target.value.trim();
+      state.sarvamApiKey = val;
+      if (window.SarvamTTS && window.SarvamTTS.config) {
+        window.SarvamTTS.config.setApiKey(val);
+      }
+      saveStateToLocalStorage();
+    });
+  }
+
+  // Narrator Voice selector listener in Settings Modal
+  const voiceGenderSelect = document.getElementById("audio-narrator-gender-select");
+  if (voiceGenderSelect) {
+    if (state.sarvamVoice) voiceGenderSelect.value = state.sarvamVoice;
+    voiceGenderSelect.addEventListener("change", (e) => {
+      state.sarvamVoice = e.target.value;
+      if (window.SarvamTTS && window.SarvamTTS.queue) {
+        window.SarvamTTS.queue.setOptions({ speaker: state.sarvamVoice });
+      }
+      saveStateToLocalStorage();
     });
   }
   
@@ -4459,15 +4360,7 @@ function setupEventListeners() {
         const dataUrl = evt.target.result;
         if (state.currentUser) {
           state.currentUser.photo = dataUrl;
-          
-          // Sync to users database
-          const users = JSON.parse(localStorage.getItem("river_of_life_users") || "[]");
-          const idx = users.findIndex(u => u.username.toLowerCase() === state.currentUser.username.toLowerCase());
-          if (idx !== -1) {
-            users[idx].photo = dataUrl;
-            localStorage.setItem("river_of_life_users", JSON.stringify(users));
-          }
-          
+          // saveStateToLocalStorage triggers Firestore sync automatically
           saveStateToLocalStorage();
           updateAllUserAvatars();
           showToast("Profile photo updated!");
@@ -4487,17 +4380,9 @@ function setupEventListeners() {
       const newChurch = prompt(promptTitle, currentChurch);
       if (newChurch !== null) {
         state.currentUser.churchName = newChurch.trim();
-        
-        // Sync to users database
-        const users = JSON.parse(localStorage.getItem("river_of_life_users") || "[]");
-        const idx = users.findIndex(u => u.username.toLowerCase() === state.currentUser.username.toLowerCase());
-        if (idx !== -1) {
-          users[idx].churchName = newChurch.trim();
-          localStorage.setItem("river_of_life_users", JSON.stringify(users));
-        }
-        
+        // saveStateToLocalStorage triggers Firestore sync automatically
         saveStateToLocalStorage();
-        
+
         const displayEl = document.getElementById("profile-church-name-display");
         if (displayEl) {
           displayEl.textContent = newChurch.trim() || (state.translation === "eng" ? "Add your church" : "चर्च जोडा");
@@ -5404,210 +5289,303 @@ function initBibleQuiz() {
 }
 
 /* ==========================================================================
-   8. User Authentication & Prayer Requests
+   8. User Authentication & Prayer Requests — Firebase Edition
    ========================================================================== */
 
-// Helper to get all registered users
-function getRegisteredUsers() {
-  try {
-    let users = JSON.parse(localStorage.getItem("river_of_life_users") || "[]");
-    // Seed default admin account if not exists
-    if (!users.some(u => u.username.toLowerCase() === "admin")) {
-      users.push({
-        username: "admin",
-        password: "admin", // Plain text password for local mock database
-        email: "admin@riveroflife.org",
-        isPastor: true,
-        isAdmin: true,
-        bookmarks: [],
-        highlights: {},
-        userNotes: {},
-        quizPoints: 0,
-        quizHighscore: 0,
-        quizBadges: []
-      });
-      localStorage.setItem("river_of_life_users", JSON.stringify(users));
+/* ─────────────────────────────────────────────────────────────────────────
+   Auth State Observer
+   Called once on startup from initAuthAndPrayers().
+   When Firebase detects a signed-in user (or restores from cookie/token),
+   this fires automatically — no manual session localStorage needed.
+   ───────────────────────────────────────────────────────────────────────── */
+function onFirebaseAuthChange(firebaseUser) {
+  if (firebaseUser) {
+    // A Firebase user is signed in — fetch their Firestore profile
+    FirebaseApp.getUserProfile(firebaseUser.uid).then(profile => {
+      state.currentUser = {
+        uid:        firebaseUser.uid,
+        username:   firebaseUser.displayName || profile?.displayName || firebaseUser.email.split('@')[0],
+        email:      firebaseUser.email,
+        photo:      firebaseUser.photoURL || profile?.photo || '',
+        isPastor:   profile?.isPastor   || false,
+        isAdmin:    profile?.isAdmin    || false,
+        churchName: profile?.churchName || '',
+      };
+
+      // Restore cloud-synced user data into app state
+      if (profile) {
+        state.bookmarks        = profile.bookmarks        || [];
+        state.highlights       = { ...state.highlights, ...(profile.highlights || {}) };
+        state.userNotes        = profile.userNotes        || {};
+        state.quizPoints       = profile.quizPoints       || 0;
+        state.quizHighscore    = profile.quizHighscore    || 0;
+        state.quizBadges       = profile.quizBadges       || [];
+        state.createdVerseImages = profile.createdVerseImages || [];
+        state.streak           = profile.streak           || 1;
+      }
+
+      saveStateToLocalStorage();
+      applyStylesFromState();
+      renderYouProfile();
+      renderPrayersScreen();
+    }).catch(err => {
+      console.error('[ROL Auth] Error fetching user profile:', err);
+      // Still sign the user in with basic info even if Firestore fetch fails
+      state.currentUser = {
+        uid:      firebaseUser.uid,
+        username: firebaseUser.displayName || firebaseUser.email.split('@')[0],
+        email:    firebaseUser.email,
+        photo:    firebaseUser.photoURL || '',
+        isPastor: false,
+        isAdmin:  false,
+        churchName: '',
+      };
+      applyStylesFromState();
+      renderYouProfile();
+      renderPrayersScreen();
+    });
+  } else {
+    // Signed out
+    if (state.currentUser) {
+      state.currentUser = null;
+      state.bookmarks = [];
+      state.highlights = {};
+      state.userNotes = {};
+      state.quizPoints = 0;
+      state.quizHighscore = 0;
+      state.quizBadges = [];
+      state.createdVerseImages = [];
+      state.streak = 1;
+      state.vodDayOffset = 0;
+      applyStylesFromState();
+      renderYouProfile();
+      renderPrayersScreen();
     }
-    return users;
-  } catch (e) {
-    console.error("Error loading users:", e);
-    return [];
   }
 }
 
-// Helper to get all global prayers
-function getGlobalPrayers() {
+/* ─────────────────────────────────────────────────────────────────────────
+   Register with Email + Password
+   ───────────────────────────────────────────────────────────────────────── */
+async function registerUser(displayName, email, password, isPastor) {
   try {
-    return JSON.parse(localStorage.getItem("river_of_life_prayers") || "[]");
-  } catch (e) {
-    console.error("Error loading prayers:", e);
-    return [];
+    const cred = await FirebaseApp.registerWithEmail(displayName, email, password);
+    const uid  = cred.user.uid;
+
+    // Create Firestore profile document
+    await FirebaseApp.saveUserProfile(uid, {
+      displayName: displayName.trim(),
+      email:       email.trim().toLowerCase(),
+      isPastor:    !!isPastor,
+      isAdmin:     false,
+      churchName:  '',
+      photo:       '',
+      streak:      1,
+      quizPoints:  0,
+      quizHighscore: 0,
+      quizBadges:  [],
+      bookmarks:   [],
+      highlights:  {},
+      userNotes:   {},
+      createdVerseImages: [],
+      createdAt:   firebase.firestore.FieldValue.serverTimestamp(),
+    });
+
+    return { success: true };
+  } catch (err) {
+    console.error('[ROL Auth] Register error:', err);
+    let msgEn = 'Registration failed. Please try again.';
+    let msgMr = 'नोंदणी अयशस्वी. कृपया पुन्हा प्रयत्न करा.';
+    if (err.code === 'auth/email-already-in-use') {
+      msgEn = 'Email already registered. Please sign in.';
+      msgMr = 'हा ईमेल आधीच नोंदणीकृत आहे. लॉगिन करा.';
+    } else if (err.code === 'auth/weak-password') {
+      msgEn = 'Password must be at least 6 characters.';
+      msgMr = 'पासवर्ड किमान ६ अक्षरांचा असावा.';
+    } else if (err.code === 'auth/invalid-email') {
+      msgEn = 'Invalid email address.';
+      msgMr = 'अवैध ईमेल पत्ता.';
+    }
+    return { success: false, messageEn: msgEn, messageMr: msgMr };
   }
 }
 
-// Register user
-function registerUser(username, email, password, isPastor) {
-  const users = getRegisteredUsers();
-  if (users.some(u => u.username.toLowerCase() === username.toLowerCase())) {
-    return { success: false, messageMr: "युझरनेम आधीच अस्तित्वात आहे!", messageEn: "Username already exists!" };
+/* ─────────────────────────────────────────────────────────────────────────
+   Sign In with Email + Password
+   ───────────────────────────────────────────────────────────────────────── */
+async function loginUser(email, password) {
+  try {
+    await FirebaseApp.signInWithEmail(email, password);
+    // onFirebaseAuthChange will handle setting state.currentUser
+    return { success: true };
+  } catch (err) {
+    console.error('[ROL Auth] Login error:', err);
+    let msgEn = 'Sign in failed. Please check your credentials.';
+    let msgMr = 'लॉगिन अयशस्वी. आपली माहिती तपासा.';
+    if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
+      msgEn = 'Invalid email or password.';
+      msgMr = 'अवैध ईमेल किंवा पासवर्ड.';
+    } else if (err.code === 'auth/too-many-requests') {
+      msgEn = 'Too many failed attempts. Please try again later.';
+      msgMr = 'खूप जास्त प्रयत्न. कृपया नंतर पुन्हा करा.';
+    }
+    return { success: false, messageEn: msgEn, messageMr: msgMr };
   }
-  
-  const newUser = {
-    username,
-    email: email || "",
-    password, // Storing plain password as requested for local mock database
-    isPastor: !!isPastor,
-    bookmarks: [
-      {
-        ref: "१ करिंथ १०:१४",
-        engRef: "1 Corinthians 10:14",
-        text: "म्हणून माझ्या प्रिय बंधूंनो, तुम्ही मूर्तीपूजेपासून दूर पळा.",
-        engText: "Therefore, my dear friends, flee from idolatry.",
-        date: new Date("2026-06-14T12:00:00Z").getTime(),
-        book: "1corinthians",
-        chapter: 10,
-        verse: 14
-      }
-    ],
-    highlights: {
-      "1corinthians_10_14": "yellow",
-      "acts_20_35": "blue"
-    },
-    userNotes: {
-      "1corinthians_10_14": "Keep running away from anything that pulls you away from God. Put Him first always."
-    },
-    quizPoints: 120,
-    quizHighscore: 80,
-    quizBadges: ["quiz_badge_novice", "quiz_badge_scholar"],
-    createdVerseImages: [
-      {
-        ref: "प्रेषितांची कृत्ये २०:३५",
-        engRef: "Acts 20:35",
-        text: "देण्यापेक्षा देणे ह्यात जास्त धन्यता आहे.",
-        engText: "It is more blessed to give than to receive.",
-        book: "acts",
-        chapter: 20,
-        verse: 35,
-        style: "gradient-vod-1",
-        timestamp: new Date("2026-06-12T10:00:00Z").getTime()
-      }
-    ],
-    churchName: "River of Life Church",
-    streak: 2,
-    photo: ""
-  };
-  
-  users.push(newUser);
-  localStorage.setItem("river_of_life_users", JSON.stringify(users));
-  return { success: true };
 }
 
-// Login user
-function loginUser(username, password) {
-  const users = getRegisteredUsers();
-  const user = users.find(u => u.username.toLowerCase() === username.toLowerCase() && u.password === password);
-  if (!user) {
-    return { success: false, messageMr: "अवैध युझरनेम किंवा पासवर्ड!", messageEn: "Invalid username or password!" };
+/* ─────────────────────────────────────────────────────────────────────────
+   Google Sign-In (Popup)
+   ───────────────────────────────────────────────────────────────────────── */
+async function loginWithGoogle() {
+  try {
+    const result = await FirebaseApp.signInWithGoogle();
+    const firebaseUser = result.user;
+    const uid = firebaseUser.uid;
+
+    // Create/update Firestore profile for Google users (merge so existing data is preserved)
+    const existingProfile = await FirebaseApp.getUserProfile(uid);
+    if (!existingProfile) {
+      // First-time Google sign-in — create profile
+      await FirebaseApp.saveUserProfile(uid, {
+        displayName: firebaseUser.displayName || '',
+        email:       firebaseUser.email || '',
+        photo:       firebaseUser.photoURL || '',
+        isPastor:    false,
+        isAdmin:     false,
+        churchName:  '',
+        streak:      1,
+        quizPoints:  0,
+        quizHighscore: 0,
+        quizBadges:  [],
+        bookmarks:   [],
+        highlights:  {},
+        userNotes:   {},
+        createdVerseImages: [],
+        createdAt:   firebase.firestore.FieldValue.serverTimestamp(),
+      });
+    } else {
+      // Update photo/name from Google in case they changed
+      await FirebaseApp.saveUserProfile(uid, {
+        displayName: firebaseUser.displayName || existingProfile.displayName || '',
+        photo:       firebaseUser.photoURL   || existingProfile.photo || '',
+      });
+    }
+    // onFirebaseAuthChange fires automatically after signInWithPopup
+    return { success: true };
+  } catch (err) {
+    console.error('[ROL Auth] Google sign-in error:', err);
+    let msgEn = 'Google sign-in failed. Please try again.';
+    let msgMr = 'Google लॉगिन अयशस्वी. पुन्हा प्रयत्न करा.';
+    if (err.code === 'auth/popup-closed-by-user') {
+      msgEn = 'Sign-in popup was closed.';
+      msgMr = 'साइन-इन बंद केले.';
+    }
+    return { success: false, messageEn: msgEn, messageMr: msgMr };
   }
-  
-  // Set current user session
-  state.currentUser = {
-    username: user.username,
-    email: user.email,
-    isPastor: user.isPastor,
-    isAdmin: user.isAdmin || user.username.toLowerCase() === "admin",
-    churchName: user.churchName || "",
-    photo: user.photo || ""
-  };
-  
-  // Restore user-specific data into state
-  state.bookmarks = user.bookmarks || [];
-  state.highlights = user.highlights || {};
-  state.userNotes = user.userNotes || {};
-  state.quizPoints = user.quizPoints || 0;
-  state.quizHighscore = user.quizHighscore || 0;
-  state.quizBadges = user.quizBadges || [];
-  state.createdVerseImages = user.createdVerseImages || [];
-  state.streak = user.streak || 2;
-  
-  saveStateToLocalStorage();
-  applyStylesFromState();
-  return { success: true };
 }
 
-// Logout user
-function logoutUser() {
+/* ─────────────────────────────────────────────────────────────────────────
+   Sign Out
+   ───────────────────────────────────────────────────────────────────────── */
+async function logoutUser() {
   if (state.currentUser) {
-    // Force one final sync to users database before clearing
-    saveStateToLocalStorage();
+    // Sync current data to Firestore before signing out
+    await syncUserDataToFirestore();
   }
-  
-  state.currentUser = null;
-  state.bookmarks = [];
-  state.highlights = {};
-  state.userNotes = {};
-  state.quizPoints = 0;
-  state.quizHighscore = 0;
-  state.quizBadges = [];
-  state.createdVerseImages = [];
-  state.streak = 1;
-  state.vodDayOffset = 0;
-  
-  saveStateToLocalStorage();
-  applyStylesFromState();
-  
-  // Navigate to home
-  window.location.hash = "#/home";
+  await FirebaseApp.signOut();
+  // onFirebaseAuthChange fires automatically and clears state
+  window.location.hash = '#/home';
 }
 
-// Submit prayer request
-function submitPrayerRequest(text, isPublic) {
-  if (!state.currentUser) return { success: false, messageEn: "Not signed in" };
-  
-  const prayers = getGlobalPrayers();
-  const newPrayer = {
-    id: "prayer_" + Date.now(),
-    username: state.currentUser.username,
-    text: text,
-    isPublic: !!isPublic,
-    status: "pending",
-    pastorNote: "",
-    createdAt: Date.now()
-  };
-  
-  prayers.unshift(newPrayer);
-  localStorage.setItem("river_of_life_prayers", JSON.stringify(prayers));
-  return { success: true };
+/* ─────────────────────────────────────────────────────────────────────────
+   Sync user-specific app data to Firestore
+   Called by saveStateToLocalStorage when a user is logged in
+   ───────────────────────────────────────────────────────────────────────── */
+async function syncUserDataToFirestore() {
+  if (!state.currentUser || !state.currentUser.uid) return;
+  try {
+    await FirebaseApp.saveUserData(state.currentUser.uid, {
+      bookmarks:        state.bookmarks        || [],
+      highlights:       state.highlights       || {},
+      userNotes:        state.userNotes        || {},
+      quizPoints:       state.quizPoints       || 0,
+      quizHighscore:    state.quizHighscore    || 0,
+      quizBadges:       state.quizBadges       || [],
+      createdVerseImages: state.createdVerseImages || [],
+      streak:           state.streak           || 1,
+      churchName:       state.currentUser.churchName || '',
+      photo:            state.currentUser.photo || '',
+      displayName:      state.currentUser.username || '',
+    });
+  } catch (err) {
+    console.warn('[ROL Firebase] Firestore sync failed (will retry on next save):', err);
+  }
 }
 
-// Toggle answered prayer status
-function toggleAnsweredPrayer(prayerId) {
-  const prayers = getGlobalPrayers();
-  const idx = prayers.findIndex(p => p.id === prayerId);
-  if (idx !== -1) {
-    prayers[idx].status = prayers[idx].status === "answered" ? "pending" : "answered";
-    localStorage.setItem("river_of_life_prayers", JSON.stringify(prayers));
+/* ─────────────────────────────────────────────────────────────────────────
+   Prayer Requests — Firestore-backed
+   ───────────────────────────────────────────────────────────────────────── */
+
+// Submit a new prayer request
+async function submitPrayerRequest(text, isPublic) {
+  if (!state.currentUser) return { success: false, messageEn: 'Not signed in' };
+  try {
+    await FirebaseApp.savePrayer({
+      uid:      state.currentUser.uid,
+      username: state.currentUser.username,
+      text:     text,
+      isPublic: !!isPublic,
+    });
+    return { success: true };
+  } catch (err) {
+    console.error('[ROL Firebase] Save prayer error:', err);
+    return { success: false, messageEn: 'Failed to save prayer. Please try again.' };
+  }
+}
+
+// Toggle answered status
+async function toggleAnsweredPrayer(prayerId) {
+  try {
+    const prayers = await FirebaseApp.getPrayers();
+    const prayer  = prayers.find(p => p.id === prayerId);
+    if (!prayer) return false;
+    await FirebaseApp.updatePrayer(prayerId, {
+      status: prayer.status === 'answered' ? 'pending' : 'answered'
+    });
     return true;
+  } catch (err) {
+    console.error('[ROL Firebase] Toggle prayer error:', err);
+    return false;
   }
-  return false;
 }
 
 // Pastor acknowledge prayer
-function pastorAckPrayer(prayerId, note) {
+async function pastorAckPrayer(prayerId, note) {
   if (!state.currentUser) return false;
-  const hasAccess = state.currentUser.isPastor || state.currentUser.isAdmin || state.currentUser.username.toLowerCase() === "admin";
+  const hasAccess = state.currentUser.isPastor || state.currentUser.isAdmin;
   if (!hasAccess) return false;
-  
-  const prayers = getGlobalPrayers();
-  const idx = prayers.findIndex(p => p.id === prayerId);
-  if (idx !== -1) {
-    prayers[idx].status = "acknowledged";
-    prayers[idx].pastorNote = note || "";
-    localStorage.setItem("river_of_life_prayers", JSON.stringify(prayers));
+  try {
+    await FirebaseApp.updatePrayer(prayerId, {
+      status:     'acknowledged',
+      pastorNote: note || ''
+    });
     return true;
+  } catch (err) {
+    console.error('[ROL Firebase] Ack prayer error:', err);
+    return false;
   }
-  return false;
 }
+
+// Get all prayer requests (one-time fetch, returns array)
+async function getGlobalPrayers() {
+  try {
+    return await FirebaseApp.getPrayers();
+  } catch (err) {
+    console.error('[ROL Firebase] Get prayers error:', err);
+    return [];
+  }
+}
+
 
 // Render Auth Screen on Profile page
 function renderAuthScreen() {
@@ -5616,13 +5594,115 @@ function renderAuthScreen() {
   const passwordInput = document.getElementById("auth-input-password");
   const pastorCheckbox = document.getElementById("auth-input-pastor");
   const errorMsg = document.getElementById("auth-error-msg");
-  
+
   if (usernameInput) usernameInput.value = "";
   if (emailInput) emailInput.value = "";
   if (passwordInput) passwordInput.value = "";
   if (pastorCheckbox) pastorCheckbox.checked = false;
   if (errorMsg) errorMsg.style.display = "none";
+
+  // Hide any pending verification banner when user explicitly resets form
+  hideEmailVerificationBanner();
 }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Email Verification Banner
+   Shown after registration to tell users to check their inbox.
+   ───────────────────────────────────────────────────────────────────────── */
+function showEmailVerificationBanner(email) {
+  // Remove any existing banner first
+  const existing = document.getElementById("rol-email-verify-banner");
+  if (existing) existing.remove();
+
+  const authCard = document.querySelector(".rol-auth-card");
+  if (!authCard) {
+    // Fallback: just show a toast
+    showToast("📧 Verification email sent to " + email + " — check your inbox!");
+    return;
+  }
+
+  const banner = document.createElement("div");
+  banner.id = "rol-email-verify-banner";
+  banner.className = "rol-verify-banner";
+  banner.innerHTML = `
+    <div class="rol-verify-icon">📧</div>
+    <h3 class="rol-verify-title">Check Your Inbox!</h3>
+    <p class="rol-verify-sub">We sent a verification email to:</p>
+    <div class="rol-verify-email">${email}</div>
+    <p class="rol-verify-hint">
+      Click the link in that email to verify your account. 
+      Check your <strong>Spam / Junk</strong> folder if you don't see it.
+    </p>
+    <div class="rol-verify-actions">
+      <button id="btn-check-verification" class="rol-verify-btn-primary">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        I Verified — Continue
+      </button>
+      <button id="btn-resend-verification" class="rol-verify-btn-secondary">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        Resend Email
+      </button>
+    </div>
+    <button id="btn-dismiss-verify-banner" class="rol-verify-dismiss">← Back to Sign In</button>
+  `;
+
+  // Insert banner before the card content (hide the form, show banner)
+  authCard.style.position = "relative";
+  authCard.appendChild(banner);
+
+  // Wire buttons
+  document.getElementById("btn-check-verification")?.addEventListener("click", async () => {
+    const btn = document.getElementById("btn-check-verification");
+    if (btn) { btn.disabled = true; btn.textContent = "Checking…"; }
+    try {
+      const verified = await FirebaseApp.isEmailVerified();
+      if (verified) {
+        hideEmailVerificationBanner();
+        showToast("✅ Email verified! Welcome to River of Life / ईमेल सत्यापित! स्वागत आहे!");
+        // Trigger profile re-render
+        renderYouProfile();
+      } else {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> I Verified — Continue`;
+        }
+        showToast("⏳ Email not verified yet. Please click the link in the email first.");
+      }
+    } catch (err) {
+      if (btn) { btn.disabled = false; btn.textContent = "I Verified — Continue"; }
+      showToast("Error checking verification status. Please try again.");
+    }
+  });
+
+  document.getElementById("btn-resend-verification")?.addEventListener("click", async () => {
+    const btn = document.getElementById("btn-resend-verification");
+    if (btn) { btn.disabled = true; btn.textContent = "Sending…"; }
+    try {
+      await FirebaseApp.resendVerificationEmail();
+      showToast("📧 Verification email resent! Check your inbox and spam folder.");
+    } catch (err) {
+      showToast("Could not resend. Please try signing in again.");
+      console.error('[ROL Auth] Resend verification error:', err);
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Resend Email`;
+      }
+    }
+  });
+
+  document.getElementById("btn-dismiss-verify-banner")?.addEventListener("click", () => {
+    hideEmailVerificationBanner();
+    // Sign them out so they can start fresh — onFirebaseAuthChange will show the auth form
+    FirebaseApp.signOut();
+  });
+}
+
+function hideEmailVerificationBanner() {
+  const banner = document.getElementById("rol-email-verify-banner");
+  if (banner) banner.remove();
+}
+
 
 // Render Prayers Screen
 function renderPrayersScreen() {
@@ -5669,12 +5749,16 @@ function formatTimeAgo(timestamp) {
 
 // Render User Portal list
 function renderUserPortal() {
-  const listEl = document.getElementById("prayers-user-list");
+  const listEl  = document.getElementById("prayers-user-list");
   const emptyEl = document.getElementById("prayers-user-list-empty");
   if (!listEl || !emptyEl) return;
-  
-  const prayers = getGlobalPrayers().filter(p => p.username === state.currentUser.username);
-  
+
+  // Use the real-time cached prayers from the Firestore listener
+  const allPrayers = window._rolPrayers || [];
+  const prayers = allPrayers.filter(p =>
+    p.uid === state.currentUser?.uid || p.username === state.currentUser?.username
+  );
+
   listEl.innerHTML = "";
   if (prayers.length === 0) {
     emptyEl.style.display = "block";
@@ -5683,20 +5767,20 @@ function renderUserPortal() {
     prayers.forEach(p => {
       const card = document.createElement("div");
       card.className = "prayer-card";
-      
+
       let badgeClass = "pending";
-      let badgeText = "Pending / प्रलंबित";
+      let badgeText  = "Pending / प्रलंबित";
       if (p.status === "answered") {
         badgeClass = "answered";
-        badgeText = "Answered / उत्तर मिळालेली";
+        badgeText  = "Answered / उत्तर मिळालेली";
       } else if (p.status === "acknowledged") {
         badgeClass = "acknowledged";
-        badgeText = "Acknowledged / स्वीकृत";
+        badgeText  = "Acknowledged / स्वीकृत";
       }
-      
+
       const privacyText = p.isPublic ? "Shared with Church / सार्वजनिक" : "Pastor Only / फक्त पास्टर";
       const timeStr = formatTimeAgo(p.createdAt);
-      
+
       let pastorNoteHtml = "";
       if (p.pastorNote) {
         pastorNoteHtml = `
@@ -5706,7 +5790,7 @@ function renderUserPortal() {
           </div>
         `;
       }
-      
+
       card.innerHTML = `
         <div class="prayer-card-header">
           <span class="badge-status ${badgeClass}">${badgeText}</span>
@@ -5720,36 +5804,39 @@ function renderUserPortal() {
           </button>
         ` : ""}
       `;
-      
+
       const ansBtn = card.querySelector(".btn-mark-answered");
       if (ansBtn) {
-        ansBtn.addEventListener("click", () => {
-          toggleAnsweredPrayer(p.id);
-          renderUserPortal();
+        ansBtn.addEventListener("click", async () => {
+          ansBtn.disabled = true;
+          await toggleAnsweredPrayer(p.id);
+          // Listener will refresh the UI automatically via window._rolPrayers update
         });
       }
-      
+
       listEl.appendChild(card);
     });
   }
 }
 
+
 // Render Pastor Portal list
 function renderPastorPortal() {
-  const listEl = document.getElementById("prayers-pastor-list");
+  const listEl  = document.getElementById("prayers-pastor-list");
   const emptyEl = document.getElementById("prayers-pastor-list-empty");
   const statsEl = document.getElementById("pastor-dashboard-stats");
   if (!listEl || !emptyEl) return;
-  
-  const prayers = getGlobalPrayers();
-  
-  const activeCount = prayers.filter(p => p.status === "pending" || p.status === "acknowledged").length;
+
+  // Use the real-time cached prayers from the Firestore listener
+  const prayers = window._rolPrayers || [];
+
+  const activeCount  = prayers.filter(p => p.status === "pending" || p.status === "acknowledged").length;
   const pendingCount = prayers.filter(p => p.status === "pending").length;
   const answeredCount = prayers.filter(p => p.status === "answered").length;
   if (statsEl) {
     statsEl.textContent = `Active: ${activeCount} • Pending: ${pendingCount} • Answered: ${answeredCount}`;
   }
-  
+
   listEl.innerHTML = "";
   if (prayers.length === 0) {
     emptyEl.style.display = "block";
@@ -5758,20 +5845,20 @@ function renderPastorPortal() {
     prayers.forEach(p => {
       const card = document.createElement("div");
       card.className = "prayer-card";
-      
+
       let badgeClass = "pending";
-      let badgeText = "Pending / प्रलंबित";
+      let badgeText  = "Pending / प्रलंबित";
       if (p.status === "answered") {
         badgeClass = "answered";
-        badgeText = "Answered / उत्तर मिळालेली";
+        badgeText  = "Answered / उत्तर मिळालेली";
       } else if (p.status === "acknowledged") {
         badgeClass = "acknowledged";
-        badgeText = "Acknowledged / स्वीकृत";
+        badgeText  = "Acknowledged / स्वीकृत";
       }
-      
+
       const privacyText = p.isPublic ? "Shared with Church / सार्वजनिक" : "Pastor Only / फक्त पास्टर (खाजगी)";
       const timeStr = formatTimeAgo(p.createdAt);
-      
+
       let ackButtonHtml = "";
       if (p.status === "pending") {
         ackButtonHtml = `
@@ -5780,7 +5867,7 @@ function renderPastorPortal() {
           </button>
         `;
       }
-      
+
       let pastorNoteHtml = "";
       if (p.pastorNote) {
         pastorNoteHtml = `
@@ -5790,7 +5877,7 @@ function renderPastorPortal() {
           </div>
         `;
       }
-      
+
       card.innerHTML = `
         <div class="prayer-card-header">
           <span class="badge-status ${badgeClass}">${badgeText}</span>
@@ -5800,14 +5887,14 @@ function renderPastorPortal() {
         ${pastorNoteHtml}
         ${ackButtonHtml}
       `;
-      
+
       const ackBtn = card.querySelector(".btn-pastor-ack");
       if (ackBtn) {
         ackBtn.addEventListener("click", () => {
           openPastorAckModal(p.id, p.text);
         });
       }
-      
+
       listEl.appendChild(card);
     });
   }
@@ -5825,147 +5912,332 @@ function openPastorAckModal(prayerId, previewText) {
 }
 
 function initAuthAndPrayers() {
-  const tabSignin = document.getElementById("auth-tab-signin");
-  const tabSignup = document.getElementById("auth-tab-signup");
-  const formEl = document.getElementById("auth-form");
-  const errorMsg = document.getElementById("auth-error-msg");
-  const btnSubmit = document.getElementById("btn-auth-submit");
-  
+  const tabSignin  = document.getElementById("auth-tab-signin");
+  const tabSignup  = document.getElementById("auth-tab-signup");
+  const formEl     = document.getElementById("auth-form");
+  const errorMsg   = document.getElementById("auth-error-msg");
+  const btnSubmit  = document.getElementById("btn-auth-submit");
+  const googleBtn  = document.getElementById("btn-google-signin");
+  const googleBtnText = document.getElementById("btn-google-signin-text");
+
   let currentAuthTab = "signin";
-  
+
+  /* ── Helper: show/hide loading state on submit buttons ── */
+  function setAuthLoading(loading) {
+    if (btnSubmit) {
+      btnSubmit.disabled = loading;
+      const span = btnSubmit.querySelector("#auth-submit-text");
+      const icon = btnSubmit.querySelector("#auth-submit-icon");
+      if (span) span.textContent = loading
+        ? "Please wait… / प्रतीक्षा करा…"
+        : (currentAuthTab === "signup" ? "Create Account / नोंदणी करा" : "Sign In / लॉगिन करा");
+      if (icon) icon.style.opacity = loading ? "0" : "1";
+    }
+    if (googleBtn) {
+      googleBtn.disabled = loading;
+      if (googleBtnText) googleBtnText.textContent = loading ? "Signing in…" : "Continue with Google";
+    }
+  }
+
+  function showError(msgEn, msgMr) {
+    if (errorMsg) {
+      const span = errorMsg.querySelector("span");
+      if (span) span.textContent = state.translation !== "eng" ? msgMr : msgEn;
+      else errorMsg.textContent = state.translation !== "eng" ? msgMr : msgEn;
+      errorMsg.style.display = "flex";
+      // Re-trigger shake animation
+      errorMsg.style.animation = "none";
+      void errorMsg.offsetHeight;
+      errorMsg.style.animation = "";
+    }
+  }
+
+  function hideError() {
+    if (errorMsg) errorMsg.style.display = "none";
+  }
+
+  /* ── Password eye toggle ── */
+  const eyeBtn      = document.getElementById("btn-toggle-password");
+  const eyeShow     = document.getElementById("eye-icon-show");
+  const eyeHide     = document.getElementById("eye-icon-hide");
+  const passInput   = document.getElementById("auth-input-password");
+  if (eyeBtn && passInput) {
+    eyeBtn.addEventListener("click", () => {
+      const isPass = passInput.type === "password";
+      passInput.type = isPass ? "text" : "password";
+      if (eyeShow) eyeShow.style.display = isPass ? "none" : "block";
+      if (eyeHide) eyeHide.style.display = isPass ? "block" : "none";
+    });
+  }
+
+  /* ── Forgot password ── */
+  const forgotBtn = document.getElementById("btn-forgot-password");
+  if (forgotBtn) {
+    forgotBtn.addEventListener("click", async () => {
+      const emailVal = (document.getElementById("auth-input-email")?.value || "").trim();
+      if (!emailVal) {
+        showError("Enter your email above first.", "आधी वरती ईमेल टाका.");
+        return;
+      }
+      forgotBtn.disabled = true;
+      try {
+        await FirebaseApp.sendPasswordResetEmail(emailVal);
+        showToast("🔑 Password reset email sent! Check your inbox / रीसेट ईमेल पाठवला — इनबॉक्स तपासा!");
+      } catch (err) {
+        if (err.code === 'auth/user-not-found') {
+          showToast("No account found with that email. / या ईमेलसाठी अकाउंट नाही.");
+        } else {
+          showToast("Could not send reset email. Please try again.");
+        }
+        console.error('[ROL Auth] Forgot password error:', err);
+      } finally {
+        forgotBtn.disabled = false;
+      }
+    });
+  }
+
+  /* ── Bottom switch link (Don't have account? / Already have account?) ── */
+  const switchBtn   = document.getElementById("auth-switch-btn");
+  const switchText  = document.getElementById("auth-switch-text");
+  if (switchBtn) {
+    switchBtn.addEventListener("click", () => {
+      if (currentAuthTab === "signin") {
+        tabSignup?.click();
+      } else {
+        tabSignin?.click();
+      }
+    });
+  }
+
+  function updateSwitchLink() {
+    if (currentAuthTab === "signup") {
+      if (switchText) switchText.textContent = "Already have an account?";
+      if (switchBtn)  switchBtn.textContent  = "Sign In / लॉगिन करा";
+    } else {
+      if (switchText) switchText.textContent = "Don't have an account?";
+      if (switchBtn)  switchBtn.textContent  = "Register / नोंदणी करा";
+    }
+  }
+
+  function updateSubmitStyle() {
+    if (!btnSubmit) return;
+    const span = btnSubmit.querySelector("#auth-submit-text");
+    const icon = btnSubmit.querySelector("#auth-submit-icon");
+    if (currentAuthTab === "signup") {
+      btnSubmit.classList.add("is-signup");
+      if (span) span.textContent = "Create Account / नोंदणी करा";
+      // Swap icon to person-plus
+      if (icon) icon.innerHTML = '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/>';
+    } else {
+      btnSubmit.classList.remove("is-signup");
+      if (span) span.textContent = "Sign In / लॉगिन करा";
+      // Swap icon back to sign-in arrow
+      if (icon) icon.innerHTML = '<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/>';
+    }
+  }
+
+  /* ── Tab switching ── */
   if (tabSignin && tabSignup) {
     tabSignin.addEventListener("click", () => {
       currentAuthTab = "signin";
       tabSignin.classList.add("active");
       tabSignup.classList.remove("active");
+      tabSignin.style.background = "var(--primary)";
+      tabSignin.style.color = "#fff";
+      tabSignup.style.background = "transparent";
+      tabSignup.style.color = "var(--text-muted)";
       document.querySelectorAll(".signup-only").forEach(el => el.style.display = "none");
       const titleEl = document.getElementById("auth-title");
-      if (titleEl) titleEl.textContent = "Sign In / लॉगिन करा";
-      if (btnSubmit) btnSubmit.querySelector("span").textContent = "Sign In / लॉगिन करा";
-      if (errorMsg) errorMsg.style.display = "none";
+      const subEl   = document.getElementById("auth-subtitle");
+      if (titleEl) titleEl.textContent = "Welcome Back 🙏";
+      if (subEl)   subEl.textContent   = "Sign in to your River of Life account";
+      hideError();
+      updateSwitchLink();
+      updateSubmitStyle();
     });
-    
+
     tabSignup.addEventListener("click", () => {
       currentAuthTab = "signup";
       tabSignup.classList.add("active");
       tabSignin.classList.remove("active");
+      tabSignup.style.background = "var(--primary)";
+      tabSignup.style.color = "#fff";
+      tabSignin.style.background = "transparent";
+      tabSignin.style.color = "var(--text-muted)";
       document.querySelectorAll(".signup-only").forEach(el => el.style.display = "flex");
       const titleEl = document.getElementById("auth-title");
-      if (titleEl) titleEl.textContent = "Register / नोंदणी करा";
-      if (btnSubmit) btnSubmit.querySelector("span").textContent = "Register / नोंदणी करा";
-      if (errorMsg) errorMsg.style.display = "none";
-    });
-  }
-  
-  if (formEl) {
-    formEl.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const username = document.getElementById("auth-input-username").value.trim();
-      const email = document.getElementById("auth-input-email").value.trim();
-      const password = document.getElementById("auth-input-password").value;
-      const isPastor = document.getElementById("auth-input-pastor").checked;
-      
-      if (!username || !password) return;
-      
-      if (currentAuthTab === "signup") {
-        const res = registerUser(username, email, password, isPastor);
-        if (!res.success) {
-          if (errorMsg) {
-            errorMsg.textContent = state.translation !== "eng" ? res.messageMr : res.messageEn;
-            errorMsg.style.display = "block";
-          }
-          return;
-        }
-        const loginRes = loginUser(username, password);
-        if (loginRes.success) {
-          renderYouProfile();
-          renderPrayersScreen();
-        }
-      } else {
-        const res = loginUser(username, password);
-        if (!res.success) {
-          if (errorMsg) {
-            errorMsg.textContent = state.translation !== "eng" ? res.messageMr : res.messageEn;
-            errorMsg.style.display = "block";
-          }
-          return;
-        }
-        renderYouProfile();
-        renderPrayersScreen();
-      }
-    });
-  }
-  
-  const logoutBtn = document.getElementById("you-btn-logout");
-  if (logoutBtn) {
-    logoutBtn.addEventListener("click", () => {
-      logoutUser();
-      renderYouProfile();
-      renderPrayersScreen();
+      const subEl   = document.getElementById("auth-subtitle");
+      if (titleEl) titleEl.textContent = "Create Account ✨";
+      if (subEl)   subEl.textContent   = "Join the River of Life community";
+      hideError();
+      updateSwitchLink();
+      updateSubmitStyle();
     });
   }
 
-  // Home page authentication banner action
+  /* ── Google Sign-In ── */
+  if (googleBtn) {
+    googleBtn.addEventListener("click", async () => {
+      hideError();
+      setAuthLoading(true);
+      const res = await loginWithGoogle();
+      setAuthLoading(false);
+      if (!res.success) {
+        showError(res.messageEn, res.messageMr || res.messageEn);
+      }
+      // On success, onFirebaseAuthChange fires automatically and updates UI
+    });
+  }
+
+  /* ── Email/Password form submit ── */
+  if (formEl) {
+    formEl.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      hideError();
+
+      const displayName = (document.getElementById("auth-input-username")?.value || "").trim();
+      const email    = (document.getElementById("auth-input-email")?.value    || "").trim();
+      const password = (document.getElementById("auth-input-password")?.value || "");
+      const isPastor = document.getElementById("auth-input-pastor")?.checked || false;
+
+      if (!email || !password) {
+        showError("Please enter your email and password.", "ईमेल आणि पासवर्ड भरा.");
+        return;
+      }
+
+      setAuthLoading(true);
+
+      if (currentAuthTab === "signup") {
+        if (!displayName) {
+          setAuthLoading(false);
+          showError("Please enter your full name.", "आपले पूर्ण नाव भरा.");
+          return;
+        }
+        const res = await registerUser(displayName, email, password, isPastor);
+        setAuthLoading(false);
+        if (!res.success) {
+          showError(res.messageEn, res.messageMr);
+          return;
+        }
+        // Registration succeeded — Firebase sent a verification email automatically
+        // Show a prominent verification notice in the UI
+        showEmailVerificationBanner(email);
+      } else {
+        const res = await loginUser(email, password);
+        setAuthLoading(false);
+        if (!res.success) {
+          showError(res.messageEn, res.messageMr);
+          return;
+        }
+        // onFirebaseAuthChange fires automatically after signInWithEmail and updates UI
+      }
+    });
+  }
+
+  /* ── Logout button (Profile page) ── */
+  const logoutBtn = document.getElementById("you-btn-logout");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", async () => {
+      await logoutUser();
+      // onFirebaseAuthChange fires automatically and clears state / re-renders
+    });
+  }
+
+  /* ── Home page authentication banner action ── */
   const homeBannerBtn = document.getElementById("home-auth-banner-btn");
   if (homeBannerBtn) {
-    homeBannerBtn.addEventListener("click", () => {
+    homeBannerBtn.addEventListener("click", async () => {
       if (state.currentUser) {
-        logoutUser();
-        renderYouProfile();
-        renderPrayersScreen();
+        await logoutUser();
       } else {
         window.location.hash = "#/you";
       }
     });
   }
-  
-  // Header authentication button action
+
+  /* ── Header authentication button action ── */
   const headerAuthBtn = document.getElementById("header-auth-btn");
   if (headerAuthBtn) {
     headerAuthBtn.addEventListener("click", () => {
       window.location.hash = "#/you";
     });
   }
-  
+
+  /* ── Prayer form submit (async Firestore) ── */
   const prayerForm = document.getElementById("prayer-form");
   if (prayerForm) {
-    prayerForm.addEventListener("submit", (e) => {
+    prayerForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const text = document.getElementById("prayer-input-text").value.trim();
+      const text    = document.getElementById("prayer-input-text").value.trim();
       const privacy = document.getElementById("prayer-input-privacy").value;
       const isPublic = (privacy === "public");
-      
+
       if (!text) return;
-      
-      const res = submitPrayerRequest(text, isPublic);
+
+      const submitBtn = prayerForm.querySelector("button[type='submit']");
+      if (submitBtn) submitBtn.disabled = true;
+
+      const res = await submitPrayerRequest(text, isPublic);
+
+      if (submitBtn) submitBtn.disabled = false;
+
       if (res.success) {
         document.getElementById("prayer-input-text").value = "";
         renderUserPortal();
+        showToast("🙏 Prayer submitted! / प्रार्थना सबमिट झाली!");
+      } else {
+        showToast("Failed to submit prayer. Please try again.");
       }
     });
   }
-  
+
+  /* ── Pastor Ack Modal ── */
   const closeAckBtn = document.getElementById("btn-close-pastor-ack");
   if (closeAckBtn) {
     closeAckBtn.addEventListener("click", () => {
       closeModal("modal-pastor-ack");
     });
   }
-  
+
   const ackSubmitBtn = document.getElementById("btn-pastor-ack-submit");
   if (ackSubmitBtn) {
-    ackSubmitBtn.addEventListener("click", () => {
+    ackSubmitBtn.addEventListener("click", async () => {
       const note = document.getElementById("pastor-ack-note").value.trim();
       if (!note || !activeAckPrayerId) return;
-      
-      const res = pastorAckPrayer(activeAckPrayerId, note);
+
+      ackSubmitBtn.disabled = true;
+      const res = await pastorAckPrayer(activeAckPrayerId, note);
+      ackSubmitBtn.disabled = false;
+
       if (res) {
         closeModal("modal-pastor-ack");
         renderPastorPortal();
       }
     });
   }
+
+  /* ── Register Firebase Auth State Observer ──
+     This is the key change: instead of reading from localStorage for session,
+     Firebase automatically fires this on every page load if a user is still
+     signed in (via its cookie/token), so no explicit session restoration needed. */
+  if (window.FirebaseApp) {
+    FirebaseApp.onAuthChange(onFirebaseAuthChange);
+  }
+
+  /* ── Set up real-time prayer listener (updates UI when any device posts) ── */
+  if (window.FirebaseApp) {
+    FirebaseApp.listenPrayers(prayers => {
+      // Store prayers in a module-level variable so portals can use them
+      window._rolPrayers = prayers;
+      // Refresh portal if currently viewing the prayers screen
+      const prayersView = document.getElementById("view-prayers");
+      if (prayersView && prayersView.classList.contains("active")) {
+        renderPrayersScreen();
+      }
+    });
+  }
 }
+
 
 // Update Authentication UI elements across Home page banner and Header bar
 // Auth Modal & DataSource Handlers
@@ -5979,53 +6251,58 @@ window.closeAuthModal = function() {
   if (modal) modal.style.display = "none";
 };
 
-window.handleAuthSubmit = function(e) {
+window.handleAuthSubmit = async function(e) {
   if (e) e.preventDefault();
-  const identifier = document.getElementById("auth-input-identifier")?.value.trim();
-  const fullName = document.getElementById("auth-input-fullname")?.value.trim();
-  const password = document.getElementById("auth-input-password")?.value.trim() || "";
-  const remember = document.getElementById("auth-checkbox-remember")?.checked || true;
+  const email    = (document.getElementById("auth-input-identifier")?.value || "").trim();
+  const fullName = (document.getElementById("auth-input-fullname")?.value   || "").trim();
+  const password = (document.getElementById("auth-input-password")?.value   || "").trim();
 
-  if (!identifier || !fullName) {
-    showToast("Please enter Phone/Email and Name / नाव व संपर्क माहिती भरा");
+  if (!email) {
+    showToast("Please enter your email / ईमेल भरा");
     return;
   }
 
-  // Datasource lookup in localStorage (rol_user_database)
-  let userDb = [];
   try {
-    userDb = JSON.parse(localStorage.getItem("rol_user_database") || "[]");
-  } catch(err) { userDb = []; }
-
-  let user = userDb.find(u => u.identifier.toLowerCase() === identifier.toLowerCase());
-  if (user) {
-    user.username = fullName;
-    user.lastLogin = Date.now();
-  } else {
-    user = {
-      id: "usr_" + Date.now(),
-      identifier: identifier,
-      username: fullName,
-      created: Date.now(),
-      quizPoints: 0,
-      highlights: [],
-      prayerRequests: []
-    };
-    userDb.push(user);
-  }
-
-  try {
-    localStorage.setItem("rol_user_database", JSON.stringify(userDb));
-    if (remember) {
-      localStorage.setItem("rol_current_user", JSON.stringify(user));
+    // Try sign-in first; if user doesn't exist, register them
+    let cred;
+    try {
+      cred = await FirebaseApp.signInWithEmail(email, password);
+    } catch (signInErr) {
+      if (signInErr.code === 'auth/user-not-found' || signInErr.code === 'auth/invalid-credential') {
+        // Register new user with provided full name
+        const displayName = fullName || email.split('@')[0];
+        cred = await FirebaseApp.registerWithEmail(displayName, email, password || 'default123');
+        await FirebaseApp.saveUserProfile(cred.user.uid, {
+          displayName,
+          email: email.toLowerCase(),
+          isPastor:  false,
+          isAdmin:   false,
+          churchName: '',
+          photo:     '',
+          streak:    1,
+          quizPoints: 0,
+          quizHighscore: 0,
+          quizBadges: [],
+          bookmarks: [],
+          highlights: {},
+          userNotes: {},
+          createdVerseImages: [],
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        });
+      } else {
+        throw signInErr;
+      }
     }
-  } catch(err) {}
 
-  state.currentUser = user;
-  updateAuthUI();
-  closeAuthModal();
-  showToast("Welcome, " + user.username + "! Data synced ☁️");
+    // onFirebaseAuthChange fires automatically and updates UI
+    closeAuthModal();
+    showToast("Welcome! Data synced ☁️ / स्वागत आहे!");
+  } catch (err) {
+    console.error('[ROL Modal Auth] Error:', err);
+    showToast("Sign in failed. Please check your details / चुकीची माहिती");
+  }
 };
+
 
 function updateAuthUI() {
   const headerIconLoggedOut = document.getElementById("header-auth-icon-loggedout");
@@ -6079,12 +6356,10 @@ function updateAuthUI() {
   }
 }
 
-window.toggleDrawerAuth = function() {
+window.toggleDrawerAuth = async function() {
   if (state.currentUser) {
-    state.currentUser = null;
-    try { localStorage.removeItem("rol_current_user"); } catch(e){}
+    await logoutUser();
     showToast("Signed out successfully / बाहेर पडलात");
-    updateAuthUI();
   } else {
     closeDrawer("drawer-account-settings");
     openAuthModal();

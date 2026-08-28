@@ -739,12 +739,11 @@ let state = {
   history: [],             // list of reading logs {ref, book, chapter, timestamp}
   streak: 1,               // daily consecutive streak counter
   userLikes: {},           // map of verse_ref -> liked boolean
-  userNotes: {},           // map of book_chapter_verse -> journal note string
-  audioTone: 'deep-bass',  // 'normal', 'deep-bass', 'warm-resonance'
-  audioSource: 'human',     // 'human' (streaming MP3), 'ai' (TTS), or 'elevenlabs' (API)
-  elevenLabsKey: ELEVENLABS_DEFAULT_KEY, // ElevenLabs API Key
-  elevenLabsVoice: 'kqVT88a5QfII1HNAEPTJ', // Declan Sage voice ID
-  quizPoints: 0,           // Total points earned
+  audioTone: 'warm-resonance',
+  audioSource: 'sarvam',     // 'sarvam' (Sarvam AI Bulbul V3 Indian Voice), 'human' (streaming MP3)
+  sarvamVoice: 'ratan',      // 'ratan' (Mature Spiritual English Indian Male), 'shubh' (Hindi/Marathi Male)
+  sarvamPace: 0.92,          // 0.92x peaceful Bible reading speed
+  sarvamApiKey: '',          // Optional Sarvam API key override
   quizHighscore: 0,        // High score in a single quiz session
   quizBadges: [],          // Unlocked badge IDs
   currentUser: null,       // Logged in user session ({ username, isPastor, email })
@@ -1915,7 +1914,7 @@ function fallbackToDirectPlay(mp3Url) {
 }
 
 /* ==========================================================================
-   Bilingual Narrator (TTS)
+   Sarvam AI Bulbul V3 Indian Voice Narrator (TTS)
    ========================================================================== */
 function startSpeechNarration() {
   closeModal("modal-audio-settings");
@@ -1925,7 +1924,12 @@ function startSpeechNarration() {
     audioPlayerInstance = null;
   }
   
-  speechSynthesis.cancel();
+  if (window.SarvamTTS && window.SarvamTTS.queue) {
+    window.SarvamTTS.queue.stop();
+  }
+  if (typeof speechSynthesis !== 'undefined') {
+    speechSynthesis.cancel();
+  }
 
   // Start background worship music if selected
   const bgMusicSelect = document.getElementById("audio-bg-music-select");
@@ -1958,9 +1962,8 @@ function startSpeechNarration() {
     const mp3Url = `https://www.wordproaudio.net/bibles/app/audio/28/${bookId}/${state.activeChapter}.mp3`;
     
     audioState.isPlaying = true;
-    audioState.speed = parseFloat(document.getElementById("tts-speed-slider").value);
+    audioState.speed = parseFloat(document.getElementById("tts-speed-slider")?.value || 0.92);
     
-    // Play directly without CORS or Web Audio filters to prevent browser playback block on iOS
     audioPlayerInstance = new Audio(mp3Url);
     audioPlayerInstance.playbackRate = audioState.speed;
     
@@ -1991,198 +1994,113 @@ function startSpeechNarration() {
     return;
   }
 
-  if (state.audioSource === "elevenlabs") {
-    const keyToUse = state.elevenLabsKey || ELEVENLABS_DEFAULT_KEY;
-    if (!keyToUse) {
-      showToast("Please enter ElevenLabs API Key in Settings");
-      closeAllDrawers();
-      window.location.hash = "#/you";
-      document.querySelectorAll(".profile-tab-btn").forEach(b => {
-        b.classList.toggle("active", b.dataset.tab === "you-settings");
-      });
-      document.querySelectorAll(".profile-tab-panel").forEach(panel => {
-        panel.classList.toggle("active", panel.id === "you-tab-content-you-settings");
-      });
-      renderYouProfile();
-      return;
-    }
-    
-    showToast("Generating ElevenLabs narration...");
-    audioState.isPlaying = true;
-    audioState.speed = parseFloat(document.getElementById("tts-speed-slider").value);
-    
-    document.getElementById("floating-audio-playbar").classList.add("active");
-    // Show spinner in playbar
-    document.getElementById("playbar-icon-svg").innerHTML = `
-      <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="38" stroke-dashoffset="19">
-        <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s" repeatCount="indefinite"/>
-      </circle>
-    `;
-    
-    const elements = document.querySelectorAll(".verse-row");
-    let versesList = [];
-    elements.forEach(el => {
-      let txt = el.dataset.text || "";
-      const cleanText = txt.replace(/[:;()[\]{}—•\-]/g, ' ').replace(/\s+/g, ' ').trim();
-      if (cleanText) versesList.push(cleanText);
-    });
-    const fullText = versesList.join(" ");
-    
-    // Use stable eleven_multilingual_v2 model for both English and Marathi/parallel 
-    // since legacy monolingual_v1 is deprecated/restricted on newer accounts
-    const modelId = "eleven_multilingual_v2";
-    
-    fetch(`https://api.elevenlabs.io/v1/text-to-speech/${state.elevenLabsVoice}`, {
-      method: "POST",
-      headers: {
-        "xi-api-key": keyToUse,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        text: fullText,
-        model_id: modelId,
-        voice_settings: {
-          stability: 0.5,
-          similarity_boost: 0.75
-        }
-      })
-    })
-    .then(async response => {
-      if (!response.ok) {
-        let errMsg = `Status ${response.status}`;
-        try {
-          const errData = await response.json();
-          if (errData && errData.detail && errData.detail.message) {
-            errMsg = errData.detail.message;
-          } else if (errData && errData.message) {
-            errMsg = errData.message;
-          }
-        } catch (_) {}
-        throw new Error(errMsg);
-      }
-      return response.blob();
-    })
-    .then(blob => {
-      if (!audioState.isPlaying) {
-        return;
-      }
-      
-      const audioUrl = URL.createObjectURL(blob);
-      audioPlayerInstance = new Audio(audioUrl);
-      audioPlayerInstance.playbackRate = audioState.speed;
-      
-      // Connect to Web Audio API context and add a GainNode to boost the volume level
-      // This increases the storytelling voice level safely (same-origin blob doesn't trigger CORS blocks)
-      try {
-        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-        if (AudioContextClass) {
-          const audioCtx = new AudioContextClass();
-          const source = audioCtx.createMediaElementSource(audioPlayerInstance);
-          const gainNode = audioCtx.createGain();
-          gainNode.gain.value = 1.8; // Boost output volume level by 80%
-          source.connect(gainNode);
-          gainNode.connect(audioCtx.destination);
-          
-          audioPlayerInstance.addEventListener('play', () => {
-            if (audioCtx.state === 'suspended') {
-              audioCtx.resume();
-            }
-          });
-        }
-      } catch (e) {
-        console.warn("Volume level boost failed, playing at normal volume:", e);
-      }
-      
-      document.getElementById("playbar-icon-svg").innerHTML = `<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>`;
-      
-      audioPlayerInstance.ontimeupdate = () => {
-        if (audioPlayerInstance && audioPlayerInstance.duration) {
-          const pct = (audioPlayerInstance.currentTime / audioPlayerInstance.duration) * 100;
-          document.getElementById("playbar-progress-line").style.width = `${pct}%`;
-        }
-      };
-      
-      audioPlayerInstance.onended = () => {
-        stopSpeechNarration();
-      };
-      
-      audioPlayerInstance.onerror = () => {
-        showToast("ElevenLabs playback error");
-        stopSpeechNarration();
-      };
-      
-      audioPlayerInstance.play().catch(err => {
-        console.warn("ElevenLabs audio playback failed:", err);
-        showToast("Playback failed or blocked by browser");
-        stopSpeechNarration();
-      });
-    })
-    .catch(err => {
-      console.warn("ElevenLabs generation failed, falling back to standard narrator:", err);
-      showToast("Premium voice unavailable. Switching to standard reader...");
-      
-      const originalSource = state.audioSource;
-      if (state.translation !== "eng") {
-        state.audioSource = "human"; // Fallback to professional human recorded Marathi male voice
-      } else {
-        state.audioSource = "ai"; // Fallback to system English male voice
-      }
-      
-      setTimeout(() => {
-        startSpeechNarration();
-        // Restore original ElevenLabs setting in background state
-        state.audioSource = originalSource;
-        saveStateToLocalStorage();
-      }, 1500);
-    });
-    
-    return;
-  }
-  
-  if (typeof speechSynthesis === 'undefined') {
-    showToast("Text-to-speech not supported");
-    return;
-  }
-  
-  const voiceSelect = document.getElementById("tts-voice-select");
-  const selectedVal = voiceSelect.value;
-  
-  if (selectedVal === "default") {
-    audioState.selectedVoice = findBestDefaultVoice(audioState.voices, state.translation);
-  } else {
-    const matching = audioState.voices.filter(v => 
-      state.translation === "eng" ? v.lang.startsWith("en") : (v.lang.startsWith("mr") || v.lang.startsWith("hi") || v.lang.startsWith("en"))
-    );
-    audioState.selectedVoice = matching[parseInt(selectedVal)];
-  }
-  
+  // Sarvam AI Bulbul V3 Indian Voice Narration
   const elements = document.querySelectorAll(".verse-row");
   if (elements.length === 0) return;
   
   audioState.versesToRead = [];
   elements.forEach(el => {
     let txt = el.dataset.text || "";
-    
-    if (state.translation === "parallel" && audioState.selectedVoice) {
-      if (audioState.selectedVoice.lang.startsWith("en")) {
-        const enDiv = el.querySelector(".verse-parallel-en");
-        if (enDiv) txt = enDiv.textContent;
-      }
+    if (state.translation === "parallel") {
+      const enDiv = el.querySelector(".verse-parallel-en");
+      if (enDiv) txt = enDiv.textContent;
     }
-    
     const cleanText = txt.replace(/[:;()[\]{}—•\-]/g, ' ').replace(/\s+/g, ' ').trim();
-    audioState.versesToRead.push({
-      key: el.dataset.verseId,
-      text: cleanText
-    });
+    if (cleanText) {
+      audioState.versesToRead.push({
+        key: el.dataset.verseId,
+        text: cleanText
+      });
+    }
   });
   
+  if (audioState.versesToRead.length === 0) return;
+
+  const speedVal = parseFloat(document.getElementById("tts-speed-slider")?.value || 0.92);
+  audioState.speed = speedVal;
   audioState.currentVerseIndex = 0;
   audioState.isPlaying = true;
-  audioState.speed = parseFloat(document.getElementById("tts-speed-slider").value);
-  
+
+  const speedPill = document.getElementById("playbar-btn-speed");
+  if (speedPill) speedPill.textContent = `${speedVal}x`;
+
   document.getElementById("floating-audio-playbar").classList.add("active");
-  speakPlaybarVerse(audioState.currentVerseIndex);
+
+  const langCode = (state.translation === "eng") ? "en-IN" : "hi-IN";
+  const voiceSelect = document.getElementById("audio-narrator-gender-select");
+  const selectedVoiceId = voiceSelect ? voiceSelect.value : (langCode === "en-IN" ? "ratan" : "shubh");
+
+  if (window.SarvamTTS && window.SarvamTTS.queue) {
+    window.SarvamTTS.queue.setListeners({
+      onVerseChange: (index, verse) => {
+        audioState.currentVerseIndex = index;
+        document.querySelectorAll(".verse-row").forEach(v => {
+          v.classList.toggle("tts-reading", v.dataset.verseId === verse.key);
+        });
+        const activeEl = document.querySelector(`.verse-row[data-verse-id="${verse.key}"]`);
+        if (activeEl) activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        const indicatorEl = document.getElementById("playbar-verse-indicator");
+        if (indicatorEl) {
+          const total = audioState.versesToRead.length;
+          if (verse && verse.key === "vod_verse") {
+            indicatorEl.textContent = "🔊 Daily Bible Verse";
+          } else if (verse && verse.key) {
+            const parts = verse.key.split("_");
+            if (parts.length >= 3) {
+              const bMeta = booksMetadataMr.find(b => b.filename.replace(".json", "") === parts[0]);
+              const bName = (state.translation === "eng" && bMeta) ? bMeta.engName : (bMeta ? bMeta.name : parts[0]);
+              indicatorEl.textContent = `${bName} ${parts[1]}:${parts[2]} (${index + 1}/${total})`;
+            } else {
+              indicatorEl.textContent = `Verse ${index + 1} of ${total}`;
+            }
+          } else {
+            indicatorEl.textContent = `Verse ${index + 1} of ${total}`;
+          }
+        }
+
+        const progress = ((index + 1) / audioState.versesToRead.length) * 100;
+        document.getElementById("playbar-progress-line").style.width = `${progress}%`;
+      },
+      onStateChange: (playbackState) => {
+        const iconSvg = document.getElementById("playbar-icon-svg");
+        if (!iconSvg) return;
+        if (playbackState === "loading") {
+          iconSvg.innerHTML = `
+            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="38" stroke-dashoffset="19">
+              <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s" repeatCount="indefinite"/>
+            </circle>
+          `;
+        } else if (playbackState === "playing") {
+          iconSvg.innerHTML = `<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>`;
+        } else {
+          iconSvg.innerHTML = `<polygon points="5 3 19 12 5 21 5 3"></polygon>`;
+        }
+      },
+      onComplete: () => {
+        stopSpeechNarration();
+      },
+      onError: (err, index, verse) => {
+        console.warn("[Sarvam TTS] Error on verse:", err);
+        if (err.message === "NO_API_KEY") {
+          showToast("Please enter Sarvam AI API key in Settings");
+          openModal("modal-audio-settings");
+        } else {
+          showToast(`Voice narration: ${err.message || 'Error'}`);
+        }
+      }
+    });
+
+    window.SarvamTTS.queue.loadVerses(audioState.versesToRead, 0, {
+      lang: langCode,
+      speaker: selectedVoiceId,
+      pace: speedVal
+    });
+
+    window.SarvamTTS.queue.play();
+  } else {
+    speakPlaybarVerse(0);
+  }
 }
 
 function speakPlaybarVerse(index) {
@@ -2192,84 +2110,9 @@ function speakPlaybarVerse(index) {
   }
   
   audioState.currentVerseIndex = index;
-  const verse = audioState.versesToRead[index];
-  
-  document.querySelectorAll(".verse-row").forEach(v => {
-    v.classList.toggle("tts-reading", v.dataset.verseId === verse.key);
-  });
-  
-  const activeEl = document.querySelector(`.verse-row[data-verse-id="${verse.key}"]`);
-  if (activeEl) activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  
-  // Update floating playbar verse indicator text
-  const indicatorEl = document.getElementById("playbar-verse-indicator");
-  if (indicatorEl) {
-    const total = audioState.versesToRead.length;
-    if (verse && verse.key === "vod_verse") {
-      indicatorEl.textContent = "🔊 Daily Bible Verse";
-    } else if (verse && verse.key) {
-      const parts = verse.key.split("_");
-      if (parts.length >= 3) {
-        const bMeta = booksMetadataMr.find(b => b.filename.replace(".json", "") === parts[0]);
-        const bName = (state.translation === "eng" && bMeta) ? bMeta.engName : (bMeta ? bMeta.name : parts[0]);
-        indicatorEl.textContent = `${bName} ${parts[1]}:${parts[2]} (${index + 1}/${total})`;
-      } else {
-        indicatorEl.textContent = `Verse ${index + 1} of ${total}`;
-      }
-    } else {
-      indicatorEl.textContent = `Verse ${index + 1} of ${total}`;
-    }
+  if (window.SarvamTTS && window.SarvamTTS.queue && window.SarvamTTS.queue.isPlaying) {
+    window.SarvamTTS.queue.jumpToVerse(index);
   }
-
-  // Set play icon to paused lines
-  document.getElementById("playbar-icon-svg").innerHTML = `<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>`;
-  
-  const progress = ((index + 1) / audioState.versesToRead.length) * 100;
-  document.getElementById("playbar-progress-line").style.width = `${progress}%`;
-  
-  const utterance = new SpeechSynthesisUtterance(verse.text);
-  if (audioState.selectedVoice) {
-    utterance.voice = audioState.selectedVoice;
-  } else if (state.translation !== "eng") {
-    const mrVoice = audioState.voices.find(v => v.lang.startsWith("mr") || v.lang.startsWith("hi"));
-    if (mrVoice) utterance.voice = mrVoice;
-  }
-  
-  let basePitch = 0.85;
-  if (state.audioTone === 'deep-bass') basePitch = 0.7;
-  else if (state.audioTone === 'warm-resonance') basePitch = 0.85;
-  else if (state.audioTone === 'normal') basePitch = 1.0;
-  
-  // Apply gender voice pitch settings
-  const genderSelect = document.getElementById("audio-narrator-gender-select");
-  const gender = genderSelect ? genderSelect.value : "male";
-  if (gender === "male") {
-    utterance.pitch = 0.7; // Deep voice
-  } else {
-    utterance.pitch = 1.15; // Soft female voice
-  }
-  utterance.rate = audioState.speed * 0.9;
-  
-  utterance.onend = () => {
-    if (audioState.isPlaying) {
-      audioState.currentVerseIndex++;
-      if (audioState.currentVerseIndex < audioState.versesToRead.length) {
-        speakPlaybarVerse(audioState.currentVerseIndex);
-      } else {
-        stopSpeechNarration();
-      }
-    }
-  };
-  
-  utterance.onerror = () => {
-    if (audioState.isPlaying) {
-      audioState.currentVerseIndex++;
-      speakPlaybarVerse(audioState.currentVerseIndex);
-    }
-  };
-  
-  audioState.activeUtterance = utterance;
-  speechSynthesis.speak(utterance);
 }
 
 function togglePlaybarSpeech() {
@@ -2283,10 +2126,13 @@ function togglePlaybarSpeech() {
       audioPlayerInstance.pause();
       document.getElementById("playbar-icon-svg").innerHTML = `<polygon points="5 3 19 12 5 21 5 3"></polygon>`;
     }
-  } else if (state.audioSource === "elevenlabs") {
-    // Cancel loading if clicked while ElevenLabs is generating
-    stopSpeechNarration();
-  } else {
+  } else if (window.SarvamTTS && window.SarvamTTS.queue) {
+    if (window.SarvamTTS.queue.isPaused) {
+      window.SarvamTTS.queue.resume();
+    } else {
+      window.SarvamTTS.queue.pause();
+    }
+  } else if (typeof speechSynthesis !== 'undefined') {
     if (speechSynthesis.paused) {
       speechSynthesis.resume();
       document.getElementById("playbar-icon-svg").innerHTML = `<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>`;
@@ -2303,7 +2149,12 @@ function stopSpeechNarration() {
     audioPlayerInstance.pause();
     audioPlayerInstance = null;
   }
-  speechSynthesis.cancel();
+  if (window.SarvamTTS && window.SarvamTTS.queue) {
+    window.SarvamTTS.queue.stop();
+  }
+  if (typeof speechSynthesis !== 'undefined') {
+    speechSynthesis.cancel();
+  }
   
   // Stop background worship music
   ambientSynthInstance.stop();
@@ -2327,7 +2178,11 @@ function startSpeechNarrationFromVerse(verseNum) {
   if (audioState.versesToRead && targetIndex < audioState.versesToRead.length) {
     audioState.isPlaying = true;
     document.getElementById("floating-audio-playbar").classList.add("active");
-    speakPlaybarVerse(targetIndex);
+    if (window.SarvamTTS && window.SarvamTTS.queue && window.SarvamTTS.queue.isPlaying) {
+      window.SarvamTTS.queue.jumpToVerse(targetIndex);
+    } else {
+      startSpeechNarration();
+    }
   } else {
     startSpeechNarration();
   }
@@ -2338,14 +2193,19 @@ function playDailyVerseAudio() {
   const vodRefEl = document.getElementById("home-vod-ref");
   if (!vodTextEl) return;
 
-  const rawText = vodTextEl.textContent.replace(/["']/g, '');
-  const refText = vodRefEl ? vodRefEl.textContent : "Daily Verse";
+  const rawText = vodTextEl.textContent.replace(/["']/g, '').trim();
+  const refText = vodRefEl ? vodRefEl.textContent.trim() : "Daily Verse";
 
   if (audioPlayerInstance) {
     audioPlayerInstance.pause();
     audioPlayerInstance = null;
   }
-  speechSynthesis.cancel();
+  if (window.SarvamTTS && window.SarvamTTS.queue) {
+    window.SarvamTTS.queue.stop();
+  }
+  if (typeof speechSynthesis !== 'undefined') {
+    speechSynthesis.cancel();
+  }
 
   showToast(`🔊 Listening: ${refText}`);
 
@@ -2356,11 +2216,58 @@ function playDailyVerseAudio() {
   audioState.currentVerseIndex = 0;
   audioState.isPlaying = true;
 
+  const speedVal = parseFloat(document.getElementById("tts-speed-slider")?.value || 0.92);
+  audioState.speed = speedVal;
+
   const speedPill = document.getElementById("playbar-btn-speed");
-  if (speedPill) speedPill.textContent = `${audioState.speed || 1.0}x`;
+  if (speedPill) speedPill.textContent = `${speedVal}x`;
 
   document.getElementById("floating-audio-playbar").classList.add("active");
-  speakPlaybarVerse(0);
+
+  const langCode = (state.translation === "eng") ? "en-IN" : "hi-IN";
+  const voiceSelect = document.getElementById("audio-narrator-gender-select");
+  const selectedVoiceId = voiceSelect ? voiceSelect.value : (langCode === "en-IN" ? "ratan" : "shubh");
+
+  if (window.SarvamTTS && window.SarvamTTS.queue) {
+    window.SarvamTTS.queue.setListeners({
+      onVerseChange: () => {
+        const indicatorEl = document.getElementById("playbar-verse-indicator");
+        if (indicatorEl) indicatorEl.textContent = `🔊 Daily Verse: ${refText}`;
+        document.getElementById("playbar-progress-line").style.width = `100%`;
+      },
+      onStateChange: (playbackState) => {
+        const iconSvg = document.getElementById("playbar-icon-svg");
+        if (!iconSvg) return;
+        if (playbackState === "loading") {
+          iconSvg.innerHTML = `
+            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="38" stroke-dashoffset="19">
+              <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s" repeatCount="indefinite"/>
+            </circle>
+          `;
+        } else if (playbackState === "playing") {
+          iconSvg.innerHTML = `<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>`;
+        } else {
+          iconSvg.innerHTML = `<polygon points="5 3 19 12 5 21 5 3"></polygon>`;
+        }
+      },
+      onComplete: () => stopSpeechNarration(),
+      onError: (err) => {
+        if (err.message === "NO_API_KEY") {
+          showToast("Please enter Sarvam AI API Key in Settings");
+          openModal("modal-audio-settings");
+        } else {
+          showToast(`Voice: ${err.message || 'Error'}`);
+        }
+      }
+    });
+
+    window.SarvamTTS.queue.loadVerses(audioState.versesToRead, 0, {
+      lang: langCode,
+      speaker: selectedVoiceId,
+      pace: speedVal
+    });
+    window.SarvamTTS.queue.play();
+  }
 }
 
 // Global Audio Processing Variables for Web Audio API
@@ -3992,8 +3899,8 @@ function setupEventListeners() {
   const speedPillBtn = document.getElementById("playbar-btn-speed");
   if (speedPillBtn) {
     speedPillBtn.addEventListener("click", () => {
-      const speeds = [1.0, 1.25, 1.5, 2.0, 0.75];
-      let currIdx = speeds.indexOf(audioState.speed || 1.0);
+      const speeds = [0.92, 1.0, 1.15, 1.25, 0.85];
+      let currIdx = speeds.indexOf(audioState.speed || 0.92);
       if (currIdx === -1) currIdx = 0;
       const nextSpeed = speeds[(currIdx + 1) % speeds.length];
       audioState.speed = nextSpeed;
@@ -4005,56 +3912,67 @@ function setupEventListeners() {
       
       if (audioPlayerInstance) {
         audioPlayerInstance.playbackRate = nextSpeed;
-      } else if (audioState.isPlaying && speechSynthesis.speaking) {
-        speechSynthesis.cancel();
-        speakPlaybarVerse(audioState.currentVerseIndex);
+      } else if (window.SarvamTTS && window.SarvamTTS.queue && window.SarvamTTS.queue.isPlaying) {
+        window.SarvamTTS.queue.setOptions({ pace: nextSpeed });
       }
-      showToast(`Speed set to ${nextSpeed}x`);
+      showToast(`Narration speed set to ${nextSpeed}x`);
     });
   }
 
   document.getElementById("playbar-btn-prev").addEventListener("click", () => {
     if (audioPlayerInstance) {
       audioPlayerInstance.currentTime = Math.max(0, audioPlayerInstance.currentTime - 10);
-    } else if (audioState.currentVerseIndex > 0) {
-      speechSynthesis.cancel();
-      audioState.currentVerseIndex--;
-      speakPlaybarVerse(audioState.currentVerseIndex);
+    } else if (window.SarvamTTS && window.SarvamTTS.queue) {
+      window.SarvamTTS.queue.previous();
     }
   });
   
   document.getElementById("playbar-btn-next").addEventListener("click", () => {
     if (audioPlayerInstance) {
       audioPlayerInstance.currentTime = Math.min(audioPlayerInstance.duration || 9999, audioPlayerInstance.currentTime + 10);
-    } else if (audioState.currentVerseIndex < audioState.versesToRead.length - 1) {
-      speechSynthesis.cancel();
-      audioState.currentVerseIndex++;
-      speakPlaybarVerse(audioState.currentVerseIndex);
+    } else if (window.SarvamTTS && window.SarvamTTS.queue) {
+      window.SarvamTTS.queue.next();
     }
   });
   
   const speedSlider = document.getElementById("tts-speed-slider");
-  speedSlider.addEventListener("input", (e) => {
-    const val = parseFloat(e.target.value).toFixed(2);
-    document.getElementById("tts-speed-val").textContent = `${val}x`;
-    audioState.speed = parseFloat(val);
-    if (audioPlayerInstance) {
-      audioPlayerInstance.playbackRate = audioState.speed;
-    } else if (audioState.isPlaying && speechSynthesis.speaking) {
-      speechSynthesis.cancel();
-      speakPlaybarVerse(audioState.currentVerseIndex);
-    }
-  });
-  
-  const toneSelect = document.getElementById("audio-tone-select");
-  if (toneSelect) {
-    toneSelect.value = state.audioTone || 'deep-bass';
-    toneSelect.addEventListener("change", () => {
-      updateAudioToneSettings();
-      if (audioState.isPlaying && !audioPlayerInstance) {
-        speechSynthesis.cancel();
-        speakPlaybarVerse(audioState.currentVerseIndex);
+  if (speedSlider) {
+    speedSlider.addEventListener("input", (e) => {
+      const val = parseFloat(e.target.value).toFixed(2);
+      document.getElementById("tts-speed-val").textContent = `${val}x`;
+      audioState.speed = parseFloat(val);
+      if (audioPlayerInstance) {
+        audioPlayerInstance.playbackRate = audioState.speed;
+      } else if (window.SarvamTTS && window.SarvamTTS.queue) {
+        window.SarvamTTS.queue.setOptions({ pace: audioState.speed });
       }
+    });
+  }
+
+  // Sarvam API Key input listener in Settings Modal
+  const sarvamKeyInput = document.getElementById("sarvam-api-key-input");
+  if (sarvamKeyInput) {
+    sarvamKeyInput.value = (window.SarvamTTS && window.SarvamTTS.config) ? window.SarvamTTS.config.getApiKey() : (state.sarvamApiKey || "");
+    sarvamKeyInput.addEventListener("input", (e) => {
+      const val = e.target.value.trim();
+      state.sarvamApiKey = val;
+      if (window.SarvamTTS && window.SarvamTTS.config) {
+        window.SarvamTTS.config.setApiKey(val);
+      }
+      saveStateToLocalStorage();
+    });
+  }
+
+  // Narrator Voice selector listener in Settings Modal
+  const voiceGenderSelect = document.getElementById("audio-narrator-gender-select");
+  if (voiceGenderSelect) {
+    if (state.sarvamVoice) voiceGenderSelect.value = state.sarvamVoice;
+    voiceGenderSelect.addEventListener("change", (e) => {
+      state.sarvamVoice = e.target.value;
+      if (window.SarvamTTS && window.SarvamTTS.queue) {
+        window.SarvamTTS.queue.setOptions({ speaker: state.sarvamVoice });
+      }
+      saveStateToLocalStorage();
     });
   }
   

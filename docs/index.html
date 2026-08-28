@@ -1696,15 +1696,18 @@
           <div class="setting-item-row">
             <label>Speech Speed</label>
             <div class="slider-wrapper">
-              <input type="range" id="tts-speed-slider" min="0.75" max="1.75" step="0.05" value="1.0" class="speed-slider">
-              <span id="tts-speed-val">1.0x</span>
+              <input type="range" id="tts-speed-slider" min="0.75" max="1.50" step="0.02" value="0.92" class="speed-slider">
+              <span id="tts-speed-val">0.92x</span>
             </div>
           </div>
           <div class="setting-item-row" id="audio-narrator-gender-row">
-            <label>Narrator Voice</label>
+            <label>Indian Narrator Voice</label>
             <select id="audio-narrator-gender-select" class="dropdown-selector" style="background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 4px;">
-              <option value="male" selected>🧔 Male Narrator (Deep Rich Bass)</option>
-              <option value="female">👩 Female Narrator (Warm & Soft)</option>
+              <option value="ratan" selected>🧔 Ratan (Indian Male - Mature & Spiritual)</option>
+              <option value="shubh">🕊️ Shubh (Indian Male - Calm & Devotional)</option>
+              <option value="aditya">🎙️ Aditya (Indian Male - Deep & Warm)</option>
+              <option value="aravind">📖 Aravind (Indian Male - Gentle Voice)</option>
+              <option value="priya">👩 Priya (Indian Female - Warm & Soft)</option>
             </select>
           </div>
           <div class="setting-item-row" id="audio-bg-music-row">
@@ -1732,12 +1735,15 @@
               <option value="60">60 Minutes</option>
             </select>
           </div>
+          <div class="setting-item-row" id="audio-sarvam-key-row">
+            <label>Sarvam AI Key</label>
+            <input type="password" id="sarvam-api-key-input" placeholder="Enter Sarvam API Key" style="background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; font-size: 12px; width: 60%; box-sizing: border-box;">
+          </div>
           <div class="setting-item-row" id="audio-source-row" style="display: none;">
             <label>Reader Type</label>
             <select id="audio-source-select" class="dropdown-selector">
-              <option value="human" selected>Professional Human Voice</option>
-              <option value="ai">AI Text-to-Speech Reader</option>
-              <option value="elevenlabs">ElevenLabs Premium Voice</option>
+              <option value="sarvam" selected>Sarvam AI Bulbul V3 Indian Voice</option>
+              <option value="human">Professional Human Voice</option>
             </select>
           </div>
           <div class="setting-item-row" id="voice-select-row" style="display: none;">
@@ -2812,8 +2818,11 @@
       <span id="toast-message">Copied to clipboard!</span>
     </div>
 
-  <!-- App Main Logic (Cache-Busted for Version 83 Extended Splash Verse & Logo Theme) -->
-  <script src="app.js?v=83_EXTENDED_SPLASH_VERSE_DISPLAY"></script>
+  <!-- Sarvam AI Bulbul V3 Indian Voice Narration Engine -->
+  <script src="sarvam-tts.js"></script>
+
+  <!-- App Main Logic (Cache-Busted for Version 83 Sarvam Bulbul V3 Narration) -->
+  <script src="app.js?v=83_SARVAM_BULBUL_V3_NARRATION"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 4.5s no matter what
