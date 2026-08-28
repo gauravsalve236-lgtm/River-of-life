@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v86-INLINE-BIBLE-AUDIO-AND-CHAPTER-SELECTOR';
+const CACHE_NAME = 'river-of-life-cache-v87-TOP-BIBLE-CHAPTER-AND-VERSE-SELECTORS';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

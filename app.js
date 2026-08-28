@@ -1382,16 +1382,14 @@ async function openReader(bookKey, chapterNum) {
     inlineSpeedSelect.value = state.sarvamPace ? state.sarvamPace.toFixed(2) : "0.92";
   }
 
-  let subTitle = `अध्याय ${chapterNum}`;
-  if (state.translation === "eng") subTitle = `Chapter ${chapterNum}`;
-  else if (state.translation === "parallel") subTitle = `अध्याय ${chapterNum} • Chapter ${chapterNum}`;
-  document.getElementById("reader-chapter-number").textContent = subTitle;
-  
   versesContainer.innerHTML = "";
   
   const versesMr = bookDataMr ? bookDataMr.chapters[chapterNum - 1] : [];
   const versesEng = bookDataEng ? bookDataEng.chapters[chapterNum - 1] : [];
   const totalVerses = Math.max(versesMr.length, versesEng.length);
+  
+  // Populate Quick Selectors at Top of Bible Tab
+  populateQuickSelectors(metadata, chapterNum, totalVerses);
   
   let currentParagraph = null;
   let pStarts = [1];
@@ -1517,6 +1515,49 @@ async function openReader(bookKey, chapterNum) {
   // Re-sync study pane view if active
   if (activeStudyVerse && activeStudyVerse.bookKey === bookKey && activeStudyVerse.chapter === chapterNum) {
     openStudySplitPane(bookKey, chapterNum, activeStudyVerse.verse);
+  }
+}
+
+function populateQuickSelectors(currentMetadata, chapterNum, totalVerses) {
+  const bookSelect = document.getElementById("reader-quick-book-select");
+  const chapterSelect = document.getElementById("reader-quick-chapter-select");
+  const verseSelect = document.getElementById("reader-quick-verse-select");
+  const transSelect = document.getElementById("reader-quick-translation-select");
+
+  if (bookSelect && booksMetadataMr.length > 0) {
+    bookSelect.innerHTML = "";
+    booksMetadataMr.forEach(b => {
+      const opt = document.createElement("option");
+      opt.value = b.filename.replace(".json", "");
+      opt.textContent = (state.translation === "eng") ? b.engName : b.name;
+      bookSelect.appendChild(opt);
+    });
+    bookSelect.value = state.activeBook;
+  }
+
+  if (chapterSelect && currentMetadata) {
+    chapterSelect.innerHTML = "";
+    for (let c = 1; c <= currentMetadata.chaptersCount; c++) {
+      const opt = document.createElement("option");
+      opt.value = c;
+      opt.textContent = (state.translation === "eng") ? `Chapter ${c}` : `अध्याय ${c}`;
+      chapterSelect.appendChild(opt);
+    }
+    chapterSelect.value = chapterNum;
+  }
+
+  if (verseSelect && totalVerses) {
+    verseSelect.innerHTML = `<option value="all">${(state.translation === "eng") ? "All Verses" : "सर्व वचने"}</option>`;
+    for (let v = 1; v <= totalVerses; v++) {
+      const opt = document.createElement("option");
+      opt.value = v;
+      opt.textContent = (state.translation === "eng") ? `Verse ${v}` : `वचन ${v}`;
+      verseSelect.appendChild(opt);
+    }
+  }
+
+  if (transSelect) {
+    transSelect.value = state.translation || "mar";
   }
 }
 
@@ -3705,6 +3746,50 @@ function setupEventListeners() {
       if (window.SarvamTTS && window.SarvamTTS.queue) {
         window.SarvamTTS.queue.setOptions({ speaker: state.sarvamVoice });
       }
+    });
+  }
+
+  // Direct Book, Chapter, Verse Quick Selectors at Top of Bible Tab
+  const quickBookSelect = document.getElementById("reader-quick-book-select");
+  if (quickBookSelect) {
+    quickBookSelect.addEventListener("change", (e) => {
+      openReader(e.target.value, 1);
+    });
+  }
+
+  const quickChapterSelect = document.getElementById("reader-quick-chapter-select");
+  if (quickChapterSelect) {
+    quickChapterSelect.addEventListener("change", (e) => {
+      openReader(state.activeBook, parseInt(e.target.value) || 1);
+    });
+  }
+
+  const quickVerseSelect = document.getElementById("reader-quick-verse-select");
+  if (quickVerseSelect) {
+    quickVerseSelect.addEventListener("change", (e) => {
+      const val = e.target.value;
+      if (val === "all") {
+        document.getElementById("reader-scroll-container").scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        const vEl = document.querySelector(`.verse-row[data-verse="${val}"]`);
+        if (vEl) {
+          vEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          vEl.classList.add("selected-pulse");
+          setTimeout(() => vEl.classList.remove("selected-pulse"), 2500);
+        }
+      }
+    });
+  }
+
+  const quickTransSelect = document.getElementById("reader-quick-translation-select");
+  if (quickTransSelect) {
+    quickTransSelect.addEventListener("change", (e) => {
+      state.translation = e.target.value;
+      applyStylesFromState();
+      saveStateToLocalStorage();
+      openReader(state.activeBook, state.activeChapter);
+      initAudioVoices();
+      toggleVoiceDropdownVisibility();
     });
   }
 
