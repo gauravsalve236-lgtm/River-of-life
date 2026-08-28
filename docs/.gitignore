@@ -1,0 +1,15 @@
+# Dependencies
+node_modules/
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Capacitor native build targets (keep configuration files but ignore build artifacts)
+ios/App/build/
+ios/App/Pods/
+ios/App/App/public/

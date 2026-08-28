@@ -1,0 +1,530 @@
+[
+  {
+    "id": 1,
+    "name": "उत्पत्ती",
+    "engName": "Genesis",
+    "chaptersCount": 50,
+    "testament": "OT",
+    "filename": "genesis.json"
+  },
+  {
+    "id": 2,
+    "name": "निर्गम",
+    "engName": "Exodus",
+    "chaptersCount": 40,
+    "testament": "OT",
+    "filename": "exodus.json"
+  },
+  {
+    "id": 3,
+    "name": "लेवीय",
+    "engName": "Leviticus",
+    "chaptersCount": 27,
+    "testament": "OT",
+    "filename": "leviticus.json"
+  },
+  {
+    "id": 4,
+    "name": "गणना",
+    "engName": "Numbers",
+    "chaptersCount": 36,
+    "testament": "OT",
+    "filename": "numbers.json"
+  },
+  {
+    "id": 5,
+    "name": "अनुवाद",
+    "engName": "Deuteronomy",
+    "chaptersCount": 34,
+    "testament": "OT",
+    "filename": "deuteronomy.json"
+  },
+  {
+    "id": 6,
+    "name": "यहोशवा",
+    "engName": "Joshua",
+    "chaptersCount": 24,
+    "testament": "OT",
+    "filename": "joshua.json"
+  },
+  {
+    "id": 7,
+    "name": "शास्ते",
+    "engName": "Judges",
+    "chaptersCount": 21,
+    "testament": "OT",
+    "filename": "judges.json"
+  },
+  {
+    "id": 8,
+    "name": "रूथ",
+    "engName": "Ruth",
+    "chaptersCount": 4,
+    "testament": "OT",
+    "filename": "ruth.json"
+  },
+  {
+    "id": 9,
+    "name": "१ शमुवेल",
+    "engName": "1 Samuel",
+    "chaptersCount": 31,
+    "testament": "OT",
+    "filename": "1samuel.json"
+  },
+  {
+    "id": 10,
+    "name": "२ शमुवेल",
+    "engName": "2 Samuel",
+    "chaptersCount": 24,
+    "testament": "OT",
+    "filename": "2samuel.json"
+  },
+  {
+    "id": 11,
+    "name": "१ राजे",
+    "engName": "1 Kings",
+    "chaptersCount": 22,
+    "testament": "OT",
+    "filename": "1kings.json"
+  },
+  {
+    "id": 12,
+    "name": "२ राजे",
+    "engName": "2 Kings",
+    "chaptersCount": 25,
+    "testament": "OT",
+    "filename": "2kings.json"
+  },
+  {
+    "id": 13,
+    "name": "१ इतिहास",
+    "engName": "1 Chronicles",
+    "chaptersCount": 29,
+    "testament": "OT",
+    "filename": "1chronicles.json"
+  },
+  {
+    "id": 14,
+    "name": "२ इतिहास",
+    "engName": "2 Chronicles",
+    "chaptersCount": 36,
+    "testament": "OT",
+    "filename": "2chronicles.json"
+  },
+  {
+    "id": 15,
+    "name": "एज्रा",
+    "engName": "Ezra",
+    "chaptersCount": 10,
+    "testament": "OT",
+    "filename": "ezra.json"
+  },
+  {
+    "id": 16,
+    "name": "नहेम्या",
+    "engName": "Nehemiah",
+    "chaptersCount": 13,
+    "testament": "OT",
+    "filename": "nehemiah.json"
+  },
+  {
+    "id": 17,
+    "name": "एस्तेर",
+    "engName": "Esther",
+    "chaptersCount": 10,
+    "testament": "OT",
+    "filename": "esther.json"
+  },
+  {
+    "id": 18,
+    "name": "ईयोब",
+    "engName": "Job",
+    "chaptersCount": 42,
+    "testament": "OT",
+    "filename": "job.json"
+  },
+  {
+    "id": 19,
+    "name": "स्तोत्रसंहिता",
+    "engName": "Psalms",
+    "chaptersCount": 150,
+    "testament": "OT",
+    "filename": "psalms.json"
+  },
+  {
+    "id": 20,
+    "name": "नीतिसूत्रे",
+    "engName": "Proverbs",
+    "chaptersCount": 31,
+    "testament": "OT",
+    "filename": "proverbs.json"
+  },
+  {
+    "id": 21,
+    "name": "उपदेशक",
+    "engName": "Ecclesiastes",
+    "chaptersCount": 12,
+    "testament": "OT",
+    "filename": "ecclesiastes.json"
+  },
+  {
+    "id": 22,
+    "name": "गीतरत्न",
+    "engName": "Song of Solomon",
+    "chaptersCount": 8,
+    "testament": "OT",
+    "filename": "songofsolomon.json"
+  },
+  {
+    "id": 23,
+    "name": "यशया",
+    "engName": "Isaiah",
+    "chaptersCount": 66,
+    "testament": "OT",
+    "filename": "isaiah.json"
+  },
+  {
+    "id": 24,
+    "name": "यिर्मया",
+    "engName": "Jeremiah",
+    "chaptersCount": 52,
+    "testament": "OT",
+    "filename": "jeremiah.json"
+  },
+  {
+    "id": 25,
+    "name": "विलापगीत",
+    "engName": "Lamentations",
+    "chaptersCount": 5,
+    "testament": "OT",
+    "filename": "lamentations.json"
+  },
+  {
+    "id": 26,
+    "name": "यहेज्केल",
+    "engName": "Ezekiel",
+    "chaptersCount": 48,
+    "testament": "OT",
+    "filename": "ezekiel.json"
+  },
+  {
+    "id": 27,
+    "name": "दानीएल",
+    "engName": "Daniel",
+    "chaptersCount": 12,
+    "testament": "OT",
+    "filename": "daniel.json"
+  },
+  {
+    "id": 28,
+    "name": "होशेय",
+    "engName": "Hosea",
+    "chaptersCount": 14,
+    "testament": "OT",
+    "filename": "hosea.json"
+  },
+  {
+    "id": 29,
+    "name": "योएल",
+    "engName": "Joel",
+    "chaptersCount": 3,
+    "testament": "OT",
+    "filename": "joel.json"
+  },
+  {
+    "id": 30,
+    "name": "आमोस",
+    "engName": "Amos",
+    "chaptersCount": 9,
+    "testament": "OT",
+    "filename": "amos.json"
+  },
+  {
+    "id": 31,
+    "name": "ओबद्या",
+    "engName": "Obadiah",
+    "chaptersCount": 1,
+    "testament": "OT",
+    "filename": "obadiah.json"
+  },
+  {
+    "id": 32,
+    "name": "योना",
+    "engName": "Jonah",
+    "chaptersCount": 4,
+    "testament": "OT",
+    "filename": "jonah.json"
+  },
+  {
+    "id": 33,
+    "name": "मीखा",
+    "engName": "Micah",
+    "chaptersCount": 7,
+    "testament": "OT",
+    "filename": "micah.json"
+  },
+  {
+    "id": 34,
+    "name": "नहूम",
+    "engName": "Nahum",
+    "chaptersCount": 3,
+    "testament": "OT",
+    "filename": "nahum.json"
+  },
+  {
+    "id": 35,
+    "name": "हबक्कूक",
+    "engName": "Habakkuk",
+    "chaptersCount": 3,
+    "testament": "OT",
+    "filename": "habakkuk.json"
+  },
+  {
+    "id": 36,
+    "name": "सफन्या",
+    "engName": "Zephaniah",
+    "chaptersCount": 3,
+    "testament": "OT",
+    "filename": "zephaniah.json"
+  },
+  {
+    "id": 37,
+    "name": "हाग्गय",
+    "engName": "Haggai",
+    "chaptersCount": 2,
+    "testament": "OT",
+    "filename": "haggai.json"
+  },
+  {
+    "id": 38,
+    "name": "जखऱ्या",
+    "engName": "Zechariah",
+    "chaptersCount": 14,
+    "testament": "OT",
+    "filename": "zechariah.json"
+  },
+  {
+    "id": 39,
+    "name": "मलाखी",
+    "engName": "Malachi",
+    "chaptersCount": 4,
+    "testament": "OT",
+    "filename": "malachi.json"
+  },
+  {
+    "id": 40,
+    "name": "मत्तय",
+    "engName": "Matthew",
+    "chaptersCount": 28,
+    "testament": "NT",
+    "filename": "matthew.json"
+  },
+  {
+    "id": 41,
+    "name": "मार्क",
+    "engName": "Mark",
+    "chaptersCount": 16,
+    "testament": "NT",
+    "filename": "mark.json"
+  },
+  {
+    "id": 42,
+    "name": "लूक",
+    "engName": "Luke",
+    "chaptersCount": 24,
+    "testament": "NT",
+    "filename": "luke.json"
+  },
+  {
+    "id": 43,
+    "name": "योहान",
+    "engName": "John",
+    "chaptersCount": 21,
+    "testament": "NT",
+    "filename": "john.json"
+  },
+  {
+    "id": 44,
+    "name": "प्रेषितांचीं कृत्यें",
+    "engName": "Acts",
+    "chaptersCount": 28,
+    "testament": "NT",
+    "filename": "acts.json"
+  },
+  {
+    "id": 45,
+    "name": "रोमकरांस",
+    "engName": "Romans",
+    "chaptersCount": 16,
+    "testament": "NT",
+    "filename": "romans.json"
+  },
+  {
+    "id": 46,
+    "name": "१ करिंथकरांस",
+    "engName": "1 Corinthians",
+    "chaptersCount": 16,
+    "testament": "NT",
+    "filename": "1corinthians.json"
+  },
+  {
+    "id": 47,
+    "name": "२ करिंथकरांस",
+    "engName": "2 Corinthians",
+    "chaptersCount": 13,
+    "testament": "NT",
+    "filename": "2corinthians.json"
+  },
+  {
+    "id": 48,
+    "name": "गलतीकरांस",
+    "engName": "Galatians",
+    "chaptersCount": 6,
+    "testament": "NT",
+    "filename": "galatians.json"
+  },
+  {
+    "id": 49,
+    "name": "इफिसकरांस",
+    "engName": "Ephesians",
+    "chaptersCount": 6,
+    "testament": "NT",
+    "filename": "ephesians.json"
+  },
+  {
+    "id": 50,
+    "name": "फिलिप्पैकरांस",
+    "engName": "Philippians",
+    "chaptersCount": 4,
+    "testament": "NT",
+    "filename": "philippians.json"
+  },
+  {
+    "id": 51,
+    "name": "कलस्सैकरांस",
+    "engName": "Colossians",
+    "chaptersCount": 4,
+    "testament": "NT",
+    "filename": "colossians.json"
+  },
+  {
+    "id": 52,
+    "name": "१ थेस्सलनीकाकरांस",
+    "engName": "1 Thessalonians",
+    "chaptersCount": 5,
+    "testament": "NT",
+    "filename": "1thessalonians.json"
+  },
+  {
+    "id": 53,
+    "name": "२ थेस्सलनीकाकरांस",
+    "engName": "2 Thessalonians",
+    "chaptersCount": 3,
+    "testament": "NT",
+    "filename": "2thessalonians.json"
+  },
+  {
+    "id": 54,
+    "name": "१ तीमथ्याला",
+    "engName": "1 Timothy",
+    "chaptersCount": 6,
+    "testament": "NT",
+    "filename": "1timothy.json"
+  },
+  {
+    "id": 55,
+    "name": "२ तीमथ्याला",
+    "engName": "2 Timothy",
+    "chaptersCount": 4,
+    "testament": "NT",
+    "filename": "2timothy.json"
+  },
+  {
+    "id": 56,
+    "name": "तीताला",
+    "engName": "Titus",
+    "chaptersCount": 3,
+    "testament": "NT",
+    "filename": "titus.json"
+  },
+  {
+    "id": 57,
+    "name": "फिलेमोना",
+    "engName": "Philemon",
+    "chaptersCount": 1,
+    "testament": "NT",
+    "filename": "philemon.json"
+  },
+  {
+    "id": 58,
+    "name": "इब्री लोकांस",
+    "engName": "Hebrews",
+    "chaptersCount": 13,
+    "testament": "NT",
+    "filename": "hebrews.json"
+  },
+  {
+    "id": 59,
+    "name": "याकोब",
+    "engName": "James",
+    "chaptersCount": 5,
+    "testament": "NT",
+    "filename": "james.json"
+  },
+  {
+    "id": 60,
+    "name": "१ पेत्र",
+    "engName": "1 Peter",
+    "chaptersCount": 5,
+    "testament": "NT",
+    "filename": "1peter.json"
+  },
+  {
+    "id": 61,
+    "name": "२ पेत्र",
+    "engName": "2 Peter",
+    "chaptersCount": 3,
+    "testament": "NT",
+    "filename": "2peter.json"
+  },
+  {
+    "id": 62,
+    "name": "१ योहान",
+    "engName": "1 John",
+    "chaptersCount": 5,
+    "testament": "NT",
+    "filename": "1john.json"
+  },
+  {
+    "id": 63,
+    "name": "२ योहान",
+    "engName": "2 John",
+    "chaptersCount": 1,
+    "testament": "NT",
+    "filename": "2john.json"
+  },
+  {
+    "id": 64,
+    "name": "३ योहान",
+    "engName": "3 John",
+    "chaptersCount": 1,
+    "testament": "NT",
+    "filename": "3john.json"
+  },
+  {
+    "id": 65,
+    "name": "यहूदा",
+    "engName": "Jude",
+    "chaptersCount": 1,
+    "testament": "NT",
+    "filename": "jude.json"
+  },
+  {
+    "id": 66,
+    "name": "प्रकटीकरण",
+    "engName": "Revelation",
+    "chaptersCount": 22,
+    "testament": "NT",
+    "filename": "revelation.json"
+  }
+]
