@@ -8,7 +8,7 @@
   <script>
     // Force immediate hard purge of all stale Service Workers and CacheStorage
     (function() {
-      const CURRENT_VER = "v87_TOP_BIBLE_CHAPTER_AND_VERSE_SELECTORS";
+      const CURRENT_VER = "v88_SHUBH_AND_RATAN_SARVAM_VOICES";
       if (localStorage.getItem("rol_app_ver") !== CURRENT_VER) {
         localStorage.setItem("rol_app_ver", CURRENT_VER);
         if ('serviceWorker' in navigator) {
@@ -44,8 +44,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   
-  <!-- Main Stylesheet (Cache-Busted for Version 87 Top Bible Chapter and Verse Selectors) -->
-  <link rel="stylesheet" href="index.css?v=87_TOP_BIBLE_CHAPTER_AND_VERSE_SELECTORS">
+  <!-- Main Stylesheet (Cache-Busted for Version 88 Shubh and Ratan Sarvam Voices) -->
+  <link rel="stylesheet" href="index.css?v=88_SHUBH_AND_RATAN_SARVAM_VOICES">
 
   <!-- Official LiveKit WebRTC Client SDK -->
   <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.0.8/dist/livekit-client.umd.min.js"></script>
@@ -541,13 +541,13 @@
                     </button>
 
                     <!-- Voice Selector Dropdown directly on the page -->
-                    <div style="flex: 1; min-width: 160px;">
+                    <div style="flex: 1; min-width: 170px;">
                       <select id="reader-inline-voice-select" class="dropdown-selector" style="width: 100%; background: var(--bg); color: var(--text); border: 1.5px solid rgba(201, 138, 44, 0.5); border-radius: 10px; padding: 8px 10px; font-size: 12.5px; font-weight: 700;">
-                        <option value="ratan">🧔 Ratan (Indian Male - English)</option>
-                        <option value="shubh">🕊️ Shubh (Indian Male - Hindi/Marathi)</option>
-                        <option value="aditya">🎙️ Aditya (Deep & Warm)</option>
-                        <option value="aravind">📖 Aravind (Gentle Voice)</option>
-                        <option value="priya">👩 Priya (Warm & Soft)</option>
+                        <option value="shubh">🕊️ Shubh (Indian Male - Calm & Devotional • Hindi/Marathi/English)</option>
+                        <option value="ratan">🧔 Ratan (Indian Male - Mature & Spiritual • English)</option>
+                        <option value="aditya">🎙️ Aditya (Indian Male - Deep & Warm)</option>
+                        <option value="aravind">📖 Aravind (Indian Male - Gentle Voice)</option>
+                        <option value="priya">👩 Priya (Indian Female - Warm & Soft)</option>
                       </select>
                     </div>
 
@@ -1813,8 +1813,8 @@
           <div class="setting-item-row" id="audio-narrator-gender-row" style="flex-direction: column; align-items: stretch; gap: 6px;">
             <label style="font-weight: 700; font-size: 13.5px; color: var(--text);">Select Indian Voice / आवाज निवडा</label>
             <select id="audio-narrator-gender-select" class="dropdown-selector" style="background: var(--bg); color: var(--text); border: 1.5px solid var(--primary); border-radius: 10px; padding: 10px; font-size: 13px; font-weight: 700; width: 100%;">
-              <option value="ratan" selected>🧔 Ratan (Indian Male - Mature & Spiritual • English)</option>
-              <option value="shubh">🕊️ Shubh (Indian Male - Calm & Devotional • Hindi/Marathi)</option>
+              <option value="shubh">🕊️ Shubh (Indian Male - Calm & Devotional • Hindi/Marathi/English)</option>
+              <option value="ratan">🧔 Ratan (Indian Male - Mature & Spiritual • English)</option>
               <option value="aditya">🎙️ Aditya (Indian Male - Deep & Warm)</option>
               <option value="aravind">📖 Aravind (Indian Male - Gentle Voice)</option>
               <option value="priya">👩 Priya (Indian Female - Warm & Soft)</option>
@@ -2936,10 +2936,10 @@
     </div>
 
   <!-- Sarvam AI Bulbul V3 Indian Voice Narration Engine -->
-  <script src="sarvam-tts.js?v=87_TOP_BIBLE_CHAPTER_AND_VERSE_SELECTORS"></script>
+  <script src="sarvam-tts.js?v=88_SHUBH_AND_RATAN_SARVAM_VOICES"></script>
 
-  <!-- App Main Logic (Cache-Busted for Version 87 Top Bible Chapter and Verse Selectors) -->
-  <script src="app.js?v=87_TOP_BIBLE_CHAPTER_AND_VERSE_SELECTORS"></script>
+  <!-- App Main Logic (Cache-Busted for Version 88 Shubh and Ratan Sarvam Voices) -->
+  <script src="app.js?v=88_SHUBH_AND_RATAN_SARVAM_VOICES"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 4.5s no matter what

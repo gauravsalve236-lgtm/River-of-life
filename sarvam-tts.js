@@ -220,8 +220,9 @@
     // Core synthesis method
     synthesizeText: async function (text, options) {
       if (!options) options = {};
-      var lang = options.lang || 'en-IN';
-      var speaker = options.speaker || SARVAM_CONFIG.speakers[lang] || 'ratan';
+      var isDevanagari = /[\u0900-\u097F]/.test(text || '');
+      var lang = options.lang || (isDevanagari ? 'hi-IN' : 'en-IN');
+      var speaker = options.speaker || (isDevanagari ? 'shubh' : (SARVAM_CONFIG.speakers[lang] || 'shubh'));
       var pace = options.pace !== undefined ? options.pace : SARVAM_CONFIG.defaultPace;
       
       var optimizedText = SarvamTextOptimizer.optimizeForNarration(text, lang);

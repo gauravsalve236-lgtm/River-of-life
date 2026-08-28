@@ -2464,14 +2464,19 @@ function updateAudioToneSettings() {
 function initAudioVoices() {
   const select = document.getElementById("tts-voice-select");
   const genderSelect = document.getElementById("audio-narrator-gender-select");
+  const inlineVoiceSelect = document.getElementById("reader-inline-voice-select");
+  const playbarVoiceBtn = document.getElementById("playbar-btn-voice-select");
   
   const sarvamVoices = [
-    { value: "ratan", label: "🧔 Ratan (Indian Male - Mature & Spiritual)", lang: "en-IN" },
-    { value: "shubh", label: "🕊️ Shubh (Indian Male - Calm & Devotional)", lang: "hi-IN" },
+    { value: "shubh", label: "🕊️ Shubh (Indian Male - Calm & Devotional • Hindi/Marathi/English)", lang: "hi-IN" },
+    { value: "ratan", label: "🧔 Ratan (Indian Male - Mature & Spiritual • English)", lang: "en-IN" },
     { value: "aditya", label: "🎙️ Aditya (Indian Male - Deep & Warm)", lang: "en-IN" },
     { value: "aravind", label: "📖 Aravind (Indian Male - Gentle Voice)", lang: "en-IN" },
     { value: "priya", label: "👩 Priya (Indian Female - Warm & Soft)", lang: "en-IN" }
   ];
+
+  const currentVoice = state.sarvamVoice || (state.translation === "eng" ? "ratan" : "shubh");
+  state.sarvamVoice = currentVoice;
 
   if (select) {
     select.innerHTML = "";
@@ -2481,11 +2486,35 @@ function initAudioVoices() {
       opt.textContent = v.label;
       select.appendChild(opt);
     });
-    select.value = state.sarvamVoice || (state.translation === "eng" ? "ratan" : "shubh");
+    select.value = currentVoice;
   }
 
   if (genderSelect) {
-    genderSelect.value = state.sarvamVoice || (state.translation === "eng" ? "ratan" : "shubh");
+    genderSelect.innerHTML = "";
+    sarvamVoices.forEach(v => {
+      const opt = document.createElement("option");
+      opt.value = v.value;
+      opt.textContent = v.label;
+      genderSelect.appendChild(opt);
+    });
+    genderSelect.value = currentVoice;
+  }
+
+  if (inlineVoiceSelect) {
+    inlineVoiceSelect.innerHTML = "";
+    sarvamVoices.forEach(v => {
+      const opt = document.createElement("option");
+      opt.value = v.value;
+      opt.textContent = v.label;
+      inlineVoiceSelect.appendChild(opt);
+    });
+    inlineVoiceSelect.value = currentVoice;
+  }
+
+  if (playbarVoiceBtn) {
+    const activeV = sarvamVoices.find(v => v.value === currentVoice) || sarvamVoices[0];
+    const shortName = activeV.value === "shubh" ? "🕊️ Shubh" : (activeV.value === "ratan" ? "🧔 Ratan" : `🎙️ ${activeV.value}`);
+    playbarVoiceBtn.textContent = shortName;
   }
 }
 
@@ -4036,7 +4065,14 @@ function setupEventListeners() {
   const playbarVoiceBtn = document.getElementById("playbar-btn-voice-select");
   if (playbarVoiceBtn) {
     playbarVoiceBtn.addEventListener("click", () => {
-      openModal("modal-audio-settings");
+      const newVoice = (state.sarvamVoice === "shubh") ? "ratan" : "shubh";
+      state.sarvamVoice = newVoice;
+      saveStateToLocalStorage();
+      initAudioVoices();
+      if (window.SarvamTTS && window.SarvamTTS.queue) {
+        window.SarvamTTS.queue.setOptions({ speaker: newVoice });
+      }
+      showToast(`🎙️ Voice switched to: ${newVoice === "shubh" ? "🕊️ Shubh (Indian Male)" : "🧔 Ratan (Indian Male)"}`);
     });
   }
 
