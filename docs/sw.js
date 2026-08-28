@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v88-SHUBH-AND-RATAN-SARVAM-VOICES';
+const CACHE_NAME = 'river-of-life-cache-v89-FIXED-TOP-BIBLE-BAR-AND-SHUBH-VOICE';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

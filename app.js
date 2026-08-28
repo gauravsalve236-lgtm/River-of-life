@@ -1163,11 +1163,23 @@ function adjustHeaderForRoute(route) {
   const staticTitle = document.getElementById("static-header-title");
   
   if (route === "reader") {
-    if (readerCtrls) readerCtrls.classList.add("active");
-    if (staticCtrls) staticCtrls.classList.remove("active");
+    if (readerCtrls) {
+      readerCtrls.classList.add("active");
+      readerCtrls.style.display = "flex";
+    }
+    if (staticCtrls) {
+      staticCtrls.classList.remove("active");
+      staticCtrls.style.display = "none";
+    }
   } else {
-    if (readerCtrls) readerCtrls.classList.remove("active");
-    if (staticCtrls) staticCtrls.classList.add("active");
+    if (readerCtrls) {
+      readerCtrls.classList.remove("active");
+      readerCtrls.style.display = "none";
+    }
+    if (staticCtrls) {
+      staticCtrls.classList.add("active");
+      staticCtrls.style.display = "flex";
+    }
     
     if (staticTitle) {
       if (route === "home") staticTitle.textContent = "River of Life";
@@ -1559,6 +1571,8 @@ function populateQuickSelectors(currentMetadata, chapterNum, totalVerses) {
   if (transSelect) {
     transSelect.value = state.translation || "mar";
   }
+
+  initAudioVoices();
 }
 
 function updateReaderNavigationButtons(currentBookMeta) {

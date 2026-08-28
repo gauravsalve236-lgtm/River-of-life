@@ -8,7 +8,7 @@
   <script>
     // Force immediate hard purge of all stale Service Workers and CacheStorage
     (function() {
-      const CURRENT_VER = "v88_SHUBH_AND_RATAN_SARVAM_VOICES";
+      const CURRENT_VER = "v89_FIXED_TOP_BIBLE_BAR_AND_SHUBH_VOICE";
       if (localStorage.getItem("rol_app_ver") !== CURRENT_VER) {
         localStorage.setItem("rol_app_ver", CURRENT_VER);
         if ('serviceWorker' in navigator) {
@@ -44,8 +44,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   
-  <!-- Main Stylesheet (Cache-Busted for Version 88 Shubh and Ratan Sarvam Voices) -->
-  <link rel="stylesheet" href="index.css?v=88_SHUBH_AND_RATAN_SARVAM_VOICES">
+  <!-- Main Stylesheet (Cache-Busted for Version 89 Fixed Top Bible Bar and Shubh Voice) -->
+  <link rel="stylesheet" href="index.css?v=89_FIXED_TOP_BIBLE_BAR_AND_SHUBH_VOICE">
 
   <!-- Official LiveKit WebRTC Client SDK -->
   <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.0.8/dist/livekit-client.umd.min.js"></script>
@@ -168,7 +168,7 @@
           </div>
         </div>
         
-        <div id="nav-static-controls" class="header-pane" style="display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 0 4px; box-sizing: border-box;">
+        <div id="nav-static-controls" class="header-pane">
           <div style="display: flex; align-items: center; gap: 10px;">
             <img src="assets/icons/app-logo.png" alt="River of Life Logo" style="width: 34px; height: 34px; border-radius: 10px; object-fit: contain; background: #ffffff; padding: 2px; border: 1.5px solid rgba(212, 175, 55, 0.45); box-shadow: 0 2px 10px rgba(0,0,0,0.06);">
             <div>
@@ -459,28 +459,15 @@
                 </div>
                 <div class="share-card-right">
                   <button id="btn-home-whatsapp-invite" class="share-whatsapp-btn">
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.09-3.974c1.652.98 3.271 1.498 4.902 1.499 5.485 0 9.948-4.464 9.951-9.95.002-2.658-1.03-5.155-2.903-7.03C16.229 2.67 13.738 1.636 11.08 1.636 5.596 1.636 1.132 6.098 1.13 11.585c-.001 1.761.472 3.479 1.371 5.011L1.472 22.03l5.675-1.488-.009-.016zm11.233-7.56c-.322-.16-.1.905-.31.84s-.977-.4-1.354-.736c-.314-.28-.52-.627-.582-.736-.062-.108-.007-.167.047-.221.05-.049.108-.127.163-.19.054-.064.072-.11.108-.182.036-.073.018-.137-.009-.19-.027-.055-.246-.593-.337-.813-.089-.214-.177-.185-.246-.188h-.21c-.072 0-.188.027-.287.137-.1.108-.38.371-.38.905 0 .533.39 1.048.444 1.12.054.072.766 1.17 1.856 1.64.26.11.462.176.62.227.26.082.497.07.684.043.21-.031.643-.263.733-.517.09-.255.09-.473.063-.518-.027-.046-.099-.073-.42-.232z"/></svg>
-                    <span>Invite / शेअर करा</span>
-                  </button>
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </section>
-
-        <!-- VIEW 2: BIBLE READER VIEW (Redesigned with inline elements) -->
-        <section id="view-reader" class="app-view split-screen-parent">
-          
-          <!-- Column 2 (Center): Bible Scripture Pane -->
-          <div class="reader-pane-left">
-            <div class="verses-scroller" id="reader-scroll-container">
-              
-              <!-- In-Page Bible Chapter Header & Sarvam Audio Controls -->
-              <div class="bible-chapter-control-header" style="max-width: 680px; margin: 0 auto 20px auto; background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 18px; padding: 18px; box-shadow: var(--shadow-sm);">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.09-3.974c1.652.98 3.271 1.498 4.902 1.499 5.485 0 9.948-4.464 9.951-9.95.002-2.658-1.03-5.155-2.903-7.03C16.229 2.67 13.738 1.636 11.08 1.636 5.596 1.636 1.132 6.098 1.13 11.585c-.001 1.761.472 3.479 1.371 5.011L1.472 22.03l5.675-1.488-.009-.016zm11.233-7.56c-.322-.16-.1.905-.31.84s-.977-.4-1.354-.736c-.314-.28-.52-.627-.582-.736-.062-.108-.00          <!-- Column 2 (Center): Bible Scripture Pane -->
+          <div class="reader-pane-left" style="display: flex; flex-direction: column; height: 100%; overflow: hidden; position: relative;">
+            
+            <!-- Sticky / Fixed Top Bible Action Bar (ALWAYS PINNED AND VISIBLE AT TOP) -->
+            <div class="bible-chapter-control-header" style="flex-shrink: 0; background: var(--bg-content); border-bottom: 2px solid var(--border); padding: 12px 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); z-index: 15;">
+              <div style="max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px;">
                 
                 <!-- Row 1: Direct Quick Selectors for Book, Chapter & Verse -->
-                <div class="bible-top-quick-selectors" style="display: flex; gap: 8px; align-items: flex-end; width: 100%; flex-wrap: wrap; margin-bottom: 14px;">
+                <div class="bible-top-quick-selectors" style="display: flex; gap: 8px; align-items: flex-end; width: 100%; flex-wrap: wrap;">
                   <!-- 1. Book Selector Dropdown -->
                   <div style="flex: 2; min-width: 130px;">
                     <label style="font-size: 10.5px; font-weight: 800; text-transform: uppercase; color: var(--primary); letter-spacing: 0.5px; display: block; margin-bottom: 4px;">📖 Book / पुस्तक</label>
@@ -522,44 +509,44 @@
                   </button>
                 </div>
 
-                <!-- Dedicated Sarvam AI Voice Narration Bar directly inside Chapter -->
-                <div class="reader-sarvam-audio-card" style="background: linear-gradient(135deg, rgba(158, 22, 34, 0.06) 0%, rgba(201, 138, 44, 0.10) 100%); border: 1.5px solid rgba(201, 138, 44, 0.35); border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px;">
-                  <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                      <span style="font-size: 18px;">🎙️</span>
-                      <strong style="font-size: 13px; font-weight: 800; color: var(--text);">Sarvam AI Indian Voice Narration</strong>
-                    </div>
-                    <button id="btn-reader-sarvam-setup-modal" style="font-size: 11px; font-weight: 800; color: var(--primary); background: transparent; border: none; cursor: pointer; text-decoration: underline;">Voice Settings ⚙️</button>
-                  </div>
+                <!-- Row 2: Sarvam AI Voice Narration Bar with Shubh and Ratan -->
+                <div class="reader-sarvam-audio-card" style="background: linear-gradient(135deg, rgba(158, 22, 34, 0.06) 0%, rgba(201, 138, 44, 0.10) 100%); border: 1.5px solid rgba(201, 138, 44, 0.35); border-radius: 12px; padding: 8px 12px; display: flex; align-items: center; gap: 10px; justify-content: space-between; flex-wrap: wrap;">
+                  <!-- Primary Play/Listen Button -->
+                  <button id="btn-reader-inline-listen" class="btn-primary-block" style="flex: 1; min-width: 140px; margin: 0; padding: 9px 16px; border-radius: 8px; font-size: 13px; font-weight: 800; background: linear-gradient(135deg, var(--primary) 0%, #7d121b 100%); color: #ffffff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 3px 10px rgba(158, 22, 34, 0.3);">
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" id="inline-play-icon-svg"><polygon points="5 3 19 12 5 3"></polygon></svg>
+                    <span id="reader-inline-listen-text">Listen Chapter</span>
+                  </button>
 
-                  <!-- Play Button & Voice Dropdown Row -->
-                  <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                    <!-- Primary Play/Listen Button -->
-                    <button id="btn-reader-inline-listen" class="btn-primary-block" style="flex: 1; min-width: 140px; margin: 0; padding: 10px 16px; border-radius: 10px; font-size: 13.5px; font-weight: 800; background: linear-gradient(135deg, var(--primary) 0%, #7d121b 100%); color: #ffffff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 3px 10px rgba(158, 22, 34, 0.3);">
-                      <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" id="inline-play-icon-svg"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                      <span id="reader-inline-listen-text">Listen Chapter</span>
-                    </button>
-
-                    <!-- Voice Selector Dropdown directly on the page -->
-                    <div style="flex: 1; min-width: 170px;">
-                      <select id="reader-inline-voice-select" class="dropdown-selector" style="width: 100%; background: var(--bg); color: var(--text); border: 1.5px solid rgba(201, 138, 44, 0.5); border-radius: 10px; padding: 8px 10px; font-size: 12.5px; font-weight: 700;">
-                        <option value="shubh">🕊️ Shubh (Indian Male - Calm & Devotional • Hindi/Marathi/English)</option>
-                        <option value="ratan">🧔 Ratan (Indian Male - Mature & Spiritual • English)</option>
-                        <option value="aditya">🎙️ Aditya (Indian Male - Deep & Warm)</option>
-                        <option value="aravind">📖 Aravind (Indian Male - Gentle Voice)</option>
-                        <option value="priya">👩 Priya (Indian Female - Warm & Soft)</option>
-                      </select>
-                    </div>
-
-                    <!-- Speed Selector -->
-                    <select id="reader-inline-speed-select" class="dropdown-selector" style="background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; font-size: 12px; font-weight: 700; max-width: 85px;">
-                      <option value="0.85">0.85x</option>
-                      <option value="0.92" selected>0.92x</option>
-                      <option value="1.0">1.00x</option>
-                      <option value="1.15">1.15x</option>
+                  <!-- Voice Selector Dropdown (Shubh first!) -->
+                  <div style="flex: 2; min-width: 180px;">
+                    <select id="reader-inline-voice-select" class="dropdown-selector" style="width: 100%; background: var(--bg); color: var(--text); border: 1.5px solid rgba(201, 138, 44, 0.6); border-radius: 8px; padding: 8px 10px; font-size: 12px; font-weight: 700;">
+                      <option value="shubh" selected>🕊️ Shubh (Indian Male - Calm & Devotional)</option>
+                      <option value="ratan">🧔 Ratan (Indian Male - Mature & Spiritual)</option>
+                      <option value="aditya">🎙️ Aditya (Deep & Warm)</option>
+                      <option value="aravind">📖 Aravind (Gentle Voice)</option>
+                      <option value="priya">👩 Priya (Indian Female - Warm & Soft)</option>
                     </select>
                   </div>
+
+                  <!-- Speed Selector -->
+                  <select id="reader-inline-speed-select" class="dropdown-selector" style="background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 12px; font-weight: 700; width: 75px;">
+                    <option value="0.85">0.85x</option>
+                    <option value="0.92" selected>0.92x</option>
+                    <option value="1.0">1.00x</option>
+                    <option value="1.15">1.15x</option>
+                  </select>
+
+                  <button id="btn-reader-sarvam-setup-modal" style="font-size: 11px; font-weight: 800; color: var(--primary); background: transparent; border: none; cursor: pointer; text-decoration: underline;">Settings ⚙️</button>
                 </div>
+
+              </div>
+            </div>
+
+            <!-- Scrollable Verses Scroller -->
+            <div class="verses-scroller" id="reader-scroll-container" style="flex: 1; overflow-y: auto;">
+              <div class="chapter-info-badge" style="margin-top: 14px;">
+                <h2 id="reader-chapter-title">शास्ते</h2>
+                <p id="reader-chapter-number">अध्याय १३</p>
               </div>
 
               <div id="reader-verses" class="verses-text-layout">
@@ -2936,10 +2923,10 @@
     </div>
 
   <!-- Sarvam AI Bulbul V3 Indian Voice Narration Engine -->
-  <script src="sarvam-tts.js?v=88_SHUBH_AND_RATAN_SARVAM_VOICES"></script>
+  <script src="sarvam-tts.js?v=89_FIXED_TOP_BIBLE_BAR_AND_SHUBH_VOICE"></script>
 
-  <!-- App Main Logic (Cache-Busted for Version 88 Shubh and Ratan Sarvam Voices) -->
-  <script src="app.js?v=88_SHUBH_AND_RATAN_SARVAM_VOICES"></script>
+  <!-- App Main Logic (Cache-Busted for Version 89 Fixed Top Bible Bar and Shubh Voice) -->
+  <script src="app.js?v=89_FIXED_TOP_BIBLE_BAR_AND_SHUBH_VOICE"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 4.5s no matter what
