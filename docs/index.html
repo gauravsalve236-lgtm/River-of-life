@@ -8,7 +8,7 @@
   <script>
     // Force immediate hard purge of all stale Service Workers and CacheStorage
     (function() {
-      const CURRENT_VER = "v89_FIXED_TOP_BIBLE_BAR_AND_SHUBH_VOICE";
+      const CURRENT_VER = "v90_UNMISSABLE_BIBLE_TOOLBAR_AND_SHUBH_VOICE";
       if (localStorage.getItem("rol_app_ver") !== CURRENT_VER) {
         localStorage.setItem("rol_app_ver", CURRENT_VER);
         if ('serviceWorker' in navigator) {
@@ -25,6 +25,9 @@
             }
           });
         }
+        setTimeout(function() {
+          window.location.reload(true);
+        }, 100);
       }
     })();
   </script>
@@ -44,8 +47,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   
-  <!-- Main Stylesheet (Cache-Busted for Version 89 Fixed Top Bible Bar and Shubh Voice) -->
-  <link rel="stylesheet" href="index.css?v=89_FIXED_TOP_BIBLE_BAR_AND_SHUBH_VOICE">
+  <!-- Main Stylesheet (Cache-Busted for Version 90 Unmissable Bible Toolbar and Shubh Voice) -->
+  <link rel="stylesheet" href="index.css?v=90_UNMISSABLE_BIBLE_TOOLBAR_AND_SHUBH_VOICE">
 
   <!-- Official LiveKit WebRTC Client SDK -->
   <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.0.8/dist/livekit-client.umd.min.js"></script>
@@ -2923,10 +2926,10 @@
     </div>
 
   <!-- Sarvam AI Bulbul V3 Indian Voice Narration Engine -->
-  <script src="sarvam-tts.js?v=89_FIXED_TOP_BIBLE_BAR_AND_SHUBH_VOICE"></script>
+  <script src="sarvam-tts.js?v=90_UNMISSABLE_BIBLE_TOOLBAR_AND_SHUBH_VOICE"></script>
 
-  <!-- App Main Logic (Cache-Busted for Version 89 Fixed Top Bible Bar and Shubh Voice) -->
-  <script src="app.js?v=89_FIXED_TOP_BIBLE_BAR_AND_SHUBH_VOICE"></script>
+  <!-- App Main Logic (Cache-Busted for Version 90 Unmissable Bible Toolbar and Shubh Voice) -->
+  <script src="app.js?v=90_UNMISSABLE_BIBLE_TOOLBAR_AND_SHUBH_VOICE"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 4.5s no matter what
