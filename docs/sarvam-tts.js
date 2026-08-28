@@ -12,23 +12,23 @@
     model: 'bulbul:v3',
     defaultPace: 0.92, // Calm, warm, mature Indian male Bible reading pace
     loudness: 1.2,
-    speechSampleRate: 22050,
+    speechSampleRate: 24000,
     enablePreprocessing: true,
     
-    // Voice Mapping for Bulbul V3
+    // Voice Mapping for Bulbul V3 - ratan for mr-IN
     speakers: {
-      'en-IN': 'ratan', // Primary English Indian Male: Mature, calm, deep, spiritual
-      'hi-IN': 'shubh', // Primary Hindi Indian Male: Devotional, natural, peaceful
-      'mr-IN': 'shubh'  // Marathi Indian Male: Clear Devanagari cadence
+      'mr-IN': 'ratan', // Primary Marathi Indian Male: Mature, calm, natural cadence
+      'en-IN': 'ratan', // Primary English Indian Male: Spiritual, warm
+      'hi-IN': 'ratan'  // Hindi Indian Male
     },
 
     // Alternative voices available in Bulbul V3 for user preference
     availableVoices: [
-      { id: 'ratan', name: 'Ratan (Indian Male - Mature & Spiritual)', lang: 'en-IN', gender: 'male' },
-      { id: 'shubh', name: 'Shubh (Indian Male - Calm & Devotional)', lang: 'hi-IN', gender: 'male' },
-      { id: 'aditya', name: 'Aditya (Indian Male - Deep & Warm)', lang: 'en-IN', gender: 'male' },
-      { id: 'aravind', name: 'Aravind (Indian Male - Gentle Voice)', lang: 'en-IN', gender: 'male' },
-      { id: 'priya', name: 'Priya (Indian Female - Warm & Soft)', lang: 'en-IN', gender: 'female' }
+      { id: 'ratan', name: 'Ratan (Marathi & English Male - Calm & Devotional)', lang: 'mr-IN', gender: 'male' },
+      { id: 'shubh', name: 'Shubh (Hindi & Marathi Male - Devotional)', lang: 'hi-IN', gender: 'male' },
+      { id: 'aditya', name: 'Aditya (Deep & Warm)', lang: 'en-IN', gender: 'male' },
+      { id: 'aravind', name: 'Aravind (Gentle Voice)', lang: 'en-IN', gender: 'male' },
+      { id: 'priya', name: 'Priya (Warm & Soft Female)', lang: 'en-IN', gender: 'female' }
     ],
 
     // API Key resolution (Settings > LocalStorage > Default)
@@ -224,8 +224,8 @@
     synthesizeText: async function (text, options) {
       if (!options) options = {};
       var isDevanagari = /[\u0900-\u097F]/.test(text || '');
-      var lang = options.lang || (isDevanagari ? 'hi-IN' : 'en-IN');
-      var speaker = options.speaker || (isDevanagari ? 'shubh' : (SARVAM_CONFIG.speakers[lang] || 'shubh'));
+      var lang = options.lang || (isDevanagari ? 'mr-IN' : 'en-IN');
+      var speaker = (options.speaker || (isDevanagari ? 'ratan' : (SARVAM_CONFIG.speakers[lang] || 'ratan'))).toLowerCase();
       var pace = options.pace !== undefined ? options.pace : SARVAM_CONFIG.defaultPace;
       
       var optimizedText = SarvamTextOptimizer.optimizeForNarration(text, lang);
@@ -246,45 +246,55 @@
         throw new Error('NO_API_KEY');
       }
 
-      var payload = {
-        inputs: [optimizedText],
-        target_language_code: lang,
-        speaker: speaker,
-        pace: pace,
-        speech_sample_rate: SARVAM_CONFIG.speechSampleRate,
-        enable_preprocessing: SARVAM_CONFIG.enablePreprocessing,
-        model: SARVAM_CONFIG.model
-      };
+      // Max 450 chars per chunk to safely comply with Sarvam's 500 char validation limit
+      var chunks = SarvamTextOptimizer.chunkPassage(optimizedText, 450);
+      if (chunks.length === 0) chunks = [optimizedText];
 
-      var response = await fetch(SARVAM_CONFIG.endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'api-subscription-key': apiKey
-        },
-        body: JSON.stringify(payload)
-      });
+      var audioBlobs = [];
 
-      if (!response.ok) {
-        var errMessage = 'HTTP ' + response.status;
-        try {
-          var errData = await response.json();
-          if (errData.detail) errMessage = typeof errData.detail === 'string' ? errData.detail : JSON.stringify(errData.detail);
-          else if (errData.message) errMessage = errData.message;
-        } catch (_) {}
-        throw new Error('Sarvam API Error: ' + errMessage);
+      for (var i = 0; i < chunks.length; i++) {
+        var chunkText = chunks[i];
+        var payload = {
+          inputs: [chunkText],
+          language_code: lang,
+          target_language_code: lang,
+          speaker: speaker,
+          pace: pace,
+          speech_sample_rate: SARVAM_CONFIG.speechSampleRate,
+          enable_preprocessing: SARVAM_CONFIG.enablePreprocessing,
+          model: SARVAM_CONFIG.model
+        };
+
+        var response = await fetch(SARVAM_CONFIG.endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'api-subscription-key': apiKey
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const body = await response.text();
+
+        if (!response.ok) {
+          console.error("SARVAM STATUS:", response.status);
+          console.error("SARVAM RESPONSE:", body);
+          throw new Error(`Sarvam ${response.status}: ${body}`);
+        }
+
+        var data = JSON.parse(body);
+        if (!data.audios || !data.audios[0]) {
+          throw new Error('Sarvam API returned no audio content');
+        }
+
+        audioBlobs.push(base64ToBlob(data.audios[0], 'audio/wav'));
       }
 
-      var data = await response.json();
-      if (!data.audios || !data.audios[0]) {
-        throw new Error('Sarvam API returned no audio content');
-      }
-
-      var audioBlob = base64ToBlob(data.audios[0], 'audio/wav');
-      await setCachedAudio(cacheKey, audioBlob);
+      var finalBlob = audioBlobs.length === 1 ? audioBlobs[0] : new Blob(audioBlobs, { type: 'audio/wav' });
+      await setCachedAudio(cacheKey, finalBlob);
 
       return {
-        audioUrl: URL.createObjectURL(audioBlob),
+        audioUrl: URL.createObjectURL(finalBlob),
         fromCache: false
       };
     }

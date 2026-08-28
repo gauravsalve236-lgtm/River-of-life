@@ -2147,9 +2147,10 @@ function startSpeechNarration() {
 
   document.getElementById("floating-audio-playbar").classList.add("active");
 
-  const langCode = (state.translation === "eng") ? "en-IN" : "hi-IN";
+  const isDevanagari = (state.translation !== "eng");
+  const langCode = isDevanagari ? "mr-IN" : "en-IN";
   const voiceSelect = document.getElementById("reader-inline-voice-select") || document.getElementById("audio-narrator-gender-select");
-  const selectedVoiceId = state.sarvamVoice || (voiceSelect ? voiceSelect.value : (langCode === "en-IN" ? "ratan" : "shubh")) || "shubh";
+  const selectedVoiceId = (state.sarvamVoice || (voiceSelect ? voiceSelect.value : "ratan") || "ratan").toLowerCase();
 
   if (window.SarvamTTS && window.SarvamTTS.queue) {
     window.SarvamTTS.queue.setListeners({
@@ -2481,14 +2482,14 @@ function initAudioVoices() {
   const playbarVoiceBtn = document.getElementById("playbar-btn-voice-select");
   
   const sarvamVoices = [
-    { value: "shubh", label: "🕊️ Shubh (Indian Male - Calm & Devotional • Hindi/Marathi/English)", lang: "hi-IN" },
-    { value: "ratan", label: "🧔 Ratan (Indian Male - Mature & Spiritual • English)", lang: "en-IN" },
-    { value: "aditya", label: "🎙️ Aditya (Indian Male - Deep & Warm)", lang: "en-IN" },
-    { value: "aravind", label: "📖 Aravind (Indian Male - Gentle Voice)", lang: "en-IN" },
-    { value: "priya", label: "👩 Priya (Indian Female - Warm & Soft)", lang: "en-IN" }
+    { value: "ratan", label: "🧔 Ratan (Marathi & English Male - Calm & Devotional)", lang: "mr-IN" },
+    { value: "shubh", label: "🕊️ Shubh (Hindi & Marathi Male - Devotional)", lang: "hi-IN" },
+    { value: "aditya", label: "🎙️ Aditya (Deep & Warm Male)", lang: "en-IN" },
+    { value: "aravind", label: "📖 Aravind (Gentle Voice Male)", lang: "en-IN" },
+    { value: "priya", label: "👩 Priya (Warm & Soft Female)", lang: "en-IN" }
   ];
 
-  const currentVoice = state.sarvamVoice || (state.translation === "eng" ? "ratan" : "shubh");
+  const currentVoice = state.sarvamVoice || "ratan";
   state.sarvamVoice = currentVoice;
 
   if (select) {
