@@ -33,17 +33,20 @@
 
     // API Key resolution (Settings > LocalStorage > Default)
     getApiKey: function () {
-      return localStorage.getItem('rol_sarvam_api_key') || 
-             window.SARVAM_API_KEY || 
-             (window.state && window.state.sarvamApiKey) || 
-             '';
+      var localKey = (typeof localStorage !== 'undefined') ? localStorage.getItem('rol_sarvam_api_key') : null;
+      return localKey || 
+             (typeof window !== 'undefined' && window.SARVAM_API_KEY) || 
+             (typeof window !== 'undefined' && window.state && window.state.sarvamApiKey) || 
+             'sk_odv5l3f4_XdZubK80ecSfBa6YYCLWDCNI';
     },
     
     setApiKey: function (key) {
-      if (key) {
-        localStorage.setItem('rol_sarvam_api_key', key.trim());
-      } else {
-        localStorage.removeItem('rol_sarvam_api_key');
+      if (typeof localStorage !== 'undefined') {
+        if (key) {
+          localStorage.setItem('rol_sarvam_api_key', key.trim());
+        } else {
+          localStorage.removeItem('rol_sarvam_api_key');
+        }
       }
     }
   };
@@ -247,9 +250,7 @@
         inputs: [optimizedText],
         target_language_code: lang,
         speaker: speaker,
-        pitch: 0,
         pace: pace,
-        loudness: SARVAM_CONFIG.loudness,
         speech_sample_rate: SARVAM_CONFIG.speechSampleRate,
         enable_preprocessing: SARVAM_CONFIG.enablePreprocessing,
         model: SARVAM_CONFIG.model

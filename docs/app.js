@@ -739,11 +739,10 @@ let state = {
   history: [],             // list of reading logs {ref, book, chapter, timestamp}
   streak: 1,               // daily consecutive streak counter
   userLikes: {},           // map of verse_ref -> liked boolean
-  audioTone: 'warm-resonance',
   audioSource: 'sarvam',     // 'sarvam' (Sarvam AI Bulbul V3 Indian Voice), 'human' (streaming MP3)
-  sarvamVoice: 'ratan',      // 'ratan' (Mature Spiritual English Indian Male), 'shubh' (Hindi/Marathi Male)
+  sarvamVoice: 'shubh',      // 'shubh' (Calm & Devotional Indian Male - Hindi/Marathi/English)
   sarvamPace: 0.92,          // 0.92x peaceful Bible reading speed
-  sarvamApiKey: '',          // Optional Sarvam API key override
+  sarvamApiKey: 'sk_odv5l3f4_XdZubK80ecSfBa6YYCLWDCNI', // Preconfigured Sarvam AI API Key
   quizHighscore: 0,        // High score in a single quiz session
   quizBadges: [],          // Unlocked badge IDs
   currentUser: null,       // Logged in user session ({ username, isPastor, email })
