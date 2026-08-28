@@ -992,6 +992,12 @@ function loadStateFromLocalStorage() {
       console.error("Error loading state:", e);
     }
   }
+  // Force migration to Sarvam AI Bulbul V3 Indian Voice Narration
+  state.audioSource = "sarvam";
+  if (!state.sarvamVoice) {
+    state.sarvamVoice = state.translation === "eng" ? "ratan" : "shubh";
+  }
+  state.sarvamPace = state.sarvamPace || 0.92;
 }
 
 function saveStateToLocalStorage() {
@@ -1953,44 +1959,13 @@ function startSpeechNarration() {
     }
   }
   
-  const isMarathiAudio = state.translation !== "eng";
-  const useHumanNarration = isMarathiAudio && state.audioSource === "human";
-  
-  if (useHumanNarration) {
-    const metadata = booksMetadataMr.find(b => b.filename.replace(".json", "") === state.activeBook);
-    const bookId = metadata ? metadata.id : 1;
-    const mp3Url = `https://www.wordproaudio.net/bibles/app/audio/28/${bookId}/${state.activeChapter}.mp3`;
-    
-    audioState.isPlaying = true;
-    audioState.speed = parseFloat(document.getElementById("tts-speed-slider")?.value || 0.92);
-    
-    audioPlayerInstance = new Audio(mp3Url);
-    audioPlayerInstance.playbackRate = audioState.speed;
-    
-    document.getElementById("floating-audio-playbar").classList.add("active");
-    document.getElementById("playbar-icon-svg").innerHTML = `<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>`;
-    
-    audioPlayerInstance.ontimeupdate = () => {
-      if (audioPlayerInstance && audioPlayerInstance.duration) {
-        const pct = (audioPlayerInstance.currentTime / audioPlayerInstance.duration) * 100;
-        document.getElementById("playbar-progress-line").style.width = `${pct}%`;
-      }
-    };
-    
-    audioPlayerInstance.onended = () => {
-      stopSpeechNarration();
-    };
-    
-    audioPlayerInstance.onerror = () => {
-      showToast("Failed to load Marathi narration audio");
-      stopSpeechNarration();
-    };
-    
-    audioPlayerInstance.play().catch(err => {
-      console.warn("Audio playback failed directly:", err);
-      showToast("Playback failed or blocked by browser");
-      stopSpeechNarration();
-    });
+  // Check Sarvam AI API Key
+  const apiKey = (window.SarvamTTS && window.SarvamTTS.config) ? window.SarvamTTS.config.getApiKey() : (state.sarvamApiKey || "");
+  if (!apiKey) {
+    showToast("🔑 Please enter your Sarvam AI API Key in Settings to start narration");
+    openModal("modal-audio-settings");
+    const keyInput = document.getElementById("sarvam-api-key-input");
+    if (keyInput) keyInput.focus();
     return;
   }
 
@@ -2353,93 +2328,31 @@ function updateAudioToneSettings() {
   }
 }
 
-function findBestDefaultVoice(voices, lang) {
-  const eng = voices.filter(v => v.lang.startsWith("en"));
-  
-  // 1. Look for high-quality English male voices (David, Mark, James, Richard, Ravi, Male, Siri, Natural)
-  const premiumMale = eng.find(v => {
-    const name = v.name.toLowerCase();
-    return name.includes("male") || 
-           name.includes("david") || 
-           name.includes("mark") || 
-           name.includes("james") || 
-           name.includes("richard") || 
-           name.includes("ravi") || 
-           (name.includes("google") && name.includes("male")) ||
-           name.includes("siri");
-  });
-  if (premiumMale) return premiumMale;
-  
-  // 2. Fallback to any premium English voice
-  const premium = eng.find(v => {
-    const name = v.name.toLowerCase();
-    return name.includes("google") || name.includes("natural");
-  });
-  if (premium) return premium;
-  
-  // 3. Marathi / Hindi search if not English
-  if (lang !== "eng") {
-    const deva = voices.find(v => v.lang.startsWith("mr") || v.lang.startsWith("hi"));
-    if (deva) return deva;
-  }
-  
-  return eng[0] || voices[0] || null;
-}
-
 function initAudioVoices() {
-  if (typeof speechSynthesis === 'undefined') return;
+  const select = document.getElementById("tts-voice-select");
+  const genderSelect = document.getElementById("audio-narrator-gender-select");
   
-  const getList = () => {
-    audioState.voices = speechSynthesis.getVoices();
-    const select = document.getElementById("tts-voice-select");
-    if (!select) return;
-    
-    select.innerHTML = '<option value="default">Default System Voice</option>';
-    
-    const filtered = audioState.voices.filter(v => 
-      state.translation === "eng" ? v.lang.startsWith("en") : (v.lang.startsWith("mr") || v.lang.startsWith("hi") || v.lang.startsWith("en"))
-    );
-    
-    filtered.forEach((voice, idx) => {
-      const opt = document.createElement("option");
-      opt.value = idx;
-      opt.textContent = `${voice.name} (${voice.lang})`;
-      select.appendChild(opt);
-    });
-    
-    // Add ElevenLabs options
-    const elVoices = [
-      { value: "elevenlabs_antoni", label: "👑 ElevenLabs Antoni (Free Male Voice)", id: "ErXwobaYiN019PkySvjV" },
-      { value: "elevenlabs_clyde", label: "👑 ElevenLabs Clyde (Free Male Voice)", id: "2E2jMRHfEMvvEBjL7aKG" },
-      { value: "elevenlabs_rachel", label: "👑 ElevenLabs Rachel (Free Female Voice)", id: "21m00Tcm4TlvDq8ikWAM" },
-      { value: "elevenlabs_declan", label: "👑 ElevenLabs Declan Sage (Paid Premium Storyteller)", id: "kqVT88a5QfII1HNAEPTJ" }
-    ];
+  const sarvamVoices = [
+    { value: "ratan", label: "🧔 Ratan (Indian Male - Mature & Spiritual)", lang: "en-IN" },
+    { value: "shubh", label: "🕊️ Shubh (Indian Male - Calm & Devotional)", lang: "hi-IN" },
+    { value: "aditya", label: "🎙️ Aditya (Indian Male - Deep & Warm)", lang: "en-IN" },
+    { value: "aravind", label: "📖 Aravind (Indian Male - Gentle Voice)", lang: "en-IN" },
+    { value: "priya", label: "👩 Priya (Indian Female - Warm & Soft)", lang: "en-IN" }
+  ];
 
-    elVoices.forEach(ev => {
+  if (select) {
+    select.innerHTML = "";
+    sarvamVoices.forEach(v => {
       const opt = document.createElement("option");
-      opt.value = ev.value;
-      opt.textContent = ev.label;
+      opt.value = v.value;
+      opt.textContent = v.label;
       select.appendChild(opt);
     });
-    
-    if (state.audioSource === "elevenlabs") {
-      const matched = elVoices.find(ev => ev.id === state.elevenLabsVoice);
-      select.value = matched ? matched.value : "elevenlabs_declan";
-    } else {
-      const best = findBestDefaultVoice(audioState.voices, state.translation);
-      if (best) {
-        const idx = filtered.findIndex(v => v.name === best.name);
-        if (idx !== -1) {
-          select.value = idx;
-          audioState.selectedVoice = best;
-        }
-      }
-    }
-  };
-  
-  getList();
-  if (speechSynthesis.onvoiceschanged !== undefined) {
-    speechSynthesis.onvoiceschanged = getList;
+    select.value = state.sarvamVoice || (state.translation === "eng" ? "ratan" : "shubh");
+  }
+
+  if (genderSelect) {
+    genderSelect.value = state.sarvamVoice || (state.translation === "eng" ? "ratan" : "shubh");
   }
 }
 
@@ -3685,73 +3598,21 @@ function setupEventListeners() {
       saveStateToLocalStorage();
       toggleVoiceDropdownVisibility();
       
-      // Keep voice selection dropdown in sync
-      const voiceSelect = document.getElementById("tts-voice-select");
-      if (voiceSelect) {
-        if (state.audioSource === "elevenlabs") {
-          const elVoices = [
-            { value: "elevenlabs_antoni", id: "ErXwobaYiN019PkySvjV" },
-            { value: "elevenlabs_clyde", id: "2E2jMRHfEMvvEBjL7aKG" },
-            { value: "elevenlabs_rachel", id: "21m00Tcm4TlvDq8ikWAM" },
-            { value: "elevenlabs_declan", id: "kqVT88a5QfII1HNAEPTJ" }
-          ];
-          const matched = elVoices.find(ev => ev.id === state.elevenLabsVoice);
-          voiceSelect.value = matched ? matched.value : "elevenlabs_declan";
-        } else {
-          // Re-populate system voices
-          initAudioVoices();
-        }
-      }
+      initAudioVoices();
     });
   }
 
-  // Speech Voice Selector change listener (switch to ElevenLabs if chosen)
+  // Voice Selector change listener
   const voiceSelect = document.getElementById("tts-voice-select");
   if (voiceSelect) {
     voiceSelect.addEventListener("change", (e) => {
-      const val = e.target.value;
-      if (val.startsWith("elevenlabs_")) {
-        state.audioSource = "elevenlabs";
-        if (val === "elevenlabs_antoni") state.elevenLabsVoice = "ErXwobaYiN019PkySvjV";
-        else if (val === "elevenlabs_clyde") state.elevenLabsVoice = "2E2jMRHfEMvvEBjL7aKG";
-        else if (val === "elevenlabs_rachel") state.elevenLabsVoice = "21m00Tcm4TlvDq8ikWAM";
-        else state.elevenLabsVoice = "kqVT88a5QfII1HNAEPTJ";
-        
-        saveStateToLocalStorage();
-        toggleVoiceDropdownVisibility();
-        if (audioSourceSelect) audioSourceSelect.value = "elevenlabs";
-        
-        // Sync setting voice input if it exists
-        const voiceInput = document.getElementById("you-elevenlabs-voice");
-        if (voiceInput) voiceInput.value = state.elevenLabsVoice;
-      } else {
-        // User selected a system voice (index or 'default')
-        state.audioSource = "ai";
-        saveStateToLocalStorage();
-        toggleVoiceDropdownVisibility();
-        if (audioSourceSelect) audioSourceSelect.value = "ai";
+      state.sarvamVoice = e.target.value;
+      saveStateToLocalStorage();
+      const genderSelect = document.getElementById("audio-narrator-gender-select");
+      if (genderSelect) genderSelect.value = state.sarvamVoice;
+      if (window.SarvamTTS && window.SarvamTTS.queue) {
+        window.SarvamTTS.queue.setOptions({ speaker: state.sarvamVoice });
       }
-    });
-  }
-
-  // ElevenLabs Key & Voice Input Handlers
-  let keyValidationTimeout = null;
-  const elKeyInput = document.getElementById("you-elevenlabs-key");
-  if (elKeyInput) {
-    elKeyInput.addEventListener("input", (e) => {
-      state.elevenLabsKey = e.target.value.trim();
-      saveStateToLocalStorage();
-      clearTimeout(keyValidationTimeout);
-      keyValidationTimeout = setTimeout(() => {
-        validateElevenLabsKey(state.elevenLabsKey);
-      }, 800);
-    });
-  }
-  const elVoiceInput = document.getElementById("you-elevenlabs-voice");
-  if (elVoiceInput) {
-    elVoiceInput.addEventListener("input", (e) => {
-      state.elevenLabsVoice = e.target.value.trim() || "kqVT88a5QfII1HNAEPTJ";
-      saveStateToLocalStorage();
     });
   }
 
