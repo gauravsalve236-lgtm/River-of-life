@@ -469,6 +469,21 @@
             <div class="bible-chapter-control-header" style="flex-shrink: 0; background: var(--bg-content); border-bottom: 2px solid var(--border); padding: 12px 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); z-index: 15;">
               <div style="max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px;">
                 
+                <!-- Row 0: Prominent Book & Chapter Tap-To-Change Banner -->
+                <div style="display: flex; justify-content: space-between; align-items: center; background: var(--pill-bg); border: 1.5px solid var(--border); border-radius: 12px; padding: 8px 14px;">
+                  <button id="btn-reader-open-book-picker" style="display: flex; align-items: center; gap: 8px; background: transparent; border: none; cursor: pointer; color: var(--text); font-family: var(--font-ui); font-size: 15px; font-weight: 800; padding: 0;">
+                    <span style="font-size: 18px;">📖</span>
+                    <span id="inline-reader-book-name" style="color: var(--primary);">यशया अध्याय 43</span>
+                    <span style="font-size: 11px; background: var(--primary); color: #ffffff; padding: 2px 8px; border-radius: 12px; font-weight: 700; margin-left: 4px;">बदला ▾</span>
+                  </button>
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span id="inline-reader-translation-name" style="font-size: 12px; font-weight: 700; color: var(--text-muted);">मराठी (BSI)</span>
+                    <button id="btn-reader-open-text-settings" style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: var(--bg-content); border: 1px solid var(--border); color: var(--text); font-weight: 800; font-size: 13px; cursor: pointer;" title="Text & Display Settings">
+                      Aa
+                    </button>
+                  </div>
+                </div>
+
                 <!-- Row 1: Direct Quick Selectors for Book, Chapter & Verse -->
                 <div class="bible-top-quick-selectors" style="display: flex; gap: 8px; align-items: flex-end; width: 100%; flex-wrap: wrap;">
                   <!-- 1. Book Selector Dropdown -->
@@ -505,11 +520,6 @@
                       <option value="parallel">Parallel</option>
                     </select>
                   </div>
-
-                  <!-- Text Formatting Trigger -->
-                  <button id="btn-reader-open-text-settings" style="display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 10px; background: var(--pill-bg); border: 1px solid var(--border); color: var(--text); font-weight: 800; font-size: 14px; cursor: pointer; flex-shrink: 0;" title="Text & Display Settings">
-                    Aa
-                  </button>
                 </div>
 
                 <!-- Row 2: Sarvam AI Voice Narration Bar with Shubh and Ratan -->
@@ -517,7 +527,7 @@
                   <!-- Primary Play/Listen Button -->
                   <button id="btn-reader-inline-listen" class="btn-primary-block" style="flex: 1; min-width: 140px; margin: 0; padding: 9px 16px; border-radius: 8px; font-size: 13px; font-weight: 800; background: linear-gradient(135deg, var(--primary) 0%, #7d121b 100%); color: #ffffff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 3px 10px rgba(158, 22, 34, 0.3);">
                     <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" id="inline-play-icon-svg"><polygon points="5 3 19 12 5 3"></polygon></svg>
-                    <span id="reader-inline-listen-text">Listen Chapter</span>
+                    <span id="reader-inline-listen-text">Listen with Shubh 🕊️</span>
                   </button>
 
                   <!-- Voice Selector Dropdown (Shubh first!) -->

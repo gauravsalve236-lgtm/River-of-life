@@ -1,0 +1,10 @@
+R_DEF: Internal format may change without notice
+local
+color bg_dark
+color card_bg
+color primary_dark
+color primary_gold
+id webview
+layout activity_main
+string app_name
+style Theme.RiverOfLife

@@ -1,0 +1,60 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "RiverOfLifeAuthSchema",
+  "description": "Unified Database Schema for River of Life Bible App Authentication & User Profiles (Firebase Cloud Firestore / Supabase Postgres)",
+  "type": "object",
+  "properties": {
+    "users": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-zA-Z0-9_-]+$": {
+          "type": "object",
+          "properties": {
+            "uid": {
+              "type": "string",
+              "description": "Primary User Authentication ID from Firebase Auth / Supabase Auth"
+            },
+            "refUserId": {
+              "type": "string",
+              "description": "Unique Reference User ID (e.g. ROL-USR-894215)"
+            },
+            "fullName": {
+              "type": "string",
+              "description": "User Full Name"
+            },
+            "email": {
+              "type": "string",
+              "format": "email",
+              "description": "Registered Email Address"
+            },
+            "phone": {
+              "type": "string",
+              "description": "Registered Mobile Phone Number (+91...)"
+            },
+            "authMethod": {
+              "type": "string",
+              "enum": ["mobile", "email", "google"]
+            },
+            "isVerified": {
+              "type": "boolean",
+              "description": "Device verification status"
+            },
+            "createdAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updatedAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "sessionToken": {
+              "type": "string",
+              "description": "Persistent auto-login JWT token"
+            }
+          },
+          "required": ["uid", "refUserId", "fullName", "email", "phone", "authMethod", "isVerified", "createdAt"]
+        }
+      }
+    }
+  }
+}
