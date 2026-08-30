@@ -194,25 +194,25 @@
               <span id="pull-refresh-text" class="pull-refresh-label">Pull to refresh / रिफ्रेश करण्यासाठी ओढा</span>
             </div>
 
-            <!-- 1ST CARD: Brand Greeting & Welcome Card -->
-            <div class="brand-hero-welcome-card">
+            <!-- 1ST CARD: Brand Greeting & Welcome Card (Clean Light Color Theme) -->
+            <div class="brand-hero-welcome-card light-theme-hero">
               <div class="hero-card-left" style="width: 100%;">
-                <div class="hero-card-header-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <div class="hero-card-header-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                   <span class="hero-date-badge">
                     <span class="pulse-dot"></span> <span id="home-hero-date-str">Today | आजचे मनन</span>
                   </span>
-                  <span class="hero-fellowship-pill" style="font-size: 11px; font-weight: 700; background: rgba(212, 175, 55, 0.15); color: #ffd369; padding: 3px 10px; border-radius: 20px; border: 1px solid rgba(212, 175, 55, 0.3);">River of Life 🕊️</span>
+                  <span class="hero-fellowship-pill" style="font-size: 11.5px; font-weight: 800; background: rgba(139, 29, 36, 0.08); color: #8B1D24; padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(139, 29, 36, 0.2);">River of Life 🕊️</span>
                 </div>
-                <h2 class="hero-welcome-title" id="home-greeting-user">Shalom & Welcome 🕊️</h2>
+                <h2 class="hero-welcome-title" id="home-greeting-user">Good morning, Shalom 🕊️</h2>
                 <p class="hero-welcome-subtitle">जीवन नदी बायबल निवासस्थान • River of Life Fellowship</p>
                 <div class="hero-action-buttons">
-                  <button class="hero-btn primary-gold" onclick="switchTab('reader')">
+                  <button class="hero-btn primary-crimson" onclick="switchTab('reader')">
                     📖 Read Bible / वाचा
                   </button>
-                  <button class="hero-btn secondary-green" onclick="switchTab('meetings')">
+                  <button class="hero-btn secondary-room" onclick="switchTab('meetings')">
                     🎥 Join Live Room
                   </button>
-                  <button class="hero-btn secondary-gold" onclick="openPrayerRequestForm()" style="background: rgba(229, 168, 59, 0.2); border: 1px solid rgba(229, 168, 59, 0.45); color: #ffd369;">
+                  <button class="hero-btn secondary-prayer" onclick="openPrayerRequestForm()">
                     🙏 Prayer Request / प्रार्थना
                   </button>
                 </div>
@@ -225,34 +225,50 @@
             </div>
 
             <div class="home-grid-layout">
-              <!-- 2ND CARD: Daily Bible Verse (Rotates Background Daily) -->
+              <!-- 2ND CARD: Daily Bible Verse (Elevated Captivating View with Live Wallpaper Switcher) -->
               <div class="daily-verse-card" id="card-daily-verse-home">
-                <div class="daily-verse-card-bg"></div>
+                <div class="daily-verse-card-bg" id="vod-dynamic-bg" style="background-image: url('assets/images/golden_dawn.png');"></div>
                 <div class="daily-verse-tint"></div>
-                <div class="daily-verse-header-tabs">
-                  <span class="tab-pill active">DAILY BIBLE VERSE</span>
-                  <span class="tab-pill" onclick="openImmersivePrayerModal('wedding_cana')">PRAYER TOPICS</span>
-                  <span class="tab-pill" onclick="openBibleQuizModal()">BIBLE QUIZ</span>
+                
+                <div class="daily-verse-top-bar">
+                  <div class="vod-badge-ribbon">
+                    <span class="vod-sparkle">✨</span>
+                    <span id="vod-date-label">DAILY BIBLE VERSE • आजचे वचन</span>
+                  </div>
+                  
+                  <!-- Interactive Scenic Wallpaper Switcher Chips -->
+                  <div class="vod-wallpaper-chips-row">
+                    <button class="vod-chip active" onclick="switchVodWallpaper('golden_dawn', this)" title="Golden Dawn">🌅 Dawn</button>
+                    <button class="vod-chip" onclick="switchVodWallpaper('mount_zion', this)" title="Mount Zion">🏔️ Zion</button>
+                    <button class="vod-chip" onclick="switchVodWallpaper('calm_waters', this)" title="Calm Waters">🌊 Waters</button>
+                    <button class="vod-chip" onclick="switchVodWallpaper('peaceful_pastures', this)" title="Peaceful Pastures">🌿 Meadow</button>
+                    <button class="vod-chip" onclick="switchVodWallpaper('stars', this)" title="Starlight">✨ Stars</button>
+                  </div>
                 </div>
+
                 <div class="daily-verse-body">
+                  <div class="vod-quote-glyph">“</div>
                   <blockquote id="home-vod-text">"परमेश्वर माझा मेंढपाळ आहे; मला काहीही कमी पडणार नाही."</blockquote>
-                  <cite id="home-vod-ref">स्तोत्रसंहिता २३:१ MARVBSI</cite>
+                  <div class="vod-ref-container">
+                    <cite id="home-vod-ref">स्तोत्रसंहिता २३:१ MARVBSI</cite>
+                  </div>
                   
                   <div class="daily-verse-nav-row">
                     <button class="vod-nav-btn" id="btn-vod-prev" title="Yesterday's Verse">
-                      <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg> Previous
+                      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg> Prev
                     </button>
-                    <button class="vod-nav-btn" id="btn-vod-listen" title="Listen to Verse">
-                      <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg> Listen
+                    <button class="vod-nav-btn highlight" id="btn-vod-listen" title="Listen with Shubh Voice">
+                      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg> Listen 🔊
                     </button>
                     <button class="vod-nav-btn" id="btn-vod-read">
-                      Read Chapter
+                      Read Chapter 📖
                     </button>
                     <button class="vod-nav-btn" id="btn-vod-next" title="Next Day's Verse">
-                      Next <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                      Next <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
                     </button>
                   </div>
                 </div>
+                
                 <div class="daily-verse-social-metrics">
                   <button class="metric-btn" id="btn-vod-like-trigger">
                     <svg id="home-vod-heart-icon" viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path></svg>
@@ -260,7 +276,7 @@
                   </button>
                   <button class="metric-btn" id="btn-vod-share-trigger">
                     <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
-                    <span>Share</span>
+                    <span>WhatsApp</span>
                   </button>
                   <button class="metric-right" id="btn-open-fullscreen-vod">
                     <span>Fullscreen ↗</span>
@@ -268,15 +284,15 @@
                 </div>
               </div>
 
-              <!-- 3RD OPTION: Topics for Prayers (Ready-Made Prayers with Backgrounds) -->
+              <!-- 3RD OPTION: Topics for Prayers (Top 4 Featured with View All Button) -->
               <div class="prayer-topics-section-container">
-                <div class="section-title-row">
+                <div class="section-title-row" style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 14px;">
                   <div class="section-title-left">
                     <span class="section-tag-gold">PRAYER SANCTUARY</span>
                     <h3 class="section-main-heading">🙏 Topics for Prayers / प्रार्थना विषय व मनन</h3>
                     <p class="section-sub-heading">Ready-made biblical prayers with inspiring background imagery & narration</p>
                   </div>
-                  <button class="btn-section-view-all" onclick="switchTab('prayers')">All Prayers →</button>
+                  <button class="btn-section-view-all" id="btn-view-all-prayers" onclick="toggleViewAllPrayers()">View All Prayers (8+) →</button>
                 </div>
 
                 <div class="prayer-topics-grid" id="prayer-topics-grid-container">
@@ -336,8 +352,9 @@
                     </div>
                   </div>
 
+                  <!-- Extra Topics 5-8 (Toggled by View All) -->
                   <!-- Topic 5: Family Blessing & Harmony -->
-                  <div class="prayer-topic-card" onclick="openImmersivePrayerModal('family_blessing')" style="background-image: url('assets/images/family_blessing.png');">
+                  <div class="prayer-topic-card prayer-topic-extra" onclick="openImmersivePrayerModal('family_blessing')" style="display: none; background-image: url('assets/images/family_blessing.png');">
                     <div class="prayer-topic-overlay"></div>
                     <div class="prayer-topic-badge">👨‍👩‍👧‍👦 FAMILY & HOME</div>
                     <div class="prayer-topic-content">
@@ -351,7 +368,7 @@
                   </div>
 
                   <!-- Topic 6: Strength in Hard Times -->
-                  <div class="prayer-topic-card" onclick="openImmersivePrayerModal('strength_trials')" style="background-image: url('assets/images/mount_zion.png');">
+                  <div class="prayer-topic-card prayer-topic-extra" onclick="openImmersivePrayerModal('strength_trials')" style="display: none; background-image: url('assets/images/mount_zion.png');">
                     <div class="prayer-topic-overlay"></div>
                     <div class="prayer-topic-badge">🛡️ STRENGTH & FAITH</div>
                     <div class="prayer-topic-content">
@@ -365,7 +382,7 @@
                   </div>
 
                   <!-- Topic 7: Wisdom & Career Guidance -->
-                  <div class="prayer-topic-card" onclick="openImmersivePrayerModal('wisdom_guidance')" style="background-image: url('assets/images/wisdom_guidance.png');">
+                  <div class="prayer-topic-card prayer-topic-extra" onclick="openImmersivePrayerModal('wisdom_guidance')" style="display: none; background-image: url('assets/images/wisdom_guidance.png');">
                     <div class="prayer-topic-overlay"></div>
                     <div class="prayer-topic-badge">💡 WISDOM & GUIDANCE</div>
                     <div class="prayer-topic-content">
@@ -379,7 +396,7 @@
                   </div>
 
                   <!-- Topic 8: Evening Thanksgiving & Rest -->
-                  <div class="prayer-topic-card" onclick="openImmersivePrayerModal('evening_rest')" style="background-image: url('assets/images/candlelight.png');">
+                  <div class="prayer-topic-card prayer-topic-extra" onclick="openImmersivePrayerModal('evening_rest')" style="display: none; background-image: url('assets/images/candlelight.png');">
                     <div class="prayer-topic-overlay"></div>
                     <div class="prayer-topic-badge">🌙 EVENING REST</div>
                     <div class="prayer-topic-content">
@@ -401,7 +418,7 @@
                   <div class="quiz-card-details">
                     <div class="quiz-badge-row" style="display: flex; gap: 6px; align-items: center; margin-bottom: 4px;">
                       <span class="quiz-badge-gold">BIBLE TRIVIA</span>
-                      <span class="quiz-badge-sub" style="font-size: 10.5px; font-weight: 700; color: #ffd369; background: rgba(255,211,105,0.15); padding: 2px 8px; border-radius: 10px;">4 LEVELS</span>
+                      <span class="quiz-badge-sub" style="font-size: 10.5px; font-weight: 700; color: #8B1D24; background: rgba(139,29,36,0.1); padding: 2px 8px; border-radius: 10px;">4 LEVELS</span>
                     </div>
                     <h5>बायबल सामान्य ज्ञान स्पर्धा</h5>
                     <p>Daily Bible Quiz • 4 Difficulty Levels • Badges & Streaks</p>
@@ -424,68 +441,9 @@
                 <button class="btn-play-quiz">Play Quiz / खेळा &rarr;</button>
               </div>
 
-              <!-- Church Companion Card -->
-              <div class="settings-card-group" id="church-companion-card" style="padding: 20px; display: flex; flex-direction: column; gap: 16px; margin: 0 16px 16px 16px; border-radius: 12px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
-                  <h4 style="margin: 0; font-size: 15px; font-weight: 800; display: flex; align-items: center; gap: 8px; color: var(--primary);">⛪ Church Companion / चर्च सहचारी</h4>
-                  <span id="church-badge-name" style="font-size: 11px; background: var(--primary-light); color: var(--primary); padding: 2px 8px; border-radius: 12px; font-weight: 700;">No Church Set</span>
-                </div>
-                
-                <div id="church-companion-setup" style="text-align: center; padding: 10px 0;">
-                  <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">Link your home church to view announcements, sermon notes, and events.</p>
-                  <button id="btn-church-setup-link" class="btn-primary-mini" style="margin: 0;">Link Church / चर्च जोडा</button>
-                </div>
-
-                <div id="church-companion-content" style="display: none; flex-direction: column; gap: 14px;">
-                  <!-- Sub-tabs: Announcements, Sermon Notes -->
-                  <div style="display: flex; gap: 8px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
-                    <button class="devo-topic-pill active" id="btn-church-tab-news" style="padding: 6px 12px; font-size: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--pill-bg); color: var(--text); cursor: pointer;">Announcements</button>
-                    <button class="devo-topic-pill" id="btn-church-tab-sermons" style="padding: 6px 12px; font-size: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--pill-bg); color: var(--text); cursor: pointer;">Sermon Notes</button>
-                  </div>
-
-                  <!-- Announcements Content -->
-                  <div id="church-news-panel" style="display: flex; flex-direction: column; gap: 10px;">
-                    <div style="background: var(--bg); padding: 10px; border-radius: 8px; border: 1px solid var(--border); text-align: left;">
-                      <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                        <span style="font-size: 11px; font-weight: 700; color: var(--primary);">NOTICE</span>
-                        <span style="font-size: 11px; color: var(--text-muted);">Today</span>
-                      </div>
-                      <strong style="font-size: 13px; display: block; margin-bottom: 2px; color: var(--text);">Sunday Service Timings Rescheduled</strong>
-                      <span style="font-size: 12.5px; color: var(--text-muted); line-height: 1.4; display: block;">Morning service will start at 8:30 AM instead of 9:00 AM next Sunday.</span>
-                    </div>
-                  </div>
-
-                  <!-- Sermon Notes Content -->
-                  <div id="church-sermons-panel" style="display: none; flex-direction: column; gap: 10px;">
-                    <div style="background: var(--bg); padding: 10px; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; text-align: left;" id="sermon-note-item-1">
-                      <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                        <span style="font-size: 11px; font-weight: 700; color: var(--primary);">SERMON</span>
-                        <span style="font-size: 11px; color: var(--text-muted);">June 14</span>
-                      </div>
-                      <strong style="font-size: 13px; display: block; margin-bottom: 2px; color: var(--text);">Walking in Divine Faith / दैवी विश्वासात चालणे</strong>
-                      <span style="font-size: 12px; color: var(--text-muted);">Pastor Sunil • Scripture: Hebrews 11:1-6</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Community Fellowship Share Card (At Bottom of Home Page) -->
-              <div class="community-share-card">
-                <div class="share-card-left">
-                  <span class="share-badge">COMMUNITY FELLOWSHIP</span>
-                  <h4 class="share-title">Invite Friends & Family / मित्रांना आमंत्रित करा</h4>
-                  <p class="share-subtitle">Share River of Life Bible app on WhatsApp to study Scripture and pray together!</p>
-                </div>
-                <div class="share-card-right">
-                  <button id="btn-home-whatsapp-invite" class="share-whatsapp-btn" onclick="shareAppWhatsApp()">
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.09-3.974c1.652.98 3.271 1.498 4.902 1.499 5.485 0 9.948-4.464 9.951-9.95.002-2.658-1.03-5.155-2.903-7.03C16.229 2.67 13.738 1.636 11.08 1.636 5.596 1.636 1.132 6.098 1.13 11.585c-.001 1.761.472 3.479 1.371 5.011L1.472 22.03l5.675-1.488-.009-.016zm11.233-7.56c-.322-.16-.1.905-.31.84s-.977-.4-1.354-.736c-.314-.28-.52-.627-.582-.736-.062-.108-.008-.16-.02-.187-.012-.028-.087-.06-.182-.108s-.565-.279-.92-.455c-.355-.177-.613-.264-.87-.353-.258-.088-.517-.088-.775.176-.258.265-.997 1.25-1.222 1.515-.226.265-.452.294-.775.132-.323-.162-1.363-.502-2.597-1.602-.96-.856-1.608-1.913-1.797-2.236-.188-.324-.02-.499.141-.66.145-.145.323-.382.484-.573.161-.191.215-.324.323-.544.107-.22.054-.412-.027-.573-.081-.162-.726-1.75-.995-2.397-.262-.63-.528-.544-.726-.554-.188-.01-.403-.012-.618-.012s-.565.081-.86.402c-.296.323-1.129 1.103-1.129 2.69 0 1.587 1.156 3.12 1.317 3.335.161.215 2.274 3.472 5.509 4.869.769.332 1.37.53 1.838.679.772.246 1.475.211 2.03.128.62-.093 1.908-.78 2.177-1.534.269-.753.269-1.398.188-1.534-.08-.135-.296-.215-.618-.376z"/></svg>
-                    <span>Share App</span>
-                  </button>
-                </div>
-              </div>
             </div> <!-- /.home-grid-layout -->
           </div> <!-- /#home-view-scroll-content -->
-        </section> <!-- /#view-home -->
+        </section>
 
         <section id="view-reader" class="app-view split-screen-parent">
           

@@ -5752,15 +5752,13 @@ input, textarea, select, [contenteditable="true"] {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: linear-gradient(135deg, #052226 0%, #0e757d 55%, #073439 100%);
+  background: linear-gradient(160deg, #1c0407 0%, #4a0810 50%, #8f121d 100%);
+  z-index: 99999;
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
-  z-index: 99999;
-  opacity: 1;
-  pointer-events: auto;
-  transition: opacity 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+  align-items: center;
+  transition: opacity 0.5s cubic-bezier(0.25, 1, 0.5, 1);
   overflow: hidden;
 }
 
@@ -5786,17 +5784,9 @@ input, textarea, select, [contenteditable="true"] {
   height: 100%;
 }
 
-.wave-p1 {
-  fill: rgba(27, 181, 190, 0.15);
-  animation: waveMove1 14s ease-in-out infinite;
-  transform-origin: bottom center;
-}
+.wave-p1 { fill: rgba(229, 168, 59, 0.15); animation: waveMove1 12s ease-in-out infinite alternate; transform-origin: bottom center; }
 
-.wave-p2 {
-  fill: rgba(229, 168, 59, 0.2);
-  animation: waveMove2 10s ease-in-out infinite;
-  transform-origin: bottom center;
-}
+.wave-p2 { fill: rgba(255, 211, 105, 0.22); animation: waveMove2 8s ease-in-out infinite alternate; transform-origin: bottom center; }
 
 .splash-content {
   position: relative;
@@ -5865,14 +5855,14 @@ input, textarea, select, [contenteditable="true"] {
 }
 
 .splash-verse-container {
-  background: rgba(7, 33, 37, 0.85);
+  background: rgba(30, 4, 8, 0.88);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1.5px solid rgba(229, 168, 59, 0.4);
-  border-radius: 24px;
-  padding: 22px 26px;
-  margin-bottom: 32px;
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4);
+  border: 1.5px solid rgba(229, 168, 59, 0.45);
+  border-radius: 16px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
   animation: fadeInSplash 1s ease-out forwards;
 }
 
@@ -6881,11 +6871,20 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
 }
 
 /* Anti-Flicker Hardware Acceleration Rules */
-.app-view, .meeting-modal-overlay, .splash-screen {
-  backface-visibility: hidden !important;
-  -webkit-backface-visibility: hidden !important;
-  transform: translateZ(0) !important;
-  -webkit-transform: translateZ(0) !important;
+.splash-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(160deg, #1c0407 0%, #4a0810 50%, #8f121d 100%);
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transition: opacity 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+  overflow: hidden;
 }
 
 /* Native Pull To Refresh Styles */
@@ -8081,4 +8080,354 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
 .ios-theme-dark .brand-hero-welcome-card {
   background: linear-gradient(135deg, #180306 0%, #42060d 50%, #690a15 100%) !important;
   border-color: rgba(224, 83, 95, 0.45) !important;
+}
+
+
+/* ==========================================================================
+   ELEVATED LIGHT WELCOME CARD & CAPTIVATING DAILY BIBLE VERSE
+   ========================================================================== */
+
+/* 1. Light Color Theme for Welcome/Greeting Card */
+.brand-hero-welcome-card.light-theme-hero {
+  margin: 12px 16px 20px 16px;
+  padding: 24px 26px;
+  border-radius: 20px;
+  background: #ffffff !important;
+  border: 1.5px solid rgba(201, 138, 44, 0.3) !important;
+  box-shadow: 0 10px 30px rgba(158, 22, 34, 0.05), 0 2px 8px rgba(0, 0, 0, 0.02) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.brand-hero-welcome-card.light-theme-hero::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 140px;
+  height: 100%;
+  background: radial-gradient(circle at 100% 0%, rgba(201, 138, 44, 0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.brand-hero-welcome-card.light-theme-hero .hero-date-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(201, 138, 44, 0.1);
+  color: #8B1D24;
+  border: 1px solid rgba(201, 138, 44, 0.3);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.brand-hero-welcome-card.light-theme-hero .hero-welcome-title {
+  color: #8B1D24 !important;
+  font-family: var(--font-ui);
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  margin: 0 0 4px 0;
+}
+
+.brand-hero-welcome-card.light-theme-hero .hero-welcome-subtitle {
+  color: #64748b !important;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+}
+
+.brand-hero-welcome-card.light-theme-hero .hero-btn.primary-crimson {
+  background: linear-gradient(135deg, #8B1D24 0%, #680d14 100%);
+  color: #ffffff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 13.5px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(139, 29, 36, 0.28);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.brand-hero-welcome-card.light-theme-hero .hero-btn.primary-crimson:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(139, 29, 36, 0.35);
+}
+
+.brand-hero-welcome-card.light-theme-hero .hero-btn.secondary-room {
+  background: rgba(13, 148, 136, 0.08);
+  border: 1px solid rgba(13, 148, 136, 0.35);
+  color: #0f766e;
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+
+.brand-hero-welcome-card.light-theme-hero .hero-btn.secondary-prayer {
+  background: rgba(201, 138, 44, 0.1);
+  border: 1.5px solid rgba(201, 138, 44, 0.38);
+  color: #8a5713;
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+
+/* Theme Adaptation for Dark/Sepia/Olive */
+.ios-theme-dark .brand-hero-welcome-card.light-theme-hero {
+  background: #151822 !important;
+  border-color: #262b3a !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
+}
+.ios-theme-dark .brand-hero-welcome-card.light-theme-hero .hero-welcome-title {
+  color: #f8fafc !important;
+}
+.ios-theme-dark .brand-hero-welcome-card.light-theme-hero .hero-welcome-subtitle {
+  color: #94a3b8 !important;
+}
+
+.ios-theme-sepia .brand-hero-welcome-card.light-theme-hero {
+  background: #eee7d7 !important;
+  border-color: #ddd3c0 !important;
+}
+.ios-theme-sepia .brand-hero-welcome-card.light-theme-hero .hero-welcome-title {
+  color: #991b1b !important;
+}
+.ios-theme-sepia .brand-hero-welcome-card.light-theme-hero .hero-welcome-subtitle {
+  color: #786958 !important;
+}
+
+/* 2. Captivating Daily Bible Verse Layout */
+.daily-verse-card {
+  position: relative;
+  margin: 0 16px 24px 16px;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18), 0 4px 12px rgba(0, 0, 0, 0.08);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  min-height: 380px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.daily-verse-card-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  transition: background-image 0.5s ease-in-out, transform 8s ease-out;
+  z-index: 1;
+}
+
+.daily-verse-card:hover .daily-verse-card-bg {
+  transform: scale(1.03);
+}
+
+.daily-verse-tint {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, rgba(8, 10, 16, 0.45) 0%, rgba(8, 10, 16, 0.65) 55%, rgba(8, 10, 16, 0.85) 100%);
+  z-index: 2;
+}
+
+.daily-verse-top-bar {
+  position: relative;
+  z-index: 3;
+  padding: 16px 20px 0 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.vod-badge-ribbon {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 211, 105, 0.4);
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #ffd369;
+  letter-spacing: 0.5px;
+}
+
+.vod-wallpaper-chips-row {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.vod-chip {
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  border-radius: 16px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.vod-chip:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: #ffd369;
+}
+
+.vod-chip.active {
+  background: linear-gradient(135deg, #ffd369 0%, #d4af37 100%);
+  color: #1a0f02;
+  border-color: #ffd369;
+  font-weight: 800;
+  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.4);
+}
+
+.daily-verse-body {
+  position: relative;
+  z-index: 3;
+  padding: 20px 24px;
+  text-align: center;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.vod-quote-glyph {
+  font-family: Georgia, serif;
+  font-size: 48px;
+  line-height: 24px;
+  color: #ffd369;
+  opacity: 0.85;
+  margin-bottom: 8px;
+}
+
+#home-vod-text {
+  font-family: var(--font-body);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.6;
+  color: #ffffff;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+  margin: 0 0 14px 0;
+  quotes: none;
+}
+
+.vod-ref-container {
+  margin-bottom: 20px;
+}
+
+#home-vod-ref {
+  display: inline-block;
+  font-family: var(--font-ui);
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #ffd369;
+  background: rgba(255, 211, 105, 0.15);
+  border: 1px solid rgba(255, 211, 105, 0.4);
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-style: normal;
+  letter-spacing: 0.5px;
+}
+
+.daily-verse-nav-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.vod-nav-btn {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  padding: 7px 14px;
+  border-radius: 20px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s;
+}
+
+.vod-nav-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.vod-nav-btn.highlight {
+  background: linear-gradient(135deg, #8B1D24 0%, #680d14 100%);
+  border-color: rgba(255, 211, 105, 0.4);
+  color: #ffd369;
+  box-shadow: 0 3px 10px rgba(139, 29, 36, 0.4);
+}
+
+.daily-verse-social-metrics {
+  position: relative;
+  z-index: 3;
+  padding: 12px 20px;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* 3. Section View All Button */
+.btn-section-view-all {
+  background: rgba(139, 29, 36, 0.08);
+  border: 1.5px solid rgba(139, 29, 36, 0.25);
+  color: #8B1D24;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-section-view-all:hover {
+  background: #8B1D24;
+  color: #ffffff;
+  border-color: #8B1D24;
+}
+
+.ios-theme-dark .btn-section-view-all {
+  background: rgba(224, 83, 95, 0.15);
+  border-color: rgba(224, 83, 95, 0.3);
+  color: #e0535f;
+}
+
+/* Ensure clean view backgrounds */
+.app-view {
+  background: transparent !important;
+}
+.content-view-viewport {
+  background-color: var(--bg) !important;
 }

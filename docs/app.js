@@ -10739,3 +10739,35 @@ window.submitPastoralPrayerRequest = function(e) {
   const detailsField = document.getElementById("prayer-req-details");
   if (detailsField) detailsField.value = "";
 };
+
+
+/* ==========================================================================
+   VOD WALLPAPER SWITCHER & PRAYER TOPICS VIEW ALL CONTROLLERS
+   ========================================================================== */
+
+window.switchVodWallpaper = function(imageName, btnEl) {
+  const bgEl = document.getElementById("vod-dynamic-bg");
+  if (bgEl) {
+    bgEl.style.backgroundImage = `url('assets/images/${imageName}.png')`;
+  }
+  if (btnEl) {
+    document.querySelectorAll(".vod-chip").forEach(c => c.classList.remove("active"));
+    btnEl.classList.add("active");
+  }
+  showToast(`Wallpaper updated: ${btnEl ? btnEl.textContent.trim() : imageName}`);
+};
+
+window.toggleViewAllPrayers = function() {
+  const extraPrayers = document.querySelectorAll(".prayer-topic-extra");
+  const btn = document.getElementById("btn-view-all-prayers");
+  if (extraPrayers.length === 0) return;
+  
+  const isHidden = (extraPrayers[0].style.display === "none" || extraPrayers[0].style.display === "");
+  if (isHidden) {
+    extraPrayers.forEach(el => el.style.display = "flex");
+    if (btn) btn.textContent = "Show Less ←";
+  } else {
+    extraPrayers.forEach(el => el.style.display = "none");
+    if (btn) btn.textContent = "View All Prayers (8+) →";
+  }
+};
