@@ -17,15 +17,15 @@
     
     // Voice Mapping for Bulbul V3 - ratan for mr-IN
     speakers: {
-      'mr-IN': 'ratan', // Primary Marathi Indian Male: Mature, calm, natural cadence
-      'en-IN': 'ratan', // Primary English Indian Male: Spiritual, warm
-      'hi-IN': 'ratan'  // Hindi Indian Male
+      'mr-IN': 'shubh', // Primary Marathi Indian Male: Mature, calm, natural cadence
+      'en-IN': 'shubh', // Primary English Indian Male: Spiritual, warm
+      'hi-IN': 'shubh'  // Hindi Indian Male
     },
 
     // Alternative voices available in Bulbul V3 for user preference
     availableVoices: [
-      { id: 'ratan', name: 'Ratan (Marathi & English Male - Calm & Devotional)', lang: 'mr-IN', gender: 'male' },
-      { id: 'shubh', name: 'Shubh (Hindi & Marathi Male - Devotional)', lang: 'hi-IN', gender: 'male' },
+      { id: 'shubh', name: 'Shubh (Marathi & Hindi Male - Devotional & Peaceful)', lang: 'mr-IN', gender: 'male' },
+      { id: 'ratan', name: 'Ratan (Marathi & English Male - Calm & Natural)', lang: 'mr-IN', gender: 'male' },
       { id: 'aditya', name: 'Aditya (Deep & Warm)', lang: 'en-IN', gender: 'male' },
       { id: 'aravind', name: 'Aravind (Gentle Voice)', lang: 'en-IN', gender: 'male' },
       { id: 'priya', name: 'Priya (Warm & Soft Female)', lang: 'en-IN', gender: 'female' }
@@ -168,22 +168,38 @@
 
     // Split long passages into sensible sentence chunks (~300-400 chars)
     chunkPassage: function (text, maxChars) {
-      if (!maxChars) maxChars = 400;
+      if (!maxChars) maxChars = 380;
       if (!text) return [];
       if (text.length <= maxChars) return [text];
 
-      // Split along sentence endings (. ! ? । \n)
-      var sentences = text.match(/[^.!?।\n]+[.!?।\n]+/g) || [text];
+      // Split into sentence and punctuation tokens
+      var sentences = text.match(/[^.!?।,;\n]+[.!?।,;\n]*/g) || [text];
       var chunks = [];
       var currentChunk = '';
 
       for (var i = 0; i < sentences.length; i++) {
-        var s = sentences[i];
-        if ((currentChunk + s).length > maxChars && currentChunk.trim()) {
-          chunks.push(currentChunk.trim());
-          currentChunk = s;
+        var s = sentences[i].trim();
+        if (!s) continue;
+        
+        // If an individual sentence token is longer than maxChars, split by words
+        if (s.length > maxChars) {
+          var words = s.split(/\s+/);
+          for (var j = 0; j < words.length; j++) {
+            var w = words[j];
+            if ((currentChunk + ' ' + w).length > maxChars) {
+              if (currentChunk.trim()) chunks.push(currentChunk.trim());
+              currentChunk = w;
+            } else {
+              currentChunk += (currentChunk ? ' ' : '') + w;
+            }
+          }
         } else {
-          currentChunk += ' ' + s;
+          if ((currentChunk + ' ' + s).length > maxChars) {
+            if (currentChunk.trim()) chunks.push(currentChunk.trim());
+            currentChunk = s;
+          } else {
+            currentChunk += (currentChunk ? ' ' : '') + s;
+          }
         }
       }
 
@@ -225,7 +241,7 @@
       if (!options) options = {};
       var isDevanagari = /[\u0900-\u097F]/.test(text || '');
       var lang = options.lang || (isDevanagari ? 'mr-IN' : 'en-IN');
-      var speaker = (options.speaker || (isDevanagari ? 'ratan' : (SARVAM_CONFIG.speakers[lang] || 'ratan'))).toLowerCase();
+      var speaker = (options.speaker || (isDevanagari ? 'shubh' : (SARVAM_CONFIG.speakers[lang] || 'shubh'))).toLowerCase();
       var pace = options.pace !== undefined ? options.pace : SARVAM_CONFIG.defaultPace;
       
       var optimizedText = SarvamTextOptimizer.optimizeForNarration(text, lang);
@@ -311,7 +327,7 @@
       this.prefetchMap = new Map(); // verseIndex -> Promise<audioUrl>
       this.options = {
         lang: 'en-IN',
-        speaker: 'ratan',
+        speaker: 'shubh',
         pace: 0.92
       };
       this.listeners = {

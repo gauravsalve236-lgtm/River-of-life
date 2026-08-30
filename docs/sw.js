@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v90-UNMISSABLE-BIBLE-TOOLBAR-AND-SHUBH-VOICE';
+const CACHE_NAME = 'river-of-life-cache-v91-PERFECT-MARATHI-RATAN-SARVAM-CHUNKING';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

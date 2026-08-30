@@ -7177,3 +7177,894 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
   word-break: break-word !important;
   overflow-wrap: anywhere !important;
 }
+
+
+/* ==========================================================================
+   ENHANCED HOME PAGE & THEME STYLES (v92 - River of Life Master Suite)
+   ========================================================================== */
+
+/* Prayer Topics Home Section */
+.prayer-topics-section-container {
+  grid-column: span 4;
+  margin-bottom: 24px;
+  background: var(--bg-content);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+}
+
+@media (max-width: 1024px) {
+  .prayer-topics-section-container {
+    grid-column: span 2;
+    padding: 18px;
+  }
+}
+
+@media (max-width: 767px) {
+  .prayer-topics-section-container {
+    grid-column: span 1;
+    padding: 16px;
+  }
+}
+
+.section-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 18px;
+  gap: 12px;
+}
+
+.section-title-left {
+  text-align: left;
+}
+
+.section-tag-gold {
+  display: inline-block;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--accent-gold);
+  background: var(--accent-gold-light);
+  padding: 3px 10px;
+  border-radius: 12px;
+  margin-bottom: 6px;
+}
+
+.section-main-heading {
+  margin: 0 0 4px 0;
+  font-family: var(--font-ui);
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1.25;
+}
+
+.section-sub-heading {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.btn-section-view-all {
+  background: var(--pill-bg);
+  border: 1px solid var(--border);
+  color: var(--primary);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.btn-section-view-all:hover {
+  background: var(--primary);
+  color: #ffffff;
+  border-color: var(--primary);
+}
+
+/* Prayer Topics Grid */
+.prayer-topics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 767px) {
+  .prayer-topics-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+.prayer-topic-card {
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 16px 18px;
+  background-size: cover;
+  background-position: center;
+  border: 1.5px solid var(--border);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+  color: #ffffff;
+  text-align: left;
+}
+
+.prayer-topic-card:hover {
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
+  border-color: var(--accent-gold);
+}
+
+.prayer-topic-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(12, 14, 20, 0.35) 0%, rgba(12, 14, 20, 0.88) 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.prayer-topic-badge {
+  position: relative;
+  z-index: 2;
+  align-self: flex-start;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  padding: 3px 9px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #ffd369;
+  text-transform: uppercase;
+}
+
+.prayer-topic-content {
+  position: relative;
+  z-index: 2;
+}
+
+.prayer-topic-content h4 {
+  margin: 0 0 4px 0;
+  font-family: var(--font-ui);
+  font-size: 16px;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1.25;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+}
+
+.prayer-topic-content .topic-en-title {
+  margin: 0 0 10px 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: #e2e8f0;
+  line-height: 1.35;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.topic-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.topic-scripture {
+  font-size: 11px;
+  font-weight: 700;
+  color: #ffd369;
+  background: rgba(212, 175, 55, 0.2);
+  padding: 2px 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(212, 175, 55, 0.35);
+}
+
+.topic-open-btn {
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(6px);
+  padding: 4px 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.2s ease;
+}
+
+.prayer-topic-card:hover .topic-open-btn {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+/* ==========================================================================
+   IMMERSIVE READY-MADE PRAYER MODAL STYLES
+   ========================================================================== */
+.prayer-immersive-sheet {
+  max-width: 620px;
+  width: 100%;
+  max-height: 90vh;
+  border-radius: 28px 28px 0 0;
+  overflow: hidden;
+  background: var(--surface);
+  color: var(--text);
+  border: 1.5px solid var(--border);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 768px) {
+  .prayer-immersive-sheet {
+    border-radius: 28px;
+    margin: auto;
+  }
+}
+
+.prayer-modal-hero {
+  position: relative;
+  min-height: 180px;
+  padding: 24px;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  color: #ffffff;
+  text-align: left;
+}
+
+.prayer-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.2) 0%, rgba(12, 14, 20, 0.92) 100%);
+  pointer-events: none;
+}
+
+.prayer-modal-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transition: all 0.2s ease;
+}
+
+.prayer-modal-close-btn:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.prayer-hero-content {
+  position: relative;
+  z-index: 2;
+}
+
+.prayer-modal-badge {
+  display: inline-block;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #ffd369;
+  background: rgba(212, 175, 55, 0.25);
+  padding: 3px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  margin-bottom: 6px;
+}
+
+.prayer-modal-title {
+  margin: 0 0 4px 0;
+  font-family: var(--font-ui);
+  font-size: 22px;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1.2;
+}
+
+.prayer-modal-subtitle {
+  font-size: 13px;
+  font-weight: 500;
+  color: #e2e8f0;
+}
+
+.prayer-modal-body-scroller {
+  padding: 20px 24px 28px 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  text-align: left;
+}
+
+.prayer-scripture-box {
+  background: var(--pill-bg);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--primary);
+  border-radius: 14px;
+  padding: 14px 16px;
+}
+
+.scripture-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  font-size: 13px;
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.scripture-verse-text {
+  margin: 0;
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.prayer-lang-tabs {
+  display: flex;
+  background: var(--pill-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 4px;
+  gap: 4px;
+}
+
+.prayer-tab-btn {
+  flex: 1;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.prayer-tab-btn.active {
+  background: var(--primary);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(158, 22, 34, 0.25);
+}
+
+.prayer-text-container {
+  background: var(--bg-content);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 18px 20px;
+  box-shadow: var(--shadow-xs);
+}
+
+.prayer-content-text {
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--text);
+  white-space: pre-line;
+}
+
+.prayer-actions-bar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.prayer-action-btn {
+  flex: 1;
+  min-width: 120px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.prayer-action-btn.primary {
+  background: linear-gradient(135deg, var(--primary) 0%, #7d121b 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(158, 22, 34, 0.3);
+}
+
+.prayer-action-btn.secondary {
+  background: rgba(37, 211, 102, 0.15);
+  color: #25d366;
+  border: 1.5px solid rgba(37, 211, 102, 0.35);
+}
+
+.prayer-action-btn.amen {
+  background: var(--pill-bg);
+  color: var(--text);
+  border: 1.5px solid var(--border);
+}
+
+.prayer-action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* ==========================================================================
+   BIBLE QUIZ MULTI-LEVEL STYLES
+   ========================================================================== */
+.quiz-welcome-banner {
+  text-align: center;
+  padding: 10px 0 16px 0;
+}
+
+.quiz-trophy-glow {
+  font-size: 54px;
+  margin-bottom: 8px;
+  animation: floatBounce 2.4s ease-in-out infinite;
+}
+
+@keyframes floatBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.quiz-welcome-banner h4 {
+  font-family: var(--font-ui);
+  font-size: 21px;
+  font-weight: 800;
+  color: var(--primary);
+  margin: 0 0 4px 0;
+}
+
+.quiz-welcome-banner h5 {
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin: 0 0 10px 0;
+}
+
+.quiz-welcome-banner p {
+  font-size: 13.5px;
+  color: var(--text);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.quiz-stats-cards-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.quiz-stat-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px;
+  text-align: center;
+}
+
+.quiz-stat-card .stat-icon {
+  font-size: 20px;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.quiz-stat-card .stat-lbl {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
+}
+
+.quiz-stat-card strong {
+  font-size: 17px;
+  color: var(--text);
+}
+
+.quiz-levels-section-label {
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--primary);
+  letter-spacing: 0.6px;
+  text-align: left;
+  margin: 14px 0 10px 0;
+}
+
+.quiz-levels-selector-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.quiz-level-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.quiz-level-card:hover {
+  border-color: var(--primary);
+  background: var(--pill-bg);
+  transform: translateX(4px);
+}
+
+.quiz-level-card.active {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  box-shadow: 0 0 0 2px rgba(158, 22, 34, 0.15);
+}
+
+.level-card-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.level-emoji {
+  font-size: 26px;
+}
+
+.level-card-left strong {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text);
+  display: block;
+  margin-bottom: 2px;
+}
+
+.level-card-left p {
+  margin: 0;
+  font-size: 11.5px;
+  color: var(--text-muted);
+  line-height: 1.3;
+}
+
+.level-badge-tag {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--primary);
+  background: var(--pill-bg);
+  border: 1px solid var(--border);
+  padding: 3px 8px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+.btn-start-quiz-prominent {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, var(--primary) 0%, #7d121b 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 14px;
+  font-family: var(--font-ui);
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(158, 22, 34, 0.3);
+  transition: all 0.2s ease;
+}
+
+.btn-start-quiz-prominent:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(158, 22, 34, 0.4);
+}
+
+/* Active Quiz Question Styles */
+.quiz-active-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.quiz-active-level-pill {
+  font-size: 11.5px;
+  font-weight: 800;
+  color: var(--primary);
+  background: var(--primary-light);
+  padding: 4px 12px;
+  border-radius: 12px;
+}
+
+.quiz-score-pill {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--accent-gold);
+}
+
+.quiz-progress-bar-container {
+  width: 100%;
+  height: 6px;
+  background: var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.quiz-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary) 0%, var(--accent-gold) 100%);
+  border-radius: 10px;
+  transition: width 0.3s ease;
+}
+
+.quiz-question-meta-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.quiz-question-card {
+  background: var(--bg-content);
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  padding: 16px 18px;
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.question-text-mr {
+  font-family: var(--font-ui);
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text);
+  margin: 0 0 6px 0;
+  line-height: 1.4;
+}
+
+.question-text-en {
+  font-size: 13.5px;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.quiz-choices-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.quiz-choice-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.quiz-choice-btn:hover:not(:disabled) {
+  border-color: var(--primary);
+  background: var(--pill-bg);
+}
+
+.quiz-choice-btn.correct {
+  background: rgba(34, 197, 94, 0.15) !important;
+  border-color: #22c55e !important;
+  color: #15803d !important;
+}
+
+.quiz-choice-btn.wrong {
+  background: rgba(239, 68, 68, 0.15) !important;
+  border-color: #ef4444 !important;
+  color: #b91c1c !important;
+}
+
+.quiz-explanation-box {
+  display: flex;
+  gap: 12px;
+  background: var(--pill-bg);
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.explanation-icon {
+  font-size: 22px;
+}
+
+.explanation-content strong {
+  display: block;
+  font-size: 13.5px;
+  color: var(--primary);
+  margin-bottom: 4px;
+}
+
+.explanation-content p {
+  margin: 0 0 6px 0;
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.explanation-content cite {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--accent-gold);
+}
+
+.btn-next-quiz-btn {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, var(--primary) 0%, #7d121b 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 14px;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.badge-unlock-card {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.15) 0%, rgba(158, 22, 34, 0.12) 100%);
+  border: 2px solid var(--accent-gold);
+  border-radius: 18px;
+  padding: 20px;
+  margin: 16px 0 20px 0;
+  text-align: center;
+}
+
+.badge-star {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--accent-gold);
+  letter-spacing: 1px;
+}
+
+.badge-icon-large {
+  font-size: 48px;
+  margin: 8px 0;
+}
+
+.badge-unlock-card h5 {
+  font-family: var(--font-ui);
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text);
+  margin: 0 0 4px 0;
+}
+
+.badge-unlock-card p {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.quiz-results-buttons-row {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-quiz-action {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  font-family: var(--font-ui);
+  font-size: 13.5px;
+  font-weight: 800;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.btn-quiz-action.primary {
+  background: var(--primary);
+  color: #ffffff;
+}
+
+.btn-quiz-action.secondary {
+  background: var(--pill-bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+/* Home Level Pills Preview in Promo Card */
+.quiz-level-pills-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin: 8px 0;
+}
+
+.quiz-level-pill {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #f1f5f9;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+
+/* High-Contrast Scripture Typography & Theme Adaptation */
+.verses-text-layout,
+.verse-row,
+.bible-paragraph {
+  color: var(--text) !important;
+}
+
+.chapter-info-badge h2 {
+  color: var(--primary) !important;
+}
+
+.chapter-info-badge p {
+  color: var(--text-muted) !important;
+}
+
+.ios-theme-sepia .brand-hero-welcome-card {
+  background: linear-gradient(135deg, #2b1810 0%, #4a2818 50%, #6e3a22 100%) !important;
+  border-color: rgba(180, 83, 9, 0.45) !important;
+}
+
+.ios-theme-olive .brand-hero-welcome-card {
+  background: linear-gradient(135deg, #07191a 0%, #0d2e30 50%, #154548 100%) !important;
+  border-color: rgba(229, 168, 59, 0.45) !important;
+}
+
+.ios-theme-dark .brand-hero-welcome-card {
+  background: linear-gradient(135deg, #180306 0%, #42060d 50%, #690a15 100%) !important;
+  border-color: rgba(224, 83, 95, 0.45) !important;
+}
