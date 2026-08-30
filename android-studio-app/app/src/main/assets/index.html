@@ -8,7 +8,7 @@
   <script>
     // Force immediate hard purge of all stale Service Workers and CacheStorage
     (function() {
-      const CURRENT_VER = "v90_UNMISSABLE_BIBLE_TOOLBAR_AND_SHUBH_VOICE";
+      const CURRENT_VER = "v81_PHONE_EMAIL_AUTHENTICATION_AND_DATASOURCE";
       if (localStorage.getItem("rol_app_ver") !== CURRENT_VER) {
         localStorage.setItem("rol_app_ver", CURRENT_VER);
         if ('serviceWorker' in navigator) {
@@ -25,9 +25,6 @@
             }
           });
         }
-        setTimeout(function() {
-          window.location.reload(true);
-        }, 100);
       }
     })();
   </script>
@@ -40,26 +37,19 @@
   <link rel="icon" type="image/png" href="assets/icons/icon-192.png">
   <link rel="shortcut icon" href="assets/icons/icon-192.png">
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#fbfaf7" id="theme-meta">
+  <meta name="theme-color" content="#f8fafc" id="theme-meta">
   
   <!-- Premium Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   
-  <!-- Main Stylesheet (Cache-Busted for Version 90 Unmissable Bible Toolbar and Shubh Voice) -->
-  <link rel="stylesheet" href="index.css?v=90_UNMISSABLE_BIBLE_TOOLBAR_AND_SHUBH_VOICE">
+  <!-- Main Stylesheet -->
+  <!-- Main Stylesheet (Cache-Busted for Version 81 Phone Email Authentication & Datasource) -->
+  <link rel="stylesheet" href="index.css?v=81_PHONE_EMAIL_AUTHENTICATION_AND_DATASOURCE">
 
   <!-- Official LiveKit WebRTC Client SDK -->
   <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.0.8/dist/livekit-client.umd.min.js"></script>
-
-  <!-- Firebase SDK v9 Compat (no bundler needed) -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
-  <!-- River of Life Firebase integration module -->
-  <script src="firebase.js"></script>
 </head>
 <body>
   
@@ -171,18 +161,15 @@
           </div>
         </div>
         
-        <div id="nav-static-controls" class="header-pane">
+        <div id="nav-static-controls" class="header-pane" style="display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 0 16px; box-sizing: border-box;">
           <div style="display: flex; align-items: center; gap: 10px;">
-            <img src="assets/icons/app-logo.png" alt="River of Life Logo" style="width: 34px; height: 34px; border-radius: 10px; object-fit: contain; background: #ffffff; padding: 2px; border: 1.5px solid rgba(212, 175, 55, 0.45); box-shadow: 0 2px 10px rgba(0,0,0,0.06);">
-            <div>
-              <h1 id="static-header-title" style="margin: 0; font-family: var(--font-ui); font-size: 17px; font-weight: 800; color: var(--text); line-height: 1.1;">River of Life</h1>
-              <span style="font-size: 10.5px; font-weight: 700; color: var(--primary); letter-spacing: 0.3px;">जीवन नदी बायबल</span>
-            </div>
+            <img src="assets/icons/app-logo.png" alt="River of Life Logo" style="width: 32px; height: 32px; border-radius: 8px; object-fit: contain; background: #ffffff; padding: 2px; border: 1px solid rgba(229, 168, 59, 0.45); box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+            <h1 id="static-header-title" style="margin: 0; font-size: 18px; font-weight: 800; color: var(--text);">Today</h1>
           </div>
           <div class="header-right" style="display: flex; align-items: center; gap: 8px;">
-            <button id="static-header-auth-btn" onclick="openDrawer('drawer-account-settings')" class="header-auth-capsule-btn" title="Profile & Settings / खाते व सेटिंग्ज" style="padding: 6px 14px; border-radius: 20px; font-size: 12.5px; font-weight: 800; font-family: var(--font-ui); background: var(--pill-bg); border: 1px solid var(--border); color: var(--text); cursor: pointer; display: flex; align-items: center; gap: 7px; transition: all 0.2s ease;">
+            <button id="static-header-auth-btn" onclick="openDrawer('drawer-account-settings')" class="header-auth-capsule-btn" title="Profile & Settings / खाते व सेटिंग्ज" style="padding: 5px 12px; border-radius: 20px; font-size: 13px; font-weight: 800; background: rgba(229, 168, 59, 0.15); border: 1.5px solid rgba(229, 168, 59, 0.4); color: var(--text); cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
               <span id="static-auth-label" style="font-weight: 700;">Account</span>
-              <div id="static-auth-avatar" class="avatar-circle-header" style="width: 22px; height: 22px; border-radius: 50%; background: var(--primary); color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; line-height: 1;">P</div>
+              <div id="static-auth-avatar" class="avatar-circle-header" style="width: 24px; height: 24px; border-radius: 50%; background: #22c55e; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; line-height: 1;">P</div>
             </button>
           </div>
         </div>
@@ -192,6 +179,7 @@
       <main class="content-view-viewport">
         
         <!-- VIEW 1: TODAY / HOME VIEW (Redesigned Grid Layout) -->
+        <!-- VIEW 1: TODAY / HOME VIEW (Redesigned Elegant Layout) -->
         <section id="view-home" class="app-view active">
           <div class="view-scroll-content" id="home-view-scroll-content">
             <!-- Native Mobile Pull To Refresh Indicator -->
@@ -206,13 +194,16 @@
               <span id="pull-refresh-text" class="pull-refresh-label">Pull to refresh / रिफ्रेश करण्यासाठी ओढा</span>
             </div>
 
-            <!-- River of Life Brand Hero Card -->
+            <!-- 1ST CARD: Brand Greeting & Welcome Card -->
             <div class="brand-hero-welcome-card">
               <div class="hero-card-left" style="width: 100%;">
-                <span class="hero-date-badge">
-                  <span class="pulse-dot"></span> <span id="home-hero-date-str">Today | आजचे मनन</span>
-                </span>
-                <h2 class="hero-welcome-title">Shalom & Welcome 🕊️</h2>
+                <div class="hero-card-header-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                  <span class="hero-date-badge">
+                    <span class="pulse-dot"></span> <span id="home-hero-date-str">Today | आजचे मनन</span>
+                  </span>
+                  <span class="hero-fellowship-pill" style="font-size: 11px; font-weight: 700; background: rgba(212, 175, 55, 0.15); color: #ffd369; padding: 3px 10px; border-radius: 20px; border: 1px solid rgba(212, 175, 55, 0.3);">River of Life 🕊️</span>
+                </div>
+                <h2 class="hero-welcome-title" id="home-greeting-user">Shalom & Welcome 🕊️</h2>
                 <p class="hero-welcome-subtitle">जीवन नदी बायबल निवासस्थान • River of Life Fellowship</p>
                 <div class="hero-action-buttons">
                   <button class="hero-btn primary-gold" onclick="switchTab('reader')">
@@ -230,22 +221,22 @@
 
             <!-- Search bar at top center -->
             <div class="home-search-container">
-              <input type="text" id="home-search-trigger-input" class="home-search-bar" placeholder="Search Bible, Topics, or Questions" readonly>
+              <input type="text" id="home-search-trigger-input" class="home-search-bar" placeholder="Search Bible, Topics, or Questions / शोधा..." readonly onclick="switchTab('discover')">
             </div>
 
             <div class="home-grid-layout">
-              <!-- Card 1: Daily Bible Verse -->
-              <div class="daily-verse-card" id="btn-open-fullscreen-vod">
+              <!-- 2ND CARD: Daily Bible Verse (Rotates Background Daily) -->
+              <div class="daily-verse-card" id="card-daily-verse-home">
                 <div class="daily-verse-card-bg"></div>
                 <div class="daily-verse-tint"></div>
                 <div class="daily-verse-header-tabs">
                   <span class="tab-pill active">DAILY BIBLE VERSE</span>
-                  <span class="tab-pill">DAILY TOUCHPOINT QUESTION</span>
-                  <span class="tab-pill">DAILY DEVO</span>
+                  <span class="tab-pill" onclick="openImmersivePrayerModal('wedding_cana')">PRAYER TOPICS</span>
+                  <span class="tab-pill" onclick="openBibleQuizModal()">BIBLE QUIZ</span>
                 </div>
                 <div class="daily-verse-body">
-                  <blockquote id="home-vod-text">"तू जलांतून चालशील तेव्हा मी तुझ्याबरोबर असेन..."</blockquote>
-                  <cite id="home-vod-ref">Psalm 20:5 NLT</cite>
+                  <blockquote id="home-vod-text">"परमेश्वर माझा मेंढपाळ आहे; मला काहीही कमी पडणार नाही."</blockquote>
+                  <cite id="home-vod-ref">स्तोत्रसंहिता २३:१ MARVBSI</cite>
                   
                   <div class="daily-verse-nav-row">
                     <button class="vod-nav-btn" id="btn-vod-prev" title="Yesterday's Verse">
@@ -263,73 +254,166 @@
                   </div>
                 </div>
                 <div class="daily-verse-social-metrics">
-                  <div class="metric"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path></svg><span>12.6L</span></div>
-                  <div class="metric"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg><span>24.3K</span></div>
-                  <div class="metric"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg><span>5.3L</span></div>
-                  <div class="metric-right">More</div>
+                  <button class="metric-btn" id="btn-vod-like-trigger">
+                    <svg id="home-vod-heart-icon" viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path></svg>
+                    <span id="home-vod-likes-count">12.6K</span>
+                  </button>
+                  <button class="metric-btn" id="btn-vod-share-trigger">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                    <span>Share</span>
+                  </button>
+                  <button class="metric-right" id="btn-open-fullscreen-vod">
+                    <span>Fullscreen ↗</span>
+                  </button>
                 </div>
               </div>
 
-              <!-- Card 2: TouchPoint Hope -->
-              <div class="touchpoint-hope-card" id="btn-open-touchpoint">
-                <div class="touchpoint-image-bg"></div>
-                <div class="touchpoint-overlay"></div>
-                <div class="touchpoint-body">
-                  <div class="touchpoint-tag">💡 TouchPoint: Hope</div>
-                  <h3>Why should I trust God as my hope?</h3>
-                  <p class="touchpoint-author">Includes lesson on faith and trust — Speaker, Leadership Coach & Pastor</p>
+              <!-- 3RD OPTION: Topics for Prayers (Ready-Made Prayers with Backgrounds) -->
+              <div class="prayer-topics-section-container">
+                <div class="section-title-row">
+                  <div class="section-title-left">
+                    <span class="section-tag-gold">PRAYER SANCTUARY</span>
+                    <h3 class="section-main-heading">🙏 Topics for Prayers / प्रार्थना विषय व मनन</h3>
+                    <p class="section-sub-heading">Ready-made biblical prayers with inspiring background imagery & narration</p>
+                  </div>
+                  <button class="btn-section-view-all" onclick="switchTab('prayers')">All Prayers →</button>
+                </div>
+
+                <div class="prayer-topics-grid" id="prayer-topics-grid-container">
+                  <!-- Topic 1: Water Turned into Wine (Wedding at Cana Miracle) -->
+                  <div class="prayer-topic-card" onclick="openImmersivePrayerModal('wedding_cana')" style="background-image: url('assets/images/wedding_cana_v425.png');">
+                    <div class="prayer-topic-overlay"></div>
+                    <div class="prayer-topic-badge">🍷 MIRACLE & PROVISION</div>
+                    <div class="prayer-topic-content">
+                      <h4>पाण्याचे द्राक्षारसात रूपांतर</h4>
+                      <p class="topic-en-title">Water into Wine • Miracle in Scarcity</p>
+                      <div class="topic-meta-row">
+                        <span class="topic-scripture">योहान २:१-११</span>
+                        <span class="topic-open-btn">Pray Now 🙏</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Topic 2: Peace Over Anxiety -->
+                  <div class="prayer-topic-card" onclick="openImmersivePrayerModal('peace_anxiety')" style="background-image: url('assets/images/peace_anxiety.png');">
+                    <div class="prayer-topic-overlay"></div>
+                    <div class="prayer-topic-badge">🕊️ PEACE & CALM</div>
+                    <div class="prayer-topic-content">
+                      <h4>चिंतेतून मुक्ती आणि शांती</h4>
+                      <p class="topic-en-title">Peace Over Anxiety & Fear</p>
+                      <div class="topic-meta-row">
+                        <span class="topic-scripture">फिलिप्पैकरांस ४:६-७</span>
+                        <span class="topic-open-btn">Pray Now 🙏</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Topic 3: Morning Grace & Divine Protection -->
+                  <div class="prayer-topic-card" onclick="openImmersivePrayerModal('morning_grace')" style="background-image: url('assets/images/golden_dawn.png');">
+                    <div class="prayer-topic-overlay"></div>
+                    <div class="prayer-topic-badge">☀️ MORNING BLESSING</div>
+                    <div class="prayer-topic-content">
+                      <h4>सकाळची कृपा व दैवी संरक्षण</h4>
+                      <p class="topic-en-title">Morning Grace & Protection</p>
+                      <div class="topic-meta-row">
+                        <span class="topic-scripture">स्तोत्रसंहिता ९१:१-४</span>
+                        <span class="topic-open-btn">Pray Now 🙏</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Topic 4: Divine Healing & Restoration -->
+                  <div class="prayer-topic-card" onclick="openImmersivePrayerModal('healing_restoration')" style="background-image: url('assets/images/healing_light.png');">
+                    <div class="prayer-topic-overlay"></div>
+                    <div class="prayer-topic-badge">🌿 HEALING & HEALTH</div>
+                    <div class="prayer-topic-content">
+                      <h4>आरोग्य आणि दैवी चंगाई</h4>
+                      <p class="topic-en-title">Divine Healing & Restoration</p>
+                      <div class="topic-meta-row">
+                        <span class="topic-scripture">यशया ५३:५</span>
+                        <span class="topic-open-btn">Pray Now 🙏</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Topic 5: Family Blessing & Harmony -->
+                  <div class="prayer-topic-card" onclick="openImmersivePrayerModal('family_blessing')" style="background-image: url('assets/images/family_blessing.png');">
+                    <div class="prayer-topic-overlay"></div>
+                    <div class="prayer-topic-badge">👨‍👩‍👧‍👦 FAMILY & HOME</div>
+                    <div class="prayer-topic-content">
+                      <h4>कुटुंब आशीर्वाद व एकता</h4>
+                      <p class="topic-en-title">Family Blessing & Unity</p>
+                      <div class="topic-meta-row">
+                        <span class="topic-scripture">यहोशवा २४:१५</span>
+                        <span class="topic-open-btn">Pray Now 🙏</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Topic 6: Strength in Hard Times -->
+                  <div class="prayer-topic-card" onclick="openImmersivePrayerModal('strength_trials')" style="background-image: url('assets/images/mount_zion.png');">
+                    <div class="prayer-topic-overlay"></div>
+                    <div class="prayer-topic-badge">🛡️ STRENGTH & FAITH</div>
+                    <div class="prayer-topic-content">
+                      <h4>कठीण प्रसंगी सामर्थ्य व धीर</h4>
+                      <p class="topic-en-title">Strength in Hard Times</p>
+                      <div class="topic-meta-row">
+                        <span class="topic-scripture">यशया ४०:२९-३१</span>
+                        <span class="topic-open-btn">Pray Now 🙏</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Topic 7: Wisdom & Career Guidance -->
+                  <div class="prayer-topic-card" onclick="openImmersivePrayerModal('wisdom_guidance')" style="background-image: url('assets/images/wisdom_guidance.png');">
+                    <div class="prayer-topic-overlay"></div>
+                    <div class="prayer-topic-badge">💡 WISDOM & GUIDANCE</div>
+                    <div class="prayer-topic-content">
+                      <h4>ज्ञानासाठी व नोकरी-व्यवसाय मार्गदर्शन</h4>
+                      <p class="topic-en-title">Wisdom & Career Guidance</p>
+                      <div class="topic-meta-row">
+                        <span class="topic-scripture">याकोब १:५</span>
+                        <span class="topic-open-btn">Pray Now 🙏</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Topic 8: Evening Thanksgiving & Rest -->
+                  <div class="prayer-topic-card" onclick="openImmersivePrayerModal('evening_rest')" style="background-image: url('assets/images/candlelight.png');">
+                    <div class="prayer-topic-overlay"></div>
+                    <div class="prayer-topic-badge">🌙 EVENING REST</div>
+                    <div class="prayer-topic-content">
+                      <h4>रात्रीची उपकारस्तुती व शांत झोप</h4>
+                      <p class="topic-en-title">Evening Thanksgiving & Rest</p>
+                      <div class="topic-meta-row">
+                        <span class="topic-scripture">स्तोत्रसंहिता ४:८</span>
+                        <span class="topic-open-btn">Pray Now 🙏</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <!-- Personalized Devotional Card -->
-              <div class="bible-quiz-promo-card" id="devotional-generator-card" style="background: linear-gradient(135deg, #1e1b4b 0%, #311042 100%); margin-bottom: 16px;">
-                <div class="quiz-card-content" style="flex-direction: column; align-items: flex-start; gap: 12px; width: 100%;">
-                  <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
-                    <span class="quiz-badge-gold">DAILY DEVOTIONAL</span>
-                    <span style="font-size: 20px;">📖</span>
-                  </div>
-                  <h5 style="margin: 0; font-size: 16px; font-weight: 800; color: #fff;">Personalized Devotional / वैयक्तिक भक्ती</h5>
-                  <p style="margin: 0; font-size: 13px; color: var(--text-muted);">Choose a topic that matches your need today:</p>
-                  
-                  <!-- Topic selection pills -->
-                  <div class="topic-pills-row" style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; width: 100%;">
-                    <button class="devo-topic-pill" data-topic="faith" style="padding: 6px 12px; font-size: 12.5px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: #fff; cursor: pointer;">🎯 Faith / विश्वास</button>
-                    <button class="devo-topic-pill" data-topic="marriage" style="padding: 6px 12px; font-size: 12.5px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: #fff; cursor: pointer;">💍 Marriage / विवाह</button>
-                    <button class="devo-topic-pill" data-topic="parenting" style="padding: 6px 12px; font-size: 12.5px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: #fff; cursor: pointer;">👨‍👩‍👧‍👦 Parenting / पालकत्व</button>
-                    <button class="devo-topic-pill" data-topic="anxiety" style="padding: 6px 12px; font-size: 12.5px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: #fff; cursor: pointer;">😰 Anxiety / चिंता</button>
-                    <button class="devo-topic-pill" data-topic="leadership" style="padding: 6px 12px; font-size: 12.5px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: #fff; cursor: pointer;">👑 Leadership / नेतृत्व</button>
-                  </div>
-                </div>
-
-                <!-- Generated Devotional container -->
-                <div id="generated-devo-container" style="display: none; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 16px; padding-top: 16px; width: 100%; text-align: left;">
-                  <div style="font-weight: 700; color: var(--primary); font-size: 12px; text-transform: uppercase; margin-bottom: 4px;" id="generated-devo-topic-label">Devotional</div>
-                  <h4 id="generated-devo-title" style="margin: 0 0 12px 0; font-size: 16px; font-weight: 800; color: #fff;">Title</h4>
-                  
-                  <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; margin-bottom: 12px; border-left: 3px solid var(--primary);">
-                    <p id="generated-devo-verse" style="font-style: italic; font-size: 13.5px; line-height: 1.5; margin: 0 0 6px 0; color: #fff;"></p>
-                    <cite id="generated-devo-ref" style="font-size: 11px; color: var(--text-muted); display: block; text-align: right;"></cite>
-                  </div>
-
-                  <p id="generated-devo-reflection" style="font-size: 13.5px; line-height: 1.6; color: #e2e8f0; margin: 0 0 12px 0;"></p>
-                  
-                  <div style="border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 10px;">
-                    <strong style="font-size: 12px; color: var(--primary); display: block; margin-bottom: 4px;">PRAYER / प्रार्थना:</strong>
-                    <p id="generated-devo-prayer" style="font-size: 13px; line-height: 1.5; color: #cbd5e1; font-style: italic; margin: 0;"></p>
-                  </div>
-
-                  <button id="btn-close-devo" class="btn-secondary-mini" style="margin-top: 16px; width: 100%; border: 1px solid rgba(255,255,255,0.2); color: #fff; background: transparent; padding: 10px; border-radius: 8px; font-size: 13px; cursor: pointer;">Close / बंद करा</button>
-                </div>
-              </div>
-
-              <!-- Card 3: Daily Bible Quiz (Replaces DEEPEN & Commentary Mockup) -->
+              <!-- 4TH OPTION: Bible Quiz with 4 Difficulty Levels -->
               <div class="bible-quiz-promo-card" id="btn-open-bible-quiz">
                 <div class="quiz-card-content">
                   <div class="quiz-card-art">🏆</div>
                   <div class="quiz-card-details">
-                    <span class="quiz-badge-gold">NEW FEATURE</span>
+                    <div class="quiz-badge-row" style="display: flex; gap: 6px; align-items: center; margin-bottom: 4px;">
+                      <span class="quiz-badge-gold">BIBLE TRIVIA</span>
+                      <span class="quiz-badge-sub" style="font-size: 10.5px; font-weight: 700; color: #ffd369; background: rgba(255,211,105,0.15); padding: 2px 8px; border-radius: 10px;">4 LEVELS</span>
+                    </div>
                     <h5>बायबल सामान्य ज्ञान स्पर्धा</h5>
-                    <p>Daily Bible Quiz • Bilingual Trivia • Earn Badges</p>
+                    <p>Daily Bible Quiz • 4 Difficulty Levels • Badges & Streaks</p>
+                    
+                    <!-- Level pills preview -->
+                    <div class="quiz-level-pills-row">
+                      <span class="quiz-level-pill lvl-1">🌱 Beginner</span>
+                      <span class="quiz-level-pill lvl-2">⚔️ Intermediate</span>
+                      <span class="quiz-level-pill lvl-3">👑 Advanced</span>
+                      <span class="quiz-level-pill lvl-4">🏆 Master</span>
+                    </div>
+
                     <div class="quiz-card-stats">
                       <span id="quiz-stat-points">Total: 0 pts</span>
                       <span class="dot-separator">•</span>
@@ -337,62 +421,10 @@
                     </div>
                   </div>
                 </div>
-                <button class="btn-play-quiz">Play Now &rarr;</button>
+                <button class="btn-play-quiz">Play Quiz / खेळा &rarr;</button>
               </div>
 
-              <!-- Card 5: TouchPoints Tag Grid -->
-              <div class="touchpoints-tags-card">
-                <span class="tags-card-label">TouchPoints</span>
-                <h4>I'm wondering about...</h4>
-                <div class="tag-chips-grid">
-                  <button class="tag-chip" data-query="wealth">Wealth</button>
-                  <button class="tag-chip" data-query="refreshment">Refreshment</button>
-                  <button class="tag-chip" data-query="words">Words</button>
-                  <button class="tag-chip" data-query="advantage">Advantage</button>
-                  <button class="tag-chip" data-query="restoration">Restoration</button>
-                  <button class="tag-chip" data-query="differences">Differences</button>
-                  <button class="tag-chip" data-query="prosperity">Prosperity</button>
-                  <button class="tag-chip" data-query="parents">Parents</button>
-                  <button class="tag-chip" data-query="sensitivity">Sensitivity</button>
-                  <button class="tag-chip" data-query="goodness">Goodness</button>
-                  <button class="tag-chip" data-query="discrimination">Discrimination</button>
-                  <button class="tag-chip" data-query="temper">Temper</button>
-                  <button class="tag-chip" data-query="bible">Bible</button>
-                  <button class="tag-chip" data-query="expectations">Expectations</button>
-                  <button class="tag-chip" data-query="love">Love</button>
-                  <button class="tag-chip" data-query="godliness">Godliness</button>
-                </div>
-                <div class="tags-footer-row">
-                  <span>Discover 500 life topic questions and answers</span>
-                  <button class="btn-see-all-tags">SEE ALL</button>
-                </div>
-              </div>
-
-              <!-- Card 6: My Reading Plans Suggested List -->
-              <div class="suggested-plans-card">
-                <div class="suggested-plans-header">
-                  <h4>My Reading Plans</h4>
-                  <span class="sub-label">SUGGESTED PLANS</span>
-                </div>
-                <div class="suggested-plans-list">
-                  <div class="suggested-plan-row" data-plan-id="anxiety_tremble">
-                    <span class="plan-avatar-icon">🌊</span>
-                    <div class="plan-info">
-                      <strong>Made to Tremble: Finding Awe in Your Anxiety</strong>
-                      <span class="plan-type">Bible Plan</span>
-                    </div>
-                  </div>
-                  <div class="suggested-plan-row" data-plan-id="still_heart">
-                    <span class="plan-avatar-icon">🕊️</span>
-                    <div class="plan-info">
-                      <strong>Cultivating a Still Heart in a Noisy World</strong>
-                      <span class="plan-type">Bible Plan</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Card 7: Church Companion Card -->
+              <!-- Church Companion Card -->
               <div class="settings-card-group" id="church-companion-card" style="padding: 20px; display: flex; flex-direction: column; gap: 16px; margin: 0 16px 16px 16px; border-radius: 12px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
                   <h4 style="margin: 0; font-size: 15px; font-weight: 800; display: flex; align-items: center; gap: 8px; color: var(--primary);">⛪ Church Companion / चर्च सहचारी</h4>
@@ -421,14 +453,6 @@
                       <strong style="font-size: 13px; display: block; margin-bottom: 2px; color: var(--text);">Sunday Service Timings Rescheduled</strong>
                       <span style="font-size: 12.5px; color: var(--text-muted); line-height: 1.4; display: block;">Morning service will start at 8:30 AM instead of 9:00 AM next Sunday.</span>
                     </div>
-                    <div style="background: var(--bg); padding: 10px; border-radius: 8px; border: 1px solid var(--border); text-align: left;">
-                      <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                        <span style="font-size: 11px; font-weight: 700; color: var(--primary);">EVENT</span>
-                        <span style="font-size: 11px; color: var(--text-muted);">2 days ago</span>
-                      </div>
-                      <strong style="font-size: 13px; display: block; margin-bottom: 2px; color: var(--text);">Youth Fellowship Meet</strong>
-                      <span style="font-size: 12.5px; color: var(--text-muted); line-height: 1.4; display: block;">Join us this Saturday at 6:00 PM in the fellowship hall for praise and study.</span>
-                    </div>
                   </div>
 
                   <!-- Sermon Notes Content -->
@@ -445,123 +469,33 @@
                 </div>
               </div>
 
-              <!-- Card 7: Resilient and Redeemed banner card -->
-              <div class="resilient-banner-card">
-                <div class="resilient-body">
-                  <h2>RESILIENT & REDEEMED</h2>
-                  <p>Lesson About Faith, Depression & Suicidality</p>
-                </div>
-              </div>
-
-              <!-- Card 8: Community Fellowship Share Card (At Bottom of Home Page) -->
+              <!-- Community Fellowship Share Card (At Bottom of Home Page) -->
               <div class="community-share-card">
                 <div class="share-card-left">
                   <span class="share-badge">COMMUNITY FELLOWSHIP</span>
                   <h4 class="share-title">Invite Friends & Family / मित्रांना आमंत्रित करा</h4>
-                  <p class="share-subtitle">Share River of Life Bible app on WhatsApp to register, study Scripture, and pray together!</p>
+                  <p class="share-subtitle">Share River of Life Bible app on WhatsApp to study Scripture and pray together!</p>
                 </div>
                 <div class="share-card-right">
-                  <button id="btn-home-whatsapp-invite" class="share-whatsapp-btn">
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.09-3.974c1.652.98 3.271 1.498 4.902 1.499 5.485 0 9.948-4.464 9.951-9.95.002-2.658-1.03-5.155-2.903-7.03C16.229 2.67 13.738 1.636 11.08 1.636 5.596 1.636 1.132 6.098 1.13 11.585c-.001 1.761.472 3.479 1.371 5.011L1.472 22.03l5.675-1.488-.009-.016zm11.233-7.56c-.322-.16-.1.905-.31.84s-.977-.4-1.354-.736c-.314-.28-.52-.627-.582-.736-.062-.108-.00          <!-- Column 2 (Center): Bible Scripture Pane -->
-          <div class="reader-pane-left" style="display: flex; flex-direction: column; height: 100%; overflow: hidden; position: relative;">
-            
-            <!-- Sticky / Fixed Top Bible Action Bar (ALWAYS PINNED AND VISIBLE AT TOP) -->
-            <div class="bible-chapter-control-header" style="flex-shrink: 0; background: var(--bg-content); border-bottom: 2px solid var(--border); padding: 12px 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); z-index: 15;">
-              <div style="max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px;">
-                
-                <!-- Row 0: Prominent Book & Chapter Tap-To-Change Banner -->
-                <div style="display: flex; justify-content: space-between; align-items: center; background: var(--pill-bg); border: 1.5px solid var(--border); border-radius: 12px; padding: 8px 14px;">
-                  <button id="btn-reader-open-book-picker" style="display: flex; align-items: center; gap: 8px; background: transparent; border: none; cursor: pointer; color: var(--text); font-family: var(--font-ui); font-size: 15px; font-weight: 800; padding: 0;">
-                    <span style="font-size: 18px;">📖</span>
-                    <span id="inline-reader-book-name" style="color: var(--primary);">यशया अध्याय 43</span>
-                    <span style="font-size: 11px; background: var(--primary); color: #ffffff; padding: 2px 8px; border-radius: 12px; font-weight: 700; margin-left: 4px;">बदला ▾</span>
+                  <button id="btn-home-whatsapp-invite" class="share-whatsapp-btn" onclick="shareAppWhatsApp()">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.09-3.974c1.652.98 3.271 1.498 4.902 1.499 5.485 0 9.948-4.464 9.951-9.95.002-2.658-1.03-5.155-2.903-7.03C16.229 2.67 13.738 1.636 11.08 1.636 5.596 1.636 1.132 6.098 1.13 11.585c-.001 1.761.472 3.479 1.371 5.011L1.472 22.03l5.675-1.488-.009-.016zm11.233-7.56c-.322-.16-.1.905-.31.84s-.977-.4-1.354-.736c-.314-.28-.52-.627-.582-.736-.062-.108-.008-.16-.02-.187-.012-.028-.087-.06-.182-.108s-.565-.279-.92-.455c-.355-.177-.613-.264-.87-.353-.258-.088-.517-.088-.775.176-.258.265-.997 1.25-1.222 1.515-.226.265-.452.294-.775.132-.323-.162-1.363-.502-2.597-1.602-.96-.856-1.608-1.913-1.797-2.236-.188-.324-.02-.499.141-.66.145-.145.323-.382.484-.573.161-.191.215-.324.323-.544.107-.22.054-.412-.027-.573-.081-.162-.726-1.75-.995-2.397-.262-.63-.528-.544-.726-.554-.188-.01-.403-.012-.618-.012s-.565.081-.86.402c-.296.323-1.129 1.103-1.129 2.69 0 1.587 1.156 3.12 1.317 3.335.161.215 2.274 3.472 5.509 4.869.769.332 1.37.53 1.838.679.772.246 1.475.211 2.03.128.62-.093 1.908-.78 2.177-1.534.269-.753.269-1.398.188-1.534-.08-.135-.296-.215-.618-.376z"/></svg>
+                    <span>Share App</span>
                   </button>
-                  <div style="display: flex; align-items: center; gap: 8px;">
-                    <span id="inline-reader-translation-name" style="font-size: 12px; font-weight: 700; color: var(--text-muted);">मराठी (BSI)</span>
-                    <button id="btn-reader-open-text-settings" style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: var(--bg-content); border: 1px solid var(--border); color: var(--text); font-weight: 800; font-size: 13px; cursor: pointer;" title="Text & Display Settings">
-                      Aa
-                    </button>
-                  </div>
                 </div>
-
-                <!-- Row 1: Direct Quick Selectors for Book, Chapter & Verse -->
-                <div class="bible-top-quick-selectors" style="display: flex; gap: 8px; align-items: flex-end; width: 100%; flex-wrap: wrap;">
-                  <!-- 1. Book Selector Dropdown -->
-                  <div style="flex: 2; min-width: 130px;">
-                    <label style="font-size: 10.5px; font-weight: 800; text-transform: uppercase; color: var(--primary); letter-spacing: 0.5px; display: block; margin-bottom: 4px;">📖 Book / पुस्तक</label>
-                    <select id="reader-quick-book-select" class="dropdown-selector" style="width: 100%; padding: 8px 10px; font-size: 13px; font-weight: 700; border-radius: 10px; background: var(--bg); color: var(--text); border: 1.5px solid var(--border); box-sizing: border-box;">
-                      <!-- Populated with books -->
-                    </select>
-                  </div>
-
-                  <!-- 2. Chapter Selector Dropdown -->
-                  <div style="flex: 1; min-width: 85px;">
-                    <label style="font-size: 10.5px; font-weight: 800; text-transform: uppercase; color: var(--primary); letter-spacing: 0.5px; display: block; margin-bottom: 4px;">🔢 Chapter / अध्याय</label>
-                    <select id="reader-quick-chapter-select" class="dropdown-selector" style="width: 100%; padding: 8px 10px; font-size: 13px; font-weight: 700; border-radius: 10px; background: var(--bg); color: var(--text); border: 1.5px solid var(--border); box-sizing: border-box;">
-                      <!-- Populated with chapters -->
-                    </select>
-                  </div>
-
-                  <!-- 3. Verse Selector Dropdown -->
-                  <div style="flex: 1; min-width: 85px;">
-                    <label style="font-size: 10.5px; font-weight: 800; text-transform: uppercase; color: var(--primary); letter-spacing: 0.5px; display: block; margin-bottom: 4px;">📍 Verse / वचन</label>
-                    <select id="reader-quick-verse-select" class="dropdown-selector" style="width: 100%; padding: 8px 10px; font-size: 13px; font-weight: 700; border-radius: 10px; background: var(--bg); color: var(--text); border: 1.5px solid var(--border); box-sizing: border-box;">
-                      <option value="all">All Verses</option>
-                      <!-- Populated with verses -->
-                    </select>
-                  </div>
-
-                  <!-- 4. Version / Translation Dropdown -->
-                  <div style="flex: 1; min-width: 100px;">
-                    <label style="font-size: 10.5px; font-weight: 800; text-transform: uppercase; color: var(--primary); letter-spacing: 0.5px; display: block; margin-bottom: 4px;">🌐 Version / भाषा</label>
-                    <select id="reader-quick-translation-select" class="dropdown-selector" style="width: 100%; padding: 8px 10px; font-size: 13px; font-weight: 700; border-radius: 10px; background: var(--bg); color: var(--text); border: 1.5px solid var(--border); box-sizing: border-box;">
-                      <option value="mar">मराठी (BSI)</option>
-                      <option value="eng">English (NLT)</option>
-                      <option value="parallel">Parallel</option>
-                    </select>
-                  </div>
-                </div>
-
-                <!-- Row 2: Sarvam AI Voice Narration Bar with Shubh and Ratan -->
-                <div class="reader-sarvam-audio-card" style="background: linear-gradient(135deg, rgba(158, 22, 34, 0.06) 0%, rgba(201, 138, 44, 0.10) 100%); border: 1.5px solid rgba(201, 138, 44, 0.35); border-radius: 12px; padding: 8px 12px; display: flex; align-items: center; gap: 10px; justify-content: space-between; flex-wrap: wrap;">
-                  <!-- Primary Play/Listen Button -->
-                  <button id="btn-reader-inline-listen" class="btn-primary-block" style="flex: 1; min-width: 140px; margin: 0; padding: 9px 16px; border-radius: 8px; font-size: 13px; font-weight: 800; background: linear-gradient(135deg, var(--primary) 0%, #7d121b 100%); color: #ffffff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 3px 10px rgba(158, 22, 34, 0.3);">
-                    <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" id="inline-play-icon-svg"><polygon points="5 3 19 12 5 3"></polygon></svg>
-                    <span id="reader-inline-listen-text">Start Reading / ऐका 📖</span>
-                  </button>
-
-                  <!-- Voice Selector Dropdown (Ratan first!) -->
-                  <div style="flex: 2; min-width: 180px;">
-                    <select id="reader-inline-voice-select" class="dropdown-selector" style="width: 100%; background: var(--bg); color: var(--text); border: 1.5px solid rgba(201, 138, 44, 0.6); border-radius: 8px; padding: 8px 10px; font-size: 12px; font-weight: 700;">
-                      <option value="ratan" selected>🧔 Ratan (Marathi & English Male - Calm & Natural)</option>
-                      <option value="shubh">🕊️ Shubh (Hindi & Marathi Male - Devotional)</option>
-                      <option value="aditya">🎙️ Aditya (Deep & Warm Male)</option>
-                      <option value="aravind">📖 Aravind (Gentle Voice Male)</option>
-                      <option value="priya">👩 Priya (Warm & Soft Female)</option>
-                    </select>
-                  </div>
-
-                  <!-- Speed Selector -->
-                  <select id="reader-inline-speed-select" class="dropdown-selector" style="background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 12px; font-weight: 700; width: 75px;">
-                    <option value="0.85">0.85x</option>
-                    <option value="0.92" selected>0.92x</option>
-                    <option value="1.0">1.00x</option>
-                    <option value="1.15">1.15x</option>
-                  </select>
-
-                  <button id="btn-reader-sarvam-setup-modal" style="font-size: 11px; font-weight: 800; color: var(--primary); background: transparent; border: none; cursor: pointer; text-decoration: underline;">Settings ⚙️</button>
-                </div>
-
               </div>
-            </div>
+            </div> <!-- /.home-grid-layout -->
+          </div> <!-- /#home-view-scroll-content -->
+        </section> <!-- /#view-home -->
 
-            <!-- Scrollable Verses Scroller -->
-            <div class="verses-scroller" id="reader-scroll-container" style="flex: 1; overflow-y: auto;">
-              <div class="chapter-info-badge" style="margin-top: 14px;">
+        <section id="view-reader" class="app-view split-screen-parent">
+          
+          <!-- Column 2 (Center): Bible Scripture Pane -->
+          <div class="reader-pane-left">
+            <div class="verses-scroller" id="reader-scroll-container">
+              <div class="chapter-info-badge">
                 <h2 id="reader-chapter-title">शास्ते</h2>
                 <p id="reader-chapter-number">अध्याय १३</p>
               </div>
-
               <div id="reader-verses" class="verses-text-layout">
                 <div class="loader-container">
                   <div class="ios-spinner"></div>
@@ -1073,147 +1007,54 @@
         <section id="view-you" class="app-view">
           <div class="view-scroll-content">
             
-            <!-- A. Logged Out Auth Screen Container — Premium Redesign -->
-            <div id="you-logged-out-container" style="min-height: 100%; display: flex; flex-direction: column; padding-bottom: 40px;">
-
-              <!-- ── Hero Header with River Wave ── -->
-              <div class="rol-auth-hero">
-                <div class="rol-auth-hero-waves">
-                  <svg viewBox="0 0 1440 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" class="rol-auth-wave">
-                    <path d="M0,60 C240,110 480,10 720,60 C960,110 1200,10 1440,60 L1440,120 L0,120 Z" fill="var(--bg)"/>
+            <!-- A. Logged Out Auth Screen Container -->
+            <div id="you-logged-out-container">
+              <div class="auth-card" style="background-color: var(--bg-content); border: 1px solid var(--border); border-radius: 20px; padding: 24px; box-shadow: var(--shadow-md); max-width: 480px; margin: 40px auto;">
+                <div style="text-align: center; margin-bottom: 12px; color: var(--primary);">
+                  <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.8" style="margin: 0 auto;">
+                    <line x1="12" y1="2" x2="12" y2="22"></line>
+                    <line x1="8" y1="9" x2="16" y2="9"></line>
                   </svg>
                 </div>
-                <div class="rol-auth-hero-content">
-                  <div class="rol-auth-logo-ring">
-                    <img src="assets/icons/icon-192.png" alt="River of Life" class="rol-auth-logo-img">
-                  </div>
-                  <h2 class="rol-auth-hero-title">River of Life</h2>
-                  <p class="rol-auth-hero-sub">जीवन नदी बायबल ॲप</p>
+                <h3 id="auth-title" style="text-align: center; font-family: var(--font-ui); font-size: 20px; font-weight: 800; color: var(--primary); margin-bottom: 6px;">Sign In / लॉगिन करा</h3>
+                <p id="auth-subtitle" style="text-align: center; font-size: 13px; color: var(--text-muted); margin-bottom: 24px;">Welcome to River of Life Bible Portal</p>
+                
+                <!-- Toggle between Sign In and Sign Up -->
+                <div class="auth-tabs-row" style="display: flex; background: var(--bg); padding: 4px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--border);">
+                  <button id="auth-tab-signin" class="auth-tab-btn active" style="flex: 1; border: none; background: var(--primary); color: #1e1b4b; padding: 8px; border-radius: 6px; font-weight: 700; font-size: 12px; cursor: pointer; transition: all 0.2s;">Sign In / लॉगिन</button>
+                  <button id="auth-tab-signup" class="auth-tab-btn" style="flex: 1; border: none; background: transparent; color: var(--text-muted); padding: 8px; border-radius: 6px; font-weight: 700; font-size: 12px; cursor: pointer; transition: all 0.2s;">Register / नोंदणी</button>
                 </div>
-              </div>
-
-              <!-- ── Auth Card ── -->
-              <div class="rol-auth-card">
-
-                <!-- Tab Row -->
-                <div class="rol-auth-tabs">
-                  <button id="auth-tab-signin" class="rol-auth-tab active" data-tab="signin">
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-                    Sign In
+                
+                <form id="auth-form" onsubmit="return false;" style="display: flex; flex-direction: column; gap: 16px;">
+                  <div class="form-input-group" style="display: flex; flex-direction: column; gap: 6px;">
+                    <label for="auth-input-username" style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-align: left;">Username / युझरनेम</label>
+                    <input type="text" id="auth-input-username" class="dropdown-selector" style="width: 100%; text-align: left; padding: 10px;" placeholder="Enter username" required autocomplete="username">
+                  </div>
+                  
+                  <div class="form-input-group signup-only" style="display: none; flex-direction: column; gap: 6px;">
+                    <label for="auth-input-email" style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-align: left;">Email Address / ईमेल (ऐच्छिक)</label>
+                    <input type="email" id="auth-input-email" class="dropdown-selector" style="width: 100%; text-align: left; padding: 10px;" placeholder="Enter email address" autocomplete="email">
+                  </div>
+                  
+                  <div class="form-input-group" style="display: flex; flex-direction: column; gap: 6px;">
+                    <label for="auth-input-password" style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-align: left;">Password / पासवर्ड</label>
+                    <input type="password" id="auth-input-password" class="dropdown-selector" style="width: 100%; text-align: left; padding: 10px;" placeholder="Enter password" required autocomplete="current-password">
+                  </div>
+                  
+                  <!-- Checkbox for Pastor (Signup only) -->
+                  <div class="form-input-group signup-only" style="display: none; flex-direction: row; align-items: center; gap: 8px; margin-top: 4px;">
+                    <input type="checkbox" id="auth-input-pastor" style="width: 16px; height: 16px; accent-color: var(--primary);">
+                    <label for="auth-input-pastor" style="font-size: 13.5px; font-weight: 600; color: var(--text); cursor: pointer; user-select: none;">I am a Pastor / मी पास्टर आहे</label>
+                  </div>
+                  
+                  <p id="auth-error-msg" style="color: var(--danger); font-size: 12.5px; font-weight: 700; text-align: center; margin-top: 4px; display: none;"></p>
+                  
+                  <button type="submit" id="btn-auth-submit" class="btn-primary-block" style="margin-top: 10px; width: 100%;">
+                    <span>Sign In / लॉगिन करा</span>
                   </button>
-                  <button id="auth-tab-signup" class="rol-auth-tab" data-tab="signup">
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
-                    Register
-                  </button>
-                </div>
-
-                <!-- Dynamic title -->
-                <div style="margin-bottom: 20px;">
-                  <h3 id="auth-title" class="rol-auth-card-title">Welcome Back 🙏</h3>
-                  <p id="auth-subtitle" class="rol-auth-card-sub">Sign in to your River of Life account</p>
-                </div>
-
-                <!-- Google Sign-In Button -->
-                <button id="btn-google-signin" type="button" class="rol-google-btn">
-                  <svg width="18" height="18" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
-                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-                  </svg>
-                  <span id="btn-google-signin-text">Continue with Google</span>
-                </button>
-
-                <!-- OR Divider -->
-                <div class="rol-auth-divider">
-                  <span>OR / किंवा</span>
-                </div>
-
-                <!-- Form -->
-                <form id="auth-form" onsubmit="return false;" autocomplete="on">
-
-                  <!-- Full Name (signup only) -->
-                  <div class="rol-field signup-only" id="field-fullname" style="display:none;">
-                    <label class="rol-label" for="auth-input-username">
-                      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                      Full Name / पूर्ण नाव
-                    </label>
-                    <div class="rol-input-wrap">
-                      <svg class="rol-input-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                      <input type="text" id="auth-input-username" class="rol-input" placeholder="Enter your full name" autocomplete="name">
-                    </div>
-                  </div>
-
-                  <!-- Email -->
-                  <div class="rol-field">
-                    <label class="rol-label" for="auth-input-email">
-                      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                      Email Address / ईमेल
-                    </label>
-                    <div class="rol-input-wrap">
-                      <svg class="rol-input-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                      <input type="email" id="auth-input-email" class="rol-input" placeholder="yourname@email.com" required autocomplete="email">
-                    </div>
-                  </div>
-
-                  <!-- Password -->
-                  <div class="rol-field">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                      <label class="rol-label" for="auth-input-password" style="margin-bottom:0;">
-                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                        Password / पासवर्ड
-                      </label>
-                      <button type="button" id="btn-forgot-password" class="rol-forgot-link" tabindex="-1">Forgot? / विसरलात?</button>
-                    </div>
-                    <div class="rol-input-wrap">
-                      <svg class="rol-input-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                      <input type="password" id="auth-input-password" class="rol-input rol-input-pass" placeholder="Min. 6 characters" required autocomplete="current-password">
-                      <button type="button" class="rol-eye-btn" id="btn-toggle-password" tabindex="-1" title="Show/hide password">
-                        <svg id="eye-icon-show" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                        <svg id="eye-icon-hide" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-                      </button>
-                    </div>
-                  </div>
-
-                  <!-- Pastor checkbox (signup only) -->
-                  <div class="rol-field signup-only rol-pastor-row" id="field-pastor" style="display:none;">
-                    <label class="rol-pastor-label">
-                      <div class="rol-custom-check">
-                        <input type="checkbox" id="auth-input-pastor">
-                        <span class="rol-checkmark">
-                          <svg viewBox="0 0 12 10" width="12" height="10" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 5 4.5 8.5 11 1"/></svg>
-                        </span>
-                      </div>
-                      <div>
-                        <span class="rol-pastor-name">I am a Pastor / मी पास्टर आहे</span>
-                        <span class="rol-pastor-hint">Enables church admin features</span>
-                      </div>
-                    </label>
-                  </div>
-
-                  <!-- Error Message -->
-                  <div id="auth-error-msg" class="rol-error-msg" style="display:none;">
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                    <span></span>
-                  </div>
-
-                  <!-- Submit Button -->
-                  <button type="submit" id="btn-auth-submit" class="rol-submit-btn">
-                    <svg id="auth-submit-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-                    <span id="auth-submit-text">Sign In / लॉगिन करा</span>
-                  </button>
-
                 </form>
-
-                <!-- Bottom toggle link -->
-                <div class="rol-auth-switch">
-                  <span id="auth-switch-text">Don't have an account?</span>
-                  <button type="button" id="auth-switch-btn" class="rol-switch-link">Register / नोंदणी करा</button>
-                </div>
-
               </div>
             </div>
-
             
             <!-- B. Logged In User Profile Container -->
             <!-- B. Logged In User Profile Container (Redesigned) -->
@@ -1434,12 +1275,13 @@
                 <div class="settings-card-group margin-top" style="padding: 20px; border-top: 1px solid var(--border); background: var(--bg-content);">
                   <h4 class="settings-group-label" style="font-size: 13px; font-weight: 700; text-transform: uppercase; margin-bottom: 12px; color: var(--primary);">Preferences</h4>
                   
-                  <div class="settings-action-row" style="margin-top: 16px; border-top: 1px solid var(--border); padding-top: 12px; display: flex; justify-content: space-between; align-items: center;">
-                    <div class="action-desc">
-                      <span style="font-weight: 700; font-size: 13.5px; color: var(--text);">🎙️ Sarvam AI Narration Voice</span>
-                      <p style="font-size: 11px; color: var(--text-muted); margin: 2px 0 0 0;">Select Indian voice (Ratan, Shubh) & setup API Key</p>
-                    </div>
-                    <button onclick="openModal('modal-audio-settings')" class="btn-primary-mini" style="background: var(--primary); color: #fff; border: none; padding: 6px 14px; border-radius: 8px; font-weight: 700; cursor: pointer;">Voice Settings</button>
+                  <div class="settings-form-row" style="margin-bottom: 12px;">
+                    <label for="you-select-translation">Default Translation</label>
+                    <select id="you-select-translation" class="dropdown-selector" style="max-width: 180px;">
+                      <option value="mar">मराठी (MARVBSI)</option>
+                      <option value="eng">English (KJV)</option>
+                      <option value="parallel">Parallel Mode</option>
+                    </select>
                   </div>
 
                   <div class="settings-action-row" style="margin-top: 16px; border-top: 1px solid var(--border); padding-top: 12px;">
@@ -1511,8 +1353,7 @@
           <button id="playbar-btn-next" class="playbar-control-btn" aria-label="Next Verse" title="Next Verse">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
           </button>
-          <button id="playbar-btn-voice-select" class="playbar-speed-pill" title="Change Indian Narrator Voice" style="background: rgba(229, 168, 59, 0.2); color: var(--text); border: 1px solid rgba(229, 168, 59, 0.4); font-weight: 800;">🎙️ Voice</button>
-          <button id="playbar-btn-speed" class="playbar-speed-pill" title="Playback Speed">0.92x</button>
+          <button id="playbar-btn-speed" class="playbar-speed-pill" title="Playback Speed">1.0x</button>
           <button id="playbar-btn-close-widget" class="playbar-control-btn close" aria-label="Close Player">&times;</button>
         </div>
         
@@ -1583,34 +1424,20 @@
               <button class="spacing-btn" data-height="2.1">Spacious</button>
             </div>
           </div>
-          <div class="setting-item-row" style="margin-top: 10px; padding-top: 12px; border-top: 1px solid var(--border);">
-            <label>Bible Voice</label>
-            <button onclick="closeDrawer('drawer-text-settings'); openModal('modal-audio-settings');" style="background: var(--pill-bg); border: 1px solid var(--border); color: var(--primary); padding: 8px 14px; border-radius: 12px; font-size: 12.5px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px;">
-              🎙️ Sarvam Voice Settings
-            </button>
-          </div>
         </div>
       </div>
     </div>
 
-    <!-- Book & Chapter Selector Drawer (Tecarta styled, 3-step Book -> Chapter -> Verse) -->
+    <!-- Book & Chapter Selector Drawer (Tecarta styled, list view on desktop) -->
     <div id="drawer-book-selector" class="drawer-overlay">
       <div class="ios-drawer-sheet full-height">
-        <div class="drawer-header-row" style="border-bottom: none; padding-bottom: 4px;">
+        <div class="drawer-header-row">
           <div class="grabber-bar"></div>
-          <h3 id="book-selector-header-title">Select Scripture</h3>
+          <h3 id="book-selector-header-title">Books</h3>
           <button class="close-drawer-btn">&times;</button>
         </div>
-
-        <!-- 3-Step Navigation Tabs -->
-        <div class="selector-steps-tabs" style="display: flex; gap: 8px; margin: 0 16px 12px 16px; background: var(--pill-bg); padding: 4px; border-radius: 12px; border: 1px solid var(--border);">
-          <button id="tab-step-books" class="sort-tab active" style="flex: 1; padding: 8px 6px; font-size: 12px; font-weight: 800; border-radius: 8px; border: none; cursor: pointer;">1. Book</button>
-          <button id="tab-step-chapters" class="sort-tab" style="flex: 1; padding: 8px 6px; font-size: 12px; font-weight: 800; border-radius: 8px; border: none; cursor: pointer;">2. Chapter</button>
-          <button id="tab-step-verses" class="sort-tab" style="flex: 1; padding: 8px 6px; font-size: 12px; font-weight: 800; border-radius: 8px; border: none; cursor: pointer;">3. Verse</button>
-        </div>
-
         <div class="drawer-book-selector-scroll">
-          <!-- Step 1: Books Selection View -->
+          <!-- Books Selection View -->
           <div id="selector-books-pane" class="selector-pane-view active">
             <div class="testament-block" id="section-ot-books">
               <h4 class="testament-heading">जुना करार (Old Testament)</h4>
@@ -1626,37 +1453,19 @@
             </div>
           </div>
           
-          <!-- Step 2: Chapters Selection View -->
+          <!-- Chapters selection view -->
           <div id="selector-chapters-pane" class="selector-pane-view">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-              <button id="btn-back-to-books" class="btn-back-link" style="margin: 0;">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                <span id="selected-book-name-indicator">शास्ते</span>
-              </button>
-              <span style="font-size: 11px; font-weight: 700; color: var(--text-muted);">Choose a chapter</span>
-            </div>
+            <button id="btn-back-to-books" class="btn-back-link">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+              <span id="selected-book-name-indicator">शास्ते</span>
+            </button>
             <div id="chapters-number-grid" class="chapters-buttons-grid">
               <!-- Chapters list loads dynamically -->
             </div>
           </div>
-
-          <!-- Step 3: Verses Selection View -->
-          <div id="selector-verses-pane" class="selector-pane-view">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-              <button id="btn-back-to-chapters" class="btn-back-link" style="margin: 0;">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                <span id="selected-chapter-indicator">Chapter 13</span>
-              </button>
-              <button id="btn-open-whole-chapter" class="btn-primary-mini" style="font-size: 11px; padding: 6px 12px; border-radius: 8px;">Open Full Chapter</button>
-            </div>
-            <div id="verses-number-grid" class="chapters-buttons-grid">
-              <!-- Verses list loads dynamically -->
-            </div>
-          </div>
         </div>
-
         <!-- Sorting bar inside book selector footer -->
-        <div class="selector-sorting-footer" id="selector-sorting-footer">
+        <div class="selector-sorting-footer">
           <div class="sorting-tabs-capsule">
             <button id="btn-sort-traditional" class="sort-tab active">Traditional</button>
             <button id="btn-sort-alphabetical" class="sort-tab">Alphabetical</button>
@@ -1803,71 +1612,74 @@
     <div id="modal-audio-settings" class="drawer-overlay">
       <div class="ios-drawer-sheet">
         <div class="drawer-header-row">
-          <div class="grabber-bar"></div>
-          <h3 style="display: flex; align-items: center; gap: 8px;">🎙️ Sarvam Voice Narration</h3>
+          <h3>Narration Settings</h3>
           <button class="close-drawer-btn" id="btn-close-audio-settings">&times;</button>
         </div>
-        <div class="drawer-body-settings" style="display: flex; flex-direction: column; gap: 14px; padding: 16px 20px;">
-          
-          <!-- Voice Selector -->
-          <div class="setting-item-row" id="audio-narrator-gender-row" style="flex-direction: column; align-items: stretch; gap: 6px;">
-            <label style="font-weight: 700; font-size: 13.5px; color: var(--text);">Select Indian Voice / आवाज निवडा</label>
-            <select id="audio-narrator-gender-select" class="dropdown-selector" style="background: var(--bg); color: var(--text); border: 1.5px solid var(--primary); border-radius: 10px; padding: 10px; font-size: 13px; font-weight: 700; width: 100%;">
-              <option value="ratan" selected>🧔 Ratan (Marathi & English Male - Calm & Natural)</option>
-              <option value="shubh">🕊️ Shubh (Hindi & Marathi Male - Devotional)</option>
-              <option value="aditya">🎙️ Aditya (Deep & Warm Male)</option>
-              <option value="aravind">📖 Aravind (Gentle Voice Male)</option>
-              <option value="priya">👩 Priya (Warm & Soft Female)</option>
+        <div class="drawer-body-settings">
+          <div class="setting-item-row">
+            <label>Speech Speed</label>
+            <div class="slider-wrapper">
+              <input type="range" id="tts-speed-slider" min="0.75" max="1.75" step="0.05" value="1.0" class="speed-slider">
+              <span id="tts-speed-val">1.0x</span>
+            </div>
+          </div>
+          <div class="setting-item-row" id="audio-narrator-gender-row">
+            <label>Narrator Voice</label>
+            <select id="audio-narrator-gender-select" class="dropdown-selector" style="background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 4px;">
+              <option value="male" selected>🧔 Male Narrator (Deep Rich Bass)</option>
+              <option value="female">👩 Female Narrator (Warm & Soft)</option>
             </select>
           </div>
-
-          <!-- Speed Slider -->
-          <div class="setting-item-row" style="flex-direction: column; align-items: stretch; gap: 6px;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <label style="font-weight: 700; font-size: 13px; color: var(--text);">Narration Pace / वाचन गती</label>
-              <span id="tts-speed-val" style="font-weight: 800; color: var(--primary); font-size: 13px;">0.92x (Recommended)</span>
-            </div>
-            <div class="slider-wrapper" style="width: 100%;">
-              <input type="range" id="tts-speed-slider" min="0.75" max="1.50" step="0.02" value="0.92" class="speed-slider" style="width: 100%;">
-            </div>
-            <span style="font-size: 11px; color: var(--text-muted);">Calm, measured devotional tempo for deep Bible meditation.</span>
-          </div>
-
-          <!-- Sarvam API Key -->
-          <div class="setting-item-row" id="audio-sarvam-key-row" style="flex-direction: column; align-items: stretch; gap: 6px; background: rgba(201, 138, 44, 0.08); padding: 12px; border-radius: 10px; border: 1px solid rgba(201, 138, 44, 0.3);">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <label style="font-weight: 700; font-size: 12.5px; color: var(--text);">Sarvam AI API Subscription Key</label>
-              <span id="sarvam-key-status-badge" style="font-size: 10px; font-weight: 800; color: #22c55e; background: rgba(34,197,94,0.15); padding: 2px 6px; border-radius: 8px;">Active</span>
-            </div>
-            <input type="password" id="sarvam-api-key-input" placeholder="Paste your Sarvam API Key here..." style="background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 12px; width: 100%; box-sizing: border-box;">
-            <span style="font-size: 10.5px; color: var(--text-muted);">Get your API key from <a href="https://sarvam.ai" target="_blank" style="color: var(--primary); text-decoration: underline;">sarvam.ai</a> dashboard.</span>
-          </div>
-
-          <!-- Background Music -->
-          <div class="setting-item-row" id="audio-bg-music-row" style="display: flex; justify-content: space-between; align-items: center;">
-            <label style="font-size: 13px; font-weight: 600;">Worship Music</label>
-            <select id="audio-bg-music-select" class="dropdown-selector" style="background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; font-size: 12px;">
+          <div class="setting-item-row" id="audio-bg-music-row">
+            <label>Background Worship Music</label>
+            <select id="audio-bg-music-select" class="dropdown-selector" style="background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 4px;">
               <option value="none" selected>None</option>
-              <option value="guitar">🎸 Acoustic Guitar</option>
-              <option value="piano">🎹 Peaceful Piano</option>
-              <option value="ambient">🕊️ Holy Spirit Strings</option>
+              <option value="guitar">🎸 Soft Acoustic Worship Guitar</option>
+              <option value="piano">🎹 Peaceful Piano Instrumental</option>
+              <option value="ambient">🕊️ Ambient Holy Spirit Strings</option>
             </select>
           </div>
-
-          <!-- Sleep Timer -->
-          <div class="setting-item-row" id="audio-sleep-timer-row" style="display: flex; justify-content: space-between; align-items: center;">
-            <label style="font-size: 13px; font-weight: 600;">Sleep Timer</label>
-            <select id="audio-sleep-timer-select" class="dropdown-selector" style="background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; font-size: 12px;">
+          <div class="setting-item-row" id="audio-bg-music-vol-row">
+            <label>Worship Music Vol</label>
+            <div class="slider-wrapper">
+              <input type="range" id="audio-bg-music-vol-slider" min="0" max="1" step="0.05" value="0.3" class="speed-slider">
+              <span id="audio-bg-music-vol-val">30%</span>
+            </div>
+          </div>
+          <div class="setting-item-row" id="audio-sleep-timer-row">
+            <label>Sleep Timer</label>
+            <select id="audio-sleep-timer-select" class="dropdown-selector" style="background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 4px;">
               <option value="off" selected>Off</option>
               <option value="15">15 Minutes</option>
               <option value="30">30 Minutes</option>
               <option value="60">60 Minutes</option>
             </select>
           </div>
-
-          <button id="btn-start-tts-reading" class="btn-primary-block" style="margin-top: 8px; padding: 14px; border-radius: 12px; font-size: 14px; font-weight: 800; background: linear-gradient(135deg, var(--primary) 0%, #7d121b 100%); color: #ffffff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 14px rgba(158, 22, 34, 0.35);">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-            <span>Start Sarvam AI Voice Narration</span>
+          <div class="setting-item-row" id="audio-source-row" style="display: none;">
+            <label>Reader Type</label>
+            <select id="audio-source-select" class="dropdown-selector">
+              <option value="human" selected>Professional Human Voice</option>
+              <option value="ai">AI Text-to-Speech Reader</option>
+              <option value="elevenlabs">ElevenLabs Premium Voice</option>
+            </select>
+          </div>
+          <div class="setting-item-row" id="voice-select-row" style="display: none;">
+            <label>Speech Voice</label>
+            <select id="tts-voice-select" class="dropdown-selector">
+              <option value="default">Default System Voice</option>
+            </select>
+          </div>
+          <div class="setting-item-row" id="tone-select-row" style="display: none;">
+            <label>Voice Tone Style</label>
+            <select id="audio-tone-select" class="dropdown-selector">
+              <option value="normal">Normal Voice</option>
+              <option value="deep-bass" selected>Deep Studio Bass (Morgan Freeman Style)</option>
+              <option value="warm-resonance">Warm Resonance</option>
+            </select>
+          </div>
+          <button id="btn-start-tts-reading" class="btn-primary-block margin-top">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            <span>Start Reading Aloud</span>
           </button>
         </div>
       </div>
@@ -1961,95 +1773,214 @@
     </div>
 
     <!-- Daily Bible Quiz Drawer -->
-    <div id="modal-bible-quiz" class="drawer-overlay">
-      <div class="ios-drawer-sheet modal-height">
-        <div class="drawer-header-row">
-          <div class="grabber-bar"></div>
-          <h3>Daily Bible Quiz</h3>
-          <button class="close-drawer-btn" id="btn-close-bible-quiz">&times;</button>
+    <!-- IMMERSIVE READY-MADE PRAYER MODAL -->
+    <div id="modal-immersive-prayer" class="drawer-overlay" style="display: none;">
+      <div class="ios-drawer-sheet prayer-immersive-sheet">
+        <div class="prayer-modal-hero" id="prayer-modal-hero-bg">
+          <div class="prayer-hero-overlay"></div>
+          <button class="prayer-modal-close-btn" id="btn-close-immersive-prayer" onclick="closeImmersivePrayerModal()">&times;</button>
+          <div class="prayer-hero-content">
+            <span class="prayer-modal-badge" id="prayer-modal-category">PRAYER TOPIC</span>
+            <h2 class="prayer-modal-title" id="prayer-modal-heading">पाण्याचे द्राक्षारसात रूपांतर</h2>
+            <span class="prayer-modal-subtitle" id="prayer-modal-subtitle">The Wedding at Cana • Miracle in Scarcity</span>
+          </div>
         </div>
-        <div class="drawer-body-settings" style="padding: 16px 24px; max-height: 75vh; overflow-y: auto;">
-          
-          <!-- Screen 1: Welcome/Start -->
-          <div id="quiz-welcome-screen" class="quiz-screen active" style="text-align: center; padding: 20px 0;">
-            <div style="font-size: 64px; margin-bottom: 16px;">🏆</div>
-            <h4 style="font-family: var(--font-ui); font-size: 22px; font-weight: 800; margin-bottom: 8px; color: var(--primary);">बायबल सामान्य ज्ञान स्पर्धा</h4>
-            <h5 style="font-family: var(--font-ui); font-size: 16px; font-weight: 600; margin-bottom: 16px; color: var(--text-muted);">Daily Bible Trivia Competition</h5>
-            <p style="font-size: 14px; line-height: 1.6; margin-bottom: 24px; color: var(--text);">
-              Answer 10 multiple-choice questions to test your scripture knowledge, earn points, and unlock achievements! Available in both Marathi and English.
+
+        <div class="prayer-modal-body-scroller">
+          <!-- Scripture Box -->
+          <div class="prayer-scripture-box">
+            <div class="scripture-badge-row">
+              <span class="scripture-icon">📖</span>
+              <strong id="prayer-modal-scripture-ref">योहान २:१-११ (John 2:1-11)</strong>
+            </div>
+            <p class="scripture-verse-text" id="prayer-modal-scripture-text">
+              "येशूने आपल्या चिन्हांचा हा आरंभ गालीलातील काना येथे केला आणि आपले सामर्थ्य प्रकट केले, आणि त्याच्या शिष्यांनी त्याच्यावर विश्वास ठेवला."
             </p>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
-              <div style="background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 12px;">
-                <span style="font-size: 24px; display: block; margin-bottom: 4px;">⚡</span>
-                <span style="font-size: 11px; color: var(--text-muted); display: block; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Your Total Points</span>
-                <strong style="font-size: 18px; color: var(--text);" id="quiz-welcome-total-points">0 pts</strong>
-              </div>
-              <div style="background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 12px;">
-                <span style="font-size: 24px; display: block; margin-bottom: 4px;">⭐</span>
-                <span style="font-size: 11px; color: var(--text-muted); display: block; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">High Score (Session)</span>
-                <strong style="font-size: 18px; color: var(--text);" id="quiz-welcome-highscore">0 pts</strong>
-              </div>
+          </div>
+
+          <!-- Language Selector Tabs for Prayer -->
+          <div class="prayer-lang-tabs">
+            <button class="prayer-tab-btn active" id="btn-prayer-lang-mr" onclick="switchPrayerLang('mr')">मराठी प्रार्थना</button>
+            <button class="prayer-tab-btn" id="btn-prayer-lang-en" onclick="switchPrayerLang('en')">English Prayer</button>
+          </div>
+
+          <!-- Prayer Devotional Content -->
+          <div class="prayer-text-container">
+            <div class="prayer-content-text" id="prayer-modal-text-content">
+              <!-- Populated dynamically -->
             </div>
-            
-            <button class="btn-primary-block" id="btn-start-quiz" style="margin-top: 10px;">
-              <span>Start Quiz / क्विझ सुरू करा</span>
+          </div>
+
+          <!-- Action Buttons Bar -->
+          <div class="prayer-actions-bar">
+            <button class="prayer-action-btn primary" id="btn-prayer-audio-play" onclick="togglePrayerAudio()">
+              <span class="btn-icon">🔊</span>
+              <span id="prayer-audio-label">Listen / ऐका</span>
+            </button>
+            <button class="prayer-action-btn secondary" id="btn-prayer-share-whatsapp" onclick="sharePrayerWhatsApp()">
+              <span class="btn-icon">💬</span>
+              <span>WhatsApp</span>
+            </button>
+            <button class="prayer-action-btn amen" id="btn-prayer-amen" onclick="togglePrayerAmen()">
+              <span class="btn-icon">🙏</span>
+              <span id="prayer-amen-count">Amen (48)</span>
             </button>
           </div>
-          
-          <!-- Screen 2: Question & Choices -->
-          <div id="quiz-question-screen" class="quiz-screen" style="display: none;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-              <span style="font-size: 13px; font-weight: 800; color: var(--primary);" id="quiz-question-number">Question 1 of 10</span>
-              <span style="font-size: 13px; font-weight: 700; color: var(--text-muted);" id="quiz-current-score">Score: 0</span>
-            </div>
-            
-            <!-- Progress Bar -->
-            <div style="height: 6px; background: var(--border); border-radius: 3px; margin-bottom: 20px; overflow: hidden; width: 100%;">
-              <div id="quiz-progress-bar" style="height: 100%; background: var(--primary); width: 10%; transition: width 0.3s ease;"></div>
-            </div>
-            
-            <!-- Question Box -->
-            <div class="commentary-card" style="border-left: 4px solid var(--primary); background: var(--bg); margin-bottom: 20px; padding: 16px;">
-              <h4 id="quiz-question-mr" style="font-family: 'Lora', serif; font-size: 17px; line-height: 1.6; margin-bottom: 10px; color: var(--text);"></h4>
-              <p id="quiz-question-en" style="font-size: 15px; line-height: 1.5; color: var(--text-muted); margin: 0;"></p>
-            </div>
-            
-            <!-- Choices Container -->
-            <div id="quiz-choices-container" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;">
-              <!-- Choices will be rendered here dynamically -->
-            </div>
-            
-            <!-- Next Action -->
-            <button class="btn-primary-block" id="btn-next-quiz-question" style="display: none;">
-              <span>Next Question / पुढचा प्रश्न &rarr;</span>
-            </button>
-          </div>
-          
-          <!-- Screen 3: Results -->
-          <div id="quiz-results-screen" class="quiz-screen" style="display: none; text-align: center; padding: 20px 0;">
-            <div style="font-size: 64px; margin-bottom: 16px;" id="quiz-results-emoji">🎉</div>
-            <h4 style="font-family: var(--font-ui); font-size: 22px; font-weight: 800; margin-bottom: 8px; color: var(--primary);" id="quiz-results-title">Great Job!</h4>
-            <p style="font-size: 15px; margin-bottom: 20px; color: var(--text);" id="quiz-results-score-text">You scored 80 / 100 points!</p>
-            
-            <!-- Badge unlocked alert -->
-            <div id="quiz-badge-unlock-container" style="display: none; background: rgba(34, 197, 94, 0.1); border: 1px solid #22c55e; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
-              <span style="font-size: 28px; display: block; margin-bottom: 4px;">🎖️</span>
-              <strong style="color: #22c55e; font-size: 14px; display: block;">NEW ACHIEVEMENT UNLOCKED!</strong>
-              <span style="font-size: 13px; color: var(--text);" id="quiz-badge-name">Scripture Scholar (शास्त्र पंडित)</span>
-            </div>
-            
-            <div style="display: flex; gap: 12px;">
-              <button class="btn-secondary-mini" id="btn-close-quiz-results" style="flex: 1; padding: 12px; border-radius: 12px; font-size: 14px;">Close / बंद करा</button>
-              <button class="btn-primary-block" id="btn-restart-quiz" style="flex: 1; margin: 0; padding: 12px; font-size: 14px;">Play Again / पुन्हा खेळा</button>
-            </div>
-          </div>
-          
         </div>
       </div>
     </div>
 
-    <!-- 1. Notification Consent Modal -->
+    <!-- DAILY BIBLE QUIZ MODAL (WITH 4 DIFFICULTY LEVELS) -->
+    <div id="modal-bible-quiz" class="drawer-overlay" style="display: none;">
+      <div class="ios-drawer-sheet modal-height quiz-drawer-sheet">
+        <div class="drawer-header-row">
+          <div class="grabber-bar"></div>
+          <h3 id="quiz-header-title">बायबल सामान्य ज्ञान स्पर्धा • Bible Quiz</h3>
+          <button class="close-drawer-btn" id="btn-close-bible-quiz" onclick="closeBibleQuizModal()">&times;</button>
+        </div>
+        <div class="drawer-body-settings" style="padding: 16px 20px; max-height: 80vh; overflow-y: auto;">
+          
+          <!-- Screen 1: Welcome & Level Selection Screen -->
+          <div id="quiz-welcome-screen" class="quiz-screen active">
+            <div class="quiz-welcome-banner">
+              <div class="quiz-trophy-glow">🏆</div>
+              <h4>बायबल सामान्य ज्ञान स्पर्धा</h4>
+              <h5>Daily Bible Trivia & Knowledge Challenge</h5>
+              <p>Choose your difficulty level, test your Scripture knowledge, maintain your streak, and earn honorary badges!</p>
+            </div>
+
+            <div class="quiz-stats-cards-grid">
+              <div class="quiz-stat-card">
+                <span class="stat-icon">⚡</span>
+                <span class="stat-lbl">Total Points</span>
+                <strong id="quiz-welcome-total-points">0 pts</strong>
+              </div>
+              <div class="quiz-stat-card">
+                <span class="stat-icon">⭐</span>
+                <span class="stat-lbl">Best Score</span>
+                <strong id="quiz-welcome-highscore">0 pts</strong>
+              </div>
+            </div>
+
+            <div class="quiz-levels-section-label">Select Difficulty Level / पातळी निवडा:</div>
+            
+            <div class="quiz-levels-selector-grid">
+              <!-- Level 1: Beginner -->
+              <div class="quiz-level-card active" id="quiz-lvl-card-1" onclick="selectQuizLevel(1)">
+                <div class="level-card-left">
+                  <span class="level-emoji">🌱</span>
+                  <div>
+                    <strong>Level 1: Beginner / नवशिक्या (सोपे)</strong>
+                    <p>Creation, Noah's Ark, Moses, David & Goliath, Birth of Jesus</p>
+                  </div>
+                </div>
+                <span class="level-badge-tag">10 Qs • +10 pts</span>
+              </div>
+
+              <!-- Level 2: Intermediate -->
+              <div class="quiz-level-card" id="quiz-lvl-card-2" onclick="selectQuizLevel(2)">
+                <div class="level-card-left">
+                  <span class="level-emoji">⚔️</span>
+                  <div>
+                    <strong>Level 2: Intermediate / शोधक (मध्यम)</strong>
+                    <p>Miracles, Parables, Old Testament Kings, Gospels & Acts</p>
+                  </div>
+                </div>
+                <span class="level-badge-tag">10 Qs • +20 pts</span>
+              </div>
+
+              <!-- Level 3: Advanced -->
+              <div class="quiz-level-card" id="quiz-lvl-card-3" onclick="selectQuizLevel(3)">
+                <div class="level-card-left">
+                  <span class="level-emoji">👑</span>
+                  <div>
+                    <strong>Level 3: Advanced / अभ्यासक (कठीण)</strong>
+                    <p>Paul's Epistles, Prophetic Books, Major Covenants & Timelines</p>
+                  </div>
+                </div>
+                <span class="level-badge-tag">10 Qs • +30 pts</span>
+              </div>
+
+              <!-- Level 4: Master -->
+              <div class="quiz-level-card" id="quiz-lvl-card-4" onclick="selectQuizLevel(4)">
+                <div class="level-card-left">
+                  <span class="level-emoji">🏆</span>
+                  <div>
+                    <strong>Level 4: Master / सखोल ज्ञानी (Expert)</strong>
+                    <p>Original Hebrew/Greek Nuances, Cross-Testament Theology, Minor Prophets</p>
+                  </div>
+                </div>
+                <span class="level-badge-tag">10 Qs • +50 pts</span>
+              </div>
+            </div>
+
+            <button class="btn-start-quiz-prominent" id="btn-start-quiz" onclick="startSelectedQuizLevel()">
+              Start Quiz / स्पर्धा सुरू करा 🎯
+            </button>
+          </div>
+
+          <!-- Screen 2: Active Question Screen -->
+          <div id="quiz-question-screen" class="quiz-screen" style="display: none;">
+            <div class="quiz-active-header">
+              <div class="quiz-active-level-pill" id="quiz-active-level-indicator">Level 1: Beginner</div>
+              <div class="quiz-score-pill">Score: <span id="quiz-current-score">0</span></div>
+            </div>
+
+            <div class="quiz-progress-bar-container">
+              <div class="quiz-progress-fill" id="quiz-progress-bar" style="width: 10%;"></div>
+            </div>
+
+            <div class="quiz-question-meta-row">
+              <span id="quiz-question-number">Question 1 of 10</span>
+              <span id="quiz-streak-count">🔥 Streak: 0</span>
+            </div>
+
+            <div class="quiz-question-card">
+              <h4 id="quiz-question-mr" class="question-text-mr">...</h4>
+              <p id="quiz-question-en" class="question-text-en">...</p>
+            </div>
+
+            <div class="quiz-choices-container" id="quiz-choices-container">
+              <!-- 4 choices rendered dynamically -->
+            </div>
+
+            <div id="quiz-explanation-box" class="quiz-explanation-box" style="display: none;">
+              <div class="explanation-icon" id="quiz-explanation-icon">💡</div>
+              <div class="explanation-content">
+                <strong id="quiz-explanation-status">Correct! / बरोबर!</strong>
+                <p id="quiz-explanation-text">...</p>
+                <cite id="quiz-explanation-ref">...</cite>
+              </div>
+            </div>
+
+            <button id="btn-next-quiz-question" class="btn-next-quiz-btn" style="display: none;" onclick="goToNextQuizQuestion()">
+              Next Question / पुढील प्रश्न &rarr;
+            </button>
+          </div>
+
+          <!-- Screen 3: Results Screen -->
+          <div id="quiz-results-screen" class="quiz-screen" style="display: none; text-align: center;">
+            <div id="quiz-results-emoji" style="font-size: 64px; margin-bottom: 12px;">🎉</div>
+            <h4 id="quiz-results-title" style="font-size: 22px; font-weight: 800; color: var(--primary);">अभिनंदन! Congratulations!</h4>
+            <p id="quiz-results-score-text" style="font-size: 16px; margin-bottom: 16px; color: var(--text);">You scored 10 / 10 (100%)</p>
+
+            <div id="quiz-badge-unlock-container" class="badge-unlock-card" style="display: none;">
+              <span class="badge-star">⭐ NEW BADGE UNLOCKED! ⭐</span>
+              <div class="badge-icon-large" id="quiz-badge-icon">👑</div>
+              <h5 id="quiz-badge-name">Bible Scholar</h5>
+              <p id="quiz-badge-desc">Awarded for mastering Level 3 Quiz with 80%+ accuracy!</p>
+            </div>
+
+            <div class="quiz-results-buttons-row">
+              <button id="btn-restart-quiz" class="btn-quiz-action primary" onclick="showQuizLevelSelect()">Play Another Level / पुढील पातळी 🔄</button>
+              <button id="btn-close-quiz-results" class="btn-quiz-action secondary" onclick="closeBibleQuizModal()">Done / पूर्ण करा ✕</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
     <div id="modal-notification-prompt" class="drawer-overlay centered-align">
       <div class="centered-modal-card">
         <div style="font-size: 52px; margin-bottom: 12px; animation: float 3s ease-in-out infinite;">🔔</div>
@@ -2871,19 +2802,7 @@
 
           <!-- Section 2: App Customization Settings -->
           <div style="display: flex; flex-direction: column; gap: 8px;">
-            <strong style="font-size: 11px; text-transform: uppercase; color: var(--primary); letter-spacing: 0.5px;">App Preferences & Audio Voice</strong>
-
-            <!-- Sarvam AI Voice Settings Trigger -->
-            <button onclick="closeDrawer('drawer-account-settings'); openModal('modal-audio-settings');" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border-radius: 12px; background: linear-gradient(135deg, rgba(158, 22, 34, 0.08) 0%, rgba(201, 138, 44, 0.12) 100%); border: 1.5px solid rgba(201, 138, 44, 0.4); cursor: pointer; text-align: left;">
-              <div style="display: flex; align-items: center; gap: 12px;">
-                <span style="font-size: 20px;">🎙️</span>
-                <div>
-                  <div style="font-size: 13.5px; font-weight: 800; color: var(--text);">Sarvam AI Indian Voice Narration</div>
-                  <div style="font-size: 11px; color: var(--text-muted); font-weight: 500;">Select voice (Ratan, Shubh) & setup API key</div>
-                </div>
-              </div>
-              <span style="font-size: 11px; font-weight: 800; color: var(--primary); background: var(--pill-bg); padding: 4px 10px; border-radius: 12px; border: 1px solid var(--border);">Setup →</span>
-            </button>
+            <strong style="font-size: 11px; text-transform: uppercase; color: var(--primary); letter-spacing: 0.5px;">App Preferences & Translation</strong>
 
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; border-radius: 12px; background: var(--bg); border: 1px solid var(--border);">
               <div style="display: flex; align-items: center; gap: 10px;">
@@ -2935,11 +2854,8 @@
       <span id="toast-message">Copied to clipboard!</span>
     </div>
 
-  <!-- Sarvam AI Bulbul V3 Indian Voice Narration Engine -->
-  <script src="sarvam-tts.js?v=90_UNMISSABLE_BIBLE_TOOLBAR_AND_SHUBH_VOICE"></script>
-
-  <!-- App Main Logic (Cache-Busted for Version 90 Unmissable Bible Toolbar and Shubh Voice) -->
-  <script src="app.js?v=90_UNMISSABLE_BIBLE_TOOLBAR_AND_SHUBH_VOICE"></script>
+  <!-- App Main Logic (Cache-Busted for Version 83 Extended Splash Verse & Logo Theme) -->
+  <script src="app.js?v=83_EXTENDED_SPLASH_VERSE_DISPLAY"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 4.5s no matter what

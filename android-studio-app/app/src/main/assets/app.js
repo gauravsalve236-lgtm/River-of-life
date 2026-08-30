@@ -994,7 +994,7 @@ function loadStateFromLocalStorage() {
   // Force migration to Sarvam AI Bulbul V3 Indian Voice Narration
   state.audioSource = "sarvam";
   if (!state.sarvamVoice) {
-    state.sarvamVoice = state.translation === "eng" ? "ratan" : "shubh";
+    state.sarvamVoice = state.sarvamVoice || "shubh";
   }
   state.sarvamPace = state.sarvamPace || 0.92;
 }
@@ -1919,86 +1919,117 @@ function getCurrentVOD() {
 function renderDailyDevotion() {
   const now = new Date();
   const options = { weekday: 'long', month: 'long', day: 'numeric' };
-  const dateEl = document.getElementById("home-greeting-date");
-  if (dateEl) dateEl.textContent = now.toLocaleDateString('en-US', options);
+  const dateStr = now.toLocaleDateString('en-US', options);
+  const dateMrStr = now.toLocaleDateString('mr-IN', options);
+  
+  const heroDateEl = document.getElementById("home-hero-date-str");
+  if (heroDateEl) heroDateEl.textContent = `Today | ${dateStr}`;
   
   const hour = now.getHours();
-  let greeting = "Good evening, Gaurav";
-  if (hour < 12) greeting = "Good morning, Gaurav";
-  else if (hour < 17) greeting = "Good afternoon, Gaurav";
+  let greetingTimeEn = "Good evening";
+  let greetingTimeMr = "शुभ संध्याकाळ";
+  if (hour < 12) {
+    greetingTimeEn = "Good morning";
+    greetingTimeMr = "शुभ सकाळ";
+  } else if (hour < 17) {
+    greetingTimeEn = "Good afternoon";
+    greetingTimeMr = "शुभ दुपार";
+  }
   
+  const userName = (state.user && state.user.displayName) ? state.user.displayName : "Shalom";
   const userEl = document.getElementById("home-greeting-user");
-  if (userEl) userEl.textContent = greeting;
+  if (userEl) {
+    userEl.textContent = `${greetingTimeEn}, ${userName} 🕊️`;
+  }
   
   const { vod, dayOfYear, offset } = getCurrentVOD();
   const displayRef = (state.translation === "eng") ? vod.engRef : vod.ref;
   const displayText = (state.translation === "eng") ? vod.engText : vod.text;
   
-  document.getElementById("home-vod-ref").textContent = `${displayRef} ${state.translation === "eng" ? "NLT" : "MARVBSI"}`;
-  document.getElementById("home-vod-text").textContent = `"${displayText}"`;
+  const homeVodRefEl = document.getElementById("home-vod-ref");
+  if (homeVodRefEl) homeVodRefEl.textContent = `${displayRef} ${state.translation === "eng" ? "NLT" : "MARVBSI"}`;
   
-  document.getElementById("fs-vod-ref").textContent = `${displayRef} ${state.translation === "eng" ? "NLT" : "MARVBSI"}`;
-  document.getElementById("fs-vod-text").textContent = `"${displayText}"`;
+  const homeVodTextEl = document.getElementById("home-vod-text");
+  if (homeVodTextEl) homeVodTextEl.textContent = `"${displayText}"`;
   
-  // Rotate backgrounds daily
-  const images = ['forest', 'mountains', 'sunrise', 'ocean', 'stars', 'mist', 'path'];
+  const fsVodRefEl = document.getElementById("fs-vod-ref");
+  if (fsVodRefEl) fsVodRefEl.textContent = `${displayRef} ${state.translation === "eng" ? "NLT" : "MARVBSI"}`;
+  
+  const fsVodTextEl = document.getElementById("fs-vod-text");
+  if (fsVodTextEl) fsVodTextEl.textContent = `"${displayText}"`;
+  
+  // Expanded 17+ Beautiful Rotating Background Wallpapers
+  const images = [
+    'river_of_life', 'golden_dawn', 'peaceful_pastures', 'calm_waters', 
+    'mount_zion', 'healing_light', 'candlelight', 'peace_anxiety', 
+    'family_blessing', 'wisdom_guidance', 'forest', 'mist', 
+    'mountains', 'ocean', 'path', 'stars', 'sunrise'
+  ];
   const imgIdx = ((dayOfYear + offset) % images.length + images.length) % images.length;
   const dailyImg = images[imgIdx];
   
   const bgEl = document.querySelector(".daily-verse-card-bg") || document.querySelector(".vod-image-background");
-  if (bgEl) bgEl.style.backgroundImage = `url('./assets/images/${dailyImg}.png')`;
+  if (bgEl) bgEl.style.backgroundImage = `url('assets/images/${dailyImg}.png')`;
 
   const fsCapsule = document.querySelector(".fullscreen-vod-capsule");
-  if (fsCapsule) fsCapsule.style.backgroundImage = `url('./assets/images/${dailyImg}.png')`;
+  if (fsCapsule) fsCapsule.style.backgroundImage = `url('assets/images/${dailyImg}.png')`;
   
   // Heart count like sync
   const hasLiked = state.userLikes[vod.ref] || false;
   const heart = document.getElementById("fs-like-heart");
-  if (hasLiked) {
-    heart.setAttribute("fill", "#f87171");
-    heart.style.color = "#f87171";
-    document.getElementById("fs-like-count").textContent = "12.6L+1";
-  } else {
-    heart.setAttribute("fill", "none");
-    heart.style.color = "#ffffff";
-    document.getElementById("fs-like-count").textContent = "12.6L";
+  if (heart) {
+    if (hasLiked) {
+      heart.setAttribute("fill", "#f87171");
+      heart.style.color = "#f87171";
+      const fsCount = document.getElementById("fs-like-count");
+      if (fsCount) fsCount.textContent = "12.6K+1";
+    } else {
+      heart.setAttribute("fill", "none");
+      heart.style.color = "#ffffff";
+      const fsCount = document.getElementById("fs-like-count");
+      if (fsCount) fsCount.textContent = "12.6K";
+    }
   }
 
-  // Update dynamic VOD title labels based on offset (yesterday, etc.)
+  const homeHeart = document.getElementById("home-vod-heart-icon");
+  const homeLikesCount = document.getElementById("home-vod-likes-count");
+  if (homeHeart && homeLikesCount) {
+    if (hasLiked) {
+      homeHeart.setAttribute("fill", "#f87171");
+      homeLikesCount.textContent = "12.6K+1";
+    } else {
+      homeHeart.setAttribute("fill", "currentColor");
+      homeLikesCount.textContent = "12.6K";
+    }
+  }
+
+  // Update dynamic VOD title labels based on offset
   const homeTabPills = document.querySelectorAll(".daily-verse-card .tab-pill");
   const fsLabel = document.querySelector("#modal-fullscreen-vod .fs-card-label");
   
-  let labelTextHome = "✉ DAILY BIBLE VERSE";
-  let labelTextFs = "Verse of the Day";
+  let offsetLabelEn = "DAILY BIBLE VERSE";
+  let fsBadgeEn = "VERSE OF THE DAY";
   
   if (offset === -1) {
-    labelTextHome = "✉ YESTERDAY'S BIBLE VERSE";
-    labelTextFs = "Yesterday's Verse";
+    offsetLabelEn = "YESTERDAY'S VERSE";
+    fsBadgeEn = "YESTERDAY'S VERSE";
+  } else if (offset === 1) {
+    offsetLabelEn = "TOMORROW'S VERSE";
+    fsBadgeEn = "TOMORROW'S VERSE";
   } else if (offset < -1) {
-    labelTextHome = `✉ ${Math.abs(offset)} DAYS AGO`;
-    labelTextFs = `${Math.abs(offset)} Days Ago`;
+    offsetLabelEn = `${Math.abs(offset)} DAYS AGO`;
+    fsBadgeEn = `${Math.abs(offset)} DAYS AGO`;
+  } else if (offset > 1) {
+    offsetLabelEn = `IN ${offset} DAYS`;
+    fsBadgeEn = `IN ${offset} DAYS`;
   }
-  
-  if (homeTabPills.length > 0) {
-    homeTabPills[0].textContent = labelTextHome;
+
+  if (homeTabPills && homeTabPills[0]) {
+    homeTabPills[0].textContent = offsetLabelEn;
   }
   if (fsLabel) {
-    fsLabel.textContent = labelTextFs;
+    fsLabel.textContent = fsBadgeEn;
   }
-  
-  // Update disabled states of VOD nav buttons
-  const btnPrev = document.getElementById("btn-vod-prev");
-  const btnNext = document.getElementById("btn-vod-next");
-  const btnFsPrev = document.getElementById("btn-fs-vod-prev");
-  const btnFsNext = document.getElementById("btn-fs-vod-next");
-  
-  const disablePrev = offset <= -6; // allow 7 days history total (0, -1, -2, -3, -4, -5, -6)
-  const disableNext = offset >= 0;
-  
-  if (btnPrev) btnPrev.disabled = disablePrev;
-  if (btnNext) btnNext.disabled = disableNext;
-  if (btnFsPrev) btnFsPrev.disabled = disablePrev;
-  if (btnFsNext) btnFsNext.disabled = disableNext;
 }
 
 function toggleLikeVOD() {
@@ -2150,7 +2181,7 @@ function startSpeechNarration() {
   const isDevanagari = (state.translation !== "eng");
   const langCode = isDevanagari ? "mr-IN" : "en-IN";
   const voiceSelect = document.getElementById("reader-inline-voice-select") || document.getElementById("audio-narrator-gender-select");
-  const selectedVoiceId = (state.sarvamVoice || (voiceSelect ? voiceSelect.value : "ratan") || "ratan").toLowerCase();
+  const selectedVoiceId = (state.sarvamVoice || (voiceSelect ? voiceSelect.value : "shubh") || "shubh").toLowerCase();
 
   if (window.SarvamTTS && window.SarvamTTS.queue) {
     window.SarvamTTS.queue.setListeners({
@@ -2482,14 +2513,14 @@ function initAudioVoices() {
   const playbarVoiceBtn = document.getElementById("playbar-btn-voice-select");
   
   const sarvamVoices = [
+    { value: "shubh", label: "🕊️ Shubh (Marathi & Hindi Male - Devotional & Peaceful)", lang: "mr-IN" },
     { value: "ratan", label: "🧔 Ratan (Marathi & English Male - Calm & Devotional)", lang: "mr-IN" },
-    { value: "shubh", label: "🕊️ Shubh (Hindi & Marathi Male - Devotional)", lang: "hi-IN" },
     { value: "aditya", label: "🎙️ Aditya (Deep & Warm Male)", lang: "en-IN" },
     { value: "aravind", label: "📖 Aravind (Gentle Voice Male)", lang: "en-IN" },
     { value: "priya", label: "👩 Priya (Warm & Soft Female)", lang: "en-IN" }
   ];
 
-  const currentVoice = state.sarvamVoice || "ratan";
+  const currentVoice = state.sarvamVoice || "shubh";
   state.sarvamVoice = currentVoice;
 
   if (select) {
@@ -5176,144 +5207,1060 @@ function toggleVoiceDropdownVisibility() {
   }
 }
 
-const QUIZ_QUESTIONS = [
-  {
-    qMr: "नोहाच्या पुरादरम्यान किती दिवस आणि रात्री पाऊस पडला?",
-    qEn: "How many days and nights did it rain during Noah's flood?",
-    choices: [
-      { textMr: "४० दिवस आणि ४० रात्री", textEn: "40 Days and 40 Nights", correct: true },
-      { textMr: "३० दिवस आणि ३० रात्री", textEn: "30 Days and 30 Nights", correct: false },
-      { textMr: "७ दिवस आणि ७ रात्री", textEn: "7 Days and 7 Nights", correct: false },
-      { textMr: "५० दिवस आणि ५० रात्री", textEn: "50 Days and 50 Nights", correct: false }
+/* ==========================================================================
+   READY-MADE PRAYER TOPICS DATA & IMMERSIVE PRAYER MODAL
+   ========================================================================== */
+
+const PRAYER_TOPICS_DATA = {
+  "wedding_cana": {
+    id: "wedding_cana",
+    categoryMr: "दैवी चमत्कार व पुरवठा",
+    categoryEn: "MIRACLE & DIVINE PROVISION",
+    titleMr: "पाण्याचे द्राक्षारसात रूपांतर",
+    titleEn: "Water Turned into Wine • Abundance in Scarcity",
+    bgImage: "assets/images/wedding_cana_v425.png",
+    refMr: "योहान २:१-११ (John 2:1-11)",
+    refEn: "John 2:1-11",
+    verseMr: "येशूने आपल्या चिन्हांचा हा आरंभ गालीलातील काना येथे केला आणि आपले सामर्थ्य प्रकट केले, आणि त्याच्या शिष्यांनी त्याच्यावर विश्वास ठेवला.",
+    verseEn: "This beginning of signs Jesus did in Cana of Galilee, and manifested His glory; and His disciples believed in Him.",
+    prayerMr: `हे स्वर्गीय पित्या व दयाळू प्रभू येशू,
+
+कानामधील लग्नाच्या प्रसंगी जेव्हा द्राक्षारसाची कमतरता पडली, तेव्हा तू साध्या पाण्याचे रूपांतर उत्कृष्ट द्राक्षारसात करून आपली दैवी कृपा व सामर्थ्य प्रकट केलेस.
+
+प्रभू, आज माझ्या जीवनात जिथे जिथे कमतरता, निराशा किंवा अपुरेपण आहे, तिथे तुझा अद्भुत चमत्कार घडू दे. माझ्या आर्थिक, आत्मिक आणि कौटुंबिक गरजांमध्ये तुझा विपुल पुरवठा येऊ दे.
+
+जसे मरीयेने सेवकांना सांगितले, "तो तुम्हाला जे सांगेल ते करा", तसेच मलाही तुझ्या वचनांचे पूर्ण आज्ञापालन करण्याचे मन दे. माझ्या संकटांचे रूपांतर आनंदाच्या उत्सवात कर.
+
+प्रभू येशूच्या सामर्थ्यशाली नावात ही प्रार्थना करतो,
+आमेन. 🙏`,
+    prayerEn: `Heavenly Father and Lord Jesus,
+
+At the wedding in Cana, when the wine ran out and human resources failed, You stepped in and turned ordinary water into the sweetest, finest wine—revealing Your divine glory and boundless grace.
+
+Lord, in every area of my life where I face lack, exhaustion, or shortage today, I invite Your miraculous presence. Transform my ordinary moments into extraordinary testimonies of Your provision.
+
+Teach me to obey whatever You say to me, trusting that You always save the best for last. Turn my mourning into dancing and my scarcity into abundance.
+
+In the mighty and precious name of Jesus Christ, I pray,
+Amen. 🙏`,
+    amenCount: 154
+  },
+  "peace_anxiety": {
+    id: "peace_anxiety",
+    categoryMr: "चिंतेतून मुक्ती आणि शांती",
+    categoryEn: "PEACE OVER ANXIETY & FEAR",
+    titleMr: "चिंतेतून मुक्ती आणि दैवी शांती",
+    titleEn: "Peace Over Anxiety & Worry",
+    bgImage: "assets/images/peace_anxiety.png",
+    refMr: "फिलिप्पैकरांस ४:६-७ (Philippians 4:6-7)",
+    refEn: "Philippians 4:6-7",
+    verseMr: "कशाविषयीही चिंता करू नका, तर सर्व गोष्टींत प्रार्थना व याचना करून उपकारस्तुतीसह आपली मागणी देवाला कळवा. म्हणजे सर्व बुद्धीच्या पलीकडची देवाची शांती तुमच्या हृदयांचे आणि मनांचे रक्षण करील.",
+    verseEn: "Do not be anxious about anything, but in every situation, by prayer and petition, with thanksgiving, present your requests to God. And the peace of God, which transcends all understanding, will guard your hearts and your minds.",
+    prayerMr: `हे शांतीच्या अधिपती प्रभू,
+
+आज माझे मन अनेक चिंतांनी, भविष्याच्या काळजीने आणि भीतींनी व्याकुळ झाले आहे. परंतु तुझे वचन मला सांगते की कशाविषयीही चिंता करू नको.
+
+मी माझी प्रत्येक काळजी, समस्या आणि भीती तुझ्या चरणी सोपवतो. सर्व बुद्धीच्या पलीकडची तुझी स्वर्गीय शांती माझ्या मनावर आणि हृदयावर पहारा करो. 
+
+माझ्या मनात चाललेले वादळ शांत कर आणि मला आठवण करून दे की तू सर्व गोष्टींवर नियंत्रण ठेवणारा जिवंत देव आहेस.
+
+येशूच्या नावात, आमेन. 🙏`,
+    prayerEn: `Lord Jesus, Prince of Peace,
+
+Today my heart feels heavy with anxious thoughts, deadlines, and uncertainties about the future. Yet Your Word gently reminds me to cast all my anxieties upon You because You care for me.
+
+I surrender every fear, doubt, and worry into Your capable hands right now. Let Your transcendent peace—which surpasses all human understanding—guard my mind, emotions, and thoughts.
+
+Quiet the storm within my soul and anchor my spirit in Your unwavering love and sovereign control.
+
+In Jesus' name, Amen. 🙏`,
+    amenCount: 238
+  },
+  "morning_grace": {
+    id: "morning_grace",
+    categoryMr: "सकाळची कृपा व संरक्षण",
+    categoryEn: "MORNING GRACE & PROTECTION",
+    titleMr: "सकाळची कृपा व दैवी संरक्षण",
+    titleEn: "Morning Grace & Divine Protection",
+    bgImage: "assets/images/golden_dawn.png",
+    refMr: "स्तोत्रसंहिता ९१:१-४ (Psalm 91:1-4)",
+    refEn: "Psalm 91:1-4",
+    verseMr: "जो परात्पराच्या गुप्त स्थानी राहतो, तो सर्वसमर्थाच्या सावलीत विसावा पावेल. तो आपल्या पंखांनी तुला झाकून घेईल, आणि त्याच्या पंखांखाली तुला आश्रय मिळेल.",
+    verseEn: "Whoever dwells in the shelter of the Most High will rest in the shadow of the Almighty. He will cover you with his feathers, and under his wings you will find refuge.",
+    prayerMr: `सर्वसमर्थ पित्या,
+
+या सुंदर सकाळच्या नवीन दिवसासाठी तुझे कोटी कोटी धन्यवाद. आजचा दिवस माझ्यासाठी तुझी नवीन दया आणि कृपा घेऊन आला आहे.
+
+मी आज घराबाहेर पडताना तुझे देवदूत माझ्या सर्व मार्गांत माझे आणि माझ्या कुटुंबाचे रक्षण करोत. सर्व वाईट, आजारपण आणि अपघातांपासून आम्हाला दूर ठेव.
+
+आज माझ्या हातून होणारे प्रत्येक काम, बोललेले प्रत्येक शब्द तुझ्या नावाचा गौरव करोत. मला पवित्र आत्म्याचे सामर्थ्य आणि मार्गदर्शन लाभू दे.
+
+येशूच्या नावात, आमेन. 🙏`,
+    prayerEn: `Almighty Father,
+
+Thank You for the gift of this brand new morning and for the breath of life in my lungs. Your compassions never fail; they are new every single morning.
+
+As I step into this day, I place myself, my family, and my loved ones under the shadow of Your wings. Grant Your angels charge over us to keep us safe in all our ways.
+
+Guide my steps, purify my thoughts, and let every conversation and task today reflect Your light, integrity, and love.
+
+In Jesus' name, Amen. 🙏`,
+    amenCount: 312
+  },
+  "healing_restoration": {
+    id: "healing_restoration",
+    categoryMr: "आरोग्य आणि दैवी चंगाई",
+    categoryEn: "DIVINE HEALING & RESTORATION",
+    titleMr: "आरोग्य आणि दैवी चंगाई",
+    titleEn: "Divine Healing & Wholeness",
+    bgImage: "assets/images/healing_light.png",
+    refMr: "यशया ५३:५ (Isaiah 53:5)",
+    refEn: "Isaiah 53:5",
+    verseMr: "तो आपल्या उल्लंघनांमुळे घायाळ झाला, आपल्या अन्यायांमुळे चिरडला गेला; आपल्या शांतीसाठी त्याच्यावर शासन झाले, आणि त्याच्या फटक्यांनी आपल्याला आरोग्य मिळाले आहे.",
+    verseEn: "He was pierced for our transgressions, he was crushed for our iniquities; the punishment that brought us peace was on him, and by his wounds we are healed.",
+    prayerMr: `हे महान वैद्य आणि चंगाई देणाऱ्या प्रभू,
+
+तुझ्या फटक्यांनी आम्हाला आरोग्य मिळाले आहे हा विश्वास मी आज जाहीर करतो. माझ्या शरीरातील, मनातील आणि आत्म्यातील सर्व वेदना, अशक्तपणा आणि आजारपणावर तुझा हात ठेव.
+
+तुझे जिवंत रक्त आणि चंगाईचे सामर्थ्य माझ्या शरीरातील प्रत्येक पेशीमध्ये, नसांमध्ये वाहू दे. सर्व रोगराई येशूच्या नावात नष्ट होवो.
+
+माझ्या शरीराला पूर्ण शक्ती, आरोग्य आणि दीर्घायुष्य लाभू दे.
+
+येशू ख्रिस्ताच्या सामर्थ्यशाली नावात, आमेन. 🙏`,
+    prayerEn: `Lord Jesus, the Great Physician,
+
+You took our infirmities and carried our diseases upon the cross. By Your stripes, we are healed, restored, and made whole.
+
+I speak Your healing life into every cell, tissue, organ, and nerve of my body right now. Remove all sickness, pain, infection, and fatigue in Jesus' name.
+
+Breathe new vitality, strength, and immune resilience into my being, and restore me to perfect health for Your glory.
+
+In the mighty name of Jesus Christ, Amen. 🙏`,
+    amenCount: 289
+  },
+  "family_blessing": {
+    id: "family_blessing",
+    categoryMr: "कुटुंब आशीर्वाद व एकता",
+    categoryEn: "FAMILY BLESSING & UNITY",
+    titleMr: "कुटुंब आशीर्वाद व एकता",
+    titleEn: "Family Blessing & Harmony",
+    bgImage: "assets/images/family_blessing.png",
+    refMr: "यहोशवा २४:१५ (Joshua 24:15)",
+    refEn: "Joshua 24:15",
+    verseMr: "मी आणि माझे घराणे तर परमेश्वराचीच सेवा करू.",
+    verseEn: "As for me and my house, we will serve the Lord.",
+    prayerMr: `हे कुटुंबांचा निर्माणकर्ता देवा,
+
+माझ्या कुटुंबावर तुझा स्वर्गीय आशीर्वाद ओत. आमच्या घरात प्रेम, क्षमा, समजूतदारपणा आणि शांततेची स्थापना कर. सर्व मतभेद आणि कटुता येशूच्या नावात निघून जावो.
+
+माझ्या मुलांचे, पालकांचे आणि जीवनसाथीचे रक्षण कर. ते सर्व तुझ्या वचनात आणि विश्वासात वाढोत. आमच्या घरामध्ये तुझ्या स्तुतीचा आणि प्रार्थनेचा आवाज निरंतर राहो.
+
+येशूच्या नावात, आमेन. 🙏`,
+    prayerEn: `Gracious God, Creator of Families,
+
+I dedicate my home and family into Your sacred care. Establish our household upon the solid rock of Your Word, where love, patience, forgiveness, and mutual honor reign.
+
+Protect my children, my spouse, and my parents from the temptations and harms of this world. Draw each heart closer to You in personal faith.
+
+Let our home be an oasis of joy, hospitaliy, and light in our community.
+
+In Jesus' name, Amen. 🙏`,
+    amenCount: 195
+  },
+  "strength_trials": {
+    id: "strength_trials",
+    categoryMr: "कठीण प्रसंगी सामर्थ्य व धीर",
+    categoryEn: "STRENGTH IN HARD TIMES",
+    titleMr: "कठीण प्रसंगी सामर्थ्य व धीर",
+    titleEn: "Strength in Trials & Difficulties",
+    bgImage: "assets/images/mount_zion.png",
+    refMr: "यशया ४०:२९-३१ (Isaiah 40:29-31)",
+    refEn: "Isaiah 40:29-31",
+    verseMr: "तो थकलेल्याला सामर्थ्य देतो आणि अशक्त असलेल्याचे बळ वाढवतो. जे परमेश्वराची वाट पाहतात ते नवीन सामर्थ्य प्राप्त करतील; ते गरुडासारखे पंख पसरून उंच उडतील.",
+    verseEn: "He gives strength to the weary and increases the power of the weak. Those who hope in the Lord will renew their strength. They will soar on wings like eagles.",
+    prayerMr: `हे माझ्या सामर्थ्याच्या खडका,
+
+जेव्हा माझे स्वतःचे बळ संपून जाते, तेव्हा तू माझे सामर्थ्य बनतोस. या कठीण परिस्थितीमध्ये मला धीर आणि टिकून राहण्याचे बळ दे.
+
+मला आठवण करून दे की हे संकट तात्पुरते आहे, परंतु तुझा विजय सार्वकालिक आहे. मी गरुडासारखा पंख लावून या संकटावर मात करेन, कारण तू माझ्याबरोबर आहेस.
+
+येशूच्या नावात, आमेन. 🙏`,
+    prayerEn: `Lord, my Strong Tower and Refuge,
+
+When my own strength is exhausted and the road ahead feels steep, You are my unshakable fortress. Renew my vigor, clarity, and determination today.
+
+Help me to keep my eyes fixed on You rather than the waves around me. Grant me supernatural perseverance to run this race without growing weary.
+
+By Your mighty Spirit, I will rise above this trial like an eagle soaring on the wind.
+
+In Jesus' name, Amen. 🙏`,
+    amenCount: 220
+  },
+  "wisdom_guidance": {
+    id: "wisdom_guidance",
+    categoryMr: "ज्ञानासाठी व नोकरी-व्यवसाय मार्गदर्शन",
+    categoryEn: "WISDOM & CAREER GUIDANCE",
+    titleMr: "ज्ञानासाठी व नोकरी-व्यवसाय मार्गदर्शन",
+    titleEn: "Wisdom & Career Guidance",
+    bgImage: "assets/images/wisdom_guidance.png",
+    refMr: "याकोब १:५ & नीतिसूत्रे ३:५-६",
+    refEn: "James 1:5 & Proverbs 3:5-6",
+    verseMr: "जर तुम्हामधील कोणाला ज्ञानाची उणीव असेल, तर त्याने ते देवाजवळ मागावे, म्हणजे ते त्याला दिले जाईल; कारण देव सर्वांना उदारपणे आणि दोष न लावता देतो.",
+    verseEn: "If any of you lacks wisdom, you should ask God, who gives generously to all without finding fault, and it will be given to you.",
+    prayerMr: `हे सर्वज्ञानी देवा,
+
+माझ्या जीवनातील प्रत्येक निर्णयासाठी, माझ्या नोकरी, व्यवसाय आणि शिक्षणासाठी मला स्वर्गीय बुद्धी आणि विवेक दे.
+
+माझ्या पुढील मार्गावर प्रकाश टाक आणि चुकीच्या निर्णयांपासून मला वाचव. माझ्या हातांच्या कष्टाला यश आणि आशीर्वाद दे. मला प्रामाणिकपणाने आणि उत्कृष्टतेने कार्य करण्याचे मन दे.
+
+येशूच्या नावात, आमेन. 🙏`,
+    prayerEn: `Omniscient God and Wise Counselor,
+
+I acknowledge that human wisdom is limited, but Your understanding is infinite. Grant me divine discernment, creativity, and wisdom for my career, education, and pivotal life decisions.
+
+Open doors of opportunity that no one can shut, and close every door that would lead me away from Your purpose. Bless the work of my hands and let me find favor with leaders and colleagues.
+
+In Jesus' name, Amen. 🙏`,
+    amenCount: 178
+  },
+  "evening_rest": {
+    id: "evening_rest",
+    categoryMr: "रात्रीची उपकारस्तुती व शांत झोप",
+    categoryEn: "EVENING THANKSGIVING & REST",
+    titleMr: "रात्रीची उपकारस्तुती व शांत झोप",
+    titleEn: "Evening Thanksgiving & Restful Sleep",
+    bgImage: "assets/images/candlelight.png",
+    refMr: "स्तोत्रसंहिता ४:८ (Psalm 4:8)",
+    refEn: "Psalm 4:8",
+    verseMr: "मी शांततेने निजेन आणि मला लगेच झोप लागेल; कारण हे परमेश्वरा, केवळ तूच मला सुरक्षिततेमध्ये ठेवतोस.",
+    verseEn: "In peace I will lie down and sleep, for you alone, Lord, make me dwell in safety.",
+    prayerMr: `हे कृपाळू पित्या,
+
+आजच्या संपूर्ण दिवसातील तुझ्या संरक्षणासाठी आणि आशीर्वादांसाठी तुझे आभार मानतो. दिवसभरात कळत-नकळत घडलेल्या सर्व चुकांची क्षमा कर.
+
+रात्रीच्या वेळी सर्व ताणतणाव आणि विचार तुझ्या हातात सोपवून मी शांत झोप घेतो. माझ्या घराभोवती तुझ्या देवदूतांचा पहारा असू दे. मला गाढ, विश्रांतीपूर्ण झोप लाभू दे.
+
+येशूच्या नावात, आमेन. 🙏`,
+    prayerEn: `Father of Mercies,
+
+As the quiet of the night settles in, I look back on today with a grateful heart. Thank You for sustaining me, forgiving my shortcomings, and keeping me safe.
+
+I release every unfinished task, every heavy conversation, and every burden of tomorrow into Your hands. Wrap my mind in peaceful rest and grant me deep, rejuvenating sleep.
+
+Let Your angels stand guard over my household throughout the night.
+
+In Jesus' name, Amen. 🙏`,
+    amenCount: 264
+  }
+};
+
+let activePrayerTopicId = "wedding_cana";
+let activePrayerLang = "mr";
+let isPrayerAudioPlaying = false;
+let prayerUtterance = null;
+
+function openImmersivePrayerModal(topicId) {
+  const data = PRAYER_TOPICS_DATA[topicId] || PRAYER_TOPICS_DATA["wedding_cana"];
+  activePrayerTopicId = data.id;
+  activePrayerLang = (state.translation === "eng") ? "en" : "mr";
+  
+  const modal = document.getElementById("modal-immersive-prayer");
+  if (!modal) return;
+  
+  // Hero Background
+  const heroBg = document.getElementById("prayer-modal-hero-bg");
+  if (heroBg) {
+    heroBg.style.backgroundImage = `url('${data.bgImage}')`;
+  }
+  
+  // Category & Titles
+  const catEl = document.getElementById("prayer-modal-category");
+  if (catEl) catEl.textContent = (activePrayerLang === "en") ? data.categoryEn : data.categoryMr;
+  
+  const titleEl = document.getElementById("prayer-modal-heading");
+  if (titleEl) titleEl.textContent = (activePrayerLang === "en") ? data.titleEn : data.titleMr;
+  
+  const subEl = document.getElementById("prayer-modal-subtitle");
+  if (subEl) subEl.textContent = (activePrayerLang === "en") ? data.categoryEn : data.titleEn;
+  
+  // Scripture Box
+  const refEl = document.getElementById("prayer-modal-scripture-ref");
+  if (refEl) refEl.textContent = (activePrayerLang === "en") ? data.refEn : data.refMr;
+  
+  const verseEl = document.getElementById("prayer-modal-scripture-text");
+  if (verseEl) verseEl.textContent = `"${(activePrayerLang === "en") ? data.verseEn : data.verseMr}"`;
+  
+  // Prayer Text
+  const textEl = document.getElementById("prayer-modal-text-content");
+  if (textEl) textEl.textContent = (activePrayerLang === "en") ? data.prayerEn : data.prayerMr;
+  
+  // Update Lang Tabs UI
+  const tabMr = document.getElementById("btn-prayer-lang-mr");
+  const tabEn = document.getElementById("btn-prayer-lang-en");
+  if (tabMr && tabEn) {
+    if (activePrayerLang === "en") {
+      tabMr.classList.remove("active");
+      tabEn.classList.add("active");
+    } else {
+      tabMr.classList.add("active");
+      tabEn.classList.remove("active");
+    }
+  }
+  
+  // Amen Count
+  const amenEl = document.getElementById("prayer-amen-count");
+  if (amenEl) amenEl.textContent = `Amen (${data.amenCount})`;
+  
+  // Reset audio button
+  const audioBtn = document.getElementById("prayer-audio-label");
+  if (audioBtn) audioBtn.textContent = "Listen / ऐका";
+  isPrayerAudioPlaying = false;
+  
+  modal.style.display = "flex";
+  setTimeout(() => modal.classList.add("active"), 10);
+}
+
+function closeImmersivePrayerModal() {
+  const modal = document.getElementById("modal-immersive-prayer");
+  if (modal) {
+    modal.classList.remove("active");
+    setTimeout(() => modal.style.display = "none", 300);
+  }
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+  }
+  isPrayerAudioPlaying = false;
+}
+
+function switchPrayerLang(lang) {
+  activePrayerLang = lang;
+  const data = PRAYER_TOPICS_DATA[activePrayerTopicId];
+  if (!data) return;
+  
+  const catEl = document.getElementById("prayer-modal-category");
+  if (catEl) catEl.textContent = (lang === "en") ? data.categoryEn : data.categoryMr;
+  
+  const titleEl = document.getElementById("prayer-modal-heading");
+  if (titleEl) titleEl.textContent = (lang === "en") ? data.titleEn : data.titleMr;
+  
+  const refEl = document.getElementById("prayer-modal-scripture-ref");
+  if (refEl) refEl.textContent = (lang === "en") ? data.refEn : data.refMr;
+  
+  const verseEl = document.getElementById("prayer-modal-scripture-text");
+  if (verseEl) verseEl.textContent = `"${(lang === "en") ? data.verseEn : data.verseMr}"`;
+  
+  const textEl = document.getElementById("prayer-modal-text-content");
+  if (textEl) textEl.textContent = (lang === "en") ? data.prayerEn : data.prayerMr;
+  
+  const tabMr = document.getElementById("btn-prayer-lang-mr");
+  const tabEn = document.getElementById("btn-prayer-lang-en");
+  if (tabMr && tabEn) {
+    if (lang === "en") {
+      tabMr.classList.remove("active");
+      tabEn.classList.add("active");
+    } else {
+      tabMr.classList.add("active");
+      tabEn.classList.remove("active");
+    }
+  }
+  
+  if (isPrayerAudioPlaying) {
+    togglePrayerAudio(); // stop and restart in new language
+    togglePrayerAudio();
+  }
+}
+
+function togglePrayerAudio() {
+  if (!('speechSynthesis' in window)) {
+    alert("Text-to-Speech is not supported on this browser.");
+    return;
+  }
+  
+  const labelEl = document.getElementById("prayer-audio-label");
+  
+  if (isPrayerAudioPlaying) {
+    window.speechSynthesis.cancel();
+    isPrayerAudioPlaying = false;
+    if (labelEl) labelEl.textContent = "Listen / ऐका";
+    return;
+  }
+  
+  const data = PRAYER_TOPICS_DATA[activePrayerTopicId];
+  if (!data) return;
+  
+  const prayerText = (activePrayerLang === "en") ? data.prayerEn : data.prayerMr;
+  const langCode = (activePrayerLang === "en") ? "en-US" : "mr-IN";
+  
+  window.speechSynthesis.cancel();
+  prayerUtterance = new SpeechSynthesisUtterance(prayerText);
+  prayerUtterance.lang = langCode;
+  prayerUtterance.rate = 0.92;
+  
+  prayerUtterance.onend = () => {
+    isPrayerAudioPlaying = false;
+    if (labelEl) labelEl.textContent = "Listen / ऐका";
+  };
+  
+  prayerUtterance.onerror = () => {
+    isPrayerAudioPlaying = false;
+    if (labelEl) labelEl.textContent = "Listen / ऐका";
+  };
+  
+  window.speechSynthesis.speak(prayerUtterance);
+  isPrayerAudioPlaying = true;
+  if (labelEl) labelEl.textContent = "Pause / थांबवा ⏸";
+}
+
+function sharePrayerWhatsApp() {
+  const data = PRAYER_TOPICS_DATA[activePrayerTopicId];
+  if (!data) return;
+  
+  const text = `🕊️ *River of Life Prayer* / *प्रार्थना*
+
+📌 *${data.titleMr}* (${data.titleEn})
+📖 *${data.refMr}*
+
+"${data.verseMr}"
+
+🙏 *प्रार्थना:*
+${data.prayerMr}
+
+📲 *Download River of Life App & Pray Together!*`;
+  const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+  window.open(url, "_blank");
+}
+
+function togglePrayerAmen() {
+  const data = PRAYER_TOPICS_DATA[activePrayerTopicId];
+  if (!data) return;
+  
+  data.amenCount += 1;
+  const amenEl = document.getElementById("prayer-amen-count");
+  if (amenEl) {
+    amenEl.textContent = `Amen (${data.amenCount}) ❤️`;
+    amenEl.style.color = "#e0535f";
+  }
+}
+
+// Make accessible on window
+window.openImmersivePrayerModal = openImmersivePrayerModal;
+window.closeImmersivePrayerModal = closeImmersivePrayerModal;
+window.switchPrayerLang = switchPrayerLang;
+window.togglePrayerAudio = togglePrayerAudio;
+window.sharePrayerWhatsApp = sharePrayerWhatsApp;
+window.togglePrayerAmen = togglePrayerAmen;
+
+
+/* ==========================================================================
+   BIBLE QUIZ MULTI-LEVEL ENGINE (4 DIFFICULTY LEVELS)
+   ========================================================================== */
+
+const QUIZ_LEVELS_DATA = {
+  1: {
+    levelId: 1,
+    nameMr: "नवशिक्या (सोपे)",
+    nameEn: "Beginner",
+    emoji: "🌱",
+    pointsPerQ: 10,
+    badgeId: "quiz_badge_novice",
+    badgeName: "Scripture Seedling",
+    badgeDesc: "Mastered Level 1 Foundation Bible Stories!",
+    questions: [
+      {
+        qMr: "नोहाच्या पुरादरम्यान किती दिवस आणि रात्री पाऊस पडला?",
+        qEn: "How many days and nights did it rain during Noah's flood?",
+        choices: [
+          { textMr: "४० दिवस आणि ४० रात्री", textEn: "40 Days and 40 Nights", correct: true },
+          { textMr: "३० दिवस आणि ३० रात्री", textEn: "30 Days and 30 Nights", correct: false },
+          { textMr: "७ दिवस आणि ७ रात्री", textEn: "7 Days and 7 Nights", correct: false },
+          { textMr: "५० दिवस आणि ५० रात्री", textEn: "50 Days and 50 Nights", correct: false }
+        ],
+        explMr: "उत्पत्ती ७:१२ नुसार, पृथ्वीवर चाळीस दिवस व चाळीस रात्री पाऊस पडत राहिला.",
+        explEn: "Genesis 7:12 - And rain fell on the earth forty days and forty nights.",
+        ref: "उत्पत्ती ७:१२ (Genesis 7:12)"
+      },
+      {
+        qMr: "देवाने हव्वा बनवण्यासाठी आदामाच्या शरीरातील कोणत्या भागाचा वापर केला?",
+        qEn: "What did God use from Adam's body to create Eve?",
+        choices: [
+          { textMr: "फासळी (Rib)", textEn: "A rib", correct: true },
+          { textMr: "धूळ (Dust)", textEn: "Dust", correct: false },
+          { textMr: "माती (Clay)", textEn: "Clay", correct: false },
+          { textMr: "हृदय (Heart)", textEn: "Heart", correct: false }
+        ],
+        explMr: "परमेश्वर देवाने आदामाची एक फासळी काढली आणि त्यातून स्त्री बनवली.",
+        explEn: "Genesis 2:22 - The Lord God made a woman from the rib he had taken out of the man.",
+        ref: "उत्पत्ती २:२२ (Genesis 2:22)"
+      },
+      {
+        qMr: "देवापासून पळून जाताना योनाला कोणत्या जीवाने गिळले?",
+        qEn: "What swallowed Jonah when he tried to run away from God?",
+        choices: [
+          { textMr: "मोठा मासा (Great Fish)", textEn: "A great fish", correct: true },
+          { textMr: "मगर (Crocodile)", textEn: "A crocodile", correct: false },
+          { textMr: "समुद्र सर्प (Sea Serpent)", textEn: "A sea serpent", correct: false },
+          { textMr: "शार्क (Shark)", textEn: "A shark", correct: false }
+        ],
+        explMr: "परमेश्वराने योनाला गिळण्यासाठी एक मोठा मासा तयार केला होता.",
+        explEn: "Jonah 1:17 - Now the Lord provided a huge fish to swallow Jonah.",
+        ref: "योना १:१७ (Jonah 1:17)"
+      },
+      {
+        qMr: "येशू ख्रिस्ताचा जन्म कोणत्या शहरात झाला?",
+        qEn: "In which town was Jesus Christ born?",
+        choices: [
+          { textMr: "बेथलेहेम (Bethlehem)", textEn: "Bethlehem", correct: true },
+          { textMr: "नाझरेथ (Nazareth)", textEn: "Nazareth", correct: false },
+          { textMr: "यरुशलेम (Jerusalem)", textEn: "Jerusalem", correct: false },
+          { textMr: "अलेक्झांड्रिया (Alexandria)", textEn: "Alexandria", correct: false }
+        ],
+        explMr: "मत्तय २:१ नुसार, येशूचा जन्म यहूदीयातील बेथलेहेम गावात झाला.",
+        explEn: "Matthew 2:1 - Jesus was born in Bethlehem in Judea.",
+        ref: "मत्तय २:१ (Matthew 2:1)"
+      },
+      {
+        qMr: "दाविदाने पराभूत केलेल्या पलिश्ती राक्षसाचे नाव काय होते?",
+        qEn: "What was the name of the Philistine giant defeated by David?",
+        choices: [
+          { textMr: "गोल्याथ (Goliath)", textEn: "Goliath", correct: true },
+          { textMr: "शमशोन (Samson)", textEn: "Samson", correct: false },
+          { textMr: "शौल (Saul)", textEn: "Saul", correct: false },
+          { textMr: "अबशालोम (Absalom)", textEn: "Absalom", correct: false }
+        ],
+        explMr: "दाविदाने गोफणीतील एका दगडाने गोल्याथ राक्षसाचा वध केला.",
+        explEn: "1 Samuel 17 - David defeated Goliath with a sling and a stone.",
+        ref: "१ शमुवेल १७:४९ (1 Samuel 17:49)"
+      },
+      {
+        qMr: "येशूने आपल्या सेवेसाठी किती मुख्य प्रेषित निवडले?",
+        qEn: "How many main apostles did Jesus choose?",
+        choices: [
+          { textMr: "१२ (12 Apostles)", textEn: "12 Apostles", correct: true },
+          { textMr: "१० (10)", textEn: "10", correct: false },
+          { textMr: "७ (7)", textEn: "7", correct: false },
+          { textMr: "१५ (15)", textEn: "15", correct: false }
+        ],
+        explMr: "येशूने बारा जणांना बोलावले आणि त्यांना प्रेषित असे नाव दिले.",
+        explEn: "Luke 6:13 - He called his disciples to him and chose twelve of them.",
+        ref: "लूक ६:१३ (Luke 6:13)"
+      },
+      {
+        qMr: "बायबलचे सर्वात पहिले पुस्तक कोणते आहे?",
+        qEn: "What is the very first book of the Bible?",
+        choices: [
+          { textMr: "उत्पत्ती (Genesis)", textEn: "Genesis", correct: true },
+          { textMr: "निर्गम (Exodus)", textEn: "Exodus", correct: false },
+          { textMr: "मत्तय (Matthew)", textEn: "Matthew", correct: false },
+          { textMr: "स्तोत्रसंहिता (Psalms)", textEn: "Psalms", correct: false }
+        ],
+        explMr: "उत्पत्ती हे बायबलमधील पहिले पुस्तक असून त्यात विश्वाची निर्मिती वर्णन केली आहे.",
+        explEn: "Genesis is the foundational first book of the Bible.",
+        ref: "उत्पत्ती १:१ (Genesis 1:1)"
+      },
+      {
+        qMr: "सीनाय पर्वतावर देवाने कोणाला दहा आज्ञा दिल्या?",
+        qEn: "Who received the Ten Commandments on Mount Sinai?",
+        choices: [
+          { textMr: "मोशे (Moses)", textEn: "Moses", correct: true },
+          { textMr: "अब्राहम (Abraham)", textEn: "Abraham", correct: false },
+          { textMr: "याकोब (Jacob)", textEn: "Jacob", correct: false },
+          { textMr: "यहोशवा (Joshua)", textEn: "Joshua", correct: false }
+        ],
+        explMr: "देवाने सीनाय पर्वतावर मोशेला दगडी पाट्यांवर दहा आज्ञा दिल्या.",
+        explEn: "Exodus 20 - God gave the Ten Commandments to Moses on Mount Sinai.",
+        ref: "निर्गम २० (Exodus 20)"
+      },
+      {
+        qMr: "येशूने कानामधील लग्नात पाण्याचे कशात रूपांतर केले?",
+        qEn: "What did Jesus turn water into at the wedding of Cana?",
+        choices: [
+          { textMr: "उत्कृष्ट द्राक्षारस (Fine Wine)", textEn: "Fine Wine", correct: true },
+          { textMr: "मध (Honey)", textEn: "Honey", correct: false },
+          { textMr: "दूध (Milk)", textEn: "Milk", correct: false },
+          { textMr: "तेल (Olive Oil)", textEn: "Olive Oil", correct: false }
+        ],
+        explMr: "येशूने पाण्याचे गोड आणि उत्तम द्राक्षारसात रूपांतर केले, जो त्याचा पहिला चमत्कार होता.",
+        explEn: "John 2:9 - The master of the banquet tasted the water that had been turned into wine.",
+        ref: "योहान २:९ (John 2:9)"
+      },
+      {
+        qMr: "देवाच्या वचनानुसार, विश्वासू अब्राहामाच्या मुलाचे नाव काय होते?",
+        qEn: "What was the name of Abraham's promised son with Sarah?",
+        choices: [
+          { textMr: "इसहाक (Isaac)", textEn: "Isaac", correct: true },
+          { textMr: "इश्माएल (Ishmael)", textEn: "Ishmael", correct: false },
+          { textMr: "एसाव (Esau)", textEn: "Esau", correct: false },
+          { textMr: "योसेफ (Joseph)", textEn: "Joseph", correct: false }
+        ],
+        explMr: "सारा गर्भवती झाली आणि तिने अब्राहामासाठी अभिवचनाचा मुलगा इसहाक याला जन्म दिला.",
+        explEn: "Genesis 21:3 - Abraham gave the name Isaac to the son Sarah bore him.",
+        ref: "उत्पत्ती २१:३ (Genesis 21:3)"
+      }
     ]
   },
-  {
-    qMr: "देवाने हव्वा बनवण्यासाठी आदामाच्या शरीरातील कोणत्या भागाचा वापर केला?",
-    qEn: "What did God use from Adam's body to create Eve?",
-    choices: [
-      { textMr: "फासळी (Rib)", textEn: "A rib", correct: true },
-      { textMr: "धूळ (Dust)", textEn: "Dust", correct: false },
-      { textMr: "माती (Clay)", textEn: "Clay", correct: false },
-      { textMr: "हृदय (Heart)", textEn: "Heart", correct: false }
+  2: {
+    levelId: 2,
+    nameMr: "शोधक (मध्यम)",
+    nameEn: "Intermediate",
+    emoji: "⚔️",
+    pointsPerQ: 20,
+    badgeId: "quiz_badge_seeker",
+    badgeName: "Scripture Seeker",
+    badgeDesc: "Mastered Level 2 Gospels, Miracles & Prophets!",
+    questions: [
+      {
+        qMr: "येशूने पाच हजार लोकांना खायला घालण्यासाठी किती भाकरी आणि माशांचा वापर केला?",
+        qEn: "How many loaves and fish did Jesus use to feed the 5,000?",
+        choices: [
+          { textMr: "५ भाकरी आणि २ मासे", textEn: "5 Loaves and 2 Fish", correct: true },
+          { textMr: "७ भाकरी आणि ३ मासे", textEn: "7 Loaves and 3 Fish", correct: false },
+          { textMr: "२ भाकरी आणि ५ मासे", textEn: "2 Loaves and 5 Fish", correct: false },
+          { textMr: "१२ भाकरी आणि २ मासे", textEn: "12 Loaves and 2 Fish", correct: false }
+        ],
+        explMr: "एका लहान मुलाच्या ५ सातूच्या भाकरी आणि २ लहान माशांवर येशूने आशीर्वाद मागितला.",
+        explEn: "John 6:9 - Here is a boy with five small barley loaves and two small fish.",
+        ref: "योहान ६:९ (John 6:9)"
+      },
+      {
+        qMr: "गव्हाऱ्यांच्या खड्ड्यात टाकूनही देवाच्या संरक्षणाने जिवंत राहिलेला संदेष्टा कोण?",
+        qEn: "Which prophet was thrown into the lion's den and preserved by God?",
+        choices: [
+          { textMr: "दानीएल (Daniel)", textEn: "Daniel", correct: true },
+          { textMr: "यिर्मया (Jeremiah)", textEn: "Jeremiah", correct: false },
+          { textMr: "यहेज्केल (Ezekiel)", textEn: "Ezekiel", correct: false },
+          { textMr: "एलिया (Elijah)", textEn: "Elijah", correct: false }
+        ],
+        explMr: "देवाने आपला दूत पाठवून सिंहांची तोंडे बंद केली आणि दानीएलाचे रक्षण केले.",
+        explEn: "Daniel 6:22 - My God sent his angel, and he shut the mouths of the lions.",
+        ref: "दानीएल ६:२२ (Daniel 6:22)"
+      },
+      {
+        qMr: "येशूच्या पुनरुत्थानानंतर त्याच्या जखमा पाहिल्याशिवाय विश्वास न ठेवणारा प्रेषित कोण?",
+        qEn: "Which disciple doubted Jesus' resurrection until he saw the wounds?",
+        choices: [
+          { textMr: "थोमा (Thomas)", textEn: "Thomas", correct: true },
+          { textMr: "पेत्र (Peter)", textEn: "Peter", correct: false },
+          { textMr: "अंद्रिया (Andrew)", textEn: "Andrew", correct: false },
+          { textMr: "फिलिप्प (Philip)", textEn: "Philip", correct: false }
+        ],
+        explMr: "थोमाने येशूला पाहून म्हटले, 'माझ्या प्रभू आणि माझ्या देवा!'",
+        explEn: "John 20:28 - Thomas said to him, 'My Lord and my God!'",
+        ref: "योहान २०:२८ (John 20:28)"
+      },
+      {
+        qMr: "कर्मेल पर्वतावर बआलाच्या ४५० संदेष्ट्यांपुढे स्वर्गातून अग्नी उतरवणारा संदेष्टा कोण?",
+        qEn: "Which prophet called down fire from heaven on Mount Carmel?",
+        choices: [
+          { textMr: "एलिया (Elijah)", textEn: "Elijah", correct: true },
+          { textMr: "इलीशा (Elisha)", textEn: "Elisha", correct: false },
+          { textMr: "शमुवेल (Samuel)", textEn: "Samuel", correct: false },
+          { textMr: "नाथानाएल (Nathan)", textEn: "Nathan", correct: false }
+        ],
+        explMr: "१ राजे १८:३८ नुसार, परमेश्वराचा अग्नी पडला आणि त्याने होमार्पण भस्म केले.",
+        explEn: "1 Kings 18:38 - Then the fire of the Lord fell and burned up the sacrifice.",
+        ref: "१ राजे १८:३८ (1 Kings 18:38)"
+      },
+      {
+        qMr: "येशूने कोणत्या मेलेल्या माणसाला चार दिवसांनंतर कबरेतून जिवंत केले?",
+        qEn: "Whom did Jesus raise from the dead after four days in the tomb?",
+        choices: [
+          { textMr: "लाजर (Lazarus)", textEn: "Lazarus", correct: true },
+          { textMr: "याईराची मुलगी (Jairus' Daughter)", textEn: "Jairus' Daughter", correct: false },
+          { textMr: "विधवेचा मुलगा (Widow's Son)", textEn: "Widow's Son", correct: false },
+          { textMr: "स्तीफन (Stephen)", textEn: "Stephen", correct: false }
+        ],
+        explMr: "येशूने मोठ्या आवाजात हाक मारली, 'लाजरा, बाहेर ये!' आणि मेलेला माणूस बाहेर आला.",
+        explEn: "John 11:43 - Jesus called in a loud voice, 'Lazarus, come out!'",
+        ref: "योहान ११:४३ (John 11:43)"
+      },
+      {
+        qMr: "राजा शलमोनाने देवाकडे सर्वात महत्त्वाची कोणती देणगी मागितली?",
+        qEn: "What did King Solomon ask God for when offered anything?",
+        choices: [
+          { textMr: "शहाणपण व विवेक (Wisdom & Discernment)", textEn: "Wisdom & Discernment", correct: true },
+          { textMr: "अफाट संपत्ती (Immense Wealth)", textEn: "Immense Wealth", correct: false },
+          { textMr: "शत्रूंचा पराभव (Defeat of Enemies)", textEn: "Defeat of Enemies", correct: false },
+          { textMr: "दीर्घायुष्य (Long Life)", textEn: "Long Life", correct: false }
+        ],
+        explMr: "शलमोनाने लोकांवर योग्य न्याय करण्यासाठी शहाणे अंतःकरण मागितले.",
+        explEn: "1 Kings 3:9 - Give your servant a discerning heart to govern your people.",
+        ref: "१ राजे ३:९ (1 Kings 3:9)"
+      },
+      {
+        qMr: "पेत्राने येशूला कोंबडा आरवण्यापूर्वी किती वेळा नाकारले?",
+        qEn: "How many times did Peter deny Jesus before the rooster crowed?",
+        choices: [
+          { textMr: "३ वेळा (3 Times)", textEn: "3 Times", correct: true },
+          { textMr: "२ वेळा (2 Times)", textEn: "2 Times", correct: false },
+          { textMr: "७ वेळा (7 Times)", textEn: "7 Times", correct: false },
+          { textMr: "१ वेळा (1 Time)", textEn: "1 Time", correct: false }
+        ],
+        explMr: "लूक २२:६१ नुसार, येशूचे भाकीत खरे ठरले आणि पेत्राने त्याला तीनदा नाकारले.",
+        explEn: "Luke 22:61 - Before the rooster crows today, you will disown me three times.",
+        ref: "लूक २२:६१ (Luke 22:61)"
+      },
+      {
+        qMr: "दमास्कसच्या वाटेवर कोणत्या संताचे अंधारात डोळे उघडले आणि रूपांतर झाले?",
+        qEn: "Who was converted on the road to Damascus after seeing a great light?",
+        choices: [
+          { textMr: "शौल / प्रेषित पौल (Saul / Apostle Paul)", textEn: "Saul / Apostle Paul", correct: true },
+          { textMr: "बर्णबा (Barnabas)", textEn: "Barnabas", correct: false },
+          { textMr: "मत्तय (Matthew)", textEn: "Matthew", correct: false },
+          { textMr: "लूक (Luke)", textEn: "Luke", correct: false }
+        ],
+        explMr: "प्रेषितांची कृत्ये ९ मध्ये शौलाचे डोळे उघडले आणि तो प्रेषित पौल बनला.",
+        explEn: "Acts 9 - Saul encountered Jesus and became the Apostle Paul.",
+        ref: "प्रेषितांची कृत्ये ९ (Acts 9)"
+      },
+      {
+        qMr: "येशूने स्वतः शिकवलेल्या प्रार्थनेची सुरुवात कशी होते?",
+        qEn: "How does the Lord's Prayer begin?",
+        choices: [
+          { textMr: "आमच्या स्वर्गातील पित्या (Our Father in Heaven)", textEn: "Our Father in Heaven", correct: true },
+          { textMr: "हे सर्वसमर्थ देवा (O Almighty God)", textEn: "O Almighty God", correct: false },
+          { textMr: "हे राजांच्या राजा (O King of Kings)", textEn: "O King of Kings", correct: false },
+          { textMr: "हे दयाळू प्रभू (O Merciful Lord)", textEn: "O Merciful Lord", correct: false }
+        ],
+        explMr: "मत्तय ६:९ - 'म्हणून तुम्ही अशी प्रार्थना करा: आमच्या स्वर्गातील पित्या, तुझे नाव पवित्र मानले जावो.'",
+        explEn: "Matthew 6:9 - Our Father in heaven, hallowed be your name.",
+        ref: "मत्तय ६:९ (Matthew 6:9)"
+      },
+      {
+        qMr: "बायबलमधील सर्वात मोठे अध्याय असलेले पुस्तक कोणते?",
+        qEn: "Which book contains the longest chapter in the Bible (Chapter 119)?",
+        choices: [
+          { textMr: "स्तोत्रसंहिता (Psalms)", textEn: "Psalms", correct: true },
+          { textMr: "यशया (Isaiah)", textEn: "Isaiah", correct: false },
+          { textMr: "उत्पत्ती (Genesis)", textEn: "Genesis", correct: false },
+          { textMr: "यिर्मया (Jeremiah)", textEn: "Jeremiah", correct: false }
+        ],
+        explMr: "स्तोत्र ११९ हे बायबलमधील सर्वात मोठे अध्याय असून त्यात १७६ वचने आहेत.",
+        explEn: "Psalm 119 is the longest chapter in the Bible with 176 verses.",
+        ref: "स्तोत्र ११९ (Psalm 119)"
+      }
     ]
   },
-  {
-    qMr: "देवापासून पळून जाताना योनाला कोणत्या जीवाने गिळले?",
-    qEn: "Who/What swallowed Jonah when he tried to run away from God?",
-    choices: [
-      { textMr: "मोठा मासा (Great Fish)", textEn: "A great fish", correct: true },
-      { textMr: "मगर (Crocodile)", textEn: "A crocodile", correct: false },
-      { textMr: "समुद्र सर्प (Sea Serpent)", textEn: "A sea serpent", correct: false },
-      { textMr: "शार्क (Shark)", textEn: "A shark", correct: false }
+  3: {
+    levelId: 3,
+    nameMr: "अभ्यासक (कठीण)",
+    nameEn: "Advanced",
+    emoji: "👑",
+    pointsPerQ: 30,
+    badgeId: "quiz_badge_scholar",
+    badgeName: "Bible Scholar",
+    badgeDesc: "Mastered Level 3 Epistles, Prophecy & Covenants!",
+    questions: [
+      {
+        qMr: "पवित्र आत्म्याची ९ फळे (Fruits of the Spirit) पौलाच्या कोणत्या पत्रात सूचीबद्ध आहेत?",
+        qEn: "In which Epistle are the 9 Fruits of the Spirit listed?",
+        choices: [
+          { textMr: "गलतीकरांस ५:२२-२३ (Galatians)", textEn: "Galatians 5:22-23", correct: true },
+          { textMr: "रोमन्स ८:१-४ (Romans)", textEn: "Romans 8:1-4", correct: false },
+          { textMr: "इफिसकरांस २:८-१० (Ephesians)", textEn: "Ephesians 2:8-10", correct: false },
+          { textMr: "कलसैState ३:१२ (Colossians)", textEn: "Colossians 3:12", correct: false }
+        ],
+        explMr: "गलतीकरांस ५:२२-२३ मध्ये प्रीती, आनंद, शांती, सहनशीलता, दयाळूपणा, चांगुलपणा, विश्वासूपणा, सौम्यता आणि आत्मसंयम ही फळे आहेत.",
+        explEn: "Galatians 5:22-23 defines the fruit of the Spirit.",
+        ref: "गलतीकरांस ५:२२-२३ (Galatians 5:22-23)"
+      },
+      {
+        qMr: "नवा करार येशूच्या रक्ताद्वारे स्थापित झाला ही घोषणा कोणत्या रात्री करण्यात आली?",
+        qEn: "On which night was the New Covenant in Jesus' blood instituted?",
+        choices: [
+          { textMr: "प्रभूचे शेवटचे भोजन (Last Supper / Passover)", textEn: "The Last Supper", correct: true },
+          { textMr: "पुनरुत्थानाचा दिवस (Resurrection Day)", textEn: "Resurrection Day", correct: false },
+          { textMr: "पेंटेकॉस्टचा दिवस (Pentecost)", textEn: "Pentecost Day", correct: false },
+          { textMr: "गेथशेमाने बागेत (Garden of Gethsemane)", textEn: "Garden of Gethsemane", correct: false }
+        ],
+        explMr: "लूक २२:२० - 'हा प्याला तुमच्यासाठी सांडण्यात येणाऱ्या माझ्या रक्तातील नवा करार आहे.'",
+        explEn: "Luke 22:20 - This cup is the new covenant in my blood, which is poured out for you.",
+        ref: "लूक २२:२० (Luke 22:20)"
+      },
+      {
+        qMr: "बायबलमधील 'विश्वासाचे अध्याय' (Faith Chapter) म्हणून कोणता अध्याय ओळखला जातो?",
+        qEn: "Which chapter is famously known as the 'Hall of Faith'?",
+        choices: [
+          { textMr: "इब्री लोकांस पत्र ११ (Hebrews 11)", textEn: "Hebrews 11", correct: true },
+          { textMr: "१ करिंथकर १३ (1 Corinthians 13)", textEn: "1 Corinthians 13", correct: false },
+          { textMr: "रोमन्स १२ (Romans 12)", textEn: "Romans 12", correct: false },
+          { textMr: "याकोब २ (James 2)", textEn: "James 2", correct: false }
+        ],
+        explMr: "इब्री ११ मध्ये 'विश्वास हा आशा धरलेल्या गोष्टींचा भरवसा...' सांगून विश्वासाच्या वीरांचे वर्णन केले आहे.",
+        explEn: "Hebrews 11 details biblical faith and heroes of faith.",
+        ref: "इब्री ११:१ (Hebrews 11:1)"
+      },
+      {
+        qMr: "येशूच्या क्रूसावर खिळले जाण्याच्या वेळी मंदिरातील पडदा कसा फाटला?",
+        qEn: "How was the temple curtain torn when Jesus died on the cross?",
+        choices: [
+          { textMr: "वरपासून खालपर्यंत दोन तुकडे झाला", textEn: "From top to bottom in two", correct: true },
+          { textMr: "खालून वर फाटला", textEn: "From bottom to top", correct: false },
+          { textMr: "मध्यभागी जळाला", textEn: "Burned in the middle", correct: false },
+          { textMr: "केवळ बाजूला सरकला", textEn: "Simply moved aside", correct: false },
+        ],
+        explMr: "मत्तय २७:५१ - 'तेव्हा मंदिराचा पडदा वरपासून खालपर्यंत फाटून त्याचे दोन तुकडे झाले.' हे देवाकडे थेट प्रवेश दर्शवते.",
+        explEn: "Matthew 27:51 - At that moment the curtain of the temple was torn in two from top to bottom.",
+        ref: "मत्तय २७:५१ (Matthew 27:51)"
+      },
+      {
+        qMr: "पेंटेकॉस्टच्या दिवशी प्रेषितांवर पवित्र आत्मा कोणत्या रूपात उतरला?",
+        qEn: "In what form did the Holy Spirit appear on the disciples on Pentecost?",
+        choices: [
+          { textMr: "अग्नीच्या जिभांप्रमाणे (Tongues of Fire)", textEn: "Tongues of fire", correct: true },
+          { textMr: "पांढऱ्या कबुतरासारखा (White Dove)", textEn: "White Dove", correct: false },
+          { textMr: "मेघाच्या रूपात (Cloud of Glory)", textEn: "Cloud of Glory", correct: false },
+          { textMr: "पाण्याच्या धारेसारखा (Stream of Water)", textEn: "Stream of Water", correct: false }
+        ],
+        explMr: "प्रेषितांची कृत्ये २:३ - 'आणि अग्नीसारख्या विभागलेल्या जिभा त्यांना दिसल्या आणि त्या प्रत्येकावर येऊन बसल्या.'",
+        explEn: "Acts 2:3 - They saw what seemed to be tongues of fire that separated and came to rest on each of them.",
+        ref: "प्रेषितांची कृत्ये २:३ (Acts 2:3)"
+      },
+      {
+        qMr: "जुना करारातील 'दुःखी सेवक' (Suffering Servant) ची प्रदीर्घ भविष्यवाणी कोणत्या अध्यायात आहे?",
+        qEn: "Which chapter contains the famous prophecy of the 'Suffering Servant'?",
+        choices: [
+          { textMr: "यशया ५३ (Isaiah 53)", textEn: "Isaiah 53", correct: true },
+          { textMr: "दानीएल ९ (Daniel 9)", textEn: "Daniel 9", correct: false },
+          { textMr: "जखऱ्या १२ (Zechariah 12)", textEn: "Zechariah 12", correct: false },
+          { textMr: "स्तोत्र २२ (Psalm 22)", textEn: "Psalm 22", correct: false }
+        ],
+        explMr: "यशया ५३ मध्ये येशूच्या बलिदानाचे, जखमांचे आणि चंगाईचे अचूक भाकीत केले आहे.",
+        explEn: "Isaiah 53 prophetically depicts Christ's crucifixion and redemption.",
+        ref: "यशया ५३ (Isaiah 53)"
+      },
+      {
+        qMr: "प्रकटीकरणाचे पुस्तक कोणत्या बेटावर बंदिवान असताना प्रेषित योहानाने लिहिले?",
+        qEn: "On which island was John exiled when he wrote the Book of Revelation?",
+        choices: [
+          { textMr: "पात्मस बेट (Patmos)", textEn: "Island of Patmos", correct: true },
+          { textMr: "क्रीत बेट (Crete)", textEn: "Crete", correct: false },
+          { textMr: "सायप्रस (Cyprus)", textEn: "Cyprus", correct: false },
+          { textMr: "माल्टा (Malta)", textEn: "Malta", correct: false }
+        ],
+        explMr: "प्रकटीकरण १:९ - 'मी योहान... देवाच्या वचनामुळे आणि येशूच्या साक्षामुळे पात्मस नावाच्या बेटावर होतो.'",
+        explEn: "Revelation 1:9 - I, John, was on the island of Patmos because of the word of God.",
+        ref: "प्रकटीकरण १:९ (Revelation 1:9)"
+      },
+      {
+        qMr: "पौलानुसार, 'प्रीती सहनशील आहे, उपकार करते...' हे प्रसिद्ध प्रीतीचे स्तोत्र कोणत्या पत्रात आहे?",
+        qEn: "Which chapter is celebrated as the great 'Love Chapter' by Paul?",
+        choices: [
+          { textMr: "१ करिंथकर १३ (1 Corinthians 13)", textEn: "1 Corinthians 13", correct: true },
+          { textMr: "रोमन्स १२ (Romans 12)", textEn: "Romans 12", correct: false },
+          { textMr: "इफिसकर ४ (Ephesians 4)", textEn: "Ephesians 4", correct: false },
+          { textMr: "१ योहान ४ (1 John 4)", textEn: "1 John 4", correct: false }
+        ],
+        explMr: "१ करिंथकर १३:४-८ हे ख्रिस्ती प्रीतीचे सर्वोत्तम वर्णन आहे.",
+        explEn: "1 Corinthians 13 is Paul's timeless treatise on unconditional love.",
+        ref: "१ करिंथकर १३:४ (1 Corinthians 13:4)"
+      },
+      {
+        qMr: "येशूच्या वंशावळीमध्ये समावेश असलेल्या दोन परदेशी स्त्रिया कोणत्या?",
+        qEn: "Which two gentile women are explicitly included in Jesus' genealogy in Matthew 1?",
+        choices: [
+          { textMr: "राहाब आणि रूथ (Rahab & Ruth)", textEn: "Rahab and Ruth", correct: true },
+          { textMr: "इस्तेर आणि सारा (Esther & Sarah)", textEn: "Esther and Sarah", correct: false },
+          { textMr: "रेबेका आणि लेआ (Rebekah & Leah)", textEn: "Rebekah and Leah", correct: false },
+          { textMr: "दबोरा आणि याएल (Deborah & Jael)", textEn: "Deborah and Jael", correct: false }
+        ],
+        explMr: "मत्तय १ मध्ये राहाब (कनानी) आणि रूथ (मोआबी) या दोघींचा येशूच्या पवित्र वंशावळीत समावेश आहे.",
+        explEn: "Matthew 1 highlights God's grace by including Rahab and Ruth.",
+        ref: "मत्तय १:५ (Matthew 1:5)"
+      },
+      {
+        qMr: "पवित्र शास्त्रात 'मल्कीसदेक' (Melchizedek) कोणाचा पूर्वछाया (Type of Christ) मानला जातो?",
+        qEn: "Melchizedek is described in Hebrews as a perpetual high priest of which order?",
+        choices: [
+          { textMr: "शालेमचा राजा आणि परात्पर देवाचा याजक (King of Salem & High Priest)", textEn: "King of Salem & Priest Forever", correct: true },
+          { textMr: "लेवी याजक (Levitical Priest)", textEn: "Levitical Priest", correct: false },
+          { textMr: "अहरोनाचा वंशज (Aaron's Lineage)", textEn: "Aaron's Lineage", correct: false },
+          { textMr: "पलिश्ती याजक (Philistine Priest)", textEn: "Philistine Priest", correct: false }
+        ],
+        explMr: "इब्री ७ नुसार येशू मल्कीसदेकाच्या पंक्तीचा सार्वकालिक मुख्य याजक आहे.",
+        explEn: "Hebrews 7 establishes Jesus' eternal priesthood after the order of Melchizedek.",
+        ref: "इब्री ७:१७ (Hebrews 7:17)"
+      }
     ]
   },
-  {
-    qMr: "येशू ख्रिस्ताचा जन्म कोणत्या शहरात झाला?",
-    qEn: "In which town was Jesus Christ born?",
-    choices: [
-      { textMr: "बेथलेहेम (Bethlehem)", textEn: "Bethlehem", correct: true },
-      { textMr: "नाझरेथ (Nazareth)", textEn: "Nazareth", correct: false },
-      { textMr: "यरुशलेम (Jerusalem)", textEn: "Jerusalem", correct: false },
-      { textMr: "अलेक्झांड्रिया (Alexandria)", textEn: "Alexandria", correct: false }
-    ]
-  },
-  {
-    qMr: "तरुण मेंढपाळ दाविदाने पराभूत केलेल्या पलिश्ती राक्षसाचे नाव काय होते?",
-    qEn: "What was the name of the Philistine giant defeated by young shepherd David?",
-    choices: [
-      { textMr: "गोल्याथ (Goliath)", textEn: "Goliath", correct: true },
-      { textMr: "शमशोन (Samson)", textEn: "Samson", correct: false },
-      { textMr: "शौल (Saul)", textEn: "Saul", correct: false },
-      { textMr: "अबशालोम (Absalom)", textEn: "Absalom", correct: false }
-    ]
-  },
-  {
-    qMr: "येशूने आपल्या सेवेसाठी किती मुख्य शिष्य निवडले?",
-    qEn: "How many main apostles did Jesus choose for His ministry?",
-    choices: [
-      { textMr: "१२ (12)", textEn: "12", correct: true },
-      { textMr: "१० (10)", textEn: "10", correct: false },
-      { textMr: "७ (7)", textEn: "7", correct: false },
-      { textMr: "१५ (15)", textEn: "15", correct: false }
-    ]
-  },
-  {
-    qMr: "बायबलचे सर्वात पहिले पुस्तक कोणते आहे?",
-    qEn: "What is the very first book of the Bible?",
-    choices: [
-      { textMr: "उत्पत्ती (Genesis)", textEn: "Genesis", correct: true },
-      { textMr: "निर्गम (Exodus)", textEn: "Exodus", correct: false },
-      { textMr: "मत्तय (Matthew)", textEn: "Matthew", correct: false },
-      { textMr: "स्तोत्रसंहिता (Psalms)", textEn: "Psalms", correct: false }
-    ]
-  },
-  {
-    qMr: "सीनाय पर्वतावर देवाने कोणाला दगडी पाट्यांवर दहा आज्ञा दिल्या?",
-    qEn: "Who received the Ten Commandments written on stone tablets from God on Mount Sinai?",
-    choices: [
-      { textMr: "मोशे (Moses)", textEn: "Moses", correct: true },
-      { textMr: "अब्राहम (Abraham)", textEn: "Abraham", correct: false },
-      { textMr: "हारून (Aaron)", textEn: "Aaron", correct: false },
-      { textMr: "जाेशुआ (Joshua)", textEn: "Joshua", correct: false }
-    ]
-  },
-  {
-    qMr: "येशूचे भूमीवरील पालक योसेफ यांचा व्यवसाय काय होता?",
-    qEn: "What was the profession of Joseph, the earthly father of Jesus?",
-    choices: [
-      { textMr: "सुतार (Carpenter)", textEn: "Carpenter", correct: true },
-      { textMr: "कोळी (Fisherman)", textEn: "Fisherman", correct: false },
-      { textMr: "कर वसूल करणारा (Tax Collector)", textEn: "Tax Collector", correct: false },
-      { textMr: "मेंढपाळ (Shepherd)", textEn: "Shepherd", correct: false }
-    ]
-  },
-  {
-    qMr: "येशूला ३० चांदीच्या नाण्यांसाठी कोणत्या शिष्याने फसवून धरून दिले?",
-    qEn: "Which apostle betrayed Jesus for 30 pieces of silver with a kiss?",
-    choices: [
-      { textMr: "यहुदा इस्कर्योत (Judas Iscariot)", textEn: "Judas Iscariot", correct: true },
-      { textMr: "शिमोन पेत्र (Simon Peter)", textEn: "Simon Peter", correct: false },
-      { textMr: "योहान (John)", textEn: "John", correct: false },
-      { textMr: "थॉमस (Thomas)", textEn: "Thomas", correct: false }
+  4: {
+    levelId: 4,
+    nameMr: "सखोल ज्ञानी (Expert)",
+    nameEn: "Theologian Master",
+    emoji: "🏆",
+    pointsPerQ: 50,
+    badgeId: "quiz_badge_theologian",
+    badgeName: "Theology Master",
+    badgeDesc: "Achieved Master status in deep Biblical theology & original languages!",
+    questions: [
+      {
+        qMr: "बायबलमधील ग्रीक शब्द 'अगापे' (Agape) चा खरा अर्थ काय आहे?",
+        qEn: "What is the primary biblical theological definition of the Greek word 'Agape'?",
+        choices: [
+          { textMr: "निःस्वार्थी, बिनशर्त दैवी प्रीती (Unconditional Sacrificial Love)", textEn: "Selfless, Unconditional Divine Love", correct: true },
+          { textMr: "भावनिक मैत्री (Brotherly Affection)", textEn: "Emotional Friendship (Phileo)", correct: false },
+          { textMr: "कौटुंबिक आपुलकी (Family Bond)", textEn: "Family Affection (Storge)", correct: false },
+          { textMr: "शारीरिक आकर्षण (Romantic Attraction)", textEn: "Romantic Passion (Eros)", correct: false }
+        ],
+        explMr: "अगापे ही देवाची स्वतःचा एकुलता एक पुत्र देण्याइतकी सर्वोच्च, निःस्वार्थी प्रीती आहे.",
+        explEn: "Agape represents highest sacrificial, unconditional divine love.",
+        ref: "१ योहान ४:८ (1 John 4:8)"
+      },
+      {
+        qMr: "देवाने मोशेला जळत्या झुडुपाजवळ आपले सनातन नाव काय सांगितले? (Hebrew: 'Ehyeh Asher Ehyeh')",
+        qEn: "What covenant name did God reveal to Moses at the burning bush? ('Ehyeh Asher Ehyeh')",
+        choices: [
+          { textMr: "मी जो आहे तो मी आहे (I AM WHO I AM)", textEn: "I AM WHO I AM", correct: true },
+          { textMr: "मी विश्वाचा निर्माता आहे (I am Creator)", textEn: "I am Creator", correct: false },
+          { textMr: "मी राजांचा राजा आहे (I am King)", textEn: "I am King", correct: false },
+          { textMr: "मी न्यायाधिश आहे (I am Judge)", textEn: "I am Judge", correct: false }
+        ],
+        explMr: "निर्गम ३:१४ - देवाने मोशेला म्हटले, 'मी जो आहे तो मी आहे. तू इस्राएल लोकांना सांग, 'मी आहे' याने मला पाठवले आहे.'",
+        explEn: "Exodus 3:14 - God said to Moses, 'I AM WHO I AM.'",
+        ref: "निर्गम ३:१४ (Exodus 3:14)"
+      },
+      {
+        qMr: "येशूच्या वधस्तंभावर उच्चारलेला हिब्रू/अरामीक उद्गार 'एलोई, एलोई, लमा सबखथनी' चा अर्थ काय?",
+        qEn: "What is the translation of Jesus' cry on the cross: 'Eloi, Eloi, lema sabachthani'?",
+        choices: [
+          { textMr: "माझ्या देवा, माझ्या देवा, तू मला का सोडलेस? (My God, my God, why have you forsaken me?)", textEn: "My God, my God, why have you forsaken me?", correct: true },
+          { textMr: "हे पित्या, त्यांचे पाप क्षमा कर", textEn: "Father forgive them", correct: false },
+          { textMr: "सर्व काही पूर्ण झाले आहे", textEn: "It is finished", correct: false },
+          { textMr: "मी माझा आत्मा सोपवतो", textEn: "Into your hands I commit my spirit", correct: false }
+        ],
+        explMr: "मार्क १५:३४ मध्ये येशूने स्तोत्र २२:१ मधील वचनाची पुनरुक्ती केली.",
+        explEn: "Mark 15:34 quotes Psalm 22:1 as Jesus bore the world's sin.",
+        ref: "मार्क १५:३४ (Mark 15:34)"
+      },
+      {
+        qMr: "नव्या करारातील 'केनोसिस' (Kenosis) हा धर्मशास्त्रीय सिद्धांत कशाशी संबंधित आहे?",
+        qEn: "The theological doctrine of 'Kenosis' (Philippians 2:7) refers to what aspect of Christ?",
+        choices: [
+          { textMr: "येशूचे स्वतःला रिक्त करून दासाचे रूप घेणे (Christ emptying Himself)", textEn: "Christ emptying Himself taking form of servant", correct: true },
+          { textMr: "येशूचे स्वर्गात जाणे (Ascension)", textEn: "Christ's Ascension", correct: false },
+          { textMr: "येशूचे मंदिर शुद्ध करणे (Cleansing Temple)", textEn: "Cleansing of the Temple", correct: false },
+          { textMr: "पाण्यातून बाप्तिस्मा घेणे (Baptism)", textEn: "Water Baptism", correct: false }
+        ],
+        explMr: "फिलिप्पै २:७ मध्ये ख्रिस्ताने स्वतःचे दैवी विशेषाधिकार बाजूला ठेवून मानवी रूप स्वीकारल्याचे वर्णन आहे.",
+        explEn: "Philippians 2:7 - Christ emptied Himself by taking the very nature of a servant.",
+        ref: "फिलिप्पै २:७ (Philippians 2:7)"
+      },
+      {
+        qMr: "जुना करारात परमेश्वराचे नाव 'यहोवा यिरे' (Jehovah Jireh) कोणत्या घटनेनंतर प्रगट झाले?",
+        qEn: "The divine name 'Jehovah Jireh' (The Lord Will Provide) was declared during which event?",
+        choices: [
+          { textMr: "मोरीया पर्वतावर अब्राहामाने इसहाकाचे अर्पण करताना (Abraham on Mount Moriah)", textEn: "Abraham sacrificing on Mount Moriah", correct: true },
+          { textMr: "तांबडा समुद्र दुभंगताना (Red Sea Parting)", textEn: "Parting of Red Sea", correct: false },
+          { textMr: "मन्ना स्वर्गातून पडताना (Manna in Wilderness)", textEn: "Manna in Wilderness", correct: false },
+          { textMr: "यर्देन नदी ओलांडताना (Jordan Crossing)", textEn: "Jordan River Crossing", correct: false }
+        ],
+        explMr: "उत्पत्ती २२:१४ - अब्राहामाने त्या जागेचे नाव 'परमेश्वर पुरवेल' (यहोवा यिरे) असे ठेवले.",
+        explEn: "Genesis 22:14 - Abraham called that place The Lord Will Provide.",
+        ref: "उत्पत्ती २२:१४ (Genesis 22:14)"
+      },
+      {
+        qMr: "नव्या करारामध्ये 'पॅराक्लीटॉस' (Parakletos / Paraclete) ही उपाधी कोणासाठी वापरली आहे?",
+        qEn: "The Greek term 'Paraclete' (Advocate, Comforter, Helper) is used by Jesus for whom?",
+        choices: [
+          { textMr: "पवित्र आत्मा (The Holy Spirit / Counselor)", textEn: "The Holy Spirit / Comforter", correct: true },
+          { textMr: "देवदूत मिखाएल (Archangel Michael)", textEn: "Archangel Michael", correct: false },
+          { textMr: "योहान बाप्तिस्मा देणारा (John the Baptist)", textEn: "John the Baptist", correct: false },
+          { textMr: "संदेष्टा एलिया (Prophet Elijah)", textEn: "Prophet Elijah", correct: false }
+        ],
+        explMr: "योहान १४:१६, २६ मध्ये येशूने पवित्र आत्म्याला 'दुसरा कैवारी व साहाय्यक' (Paraclete) म्हटले आहे.",
+        explEn: "John 14:16, 26 - The Advocate/Comforter, the Holy Spirit.",
+        ref: "योहान १४:२६ (John 14:26)"
+      },
+      {
+        qMr: "रोमन्स ५:१ नुसार, आपण विश्वासाने नीतिमान ठरल्यामुळे देवाबरोबर आपल्याला काय प्राप्त होते?",
+        qEn: "According to Romans 5:1, since we have been justified through faith, what do we have with God?",
+        choices: [
+          { textMr: "आपल्या प्रभू येशू ख्रिस्ताद्वारे देवाबरोबर शांती (Peace with God through Christ)", textEn: "Peace with God through our Lord Jesus Christ", correct: true },
+          { textMr: "केवळ भौतिक समृद्धी", textEn: "Material Wealth", correct: false },
+          { textMr: "शारीरिक अमरत्व", textEn: "Physical Immortality", correct: false },
+          { textMr: "सांसारिक अधिकार", textEn: "Earthly Authority", correct: false }
+        ],
+        explMr: "रोमन्स ५:१ - 'म्हणून विश्वासाने नीतिमान ठरल्यामुळे आपल्या प्रभू येशू ख्रिस्ताद्वारे देवाशी आमची शांती झाली आहे.'",
+        explEn: "Romans 5:1 - Since we have been justified through faith, we have peace with God.",
+        ref: "रोमन्स ५:१ (Romans 5:1)"
+      },
+      {
+        qMr: "प्रकटीकरण १:८ मध्ये येशूने स्वतःला काय संबोधले आहे? ('मी ______ आणि ______ आहे.')",
+        qEn: "In Revelation 1:8, what divine title does the Lord declare? ('I am the _____ and the _____')",
+        choices: [
+          { textMr: "अल्फा आणि ओमेगा (Alpha & Omega)", textEn: "Alpha and Omega", correct: true },
+          { textMr: "आरंभ आणि अंत (First and Middle)", textEn: "First and Middle", correct: false },
+          { textMr: "सूर्य आणि चंद्र (Sun and Moon)", textEn: "Sun and Moon", correct: false },
+          { textMr: "न्यायाधिश आणि राजा (Judge and Ruler)", textEn: "Judge and Ruler", correct: false }
+        ],
+        explMr: "प्रकटीकरण १:८ - 'प्रभू देव जो आहे, जो होता आणि जो येणार आहे, तो सर्वसमर्थ म्हणतो, मी अल्फा आणि ओमेगा आहे.'",
+        explEn: "Revelation 1:8 - 'I am the Alpha and the Omega,' says the Lord God.",
+        ref: "प्रकटीकरण १:८ (Revelation 1:8)"
+      },
+      {
+        qMr: "बायबलमधील 'हबलल हाबालिम' (Hebrew: 'Vanity of vanities') हे वचन कोणत्या पुस्तकातील मुख्य विषय आहे?",
+        qEn: "The Hebrew philosophical phrase 'Hevel Havalim' (Vanity of vanities / Meaningless) is central to which book?",
+        choices: [
+          { textMr: "उपदेशक (Ecclesiastes)", textEn: "Ecclesiastes", correct: true },
+          { textMr: "ईयोब (Job)", textEn: "Job", correct: false },
+          { textMr: "गीतरत्न (Song of Solomon)", textEn: "Song of Solomon", correct: false },
+          { textMr: "विलापगीत (Lamentations)", textEn: "Lamentations", correct: false }
+        ],
+        explMr: "उपदेशक १:२ मध्ये शलमोनाने जगातील नश्वरतेवर चिंतन करताना 'व्यर्थाचे व्यर्थ, सर्व काही व्यर्थ' म्हटले आहे.",
+        explEn: "Ecclesiastes 1:2 - 'Meaningless! Meaningless!' says the Teacher. 'Utterly meaningless!'",
+        ref: "उपदेशक १:२ (Ecclesiastes 1:2)"
+      },
+      {
+        qMr: "येशूने क्रूसावर शेवटचा शब्द 'तेतेलेस्ताई' (Tetelestai - It is finished) उच्चारला; त्याचा मूळ व्यापारिक अर्थ काय होता?",
+        qEn: "What was the commercial/accounting meaning of Jesus' final Greek word 'Tetelestai' (It is finished)?",
+        choices: [
+          { textMr: "कर्ज पूर्णपणे फेडले गेले आहे! (Paid in Full!)", textEn: "Paid in Full! (Debt Canceled)", correct: true },
+          { textMr: "माझे जीवन संपले आहे", textEn: "My life is over", correct: false },
+          { textMr: "दिवस मावळला आहे", textEn: "The sun has set", correct: false },
+          { textMr: "युद्धाचा शेवट झाला", textEn: "The battle ended", correct: false }
+        ],
+        explMr: "प्राचीन काळात कर्जाच्या पावतीवर कर्ज पूर्ण फेडल्याची खात्री म्हणून 'तेतेलेस्ताई' (Paid in Full) शिक्का मारला जाई. येशूने आपल्या पापांचे संपूर्ण कर्ज फेडले!",
+        explEn: "Tetelestai was stamped on debt receipts to signify that a debt was Paid in Full.",
+        ref: "योहान १९:३० (John 19:30)"
+      }
     ]
   }
-];
+};
 
+let selectedQuizLevel = 1;
 let quizCurrentQuestionIdx = 0;
 let quizSessionScore = 0;
+let quizSessionStreak = 0;
+let quizMaxStreak = 0;
 let quizShuffledQuestions = [];
+let quizHasAnsweredCurrent = false;
 
 function playQuizSound(type) {
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    if (type === 'correct') {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.type = 'sine';
-      gain.gain.setValueAtTime(0.1, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    
+    if (type === "correct") {
+      osc.type = "triangle";
       osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
-      osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1); // E5
+      osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.08); // E5
+      osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.16); // G5
+      gain.gain.setValueAtTime(0.2, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.35);
+    } else if (type === "wrong") {
+      osc.type = "sawtooth";
+      osc.frequency.setValueAtTime(220, ctx.currentTime); // A3
+      osc.frequency.setValueAtTime(185, ctx.currentTime + 0.12);
+      gain.gain.setValueAtTime(0.2, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
       osc.start();
       osc.stop(ctx.currentTime + 0.3);
-    } else if (type === 'incorrect') {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.type = 'sawtooth';
-      gain.gain.setValueAtTime(0.08, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
-      osc.frequency.setValueAtTime(150, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.3);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.4);
     }
-  } catch (e) {
-    console.warn("AudioContext sound play blocked or unsupported:", e);
-  }
+  } catch (e) {}
 }
 
 function updateQuizCardStats() {
@@ -5331,410 +6278,294 @@ function updateQuizCardStats() {
   if (welcomeHighscoreEl) welcomeHighscoreEl.textContent = `${hs} pts`;
 }
 
-function startQuiz() {
+function openBibleQuizModal() {
+  const modal = document.getElementById("modal-bible-quiz");
+  if (!modal) return;
+  
+  showQuizLevelSelect();
+  updateQuizCardStats();
+  
+  modal.style.display = "flex";
+  setTimeout(() => modal.classList.add("active"), 10);
+}
+
+function closeBibleQuizModal() {
+  const modal = document.getElementById("modal-bible-quiz");
+  if (modal) {
+    modal.classList.remove("active");
+    setTimeout(() => modal.style.display = "none", 300);
+  }
+}
+
+function selectQuizLevel(levelNum) {
+  selectedQuizLevel = levelNum;
+  for (let i = 1; i <= 4; i++) {
+    const card = document.getElementById(`quiz-lvl-card-${i}`);
+    if (card) {
+      if (i === levelNum) {
+        card.classList.add("active");
+      } else {
+        card.classList.remove("active");
+      }
+    }
+  }
+}
+
+function showQuizLevelSelect() {
+  const welcomeScreen = document.getElementById("quiz-welcome-screen");
+  const questionScreen = document.getElementById("quiz-question-screen");
+  const resultsScreen = document.getElementById("quiz-results-screen");
+  
+  if (welcomeScreen) welcomeScreen.style.display = "block";
+  if (questionScreen) questionScreen.style.display = "none";
+  if (resultsScreen) resultsScreen.style.display = "none";
+  
+  selectQuizLevel(selectedQuizLevel);
+  updateQuizCardStats();
+}
+
+function startSelectedQuizLevel() {
+  const lvlData = QUIZ_LEVELS_DATA[selectedQuizLevel] || QUIZ_LEVELS_DATA[1];
+  
+  // Clone & shuffle questions
+  quizShuffledQuestions = [...lvlData.questions].sort(() => 0.5 - Math.random());
   quizCurrentQuestionIdx = 0;
   quizSessionScore = 0;
+  quizSessionStreak = 0;
+  quizMaxStreak = 0;
   
-  quizShuffledQuestions = [...QUIZ_QUESTIONS].sort(() => Math.random() - 0.5);
+  const welcomeScreen = document.getElementById("quiz-welcome-screen");
+  const questionScreen = document.getElementById("quiz-question-screen");
+  const resultsScreen = document.getElementById("quiz-results-screen");
   
-  document.getElementById("quiz-welcome-screen").style.display = "none";
-  document.getElementById("quiz-results-screen").style.display = "none";
-  document.getElementById("quiz-question-screen").style.display = "block";
+  if (welcomeScreen) welcomeScreen.style.display = "none";
+  if (resultsScreen) resultsScreen.style.display = "none";
+  if (questionScreen) questionScreen.style.display = "block";
+  
+  const lvlInd = document.getElementById("quiz-active-level-indicator");
+  if (lvlInd) lvlInd.textContent = `Level ${selectedQuizLevel}: ${lvlData.nameEn} / ${lvlData.nameMr}`;
   
   showQuizQuestion();
 }
 
 function showQuizQuestion() {
+  quizHasAnsweredCurrent = false;
   const currentQ = quizShuffledQuestions[quizCurrentQuestionIdx];
+  if (!currentQ) {
+    showQuizResults();
+    return;
+  }
+  
   const qNumEl = document.getElementById("quiz-question-number");
   const scoreEl = document.getElementById("quiz-current-score");
+  const streakEl = document.getElementById("quiz-streak-count");
   const progressEl = document.getElementById("quiz-progress-bar");
   const qMrEl = document.getElementById("quiz-question-mr");
   const qEnEl = document.getElementById("quiz-question-en");
   const choicesContainer = document.getElementById("quiz-choices-container");
+  const explBox = document.getElementById("quiz-explanation-box");
   const nextBtn = document.getElementById("btn-next-quiz-question");
   
-  qNumEl.textContent = `Question ${quizCurrentQuestionIdx + 1} of 10`;
-  scoreEl.textContent = `Score: ${quizSessionScore}`;
-  progressEl.style.width = `${((quizCurrentQuestionIdx + 1) / 10) * 100}%`;
+  if (qNumEl) qNumEl.textContent = `Question ${quizCurrentQuestionIdx + 1} of ${quizShuffledQuestions.length}`;
+  if (scoreEl) scoreEl.textContent = `${quizSessionScore} pts`;
+  if (streakEl) streakEl.textContent = `🔥 Streak: ${quizSessionStreak}`;
   
-  qMrEl.textContent = currentQ.qMr;
-  qEnEl.textContent = currentQ.qEn;
+  const pct = ((quizCurrentQuestionIdx + 1) / quizShuffledQuestions.length) * 100;
+  if (progressEl) progressEl.style.width = `${pct}%`;
   
-  choicesContainer.innerHTML = "";
-  nextBtn.style.display = "none";
+  if (qMrEl) qMrEl.textContent = currentQ.qMr;
+  if (qEnEl) qEnEl.textContent = currentQ.qEn;
   
-  currentQ.choices.forEach((choice, idx) => {
-    const btn = document.createElement("button");
-    btn.className = "quiz-choice-btn";
-    btn.innerHTML = `
-      <span>${state.translation !== "eng" ? choice.textMr : choice.textEn}</span>
-      <span class="choice-status-icon"></span>
-    `;
-    btn.addEventListener("click", () => selectQuizChoice(btn, choice.correct));
-    choicesContainer.appendChild(btn);
-  });
+  if (explBox) explBox.style.display = "none";
+  if (nextBtn) nextBtn.style.display = "none";
+  
+  if (choicesContainer) {
+    choicesContainer.innerHTML = "";
+    
+    // Shuffle choices
+    const choices = [...currentQ.choices].sort(() => 0.5 - Math.random());
+    const letterLabels = ["A", "B", "C", "D"];
+    
+    choices.forEach((c, idx) => {
+      const btn = document.createElement("button");
+      btn.className = "quiz-choice-btn";
+      btn.innerHTML = `
+        <span style="display: flex; align-items: center; gap: 10px;">
+          <span style="width: 24px; height: 24px; border-radius: 50%; background: var(--pill-bg); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800;">${letterLabels[idx]}</span>
+          <span>${c.textMr} <small style="display: block; color: var(--text-muted); font-size: 11.5px;">${c.textEn}</small></span>
+        </span>
+        <span class="choice-icon" style="font-size: 16px;"></span>
+      `;
+      
+      btn.addEventListener("click", () => {
+        if (quizHasAnsweredCurrent) return;
+        selectQuizChoice(btn, c.correct);
+      });
+      
+      choicesContainer.appendChild(btn);
+    });
+  }
 }
 
 function selectQuizChoice(selectedBtn, isCorrect) {
+  if (quizHasAnsweredCurrent) return;
+  quizHasAnsweredCurrent = true;
+  
   const choicesContainer = document.getElementById("quiz-choices-container");
   const buttons = choicesContainer.querySelectorAll(".quiz-choice-btn");
   const currentQ = quizShuffledQuestions[quizCurrentQuestionIdx];
+  const lvlData = QUIZ_LEVELS_DATA[selectedQuizLevel] || QUIZ_LEVELS_DATA[1];
   
-  buttons.forEach(btn => btn.disabled = true);
+  buttons.forEach(btn => {
+    btn.disabled = true;
+    btn.style.cursor = "default";
+  });
+  
+  const explBox = document.getElementById("quiz-explanation-box");
+  const explStatus = document.getElementById("quiz-explanation-status");
+  const explText = document.getElementById("quiz-explanation-text");
+  const explRef = document.getElementById("quiz-explanation-ref");
+  const explIcon = document.getElementById("quiz-explanation-icon");
+  const nextBtn = document.getElementById("btn-next-quiz-question");
   
   if (isCorrect) {
-    quizSessionScore += 10;
     selectedBtn.classList.add("correct");
-    selectedBtn.querySelector(".choice-status-icon").textContent = "✓";
-    playQuizSound('correct');
-  } else {
-    selectedBtn.classList.add("incorrect");
-    selectedBtn.querySelector(".choice-status-icon").textContent = "✗";
-    playQuizSound('incorrect');
+    selectedBtn.querySelector(".choice-icon").textContent = "✓";
+    playQuizSound("correct");
     
-    buttons.forEach((btn, idx) => {
-      if (currentQ.choices[idx].correct) {
+    quizSessionStreak += 1;
+    if (quizSessionStreak > quizMaxStreak) quizMaxStreak = quizSessionStreak;
+    
+    const streakBonus = Math.floor(quizSessionStreak / 3) * 5;
+    const gained = lvlData.pointsPerQ + streakBonus;
+    quizSessionScore += gained;
+    
+    if (explStatus) explStatus.textContent = `Correct! / बरोबर! (+${gained} pts)`;
+    if (explIcon) explIcon.textContent = "🌟";
+  } else {
+    selectedBtn.classList.add("wrong");
+    selectedBtn.querySelector(".choice-icon").textContent = "✕";
+    playQuizSound("wrong");
+    quizSessionStreak = 0;
+    
+    if (explStatus) explStatus.textContent = "Incorrect / चुकीचे उत्तर";
+    if (explIcon) explIcon.textContent = "💡";
+    
+    // Highlight correct choice
+    buttons.forEach(btn => {
+      const text = btn.innerText;
+      const correctChoice = currentQ.choices.find(c => c.correct);
+      if (correctChoice && (text.includes(correctChoice.textMr) || text.includes(correctChoice.textEn))) {
         btn.classList.add("correct");
-        btn.querySelector(".choice-status-icon").textContent = "✓";
+        btn.querySelector(".choice-icon").textContent = "✓";
       }
     });
   }
   
-  document.getElementById("btn-next-quiz-question").style.display = "block";
+  if (explText) explText.textContent = `${currentQ.explMr}
+${currentQ.explEn}`;
+  if (explRef) explRef.textContent = `📖 ${currentQ.ref}`;
+  if (explBox) explBox.style.display = "flex";
+  if (nextBtn) {
+    nextBtn.style.display = "block";
+    nextBtn.textContent = (quizCurrentQuestionIdx === quizShuffledQuestions.length - 1) ? "View Results / निकाल पहा 🏁" : "Next Question / पुढील प्रश्न &rarr;";
+  }
+  
+  const scoreEl = document.getElementById("quiz-current-score");
+  const streakEl = document.getElementById("quiz-streak-count");
+  if (scoreEl) scoreEl.textContent = `${quizSessionScore} pts`;
+  if (streakEl) streakEl.textContent = `🔥 Streak: ${quizSessionStreak}`;
+}
+
+function goToNextQuizQuestion() {
+  quizCurrentQuestionIdx++;
+  if (quizCurrentQuestionIdx < quizShuffledQuestions.length) {
+    showQuizQuestion();
+  } else {
+    showQuizResults();
+  }
 }
 
 function showQuizResults() {
-  document.getElementById("quiz-question-screen").style.display = "none";
+  const questionScreen = document.getElementById("quiz-question-screen");
+  const resultsScreen = document.getElementById("quiz-results-screen");
   
+  if (questionScreen) questionScreen.style.display = "none";
+  if (resultsScreen) resultsScreen.style.display = "block";
+  
+  const lvlData = QUIZ_LEVELS_DATA[selectedQuizLevel] || QUIZ_LEVELS_DATA[1];
+  const maxPossible = quizShuffledQuestions.length * lvlData.pointsPerQ;
   const scoreTextEl = document.getElementById("quiz-results-score-text");
   const badgeUnlockContainer = document.getElementById("quiz-badge-unlock-container");
   const badgeNameEl = document.getElementById("quiz-badge-name");
+  const badgeDescEl = document.getElementById("quiz-badge-desc");
+  const badgeIconEl = document.getElementById("quiz-badge-icon");
   const resultsEmojiEl = document.getElementById("quiz-results-emoji");
   const resultsTitleEl = document.getElementById("quiz-results-title");
   
-  scoreTextEl.textContent = `You scored ${quizSessionScore} / 100 points!`;
-  
+  // Save points to global state & localStorage
   state.quizPoints = (state.quizPoints || 0) + quizSessionScore;
-  
-  if (quizSessionScore > (state.quizHighscore || 0)) {
+  if (!state.quizHighscore || quizSessionScore > state.quizHighscore) {
     state.quizHighscore = quizSessionScore;
   }
   
-  badgeUnlockContainer.style.display = "none";
-  let unlockedBadge = null;
+  const accuracy = (quizSessionScore / maxPossible) * 100;
   
-  if (quizSessionScore >= 100) {
-    unlockedBadge = { id: "quiz_badge_theologian", nameMr: "बायबल शास्त्रज्ञ (Theologian)", nameEn: "Bible Theologian (बायबल शास्त्रज्ञ)" };
-  } else if (quizSessionScore >= 70) {
-    unlockedBadge = { id: "quiz_badge_scholar", nameMr: "शास्त्र पंडित (Scholar)", nameEn: "Scripture Scholar (शास्त्र पंडित)" };
-  } else if (quizSessionScore >= 30) {
-    unlockedBadge = { id: "quiz_badge_novice", nameMr: "नवा शोधक (Novice Explorer)", nameEn: "Novice Explorer (नवा शोधक)" };
+  if (scoreTextEl) {
+    scoreTextEl.textContent = `You earned ${quizSessionScore} Points! (Max streak: 🔥 ${quizMaxStreak})`;
   }
   
-  if (unlockedBadge && !state.quizBadges.includes(unlockedBadge.id)) {
-    state.quizBadges.push(unlockedBadge.id);
-    badgeUnlockContainer.style.display = "block";
-    badgeNameEl.textContent = state.translation !== "eng" ? unlockedBadge.nameMr : unlockedBadge.nameEn;
-  }
-  
-  saveStateToLocalStorage();
-  updateQuizCardStats();
-  
-  if (quizSessionScore >= 80) {
-    resultsEmojiEl.textContent = "🏆";
-    resultsTitleEl.textContent = state.translation !== "eng" ? "उत्कृष्ट कामगिरी!" : "Excellent Job!";
-  } else if (quizSessionScore >= 40) {
-    resultsEmojiEl.textContent = "🎉";
-    resultsTitleEl.textContent = state.translation !== "eng" ? "खूप छान!" : "Great Job!";
+  if (accuracy >= 80) {
+    if (resultsEmojiEl) resultsEmojiEl.textContent = "🏆";
+    if (resultsTitleEl) resultsTitleEl.textContent = "अप्रतिम! Outstanding Mastery!";
+    
+    // Unlock level badge
+    if (!state.quizBadges) state.quizBadges = [];
+    if (!state.quizBadges.includes(lvlData.badgeId)) {
+      state.quizBadges.push(lvlData.badgeId);
+    }
+    
+    if (badgeUnlockContainer) badgeUnlockContainer.style.display = "block";
+    if (badgeNameEl) badgeNameEl.textContent = lvlData.badgeName;
+    if (badgeDescEl) badgeDescEl.textContent = lvlData.badgeDesc;
+    if (badgeIconEl) badgeIconEl.textContent = lvlData.emoji;
+  } else if (accuracy >= 50) {
+    if (resultsEmojiEl) resultsEmojiEl.textContent = "⭐";
+    if (resultsTitleEl) resultsTitleEl.textContent = "छान प्रयत्न! Great Effort!";
+    if (badgeUnlockContainer) badgeUnlockContainer.style.display = "none";
   } else {
-    resultsEmojiEl.textContent = "💡";
-    resultsTitleEl.textContent = state.translation !== "eng" ? "पुन्हा प्रयत्न करा!" : "Keep Learning!";
+    if (resultsEmojiEl) resultsEmojiEl.textContent = "📖";
+    if (resultsTitleEl) resultsTitleEl.textContent = "अधिक सराव करा! Keep Reading Scripture!";
+    if (badgeUnlockContainer) badgeUnlockContainer.style.display = "none";
   }
   
-  document.getElementById("quiz-results-screen").style.display = "block";
+  saveState();
+  updateQuizCardStats();
 }
 
 function initBibleQuiz() {
-  const startBtn = document.getElementById("btn-start-quiz");
-  if (startBtn) startBtn.addEventListener("click", startQuiz);
-  
-  const nextBtn = document.getElementById("btn-next-quiz-question");
-  if (nextBtn) {
-    nextBtn.addEventListener("click", () => {
-      quizCurrentQuestionIdx++;
-      if (quizCurrentQuestionIdx < 10) {
-        showQuizQuestion();
-      } else {
-        showQuizResults();
-      }
-    });
-  }
-  
-  const restartBtn = document.getElementById("btn-restart-quiz");
-  if (restartBtn) restartBtn.addEventListener("click", startQuiz);
-  
-  const closeResultsBtn = document.getElementById("btn-close-quiz-results");
-  if (closeResultsBtn) {
-    closeResultsBtn.addEventListener("click", () => {
-      closeModal("modal-bible-quiz");
-    });
-  }
-  
-  const closeQuizBtn = document.getElementById("btn-close-bible-quiz");
-  if (closeQuizBtn) {
-    closeQuizBtn.addEventListener("click", () => {
-      closeModal("modal-bible-quiz");
-    });
-  }
-  
   const openQuizBtn = document.getElementById("btn-open-bible-quiz");
   if (openQuizBtn) {
-    openQuizBtn.addEventListener("click", () => {
-      openModal("modal-bible-quiz");
-    });
+    openQuizBtn.addEventListener("click", openBibleQuizModal);
   }
+  
+  updateQuizCardStats();
 }
 
-/* ==========================================================================
-   8. User Authentication & Prayer Requests — Firebase Edition
-   ========================================================================== */
+// Make accessible on window
+window.openBibleQuizModal = openBibleQuizModal;
+window.closeBibleQuizModal = closeBibleQuizModal;
+window.selectQuizLevel = selectQuizLevel;
+window.startSelectedQuizLevel = startSelectedQuizLevel;
+window.showQuizLevelSelect = showQuizLevelSelect;
+window.showQuizQuestion = showQuizQuestion;
+window.selectQuizChoice = selectQuizChoice;
+window.goToNextQuizQuestion = goToNextQuizQuestion;
+window.showQuizResults = showQuizResults;
+window.updateQuizCardStats = updateQuizCardStats;
+window.initBibleQuiz = initBibleQuiz;
 
-/* ─────────────────────────────────────────────────────────────────────────
-   Auth State Observer
-   Called once on startup from initAuthAndPrayers().
-   When Firebase detects a signed-in user (or restores from cookie/token),
-   this fires automatically — no manual session localStorage needed.
-   ───────────────────────────────────────────────────────────────────────── */
-function onFirebaseAuthChange(firebaseUser) {
-  if (firebaseUser) {
-    // A Firebase user is signed in — fetch their Firestore profile
-    FirebaseApp.getUserProfile(firebaseUser.uid).then(profile => {
-      state.currentUser = {
-        uid:        firebaseUser.uid,
-        username:   firebaseUser.displayName || profile?.displayName || firebaseUser.email.split('@')[0],
-        email:      firebaseUser.email,
-        photo:      firebaseUser.photoURL || profile?.photo || '',
-        isPastor:   profile?.isPastor   || false,
-        isAdmin:    profile?.isAdmin    || false,
-        churchName: profile?.churchName || '',
-      };
 
-      // Restore cloud-synced user data into app state
-      if (profile) {
-        state.bookmarks        = profile.bookmarks        || [];
-        state.highlights       = { ...state.highlights, ...(profile.highlights || {}) };
-        state.userNotes        = profile.userNotes        || {};
-        state.quizPoints       = profile.quizPoints       || 0;
-        state.quizHighscore    = profile.quizHighscore    || 0;
-        state.quizBadges       = profile.quizBadges       || [];
-        state.createdVerseImages = profile.createdVerseImages || [];
-        state.streak           = profile.streak           || 1;
-      }
-
-      saveStateToLocalStorage();
-      applyStylesFromState();
-      renderYouProfile();
-      renderPrayersScreen();
-    }).catch(err => {
-      console.error('[ROL Auth] Error fetching user profile:', err);
-      // Still sign the user in with basic info even if Firestore fetch fails
-      state.currentUser = {
-        uid:      firebaseUser.uid,
-        username: firebaseUser.displayName || firebaseUser.email.split('@')[0],
-        email:    firebaseUser.email,
-        photo:    firebaseUser.photoURL || '',
-        isPastor: false,
-        isAdmin:  false,
-        churchName: '',
-      };
-      applyStylesFromState();
-      renderYouProfile();
-      renderPrayersScreen();
-    });
-  } else {
-    // Signed out
-    if (state.currentUser) {
-      state.currentUser = null;
-      state.bookmarks = [];
-      state.highlights = {};
-      state.userNotes = {};
-      state.quizPoints = 0;
-      state.quizHighscore = 0;
-      state.quizBadges = [];
-      state.createdVerseImages = [];
-      state.streak = 1;
-      state.vodDayOffset = 0;
-      applyStylesFromState();
-      renderYouProfile();
-      renderPrayersScreen();
-    }
-  }
-}
-
-/* ─────────────────────────────────────────────────────────────────────────
-   Register with Email + Password
-   ───────────────────────────────────────────────────────────────────────── */
-async function registerUser(displayName, email, password, isPastor) {
-  try {
-    const cred = await FirebaseApp.registerWithEmail(displayName, email, password);
-    const uid  = cred.user.uid;
-
-    // Create Firestore profile document
-    await FirebaseApp.saveUserProfile(uid, {
-      displayName: displayName.trim(),
-      email:       email.trim().toLowerCase(),
-      isPastor:    !!isPastor,
-      isAdmin:     false,
-      churchName:  '',
-      photo:       '',
-      streak:      1,
-      quizPoints:  0,
-      quizHighscore: 0,
-      quizBadges:  [],
-      bookmarks:   [],
-      highlights:  {},
-      userNotes:   {},
-      createdVerseImages: [],
-      createdAt:   firebase.firestore.FieldValue.serverTimestamp(),
-    });
-
-    return { success: true };
-  } catch (err) {
-    console.error('[ROL Auth] Register error:', err);
-    let msgEn = 'Registration failed. Please try again.';
-    let msgMr = 'नोंदणी अयशस्वी. कृपया पुन्हा प्रयत्न करा.';
-    if (err.code === 'auth/email-already-in-use') {
-      msgEn = 'Email already registered. Please sign in.';
-      msgMr = 'हा ईमेल आधीच नोंदणीकृत आहे. लॉगिन करा.';
-    } else if (err.code === 'auth/weak-password') {
-      msgEn = 'Password must be at least 6 characters.';
-      msgMr = 'पासवर्ड किमान ६ अक्षरांचा असावा.';
-    } else if (err.code === 'auth/invalid-email') {
-      msgEn = 'Invalid email address.';
-      msgMr = 'अवैध ईमेल पत्ता.';
-    }
-    return { success: false, messageEn: msgEn, messageMr: msgMr };
-  }
-}
-
-/* ─────────────────────────────────────────────────────────────────────────
-   Sign In with Email + Password
-   ───────────────────────────────────────────────────────────────────────── */
-async function loginUser(email, password) {
-  try {
-    await FirebaseApp.signInWithEmail(email, password);
-    // onFirebaseAuthChange will handle setting state.currentUser
-    return { success: true };
-  } catch (err) {
-    console.error('[ROL Auth] Login error:', err);
-    let msgEn = 'Sign in failed. Please check your credentials.';
-    let msgMr = 'लॉगिन अयशस्वी. आपली माहिती तपासा.';
-    if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
-      msgEn = 'Invalid email or password.';
-      msgMr = 'अवैध ईमेल किंवा पासवर्ड.';
-    } else if (err.code === 'auth/too-many-requests') {
-      msgEn = 'Too many failed attempts. Please try again later.';
-      msgMr = 'खूप जास्त प्रयत्न. कृपया नंतर पुन्हा करा.';
-    }
-    return { success: false, messageEn: msgEn, messageMr: msgMr };
-  }
-}
-
-/* ─────────────────────────────────────────────────────────────────────────
-   Google Sign-In (Popup)
-   ───────────────────────────────────────────────────────────────────────── */
-async function loginWithGoogle() {
-  try {
-    const result = await FirebaseApp.signInWithGoogle();
-    const firebaseUser = result.user;
-    const uid = firebaseUser.uid;
-
-    // Create/update Firestore profile for Google users (merge so existing data is preserved)
-    const existingProfile = await FirebaseApp.getUserProfile(uid);
-    if (!existingProfile) {
-      // First-time Google sign-in — create profile
-      await FirebaseApp.saveUserProfile(uid, {
-        displayName: firebaseUser.displayName || '',
-        email:       firebaseUser.email || '',
-        photo:       firebaseUser.photoURL || '',
-        isPastor:    false,
-        isAdmin:     false,
-        churchName:  '',
-        streak:      1,
-        quizPoints:  0,
-        quizHighscore: 0,
-        quizBadges:  [],
-        bookmarks:   [],
-        highlights:  {},
-        userNotes:   {},
-        createdVerseImages: [],
-        createdAt:   firebase.firestore.FieldValue.serverTimestamp(),
-      });
-    } else {
-      // Update photo/name from Google in case they changed
-      await FirebaseApp.saveUserProfile(uid, {
-        displayName: firebaseUser.displayName || existingProfile.displayName || '',
-        photo:       firebaseUser.photoURL   || existingProfile.photo || '',
-      });
-    }
-    // onFirebaseAuthChange fires automatically after signInWithPopup
-    return { success: true };
-  } catch (err) {
-    console.error('[ROL Auth] Google sign-in error:', err);
-    let msgEn = 'Google sign-in failed. Please try again.';
-    let msgMr = 'Google लॉगिन अयशस्वी. पुन्हा प्रयत्न करा.';
-    if (err.code === 'auth/popup-closed-by-user') {
-      msgEn = 'Sign-in popup was closed.';
-      msgMr = 'साइन-इन बंद केले.';
-    }
-    return { success: false, messageEn: msgEn, messageMr: msgMr };
-  }
-}
-
-/* ─────────────────────────────────────────────────────────────────────────
-   Sign Out
-   ───────────────────────────────────────────────────────────────────────── */
-async function logoutUser() {
-  if (state.currentUser) {
-    // Sync current data to Firestore before signing out
-    await syncUserDataToFirestore();
-  }
-  await FirebaseApp.signOut();
-  // onFirebaseAuthChange fires automatically and clears state
-  window.location.hash = '#/home';
-}
-
-/* ─────────────────────────────────────────────────────────────────────────
-   Sync user-specific app data to Firestore
-   Called by saveStateToLocalStorage when a user is logged in
-   ───────────────────────────────────────────────────────────────────────── */
-async function syncUserDataToFirestore() {
-  if (!state.currentUser || !state.currentUser.uid) return;
-  try {
-    await FirebaseApp.saveUserData(state.currentUser.uid, {
-      bookmarks:        state.bookmarks        || [],
-      highlights:       state.highlights       || {},
-      userNotes:        state.userNotes        || {},
-      quizPoints:       state.quizPoints       || 0,
-      quizHighscore:    state.quizHighscore    || 0,
-      quizBadges:       state.quizBadges       || [],
-      createdVerseImages: state.createdVerseImages || [],
-      streak:           state.streak           || 1,
-      churchName:       state.currentUser.churchName || '',
-      photo:            state.currentUser.photo || '',
-      displayName:      state.currentUser.username || '',
-    });
-  } catch (err) {
-    console.warn('[ROL Firebase] Firestore sync failed (will retry on next save):', err);
-  }
-}
-
-/* ─────────────────────────────────────────────────────────────────────────
-   Prayer Requests — Firestore-backed
-   ───────────────────────────────────────────────────────────────────────── */
-
-// Submit a new prayer request
 async function submitPrayerRequest(text, isPublic) {
   if (!state.currentUser) return { success: false, messageEn: 'Not signed in' };
   try {

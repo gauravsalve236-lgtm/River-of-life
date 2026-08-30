@@ -1,0 +1,35 @@
+{
+  "name": "River of Life",
+  "short_name": "River of Life",
+  "description": "Bilingual Marathi & English Bible",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "display_override": [
+    "standalone",
+    "minimal-ui",
+    "window-controls-overlay"
+  ],
+  "background_color": "#e91c1e",
+  "theme_color": "#e91c1e",
+  "orientation": "portrait-primary",
+  "permissions": [
+    "camera",
+    "microphone",
+    "audio-capture",
+    "video-capture"
+  ],
+  "icons": [
+    {
+      "src": "assets/icons/icon-192.png?v=403_IOS_CRIMSON_FULLBLEED",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icons/icon-512.png?v=403_IOS_CRIMSON_FULLBLEED",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ]
+}
