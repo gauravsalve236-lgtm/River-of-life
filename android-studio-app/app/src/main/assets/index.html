@@ -490,7 +490,97 @@
         <section id="view-reader" class="app-view split-screen-parent">
           
           <!-- Column 2 (Center): Bible Scripture Pane -->
-          <div class="reader-pane-left">
+          <div class="reader-pane-left" style="display: flex; flex-direction: column; height: 100%; overflow: hidden; position: relative;">
+            <!-- Sticky / Fixed Top Bible Action Bar (ALWAYS PINNED AND VISIBLE AT TOP) -->
+            <div class="bible-chapter-control-header" style="flex-shrink: 0; background: var(--bg-content); border-bottom: 2px solid var(--border); padding: 12px 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); z-index: 15;">
+              <div style="max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px;">
+                
+                <!-- Row 0: Prominent Book & Chapter Tap-To-Change Banner -->
+                <div style="display: flex; justify-content: space-between; align-items: center; background: var(--pill-bg); border: 1.5px solid var(--border); border-radius: 12px; padding: 8px 14px;">
+                  <button id="btn-reader-open-book-picker" style="display: flex; align-items: center; gap: 8px; background: transparent; border: none; cursor: pointer; color: var(--text); font-family: var(--font-ui); font-size: 15px; font-weight: 800; padding: 0;">
+                    <span style="font-size: 18px;">📖</span>
+                    <span id="inline-reader-book-name" style="color: var(--primary);">शास्ते अध्याय १३</span>
+                    <span style="font-size: 11px; background: var(--primary); color: #ffffff; padding: 2px 8px; border-radius: 12px; font-weight: 700; margin-left: 4px;">बदला ▾</span>
+                  </button>
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span id="inline-reader-translation-name" style="font-size: 12px; font-weight: 700; color: var(--text-muted);">मराठी (BSI)</span>
+                    <button id="btn-reader-open-text-settings" style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: var(--bg-content); border: 1px solid var(--border); color: var(--text); font-weight: 800; font-size: 13px; cursor: pointer;" title="Text & Display Settings">
+                      Aa
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Row 1: Direct Quick Selectors for Book, Chapter & Verse -->
+                <div class="bible-top-quick-selectors" style="display: flex; gap: 8px; align-items: flex-end; width: 100%; flex-wrap: wrap;">
+                  <!-- 1. Book Selector Dropdown -->
+                  <div style="flex: 2; min-width: 130px;">
+                    <label style="font-size: 10.5px; font-weight: 800; text-transform: uppercase; color: var(--primary); letter-spacing: 0.5px; display: block; margin-bottom: 4px;">📖 Book / पुस्तक</label>
+                    <select id="reader-quick-book-select" class="dropdown-selector" style="width: 100%; padding: 8px 10px; font-size: 13px; font-weight: 700; border-radius: 10px; background: var(--bg); color: var(--text); border: 1.5px solid var(--border); box-sizing: border-box;">
+                      <!-- Populated with books -->
+                    </select>
+                  </div>
+
+                  <!-- 2. Chapter Selector Dropdown -->
+                  <div style="flex: 1; min-width: 85px;">
+                    <label style="font-size: 10.5px; font-weight: 800; text-transform: uppercase; color: var(--primary); letter-spacing: 0.5px; display: block; margin-bottom: 4px;">🔢 Chapter / अध्याय</label>
+                    <select id="reader-quick-chapter-select" class="dropdown-selector" style="width: 100%; padding: 8px 10px; font-size: 13px; font-weight: 700; border-radius: 10px; background: var(--bg); color: var(--text); border: 1.5px solid var(--border); box-sizing: border-box;">
+                      <!-- Populated with chapters -->
+                    </select>
+                  </div>
+
+                  <!-- 3. Verse Selector Dropdown -->
+                  <div style="flex: 1; min-width: 85px;">
+                    <label style="font-size: 10.5px; font-weight: 800; text-transform: uppercase; color: var(--primary); letter-spacing: 0.5px; display: block; margin-bottom: 4px;">📍 Verse / वचन</label>
+                    <select id="reader-quick-verse-select" class="dropdown-selector" style="width: 100%; padding: 8px 10px; font-size: 13px; font-weight: 700; border-radius: 10px; background: var(--bg); color: var(--text); border: 1.5px solid var(--border); box-sizing: border-box;">
+                      <option value="all">All Verses</option>
+                      <!-- Populated with verses -->
+                    </select>
+                  </div>
+
+                  <!-- 4. Version / Translation Dropdown -->
+                  <div style="flex: 1; min-width: 100px;">
+                    <label style="font-size: 10.5px; font-weight: 800; text-transform: uppercase; color: var(--primary); letter-spacing: 0.5px; display: block; margin-bottom: 4px;">🌐 Version / भाषा</label>
+                    <select id="reader-quick-translation-select" class="dropdown-selector" style="width: 100%; padding: 8px 10px; font-size: 13px; font-weight: 700; border-radius: 10px; background: var(--bg); color: var(--text); border: 1.5px solid var(--border); box-sizing: border-box;">
+                      <option value="mar">मराठी (BSI)</option>
+                      <option value="eng">English (NLT)</option>
+                      <option value="parallel">Parallel</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Row 2: Sarvam AI Voice Narration Bar with Shubh (Default) -->
+                <div class="reader-sarvam-audio-card" style="background: linear-gradient(135deg, rgba(158, 22, 34, 0.06) 0%, rgba(201, 138, 44, 0.10) 100%); border: 1.5px solid rgba(201, 138, 44, 0.35); border-radius: 12px; padding: 8px 12px; display: flex; align-items: center; gap: 10px; justify-content: space-between; flex-wrap: wrap;">
+                  <!-- Primary Play/Listen Button -->
+                  <button id="btn-reader-inline-listen" class="btn-primary-block" style="flex: 1; min-width: 140px; margin: 0; padding: 9px 16px; border-radius: 8px; font-size: 13px; font-weight: 800; background: linear-gradient(135deg, var(--primary) 0%, #7d121b 100%); color: #ffffff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 3px 10px rgba(158, 22, 34, 0.3);">
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" id="inline-play-icon-svg"><polygon points="5 3 19 12 5 3"></polygon></svg>
+                    <span id="reader-inline-listen-text">Start Reading / ऐका 📖</span>
+                  </button>
+
+                  <!-- Voice Selector Dropdown (Shubh first and default!) -->
+                  <div style="flex: 2; min-width: 180px;">
+                    <select id="reader-inline-voice-select" class="dropdown-selector" style="width: 100%; background: var(--bg); color: var(--text); border: 1.5px solid rgba(201, 138, 44, 0.6); border-radius: 8px; padding: 8px 10px; font-size: 12px; font-weight: 700;">
+                      <option value="shubh" selected>🕊️ Shubh (Hindi & Marathi Male - Devotional)</option>
+                      <option value="ratan">🧔 Ratan (Marathi & English Male - Calm & Natural)</option>
+                      <option value="aditya">🎙️ Aditya (Deep & Warm Male)</option>
+                      <option value="aravind">📖 Aravind (Gentle Voice Male)</option>
+                      <option value="priya">👩 Priya (Warm & Soft Female)</option>
+                    </select>
+                  </div>
+
+                  <!-- Speed Selector -->
+                  <select id="reader-inline-speed-select" class="dropdown-selector" style="background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 12px; font-weight: 700; width: 75px;">
+                    <option value="0.85">0.85x</option>
+                    <option value="0.92" selected>0.92x</option>
+                    <option value="1.0">1.00x</option>
+                    <option value="1.15">1.15x</option>
+                  </select>
+
+                  <button id="btn-reader-sarvam-setup-modal" onclick="openModal('modal-audio-settings')" style="font-size: 11px; font-weight: 800; color: var(--primary); background: transparent; border: none; cursor: pointer; text-decoration: underline;">Settings ⚙️</button>
+                </div>
+
+              </div>
+            </div>
+
             <div class="verses-scroller" id="reader-scroll-container">
               <div class="chapter-info-badge">
                 <h2 id="reader-chapter-title">शास्ते</h2>
