@@ -10827,3 +10827,55 @@ window.toggleAudioNarration = function() {
     playbar.classList.add("active");
   }
 };
+
+
+/* ==========================================================================
+   ROBUST AUDIO NARRATION CONTROLLER WITH SARVAM SHUBH VOICE & SPEECH FALLBACK
+   ========================================================================== */
+
+window.toggleAudioNarration = function() {
+  state.sarvamVoice = state.sarvamVoice || "shubh";
+  state.audioSource = "sarvam";
+
+  const fabIcon = document.getElementById("circle-fab-play-icon");
+  const fabBtn = document.getElementById("btn-floating-reader-play-circle");
+
+  // If already playing in Sarvam Queue, toggle pause/resume
+  if (window.SarvamTTS && window.SarvamTTS.queue && window.SarvamTTS.queue.isPlaying) {
+    if (window.SarvamTTS.queue.isPaused) {
+      window.SarvamTTS.queue.resume();
+      showToast("▶ ऑडिओ सुरू केला (Resumed)");
+      if (fabIcon) fabIcon.innerHTML = `<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>`;
+      if (fabBtn) fabBtn.classList.add("playing");
+    } else {
+      window.SarvamTTS.queue.pause();
+      showToast("⏸ ऑडिओ थांबवला (Paused)");
+      if (fabIcon) fabIcon.innerHTML = `<polygon points="7 4 19 12 7 20 7 4"></polygon>`;
+      if (fabBtn) fabBtn.classList.remove("playing");
+    }
+    return;
+  }
+
+  // If SpeechSynthesis is speaking, toggle pause/resume
+  if (typeof speechSynthesis !== 'undefined' && speechSynthesis.speaking) {
+    if (speechSynthesis.paused) {
+      speechSynthesis.resume();
+      showToast("▶ ऑडिओ सुरू केला (Resumed)");
+      if (fabIcon) fabIcon.innerHTML = `<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>`;
+    } else {
+      speechSynthesis.pause();
+      showToast("⏸ ऑडिओ थांबवला (Paused)");
+      if (fabIcon) fabIcon.innerHTML = `<polygon points="7 4 19 12 7 20 7 4"></polygon>`;
+    }
+    return;
+  }
+
+  // Start fresh chapter narration
+  showToast("🕊️ Shubh आवाजात अध्याय वाचन सुरू होत आहे...");
+  if (fabIcon) fabIcon.innerHTML = `<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>`;
+  if (fabBtn) fabBtn.classList.add("playing");
+
+  if (typeof startSpeechNarration === "function") {
+    startSpeechNarration();
+  }
+};
