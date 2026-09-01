@@ -8664,29 +8664,30 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
 }
 
 
-/* Floating Circular Play FAB (media_1788279039293.png) */
+/* Floating Circular Play FAB (media_1788279039293.png & media_1788279620820.png - Bottom Center) */
 .floating-circle-play-fab {
   position: fixed;
-  bottom: calc(85px + env(safe-area-inset-bottom, 0px));
-  right: 22px;
-  width: 58px;
-  height: 58px;
+  bottom: calc(75px + env(safe-area-inset-bottom, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   background: linear-gradient(135deg, #8B1D24 0%, #680d14 100%);
   color: #ffffff;
   border: 2px solid rgba(229, 168, 59, 0.6);
-  box-shadow: 0 10px 28px rgba(139, 29, 36, 0.45), 0 0 16px rgba(229, 168, 59, 0.25);
+  box-shadow: 0 10px 28px rgba(139, 29, 36, 0.4), 0 0 16px rgba(229, 168, 59, 0.25);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   z-index: 999;
   transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s;
-  animation: floatPulse 3s ease-in-out infinite;
+  animation: floatPulseCenter 3s ease-in-out infinite;
 }
 
 .floating-circle-play-fab:hover {
-  transform: scale(1.1) translateY(-2px);
+  transform: translateX(-50%) scale(1.1) translateY(-2px);
   box-shadow: 0 14px 34px rgba(139, 29, 36, 0.55);
 }
 
@@ -8697,4 +8698,9 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
 
 .floating-circle-play-fab.playing svg {
   margin-left: 0;
+}
+
+@keyframes floatPulseCenter {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(-3px); }
 }
