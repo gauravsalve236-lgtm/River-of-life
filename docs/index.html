@@ -450,92 +450,16 @@
           <!-- Column 2 (Center): Bible Scripture Pane -->
           <div class="reader-pane-left" style="display: flex; flex-direction: column; height: 100%; overflow: hidden; position: relative;">
             <!-- Sticky / Fixed Top Bible Action Bar (ALWAYS PINNED AND VISIBLE AT TOP) -->
-            <div class="bible-chapter-control-header" style="flex-shrink: 0; background: var(--bg-content); border-bottom: 2px solid var(--border); padding: 12px 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); z-index: 15;">
-              <div style="max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px;">
-                
-                <!-- Row 0: Prominent Book & Chapter Tap-To-Change Banner -->
-                <div style="display: flex; justify-content: space-between; align-items: center; background: var(--pill-bg); border: 1.5px solid var(--border); border-radius: 12px; padding: 8px 14px;">
-                  <button id="btn-reader-open-book-picker" style="display: flex; align-items: center; gap: 8px; background: transparent; border: none; cursor: pointer; color: var(--text); font-family: var(--font-ui); font-size: 15px; font-weight: 800; padding: 0;">
-                    <span style="font-size: 18px;">📖</span>
-                    <span id="inline-reader-book-name" style="color: var(--primary);">शास्ते अध्याय १३</span>
-                    <span style="font-size: 11px; background: var(--primary); color: #ffffff; padding: 2px 8px; border-radius: 12px; font-weight: 700; margin-left: 4px;">बदला ▾</span>
-                  </button>
-                  <div style="display: flex; align-items: center; gap: 8px;">
-                    <span id="inline-reader-translation-name" style="font-size: 12px; font-weight: 700; color: var(--text-muted);">मराठी (BSI)</span>
-                    <button id="btn-reader-open-text-settings" style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: var(--bg-content); border: 1px solid var(--border); color: var(--text); font-weight: 800; font-size: 13px; cursor: pointer;" title="Text & Display Settings">
-                      Aa
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Row 1: Direct Quick Selectors for Book, Chapter & Verse -->
-                <div class="bible-top-quick-selectors" style="display: flex; gap: 8px; align-items: flex-end; width: 100%; flex-wrap: wrap;">
-                  <!-- 1. Book Selector Dropdown -->
-                  <div style="flex: 2; min-width: 130px;">
-                    <label style="font-size: 10.5px; font-weight: 800; text-transform: uppercase; color: var(--primary); letter-spacing: 0.5px; display: block; margin-bottom: 4px;">📖 Book / पुस्तक</label>
-                    <select id="reader-quick-book-select" class="dropdown-selector" style="width: 100%; padding: 8px 10px; font-size: 13px; font-weight: 700; border-radius: 10px; background: var(--bg); color: var(--text); border: 1.5px solid var(--border); box-sizing: border-box;">
-                      <!-- Populated with books -->
-                    </select>
-                  </div>
-
-                  <!-- 2. Chapter Selector Dropdown -->
-                  <div style="flex: 1; min-width: 85px;">
-                    <label style="font-size: 10.5px; font-weight: 800; text-transform: uppercase; color: var(--primary); letter-spacing: 0.5px; display: block; margin-bottom: 4px;">🔢 Chapter / अध्याय</label>
-                    <select id="reader-quick-chapter-select" class="dropdown-selector" style="width: 100%; padding: 8px 10px; font-size: 13px; font-weight: 700; border-radius: 10px; background: var(--bg); color: var(--text); border: 1.5px solid var(--border); box-sizing: border-box;">
-                      <!-- Populated with chapters -->
-                    </select>
-                  </div>
-
-                  <!-- 3. Verse Selector Dropdown -->
-                  <div style="flex: 1; min-width: 85px;">
-                    <label style="font-size: 10.5px; font-weight: 800; text-transform: uppercase; color: var(--primary); letter-spacing: 0.5px; display: block; margin-bottom: 4px;">📍 Verse / वचन</label>
-                    <select id="reader-quick-verse-select" class="dropdown-selector" style="width: 100%; padding: 8px 10px; font-size: 13px; font-weight: 700; border-radius: 10px; background: var(--bg); color: var(--text); border: 1.5px solid var(--border); box-sizing: border-box;">
-                      <option value="all">All Verses</option>
-                      <!-- Populated with verses -->
-                    </select>
-                  </div>
-
-                  <!-- 4. Version / Translation Dropdown -->
-                  <div style="flex: 1; min-width: 100px;">
-                    <label style="font-size: 10.5px; font-weight: 800; text-transform: uppercase; color: var(--primary); letter-spacing: 0.5px; display: block; margin-bottom: 4px;">🌐 Version / भाषा</label>
-                    <select id="reader-quick-translation-select" class="dropdown-selector" style="width: 100%; padding: 8px 10px; font-size: 13px; font-weight: 700; border-radius: 10px; background: var(--bg); color: var(--text); border: 1.5px solid var(--border); box-sizing: border-box;">
-                      <option value="mar">मराठी (BSI)</option>
-                      <option value="eng">English (NLT)</option>
-                      <option value="parallel">Parallel</option>
-                    </select>
-                  </div>
-                </div>
-
-                <!-- Row 2: Sarvam AI Voice Narration Bar with Shubh (Default) -->
-                <div class="reader-sarvam-audio-card" style="background: linear-gradient(135deg, rgba(158, 22, 34, 0.06) 0%, rgba(201, 138, 44, 0.10) 100%); border: 1.5px solid rgba(201, 138, 44, 0.35); border-radius: 12px; padding: 8px 12px; display: flex; align-items: center; gap: 10px; justify-content: space-between; flex-wrap: wrap;">
-                  <!-- Primary Play/Listen Button -->
-                  <button id="btn-reader-inline-listen" class="btn-primary-block" style="flex: 1; min-width: 140px; margin: 0; padding: 9px 16px; border-radius: 8px; font-size: 13px; font-weight: 800; background: linear-gradient(135deg, var(--primary) 0%, #7d121b 100%); color: #ffffff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 3px 10px rgba(158, 22, 34, 0.3);">
-                    <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" id="inline-play-icon-svg"><polygon points="5 3 19 12 5 3"></polygon></svg>
-                    <span id="reader-inline-listen-text">Start Reading / ऐका 📖</span>
-                  </button>
-
-                  <!-- Voice Selector Dropdown (Shubh first and default!) -->
-                  <div style="flex: 2; min-width: 180px;">
-                    <select id="reader-inline-voice-select" class="dropdown-selector" style="width: 100%; background: var(--bg); color: var(--text); border: 1.5px solid rgba(201, 138, 44, 0.6); border-radius: 8px; padding: 8px 10px; font-size: 12px; font-weight: 700;">
-                      <option value="shubh" selected>🕊️ Shubh (Hindi & Marathi Male - Devotional)</option>
-                      <option value="ratan">🧔 Ratan (Marathi & English Male - Calm & Natural)</option>
-                      <option value="aditya">🎙️ Aditya (Deep & Warm Male)</option>
-                      <option value="aravind">📖 Aravind (Gentle Voice Male)</option>
-                      <option value="priya">👩 Priya (Warm & Soft Female)</option>
-                    </select>
-                  </div>
-
-                  <!-- Speed Selector -->
-                  <select id="reader-inline-speed-select" class="dropdown-selector" style="background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 12px; font-weight: 700; width: 75px;">
-                    <option value="0.85">0.85x</option>
-                    <option value="0.92" selected>0.92x</option>
-                    <option value="1.0">1.00x</option>
-                    <option value="1.15">1.15x</option>
-                  </select>
-
-                  <button id="btn-reader-sarvam-setup-modal" onclick="openModal('modal-audio-settings')" style="font-size: 11px; font-weight: 800; color: var(--primary); background: transparent; border: none; cursor: pointer; text-decoration: underline;">Settings ⚙️</button>
-                </div>
-
+            <!-- Clean Minimal Top Chapter Bar (Single-line, Uncluttered) -->
+            <div class="bible-minimal-chapter-bar">
+              <button id="btn-reader-open-book-picker" class="reader-chapter-pill" title="Change Book/Chapter">
+                <span class="icon">📖</span>
+                <span id="inline-reader-book-name" class="name">शास्ते १३</span>
+                <span class="badge">बदला ▾</span>
+              </button>
+              <div class="reader-right-tools">
+                <span id="inline-reader-translation-name" class="trans-label">मराठी (BSI)</span>
+                <button id="btn-reader-open-text-settings" class="reader-tool-btn" title="Text & Display Settings">Aa</button>
               </div>
             </div>
 
@@ -609,6 +533,16 @@
               </div>
             </div>
           </div>
+        
+        <!-- Floating Bottom Audio Play Button (Sarvam Shubh Voice) -->
+        <button id="btn-floating-reader-play" class="floating-reader-play-btn" onclick="toggleAudioNarration()" title="Listen to Chapter (Shubh Voice)">
+          <div class="play-icon-circle">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+          </div>
+          <span class="play-btn-title">ऐका / Listen</span>
+          <span class="play-btn-voice-tag">🕊️ Shubh</span>
+        </button>
+
         </section>
 
         <!-- VIEW 3: READING PLANS VIEW (Redesigned with Discover Subtabs) -->
@@ -2235,90 +2169,70 @@
     </div>
 
     <!-- Complete Pastoral Prayer Request Form Modal -->
-    <div id="modal-prayer-request" class="meeting-modal-overlay" style="display: none; align-items: center; justify-content: center; z-index: 10000; padding: 16px;">
-      <div style="max-width: 560px; width: 100%; max-height: 90vh; background: var(--surface); color: var(--text); border-radius: 20px; border: 1.5px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.4); display: flex; flex-direction: column; overflow: hidden; margin: auto; position: relative;">
+    <div id="modal-prayer-request" class="pastoral-prayer-modal-overlay" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 99999; padding: 16px;">
+      <div class="prayer-modal-card" style="max-width: 520px; width: 100%; max-height: 90vh; background: var(--bg-content, #ffffff); color: var(--text, #1e293b); border-radius: 22px; border: 1.5px solid var(--border); box-shadow: 0 24px 60px rgba(0,0,0,0.35); display: flex; flex-direction: column; overflow: hidden; margin: auto; position: relative;">
         
         <!-- Modal Header -->
-        <div style="padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, rgba(39, 58, 37, 0.95), rgba(22, 33, 20, 0.98)); color: #fff;">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <span style="font-size: 22px;">🙏</span>
+        <div style="padding: 18px 22px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #8B1D24 0%, #680d14 100%); color: #ffffff;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="font-size: 24px;">🙏</span>
             <div>
-              <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #fff;">Prayer Request Form / प्रार्थना विनंती</h3>
-              <span style="font-size: 11px; color: rgba(255,255,255,0.75);">River of Life Pastoral Prayer Team</span>
+              <h3 style="margin: 0; font-size: 17px; font-weight: 800; color: #ffffff;">Prayer Request Form / प्रार्थना विनंती</h3>
+              <span style="font-size: 11.5px; color: rgba(255,255,255,0.85);">River of Life Pastoral Prayer Team • जीवन नदी प्रार्थना कक्ष</span>
             </div>
           </div>
-          <button onclick="closePrayerRequestForm()" style="background: rgba(255,255,255,0.15); border: none; color: #fff; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center;">✕</button>
+          <button onclick="closePrayerRequestForm()" style="background: rgba(255,255,255,0.2); border: none; color: #ffffff; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: 800; display: flex; align-items: center; justify-content: center; transition: background 0.15s;">✕</button>
         </div>
 
         <!-- Modal Body Form -->
-        <form id="form-pastoral-prayer-request" onsubmit="submitPastoralPrayerRequest(event)" style="padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; text-align: left;">
+        <form id="form-pastoral-prayer-request" onsubmit="submitPastoralPrayerRequest(event)" style="padding: 22px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; text-align: left;">
           
-          <p style="font-size: 13px; color: var(--text-muted); margin: 0 0 4px 0; line-height: 1.5;">
-            Thank you for trusting us with your prayer request. Please fill out the details below so that our team can support you in prayer.
+          <p style="font-size: 13.5px; color: var(--text-muted); margin: 0; line-height: 1.5;">
+            तुमची प्रार्थना विनंती आमच्या पास्टोरल टीमकडे पाठवा. आम्ही तुमच्यासाठी निरंतर प्रार्थना करू. (Please fill out the details below so our pastoral team can pray with you.)
           </p>
 
           <!-- Contact Information Section -->
-          <div style="background: var(--bg); padding: 14px; border-radius: 12px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 12px;">
-            <strong style="font-size: 12px; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px;">Contact Information / संपर्क माहिती</strong>
-            
-            <div>
-              <label style="font-size: 12.5px; font-weight: 700; color: var(--text); display: block; margin-bottom: 4px;">Full Name *</label>
-              <input type="text" id="prayer-req-fullname" required class="dropdown-selector" style="width: 100%; box-sizing: border-box;" placeholder="Enter your full name">
+          <div style="background: var(--pill-bg, #f5f1e8); padding: 14px; border-radius: 14px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px;">
+            <div style="display: flex; gap: 10px;">
+              <div style="flex: 1;">
+                <label for="prayer-req-fullname" style="font-size: 11.5px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; display: block;">Full Name / पूर्ण नाव *</label>
+                <input type="text" id="prayer-req-fullname" required class="dropdown-selector" style="width: 100%; box-sizing: border-box; padding: 10px; font-size: 13px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-content);" placeholder="उदा. राहुल शिंदे">
+              </div>
+              <div style="flex: 1;">
+                <label for="prayer-req-phone" style="font-size: 11.5px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; display: block;">Phone / मोबाइल नंबर</label>
+                <input type="tel" id="prayer-req-phone" class="dropdown-selector" style="width: 100%; box-sizing: border-box; padding: 10px; font-size: 13px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-content);" placeholder="+91 9876543210">
+              </div>
             </div>
-
             <div>
-              <label style="font-size: 12.5px; font-weight: 700; color: var(--text); display: block; margin-bottom: 4px;">Email Address *</label>
-              <input type="email" id="prayer-req-email" required class="dropdown-selector" style="width: 100%; box-sizing: border-box;" placeholder="name@example.com">
-            </div>
-
-            <div>
-              <label style="font-size: 12.5px; font-weight: 700; color: var(--text); display: block; margin-bottom: 4px;">Phone Number (Optional)</label>
-              <input type="tel" id="prayer-req-phone" class="dropdown-selector" style="width: 100%; box-sizing: border-box;" placeholder="+91 98765 43210">
+              <label for="prayer-req-email" style="font-size: 11.5px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; display: block;">Email Address (Optional)</label>
+              <input type="email" id="prayer-req-email" class="dropdown-selector" style="width: 100%; box-sizing: border-box; padding: 10px; font-size: 13px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-content);" placeholder="yourname@gmail.com">
             </div>
           </div>
 
-          <!-- Request Details Section -->
-          <div style="background: var(--bg); padding: 14px; border-radius: 12px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px;">
-            <strong style="font-size: 12px; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px;">Request Details / प्रार्थनेचा विषय *</strong>
-            <label style="font-size: 12px; color: var(--text-muted);">Please provide a brief description of the situation or need you would like us to pray for.</label>
-            <textarea id="prayer-req-details" required rows="4" class="dropdown-selector" style="width: 100%; box-sizing: border-box; resize: vertical;" placeholder="Write your prayer request here... (उदा. आरोग्यासाठी प्रार्थना, कुटुंबातील शांती...)"></textarea>
+          <!-- Prayer Request Category & Details -->
+          <div>
+            <label for="prayer-req-category" style="font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 6px; display: block;">Prayer Category / विषय *</label>
+            <select id="prayer-req-category" class="dropdown-selector" style="width: 100%; box-sizing: border-box; padding: 10px; font-size: 13px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-content);">
+              <option value="healing">🌿 Health & Healing / आरोग्य व दैवी चंगाई</option>
+              <option value="family">👨‍👩‍👧‍👦 Family & Relationship / कुटुंब व नातेसंबंध</option>
+              <option value="deliverance">🕊️ Peace & Deliverance / शांती व मुक्ती</option>
+              <option value="finance">💼 Job, Career & Finance / नोकरी, व्यवसाय व आर्थिक प्रगती</option>
+              <option value="spiritual">📖 Spiritual Growth / आत्मिक उन्नती</option>
+              <option value="thanksgiving">🙌 Thanksgiving & Praise / उपकारस्तुती व धन्यवाद</option>
+              <option value="other">✨ Other / इतर विषय</option>
+            </select>
           </div>
 
-          <!-- Privacy & Sharing Preferences -->
-          <div style="background: var(--bg); padding: 14px; border-radius: 12px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px;">
-            <strong style="font-size: 12px; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px;">Privacy & Sharing Preferences</strong>
-            
-            <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; color: var(--text); cursor: pointer;">
-              <input type="radio" name="prayer_sharing_level" value="private" checked style="margin-top: 2px;">
-              <span>Keep this request private (for the pastoral/prayer team only).</span>
-            </label>
-
-            <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; color: var(--text); cursor: pointer;">
-              <input type="radio" name="prayer_sharing_level" value="chain" style="margin-top: 2px;">
-              <span>Share this request with the church prayer chain/group.</span>
-            </label>
-
-            <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; color: var(--text); cursor: pointer;">
-              <input type="radio" name="prayer_sharing_level" value="anonymous" style="margin-top: 2px;">
-              <span>Keep this request anonymous (do not share my name).</span>
-            </label>
-          </div>
-
-          <!-- Follow-up Preference -->
-          <div style="background: var(--bg); padding: 14px; border-radius: 12px; border: 1px solid var(--border);">
-            <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; color: var(--text); cursor: pointer; margin: 0;">
-              <input type="checkbox" id="prayer-req-followup" style="margin-top: 2px;">
-              <span style="font-weight: 600;">I would like a member of the prayer team to contact me regarding this request.</span>
-            </label>
+          <div>
+            <label for="prayer-req-details" style="font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 6px; display: block;">Prayer Petition / तुमची प्रार्थना विनंती *</label>
+            <textarea id="prayer-req-details" required rows="4" class="dropdown-selector" style="width: 100%; box-sizing: border-box; padding: 10px; font-size: 13px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-content); resize: vertical; font-family: var(--font-sans);" placeholder="तुमची विनंती येथे सविस्तर लिहा... (उदा. आरोग्यासाठी प्रार्थना, कुटुंबातील शांती व आशीर्वाद...)"></textarea>
           </div>
 
           <!-- Submit Button -->
-          <button type="submit" class="btn-primary-block" style="padding: 14px; font-size: 14px; font-weight: 800; border-radius: 12px; background: linear-gradient(135deg, #dfa938 0%, #c99328 100%); border: none; color: #172116; cursor: pointer; box-shadow: 0 4px 16px rgba(223, 169, 56, 0.35);">
+          <button type="submit" class="btn-primary-block" style="padding: 14px; font-size: 14px; font-weight: 800; border-radius: 12px; background: linear-gradient(135deg, #8B1D24 0%, #680d14 100%); color: #ffffff; border: none; cursor: pointer; box-shadow: 0 4px 16px rgba(139, 29, 36, 0.35); transition: transform 0.15s;">
             🙏 Submit Prayer Request / प्रार्थना विनंती पाठवा
           </button>
-
         </form>
-
       </div>
     </div>
 

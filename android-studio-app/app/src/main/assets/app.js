@@ -10771,3 +10771,59 @@ window.toggleViewAllPrayers = function() {
     if (btn) btn.textContent = "View All Prayers (8+) →";
   }
 };
+
+
+/* ==========================================================================
+   ENHANCED GLOBAL AUDIO & PRAYER HANDLERS
+   ========================================================================== */
+
+window.openPrayerRequestForm = function() {
+  const modal = document.getElementById("modal-prayer-request");
+  if (modal) {
+    modal.style.display = "flex";
+  }
+};
+
+window.closePrayerRequestForm = function() {
+  const modal = document.getElementById("modal-prayer-request");
+  if (modal) {
+    modal.style.display = "none";
+  }
+};
+
+window.submitPastoralPrayerRequest = function(e) {
+  if (e) e.preventDefault();
+  const fullName = document.getElementById("prayer-req-fullname")?.value.trim() || "मित्र";
+  showToast(`🙏 धन्यवाद ${fullName}! तुमची प्रार्थना विनंती पाठवली आहे. आमची टीम तुमच्यासाठी प्रार्थना करत आहे.`);
+  closePrayerRequestForm();
+  const form = document.getElementById("form-pastoral-prayer-request");
+  if (form) form.reset();
+};
+
+window.toggleAudioNarration = function() {
+  // Ensure default Shubh voice
+  state.sarvamVoice = state.sarvamVoice || "shubh";
+  state.audioSource = "sarvam";
+
+  // If floating playbar is playing, toggle play/pause
+  const playbarBtn = document.getElementById("playbar-btn-play");
+  const playbar = document.getElementById("floating-audio-playbar");
+
+  if (window.nativeAudioEngine && window.nativeAudioEngine.isPlaying) {
+    window.nativeAudioEngine.togglePlayPause();
+    showToast("ऑडिओ थांबवला (Paused)");
+    return;
+  }
+
+  // Otherwise trigger full chapter narration with Shubh voice
+  showToast("🕊️ Shubh आवाजात अध्याय वाचन सुरू करत आहे...");
+  if (typeof startNarrationQueue === "function") {
+    startNarrationQueue();
+  } else if (playbarBtn) {
+    playbarBtn.click();
+  }
+  
+  if (playbar) {
+    playbar.classList.add("active");
+  }
+};

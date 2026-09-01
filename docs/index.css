@@ -8431,3 +8431,158 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
 .content-view-viewport {
   background-color: var(--bg) !important;
 }
+
+
+/* ==========================================================================
+   MINIMAL BIBLE READER HEADER & FLOATING BOTTOM PLAY BUTTON
+   ========================================================================== */
+
+.bible-minimal-chapter-bar {
+  flex-shrink: 0;
+  background: var(--bg-content);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.reader-chapter-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--pill-bg);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 6px 14px;
+  cursor: pointer;
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 800;
+  transition: all 0.15s ease;
+}
+
+.reader-chapter-pill:hover {
+  background: var(--primary-light);
+  border-color: var(--primary);
+}
+
+.reader-chapter-pill .badge {
+  font-size: 10.5px;
+  background: var(--primary);
+  color: #ffffff;
+  padding: 2px 7px;
+  border-radius: 10px;
+  font-weight: 700;
+}
+
+.reader-right-tools {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.trans-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.reader-tool-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--bg-content);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-weight: 800;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+/* Floating Bottom Audio Play Button (Sarvam Shubh Voice) */
+.floating-reader-play-btn {
+  position: fixed;
+  bottom: calc(85px + env(safe-area-inset-bottom, 0px));
+  right: 24px;
+  background: linear-gradient(135deg, #8B1D24 0%, #680d14 100%);
+  color: #ffffff;
+  border: 1.5px solid rgba(229, 168, 59, 0.5);
+  border-radius: 30px;
+  padding: 10px 18px 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(139, 29, 36, 0.35), 0 0 15px rgba(229, 168, 59, 0.2);
+  z-index: 100;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: floatPulse 3s ease-in-out infinite;
+}
+
+.floating-reader-play-btn:hover {
+  transform: scale(1.05) translateY(-2px);
+  box-shadow: 0 14px 30px rgba(139, 29, 36, 0.45);
+}
+
+.floating-reader-play-btn .play-icon-circle {
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.floating-reader-play-btn .play-btn-title {
+  font-family: var(--font-ui);
+  font-size: 13.5px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+}
+
+.floating-reader-play-btn .play-btn-voice-tag {
+  font-size: 11px;
+  font-weight: 800;
+  background: rgba(255, 211, 105, 0.25);
+  color: #ffd369;
+  border: 1px solid rgba(255, 211, 105, 0.4);
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+@keyframes floatPulse {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+/* Luminous High-Quality Daily Bible Verse Background Overlay */
+.daily-verse-tint {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.35) 45%, rgba(0, 0, 0, 0.65) 100%) !important;
+  z-index: 2;
+}
+
+.daily-verse-card-bg {
+  filter: brightness(0.95) saturate(1.15) !important;
+}
+
+/* Pastoral Prayer Modal Fixes */
+.pastoral-prayer-modal-overlay {
+  animation: fadeInModal 0.2s ease-out;
+}
+@keyframes fadeInModal {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
