@@ -13519,10 +13519,17 @@ window.copyDailyVerseText = function() {
    RIVER OF LIFE 3-CARD SPIRITUAL FLOW LOGIC (HEADWATERS, CONFLUENCE, RESET)
    ========================================================================== */
 
-// 1. THE HEADWATERS MODAL LOGIC (ELEVATED SLEEK AUDIO TRACK & PROGRESS)
+// 1. THE HEADWATERS MODAL LOGIC (GUIDED AUDIO PRAYER, WAVEFORM, 1-MIN BREATH & JOURNAL)
+let headwatersBreathTimer = null;
+let headwatersBreathSecRemaining = 60;
+let headwatersBreathPhaseInterval = null;
+
 window.openHeadwatersModal = function() {
   const modal = document.getElementById("modal-headwaters-sanctuary");
-  if (modal) modal.style.display = "flex";
+  if (modal) {
+    modal.style.display = "flex";
+    loadHeadwatersPersonalPrayer();
+  }
 };
 
 window.closeHeadwatersModal = function() {
@@ -13543,23 +13550,26 @@ window.closeHeadwatersModal = function() {
   }
   const progressBar = document.getElementById("headwaters-progress-bar");
   if (progressBar) progressBar.style.width = '0%';
-  const timeEl = document.getElementById("headwaters-audio-time");
-  if (timeEl) timeEl.textContent = '0:45';
+  const playerBox = document.getElementById("headwaters-audio-player-box");
+  if (playerBox) playerBox.classList.remove("playing");
+  
+  // Stop breath pause if running
+  stopHeadwatersBreathPause();
 };
 
 window.playHeadwatersMorningAudio = function(btnElement) {
   const icon = document.getElementById("headwaters-play-icon");
   const progressBar = document.getElementById("headwaters-progress-bar");
   const timeEl = document.getElementById("headwaters-audio-time");
+  const playerBox = document.getElementById("headwaters-audio-player-box");
   
   const text = "हे स्वर्गीय पित्या... या नवीन दिवसाच्या उषःकाली, मी माझे संपूर्ण मन व जीवन तुझ्या हातात सोपवतो. विलापगीते सांगते, की तुझ्या दया रोज सकाळी नव्या असतात... तुझा विश्वासूपणा महान आहे. आजचा प्रत्येक निर्णय, विचार आणि शब्द, तुझ्या प्रीतीचा सुगंध पसरवणारा असू दे... येशूच्या नावात, आमेन.";
   
   // Toggle Pause if already playing
   if (window.headwatersAudioInstance && !window.headwatersAudioInstance.paused) {
     window.headwatersAudioInstance.pause();
-    if (icon) {
-      icon.innerHTML = '<polygon points="6 4 20 12 6 20 6 4"></polygon>';
-    }
+    if (icon) icon.innerHTML = '<polygon points="6 4 20 12 6 20 6 4"></polygon>';
+    if (playerBox) playerBox.classList.remove("playing");
     if (window.headwatersProgressInterval) {
       clearInterval(window.headwatersProgressInterval);
       window.headwatersProgressInterval = null;
@@ -13577,6 +13587,7 @@ window.playHeadwatersMorningAudio = function(btnElement) {
   if (icon) {
     icon.innerHTML = '<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>';
   }
+  if (playerBox) playerBox.classList.add("playing");
   if (progressBar && progressBar.style.width === '0%') progressBar.style.width = '4%';
   if (timeEl) timeEl.textContent = '0:01 / 0:45';
   
@@ -13608,11 +13619,13 @@ window.playHeadwatersMorningAudio = function(btnElement) {
     
     audio.onplay = () => {
       if (icon) icon.innerHTML = '<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>';
+      if (playerBox) playerBox.classList.add("playing");
       showToast("🔊 सकाळची प्रार्थना सुरू आहे (Natural Devotional Marathi Voice) ✨");
     };
     
     audio.onended = () => {
       if (icon) icon.innerHTML = '<polygon points="6 4 20 12 6 20 6 4"></polygon>';
+      if (playerBox) playerBox.classList.remove("playing");
       if (progressBar) progressBar.style.width = '0%';
       if (timeEl) timeEl.textContent = '0:45';
       window.headwatersAudioInstance = null;
@@ -13620,7 +13633,7 @@ window.playHeadwatersMorningAudio = function(btnElement) {
     };
     
     audio.onerror = () => {
-      console.warn("Direct audio not found, fallback to speech synthesis with dynamic track animation");
+      console.warn("Direct audio not found, fallback to speech synthesis with dynamic wave rhythm");
       if (window.speechSynthesis) {
         window.speechSynthesis.cancel();
         const utter = new SpeechSynthesisUtterance(text);
@@ -13630,6 +13643,7 @@ window.playHeadwatersMorningAudio = function(btnElement) {
         let startT = Date.now();
         const estDuration = 22000;
         
+        if (playerBox) playerBox.classList.add("playing");
         if (window.headwatersProgressInterval) clearInterval(window.headwatersProgressInterval);
         window.headwatersProgressInterval = setInterval(() => {
           const elapsed = Date.now() - startT;
@@ -13645,6 +13659,7 @@ window.playHeadwatersMorningAudio = function(btnElement) {
         
         utter.onend = () => {
           if (icon) icon.innerHTML = '<polygon points="6 4 20 12 6 20 6 4"></polygon>';
+          if (playerBox) playerBox.classList.remove("playing");
           if (progressBar) progressBar.style.width = '0%';
           if (timeEl) timeEl.textContent = '0:45';
           if (window.headwatersProgressInterval) {
@@ -13664,6 +13679,122 @@ window.playHeadwatersMorningAudio = function(btnElement) {
   } catch (err) {
     console.error(err);
   }
+};
+
+// 1-MIN MINDFUL BREATH & REFLECTION LOGIC
+window.toggleHeadwatersBreathPause = function() {
+  if (headwatersBreathTimer) {
+    stopHeadwatersBreathPause();
+    showToast("⏹ Breath Pause Stopped / विसावा थांबवला");
+    return;
+  }
+  startHeadwatersBreathPause();
+};
+
+function startHeadwatersBreathPause() {
+  headwatersBreathSecRemaining = 60;
+  const btnIcon = document.getElementById("headwaters-breath-btn-icon");
+  const timerText = document.getElementById("headwaters-breath-timer-text");
+  const instruction = document.getElementById("headwaters-breath-instruction");
+  const orb = document.getElementById("headwaters-breath-orb");
+
+  if (btnIcon) btnIcon.textContent = "⏸";
+  if (timerText) timerText.textContent = "1:00";
+  showToast("🧘 १ मिनिटांचा शांत विसावा सुरू झाला (Inhale Peace)");
+
+  let breathCycle = 0; // 0: inhale, 1: hold, 2: exhale
+  const runBreathPhase = () => {
+    if (!orb || !instruction) return;
+    if (breathCycle % 3 === 0) {
+      instruction.textContent = "श्वास घ्या (Inhale Peace & Life)...";
+      orb.className = "headwaters-breath-orb inhale";
+    } else if (breathCycle % 3 === 1) {
+      instruction.textContent = "शांत व्हा व देवाची उपस्थिती अनुभवा (Be Still)...";
+      orb.className = "headwaters-breath-orb";
+    } else {
+      instruction.textContent = "हळूवार श्वास सोडा (Exhale Stress & Worries)...";
+      orb.className = "headwaters-breath-orb exhale";
+    }
+    breathCycle++;
+  };
+
+  runBreathPhase();
+  headwatersBreathPhaseInterval = setInterval(runBreathPhase, 4000);
+
+  headwatersBreathTimer = setInterval(() => {
+    headwatersBreathSecRemaining--;
+    if (timerText) {
+      const s = headwatersBreathSecRemaining.toString().padStart(2, '0');
+      timerText.textContent = `0:${s}`;
+    }
+    if (headwatersBreathSecRemaining <= 0) {
+      stopHeadwatersBreathPause();
+      if (instruction) instruction.textContent = "✨ विसावा पूर्ण झाला! देव तुमच्या पाठीशी आहे.";
+      showToast("✨ १ मिनिटांचा शांत विसावा पूर्ण झाला (Peace & Strength Received)");
+    }
+  }, 1000);
+}
+
+function stopHeadwatersBreathPause() {
+  if (headwatersBreathTimer) {
+    clearInterval(headwatersBreathTimer);
+    headwatersBreathTimer = null;
+  }
+  if (headwatersBreathPhaseInterval) {
+    clearInterval(headwatersBreathPhaseInterval);
+    headwatersBreathPhaseInterval = null;
+  }
+  const btnIcon = document.getElementById("headwaters-breath-btn-icon");
+  const timerText = document.getElementById("headwaters-breath-timer-text");
+  const instruction = document.getElementById("headwaters-breath-instruction");
+  const orb = document.getElementById("headwaters-breath-orb");
+
+  if (btnIcon) btnIcon.textContent = "▶";
+  if (timerText) timerText.textContent = "1 Min";
+  if (instruction) instruction.textContent = "श्वास घ्या व देवाची शांती अनुभवा (Inhale Peace)";
+  if (orb) orb.className = "headwaters-breath-orb";
+}
+
+// PERSONAL JOURNAL PROMPT & PERSISTENCE
+window.saveHeadwatersPersonalPrayer = function() {
+  const input = document.getElementById("headwaters-personal-prayer-input");
+  const status = document.getElementById("headwaters-journal-status");
+  if (!input) return;
+
+  const todayStr = new Date().toISOString().split("T")[0];
+  const val = input.value.trim();
+  localStorage.setItem(`river_headwaters_prayer_${todayStr}`, val);
+
+  if (status) {
+    status.textContent = "💾 Saved / जतन झाले";
+    status.style.color = "#16a34a";
+    setTimeout(() => {
+      if (status) {
+        status.textContent = "💾 Autosaved";
+        status.style.color = "var(--text-muted)";
+      }
+    }, 1800);
+  }
+};
+
+window.loadHeadwatersPersonalPrayer = function() {
+  const input = document.getElementById("headwaters-personal-prayer-input");
+  if (!input) return;
+  const todayStr = new Date().toISOString().split("T")[0];
+  const saved = localStorage.getItem(`river_headwaters_prayer_${todayStr}`) || "";
+  input.value = saved;
+};
+
+window.appendHeadwatersPrompt = function(promptText) {
+  const input = document.getElementById("headwaters-personal-prayer-input");
+  if (!input) return;
+  if (input.value && !input.value.endsWith(" ")) {
+    input.value += " " + promptText;
+  } else {
+    input.value += promptText;
+  }
+  input.focus();
+  saveHeadwatersPersonalPrayer();
 };
 
 // 2. THE DAILY CONFLUENCE LOGIC
