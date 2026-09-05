@@ -14240,111 +14240,326 @@ window.closeHeadwatersModal = function() {
   if (playerBox) playerBox.classList.remove("playing");
 };
 
-window.playHeadwatersMorningAudio = function(btnElement) {
+window.headwatersAudioPlayer = {
+  isPlaying: false,
+  isPaused: false,
+  progressInterval: null,
+  startTs: 0,
+  pausedElapsed: 0,
+  estimatedDurationMs: 45000,
+  activeAudio: null,
+  activeUtterance: null,
+  currentSessionId: 0
+};
+
+window.playHeadwatersMorningAudio = async function(btnElement) {
   const icon = document.getElementById("headwaters-play-icon");
   const progressBar = document.getElementById("headwaters-progress-bar");
   const timeEl = document.getElementById("headwaters-audio-time");
   const playerBox = document.getElementById("headwaters-audio-player-box");
+  const player = window.headwatersAudioPlayer;
   
   const prayer = window.getTodayHeadwatersPrayer();
   const isEng = (window.state && window.state.translation === "eng");
-  const prayerParagraphs = (prayer && (isEng ? prayer.paragraphsEn : prayer.paragraphsMr)) || [
+  const paragraphs = (prayer && (isEng ? prayer.paragraphsEn : prayer.paragraphsMr)) || [
     "हे दयाळू आणि सर्वसमर्थ स्वर्गीय पित्या, या नव्या दिवसाच्या उषःकाली मी अत्यंत कृतज्ञ अंतःकरणाने तुझ्या पवित्र चरणांशी नतमस्तक होतो."
   ];
-  const fullPrayerText = prayerParagraphs.join(" ");
+  const fullPrayerText = paragraphs.join(" ");
   
-  // Toggle Pause if already playing
-  if ((window.headwatersAudioInstance && !window.headwatersAudioInstance.paused) || (window.speechSynthesis && window.speechSynthesis.speaking)) {
-    if (window.headwatersAudioInstance) {
-      window.headwatersAudioInstance.pause();
+  // 1. If currently playing, Pause
+  if (player.isPlaying && !player.isPaused) {
+    player.isPaused = true;
+    player.pausedElapsed = Date.now() - player.startTs;
+    
+    if (player.activeAudio && !player.activeAudio.paused) {
+      try { player.activeAudio.pause(); } catch(e) {}
     }
-    if (window.speechSynthesis) {
-      window.speechSynthesis.cancel();
+    if (window.speechSynthesis && (window.speechSynthesis.speaking || window.speechSynthesis.pending)) {
+      try { window.speechSynthesis.pause(); } catch(e) {}
     }
+    if (player.progressInterval) {
+      clearInterval(player.progressInterval);
+      player.progressInterval = null;
+    }
+    
     if (icon) icon.innerHTML = '<polygon points="6 4 20 12 6 20 6 4"></polygon>';
     if (playerBox) playerBox.classList.remove("playing");
-    if (window.headwatersProgressInterval) {
-      clearInterval(window.headwatersProgressInterval);
-      window.headwatersProgressInterval = null;
-    }
     showToast(isEng ? "⏸ Audio Paused" : "⏸ ऑडिओ थांबवला (Audio Paused)");
     return;
   }
   
-  // Stop any other active audio
-  if (window.currentSingleAudio && window.currentSingleAudio !== window.headwatersAudioInstance) {
+  // 2. If paused, Resume
+  if (player.isPlaying && player.isPaused) {
+    player.isPaused = false;
+    player.startTs = Date.now() - player.pausedElapsed;
+    
+    if (icon) icon.innerHTML = '<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>';
+    if (playerBox) playerBox.classList.add("playing");
+    
+    if (player.activeAudio && player.activeAudio.paused) {
+      player.activeAudio.play().catch(e => console.warn(e));
+    } else if (window.speechSynthesis && window.speechSynthesis.paused) {
+      window.speechSynthesis.resume();
+    }
+    
+    startHeadwatersProgressLoop();
+    showToast(isEng ? "▶ Resuming Prayer..." : "▶ प्रार्थना सुरू ठेवत आहे...");
+    return;
+  }
+  
+  // 3. Clean slate: Stop all other active audio
+  if (window.currentSingleAudio) {
     try { window.currentSingleAudio.pause(); } catch(e) {}
     window.currentSingleAudio = null;
   }
-  
-  if (icon) {
-    icon.innerHTML = '<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>';
+  if (window.audioPlayerInstance) {
+    try { window.audioPlayerInstance.pause(); } catch(e) {}
+    window.audioPlayerInstance = null;
   }
-  if (playerBox) playerBox.classList.add("playing");
-  if (progressBar && progressBar.style.width === '0%') progressBar.style.width = '3%';
-  
-  // Use natural speech synthesis for daily dynamic text
+  if (window.SarvamTTS && window.SarvamTTS.queue) {
+    try { window.SarvamTTS.queue.stop(); } catch(e) {}
+  }
   if (window.speechSynthesis) {
-    window.speechSynthesis.cancel();
-    const utter = new SpeechSynthesisUtterance(fullPrayerText);
-    utter.lang = isEng ? 'en-US' : 'mr-IN';
-    utter.rate = 0.88;
-    
-    // Estimate total time based on length
-    const words = fullPrayerText.split(/\s+/).length;
-    const estDurationMs = Math.max(30000, Math.round((words / 2.2) * 1000));
-    let startT = Date.now();
-    
-    if (window.headwatersProgressInterval) clearInterval(window.headwatersProgressInterval);
-    window.headwatersProgressInterval = setInterval(() => {
-      const elapsed = Date.now() - startT;
-      const pct = Math.min(100, (elapsed / estDurationMs) * 100);
-      if (progressBar) progressBar.style.width = pct + '%';
-      
-      const secElapsed = Math.floor(elapsed / 1000);
-      const totalSec = Math.floor(estDurationMs / 1000);
-      const mCur = Math.floor(secElapsed / 60);
-      const sCur = (secElapsed % 60).toString().padStart(2, '0');
-      const mTot = Math.floor(totalSec / 60);
-      const sTot = (totalSec % 60).toString().padStart(2, '0');
-      if (timeEl) timeEl.textContent = `${mCur}:${sCur} / ${mTot}:${sTot}`;
-      
-      if (pct >= 100) {
-        clearInterval(window.headwatersProgressInterval);
-        window.headwatersProgressInterval = null;
-      }
-    }, 200);
-    
-    utter.onend = () => {
-      if (icon) icon.innerHTML = '<polygon points="6 4 20 12 6 20 6 4"></polygon>';
-      if (playerBox) playerBox.classList.remove("playing");
-      if (progressBar) progressBar.style.width = '0%';
-      const totalSec = Math.floor(estDurationMs / 1000);
-      const mTot = Math.floor(totalSec / 60);
-      const sTot = (totalSec % 60).toString().padStart(2, '0');
-      if (timeEl) timeEl.textContent = `${mTot}:${sTot}`;
-      if (window.headwatersProgressInterval) {
-        clearInterval(window.headwatersProgressInterval);
-        window.headwatersProgressInterval = null;
-      }
-    };
-    
-    utter.onerror = () => {
-      if (icon) icon.innerHTML = '<polygon points="6 4 20 12 6 20 6 4"></polygon>';
-      if (playerBox) playerBox.classList.remove("playing");
-      if (window.headwatersProgressInterval) {
-        clearInterval(window.headwatersProgressInterval);
-        window.headwatersProgressInterval = null;
-      }
-    };
-    
-    window.speechSynthesis.speak(utter);
-    showToast(isEng ? "🔊 Guided Morning Prayer playing ✨" : "🔊 सकाळची प्रार्थना सुरू आहे (Daily Guided Prayer) ✨");
-  } else {
-    showToast("ऑडिओ उपलब्ध नाही (Audio not supported on this device)");
+    try {
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.resume();
+    } catch(e) {}
   }
+  
+  // Unlock audio context on mobile immediately
+  try {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (AudioContextClass) {
+      const ctx = new AudioContextClass();
+      if (ctx.state === 'suspended') ctx.resume();
+    }
+  } catch(e) {}
+  
+  player.currentSessionId = Date.now();
+  const thisSessionId = player.currentSessionId;
+  
+  // Duration calculation
+  const words = fullPrayerText.split(/\s+/).length;
+  const estDurationSec = Math.max(30, Math.min(85, Math.round(words / 1.9)));
+  player.estimatedDurationMs = estDurationSec * 1000;
+  player.startTs = Date.now();
+  player.pausedElapsed = 0;
+  player.isPlaying = true;
+  player.isPaused = false;
+  
+  if (icon) icon.innerHTML = '<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>';
+  if (playerBox) playerBox.classList.add("playing");
+  if (progressBar) progressBar.style.width = '3%';
+  
+  startHeadwatersProgressLoop();
+  
+  // 4. Try Direct High-Fidelity Audio File First
+  const directAudioPath = (prayer && prayer.id === 1) ? "assets/audio/devotional/headwaters_morning.mp3" : null;
+  if (directAudioPath && !isEng) {
+    try {
+      const audio = new Audio(directAudioPath);
+      player.activeAudio = audio;
+      window.currentSingleAudio = audio;
+      
+      audio.onloadedmetadata = () => {
+        if (audio.duration && !isNaN(audio.duration) && audio.duration > 0) {
+          player.estimatedDurationMs = Math.round(audio.duration * 1000);
+        }
+      };
+      
+      audio.ontimeupdate = () => {
+        if (!player.isPlaying || player.isPaused) return;
+        const cur = audio.currentTime || 0;
+        const dur = audio.duration || (player.estimatedDurationMs / 1000);
+        const pct = Math.min(99, Math.max(0, (cur / dur) * 100));
+        if (progressBar) progressBar.style.width = `${pct.toFixed(1)}%`;
+        
+        const mCur = Math.floor(cur / 60);
+        const sCur = Math.floor(cur % 60).toString().padStart(2, "0");
+        const mDur = Math.floor(dur / 60);
+        const sDur = Math.floor(dur % 60).toString().padStart(2, "0");
+        if (timeEl) timeEl.textContent = `${mCur}:${sCur} / ${mDur}:${sDur}`;
+      };
+      
+      audio.onplay = () => {
+        showToast("🔊 सकाळची प्रार्थना सुरू आहे (Natural Devotional Marathi Voice) ✨");
+      };
+      
+      audio.onended = () => {
+        if (player.currentSessionId === thisSessionId) {
+          stopHeadwatersPlaybackState();
+        }
+      };
+      
+      audio.onerror = () => {
+        console.warn("Direct audio failed, falling back to Web Speech...");
+        player.activeAudio = null;
+        executeHeadwatersSpeechSynthesis(fullPrayerText, isEng, thisSessionId);
+      };
+      
+      await audio.play();
+      return;
+    } catch (e) {
+      console.warn("Direct audio playback failed:", e);
+      player.activeAudio = null;
+    }
+  }
+  
+  // 5. Fallback: Universal Voice Speech Synthesis
+  executeHeadwatersSpeechSynthesis(fullPrayerText, isEng, thisSessionId);
 };
 
+function executeHeadwatersSpeechSynthesis(fullPrayerText, isEng, thisSessionId) {
+  const player = window.headwatersAudioPlayer;
+  
+  if (window.speechSynthesis) {
+    const cleanText = fullPrayerText
+      .replace(/[—–]/g, ', ')
+      .replace(/[;:]/g, ', ')
+      .replace(/["']/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+    
+    const utter = new SpeechSynthesisUtterance(cleanText);
+    utter.rate = isEng ? 0.92 : 0.86;
+    utter.pitch = 0.95;
+    
+    const voices = window.speechSynthesis.getVoices() || [];
+    let selectedVoice = null;
+    
+    if (!isEng) {
+      selectedVoice = voices.find(v => (v.lang === 'mr-IN' || v.lang === 'mr_IN' || v.lang.startsWith('mr')));
+      if (!selectedVoice) {
+        selectedVoice = voices.find(v => (v.lang === 'hi-IN' || v.lang === 'hi_IN' || v.lang.startsWith('hi')));
+      }
+      if (!selectedVoice) {
+        selectedVoice = voices.find(v => v.lang.includes('IN') || (v.name && v.name.toLowerCase().includes('india')));
+      }
+      
+      if (selectedVoice) {
+        utter.voice = selectedVoice;
+        utter.lang = selectedVoice.lang;
+      } else {
+        utter.lang = 'mr-IN';
+      }
+    } else {
+      selectedVoice = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Natural') || v.name.includes('Neural') || v.name.includes('Online'))) ||
+                      voices.find(v => v.lang.startsWith('en'));
+      if (selectedVoice) {
+        utter.voice = selectedVoice;
+        utter.lang = selectedVoice.lang;
+      } else {
+        utter.lang = 'en-US';
+      }
+    }
+    
+    utter.onstart = () => {
+      if (player.currentSessionId === thisSessionId) {
+        player.startTs = Date.now();
+        showToast(isEng ? "🔊 Listening to Daily Prayer ✨" : "🔊 सकाळची प्रार्थना सुरू आहे (Daily Guided Prayer) ✨");
+      }
+    };
+    
+    utter.onend = () => {
+      if (player.currentSessionId === thisSessionId && player.isPlaying && !player.isPaused) {
+        stopHeadwatersPlaybackState();
+      }
+    };
+    
+    utter.onerror = (e) => {
+      if (e.error === 'canceled' || e.error === 'interrupted') return;
+      console.warn("[Headwaters TTS Error]:", e);
+      if (player.currentSessionId === thisSessionId) {
+        stopHeadwatersPlaybackState();
+      }
+    };
+    
+    player.activeUtterance = utter;
+    window.speechSynthesis.speak(utter);
+  } else {
+    showToast("ऑडिओ उपलब्ध नाही (Speech synthesis not supported)");
+    stopHeadwatersPlaybackState();
+  }
+}
+
+function startHeadwatersProgressLoop() {
+  const player = window.headwatersAudioPlayer;
+  const progressBar = document.getElementById("headwaters-progress-bar");
+  const timeEl = document.getElementById("headwaters-audio-time");
+  
+  if (player.progressInterval) clearInterval(player.progressInterval);
+  
+  player.progressInterval = setInterval(() => {
+    if (!player.isPlaying || player.isPaused) return;
+    
+    // If active audio element is tracking its own time, let audio.ontimeupdate handle it
+    if (player.activeAudio) return;
+    
+    const elapsedMs = Date.now() - player.startTs;
+    const pct = Math.min(99, (elapsedMs / player.estimatedDurationMs) * 100);
+    if (progressBar) progressBar.style.width = `${pct.toFixed(1)}%`;
+    
+    const curSec = Math.floor(elapsedMs / 1000);
+    const totSec = Math.floor(player.estimatedDurationMs / 1000);
+    const mCur = Math.floor(curSec / 60);
+    const sCur = (curSec % 60).toString().padStart(2, "0");
+    const mTot = Math.floor(totSec / 60);
+    const sTot = (totSec % 60).toString().padStart(2, "0");
+    if (timeEl) timeEl.textContent = `${mCur}:${sCur} / ${mTot}:${sTot}`;
+    
+    if (elapsedMs >= player.estimatedDurationMs + 2000) {
+      stopHeadwatersPlaybackState();
+    }
+  }, 250);
+}
+
+function stopHeadwatersPlaybackState() {
+  const player = window.headwatersAudioPlayer;
+  player.isPlaying = false;
+  player.isPaused = false;
+  player.pausedElapsed = 0;
+  
+  if (player.activeAudio) {
+    try { player.activeAudio.pause(); } catch(e) {}
+    player.activeAudio = null;
+  }
+  
+  if (player.progressInterval) {
+    clearInterval(player.progressInterval);
+    player.progressInterval = null;
+  }
+  
+  const icon = document.getElementById("headwaters-play-icon");
+  const playerBox = document.getElementById("headwaters-audio-player-box");
+  const progressBar = document.getElementById("headwaters-progress-bar");
+  const timeEl = document.getElementById("headwaters-audio-time");
+  
+  if (icon) icon.innerHTML = '<polygon points="6 4 20 12 6 20 6 4"></polygon>';
+  if (playerBox) playerBox.classList.remove("playing");
+  if (progressBar) progressBar.style.width = '0%';
+  
+  if (timeEl) {
+    const totSec = Math.floor(player.estimatedDurationMs / 1000);
+    const mTot = Math.floor(totSec / 60);
+    const sTot = (totSec % 60).toString().padStart(2, "0");
+    timeEl.textContent = `${mTot}:${sTot}`;
+  }
+}
+
+window.closeHeadwatersModal = function() {
+  const modal = document.getElementById("modal-headwaters-sanctuary");
+  if (modal) modal.style.display = "none";
+  
+  const player = window.headwatersAudioPlayer;
+  if (player) {
+    player.currentSessionId = 0;
+  }
+  
+  if (window.speechSynthesis) {
+    try { window.speechSynthesis.cancel(); } catch(e) {}
+  }
+  stopHeadwatersPlaybackState();
+};
 
 // 2. THE DAILY CONFLUENCE LOGIC
 const CONFLUENCE_SOUL_DB = {
