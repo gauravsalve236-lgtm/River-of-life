@@ -2084,7 +2084,8 @@ function selectBookForChapterScreen(bookMeta) {
     cBtn.className = "chapter-select-btn";
     cBtn.textContent = c;
     cBtn.addEventListener("click", () => {
-      selectChapterForVerseScreen(bookMeta, c);
+      closeAllDrawers();
+      openReader(bookMeta.filename.replace(".json", ""), c, 1);
     });
     grid.appendChild(cBtn);
   }

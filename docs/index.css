@@ -877,6 +877,20 @@ body {
   cursor: pointer;
 }
 
+
+.study-backdrop-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 10001;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 /* Right Study Pane (Column 3) */
 .reader-pane-right {
   width: 0;
@@ -2714,21 +2728,62 @@ body {
   }
 
   .split-screen-parent.study-open .reader-pane-left {
-    height: 55%;
+    height: 100%;
+  }
+
+  .study-backdrop-overlay {
+    display: block;
+  }
+
+  .split-screen-parent.study-open .study-backdrop-overlay {
+    opacity: 1;
+    pointer-events: auto;
   }
 
   .reader-pane-right {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
     width: 100% !important;
     height: 0;
+    max-height: 85vh;
+    background-color: var(--drawer-bg, #ffffff) !important;
     border-left: none;
     border-top: 1px solid var(--border);
-    box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.1);
-    transition: height 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    z-index: 11;
+    border-radius: 24px 24px 0 0;
+    box-shadow: 0 -16px 50px rgba(0, 0, 0, 0.45);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), height 0.3s ease;
+    transform: translateY(100%);
+    z-index: 10002;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
 
   .split-screen-parent.study-open .reader-pane-right {
-    height: 45%;
+    height: 85vh;
+    transform: translateY(0);
+  }
+
+  .study-pane-header {
+    background-color: var(--drawer-bg, #ffffff) !important;
+    z-index: 2;
+    border-bottom: 1px solid var(--border);
+    padding: 14px 18px 10px 18px;
+    flex-shrink: 0;
+  }
+
+  .study-pane-body-scroller {
+    background-color: var(--drawer-bg, #ffffff) !important;
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 16px 18px calc(45px + env(safe-area-inset-bottom, 24px)) 18px !important;
+  }
+
+  .split-screen-parent.study-open .floating-circle-play-fab {
+    display: none !important;
   }
 
   .drag-handle-bar {

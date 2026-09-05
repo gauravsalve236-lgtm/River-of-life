@@ -600,10 +600,7 @@
                   <span class="explanation-label">स्पष्टीकरण</span>
                 </button>
 
-                <button id="btn-toggle-story-theater" class="reader-story-theater-btn" onclick="openStoryTheater()" title="Open Story Theater Mode (कथा वाचन दृश्य)">
-                  <span class="theater-icon">🎭</span>
-                  <span class="theater-label">कथा दृश्य</span>
-                </button>
+                
 
                 <button id="btn-reader-open-text-settings" class="reader-tool-btn" title="Text & Display Settings">Aa</button>
               </div>
@@ -633,6 +630,9 @@
               </div>
             </div>
           </div>
+
+          <!-- Backdrop overlay for study explanation bottom sheet on mobile -->
+          <div id="study-backdrop-overlay" class="study-backdrop-overlay" onclick="closeStudySplitPane()"></div>
 
           <!-- Column 3 (Right): Study commentary split pane (collapsible) -->
           <div id="reader-study-pane" class="reader-pane-right">
