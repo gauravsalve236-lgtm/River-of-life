@@ -195,8 +195,8 @@
 
             <!-- YouVersion Style Top Subnav Tabs -->
             <div class="youversion-subnav-tabs" style="display: flex; align-items: center; gap: 24px; padding: 12px 0 6px 0; margin-bottom: 4px;">
-              <button class="youversion-subnav-btn active" id="btn-home-tab-today" data-i18n="tab_today" onclick="switchHomeTab(\'today\')">आज</button>
-              <button class="youversion-subnav-btn" id="btn-home-tab-community" data-i18n="tab_community" onclick="switchHomeTab(\'community\')">समुदाय</button>
+              <button class="youversion-subnav-btn active" id="btn-home-tab-today" data-i18n="tab_today" onclick="switchHomeTab(\'today\')">Today</button>
+              <button class="youversion-subnav-btn" id="btn-home-tab-community" data-i18n="tab_community" onclick="switchHomeTab(\'community\')">Community</button>
             </div>
 
             <!-- YouVersion Style Clean Greeting Header Row -->
@@ -218,8 +218,8 @@
             <div class="home-search-bar-container" style="margin: 0 0 16px 0;">
               <div class="home-prominent-search-box" onclick="switchTab('discover'); setTimeout(() => document.getElementById('search-input-main')?.focus(), 150);" style="display: flex; align-items: center; gap: 12px; background: var(--surface, #ffffff); border: 1.5px solid var(--border, rgba(0,0,0,0.08)); border-radius: 16px; padding: 13px 18px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); cursor: pointer; transition: all 0.2s ease;">
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--text-muted, #64748b)" stroke-width="2.3"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                <span id="home-search-placeholder-text" data-i18n="search_placeholder" style="flex: 1; font-size: 14.5px; font-weight: 600; color: var(--text-muted, #64748b); font-family: var(--font-ui);">बायबल, विषय किंवा प्रश्न शोधा...</span>
-                <span id="home-search-explore-badge" data-i18n="search_explore" style="font-size: 11.5px; font-weight: 800; color: var(--primary); background: rgba(143,18,29,0.08); padding: 4px 9px; border-radius: 8px;">शोधा</span>
+                <span id="home-search-placeholder-text" data-i18n="search_placeholder" style="flex: 1; font-size: 14.5px; font-weight: 600; color: var(--text-muted, #64748b); font-family: var(--font-ui);">Search Bible, Topics, or Questions...</span>
+                <span id="home-search-explore-badge" data-i18n="search_explore" style="font-size: 11.5px; font-weight: 800; color: var(--primary); background: rgba(143,18,29,0.08); padding: 4px 9px; border-radius: 8px;">Explore</span>
               </div>
             </div>
 
@@ -232,7 +232,7 @@
                 
                 <div class="youversion-vod-content" style="position: relative; z-index: 3; padding: 22px 20px 16px 20px; display: flex; flex-direction: column; justify-content: space-between; min-height: 340px; box-sizing: border-box;">
                   <div class="youversion-vod-top-meta" style="margin-bottom: 16px;">
-                    <span class="youversion-vod-label" data-i18n="vod_label" style="font-size: 13px; color: rgba(255,255,255,0.75); font-weight: 600; display: block; margin-bottom: 4px;">आजचे वचन</span>
+                    <span class="youversion-vod-label" data-i18n="vod_label" style="font-size: 13px; color: rgba(255,255,255,0.75); font-weight: 600; display: block; margin-bottom: 4px;">VERSE OF THE DAY</span>
                     <h2 class="youversion-vod-ref" id="home-vod-ref" style="font-size: 18px; font-weight: 800; color: #ffffff; margin: 0;">स्तोत्रसंहिता २३:१ MARVBSI</h2>
                   </div>
 
@@ -281,13 +281,13 @@
 
                 <div style="position: relative; z-index: 3; flex: 1; padding-right: 12px;">
                   <div style="font-size: 12px; font-weight: 800; color: #9a3412; margin-bottom: 4px; letter-spacing: 0.5px; text-transform: uppercase;">
-                    <span data-i18n="headwaters_cat">उगमस्थान</span>
+                    <span data-i18n="headwaters_cat">THE HEADWATERS</span>
                   </div>
                   <h3 data-i18n="headwaters_title" style="font-size: 18px; font-weight: 800; color: #1e293b; margin: 0 0 6px 0; line-height: 1.3; letter-spacing: -0.2px;">
                     सकाळचा पवित्र विसावा
                   </h3>
                   <div style="font-size: 12px; font-weight: 700; color: #c2410c; display: flex; align-items: center; gap: 4px;">
-                    <span data-i18n="headwaters_time">▶ ३-५ मिनिटे</span>
+                    <span data-i18n="headwaters_time">▶ 3-5 min</span>
                   </div>
                 </div>
 
@@ -311,7 +311,7 @@
 
                 <div style="position: relative; z-index: 3; flex: 1;">
                   <div style="font-size: 12px; font-weight: 800; color: #047857; margin-bottom: 4px; letter-spacing: 0.5px; text-transform: uppercase;">
-                    <span data-i18n="confluence_cat">दैनंदिन संगम</span>
+                    <span data-i18n="confluence_cat">THE DAILY CONFLUENCE</span>
                   </div>
                   <h3 data-i18n="confluence_title" style="font-size: 17.5px; font-weight: 800; color: #0f172a; margin: 0 0 10px 0; line-height: 1.3; letter-spacing: -0.2px;">
                     तुमचा आत्मा आज कसा वाहत आहे?
@@ -321,19 +321,19 @@
                   <div class="soul-flow-chips-row" onclick="event.stopPropagation();" style="display: flex; gap: 7px; flex-wrap: wrap;">
                     <button class="flow-chip" data-flow="restless" onclick="selectSoulFlowChip(this, 'restless')">
                       <span class="chip-dot" style="background: #38bdf8;"></span>
-                      <span data-i18n="chip_restless">अस्वस्थ</span>
+                      <span data-i18n="chip_restless">Restless</span>
                     </button>
                     <button class="flow-chip active" data-flow="heavy" onclick="selectSoulFlowChip(this, 'heavy')">
                       <span class="chip-dot" style="background: #a855f7;"></span>
-                      <span data-i18n="chip_heavy">थकलेले</span>
+                      <span data-i18n="chip_heavy">Heavy</span>
                     </button>
                     <button class="flow-chip" data-flow="thirsty" onclick="selectSoulFlowChip(this, 'thirsty')">
                       <span class="chip-dot" style="background: #0ea5e9;"></span>
-                      <span data-i18n="chip_thirsty">तहानलेले</span>
+                      <span data-i18n="chip_thirsty">Thirsty</span>
                     </button>
                     <button class="flow-chip" data-flow="peaceful" onclick="selectSoulFlowChip(this, 'peaceful')">
                       <span class="chip-dot" style="background: #10b981;"></span>
-                      <span data-i18n="chip_peaceful">शांत</span>
+                      <span data-i18n="chip_peaceful">Peaceful</span>
                     </button>
                   </div>
                 </div>
@@ -354,13 +354,13 @@
 
                 <div style="position: relative; z-index: 3; flex: 1; padding-right: 12px;">
                   <div style="font-size: 12px; font-weight: 800; color: #67e8f9; margin-bottom: 4px; letter-spacing: 0.5px; text-transform: uppercase;">
-                    <span data-i18n="living_water_cat">जीवन जल विश्रांती</span>
+                    <span data-i18n="living_water_cat">LIVING WATER RESET</span>
                   </div>
                   <h3 data-i18n="living_water_title" style="font-size: 18px; font-weight: 800; color: #fef08a; margin: 0 0 6px 0; line-height: 1.3; letter-spacing: -0.2px; text-shadow: 0 2px 8px rgba(0,0,0,0.5);">
                     पवित्र शांतीचा झरा
                   </h3>
                   <div style="font-size: 12px; font-weight: 700; color: #a5f3fc; display: flex; align-items: center; gap: 4px;">
-                    <span data-i18n="living_water_sub">▶ १-३ मिनिटे • शांतता, श्वास व संगीत</span>
+                    <span data-i18n="living_water_sub">▶ 1-3 min • 432Hz Ambient Meditation</span>
                   </div>
                 </div>
 
@@ -374,10 +374,10 @@
               <div class="youversion-feed-card home-commandments-feed-card" onclick="toggleTenCommandmentsModal()" style="margin: 0 0 14px 0; background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 16px 18px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.03); transition: transform 0.2s ease, box-shadow 0.2s ease;">
                 <div class="feed-card-content" style="flex: 1; padding-right: 14px;">
                   <div class="feed-card-badge-row" style="display: flex; align-items: center; gap: 6px; margin-bottom: 5px;">
-                    <span class="feed-card-pill" data-i18n="commandments_ref" style="display: inline-flex; align-items: center; gap: 3px; background: rgba(229, 168, 59, 0.15); padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 800; color: var(--accent-gold, #c98a2c);">निर्गम २०:१-१७</span>
-                    <span class="feed-card-label" data-i18n="commandments_cat" style="font-size: 12px; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">बायबलमधील नियमशास्त्र</span>
+                    <span class="feed-card-pill" data-i18n="commandments_ref" style="display: inline-flex; align-items: center; gap: 3px; background: rgba(229, 168, 59, 0.15); padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 800; color: var(--accent-gold, #c98a2c);">Exodus 20:1-17</span>
+                    <span class="feed-card-label" data-i18n="commandments_cat" style="font-size: 12px; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">BIBLICAL LAW</span>
                   </div>
-                  <h3 class="feed-card-title" data-i18n="commandments_title" style="font-size: 17px; font-weight: 800; color: var(--text); margin: 0 0 4px 0; line-height: 1.35;">दहा आज्ञा आणि ख्रिस्ती आचरण</h3>
+                  <h3 class="feed-card-title" data-i18n="commandments_title" style="font-size: 17px; font-weight: 800; color: var(--text); margin: 0 0 4px 0; line-height: 1.35;">The 10 Commandments</h3>
                   <p data-i18n="commandments_sub" style="font-size: 12.5px; color: var(--text-muted); margin: 0 0 6px 0; line-height: 1.4;">
                     सीनाय पर्वतावर देवाने दिलेला शाश्वत नियम आणि येशूने सांगितलेला सारांश.
                   </p>
@@ -401,11 +401,11 @@
               <div class="prayer-topics-section-container">
                 <div class="section-title-row" style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 14px;">
                   <div class="section-title-left">
-                    <span class="section-tag-gold" data-i18n="tag_prayer_sanctuary">प्रार्थना कक्ष</span>
-                    <h3 class="section-main-heading" data-i18n="prayers_section_title">दैनंदिन प्रार्थना आणि आशीर्वाद</h3>
-                    <p class="section-sub-heading" data-i18n="prayers_section_sub">तुमच्या गरजेनुसार तयार केलेल्या बायबल आधारित प्रार्थना</p>
+                    <span class="section-tag-gold" data-i18n="tag_prayer_sanctuary">PRAYER SANCTUARY</span>
+                    <h3 class="section-main-heading" data-i18n="prayers_section_title">Daily Guided Prayers</h3>
+                    <p class="section-sub-heading" data-i18n="prayers_section_sub">बायबल आधारित प्रार्थना आणि आत्मिक मनन</p>
                   </div>
-                  <button class="btn-section-view-all" id="btn-view-all-prayers" onclick="toggleViewAllPrayers()" data-i18n="btn_view_all_prayers">सर्व प्रार्थना पहा (८+) →</button>
+                  <button class="btn-section-view-all" id="btn-view-all-prayers" onclick="toggleViewAllPrayers()" data-i18n="btn_view_all_prayers">View All Prayers (8+) →</button>
                 </div>
 
                 <!-- Live Prayer Sanctuary Fellowship Banner -->
@@ -415,11 +415,11 @@
                       <span style="width: 7px; height: 7px; border-radius: 50%; background: #ffffff; display: inline-block;"></span>
                       🔴 LIVE FELLOWSHIP NOW
                     </span>
-                    <span style="font-size: 12px; color: rgba(255,255,255,0.75); font-weight: 600;" data-i18n="daily_sanctuary_tag">दैनिक प्रार्थना कक्ष</span>
+                    <span style="font-size: 12px; color: rgba(255,255,255,0.75); font-weight: 600;" data-i18n="daily_sanctuary_tag">Daily Sanctuary</span>
                   </div>
 
                   <div>
-                    <h4 style="margin: 0 0 6px 0; font-size: 18px; font-weight: 800; color: #ffffff;" data-i18n="live_fellowship_title">दैनिक प्रार्थना आणि बायबल अभ्यास</h4>
+                    <h4 style="margin: 0 0 6px 0; font-size: 18px; font-weight: 800; color: #ffffff;" data-i18n="live_fellowship_title">Daily Prayer & Scripture Fellowship</h4>
                     <p style="margin: 0; font-size: 13px; color: rgba(255,255,255,0.85); line-height: 1.4;" data-i18n="live_fellowship_sub">
                       थेट भक्ती, स्तुती आणि शास्त्रवचनांच्या मननामध्ये सहभागी व्हा.
                     </p>
@@ -427,7 +427,7 @@
 
                   <button class="btn-primary-block" onclick="switchTab('meetings')" style="background: linear-gradient(135deg, #dfa938 0%, #c99328 100%); color: #172116; border: none; border-radius: 12px; padding: 12px 18px; font-size: 14.5px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(223,169,56,0.35);">
                     <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2"></rect></svg>
-                    <span data-i18n="btn_join_fellowship">प्रार्थनेत सामील व्हा</span>
+                    <span data-i18n="btn_join_fellowship">Join Prayer Sanctuary</span>
                   </button>
                 </div>
 
@@ -435,13 +435,13 @@
                   <!-- Topic 1: Water Turned into Wine (Wedding at Cana Miracle) -->
                   <div class="prayer-topic-card" onclick="openImmersivePrayerModal('wedding_cana')" style="background-image: url('assets/images/wedding_cana_miracle.jpg');">
                     <div class="prayer-topic-overlay"></div>
-                    <div class="prayer-topic-badge" data-i18n="prayer_cana_badge">दैवी चमत्कार व पुरवठा</div>
+                    <div class="prayer-topic-badge" data-i18n="prayer_cana_badge">MIRACLE & PROVISION</div>
                     <div class="prayer-topic-content">
-                      <h4 data-i18n="prayer_cana_title">पाण्याचे द्राक्षारसात रूपांतर</h4>
+                      <h4 data-i18n="prayer_cana_title">Water Turned into Wine</h4>
                       <p class="topic-en-title" data-i18n="prayer_cana_sub">कमीपणाच्या वेळी अद्भुत पुरवठा</p>
                       <div class="topic-meta-row">
-                        <span class="topic-scripture" data-i18n="prayer_cana_ref">योहान २:१-११</span>
-                        <span class="topic-open-btn" data-i18n="btn_pray_now">प्रार्थना करा</span>
+                        <span class="topic-scripture" data-i18n="prayer_cana_ref">John 2:1-11</span>
+                        <span class="topic-open-btn" data-i18n="btn_pray_now">Pray Now</span>
                       </div>
                     </div>
                   </div>
@@ -449,13 +449,13 @@
                   <!-- Topic 2: Peace Over Anxiety -->
                   <div class="prayer-topic-card" onclick="openImmersivePrayerModal('peace_anxiety')" style="background-image: url('assets/images/peace_anxiety.png');">
                     <div class="prayer-topic-overlay"></div>
-                    <div class="prayer-topic-badge" data-i18n="prayer_peace_badge">शांती व सांत्वन</div>
+                    <div class="prayer-topic-badge" data-i18n="prayer_peace_badge">PEACE & CALM</div>
                     <div class="prayer-topic-content">
-                      <h4 data-i18n="prayer_peace_title">चिंतेतून मुक्ती आणि शांती</h4>
+                      <h4 data-i18n="prayer_peace_title">Peace Over Anxiety</h4>
                       <p class="topic-en-title" data-i18n="prayer_peace_sub">सर्व बुद्धीपलीकडची देवाची शांती</p>
                       <div class="topic-meta-row">
-                        <span class="topic-scripture" data-i18n="prayer_peace_ref">फिलिप्पैकरांस ४:६-७</span>
-                        <span class="topic-open-btn" data-i18n="btn_pray_now">प्रार्थना करा</span>
+                        <span class="topic-scripture" data-i18n="prayer_peace_ref">Philippians 4:6-7</span>
+                        <span class="topic-open-btn" data-i18n="btn_pray_now">Pray Now</span>
                       </div>
                     </div>
                   </div>
@@ -463,13 +463,13 @@
                   <!-- Topic 3: Morning Grace & Divine Protection -->
                   <div class="prayer-topic-card" onclick="openImmersivePrayerModal('morning_grace')" style="background-image: url('assets/images/golden_dawn.png');">
                     <div class="prayer-topic-overlay"></div>
-                    <div class="prayer-topic-badge" data-i18n="prayer_morning_badge">सकाळची कृपा</div>
+                    <div class="prayer-topic-badge" data-i18n="prayer_morning_badge">MORNING BLESSING</div>
                     <div class="prayer-topic-content">
-                      <h4 data-i18n="prayer_morning_title">सकाळची कृपा व दैवी संरक्षण</h4>
+                      <h4 data-i18n="prayer_morning_title">Morning Grace & Protection</h4>
                       <p class="topic-en-title" data-i18n="prayer_morning_sub">सर्वसमर्थाच्या सावलीत विसावा</p>
                       <div class="topic-meta-row">
-                        <span class="topic-scripture" data-i18n="prayer_morning_ref">स्तोत्रसंहिता ९१:१-४</span>
-                        <span class="topic-open-btn" data-i18n="btn_pray_now">प्रार्थना करा</span>
+                        <span class="topic-scripture" data-i18n="prayer_morning_ref">Psalm 91:1-4</span>
+                        <span class="topic-open-btn" data-i18n="btn_pray_now">Pray Now</span>
                       </div>
                     </div>
                   </div>
@@ -477,13 +477,13 @@
                   <!-- Topic 4: Divine Healing & Restoration -->
                   <div class="prayer-topic-card" onclick="openImmersivePrayerModal('healing_restoration')" style="background-image: url('assets/images/healing_light.png');">
                     <div class="prayer-topic-overlay"></div>
-                    <div class="prayer-topic-badge" data-i18n="prayer_healing_badge">आरोग्य व चंगाई</div>
+                    <div class="prayer-topic-badge" data-i18n="prayer_healing_badge">HEALING & HEALTH</div>
                     <div class="prayer-topic-content">
-                      <h4 data-i18n="prayer_healing_title">आरोग्य आणि दैवी चंगाई</h4>
+                      <h4 data-i18n="prayer_healing_title">Divine Healing & Restoration</h4>
                       <p class="topic-en-title" data-i18n="prayer_healing_sub">येशूच्या फटक्यांनी मिळालेले आरोग्य</p>
                       <div class="topic-meta-row">
-                        <span class="topic-scripture" data-i18n="prayer_healing_ref">यशया ५३:५</span>
-                        <span class="topic-open-btn" data-i18n="btn_pray_now">प्रार्थना करा</span>
+                        <span class="topic-scripture" data-i18n="prayer_healing_ref">Isaiah 53:5</span>
+                        <span class="topic-open-btn" data-i18n="btn_pray_now">Pray Now</span>
                       </div>
                     </div>
                   </div>
@@ -492,13 +492,13 @@
                   <!-- Topic 5: Family Blessing & Harmony -->
                   <div class="prayer-topic-card prayer-topic-extra" onclick="openImmersivePrayerModal('family_blessing')" style="display: none; background-image: url('assets/images/family_blessing.png');">
                     <div class="prayer-topic-overlay"></div>
-                    <div class="prayer-topic-badge" data-i18n="prayer_family_badge">कुटुंबासाठी आशीर्वाद</div>
+                    <div class="prayer-topic-badge" data-i18n="prayer_family_badge">FAMILY & HOME</div>
                     <div class="prayer-topic-content">
-                      <h4 data-i18n="prayer_family_title">कुटुंब आशीर्वाद व एकता</h4>
+                      <h4 data-i18n="prayer_family_title">Family Blessing & Unity</h4>
                       <p class="topic-en-title" data-i18n="prayer_family_sub">घरामध्ये प्रेम, शांती व देवाचे भय</p>
                       <div class="topic-meta-row">
-                        <span class="topic-scripture" data-i18n="prayer_family_ref">यहोशू २४:१५</span>
-                        <span class="topic-open-btn" data-i18n="btn_pray_now">प्रार्थना करा</span>
+                        <span class="topic-scripture" data-i18n="prayer_family_ref">Joshua 24:15</span>
+                        <span class="topic-open-btn" data-i18n="btn_pray_now">Pray Now</span>
                       </div>
                     </div>
                   </div>
@@ -506,13 +506,13 @@
                   <!-- Topic 6: Strength in Hard Times -->
                   <div class="prayer-topic-card prayer-topic-extra" onclick="openImmersivePrayerModal('strength_trials')" style="display: none; background-image: url('assets/images/mount_zion.png');">
                     <div class="prayer-topic-overlay"></div>
-                    <div class="prayer-topic-badge" data-i18n="prayer_strength_badge">सामर्थ्य व धीर</div>
+                    <div class="prayer-topic-badge" data-i18n="prayer_strength_badge">STRENGTH & FAITH</div>
                     <div class="prayer-topic-content">
-                      <h4 data-i18n="prayer_strength_title">कठीण प्रसंगी सामर्थ्य व धीर</h4>
+                      <h4 data-i18n="prayer_strength_title">Strength in Hard Times</h4>
                       <p class="topic-en-title" data-i18n="prayer_strength_sub">थकलेल्याला नवीन बळ देणारा देव</p>
                       <div class="topic-meta-row">
-                        <span class="topic-scripture" data-i18n="prayer_strength_ref">यशया ४०:२९-३१</span>
-                        <span class="topic-open-btn" data-i18n="btn_pray_now">प्रार्थना करा</span>
+                        <span class="topic-scripture" data-i18n="prayer_strength_ref">Isaiah 40:29-31</span>
+                        <span class="topic-open-btn" data-i18n="btn_pray_now">Pray Now</span>
                       </div>
                     </div>
                   </div>
@@ -520,13 +520,13 @@
                   <!-- Topic 7: Wisdom & Career Guidance -->
                   <div class="prayer-topic-card prayer-topic-extra" onclick="openImmersivePrayerModal('wisdom_guidance')" style="display: none; background-image: url('assets/images/wisdom_guidance.png');">
                     <div class="prayer-topic-overlay"></div>
-                    <div class="prayer-topic-badge" data-i18n="prayer_wisdom_badge">ज्ञान व मार्गदर्शन</div>
+                    <div class="prayer-topic-badge" data-i18n="prayer_wisdom_badge">WISDOM & GUIDANCE</div>
                     <div class="prayer-topic-content">
-                      <h4 data-i18n="prayer_wisdom_title">ज्ञानासाठी व करिअर मार्गदर्शन</h4>
+                      <h4 data-i18n="prayer_wisdom_title">Wisdom & Career Guidance</h4>
                       <p class="topic-en-title" data-i18n="prayer_wisdom_sub">योग्य निर्णयांसाठी स्वर्गीय बुद्धी</p>
                       <div class="topic-meta-row">
-                        <span class="topic-scripture" data-i18n="prayer_wisdom_ref">याकोब १:५</span>
-                        <span class="topic-open-btn" data-i18n="btn_pray_now">प्रार्थना करा</span>
+                        <span class="topic-scripture" data-i18n="prayer_wisdom_ref">James 1:5</span>
+                        <span class="topic-open-btn" data-i18n="btn_pray_now">Pray Now</span>
                       </div>
                     </div>
                   </div>
@@ -534,13 +534,13 @@
                   <!-- Topic 8: Evening Thanksgiving & Rest -->
                   <div class="prayer-topic-card prayer-topic-extra" onclick="openImmersivePrayerModal('evening_rest')" style="display: none; background-image: url('assets/images/candlelight.png');">
                     <div class="prayer-topic-overlay"></div>
-                    <div class="prayer-topic-badge" data-i18n="prayer_evening_badge">रात्रीची विश्रांती</div>
+                    <div class="prayer-topic-badge" data-i18n="prayer_evening_badge">EVENING REST</div>
                     <div class="prayer-topic-content">
-                      <h4 data-i18n="prayer_evening_title">रात्रीची उपकारस्तुती व शांत झोप</h4>
+                      <h4 data-i18n="prayer_evening_title">Evening Thanksgiving & Rest</h4>
                       <p class="topic-en-title" data-i18n="prayer_evening_sub">सुरक्षिततेत शांत विश्रांती</p>
                       <div class="topic-meta-row">
-                        <span class="topic-scripture" data-i18n="prayer_evening_ref">स्तोत्रसंहिता ४:८</span>
-                        <span class="topic-open-btn" data-i18n="btn_pray_now">प्रार्थना करा</span>
+                        <span class="topic-scripture" data-i18n="prayer_evening_ref">Psalm 4:8</span>
+                        <span class="topic-open-btn" data-i18n="btn_pray_now">Pray Now</span>
                       </div>
                     </div>
                   </div>
@@ -553,10 +553,10 @@
                   <div class="quiz-card-art">🏆</div>
                   <div class="quiz-card-details">
                     <div class="quiz-badge-row" style="display: flex; gap: 6px; align-items: center; margin-bottom: 4px;">
-                      <span class="quiz-badge-gold" data-i18n="quiz_badge_trivia">बायबल प्रश्नमंजुषा</span>
-                      <span class="quiz-badge-sub" data-i18n="quiz_badge_levels" style="font-size: 10.5px; font-weight: 700; color: #8B1D24; background: rgba(139,29,36,0.1); padding: 2px 8px; border-radius: 10px;">४ स्तर</span>
+                      <span class="quiz-badge-gold" data-i18n="quiz_badge_trivia">BIBLE TRIVIA</span>
+                      <span class="quiz-badge-sub" data-i18n="quiz_badge_levels" style="font-size: 10.5px; font-weight: 700; color: #8B1D24; background: rgba(139,29,36,0.1); padding: 2px 8px; border-radius: 10px;">4 LEVELS</span>
                     </div>
-                    <h5 data-i18n="quiz_card_title">बायबल सामान्य ज्ञान स्पर्धा</h5>
+                    <h5 data-i18n="quiz_card_title">Daily Bible Quiz Challenge</h5>
                     <p data-i18n="quiz_card_sub">दैनिक बायबल प्रश्नमंजुषा • ४ कठीणता स्तर • बॅजेस</p>
                     
                     <!-- Level pills preview -->
@@ -574,7 +574,7 @@
                     </div>
                   </div>
                 </div>
-                <button class="btn-play-quiz" data-i18n="quiz_card_btn">खेळा &rarr;</button>
+                <button class="btn-play-quiz" data-i18n="quiz_card_btn">Play Quiz &rarr;</button>
               </div>
 
             </div> <!-- /.home-grid-layout -->

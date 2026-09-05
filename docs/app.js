@@ -1015,117 +1015,117 @@ function saveStateToLocalStorage() {
 
 const I18N_DICTIONARY = {
   mr: {
-    // Navigation & Header
-    "pull_refresh": "रिफ्रेश करण्यासाठी ओढा",
-    "tab_today": "आज",
-    "tab_community": "समुदाय",
-    "greeting_morning": "शुभ प्रभात",
-    "greeting_afternoon": "शुभ दुपार",
-    "greeting_evening": "शुभ संध्याकाळ",
-    "streak_toast": "दैनिक वचन सातत्य: {n} दिवस",
-    "search_placeholder": "बायबल, विषय किंवा प्रश्न शोधा...",
-    "search_explore": "शोधा",
+    // Navigation & Header (English UI navigation & greetings as requested)
+    "pull_refresh": "Pull to refresh",
+    "tab_today": "Today",
+    "tab_community": "Community",
+    "greeting_morning": "Good morning",
+    "greeting_afternoon": "Good afternoon",
+    "greeting_evening": "Good evening",
+    "streak_toast": "Daily Devotion Streak: {n} Day",
+    "search_placeholder": "Search Bible, Topics, or Questions...",
+    "search_explore": "Explore",
     
-    // Bottom Navigation
-    "nav_home": "मुख्यपृष्ठ",
-    "nav_bible": "बायबल",
-    "nav_meetings": "सभा",
-    "nav_more": "अधिक",
+    // Bottom Navigation (English UI Tabs)
+    "nav_home": "Home",
+    "nav_bible": "Bible",
+    "nav_meetings": "Meetings",
+    "nav_more": "More",
     
     // Verse of the Day (English Name / Header, Marathi Body inside)
     "vod_label": "VERSE OF THE DAY",
     "vod_share_title": "व्हॉट्सॲपवर शेअर करा",
     "vod_trans_suffix": "MARVBSI",
     
-    // River of Life Flow Modules (English Category Headers, Marathi Body inside)
+    // River of Life Flow Modules (English Category Headers & Titles, Marathi Details/Reflections inside)
     "headwaters_cat": "THE HEADWATERS",
-    "headwaters_title": "सकाळचा पवित्र विसावा",
-    "headwaters_time": "▶ ३-५ मिनिटे",
+    "headwaters_title": "Morning Manna at the Source",
+    "headwaters_time": "▶ 3-5 min",
     "headwaters_sub": "दिवसाची कृपा व शांती",
     
     "confluence_cat": "THE DAILY CONFLUENCE",
-    "confluence_title": "तुमचा आत्मा आज कसा वाहत आहे?",
-    "chip_restless": "अस्वस्थ",
-    "chip_heavy": "थकलेले",
-    "chip_thirsty": "तहानलेले",
-    "chip_peaceful": "शांत",
+    "confluence_title": "Where is Your Soul Flowing Today?",
+    "chip_restless": "Restless",
+    "chip_heavy": "Heavy",
+    "chip_thirsty": "Thirsty",
+    "chip_peaceful": "Peaceful",
     
     "living_water_cat": "LIVING WATER RESET",
-    "living_water_title": "पवित्र शांतीचा झरा",
-    "living_water_sub": "४३२ हर्ट्झ ध्यान व प्रार्थना",
+    "living_water_title": "Sanctuary of Rest & Peace",
+    "living_water_sub": "▶ 1-3 min • 432Hz Ambient Meditation",
     
-    // 10 Commandments (English Header / Ref, Marathi Body inside)
+    // 10 Commandments (English Header & Title, Marathi Summary & Body inside)
     "commandments_cat": "BIBLICAL LAW",
-    "commandments_title": "दहा आज्ञा आणि ख्रिस्ती आचरण",
+    "commandments_title": "The 10 Commandments",
     "commandments_ref": "Exodus 20:1-17",
     "commandments_sub": "सीनाय पर्वतावर देवाने दिलेला शाश्वत नियम आणि येशूने सांगितलेला सारांश.",
-    "commandments_action": "सर्व १० आज्ञा उघडा व ऐका",
+    "commandments_action": "Read & Listen to All 10 Commandments →",
     
     // Ready-Made Prayers Grid Header & Live Fellowship
     "tag_prayer_sanctuary": "PRAYER SANCTUARY",
-    "prayers_section_title": "दैनंदिन प्रार्थना आणि आशीर्वाद",
-    "prayers_section_sub": "तुमच्या गरजेनुसार तयार केलेल्या बायबल आधारित प्रार्थना",
-    "btn_view_all_prayers": "सर्व प्रार्थना पहा (८+) →",
+    "prayers_section_title": "Daily Guided Prayers",
+    "prayers_section_sub": "बायबल आधारित प्रार्थना आणि आत्मिक मनन",
+    "btn_view_all_prayers": "View All Prayers (8+) →",
     "daily_sanctuary_tag": "Daily Sanctuary",
-    "live_fellowship_title": "दैनिक प्रार्थना आणि बायबल अभ्यास",
+    "live_fellowship_title": "Daily Prayer & Scripture Fellowship",
     "live_fellowship_sub": "थेट भक्ती, स्तुती आणि शास्त्रवचनांच्या मननामध्ये सहभागी व्हा.",
-    "btn_join_fellowship": "प्रार्थनेत सामील व्हा",
-    "btn_pray_now": "प्रार्थना करा",
+    "btn_join_fellowship": "Join Prayer Sanctuary",
+    "btn_pray_now": "Pray Now",
     
-    // Prayer Topics (English Badges & Scripture Names, Marathi Titles & Content inside)
+    // Prayer Topics (English Badges & Titles, Rich Marathi Prayer inside Modal)
     "prayer_cana_badge": "MIRACLE & PROVISION",
-    "prayer_cana_title": "पाण्याचे द्राक्षारसात रूपांतर",
-    "prayer_cana_sub": "कमीपणाच्या वेळी अद्भुत पुरवठा",
+    "prayer_cana_title": "Water Turned into Wine",
+    "prayer_cana_sub": "पाण्याचे द्राक्षारसात रूपांतर • अद्भुत पुरवठा",
     "prayer_cana_ref": "John 2:1-11",
 
     "prayer_peace_badge": "PEACE & CALM",
-    "prayer_peace_title": "चिंतेतून मुक्ती आणि शांती",
-    "prayer_peace_sub": "सर्व बुद्धीपलीकडची देवाची शांती",
+    "prayer_peace_title": "Peace Over Anxiety",
+    "prayer_peace_sub": "चिंतेतून मुक्ती आणि देवाची शांती",
     "prayer_peace_ref": "Philippians 4:6-7",
 
     "prayer_morning_badge": "MORNING BLESSING",
-    "prayer_morning_title": "सकाळची कृपा व दैवी संरक्षण",
-    "prayer_morning_sub": "सर्वसमर्थाच्या सावलीत विसावा",
+    "prayer_morning_title": "Morning Grace & Protection",
+    "prayer_morning_sub": "सकाळची कृपा व दैवी संरक्षण",
     "prayer_morning_ref": "Psalm 91:1-4",
 
     "prayer_healing_badge": "HEALING & HEALTH",
-    "prayer_healing_title": "आरोग्य आणि दैवी चंगाई",
-    "prayer_healing_sub": "येशूच्या फटक्यांनी मिळालेले आरोग्य",
+    "prayer_healing_title": "Divine Healing & Restoration",
+    "prayer_healing_sub": "आरोग्य आणि दैवी चंगाई",
     "prayer_healing_ref": "Isaiah 53:5",
 
     "prayer_family_badge": "FAMILY & HOME",
-    "prayer_family_title": "कुटुंब आशीर्वाद व एकता",
-    "prayer_family_sub": "घरामध्ये प्रेम, शांती व देवाचे भय",
+    "prayer_family_title": "Family Blessing & Unity",
+    "prayer_family_sub": "कुटुंब आशीर्वाद व घरातील एकता",
     "prayer_family_ref": "Joshua 24:15",
 
     "prayer_strength_badge": "STRENGTH & FAITH",
-    "prayer_strength_title": "कठीण प्रसंगी सामर्थ्य व धीर",
-    "prayer_strength_sub": "थकलेल्याला नवीन बळ देणारा देव",
+    "prayer_strength_title": "Strength in Hard Times",
+    "prayer_strength_sub": "कठीण प्रसंगी सामर्थ्य व धीर",
     "prayer_strength_ref": "Isaiah 40:29-31",
 
     "prayer_wisdom_badge": "WISDOM & GUIDANCE",
-    "prayer_wisdom_title": "ज्ञानासाठी व करिअर मार्गदर्शन",
-    "prayer_wisdom_sub": "योग्य निर्णयांसाठी स्वर्गीय बुद्धी",
+    "prayer_wisdom_title": "Wisdom & Career Guidance",
+    "prayer_wisdom_sub": "ज्ञानासाठी व नोकरी-व्यवसाय मार्गदर्शन",
     "prayer_wisdom_ref": "James 1:5",
 
     "prayer_evening_badge": "EVENING REST",
-    "prayer_evening_title": "रात्रीची उपकारस्तुती व शांत झोप",
-    "prayer_evening_sub": "सुरक्षिततेत शांत विश्रांती",
+    "prayer_evening_title": "Evening Thanksgiving & Rest",
+    "prayer_evening_sub": "रात्रीची उपकारस्तुती व शांत झोप",
     "prayer_evening_ref": "Psalm 4:8",
 
     // Quiz Promo Card
     "quiz_badge_trivia": "BIBLE TRIVIA",
     "quiz_badge_levels": "4 LEVELS",
-    "quiz_card_title": "बायबल सामान्य ज्ञान स्पर्धा",
+    "quiz_card_title": "Daily Bible Quiz Challenge",
     "quiz_card_sub": "दैनिक बायबल प्रश्नमंजुषा • ४ कठीणता स्तर • बॅजेस",
-    "quiz_card_btn": "खेळा →",
+    "quiz_card_btn": "Play Quiz →",
     "quiz_lvl_1": "🌱 Beginner",
     "quiz_lvl_2": "⚔️ Intermediate",
     "quiz_lvl_3": "👑 Advanced",
     "quiz_lvl_4": "🏆 Master",
-    "quiz_banner_title": "दैनिक बायबल ज्ञान स्पर्धा",
-    "quiz_banner_sub": "आजच्या प्रश्नांची उत्तरे द्या व गुण मिळवा",
-    "quiz_banner_btn": "स्पर्धा सुरू करा"
+    "quiz_banner_title": "Daily Bible Quiz Challenge",
+    "quiz_banner_sub": "Test your knowledge and earn spiritual badges",
+    "quiz_banner_btn": "Start Quiz"
   },
   en: {
     // Navigation & Header
@@ -1165,18 +1165,18 @@ const I18N_DICTIONARY = {
     
     "living_water_cat": "LIVING WATER RESET",
     "living_water_title": "Sanctuary of Rest & Peace",
-    "living_water_sub": "432Hz Ambient Meditation",
+    "living_water_sub": "▶ 1-3 min • 432Hz Ambient Meditation",
     
     // 10 Commandments
     "commandments_cat": "BIBLICAL LAW",
     "commandments_title": "The 10 Commandments",
     "commandments_ref": "Exodus 20:1-17",
     "commandments_sub": "God's timeless blueprint given at Mount Sinai and fulfilled in Christ.",
-    "commandments_action": "Read & Listen to All 10 Commandments",
+    "commandments_action": "Read & Listen to All 10 Commandments →",
     
     // Ready-Made Prayers Grid Header & Live Fellowship
     "tag_prayer_sanctuary": "PRAYER SANCTUARY",
-    "prayers_section_title": "Daily Biblical Prayers",
+    "prayers_section_title": "Daily Guided Prayers",
     "prayers_section_sub": "Ready-made scriptural prayers with inspiring background imagery",
     "btn_view_all_prayers": "View All Prayers (8+) →",
     "daily_sanctuary_tag": "Daily Sanctuary",
@@ -2265,13 +2265,10 @@ function renderDailyDevotion() {
   
   const hour = now.getHours();
   let greetingTimeEn = "Good evening";
-  let greetingTimeMr = "शुभ संध्याकाळ";
   if (hour < 12) {
     greetingTimeEn = "Good morning";
-    greetingTimeMr = "शुभ प्रभात";
   } else if (hour < 17) {
     greetingTimeEn = "Good afternoon";
-    greetingTimeMr = "शुभ दुपार";
   }
   
   const currentUserObj = state.currentUser || state.user;
@@ -2284,7 +2281,7 @@ function renderDailyDevotion() {
   
   const userEl = document.getElementById("home-greeting-user");
   if (userEl) {
-    userEl.textContent = `${isEng ? greetingTimeEn : greetingTimeMr}, ${userName}`;
+    userEl.textContent = `${greetingTimeEn}, ${userName}`;
   }
   
   const { vod, dayOfYear, offset } = getCurrentVOD();
