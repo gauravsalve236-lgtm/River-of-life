@@ -8,7 +8,7 @@
   <script>
     // Force immediate hard purge of all stale Service Workers and CacheStorage
     (function() {
-      const CURRENT_VER = "v81_PHONE_EMAIL_AUTHENTICATION_AND_DATASOURCE";
+      const CURRENT_VER = "v94_DAILY_VERSE_GALLERY_AND_WHATSAPP_SHARING";
       if (localStorage.getItem("rol_app_ver") !== CURRENT_VER) {
         localStorage.setItem("rol_app_ver", CURRENT_VER);
         if ('serviceWorker' in navigator) {
@@ -44,9 +44,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   
-  <!-- Main Stylesheet -->
-  <!-- Main Stylesheet (Cache-Busted for Version 81 Phone Email Authentication & Datasource) -->
-  <link rel="stylesheet" href="index.css?v=81_PHONE_EMAIL_AUTHENTICATION_AND_DATASOURCE">
+  <!-- Main Stylesheet (Cache-Busted for Version 87 YouVersion Clean Desktop & Auto-Refresh) -->
+  <link rel="stylesheet" href="index.css?v=94_DAILY_VERSE_GALLERY_AND_WHATSAPP_SHARING">
 
   <!-- Official LiveKit WebRTC Client SDK -->
   <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.0.8/dist/livekit-client.umd.min.js"></script>
@@ -163,7 +162,7 @@
         
         <div id="nav-static-controls" class="header-pane" style="display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 0 16px; box-sizing: border-box;">
           <div style="display: flex; align-items: center; gap: 10px;">
-            <img src="assets/icons/app-logo.png" alt="River of Life Logo" style="width: 32px; height: 32px; border-radius: 8px; object-fit: contain; background: #ffffff; padding: 2px; border: 1px solid rgba(229, 168, 59, 0.45); box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+            <img src="assets/icons/app-logo.png" alt="River of Life Logo" style="width: 32px; height: 32px; object-fit: contain; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.25));">
             <h1 id="static-header-title" style="margin: 0; font-size: 18px; font-weight: 800; color: var(--text);">Today</h1>
           </div>
           <div class="header-right" style="display: flex; align-items: center; gap: 8px;">
@@ -191,121 +190,258 @@
                   <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
                 </svg>
               </div>
-              <span id="pull-refresh-text" class="pull-refresh-label">Pull to refresh / रिफ्रेश करण्यासाठी ओढा</span>
+              <span id="pull-refresh-text" class="pull-refresh-label" data-i18n="pull_refresh">रिफ्रेश करण्यासाठी ओढा</span>
             </div>
 
-            <!-- 1ST CARD: Brand Greeting & Welcome Card (Clean Light Color Theme) -->
-            <div class="brand-hero-welcome-card light-theme-hero">
-              <div class="hero-card-left" style="width: 100%;">
-                <div class="hero-card-header-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                  <span class="hero-date-badge">
-                    <span class="pulse-dot"></span> <span id="home-hero-date-str">Today | आजचे मनन</span>
+            <!-- YouVersion Style Top Subnav Tabs -->
+            <div class="youversion-subnav-tabs" style="display: flex; align-items: center; gap: 24px; padding: 12px 0 6px 0; margin-bottom: 4px;">
+              <button class="youversion-subnav-btn active" id="btn-home-tab-today" data-i18n="tab_today" onclick="switchHomeTab(\'today\')">आज</button>
+              <button class="youversion-subnav-btn" id="btn-home-tab-community" data-i18n="tab_community" onclick="switchHomeTab(\'community\')">समुदाय</button>
+            </div>
+
+            <!-- YouVersion Style Clean Greeting Header Row -->
+            <div class="youversion-greeting-row" style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0 12px 0;">
+              <h1 class="youversion-greeting-title" id="home-greeting-user" style="font-size: 24px; font-weight: 800; margin: 0; color: var(--text);">Good afternoon, Gaurav</h1>
+              <div class="youversion-greeting-actions" style="display: flex; align-items: center; gap: 14px;">
+                <div class="youversion-streak-indicator" id="home-streak-pill" title="Daily Streak" onclick="showToast('Active Daily Devotion Streak: 1 Day 🔥')" style="display: flex; align-items: center; gap: 4px; font-size: 15px; font-weight: 800; cursor: pointer;">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="#f59e0b"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                  <span id="home-streak-count">1</span>
+                </div>
+                <button class="youversion-bell-btn" onclick="openNotificationModal()" title="Notifications" style="background: none; border: none; padding: 0; cursor: pointer; position: relative; display: flex; align-items: center; justify-content: center; color: var(--text);">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                  <span class="bell-badge-count">8</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Prominent Home Search Input Field -->
+            <div class="home-search-bar-container" style="margin: 0 0 16px 0;">
+              <div class="home-prominent-search-box" onclick="switchTab('discover'); setTimeout(() => document.getElementById('search-input-main')?.focus(), 150);" style="display: flex; align-items: center; gap: 12px; background: var(--surface, #ffffff); border: 1.5px solid var(--border, rgba(0,0,0,0.08)); border-radius: 16px; padding: 13px 18px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); cursor: pointer; transition: all 0.2s ease;">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--text-muted, #64748b)" stroke-width="2.3"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <span id="home-search-placeholder-text" data-i18n="search_placeholder" style="flex: 1; font-size: 14.5px; font-weight: 600; color: var(--text-muted, #64748b); font-family: var(--font-ui);">बायबल, विषय किंवा प्रश्न शोधा...</span>
+                <span id="home-search-explore-badge" data-i18n="search_explore" style="font-size: 11.5px; font-weight: 800; color: var(--primary); background: rgba(143,18,29,0.08); padding: 4px 9px; border-radius: 8px;">शोधा</span>
+              </div>
+            </div>
+
+            <!-- TODAY TAB FEED -->
+            <div id="home-feed-today-container">
+              <!-- YouVersion Style Verse of the Day Card (Directly below Greeting) -->
+              <div class="youversion-vod-card" id="card-daily-verse-home" onclick="openFullscreenVOD()" style="position: relative; overflow: hidden; border-radius: 22px; min-height: 340px; background-color: #0b0f19; margin: 0 0 16px 0; box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: flex; flex-direction: column; justify-content: space-between; cursor: pointer;" title="Tap to open full image, save to gallery or share status">
+                <div class="youversion-vod-bg" id="vod-dynamic-bg" style="position: absolute; inset: 0; background-size: cover; background-position: center; background-image: url('assets/daily_verses/stars.png');"></div>
+                <div class="youversion-vod-overlay" style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.42) 0%, rgba(0,0,0,0.25) 40%, rgba(0,0,0,0.85) 100%); z-index: 2;"></div>
+                
+                <div class="youversion-vod-content" style="position: relative; z-index: 3; padding: 22px 20px 16px 20px; display: flex; flex-direction: column; justify-content: space-between; min-height: 340px; box-sizing: border-box;">
+                  <div class="youversion-vod-top-meta" style="margin-bottom: 16px;">
+                    <span class="youversion-vod-label" data-i18n="vod_label" style="font-size: 13px; color: rgba(255,255,255,0.75); font-weight: 600; display: block; margin-bottom: 4px;">आजचे वचन</span>
+                    <h2 class="youversion-vod-ref" id="home-vod-ref" style="font-size: 18px; font-weight: 800; color: #ffffff; margin: 0;">स्तोत्रसंहिता २३:१ MARVBSI</h2>
+                  </div>
+
+                  <blockquote class="youversion-vod-text" id="home-vod-text" style="font-family: var(--font-body, 'Noto Serif Devanagari', serif); font-size: 21px; line-height: 1.6; color: #ffffff; font-weight: 700; margin: 0 0 20px 0; text-shadow: 0 2px 8px rgba(0,0,0,0.7);">
+                    "परमेश्वर माझा मेंढपाळ आहे; मला काहीही कमी पडणार नाही."
+                  </blockquote>
+
+                  <div class="youversion-vod-actions" style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 12px;">
+                    <button class="youversion-action-btn" id="btn-vod-like-trigger">
+                      <svg id="home-vod-heart-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                      <span id="home-vod-likes-count">12.9L</span>
+                    </button>
+                    <button class="youversion-action-btn" onclick="openStudyPanel(state.activeBook, state.activeChapter)">
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                      <span>22.7K</span>
+                    </button>
+                    <button class="youversion-action-btn" id="btn-vod-share-trigger" onclick="event.stopPropagation(); shareDailyVerseToWhatsApp();" title="Share to WhatsApp Status / व्हॉट्सॲपवर शेअर करा">
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
+                      <span>5.8L</span>
+                    </button>
+                    <button class="youversion-action-btn" id="btn-vod-more" onclick="openVodMoreSheet()">
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1.5"></circle><circle cx="6" cy="12" r="1.5"></circle><circle cx="18" cy="12" r="1.5"></circle></svg>
+                      <span>More</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ==========================================================================
+                   RIVER OF LIFE 3-CARD SPIRITUAL FLOW SERIES (IMAGE 2 MATCH)
+                   ========================================================================== -->
+
+              <!-- 1. The Headwaters: Foundational Morning Check-in -->
+              <div class="river-flow-card headwaters-card" onclick="openHeadwatersModal()" title="सकाळचा पवित्र विसावा">
+                <!-- Scenic River to Sunrise Background Graphic -->
+                <div class="card-scenic-bg headwaters-bg" style="position: absolute; right: 60px; top: 0; bottom: 0; width: 160px; pointer-events: none; opacity: 0.85; background: radial-gradient(circle at 65% 50%, rgba(255,255,255,0.9) 0%, rgba(254,240,138,0.4) 35%, transparent 70%);">
+                  <svg viewBox="0 0 160 96" preserveAspectRatio="none" style="width: 100%; height: 100%; position: absolute; inset: 0;">
+                    <circle cx="110" cy="48" r="22" fill="#ffffff" opacity="0.95" />
+                    <circle cx="110" cy="48" r="32" fill="#fef08a" opacity="0.45" />
+                    <path d="M 0 96 Q 50 65 110 70 Q 140 73 160 96 Z" fill="#ea580c" opacity="0.35" />
+                    <path d="M 40 96 Q 85 78 160 82 L 160 96 Z" fill="#f97316" opacity="0.45" />
+                    <path d="M 20 96 Q 60 82 110 55 L 115 55 Q 80 84 45 96 Z" fill="#e0f2fe" opacity="0.85" />
+                    <path d="M 30 96 Q 65 83 112 55 L 114 55 Q 75 85 40 96 Z" fill="#ffffff" opacity="0.95" />
+                  </svg>
+                </div>
+
+                <div style="position: relative; z-index: 3; flex: 1; padding-right: 12px;">
+                  <div style="font-size: 12px; font-weight: 800; color: #9a3412; margin-bottom: 4px; letter-spacing: 0.5px; text-transform: uppercase;">
+                    <span data-i18n="headwaters_cat">उगमस्थान</span>
+                  </div>
+                  <h3 data-i18n="headwaters_title" style="font-size: 18px; font-weight: 800; color: #1e293b; margin: 0 0 6px 0; line-height: 1.3; letter-spacing: -0.2px;">
+                    सकाळचा पवित्र विसावा
+                  </h3>
+                  <div style="font-size: 12px; font-weight: 700; color: #c2410c; display: flex; align-items: center; gap: 4px;">
+                    <span data-i18n="headwaters_time">▶ ३-५ मिनिटे</span>
+                  </div>
+                </div>
+
+                <div style="position: relative; z-index: 3; width: 68px; height: 68px; min-width: 68px; max-width: 68px; display: flex; align-items: center; justify-content: center;">
+                  <img src="assets/icons/headwaters_sunrise.svg" alt="Sunrise" style="width: 62px; height: 62px; object-fit: contain; filter: drop-shadow(0 4px 10px rgba(245,158,11,0.35));">
+                </div>
+              </div>
+
+              <!-- 2. The Daily Confluence: Interactive Emotional Flow Picker -->
+              <div class="river-flow-card confluence-card" onclick="openConfluenceModal()" title="दैनंदिन संगम">
+                <!-- Scenic River Confluence Background Graphic -->
+                <div class="card-scenic-bg confluence-bg" style="position: absolute; right: 50px; top: 0; bottom: 0; width: 170px; pointer-events: none; opacity: 0.8; background: radial-gradient(circle at 60% 50%, rgba(255,255,255,0.85) 0%, rgba(204,251,241,0.4) 40%, transparent 75%);">
+                  <svg viewBox="0 0 170 104" preserveAspectRatio="none" style="width: 100%; height: 100%; position: absolute; inset: 0;">
+                    <path d="M 0 0 Q 60 30 75 104 L 0 104 Z" fill="#047857" opacity="0.25" />
+                    <path d="M 40 0 Q 95 38 120 104 L 75 104 Q 60 30 0 0 Z" fill="#0d9488" opacity="0.35" />
+                    <path d="M 120 0 Q 135 45 170 85 L 170 104 L 120 104 Q 95 38 40 0 Z" fill="#059669" opacity="0.2" />
+                    <path d="M 25 0 Q 80 32 95 104 L 105 104 Q 90 32 35 0 Z" fill="#ccfbf1" opacity="0.9" />
+                    <path d="M 30 0 Q 82 32 98 104 L 102 104 Q 86 32 34 0 Z" fill="#ffffff" opacity="0.95" />
+                  </svg>
+                </div>
+
+                <div style="position: relative; z-index: 3; flex: 1;">
+                  <div style="font-size: 12px; font-weight: 800; color: #047857; margin-bottom: 4px; letter-spacing: 0.5px; text-transform: uppercase;">
+                    <span data-i18n="confluence_cat">दैनंदिन संगम</span>
+                  </div>
+                  <h3 data-i18n="confluence_title" style="font-size: 17.5px; font-weight: 800; color: #0f172a; margin: 0 0 10px 0; line-height: 1.3; letter-spacing: -0.2px;">
+                    तुमचा आत्मा आज कसा वाहत आहे?
+                  </h3>
+                  
+                  <!-- Interactive Soul Flow State Chips -->
+                  <div class="soul-flow-chips-row" onclick="event.stopPropagation();" style="display: flex; gap: 7px; flex-wrap: wrap;">
+                    <button class="flow-chip" data-flow="restless" onclick="selectSoulFlowChip(this, 'restless')">
+                      <span class="chip-dot" style="background: #38bdf8;"></span>
+                      <span data-i18n="chip_restless">अस्वस्थ</span>
+                    </button>
+                    <button class="flow-chip active" data-flow="heavy" onclick="selectSoulFlowChip(this, 'heavy')">
+                      <span class="chip-dot" style="background: #a855f7;"></span>
+                      <span data-i18n="chip_heavy">थकलेले</span>
+                    </button>
+                    <button class="flow-chip" data-flow="thirsty" onclick="selectSoulFlowChip(this, 'thirsty')">
+                      <span class="chip-dot" style="background: #0ea5e9;"></span>
+                      <span data-i18n="chip_thirsty">तहानलेले</span>
+                    </button>
+                    <button class="flow-chip" data-flow="peaceful" onclick="selectSoulFlowChip(this, 'peaceful')">
+                      <span class="chip-dot" style="background: #10b981;"></span>
+                      <span data-i18n="chip_peaceful">शांत</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div style="position: relative; z-index: 3; width: 56px; height: 56px; min-width: 56px; max-width: 56px; display: flex; align-items: center; justify-content: center; margin-left: 6px;">
+                  <img src="assets/icons/confluence_stream.svg" alt="Streams" style="width: 50px; height: 50px; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(13,148,136,0.3));">
+                </div>
+              </div>
+
+              <!-- 3. Living Water Reset: Vibrant Deep Teal Module with Dynamic Ripple Effect -->
+              <div class="river-flow-card living-water-reset-card" onclick="openLivingWaterResetModal()" title="जीवन जल विश्रांती">
+                <!-- Dynamic Water Ripple Animation Background Graphic -->
+                <div class="card-scenic-bg living-water-bg" style="position: absolute; right: 55px; top: 0; bottom: 0; width: 170px; pointer-events: none; display: flex; align-items: center; justify-content: center;">
+                  <div class="ripple-ring r1" style="width: 40px; height: 20px; border: 1.5px solid rgba(94, 234, 212, 0.6); animation: ripplePulse 3s infinite ease-out;"></div>
+                  <div class="ripple-ring r2" style="width: 80px; height: 40px; border: 1.5px solid rgba(94, 234, 212, 0.4); animation: ripplePulse 3s infinite 1s ease-out;"></div>
+                  <div class="ripple-ring r3" style="width: 120px; height: 60px; border: 1.5px solid rgba(94, 234, 212, 0.2); animation: ripplePulse 3s infinite 2s ease-out;"></div>
+                </div>
+
+                <div style="position: relative; z-index: 3; flex: 1; padding-right: 12px;">
+                  <div style="font-size: 12px; font-weight: 800; color: #67e8f9; margin-bottom: 4px; letter-spacing: 0.5px; text-transform: uppercase;">
+                    <span data-i18n="living_water_cat">जीवन जल विश्रांती</span>
+                  </div>
+                  <h3 data-i18n="living_water_title" style="font-size: 18px; font-weight: 800; color: #fef08a; margin: 0 0 6px 0; line-height: 1.3; letter-spacing: -0.2px; text-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+                    पवित्र शांतीचा झरा
+                  </h3>
+                  <div style="font-size: 12px; font-weight: 700; color: #a5f3fc; display: flex; align-items: center; gap: 4px;">
+                    <span data-i18n="living_water_sub">▶ १-३ मिनिटे • शांतता, श्वास व संगीत</span>
+                  </div>
+                </div>
+
+                <div style="position: relative; z-index: 3; width: 68px; height: 68px; min-width: 68px; max-width: 68px; display: flex; align-items: center; justify-content: center;">
+                  <img src="assets/icons/living_water_drop.svg" alt="Droplet" style="width: 58px; height: 58px; object-fit: contain; filter: drop-shadow(0 4px 12px rgba(45,212,191,0.5));">
+                </div>
+              </div>
+              </div>
+
+                            <!-- 10 COMMANDMENTS (दहा आज्ञा) COMPACT FEATURED CARD ON HOME -->
+              <div class="youversion-feed-card home-commandments-feed-card" onclick="toggleTenCommandmentsModal()" style="margin: 0 0 14px 0; background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 16px 18px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.03); transition: transform 0.2s ease, box-shadow 0.2s ease;">
+                <div class="feed-card-content" style="flex: 1; padding-right: 14px;">
+                  <div class="feed-card-badge-row" style="display: flex; align-items: center; gap: 6px; margin-bottom: 5px;">
+                    <span class="feed-card-pill" data-i18n="commandments_ref" style="display: inline-flex; align-items: center; gap: 3px; background: rgba(229, 168, 59, 0.15); padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 800; color: var(--accent-gold, #c98a2c);">निर्गम २०:१-१७</span>
+                    <span class="feed-card-label" data-i18n="commandments_cat" style="font-size: 12px; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">बायबलमधील नियमशास्त्र</span>
+                  </div>
+                  <h3 class="feed-card-title" data-i18n="commandments_title" style="font-size: 17px; font-weight: 800; color: var(--text); margin: 0 0 4px 0; line-height: 1.35;">दहा आज्ञा आणि ख्रिस्ती आचरण</h3>
+                  <p data-i18n="commandments_sub" style="font-size: 12.5px; color: var(--text-muted); margin: 0 0 6px 0; line-height: 1.4;">
+                    सीनाय पर्वतावर देवाने दिलेला शाश्वत नियम आणि येशूने सांगितलेला सारांश.
+                  </p>
+                  <span class="feed-card-sub" data-i18n="commandments_action" style="font-size: 12px; color: var(--primary); font-weight: 800; display: inline-flex; align-items: center; gap: 4px;">
+                    ▶ सर्व १० आज्ञा उघडा व ऐका &rarr;
                   </span>
-                  <span class="hero-fellowship-pill" style="font-size: 11.5px; font-weight: 800; background: rgba(139, 29, 36, 0.08); color: #8B1D24; padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(139, 29, 36, 0.2);">River of Life 🕊️</span>
                 </div>
-                <h2 class="hero-welcome-title" id="home-greeting-user">Good morning, Shalom 🕊️</h2>
-                <p class="hero-welcome-subtitle">जीवन नदी बायबल निवासस्थान • River of Life Fellowship</p>
-                <div class="hero-action-buttons">
-                  <button class="hero-btn primary-crimson" onclick="switchTab('reader')">
-                    📖 Read Bible / वाचा
-                  </button>
-                  <button class="hero-btn secondary-room" onclick="switchTab('meetings')">
-                    🎥 Join Live Room
-                  </button>
-                  <button class="hero-btn secondary-prayer" onclick="openPrayerRequestForm()">
-                    🙏 Prayer Request / प्रार्थना
-                  </button>
+                <div class="feed-card-media" style="width: 72px; height: 72px; min-width: 72px; max-width: 72px; border-radius: 14px; overflow: hidden; position: relative; flex-shrink: 0; background: linear-gradient(135deg, #1e1b4b, #312e81); display: flex; align-items: center; justify-content: center; border: 1.5px solid rgba(229, 168, 59, 0.35); box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                  <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="#f59e0b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                    <line x1="10" y1="6" x2="16" y2="6"></line>
+                    <line x1="10" y1="10" x2="16" y2="10"></line>
+                  </svg>
                 </div>
               </div>
-            </div>
 
-            <!-- Search bar at top center -->
-            <div class="home-search-container">
-              <input type="text" id="home-search-trigger-input" class="home-search-bar" placeholder="Search Bible, Topics, or Questions / शोधा..." readonly onclick="switchTab('discover')">
-            </div>
-
-            <div class="home-grid-layout">
-              <!-- 2ND CARD: Daily Bible Verse (Elevated Captivating View with Live Wallpaper Switcher) -->
-              <div class="daily-verse-card" id="card-daily-verse-home">
-                <div class="daily-verse-card-bg" id="vod-dynamic-bg" style="background-image: url('assets/images/golden_dawn.png');"></div>
-                <div class="daily-verse-tint"></div>
-                
-                <div class="daily-verse-top-bar">
-                  <div class="vod-badge-ribbon">
-                    <span class="vod-sparkle">✨</span>
-                    <span id="vod-date-label">DAILY BIBLE VERSE • आजचे वचन</span>
-                  </div>
-                  
-                  <!-- Interactive Scenic Wallpaper Switcher Chips -->
-                  <div class="vod-wallpaper-chips-row">
-                    <button class="vod-chip active" onclick="switchVodWallpaper('golden_dawn', this)" title="Golden Dawn">🌅 Dawn</button>
-                    <button class="vod-chip" onclick="switchVodWallpaper('mount_zion', this)" title="Mount Zion">🏔️ Zion</button>
-                    <button class="vod-chip" onclick="switchVodWallpaper('calm_waters', this)" title="Calm Waters">🌊 Waters</button>
-                    <button class="vod-chip" onclick="switchVodWallpaper('peaceful_pastures', this)" title="Peaceful Pastures">🌿 Meadow</button>
-                    <button class="vod-chip" onclick="switchVodWallpaper('stars', this)" title="Starlight">✨ Stars</button>
-                  </div>
-                </div>
-
-                <div class="daily-verse-body">
-                  <div class="vod-quote-glyph">“</div>
-                  <blockquote id="home-vod-text">"परमेश्वर माझा मेंढपाळ आहे; मला काहीही कमी पडणार नाही."</blockquote>
-                  <div class="vod-ref-container">
-                    <cite id="home-vod-ref">स्तोत्रसंहिता २३:१ MARVBSI</cite>
-                  </div>
-                  
-                  <div class="daily-verse-nav-row">
-                    <button class="vod-nav-btn" id="btn-vod-prev" title="Yesterday's Verse">
-                      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg> Prev
-                    </button>
-                    <button class="vod-nav-btn highlight" id="btn-vod-listen" title="Listen with Shubh Voice">
-                      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg> Listen 🔊
-                    </button>
-                    <button class="vod-nav-btn" id="btn-vod-read">
-                      Read Chapter 📖
-                    </button>
-                    <button class="vod-nav-btn" id="btn-vod-next" title="Next Day's Verse">
-                      Next <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                    </button>
-                  </div>
-                </div>
-                
-                <div class="daily-verse-social-metrics">
-                  <button class="metric-btn" id="btn-vod-like-trigger">
-                    <svg id="home-vod-heart-icon" viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path></svg>
-                    <span id="home-vod-likes-count">12.6K</span>
-                  </button>
-                  <button class="metric-btn" id="btn-vod-share-trigger">
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
-                    <span>WhatsApp</span>
-                  </button>
-                  <button class="metric-right" id="btn-open-fullscreen-vod">
-                    <span>Fullscreen ↗</span>
-                  </button>
-                </div>
-              </div>
+              <div class="home-grid-layout">
 
               <!-- 3RD OPTION: Topics for Prayers (Top 4 Featured with View All Button) -->
               <div class="prayer-topics-section-container">
                 <div class="section-title-row" style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 14px;">
                   <div class="section-title-left">
-                    <span class="section-tag-gold">PRAYER SANCTUARY</span>
-                    <h3 class="section-main-heading">🙏 Topics for Prayers / प्रार्थना विषय व मनन</h3>
-                    <p class="section-sub-heading">Ready-made biblical prayers with inspiring background imagery & narration</p>
+                    <span class="section-tag-gold" data-i18n="tag_prayer_sanctuary">प्रार्थना कक्ष</span>
+                    <h3 class="section-main-heading" data-i18n="prayers_section_title">दैनंदिन प्रार्थना आणि आशीर्वाद</h3>
+                    <p class="section-sub-heading" data-i18n="prayers_section_sub">तुमच्या गरजेनुसार तयार केलेल्या बायबल आधारित प्रार्थना</p>
                   </div>
-                  <button class="btn-section-view-all" id="btn-view-all-prayers" onclick="toggleViewAllPrayers()">View All Prayers (8+) →</button>
+                  <button class="btn-section-view-all" id="btn-view-all-prayers" onclick="toggleViewAllPrayers()" data-i18n="btn_view_all_prayers">सर्व प्रार्थना पहा (८+) →</button>
+                </div>
+
+                <!-- Live Prayer Sanctuary Fellowship Banner -->
+                <div class="prayer-sanctuary-banner-card" style="margin-bottom: 18px; border-radius: 20px; overflow: hidden; background: linear-gradient(135deg, #1c0407 0%, #3b0a11 50%, #5c0f1b 100%); color: #ffffff; padding: 20px; box-shadow: 0 10px 25px rgba(92,15,27,0.25); border: 1px solid rgba(229,168,59,0.3); display: flex; flex-direction: column; gap: 12px; position: relative;">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="background: linear-gradient(135deg, #16a34a, #22c55e); color: #fff; font-size: 11px; font-weight: 800; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 4px;">
+                      <span style="width: 7px; height: 7px; border-radius: 50%; background: #ffffff; display: inline-block;"></span>
+                      🔴 LIVE FELLOWSHIP NOW
+                    </span>
+                    <span style="font-size: 12px; color: rgba(255,255,255,0.75); font-weight: 600;" data-i18n="daily_sanctuary_tag">दैनिक प्रार्थना कक्ष</span>
+                  </div>
+
+                  <div>
+                    <h4 style="margin: 0 0 6px 0; font-size: 18px; font-weight: 800; color: #ffffff;" data-i18n="live_fellowship_title">दैनिक प्रार्थना आणि बायबल अभ्यास</h4>
+                    <p style="margin: 0; font-size: 13px; color: rgba(255,255,255,0.85); line-height: 1.4;" data-i18n="live_fellowship_sub">
+                      थेट भक्ती, स्तुती आणि शास्त्रवचनांच्या मननामध्ये सहभागी व्हा.
+                    </p>
+                  </div>
+
+                  <button class="btn-primary-block" onclick="switchTab('meetings')" style="background: linear-gradient(135deg, #dfa938 0%, #c99328 100%); color: #172116; border: none; border-radius: 12px; padding: 12px 18px; font-size: 14.5px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(223,169,56,0.35);">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2"></rect></svg>
+                    <span data-i18n="btn_join_fellowship">प्रार्थनेत सामील व्हा</span>
+                  </button>
                 </div>
 
                 <div class="prayer-topics-grid" id="prayer-topics-grid-container">
                   <!-- Topic 1: Water Turned into Wine (Wedding at Cana Miracle) -->
-                  <div class="prayer-topic-card" onclick="openImmersivePrayerModal('wedding_cana')" style="background-image: url('assets/images/wedding_cana_v425.png');">
+                  <div class="prayer-topic-card" onclick="openImmersivePrayerModal('wedding_cana')" style="background-image: url('assets/images/wedding_cana_miracle.jpg');">
                     <div class="prayer-topic-overlay"></div>
-                    <div class="prayer-topic-badge">🍷 MIRACLE & PROVISION</div>
+                    <div class="prayer-topic-badge" data-i18n="prayer_cana_badge">दैवी चमत्कार व पुरवठा</div>
                     <div class="prayer-topic-content">
-                      <h4>पाण्याचे द्राक्षारसात रूपांतर</h4>
-                      <p class="topic-en-title">Water into Wine • Miracle in Scarcity</p>
+                      <h4 data-i18n="prayer_cana_title">पाण्याचे द्राक्षारसात रूपांतर</h4>
+                      <p class="topic-en-title" data-i18n="prayer_cana_sub">कमीपणाच्या वेळी अद्भुत पुरवठा</p>
                       <div class="topic-meta-row">
-                        <span class="topic-scripture">योहान २:१-११</span>
-                        <span class="topic-open-btn">Pray Now 🙏</span>
+                        <span class="topic-scripture" data-i18n="prayer_cana_ref">योहान २:१-११</span>
+                        <span class="topic-open-btn" data-i18n="btn_pray_now">प्रार्थना करा</span>
                       </div>
                     </div>
                   </div>
@@ -313,13 +449,13 @@
                   <!-- Topic 2: Peace Over Anxiety -->
                   <div class="prayer-topic-card" onclick="openImmersivePrayerModal('peace_anxiety')" style="background-image: url('assets/images/peace_anxiety.png');">
                     <div class="prayer-topic-overlay"></div>
-                    <div class="prayer-topic-badge">🕊️ PEACE & CALM</div>
+                    <div class="prayer-topic-badge" data-i18n="prayer_peace_badge">शांती व सांत्वन</div>
                     <div class="prayer-topic-content">
-                      <h4>चिंतेतून मुक्ती आणि शांती</h4>
-                      <p class="topic-en-title">Peace Over Anxiety & Fear</p>
+                      <h4 data-i18n="prayer_peace_title">चिंतेतून मुक्ती आणि शांती</h4>
+                      <p class="topic-en-title" data-i18n="prayer_peace_sub">सर्व बुद्धीपलीकडची देवाची शांती</p>
                       <div class="topic-meta-row">
-                        <span class="topic-scripture">फिलिप्पैकरांस ४:६-७</span>
-                        <span class="topic-open-btn">Pray Now 🙏</span>
+                        <span class="topic-scripture" data-i18n="prayer_peace_ref">फिलिप्पैकरांस ४:६-७</span>
+                        <span class="topic-open-btn" data-i18n="btn_pray_now">प्रार्थना करा</span>
                       </div>
                     </div>
                   </div>
@@ -327,13 +463,13 @@
                   <!-- Topic 3: Morning Grace & Divine Protection -->
                   <div class="prayer-topic-card" onclick="openImmersivePrayerModal('morning_grace')" style="background-image: url('assets/images/golden_dawn.png');">
                     <div class="prayer-topic-overlay"></div>
-                    <div class="prayer-topic-badge">☀️ MORNING BLESSING</div>
+                    <div class="prayer-topic-badge" data-i18n="prayer_morning_badge">सकाळची कृपा</div>
                     <div class="prayer-topic-content">
-                      <h4>सकाळची कृपा व दैवी संरक्षण</h4>
-                      <p class="topic-en-title">Morning Grace & Protection</p>
+                      <h4 data-i18n="prayer_morning_title">सकाळची कृपा व दैवी संरक्षण</h4>
+                      <p class="topic-en-title" data-i18n="prayer_morning_sub">सर्वसमर्थाच्या सावलीत विसावा</p>
                       <div class="topic-meta-row">
-                        <span class="topic-scripture">स्तोत्रसंहिता ९१:१-४</span>
-                        <span class="topic-open-btn">Pray Now 🙏</span>
+                        <span class="topic-scripture" data-i18n="prayer_morning_ref">स्तोत्रसंहिता ९१:१-४</span>
+                        <span class="topic-open-btn" data-i18n="btn_pray_now">प्रार्थना करा</span>
                       </div>
                     </div>
                   </div>
@@ -341,13 +477,13 @@
                   <!-- Topic 4: Divine Healing & Restoration -->
                   <div class="prayer-topic-card" onclick="openImmersivePrayerModal('healing_restoration')" style="background-image: url('assets/images/healing_light.png');">
                     <div class="prayer-topic-overlay"></div>
-                    <div class="prayer-topic-badge">🌿 HEALING & HEALTH</div>
+                    <div class="prayer-topic-badge" data-i18n="prayer_healing_badge">आरोग्य व चंगाई</div>
                     <div class="prayer-topic-content">
-                      <h4>आरोग्य आणि दैवी चंगाई</h4>
-                      <p class="topic-en-title">Divine Healing & Restoration</p>
+                      <h4 data-i18n="prayer_healing_title">आरोग्य आणि दैवी चंगाई</h4>
+                      <p class="topic-en-title" data-i18n="prayer_healing_sub">येशूच्या फटक्यांनी मिळालेले आरोग्य</p>
                       <div class="topic-meta-row">
-                        <span class="topic-scripture">यशया ५३:५</span>
-                        <span class="topic-open-btn">Pray Now 🙏</span>
+                        <span class="topic-scripture" data-i18n="prayer_healing_ref">यशया ५३:५</span>
+                        <span class="topic-open-btn" data-i18n="btn_pray_now">प्रार्थना करा</span>
                       </div>
                     </div>
                   </div>
@@ -356,13 +492,13 @@
                   <!-- Topic 5: Family Blessing & Harmony -->
                   <div class="prayer-topic-card prayer-topic-extra" onclick="openImmersivePrayerModal('family_blessing')" style="display: none; background-image: url('assets/images/family_blessing.png');">
                     <div class="prayer-topic-overlay"></div>
-                    <div class="prayer-topic-badge">👨‍👩‍👧‍👦 FAMILY & HOME</div>
+                    <div class="prayer-topic-badge" data-i18n="prayer_family_badge">कुटुंबासाठी आशीर्वाद</div>
                     <div class="prayer-topic-content">
-                      <h4>कुटुंब आशीर्वाद व एकता</h4>
-                      <p class="topic-en-title">Family Blessing & Unity</p>
+                      <h4 data-i18n="prayer_family_title">कुटुंब आशीर्वाद व एकता</h4>
+                      <p class="topic-en-title" data-i18n="prayer_family_sub">घरामध्ये प्रेम, शांती व देवाचे भय</p>
                       <div class="topic-meta-row">
-                        <span class="topic-scripture">यहोशवा २४:१५</span>
-                        <span class="topic-open-btn">Pray Now 🙏</span>
+                        <span class="topic-scripture" data-i18n="prayer_family_ref">यहोशू २४:१५</span>
+                        <span class="topic-open-btn" data-i18n="btn_pray_now">प्रार्थना करा</span>
                       </div>
                     </div>
                   </div>
@@ -370,13 +506,13 @@
                   <!-- Topic 6: Strength in Hard Times -->
                   <div class="prayer-topic-card prayer-topic-extra" onclick="openImmersivePrayerModal('strength_trials')" style="display: none; background-image: url('assets/images/mount_zion.png');">
                     <div class="prayer-topic-overlay"></div>
-                    <div class="prayer-topic-badge">🛡️ STRENGTH & FAITH</div>
+                    <div class="prayer-topic-badge" data-i18n="prayer_strength_badge">सामर्थ्य व धीर</div>
                     <div class="prayer-topic-content">
-                      <h4>कठीण प्रसंगी सामर्थ्य व धीर</h4>
-                      <p class="topic-en-title">Strength in Hard Times</p>
+                      <h4 data-i18n="prayer_strength_title">कठीण प्रसंगी सामर्थ्य व धीर</h4>
+                      <p class="topic-en-title" data-i18n="prayer_strength_sub">थकलेल्याला नवीन बळ देणारा देव</p>
                       <div class="topic-meta-row">
-                        <span class="topic-scripture">यशया ४०:२९-३१</span>
-                        <span class="topic-open-btn">Pray Now 🙏</span>
+                        <span class="topic-scripture" data-i18n="prayer_strength_ref">यशया ४०:२९-३१</span>
+                        <span class="topic-open-btn" data-i18n="btn_pray_now">प्रार्थना करा</span>
                       </div>
                     </div>
                   </div>
@@ -384,13 +520,13 @@
                   <!-- Topic 7: Wisdom & Career Guidance -->
                   <div class="prayer-topic-card prayer-topic-extra" onclick="openImmersivePrayerModal('wisdom_guidance')" style="display: none; background-image: url('assets/images/wisdom_guidance.png');">
                     <div class="prayer-topic-overlay"></div>
-                    <div class="prayer-topic-badge">💡 WISDOM & GUIDANCE</div>
+                    <div class="prayer-topic-badge" data-i18n="prayer_wisdom_badge">ज्ञान व मार्गदर्शन</div>
                     <div class="prayer-topic-content">
-                      <h4>ज्ञानासाठी व नोकरी-व्यवसाय मार्गदर्शन</h4>
-                      <p class="topic-en-title">Wisdom & Career Guidance</p>
+                      <h4 data-i18n="prayer_wisdom_title">ज्ञानासाठी व करिअर मार्गदर्शन</h4>
+                      <p class="topic-en-title" data-i18n="prayer_wisdom_sub">योग्य निर्णयांसाठी स्वर्गीय बुद्धी</p>
                       <div class="topic-meta-row">
-                        <span class="topic-scripture">याकोब १:५</span>
-                        <span class="topic-open-btn">Pray Now 🙏</span>
+                        <span class="topic-scripture" data-i18n="prayer_wisdom_ref">याकोब १:५</span>
+                        <span class="topic-open-btn" data-i18n="btn_pray_now">प्रार्थना करा</span>
                       </div>
                     </div>
                   </div>
@@ -398,13 +534,13 @@
                   <!-- Topic 8: Evening Thanksgiving & Rest -->
                   <div class="prayer-topic-card prayer-topic-extra" onclick="openImmersivePrayerModal('evening_rest')" style="display: none; background-image: url('assets/images/candlelight.png');">
                     <div class="prayer-topic-overlay"></div>
-                    <div class="prayer-topic-badge">🌙 EVENING REST</div>
+                    <div class="prayer-topic-badge" data-i18n="prayer_evening_badge">रात्रीची विश्रांती</div>
                     <div class="prayer-topic-content">
-                      <h4>रात्रीची उपकारस्तुती व शांत झोप</h4>
-                      <p class="topic-en-title">Evening Thanksgiving & Rest</p>
+                      <h4 data-i18n="prayer_evening_title">रात्रीची उपकारस्तुती व शांत झोप</h4>
+                      <p class="topic-en-title" data-i18n="prayer_evening_sub">सुरक्षिततेत शांत विश्रांती</p>
                       <div class="topic-meta-row">
-                        <span class="topic-scripture">स्तोत्रसंहिता ४:८</span>
-                        <span class="topic-open-btn">Pray Now 🙏</span>
+                        <span class="topic-scripture" data-i18n="prayer_evening_ref">स्तोत्रसंहिता ४:८</span>
+                        <span class="topic-open-btn" data-i18n="btn_pray_now">प्रार्थना करा</span>
                       </div>
                     </div>
                   </div>
@@ -417,18 +553,18 @@
                   <div class="quiz-card-art">🏆</div>
                   <div class="quiz-card-details">
                     <div class="quiz-badge-row" style="display: flex; gap: 6px; align-items: center; margin-bottom: 4px;">
-                      <span class="quiz-badge-gold">BIBLE TRIVIA</span>
-                      <span class="quiz-badge-sub" style="font-size: 10.5px; font-weight: 700; color: #8B1D24; background: rgba(139,29,36,0.1); padding: 2px 8px; border-radius: 10px;">4 LEVELS</span>
+                      <span class="quiz-badge-gold" data-i18n="quiz_badge_trivia">बायबल प्रश्नमंजुषा</span>
+                      <span class="quiz-badge-sub" data-i18n="quiz_badge_levels" style="font-size: 10.5px; font-weight: 700; color: #8B1D24; background: rgba(139,29,36,0.1); padding: 2px 8px; border-radius: 10px;">४ स्तर</span>
                     </div>
-                    <h5>बायबल सामान्य ज्ञान स्पर्धा</h5>
-                    <p>Daily Bible Quiz • 4 Difficulty Levels • Badges & Streaks</p>
+                    <h5 data-i18n="quiz_card_title">बायबल सामान्य ज्ञान स्पर्धा</h5>
+                    <p data-i18n="quiz_card_sub">दैनिक बायबल प्रश्नमंजुषा • ४ कठीणता स्तर • बॅजेस</p>
                     
                     <!-- Level pills preview -->
                     <div class="quiz-level-pills-row">
-                      <span class="quiz-level-pill lvl-1">🌱 Beginner</span>
-                      <span class="quiz-level-pill lvl-2">⚔️ Intermediate</span>
-                      <span class="quiz-level-pill lvl-3">👑 Advanced</span>
-                      <span class="quiz-level-pill lvl-4">🏆 Master</span>
+                      <span class="quiz-level-pill lvl-1" data-i18n="quiz_lvl_1">🌱 नवशिक्या</span>
+                      <span class="quiz-level-pill lvl-2" data-i18n="quiz_lvl_2">⚔️ मध्यम</span>
+                      <span class="quiz-level-pill lvl-3" data-i18n="quiz_lvl_3">👑 प्रगत</span>
+                      <span class="quiz-level-pill lvl-4" data-i18n="quiz_lvl_4">🏆 पारंगत</span>
                     </div>
 
                     <div class="quiz-card-stats">
@@ -438,7 +574,7 @@
                     </div>
                   </div>
                 </div>
-                <button class="btn-play-quiz">Play Quiz / खेळा &rarr;</button>
+                <button class="btn-play-quiz" data-i18n="quiz_card_btn">खेळा &rarr;</button>
               </div>
 
             </div> <!-- /.home-grid-layout -->
@@ -457,8 +593,18 @@
                 <span id="inline-reader-book-name" class="name">शास्ते १३</span>
                 <span class="badge">बदला ▾</span>
               </button>
-              <div class="reader-right-tools">
-                <span id="inline-reader-translation-name" class="trans-label">मराठी (BSI)</span>
+              
+              <div class="reader-right-tools" style="display: flex; align-items: center; gap: 6px;">
+                <button id="btn-reader-open-explanation" class="reader-explanation-btn" onclick="openChapterExplanation()" title="Read Chapter Explanation & Study Notes (अध्याय स्पष्टीकरण)">
+                  <span class="explanation-icon">💡</span>
+                  <span class="explanation-label">स्पष्टीकरण</span>
+                </button>
+
+                <button id="btn-toggle-story-theater" class="reader-story-theater-btn" onclick="openStoryTheater()" title="Open Story Theater Mode (कथा वाचन दृश्य)">
+                  <span class="theater-icon">🎭</span>
+                  <span class="theater-label">कथा दृश्य</span>
+                </button>
+
                 <button id="btn-reader-open-text-settings" class="reader-tool-btn" title="Text & Display Settings">Aa</button>
               </div>
             </div>
@@ -536,7 +682,7 @@
         
         <!-- Floating Bottom Audio Play Button (Sarvam Shubh Voice) -->
         <!-- Floating Circular Play Button FAB (media_1788279039293.png Design) -->
-        <button id="btn-floating-reader-play-circle" class="floating-circle-play-fab" onclick="toggleAudioNarration()" title="Play Chapter Audio (Sarvam Shubh Voice)">
+        <button id="btn-floating-reader-play-circle" class="floating-circle-play-fab" onclick="toggleAudioNarration()" title="Play Chapter Audio (अस्खलित अस्सल मराठी ऑडिओ)">
           <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor" id="circle-fab-play-icon">
             <polygon points="7 4 19 12 7 20 7 4"></polygon>
           </svg>
@@ -559,6 +705,25 @@
               <div class="plans-search-container">
                 <svg viewBox="0 0 24 24" class="plans-search-icon" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                 <input type="search" id="plans-search-input" placeholder="Search by title or author" autocomplete="off">
+              </div>
+
+              <!-- Flagship Feature 3: Daily Plan: Divine Growth (7-Day Spiritual Track) -->
+              <div class="divine-growth-featured-banner" onclick="startDivineGrowthPlan()" style="margin: 14px 0 18px 0; background: linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #065f46 100%); border-radius: 20px; padding: 22px; color: #ffffff; cursor: pointer; box-shadow: 0 10px 25px rgba(0,0,0,0.18); position: relative; overflow: hidden; border: 1.5px solid rgba(251, 191, 36, 0.4); transition: transform 0.2s ease;">
+                <div style="position: absolute; right: -15px; top: -15px; opacity: 0.15; font-size: 110px; line-height: 1; pointer-events: none;">🌱</div>
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                  <span style="font-size: 11px; font-weight: 800; background: #f59e0b; color: #1e1b4b; padding: 3px 9px; border-radius: 6px; letter-spacing: 0.5px;">⭐ FEATURED 7-DAY PLAN</span>
+                  <span style="font-size: 12px; color: rgba(255,255,255,0.85); font-weight: 600;">आत्मिक वाढ ट्रॅक</span>
+                </div>
+                <h3 style="font-size: 21px; font-weight: 800; margin: 0 0 6px 0; font-family: var(--font-ui); color: #ffffff;">Daily Plan: Divine Growth (आत्मिक वाढ)</h3>
+                <p style="font-size: 13.5px; color: rgba(255,255,255,0.9); margin: 0 0 16px 0; line-height: 1.5; max-width: 500px;">
+                  A structured 7-day spiritual journey of salvation, rooting in the Word, prayer, walking in the Holy Spirit, and bearing eternal fruit.
+                </p>
+                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                  <button class="btn-start-divine-plan" style="background: #ffffff; color: #1e1b4b; font-weight: 800; border: none; padding: 9px 18px; border-radius: 12px; cursor: pointer; font-size: 13.5px; box-shadow: 0 3px 10px rgba(0,0,0,0.2);">
+                    Start 7-Day Plan / सुरू करा &rarr;
+                  </button>
+                  <span style="font-size: 12.5px; color: rgba(255,255,255,0.8); font-weight: 600;">7 Days • Daily Scriptures & Reflection</span>
+                </div>
               </div>
 
               <!-- Top Carousel Banners -->
@@ -719,52 +884,107 @@
           <div class="search-results-viewport">
             <!-- Empty state center content (Screenshot 3) -->
             <div id="search-empty-state-content" class="search-empty-state">
-              <!-- Life Situations Emotion Grid -->
-              <div class="emotion-search-box" style="margin-top: 16px; margin-bottom: 24px; text-align: left; width: 100%;">
-                <h5 style="font-family: var(--font-ui); font-size: 14px; font-weight: 800; margin-bottom: 12px; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px;">How do you feel today? / मी आज... अनुभवत आहे</h5>
-                <div class="emotion-chips-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px;">
-                  <button class="emotion-chip-btn" data-emotion="worried" style="display: flex; align-items: center; gap: 8px; padding: 10px 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-content); color: var(--text); font-size: 13.5px; font-weight: 600; cursor: pointer; text-align: left; transition: all 0.2s ease;">
-                    <span style="font-size: 18px;">😰</span>
+              <!-- Feature 2: Personalized Verses For Your Mood (12 Mood Categories) -->
+              <div class="mood-sanctuary-box" style="margin-top: 18px; margin-bottom: 24px; text-align: left; width: 100%; background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 20px; padding: 20px; box-shadow: var(--shadow-sm);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                  <div>
+                    <h4 style="font-family: var(--font-ui); font-size: 16px; font-weight: 800; margin: 0 0 2px 0; color: var(--primary);">
+                      Personalized Verses For Your Mood / तुमच्या मनाच्या स्थितीनुसार वचने
+                    </h4>
+                    <span style="font-size: 12px; color: var(--text-muted);">Choose how you are feeling right now for personalized scriptures & audio</span>
+                  </div>
+                </div>
+
+                <div class="mood-chips-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px;">
+                  <button class="mood-chip-btn" data-mood="peace" onclick="selectMood('peace')" style="display: flex; align-items: center; gap: 8px; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 12px; background: var(--bg); color: var(--text); cursor: pointer; text-align: left; transition: all 0.2s ease;">
+                    <span style="font-size: 20px;">🕊️</span>
                     <div>
-                      <span style="display: block; font-size: 12.5px;">Worried</span>
-                      <span style="display: block; font-size: 10.5px; color: var(--text-muted);">चिंतेत</span>
+                      <span style="display: block; font-size: 13px; font-weight: 700;">Peace</span>
+                      <span style="display: block; font-size: 11px; color: var(--text-muted);">शांती</span>
                     </div>
                   </button>
-                  <button class="emotion-chip-btn" data-emotion="lonely" style="display: flex; align-items: center; gap: 8px; padding: 10px 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-content); color: var(--text); font-size: 13.5px; font-weight: 600; cursor: pointer; text-align: left; transition: all 0.2s ease;">
-                    <span style="font-size: 18px;">🥺</span>
+                  <button class="mood-chip-btn" data-mood="anxiety" onclick="selectMood('anxiety')" style="display: flex; align-items: center; gap: 8px; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 12px; background: var(--bg); color: var(--text); cursor: pointer; text-align: left; transition: all 0.2s ease;">
+                    <span style="font-size: 20px;">😰</span>
                     <div>
-                      <span style="display: block; font-size: 12.5px;">Lonely</span>
-                      <span style="display: block; font-size: 10.5px; color: var(--text-muted);">एकाकी</span>
+                      <span style="display: block; font-size: 13px; font-weight: 700;">Anxiety</span>
+                      <span style="display: block; font-size: 11px; color: var(--text-muted);">चिंता</span>
                     </div>
                   </button>
-                  <button class="emotion-chip-btn" data-emotion="angry" style="display: flex; align-items: center; gap: 8px; padding: 10px 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-content); color: var(--text); font-size: 13.5px; font-weight: 600; cursor: pointer; text-align: left; transition: all 0.2s ease;">
-                    <span style="font-size: 18px;">😡</span>
+                  <button class="mood-chip-btn" data-mood="fear" onclick="selectMood('fear')" style="display: flex; align-items: center; gap: 8px; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 12px; background: var(--bg); color: var(--text); cursor: pointer; text-align: left; transition: all 0.2s ease;">
+                    <span style="font-size: 20px;">🛡️</span>
                     <div>
-                      <span style="display: block; font-size: 12.5px;">Angry</span>
-                      <span style="display: block; font-size: 10.5px; color: var(--text-muted);">रागात</span>
+                      <span style="display: block; font-size: 13px; font-weight: 700;">Fear</span>
+                      <span style="display: block; font-size: 11px; color: var(--text-muted);">भीतीवर विजय</span>
                     </div>
                   </button>
-                  <button class="emotion-chip-btn" data-emotion="grateful" style="display: flex; align-items: center; gap: 8px; padding: 10px 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-content); color: var(--text); font-size: 13.5px; font-weight: 600; cursor: pointer; text-align: left; transition: all 0.2s ease;">
-                    <span style="font-size: 18px;">🙏</span>
+                  <button class="mood-chip-btn" data-mood="grief" onclick="selectMood('grief')" style="display: flex; align-items: center; gap: 8px; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 12px; background: var(--bg); color: var(--text); cursor: pointer; text-align: left; transition: all 0.2s ease;">
+                    <span style="font-size: 20px;">💔</span>
                     <div>
-                      <span style="display: block; font-size: 12.5px;">Grateful</span>
-                      <span style="display: block; font-size: 10.5px; color: var(--text-muted);">कृतज्ञ</span>
+                      <span style="display: block; font-size: 13px; font-weight: 700;">Grief</span>
+                      <span style="display: block; font-size: 11px; color: var(--text-muted);">दुःख व सांत्वन</span>
                     </div>
                   </button>
-                  <button class="emotion-chip-btn" data-emotion="depressed" style="display: flex; align-items: center; gap: 8px; padding: 10px 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-content); color: var(--text); font-size: 13.5px; font-weight: 600; cursor: pointer; text-align: left; transition: all 0.2s ease;">
-                    <span style="font-size: 18px;">😭</span>
+                  <button class="mood-chip-btn" data-mood="joy" onclick="selectMood('joy')" style="display: flex; align-items: center; gap: 8px; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 12px; background: var(--bg); color: var(--text); cursor: pointer; text-align: left; transition: all 0.2s ease;">
+                    <span style="font-size: 20px;">🎉</span>
                     <div>
-                      <span style="display: block; font-size: 12.5px;">Depressed</span>
-                      <span style="display: block; font-size: 10.5px; color: var(--text-muted);">निराश</span>
+                      <span style="display: block; font-size: 13px; font-weight: 700;">Joy</span>
+                      <span style="display: block; font-size: 11px; color: var(--text-muted);">आनंद व स्तुती</span>
                     </div>
                   </button>
-                  <button class="emotion-chip-btn" data-emotion="hopeful" style="display: flex; align-items: center; gap: 8px; padding: 10px 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-content); color: var(--text); font-size: 13.5px; font-weight: 600; cursor: pointer; text-align: left; transition: all 0.2s ease;">
-                    <span style="font-size: 18px;">☀️</span>
+                  <button class="mood-chip-btn" data-mood="loneliness" onclick="selectMood('loneliness')" style="display: flex; align-items: center; gap: 8px; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 12px; background: var(--bg); color: var(--text); cursor: pointer; text-align: left; transition: all 0.2s ease;">
+                    <span style="font-size: 20px;">🥺</span>
                     <div>
-                      <span style="display: block; font-size: 12.5px;">Hopeful</span>
-                      <span style="display: block; font-size: 10.5px; color: var(--text-muted);">आशावादी</span>
+                      <span style="display: block; font-size: 13px; font-weight: 700;">Lonely</span>
+                      <span style="display: block; font-size: 11px; color: var(--text-muted);">एकाकी</span>
                     </div>
                   </button>
+                  <button class="mood-chip-btn" data-mood="hope" onclick="selectMood('hope')" style="display: flex; align-items: center; gap: 8px; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 12px; background: var(--bg); color: var(--text); cursor: pointer; text-align: left; transition: all 0.2s ease;">
+                    <span style="font-size: 20px;">☀️</span>
+                    <div>
+                      <span style="display: block; font-size: 13px; font-weight: 700;">Hope</span>
+                      <span style="display: block; font-size: 11px; color: var(--text-muted);">आशा</span>
+                    </div>
+                  </button>
+                  <button class="mood-chip-btn" data-mood="faith" onclick="selectMood('faith')" style="display: flex; align-items: center; gap: 8px; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 12px; background: var(--bg); color: var(--text); cursor: pointer; text-align: left; transition: all 0.2s ease;">
+                    <span style="font-size: 20px;">⚓</span>
+                    <div>
+                      <span style="display: block; font-size: 13px; font-weight: 700;">Faith</span>
+                      <span style="display: block; font-size: 11px; color: var(--text-muted);">विश्वास</span>
+                    </div>
+                  </button>
+                  <button class="mood-chip-btn" data-mood="healing" onclick="selectMood('healing')" style="display: flex; align-items: center; gap: 8px; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 12px; background: var(--bg); color: var(--text); cursor: pointer; text-align: left; transition: all 0.2s ease;">
+                    <span style="font-size: 20px;">🌿</span>
+                    <div>
+                      <span style="display: block; font-size: 13px; font-weight: 700;">Healing</span>
+                      <span style="display: block; font-size: 11px; color: var(--text-muted);">आरोग्य व चंगाई</span>
+                    </div>
+                  </button>
+                  <button class="mood-chip-btn" data-mood="guidance" onclick="selectMood('guidance')" style="display: flex; align-items: center; gap: 8px; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 12px; background: var(--bg); color: var(--text); cursor: pointer; text-align: left; transition: all 0.2s ease;">
+                    <span style="font-size: 20px;">🧭</span>
+                    <div>
+                      <span style="display: block; font-size: 13px; font-weight: 700;">Guidance</span>
+                      <span style="display: block; font-size: 11px; color: var(--text-muted);">मार्गदर्शन</span>
+                    </div>
+                  </button>
+                  <button class="mood-chip-btn" data-mood="anger" onclick="selectMood('anger')" style="display: flex; align-items: center; gap: 8px; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 12px; background: var(--bg); color: var(--text); cursor: pointer; text-align: left; transition: all 0.2s ease;">
+                    <span style="font-size: 20px;">😡</span>
+                    <div>
+                      <span style="display: block; font-size: 13px; font-weight: 700;">Anger</span>
+                      <span style="display: block; font-size: 11px; color: var(--text-muted);">राग व क्षमा</span>
+                    </div>
+                  </button>
+                  <button class="mood-chip-btn" data-mood="gratitude" onclick="selectMood('gratitude')" style="display: flex; align-items: center; gap: 8px; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 12px; background: var(--bg); color: var(--text); cursor: pointer; text-align: left; transition: all 0.2s ease;">
+                    <span style="font-size: 20px;">🙏</span>
+                    <div>
+                      <span style="display: block; font-size: 13px; font-weight: 700;">Grateful</span>
+                      <span style="display: block; font-size: 11px; color: var(--text-muted);">कृतज्ञता</span>
+                    </div>
+                  </button>
+                </div>
+
+                <!-- Mood Dynamic Results Area -->
+                <div id="mood-verses-results-container" style="display: none; margin-top: 18px; padding-top: 16px; border-top: 1.5px dashed var(--border);">
+                  <!-- Dynamically populated by app.js -->
                 </div>
               </div>
 
@@ -790,6 +1010,40 @@
                   </ul>
                 </div>
               </div>
+
+              <!-- Feature 5: Biblical Reference Library & 10 Commandments Hub -->
+              <div class="biblical-foundations-hub" style="margin-top: 24px; text-align: left; width: 100%;">
+                <h4 style="font-family: var(--font-ui); font-size: 15px; font-weight: 800; margin-bottom: 12px; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px;">
+                  Biblical Foundations & Reference / पवित्र शास्त्रातील मूलभूत सत्ये
+                </h4>
+                
+                <!-- 10 Commandments Card -->
+                <div class="commandments-hub-card" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-radius: 18px; padding: 20px; color: #ffffff; border: 1.5px solid rgba(229, 168, 59, 0.35); box-shadow: var(--shadow-md);">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                    <div>
+                      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                        <span style="font-size: 11px; font-weight: 800; background: var(--accent-gold, #e5a83b); color: #1e1b4b; padding: 3px 8px; border-radius: 6px;">EXODUS 20 • निर्गम २०</span>
+                        <span style="font-size: 11.5px; color: rgba(255,255,255,0.75);">The Moral Law</span>
+                      </div>
+                      <h3 style="font-size: 20px; font-weight: 800; margin: 0; color: #ffffff;">The 10 Commandments (दहा आज्ञा)</h3>
+                    </div>
+                    <span style="font-size: 32px;">📜</span>
+                  </div>
+                  <p style="font-size: 13.5px; color: rgba(255,255,255,0.85); margin: 0 0 16px 0; line-height: 1.5;">
+                    God's eternal covenant given at Mount Sinai (Exodus 20 / Deuteronomy 5) and fulfilled in Christ's Great Commandment of love (Matthew 22:37-40).
+                  </p>
+                  
+                  <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button onclick="toggleTenCommandmentsModal()" style="background: var(--accent-gold, #e5a83b); color: #1e1b4b; font-weight: 800; border: none; padding: 9px 18px; border-radius: 10px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                      <span>Explore All 10 Commandments (सर्व १० आज्ञा वाचा)</span>
+                      <span>&rarr;</span>
+                    </button>
+                    <button onclick="openReader('exodus', 20)" style="background: rgba(255,255,255,0.12); color: #ffffff; font-weight: 700; border: 1px solid rgba(255,255,255,0.25); padding: 9px 14px; border-radius: 10px; font-size: 13px; cursor: pointer;">
+                      Open Exodus 20 in Bible 📖
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <!-- Matches dynamic list -->
@@ -800,29 +1054,172 @@
           </div>
         </section>
 
-        <!-- VIEW 6: PRAYERS / PRAYER REQUESTS VIEW -->
+        <!-- VIEW 6: PRAYERS & MEDITATION SANCTUARY -->
         <section id="view-prayers" class="app-view" style="display: none;">
-          <div class="view-scroll-content">
+          <div class="view-scroll-content" style="padding-bottom: 90px;">
             
-            <!-- Lock state (Logged Out) -->
-            <div id="prayers-logged-out-container" style="text-align: center; padding: 60px 20px;">
-              <div style="margin-bottom: 20px; color: var(--primary); display: flex; justify-content: center;">
-                <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.8" style="opacity: 0.85;">
-                  <line x1="12" y1="2" x2="12" y2="22"></line>
-                  <line x1="8" y1="9" x2="16" y2="9"></line>
-                </svg>
-              </div>
-              <h4 style="font-family: var(--font-ui); font-size: 20px; font-weight: 800; margin-bottom: 8px; color: var(--primary);">Prayer Requests / प्रार्थना विनंत्या</h4>
-              <p style="font-size: 14px; color: var(--text-muted); max-width: 340px; margin: 0 auto 24px auto; line-height: 1.6;">
-                Join our church prayer circle. Sign in to submit personal requests, mark prayers as answered, and interact with the pastor or admin group.
-              </p>
-              <button onclick="window.location.hash='#/you'" class="btn-primary-block" style="width: auto; display: inline-flex; padding: 12px 24px; font-size: 13.5px; border-radius: 12px;">
-                Sign In to Continue / लॉगिन करा &rarr;
+            <!-- Top Segmented Subnav for Prayers View -->
+            <div class="prayers-subnav-row" style="display: flex; gap: 8px; margin-bottom: 18px; border-bottom: 1.5px solid var(--border); padding-bottom: 12px;">
+              <button class="prayers-subnav-btn active" id="btn-prayers-subtab-meditation" onclick="switchPrayersSubtab('meditation')" style="flex: 1; padding: 10px 14px; border-radius: 12px; font-size: 13.5px; font-weight: 800; border: none; background: var(--primary); color: #ffffff; cursor: pointer; transition: all 0.2s ease;">
+                🧘 Daily Meditation (दैनंदिन ध्यान)
+              </button>
+              <button class="prayers-subnav-btn" id="btn-prayers-subtab-requests" onclick="switchPrayersSubtab('requests')" style="flex: 1; padding: 10px 14px; border-radius: 12px; font-size: 13.5px; font-weight: 700; border: 1.5px solid var(--border); background: var(--bg-content); color: var(--text); cursor: pointer; transition: all 0.2s ease;">
+                ⛪ Prayer Requests (मंडळी विनंत्या)
               </button>
             </div>
-            
-            <!-- Logged In state -->
-            <div id="prayers-logged-in-container" style="display: none;">
+
+            <!-- SUBTAB 1: DAILY PRAYERS FOR MEDITATION (Feature 4) -->
+            <div id="prayers-panel-meditation" class="prayers-subtab-panel active">
+              <!-- Ambient Worship Sound Bar -->
+              <div class="meditation-ambient-bar" style="background: linear-gradient(135deg, #1e1b4b, #312e81); border-radius: 16px; padding: 14px 18px; color: #ffffff; display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; border: 1.5px solid rgba(251, 191, 36, 0.3); box-shadow: var(--shadow-sm);">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <span style="font-size: 24px;">🕊️</span>
+                  <div>
+                    <h5 style="font-size: 14px; font-weight: 800; margin: 0; color: #ffffff;">Peaceful Worship Sanctuary Audio</h5>
+                    <span style="font-size: 11.5px; color: rgba(255,255,255,0.75);">Soft ambient pads for deep Christian meditation</span>
+                  </div>
+                </div>
+                <button id="btn-ambient-toggle" onclick="toggleAmbientMusic()" style="background: #f59e0b; color: #1e1b4b; font-weight: 800; border: none; padding: 7px 14px; border-radius: 10px; font-size: 12.5px; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                  <span id="ambient-icon">▶</span>
+                  <span id="ambient-label">Play Ambient</span>
+                </button>
+              </div>
+
+              <!-- 6 Daily Meditation Devotionals Grid -->
+              <div class="meditation-cards-grid" style="display: flex; flex-direction: column; gap: 16px;">
+                
+                <!-- 1. Morning Awakening Prayer -->
+                <div class="meditation-card" style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 18px; padding: 20px; box-shadow: var(--shadow-sm);">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                    <div>
+                      <span style="font-size: 11px; font-weight: 800; background: rgba(245, 158, 11, 0.15); color: #d97706; padding: 3px 8px; border-radius: 6px;">🌅 MORNING DEVOTIONAL</span>
+                      <h4 style="font-size: 17px; font-weight: 800; margin: 6px 0 2px 0; color: var(--text);">Morning Awakening Prayer (प्रभात प्रार्थना)</h4>
+                      <span style="font-size: 12.5px; font-weight: 700; color: var(--primary);">विलापगीते ३:२२-२३ • Lamentations 3:22-23</span>
+                    </div>
+                    <span style="font-size: 28px;">🌅</span>
+                  </div>
+                  <blockquote style="font-family: var(--font-body); font-size: 14.5px; line-height: 1.6; color: var(--text); background: var(--bg); padding: 12px 14px; border-radius: 10px; border-left: 3px solid var(--primary); margin: 8px 0 12px 0;">
+                    "हे परमेश्वरा, आजच्या नव्या दिवसासाठी मी तुझे आभार मानतो. तुझी दया दररोज सकाळी नवी असते. आजच्या प्रत्येक पावलात, निर्णयात आणि संभाषणात तुझे मार्गदर्शन माझ्यासोबत असू दे. आमेन."
+                  </blockquote>
+                  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                    <button onclick="readPrayerAloud('morning')" class="btn-prayer-listen" style="background: var(--primary-light); color: var(--primary); border: 1px solid var(--primary); padding: 6px 14px; border-radius: 8px; font-size: 12.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                      <span>▶ Listen Guided Prayer</span>
+                    </button>
+                    <span style="font-size: 12px; color: var(--text-muted);">3-min quiet meditation</span>
+                  </div>
+                </div>
+
+                <!-- 2. Midday Grace & Strength -->
+                <div class="meditation-card" style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 18px; padding: 20px; box-shadow: var(--shadow-sm);">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                    <div>
+                      <span style="font-size: 11px; font-weight: 800; background: rgba(59, 130, 246, 0.15); color: #2563eb; padding: 3px 8px; border-radius: 6px;">☀️ MIDDAY RENEWAL</span>
+                      <h4 style="font-size: 17px; font-weight: 800; margin: 6px 0 2px 0; color: var(--text);">Midday Strength & Peace (मध्यान्ह शांती)</h4>
+                      <span style="font-size: 12.5px; font-weight: 700; color: var(--primary);">यशया ४०:३१ • Isaiah 40:31</span>
+                    </div>
+                    <span style="font-size: 28px;">☀️</span>
+                  </div>
+                  <blockquote style="font-family: var(--font-body); font-size: 14.5px; line-height: 1.6; color: var(--text); background: var(--bg); padding: 12px 14px; border-radius: 10px; border-left: 3px solid #2563eb; margin: 8px 0 12px 0;">
+                    "हे प्रभो, दिवसाच्या धावपळीत माझे मन तुझ्या शांतीमध्ये स्थिर कर. जे परमेश्वराची वाट पाहतात त्यांना नवे सामर्थ्य प्राप्त होते. माझा थकवा दूर कर आणि मला तुझ्या आत्म्याने पुन्हा उत्साही कर."
+                  </blockquote>
+                  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                    <button onclick="readPrayerAloud('midday')" class="btn-prayer-listen" style="background: var(--primary-light); color: var(--primary); border: 1px solid var(--primary); padding: 6px 14px; border-radius: 8px; font-size: 12.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                      <span>▶ Listen Guided Prayer</span>
+                    </button>
+                    <span style="font-size: 12px; color: var(--text-muted);">Recharge in the Lord</span>
+                  </div>
+                </div>
+
+                <!-- 3. Evening Surrender & Rest -->
+                <div class="meditation-card" style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 18px; padding: 20px; box-shadow: var(--shadow-sm);">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                    <div>
+                      <span style="font-size: 11px; font-weight: 800; background: rgba(139, 92, 246, 0.15); color: #7c3aed; padding: 3px 8px; border-radius: 6px;">🌙 EVENING PEACE</span>
+                      <h4 style="font-size: 17px; font-weight: 800; margin: 6px 0 2px 0; color: var(--text);">Evening Surrender & Sleep (संध्याकाळचे समर्पण)</h4>
+                      <span style="font-size: 12.5px; font-weight: 700; color: var(--primary);">स्तोत्रसंहिता ४:८ • Psalm 4:8</span>
+                    </div>
+                    <span style="font-size: 28px;">🌙</span>
+                  </div>
+                  <blockquote style="font-family: var(--font-body); font-size: 14.5px; line-height: 1.6; color: var(--text); background: var(--bg); padding: 12px 14px; border-radius: 10px; border-left: 3px solid #7c3aed; margin: 8px 0 12px 0;">
+                    "हे देवा, मी शांतीने निजेन व झोपेन; कारण तूच मला निर्भयपणे राहू देतोस. आजच्या सर्व चिंता मी तुझ्या चरणी सोपवतो. माझ्या घराचे व मनाचे रक्षण कर."
+                  </blockquote>
+                  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                    <button onclick="readPrayerAloud('evening')" class="btn-prayer-listen" style="background: var(--primary-light); color: var(--primary); border: 1px solid var(--primary); padding: 6px 14px; border-radius: 8px; font-size: 12.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                      <span>▶ Listen Guided Prayer</span>
+                    </button>
+                    <span style="font-size: 12px; color: var(--text-muted);">Peaceful sleep meditation</span>
+                  </div>
+                </div>
+
+                <!-- 4. Psalm 91 Protection Prayer -->
+                <div class="meditation-card" style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 18px; padding: 20px; box-shadow: var(--shadow-sm);">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                    <div>
+                      <span style="font-size: 11px; font-weight: 800; background: rgba(16, 185, 129, 0.15); color: #059669; padding: 3px 8px; border-radius: 6px;">🛡️ DIVINE PROTECTION</span>
+                      <h4 style="font-size: 17px; font-weight: 800; margin: 6px 0 2px 0; color: var(--text);">Psalm 91 Protection Prayer (स्तोत्र ९१ संपूर्ण संरक्षण)</h4>
+                      <span style="font-size: 12.5px; font-weight: 700; color: var(--primary);">स्तोत्रसंहिता ९१:१-४ • Psalm 91:1-4</span>
+                    </div>
+                    <span style="font-size: 28px;">🛡️</span>
+                  </div>
+                  <blockquote style="font-family: var(--font-body); font-size: 14.5px; line-height: 1.6; color: var(--text); background: var(--bg); padding: 12px 14px; border-radius: 10px; border-left: 3px solid #059669; margin: 8px 0 12px 0;">
+                    "जो परात्पर देवाच्या गुप्तस्थळी राहतो, तो सर्वसमर्थाच्या सावलीत विसावा पावेल. परमेश्वर माझा कोट व माझा किल्ला आहे. तो मला सर्व संकटांपासून सोडवील आणि आपल्या पंखांखाली मला आश्रय देईल."
+                  </blockquote>
+                  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                    <button onclick="readPrayerAloud('psalm91')" class="btn-prayer-listen" style="background: var(--primary-light); color: var(--primary); border: 1px solid var(--primary); padding: 6px 14px; border-radius: 8px; font-size: 12.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                      <span>▶ Listen Guided Prayer</span>
+                    </button>
+                    <button onclick="openReader('psalms', 91)" style="background: none; border: 1px solid var(--border); padding: 6px 12px; border-radius: 8px; font-size: 12px; color: var(--text); cursor: pointer;">
+                      Read Psalm 91 📖
+                    </button>
+                  </div>
+                </div>
+
+                <!-- 5. Inner Healing & Stress Relief -->
+                <div class="meditation-card" style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 18px; padding: 20px; box-shadow: var(--shadow-sm);">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                    <div>
+                      <span style="font-size: 11px; font-weight: 800; background: rgba(236, 72, 153, 0.15); color: #db2777; padding: 3px 8px; border-radius: 6px;">🌿 INNER HEALING</span>
+                      <h4 style="font-size: 17px; font-weight: 800; margin: 6px 0 2px 0; color: var(--text);">Inner Healing & Stress Relief (आत्मिक आरोग्य)</h4>
+                      <span style="font-size: 12.5px; font-weight: 700; color: var(--primary);">मत्तय ११:२८ • Matthew 11:28</span>
+                    </div>
+                    <span style="font-size: 28px;">🌿</span>
+                  </div>
+                  <blockquote style="font-family: var(--font-body); font-size: 14.5px; line-height: 1.6; color: var(--text); background: var(--bg); padding: 12px 14px; border-radius: 10px; border-left: 3px solid #db2777; margin: 8px 0 12px 0;">
+                    "हे येशू, तू म्हणालास: 'अहो कष्टी व भाराक्रांत जनहो, तुम्ही सर्व मजकडे या, म्हणजे मी तुम्हाला विसावा देईन.' माझ्या मनातील वेदना, भीती आणि ताण मी तुला देतो. तुझी स्वर्गीय शांती माझ्या हृदयात वाहू दे."
+                  </blockquote>
+                  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                    <button onclick="readPrayerAloud('healing')" class="btn-prayer-listen" style="background: var(--primary-light); color: var(--primary); border: 1px solid var(--primary); padding: 6px 14px; border-radius: 8px; font-size: 12.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                      <span>▶ Listen Guided Prayer</span>
+                    </button>
+                    <span style="font-size: 12px; color: var(--text-muted);">Find deep rest in Christ</span>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- SUBTAB 2: CHURCH PRAYER REQUESTS (Community circle) -->
+            <div id="prayers-panel-requests" class="prayers-subtab-panel" style="display: none;">
+              
+              <!-- Lock state (Logged Out) -->
+              <div id="prayers-logged-out-container" style="text-align: center; padding: 40px 20px; background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 18px;">
+                <div style="margin-bottom: 16px; color: var(--primary); display: flex; justify-content: center;">
+                  <svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.8" style="opacity: 0.85;">
+                    <line x1="12" y1="2" x2="12" y2="22"></line>
+                    <line x1="8" y1="9" x2="16" y2="9"></line>
+                  </svg>
+                </div>
+                <h4 style="font-family: var(--font-ui); font-size: 18px; font-weight: 800; margin-bottom: 6px; color: var(--primary);">Prayer Requests / प्रार्थना विनंत्या</h4>
+                <p style="font-size: 13.5px; color: var(--text-muted); max-width: 340px; margin: 0 auto 20px auto; line-height: 1.5;">
+                  Join our church prayer circle. Sign in to submit personal requests, mark prayers as answered, and interact with the pastor or admin group.
+                </p>
+                <button onclick="window.location.hash='#/you'" class="btn-primary-block" style="width: auto; display: inline-flex; padding: 10px 22px; font-size: 13px; border-radius: 10px;">
+                  Sign In to Submit / लॉगिन करा &rarr;
+                </button>
+              </div>
+              
+              <!-- Logged In state -->
+              <div id="prayers-logged-in-container" style="display: none;">
               
               <!-- 1. Normal User Dashboard -->
               <div id="prayers-user-portal">
@@ -906,12 +1303,12 @@
               </button>
             </div>
 
-            <!-- Meetings Subtabs Row (Slide Segmented Control style) -->
-            <div class="plans-subnav-row" style="margin-bottom: 20px; display: flex; gap: 4px; overflow-x: auto;">
-              <button class="plans-subnav-btn active" data-meetings-subtab="live" style="flex: 1; min-width: 100px; white-space: nowrap;">LIVE NOW / थेट सुरू</button>
-              <button class="plans-subnav-btn" data-meetings-subtab="upcoming" style="flex: 1; min-width: 100px; white-space: nowrap;">UPCOMING / आगामी</button>
-              <button class="plans-subnav-btn" data-meetings-subtab="my" style="flex: 1; min-width: 110px; white-space: nowrap;">MY MEETINGS / माझ्या सभा</button>
-              <button class="plans-subnav-btn" data-meetings-subtab="past" style="flex: 1; min-width: 90px; white-space: nowrap;">PAST / मागील सभा</button>
+            <!-- Meetings Subtabs Row (Segmented Pill Carousel style) -->
+            <div class="meetings-subnav-row">
+              <button class="meetings-subnav-btn active" data-meetings-subtab="live">🔴 LIVE NOW / थेट सुरू</button>
+              <button class="meetings-subnav-btn" data-meetings-subtab="upcoming">UPCOMING / आगामी</button>
+              <button class="meetings-subnav-btn" data-meetings-subtab="my">MY MEETINGS / माझ्या सभा</button>
+              <button class="meetings-subnav-btn" data-meetings-subtab="past">PAST / मागील सभा</button>
             </div>
 
             <!-- Panel 1: Live Now -->
@@ -1031,7 +1428,7 @@
                   <p id="auth-error-msg" style="color: var(--danger); font-size: 12.5px; font-weight: 700; text-align: center; margin-top: 4px; display: none;"></p>
                   
                   <button type="submit" id="btn-auth-submit" class="btn-primary-block" style="margin-top: 10px; width: 100%;">
-                    <span>Sign In / लॉगिन करा</span>
+                    <span id="auth-submit-text">Sign In / लॉगिन करा</span>
                   </button>
                 </form>
               </div>
@@ -1057,7 +1454,7 @@
                     
                     <div class="profile-location-row">
                       <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                      <span id="profile-location-text">en</span>
+                      <span id="profile-location-text">Maharashtra, India</span>
                     </div>
                   </div>
                   
@@ -1286,31 +1683,23 @@
         </section>
       </main>
 
-      <!-- 3. MOBILE BOTTOM NAVIGATION TAB BAR -->
-      <nav class="mobile-bottom-tabs">
+      <!-- 3. MOBILE BOTTOM NAVIGATION TAB BAR (Exactly 4 Tabs: Home page, Bible, Meetings, More) -->
+      <nav class="mobile-bottom-tabs four-tabs">
         <button class="tab-btn active" data-tab="home">
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-          <span class="tab-label">Home</span>
+          <span class="tab-label" data-i18n="nav_home">मुख्यपृष्ठ</span>
         </button>
         <button class="tab-btn" data-tab="reader">
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
-          <span class="tab-label">Bible</span>
+          <span class="tab-label" data-i18n="nav_bible">बायबल</span>
         </button>
         <button class="tab-btn" data-tab="meetings">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M23 7l-7 5 7 5V7z"></path><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
-          <span class="tab-label">Meetings</span>
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+          <span class="tab-label" data-i18n="nav_meetings">सभा</span>
         </button>
-        <button class="tab-btn" data-tab="plans">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><path d="M9 16l2 2 4-4"></path></svg>
-          <span class="tab-label">Plans</span>
-        </button>
-        <button class="tab-btn" data-tab="prayers">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-          <span class="tab-label">Prayers</span>
-        </button>
-        <button class="tab-btn" data-tab="you">
-          <div id="nav-you-avatar" class="avatar-circle" style="width: 22px; height: 22px; font-size: 10px; font-weight: 800; border: 1.5px solid currentColor; margin: 0 auto 2px auto; background: transparent; color: currentColor; border-radius: 50%; display: flex; align-items: center; justify-content: center; line-height: 20px;">U</div>
-          <span class="tab-label">You</span>
+        <button class="tab-btn" data-tab="more" id="btn-tab-more" onclick="openMoreMenu()">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="12" cy="12" r="2"></circle><circle cx="19" cy="12" r="2"></circle><circle cx="5" cy="12" r="2"></circle></svg>
+          <span class="tab-label" data-i18n="nav_more">अधिक</span>
         </button>
       </nav>
 
@@ -1334,7 +1723,8 @@
           <button id="playbar-btn-next" class="playbar-control-btn" aria-label="Next Verse" title="Next Verse">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
           </button>
-          <button id="playbar-btn-speed" class="playbar-speed-pill" title="Playback Speed">1.0x</button>
+          <button id="playbar-btn-speed" class="playbar-speed-pill" title="Playback Speed">0.92x</button>
+          <button id="playbar-btn-audio-settings" class="playbar-control-btn" title="Audio Settings & API Keys" onclick="openModal('modal-audio-settings')" style="font-size: 13px;">⚙️</button>
           <button id="playbar-btn-close-widget" class="playbar-control-btn close" aria-label="Close Player">&times;</button>
         </div>
         
@@ -1346,6 +1736,78 @@
     </div>
 
     <!-- 4. BOTTOM DRAWERS & MODALS -->
+    
+    <!-- More Menu Action Sheet / Drawer -->
+    <div id="drawer-more-menu" class="drawer-overlay" onclick="if (event.target === this) closeDrawer('drawer-more-menu');">
+      <div class="ios-drawer-sheet" style="max-height: 85vh; border-radius: 26px 26px 0 0; padding-bottom: calc(24px + env(safe-area-inset-bottom, 16px));">
+        <div class="drawer-header-row" style="padding: 16px 20px 12px 20px; border-bottom: 1px solid var(--border);">
+          <div class="grabber-bar"></div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <img src="assets/icons/app-logo.png" alt="Logo" style="width: 26px; height: 26px; object-fit: contain;">
+            <h3 style="margin: 0; font-size: 17px; font-weight: 800; color: var(--text);">More Options / अधिक पर्याय</h3>
+          </div>
+          <button class="close-drawer-btn" onclick="closeDrawer('drawer-more-menu')" style="background: var(--pill-bg); border: none; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; color: var(--text);">&times;</button>
+        </div>
+        
+        <div class="more-menu-content-grid" style="padding: 18px 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; overflow-y: auto;">
+          <!-- 1. Hymnal -->
+          <div class="more-card-item" onclick="closeDrawer('drawer-more-menu'); openHymnalModal();" style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 16px; padding: 14px; cursor: pointer; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+            <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(229,168,59,0.15); display: flex; align-items: center; justify-content: center; font-size: 18px;">🎵</div>
+            <h4 style="margin: 0; font-size: 14px; font-weight: 800; color: var(--text);">Hymns / स्तोत्रे</h4>
+            <span style="font-size: 11.5px; color: var(--text-muted);">Traditional Marathi Christian hymns & lyrics</span>
+          </div>
+
+          <!-- 2. Family Stories & Theater -->
+          <div class="more-card-item" onclick="closeDrawer('drawer-more-menu'); openStoryModal('wedding_cana');" style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 16px; padding: 14px; cursor: pointer; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+            <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(59,130,246,0.15); display: flex; align-items: center; justify-content: center; font-size: 18px;">🎭</div>
+            <h4 style="margin: 0; font-size: 14px; font-weight: 800; color: var(--text);">Bible Stories</h4>
+            <span style="font-size: 11.5px; color: var(--text-muted);">Interactive dramatized multi-voice stories</span>
+          </div>
+
+          <!-- 3. Community Prayer Requests -->
+          <div class="more-card-item" onclick="closeDrawer('drawer-more-menu'); switchTab('prayers');" style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 16px; padding: 14px; cursor: pointer; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+            <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(239,68,68,0.15); display: flex; align-items: center; justify-content: center; font-size: 18px;">🙏</div>
+            <h4 style="margin: 0; font-size: 14px; font-weight: 800; color: var(--text);">Prayer Requests</h4>
+            <span style="font-size: 11.5px; color: var(--text-muted);">Submit & pray for church circle needs</span>
+          </div>
+
+          <!-- 4. Reading Plans -->
+          <div class="more-card-item" onclick="closeDrawer('drawer-more-menu'); switchTab('plans');" style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 16px; padding: 14px; cursor: pointer; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+            <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(160,185,129,0.15); display: flex; align-items: center; justify-content: center; font-size: 18px;">📖</div>
+            <h4 style="margin: 0; font-size: 14px; font-weight: 800; color: var(--text);">Reading Plans</h4>
+            <span style="font-size: 11.5px; color: var(--text-muted);">Guided daily Bible reading journeys</span>
+          </div>
+
+          <!-- 5. Search & Discover -->
+          <div class="more-card-item" onclick="closeDrawer('drawer-more-menu'); switchTab('discover');" style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 16px; padding: 14px; cursor: pointer; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+            <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(168,85,247,0.15); display: flex; align-items: center; justify-content: center; font-size: 18px;">🔍</div>
+            <h4 style="margin: 0; font-size: 14px; font-weight: 800; color: var(--text);">Discover</h4>
+            <span style="font-size: 11.5px; color: var(--text-muted);">Search keywords, moods & feelings</span>
+          </div>
+
+          <!-- 6. Bible Quiz & Trivia -->
+          <div class="more-card-item" onclick="closeDrawer('drawer-more-menu'); openBibleQuizModal();" style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 16px; padding: 14px; cursor: pointer; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+            <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(245,158,11,0.15); display: flex; align-items: center; justify-content: center; font-size: 18px;">🏆</div>
+            <h4 style="margin: 0; font-size: 14px; font-weight: 800; color: var(--text);">Bible Quiz</h4>
+            <span style="font-size: 11.5px; color: var(--text-muted);">Trivia challenge, points & badges</span>
+          </div>
+
+          <!-- 7. You Profile -->
+          <div class="more-card-item" onclick="closeDrawer('drawer-more-menu'); switchTab('you');" style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 16px; padding: 14px; cursor: pointer; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+            <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(236,72,153,0.15); display: flex; align-items: center; justify-content: center; font-size: 18px;">👤</div>
+            <h4 style="margin: 0; font-size: 14px; font-weight: 800; color: var(--text);">You / प्रोफाईल</h4>
+            <span style="font-size: 11.5px; color: var(--text-muted);">Activity feed, streak, bookmarks & notes</span>
+          </div>
+
+          <!-- 8. Audio & Settings -->
+          <div class="more-card-item" onclick="closeDrawer('drawer-more-menu'); openDrawer('drawer-account-settings');" style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 16px; padding: 14px; cursor: pointer; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+            <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(100,116,139,0.15); display: flex; align-items: center; justify-content: center; font-size: 18px;">⚙️</div>
+            <h4 style="margin: 0; font-size: 14px; font-weight: 800; color: var(--text);">App Settings</h4>
+            <span style="font-size: 11.5px; color: var(--text-muted);">Audio speed, voices, font & dark mode</span>
+          </div>
+        </div>
+      </div>
+    </div>
     
     <!-- Translation Selector Drawer -->
     <div id="drawer-translation-selector" class="drawer-overlay">
@@ -1410,46 +1872,67 @@
     </div>
 
     <!-- Book & Chapter Selector Drawer (Tecarta styled, list view on desktop) -->
+        <!-- Universal Book, Chapter & Verse Selector Drawer -->
     <div id="drawer-book-selector" class="drawer-overlay">
       <div class="ios-drawer-sheet full-height">
         <div class="drawer-header-row">
           <div class="grabber-bar"></div>
-          <h3 id="book-selector-header-title">Books</h3>
-          <button class="close-drawer-btn">&times;</button>
+          <h3 id="book-selector-header-title">पुस्तके व अध्याय (Books & Chapters)</h3>
+          <button class="close-drawer-btn" onclick="closeAllDrawers()">&times;</button>
         </div>
         <div class="drawer-book-selector-scroll">
-          <!-- Books Selection View -->
+          <!-- Step 1: Books Selection View -->
           <div id="selector-books-pane" class="selector-pane-view active">
             <div class="testament-block" id="section-ot-books">
-              <h4 class="testament-heading">जुना करार (Old Testament)</h4>
+              <h4 class="testament-heading">जुना करार (Old Testament - ३९ पुस्तके)</h4>
               <div id="ot-books-grid" class="books-buttons-grid">
                 <!-- OT books grid loads here -->
               </div>
             </div>
             <div class="testament-block" id="section-nt-books">
-              <h4 class="testament-heading">नवा करार (New Testament)</h4>
+              <h4 class="testament-heading">नवा करार (New Testament - २७ पुस्तके)</h4>
               <div id="nt-books-grid" class="books-buttons-grid">
                 <!-- NT books grid loads here -->
               </div>
             </div>
           </div>
           
-          <!-- Chapters selection view -->
+          <!-- Step 2: Chapters selection view -->
           <div id="selector-chapters-pane" class="selector-pane-view">
-            <button id="btn-back-to-books" class="btn-back-link">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
-              <span id="selected-book-name-indicator">शास्ते</span>
-            </button>
+            <div class="selector-sub-header">
+              <button id="btn-back-to-books" class="btn-back-link" onclick="switchSelectorStep('books')">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                <span>← सर्व पुस्तके (All Books)</span>
+              </button>
+              <span id="selected-book-name-indicator" class="selected-book-badge">शास्ते</span>
+            </div>
+            <div class="chapter-picker-title">अध्याय निवडा (Select Chapter):</div>
             <div id="chapters-number-grid" class="chapters-buttons-grid">
               <!-- Chapters list loads dynamically -->
             </div>
           </div>
+
+          <!-- Step 3: Verses selection view (Fallback / optional) -->
+          <div id="selector-verses-pane" class="selector-pane-view">
+            <div class="selector-sub-header">
+              <button id="btn-back-to-chapters" class="btn-back-link" onclick="switchSelectorStep('chapters')">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                <span>← अध्याय निवडीकडे (Back)</span>
+              </button>
+              <span id="selected-chapter-indicator" class="selected-book-badge">शास्ते १३</span>
+            </div>
+            <div class="chapter-picker-title">वचन निवडा (Select Verse):</div>
+            <div id="verses-number-grid" class="chapters-buttons-grid">
+              <!-- Verses list loads dynamically -->
+            </div>
+          </div>
         </div>
+
         <!-- Sorting bar inside book selector footer -->
-        <div class="selector-sorting-footer">
+        <div class="selector-sorting-footer" id="selector-sorting-footer">
           <div class="sorting-tabs-capsule">
-            <button id="btn-sort-traditional" class="sort-tab active">Traditional</button>
-            <button id="btn-sort-alphabetical" class="sort-tab">Alphabetical</button>
+            <button id="btn-sort-traditional" class="sort-tab active">पारंपारिक (Traditional)</button>
+            <button id="btn-sort-alphabetical" class="sort-tab">अकारविल्हे (Alphabetical)</button>
           </div>
         </div>
       </div>
@@ -1511,47 +1994,70 @@
       </div>
     </div>
 
-    <!-- Fullscreen Verse of the Day Card Modal -->
-    <div id="modal-fullscreen-vod" class="modal-overlay-fullscreen">
-      <div class="fullscreen-vod-capsule">
-        <button id="btn-close-fullscreen-vod" class="round-close-btn top-left" aria-label="Close">&times;</button>
-        <button id="btn-fs-options" class="round-close-btn top-right" aria-label="Options">&#8942;</button>
+    <!-- Fullscreen Verse of the Day Card Modal & Image Sharing Studio -->
+    <div id="modal-fullscreen-vod" class="modal-overlay-fullscreen" onclick="if(event.target === this) closeFullscreenVOD();" style="display: none; position: fixed; inset: 0; background-color: rgba(0,0,0,0.92); z-index: 99999; backdrop-filter: blur(8px); justify-content: center; align-items: center;">
+      <div class="fullscreen-vod-capsule" id="fs-vod-capsule-bg" style="width: 100%; max-width: 520px; height: 100%; max-height: 94vh; background-size: cover; background-position: center; border-radius: 24px; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; padding: 24px 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); border: 1.5px solid rgba(255,255,255,0.15);">
         
-        <div class="fullscreen-vod-content">
-          <div class="fs-card-label">Verse of the Day</div>
-          <blockquote id="fs-vod-text" class="fs-card-text">"तू जलांतून चालशील..."</blockquote>
-          <cite id="fs-vod-ref" class="fs-card-ref">यशया ४३:२ MARVBSI</cite>
+        <!-- Top Overlay Gradient (pointer-events: none) -->
+        <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.2) 40%, rgba(0,0,0,0.88) 100%); z-index: 1; pointer-events: none;"></div>
+
+        <!-- Top Header Navigation -->
+        <div style="position: relative; z-index: 20; display: flex; justify-content: space-between; align-items: center; width: 100%;">
+          <button id="btn-close-fullscreen-vod" onclick="closeFullscreenVOD(); event.stopPropagation();" class="vod-studio-close-btn" aria-label="Close" title="Close / बंद करा">&times;</button>
           
-          <div class="daily-verse-nav-row" style="margin-top: 24px; justify-content: center; gap: 16px;">
-            <button class="vod-nav-btn" id="btn-fs-vod-prev" style="padding: 8px 16px; font-size: 12.5px;">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg> Previous
-            </button>
-            <button class="vod-nav-btn" id="btn-fs-vod-read" style="padding: 8px 16px; font-size: 12.5px;">
-              Read Chapter
-            </button>
-            <button class="vod-nav-btn" id="btn-fs-vod-next" style="padding: 8px 16px; font-size: 12.5px;">
-              Next <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
-            </button>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <button onclick="navigateVOD('prev')" style="background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.25); color: #fff; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; cursor: pointer;">&larr; कालचे</button>
+            <span style="font-size: 11px; font-weight: 800; color: #f59e0b; background: rgba(0,0,0,0.55); padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(245,158,11,0.4); text-transform: uppercase; letter-spacing: 0.5px;">दैनिक वचन</span>
+            <button onclick="navigateVOD('next')" style="background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.25); color: #fff; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; cursor: pointer;">उद्याचे &rarr;</button>
           </div>
+
+          <button onclick="cycleVodWallpaper()" title="Change Wallpaper / वॉलपेपर बदला" style="background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.25); width: 42px; height: 42px; border-radius: 50%; color: #fff; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;">🎨</button>
         </div>
         
-        <div class="fullscreen-vod-actions">
-          <div class="social-row-buttons">
-            <button id="btn-fs-like" class="social-btn">
-              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" id="fs-like-heart"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path></svg>
-              <span id="fs-like-count">12.6L</span>
+        <!-- Center Verse Typography Content -->
+        <div class="fullscreen-vod-content-body" style="position: relative; z-index: 10; padding: 16px 10px; text-align: center; margin: auto 0; flex: 1; display: flex; flex-direction: column; justify-content: center;">
+          <div class="fs-card-label" style="font-size: 12px; font-weight: 800; color: rgba(255,255,255,0.75); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px;">
+            VERSE OF THE DAY • दैनिक वचन
+          </div>
+          
+          <blockquote id="fs-vod-text" class="fs-card-text" style="font-family: var(--font-body, 'Noto Serif Devanagari', serif); font-size: 23px; line-height: 1.65; color: #ffffff; font-weight: 700; margin: 0 0 16px 0; text-shadow: 0 2px 10px rgba(0,0,0,0.85);">
+            "तू जलांतून चालशील तेव्हा मी तुझ्याबरोबर असेन..."
+          </blockquote>
+          
+          <cite id="fs-vod-ref" class="fs-card-ref" style="font-family: var(--font-ui); font-size: 16px; font-weight: 800; color: #f59e0b; display: block; font-style: normal; text-shadow: 0 2px 6px rgba(0,0,0,0.8);">
+            यशया ४३:२ MARVBSI
+          </cite>
+        </div>
+        
+        <!-- Bottom Action Studio Controls (Save to Gallery, WhatsApp, Copy, Read) -->
+        <div class="fullscreen-vod-actions" style="position: relative; z-index: 2; display: flex; flex-direction: column; gap: 10px;">
+          
+          <!-- Primary Save & Share Buttons Row -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <button onclick="saveExactDailyVerseImage()" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #ffffff; border: none; padding: 13px 14px; border-radius: 14px; font-weight: 800; font-size: 13.5px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(37,99,235,0.4); transition: transform 0.15s ease;">
+              <span style="font-size: 18px;">📥</span>
+              <span>Save to Gallery</span>
             </button>
-            <button id="btn-fs-comment" class="social-btn">
-              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
-              <span>24.4K</span>
-            </button>
-            <button id="btn-fs-share-trigger" class="social-btn">
-              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
-              <span>5.3L</span>
+
+            <button onclick="shareDailyVerseToWhatsApp()" style="background: linear-gradient(135deg, #22c55e, #16a34a); color: #ffffff; border: none; padding: 13px 14px; border-radius: 14px; font-weight: 800; font-size: 13.5px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(34,197,94,0.4); transition: transform 0.15s ease;">
+              <span style="font-size: 18px;">💬</span>
+              <span>WhatsApp Status</span>
             </button>
           </div>
-          <button id="btn-fs-customize-card" class="btn-customize-theme-pill">🎨 Customize Card</button>
+
+          <!-- Secondary Quick Tools Row (Copy text, Read Chapter, Wallpaper) -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <button onclick="copyDailyVerseText()" style="background: rgba(255,255,255,0.14); backdrop-filter: blur(10px); color: #ffffff; border: 1px solid rgba(255,255,255,0.25); padding: 10px 12px; border-radius: 12px; font-weight: 700; font-size: 12.5px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+              <span>📋 Copy Verse</span>
+            </button>
+
+            <button onclick="readVODChapter(); closeFullscreenVOD();" style="background: rgba(255,255,255,0.14); backdrop-filter: blur(10px); color: #ffffff; border: 1px solid rgba(255,255,255,0.25); padding: 10px 12px; border-radius: 12px; font-weight: 700; font-size: 12.5px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+              <span>📖 Read Chapter</span>
+            </button>
+          </div>
+
         </div>
+
       </div>
     </div>
 
@@ -1590,77 +2096,98 @@
     </div>
 
     <!-- Audio Speech Settings Modal -->
-    <div id="modal-audio-settings" class="drawer-overlay">
-      <div class="ios-drawer-sheet">
-        <div class="drawer-header-row">
-          <h3>Narration Settings</h3>
-          <button class="close-drawer-btn" id="btn-close-audio-settings">&times;</button>
+    <div id="modal-audio-settings" class="drawer-overlay" onclick="if (event.target === this) closeModal('modal-audio-settings');">
+      <div class="ios-drawer-sheet" style="max-height: 88vh; border-radius: 26px 26px 0 0;">
+        <div class="drawer-header-row" style="padding: 16px 20px 12px 20px; border-bottom: 1px solid var(--border);">
+          <div class="grabber-bar"></div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 20px;">🎙️</span>
+            <h3 style="margin: 0; font-size: 17px; font-weight: 800; color: var(--text);">AI Voice Narration (ElevenLabs & Sarvam)</h3>
+          </div>
+          <button class="close-drawer-btn" id="btn-close-audio-settings" onclick="closeModal('modal-audio-settings')" style="background: var(--pill-bg); border: none; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; color: var(--text);">&times;</button>
         </div>
-        <div class="drawer-body-settings">
-          <div class="setting-item-row">
-            <label>Speech Speed</label>
-            <div class="slider-wrapper">
-              <input type="range" id="tts-speed-slider" min="0.75" max="1.75" step="0.05" value="1.0" class="speed-slider">
-              <span id="tts-speed-val">1.0x</span>
+        <div class="drawer-body-settings" style="padding: 18px 20px 24px 20px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto;">
+          
+          <!-- Default Unified Narrator Voice Banner -->
+          <div style="background: rgba(229,168,59,0.08); border: 1.5px solid var(--border); border-radius: 12px; padding: 12px 14px; display: flex; align-items: center; gap: 12px;">
+            <span style="font-size: 22px;">🎙️</span>
+            <div>
+              <div style="font-weight: 800; font-size: 13.5px; color: var(--text);">Natural Reverent Male Voice (नैसर्गिक पुरुष वाचक आवाज)</div>
+              <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 2px;">Optimized devotional reading for Marathi & English Bible scriptures</div>
             </div>
           </div>
-          <div class="setting-item-row" id="audio-narrator-gender-row">
-            <label>Narrator Voice</label>
-            <select id="audio-narrator-gender-select" class="dropdown-selector" style="background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 4px;">
-              <option value="male" selected>🧔 Male Narrator (Deep Rich Bass)</option>
-              <option value="female">👩 Female Narrator (Warm & Soft)</option>
-            </select>
+
+          <!-- Reading Speed Slider -->
+          <div class="setting-item-row">
+            <label style="font-weight: 700; font-size: 13.5px; color: var(--text);">Reading Pace / वाचनाचा वेग</label>
+            <div class="slider-wrapper" style="display: flex; align-items: center; gap: 12px;">
+              <input type="range" id="tts-speed-slider" min="0.75" max="1.50" step="0.05" value="0.92" class="speed-slider" style="flex: 1;">
+              <span id="tts-speed-val" style="font-weight: 800; font-size: 13px; color: var(--primary); min-width: 44px; text-align: right;">0.92x</span>
+            </div>
           </div>
+
+          <!-- ElevenLabs API Configuration Card -->
+          <div style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">ElevenLabs API Key (Shrey Voice)</span>
+              <span id="elevenlabs-key-status-badge" style="font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 12px; background: rgba(59,130,246,0.15); color: #3b82f6;">Ready</span>
+            </div>
+            <input type="text" id="elevenlabs-api-key-input" placeholder="Enter ElevenLabs API Key" autocomplete="off" style="width: 100%; box-sizing: border-box; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 12px; font-family: monospace;">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 2px;">
+              <span style="font-size: 11px; color: var(--text-muted);">Model: eleven_v3 | Voice: Shrey</span>
+              <button id="btn-test-elevenlabs-voice" type="button" style="padding: 6px 14px; font-size: 11.5px; font-weight: 800; border-radius: 14px; background: rgba(59,130,246,0.15); color: #2563eb; border: 1px solid rgba(59,130,246,0.3); cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                <span>🔊 Test Shrey / ऐका</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Sarvam AI API Configuration Card -->
+          <div style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Sarvam AI API Key</span>
+              <span id="sarvam-key-status-badge" style="font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 12px; background: rgba(34,197,94,0.15); color: #22c55e;">Key Ready</span>
+            </div>
+            <input type="text" id="sarvam-api-key-input" placeholder="Enter Sarvam API Key (sk_...)" autocomplete="off" style="width: 100%; box-sizing: border-box; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 12px; font-family: monospace;">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 2px;">
+              <span style="font-size: 11px; color: var(--text-muted);">Bulbul V3 Indian Voice Narration</span>
+              <button id="btn-test-sarvam-voice" type="button" style="padding: 6px 14px; font-size: 11.5px; font-weight: 800; border-radius: 14px; background: rgba(229,168,59,0.15); color: var(--primary); border: 1px solid rgba(229,168,59,0.3); cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                <span>🔊 Test Sarvam / ऐका</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Background Worship Music -->
           <div class="setting-item-row" id="audio-bg-music-row">
-            <label>Background Worship Music</label>
-            <select id="audio-bg-music-select" class="dropdown-selector" style="background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 4px;">
-              <option value="none" selected>None</option>
+            <label style="font-weight: 700; font-size: 13.5px; color: var(--text);">Background Worship Music</label>
+            <select id="audio-bg-music-select" class="dropdown-selector" style="background: var(--bg); color: var(--text); border: 1.5px solid var(--border); border-radius: 10px; padding: 8px 12px; font-size: 13px; width: 100%;">
+              <option value="none" selected>None / काही नाही</option>
               <option value="guitar">🎸 Soft Acoustic Worship Guitar</option>
               <option value="piano">🎹 Peaceful Piano Instrumental</option>
               <option value="ambient">🕊️ Ambient Holy Spirit Strings</option>
             </select>
           </div>
           <div class="setting-item-row" id="audio-bg-music-vol-row">
-            <label>Worship Music Vol</label>
-            <div class="slider-wrapper">
-              <input type="range" id="audio-bg-music-vol-slider" min="0" max="1" step="0.05" value="0.3" class="speed-slider">
-              <span id="audio-bg-music-vol-val">30%</span>
+            <label style="font-weight: 700; font-size: 13.5px; color: var(--text);">Worship Music Vol</label>
+            <div class="slider-wrapper" style="display: flex; align-items: center; gap: 12px;">
+              <input type="range" id="audio-bg-music-vol-slider" min="0" max="1" step="0.05" value="0.3" class="speed-slider" style="flex: 1;">
+              <span id="audio-bg-music-vol-val" style="font-weight: 800; font-size: 13px; min-width: 40px; text-align: right;">30%</span>
             </div>
           </div>
+
+          <!-- Sleep Timer -->
           <div class="setting-item-row" id="audio-sleep-timer-row">
-            <label>Sleep Timer</label>
-            <select id="audio-sleep-timer-select" class="dropdown-selector" style="background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 4px;">
+            <label style="font-weight: 700; font-size: 13.5px; color: var(--text);">Sleep Timer</label>
+            <select id="audio-sleep-timer-select" class="dropdown-selector" style="background: var(--bg); color: var(--text); border: 1.5px solid var(--border); border-radius: 10px; padding: 8px 12px; font-size: 13px; width: 100%;">
               <option value="off" selected>Off</option>
               <option value="15">15 Minutes</option>
               <option value="30">30 Minutes</option>
               <option value="60">60 Minutes</option>
             </select>
           </div>
-          <div class="setting-item-row" id="audio-source-row" style="display: none;">
-            <label>Reader Type</label>
-            <select id="audio-source-select" class="dropdown-selector">
-              <option value="human" selected>Professional Human Voice</option>
-              <option value="ai">AI Text-to-Speech Reader</option>
-              <option value="elevenlabs">ElevenLabs Premium Voice</option>
-            </select>
-          </div>
-          <div class="setting-item-row" id="voice-select-row" style="display: none;">
-            <label>Speech Voice</label>
-            <select id="tts-voice-select" class="dropdown-selector">
-              <option value="default">Default System Voice</option>
-            </select>
-          </div>
-          <div class="setting-item-row" id="tone-select-row" style="display: none;">
-            <label>Voice Tone Style</label>
-            <select id="audio-tone-select" class="dropdown-selector">
-              <option value="normal">Normal Voice</option>
-              <option value="deep-bass" selected>Deep Studio Bass (Morgan Freeman Style)</option>
-              <option value="warm-resonance">Warm Resonance</option>
-            </select>
-          </div>
-          <button id="btn-start-tts-reading" class="btn-primary-block margin-top">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-            <span>Start Reading Aloud</span>
+
+          <button id="btn-start-tts-reading" class="btn-primary-block margin-top" style="padding: 14px; border-radius: 14px; font-weight: 800; font-size: 15px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            <span>Start Audio Reading / वाचन सुरू करा</span>
           </button>
         </div>
       </div>
@@ -1754,57 +2281,101 @@
     </div>
 
     <!-- Daily Bible Quiz Drawer -->
-    <!-- IMMERSIVE READY-MADE PRAYER MODAL -->
-    <div id="modal-immersive-prayer" class="drawer-overlay" style="display: none;">
-      <div class="ios-drawer-sheet prayer-immersive-sheet">
-        <div class="prayer-modal-hero" id="prayer-modal-hero-bg">
-          <div class="prayer-hero-overlay"></div>
-          <button class="prayer-modal-close-btn" id="btn-close-immersive-prayer" onclick="closeImmersivePrayerModal()">&times;</button>
-          <div class="prayer-hero-content">
-            <span class="prayer-modal-badge" id="prayer-modal-category">PRAYER TOPIC</span>
-            <h2 class="prayer-modal-title" id="prayer-modal-heading">पाण्याचे द्राक्षारसात रूपांतर</h2>
-            <span class="prayer-modal-subtitle" id="prayer-modal-subtitle">The Wedding at Cana • Miracle in Scarcity</span>
-          </div>
-        </div>
-
-        <div class="prayer-modal-body-scroller">
-          <!-- Scripture Box -->
-          <div class="prayer-scripture-box">
-            <div class="scripture-badge-row">
-              <span class="scripture-icon">📖</span>
-              <strong id="prayer-modal-scripture-ref">योहान २:१-११ (John 2:1-11)</strong>
+        <!-- IMMERSIVE READY-MADE PRAYER SANCTUARY MODAL (TEXT ON IMAGE) -->
+    <div id="modal-immersive-prayer" class="prayer-sanctuary-modal-overlay" style="display: none;">
+      <div class="prayer-sanctuary-sheet">
+        <!-- Full-bleed Photographic Artwork Card with Gradient Scrim -->
+        <div class="prayer-sanctuary-artwork" id="prayer-modal-hero-bg" style="background-image: url('assets/images/wedding_cana_miracle.jpg');">
+          <div class="prayer-artwork-vignette"></div>
+          
+          <!-- Top Control Header Bar -->
+          <div class="prayer-sanctuary-top-bar">
+            <div class="prayer-category-pill" id="prayer-modal-category">
+              दैवी चमत्कार व पुरवठा
             </div>
-            <p class="scripture-verse-text" id="prayer-modal-scripture-text">
-              "येशूने आपल्या चिन्हांचा हा आरंभ गालीलातील काना येथे केला आणि आपले सामर्थ्य प्रकट केले, आणि त्याच्या शिष्यांनी त्याच्यावर विश्वास ठेवला."
-            </p>
+            <button class="prayer-close-round-btn" id="btn-close-immersive-prayer" onclick="closeImmersivePrayerModal()" title="बंद करा / Close" aria-label="Close">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
           </div>
 
-          <!-- Language Selector Tabs for Prayer -->
-          <div class="prayer-lang-tabs">
-            <button class="prayer-tab-btn active" id="btn-prayer-lang-mr" onclick="switchPrayerLang('mr')">मराठी प्रार्थना</button>
-            <button class="prayer-tab-btn" id="btn-prayer-lang-en" onclick="switchPrayerLang('en')">English Prayer</button>
-          </div>
+          <!-- Main Scrollable Content Overlay -->
+          <div class="prayer-sanctuary-scrollable">
+            <!-- Hero Title Block -->
+            <div class="prayer-sanctuary-heading-block">
+              <h2 class="prayer-sanctuary-title" id="prayer-modal-heading">पाण्याचे द्राक्षारसात रूपांतर</h2>
+              <p class="prayer-sanctuary-subtitle" id="prayer-modal-subtitle">The Wedding at Cana • Miracle in Scarcity</p>
+            </div>
 
-          <!-- Prayer Devotional Content -->
-          <div class="prayer-text-container">
-            <div class="prayer-content-text" id="prayer-modal-text-content">
-              <!-- Populated dynamically -->
+            <!-- Scripture & Chapter Jump Box -->
+            <div class="prayer-sanctuary-scripture-glass">
+              <div class="prayer-scripture-meta-row">
+                <div class="prayer-scripture-ref-badge">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                  </svg>
+                  <strong id="prayer-modal-scripture-ref">योहान २:१-११ (John 2:1-11)</strong>
+                </div>
+                <!-- Action to open chapter in reader -->
+                <button class="prayer-btn-jump-chapter" id="btn-prayer-open-chapter" onclick="openPrayerChapter()" title="हा अध्याय बायबलमध्ये उघडा">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                  </svg>
+                  <span id="prayer-open-chapter-label">अध्याय उघडा (योहान २)</span>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                  </svg>
+                </button>
+              </div>
+              <blockquote class="prayer-scripture-quote" id="prayer-modal-scripture-text">
+                "येशूने आपल्या चिन्हांचा हा आरंभ गालीलातील काना येथे केला आणि आपले सामर्थ्य प्रकट केले, आणि त्याच्या शिष्यांनी त्याच्यावर विश्वास ठेवला."
+              </blockquote>
+            </div>
+
+            <!-- Language Switcher Pill -->
+            <div class="prayer-sanctuary-lang-row">
+              <div class="prayer-lang-pill-track">
+                <button class="prayer-lang-pill-btn active" id="btn-prayer-lang-mr" onclick="switchPrayerLang('mr')">मराठी प्रार्थना</button>
+                <button class="prayer-lang-pill-btn" id="btn-prayer-lang-en" onclick="switchPrayerLang('en')">English Prayer</button>
+              </div>
+            </div>
+
+            <!-- Prayer Devotional Text (Directly on translucent dark glass overlay) -->
+            <div class="prayer-sanctuary-text-card">
+              <div class="prayer-sanctuary-text-body" id="prayer-modal-text-content">
+                <!-- Dynamically populated without emojis -->
+              </div>
             </div>
           </div>
 
-          <!-- Action Buttons Bar -->
-          <div class="prayer-actions-bar">
+          <!-- Bottom Floating Action Bar -->
+          <div class="prayer-sanctuary-actions-bar">
+            <!-- Audio Play/Pause Button -->
             <button class="prayer-action-btn primary" id="btn-prayer-audio-play" onclick="togglePrayerAudio()">
-              <span class="btn-icon">🔊</span>
-              <span id="prayer-audio-label">Listen / ऐका</span>
+              <svg id="prayer-audio-play-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+              </svg>
+              <span id="prayer-audio-label">ऐका / Listen</span>
             </button>
+
+            <!-- WhatsApp Share Button (Clean SVG, No Emoji) -->
             <button class="prayer-action-btn secondary" id="btn-prayer-share-whatsapp" onclick="sharePrayerWhatsApp()">
-              <span class="btn-icon">💬</span>
-              <span>WhatsApp</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 14.99 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67M9.53 7.33C9.37 7.33 9.1 7.39 8.87 7.64C8.64 7.89 8 8.49 8 9.71C8 10.93 8.89 12.1 9.01 12.26C9.13 12.42 10.74 14.92 13.22 15.99C15.28 16.88 15.7 16.7 16.14 16.66C16.58 16.62 17.57 16.07 17.78 15.49C17.98 14.91 17.98 14.41 17.92 14.31C17.86 14.21 17.7 14.15 17.45 14.03C17.21 13.91 16.01 13.32 15.78 13.24C15.56 13.16 15.4 13.12 15.23 13.36C15.07 13.61 14.6 14.21 14.46 14.37C14.32 14.53 14.18 14.55 13.93 14.43C13.69 14.31 12.9 14.05 11.96 13.21C11.23 12.56 10.73 11.75 10.59 11.51C10.45 11.26 10.57 11.13 10.7 11C10.81 10.89 10.95 10.71 11.07 10.56C11.19 10.42 11.23 10.31 11.31 10.15C11.39 9.99 11.35 9.84 11.29 9.73C11.23 9.61 10.74 8.41 10.53 7.91C10.33 7.42 10.13 7.49 9.97 7.48C9.83 7.48 9.66 7.48 9.53 7.33Z"/>
+              </svg>
+              <span>Share</span>
             </button>
+
+            <!-- Amen Button (Clean SVG, No Emoji) -->
             <button class="prayer-action-btn amen" id="btn-prayer-amen" onclick="togglePrayerAmen()">
-              <span class="btn-icon">🙏</span>
-              <span id="prayer-amen-count">Amen (48)</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+              </svg>
+              <span id="prayer-amen-count">Amen (154)</span>
             </button>
           </div>
         </div>
@@ -2674,7 +3245,7 @@
           <!-- Password / Passcode Input -->
           <div>
             <label style="font-size: 12.5px; font-weight: 700; color: var(--text); display: block; margin-bottom: 4px;">Passcode / पासवर्ड (Opt.)</label>
-            <input type="password" id="auth-input-password" class="dropdown-selector" style="width: 100%; box-sizing: border-box;" placeholder="Enter your secret passcode">
+            <input type="password" id="auth-modal-input-password" class="dropdown-selector" style="width: 100%; box-sizing: border-box;" placeholder="Enter your secret passcode">
           </div>
 
           <!-- Remember Me Checkbox -->
@@ -2815,9 +3386,9 @@
       <span id="toast-message">Copied to clipboard!</span>
     </div>
 
-  <!-- App Main Logic (Cache-Busted for Version 83 Extended Splash Verse & Logo Theme) -->
-  <script src="sarvam-tts.js"></script>
-  <script src="app.js?v=83_EXTENDED_SPLASH_VERSE_DISPLAY"></script>
+  <!-- App Main Logic (Cache-Busted for Version 90 Authentic Fluent Marathi Audio Bible) -->
+  <script src="sarvam-tts.js?v=90_NATIVE_FLUENT_MARATHI_AUDIO_BIBLE"></script>
+  <script src="app.js?v=96_RIVER_OF_LIFE_3_CARD_FLOW_SERIES"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 4.5s no matter what
@@ -2829,6 +3400,368 @@
       }
     }, 4500);
   </script>
+
+    <!-- ==========================================================================
+         FULL-SCREEN DRAMATIZED STORY THEATER MODAL (SCENE ART + AMBIENT MUSIC)
+         ========================================================================== -->
+        <!-- ==========================================================================
+         3-VOICE MULTI-CAST DRAMATIZED STORY THEATER MODAL (SHUBH + RATAN + PRIYA)
+         ========================================================================== -->
+    <div id="modal-story-theater" class="story-theater-overlay" style="display: none;">
+      <!-- Dynamic Scenic Background Image with Ken Burns drift -->
+      <div id="story-theater-bg" class="story-theater-backdrop"></div>
+      <div class="story-theater-vignette"></div>
+
+      <!-- Theater Top Bar -->
+      <div class="story-theater-topbar">
+        <div class="story-theater-chapter-badge">
+          <span id="story-theater-book-chapter">शास्ते १३</span>
+          <span id="story-theater-theme-tag" class="story-theme-pill">🦁 शूर शमशोन आणि देवाचे न्यायकर्ते</span>
+        </div>
+
+                <div class="story-theater-top-actions">
+          <!-- Multi-Chapter Story Library Selector -->
+          <div class="story-library-pill">
+            <span class="story-book-icon">📖</span>
+            <select id="story-episode-select" onchange="loadStoryEpisode(this.value)">
+              <option value="samson" selected>🦁 शूर शमशोन (Judges 13)</option>
+              <option value="david_goliath">⚔️ दावीद आणि गल्याथ (1 Sam 17)</option>
+              <option value="wedding_cana">🍷 कानामधील चमत्कार (John 2)</option>
+              <option value="prodigal_son">🕊️ हरवलेला मुलगा (Luke 15)</option>
+            </select>
+          </div>
+
+          <!-- Background Music Selector -->
+          <div class="story-music-control-pill">
+            <span class="music-icon">🎵</span>
+            <select id="story-bg-music-select" onchange="changeStoryMusic(this.value)">
+              <option value="cinematic" selected>🎬 चित्रपट संगीत (Cinematic Score)</option>
+              <option value="harp">🕊️ Harp & Strings</option>
+              <option value="river">🌊 River of Life</option>
+              <option value="pads">🎹 Sacred Pads</option>
+              <option value="flute">🌄 Morning Chimes</option>
+              <option value="none">🔇 Music Off</option>
+            </select>
+          </div>
+
+          <button class="story-theater-close-btn" onclick="closeStoryTheater()" title="Exit Story Mode">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Theater Center: Dramatic Scripture Story Text -->
+      <div class="story-theater-content">
+        <!-- Dynamic Glowing Speaker / Character Banner -->
+        <div class="story-active-speaker-badge" id="story-active-speaker-badge">
+          <span class="speaker-avatar-circle" id="story-speaker-avatar">🕊️</span>
+          <div class="speaker-meta">
+            <span class="speaker-role-title" id="story-speaker-role">सूत्रधार (Narrator)</span>
+            <span class="speaker-voice-sub" id="story-speaker-voice">Sarvam Shubh Voice</span>
+          </div>
+        </div>
+
+        <div class="story-verse-display-card">
+          <div class="story-verse-number-badge" id="story-current-verse-num">वचन १ (1/25)</div>
+          <p class="story-verse-marathi-text" id="story-current-verse-text">
+            "इस्राएल लोकांनी दुष्कृत्ये करायला सुरुवात केली आहे असे पुन्हा परमेश्वराच्या लक्षात आले..."
+          </p>
+        </div>
+      </div>
+
+      <!-- Theater Bottom Playback Bar -->
+      <!-- Theater Bottom Playback Bar -->
+      <div class="story-theater-bottom-bar">
+        <div class="story-playback-controls">
+          <button class="story-nav-btn" onclick="storyPrevVerse()" title="Previous Verse">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>
+          </button>
+
+          <button id="btn-story-theater-play" class="story-main-play-fab" onclick="toggleStoryPlayback()" title="Play / Pause">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor" id="story-fab-icon">
+              <polygon points="7 4 19 12 7 20 7 4"></polygon>
+            </svg>
+          </button>
+
+          <button class="story-nav-btn" onclick="storyNextVerse()" title="Next Verse">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
+          </button>
+        </div>
+
+        <div class="story-footer-info">
+          <span class="story-voice-badge">🕊️ Sarvam AI Shubh</span>
+          <span class="story-audio-status" id="story-theater-status">वाचन तयार आहे (Ready)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Verse of the Day More Options Bottom Sheet -->
+    <div id="modal-vod-more-sheet" class="meeting-modal-overlay" style="display: none; align-items: flex-end; justify-content: center; z-index: 10006;" onclick="if(event.target === this) closeVodMoreSheet();">
+      <div class="ios-drawer-sheet" style="max-width: 500px; width: 100%; border-radius: 24px 24px 0 0; background: var(--surface); color: var(--text); padding: 20px 24px 32px 24px; box-shadow: 0 -10px 40px rgba(0,0,0,0.3);">
+        <div class="grabber-bar" style="width: 40px; height: 5px; background: var(--border); border-radius: 3px; margin: 0 auto 16px auto;"></div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <h3 style="margin: 0; font-size: 17px; font-weight: 800;">Verse Options • अधिक पर्याय</h3>
+          <button onclick="closeVodMoreSheet()" style="background: none; border: none; font-size: 20px; color: var(--text-muted); cursor: pointer;">✕</button>
+        </div>
+        
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <button class="vod-sheet-option-btn" id="btn-vod-sheet-listen" onclick="playDailyVerseAudio(); closeVodMoreSheet();" style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 14px; background: var(--bg); border: 1px solid var(--border); color: var(--text); cursor: pointer; text-align: left;">
+            <span style="font-size: 22px;">🔊</span>
+            <div>
+              <div style="font-weight: 800; font-size: 14.5px;">Listen with Sarvam Shubh Voice</div>
+              <div style="font-size: 12px; color: var(--text-muted);">मराठी पवित्र वचन ऑडिओ ऐका</div>
+            </div>
+          </button>
+
+          <button class="vod-sheet-option-btn" id="btn-vod-sheet-read" onclick="readVODChapter(); closeVodMoreSheet();" style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 14px; background: var(--bg); border: 1px solid var(--border); color: var(--text); cursor: pointer; text-align: left;">
+            <span style="font-size: 22px;">📖</span>
+            <div>
+              <div style="font-weight: 800; font-size: 14.5px;">Read Full Chapter in Bible</div>
+              <div style="font-size: 12px; color: var(--text-muted);">बायबलमध्ये संपूर्ण अध्याय वाचा</div>
+            </div>
+          </button>
+
+          <button class="vod-sheet-option-btn" onclick="openFullscreenVOD(); closeVodMoreSheet();" style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 14px; background: var(--bg); border: 1px solid var(--border); color: var(--text); cursor: pointer; text-align: left;">
+            <span style="font-size: 22px;">🖼️</span>
+            <div>
+              <div style="font-weight: 800; font-size: 14.5px;">Fullscreen Scenic Artwork</div>
+              <div style="font-size: 12px; color: var(--text-muted);">फुलस्क्रीन आकर्षक वॉलपेपर दृश्य</div>
+            </div>
+          </button>
+
+          <!-- Scenic Wallpaper Switcher Chips inside sheet -->
+          <div style="margin-top: 10px; padding-top: 12px; border-top: 1px solid var(--border);">
+            <span style="font-size: 12.5px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 8px;">Switch Scenic Wallpaper:</span>
+            <div class="vod-wallpaper-chips-row" style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button class="vod-chip active" onclick="switchVodWallpaper('stars', this); closeVodMoreSheet();">✨ Stars</button>
+              <button class="vod-chip" onclick="switchVodWallpaper('golden_dawn', this); closeVodMoreSheet();">🌅 Dawn</button>
+              <button class="vod-chip" onclick="switchVodWallpaper('mount_zion', this); closeVodMoreSheet();">🏔️ Zion</button>
+              <button class="vod-chip" onclick="switchVodWallpaper('calm_waters', this); closeVodMoreSheet();">🌊 Waters</button>
+              <button class="vod-chip" onclick="switchVodWallpaper('peaceful_pastures', this); closeVodMoreSheet();">🌿 Meadow</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+  <!-- 10 Commandments Comprehensive Modal (Feature 5) -->
+  <div id="modal-ten-commandments" class="app-modal-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 9999; backdrop-filter: blur(4px); justify-content: center; align-items: center; padding: 16px;">
+    <div class="modal-card-sheet" style="background: var(--bg-content); border-radius: 22px; width: 100%; max-width: 650px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: var(--shadow-lg); border: 1.5px solid var(--border);">
+      <div style="padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: var(--bg);">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 22px;">📜</span>
+          <div>
+            <h3 style="margin: 0; font-size: 17px; font-weight: 800; color: var(--primary);">दहा आज्ञा • The 10 Commandments</h3>
+            <span style="font-size: 11.5px; color: var(--text-muted); font-weight: 600;">निर्गम २०:१-१७ (Exodus 20:1-17)</span>
+          </div>
+        </div>
+        <button onclick="toggleTenCommandmentsModal()" style="background: none; border: none; font-size: 24px; color: var(--text-muted); cursor: pointer; padding: 4px 8px;">&times;</button>
+      </div>
+
+      <div class="modal-body-scroller" style="padding: 16px 20px; overflow-y: auto; flex: 1;">
+        <!-- The 10 Commandments Clean List -->
+        <div class="commandments-list-accordion" id="commandments-accordion-container" style="display: flex; flex-direction: column; gap: 10px;">
+          <!-- Populated cleanly by app.js -->
+        </div>
+      </div>
+
+      <div style="padding: 14px 20px; border-top: 1px solid var(--border); background: var(--bg); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <button onclick="readTenCommandmentsAloud(this)" style="background: var(--surface); border: 1.5px solid var(--primary); padding: 8px 14px; border-radius: 10px; font-weight: 800; font-size: 12.5px; color: var(--primary); cursor: pointer; display: flex; align-items: center; gap: 5px; box-shadow: var(--shadow-xs);">
+            <span>▶ संपूर्ण दहा आज्ञा ऐका</span>
+          </button>
+          <button onclick="openReader('exodus', 20); toggleTenCommandmentsModal();" class="btn-primary-mini" style="background: var(--primary); color: #ffffff; padding: 8px 14px; border-radius: 10px; font-weight: 700; font-size: 12.5px; border: none; cursor: pointer;">
+            📖 Open in Bible
+          </button>
+        </div>
+        <button onclick="toggleTenCommandmentsModal()" style="background: none; border: 1px solid var(--border); padding: 8px 16px; border-radius: 10px; font-weight: 700; font-size: 12.5px; color: var(--text); cursor: pointer;">
+          Close / बंद करा
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ==========================================================================
+       MODAL 1: THE HEADWATERS (MORNING MANNA AT THE SOURCE)
+       ========================================================================== -->
+  <div id="modal-headwaters-sanctuary" class="app-modal-backdrop" onclick="if(event.target === this) closeHeadwatersModal();" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 99999; backdrop-filter: blur(6px); justify-content: center; align-items: center; padding: 16px;">
+    <div class="modal-card-sheet" style="background: var(--surface, #ffffff); border-radius: 22px; width: 100%; max-width: 560px; max-height: 88vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.4); border: 1.5px solid rgba(245, 158, 11, 0.4);">
+      <!-- Header with sunrise golden theme -->
+      <div style="padding: 18px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <img src="assets/icons/headwaters_sunrise.svg" alt="Headwaters" style="width: 36px; height: 36px; object-fit: contain;">
+          <div>
+            <h3 style="margin: 0; font-size: 17px; font-weight: 800; color: #9a3412;">The Headwaters • उगमस्थान</h3>
+            <span style="font-size: 12px; color: #c2410c; font-weight: 600;">Morning Manna at the Source • सकाळचा पवित्र विसावा</span>
+          </div>
+        </div>
+        <button onclick="closeHeadwatersModal()" style="background: rgba(0,0,0,0.06); border: none; font-size: 20px; width: 34px; height: 34px; border-radius: 50%; color: #9a3412; cursor: pointer; display: flex; align-items: center; justify-content: center;">&times;</button>
+      </div>
+
+      <div class="modal-body-scroller" style="padding: 20px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 16px;">
+        <!-- Scripture Quote Card -->
+        <div style="background: linear-gradient(135deg, rgba(254,243,199,0.5), rgba(253,230,138,0.3)); border: 1.5px solid #f59e0b; border-radius: 16px; padding: 18px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-size: 11px; font-weight: 800; color: #9a3412; background: rgba(245,158,11,0.2); padding: 3px 8px; border-radius: 6px; text-transform: uppercase;">🌅 Morning Scripture • सकाळचे वचन</span>
+            <span style="font-size: 12px; font-weight: 700; color: #9a3412;">विलापगीते ३:२२-२३</span>
+          </div>
+          <p style="font-family: var(--font-body); font-size: 16px; font-weight: 700; line-height: 1.6; color: #1e293b; margin: 0 0 6px 0;">
+            "परमेश्वराच्या कृपेने आमचा अंत झाला नाही; कारण त्याच्या दया कधी संपत नाहीत. त्या रोज सकाळी नव्या असतात; तुझा विश्वासूपणा महान आहे."
+          </p>
+          <span style="font-size: 12.5px; color: #64748b; font-style: italic;">
+            "The steadfast love of the Lord never ceases; his mercies never come to an end; they are new every morning; great is your faithfulness."
+          </span>
+        </div>
+
+        <!-- Spoken Prayer Check-in -->
+        <div style="background: var(--bg, #f8fafc); border: 1px solid var(--border); border-radius: 16px; padding: 16px;">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+            <span style="font-size: 20px;">🙏</span>
+            <strong style="font-size: 14px; color: var(--text);">Morning Heart Prayer • सकाळची प्रार्थना</strong>
+          </div>
+          <p style="font-size: 14px; line-height: 1.6; color: var(--text); margin: 0 0 12px 0;">
+            "हे स्वर्गीय पित्या, या नवीन दिवसाच्या उषःकाली मी माझे संपूर्ण मन व जीवन तुझ्या हातात सोपवतो. आजचा प्रत्येक निर्णय, प्रत्येक विचार आणि प्रत्येक शब्द तुझ्या प्रीतीचा सुगंध पसरवणारा असू दे. येशूच्या नावात, आमेन."
+          </p>
+          <button id="btn-play-headwaters-audio" onclick="playHeadwatersMorningAudio()" style="width: 100%; padding: 12px; border-radius: 12px; font-weight: 800; font-size: 13.5px; background: linear-gradient(135deg, #f59e0b, #d97706); border: none; color: #ffffff; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 14px rgba(245,158,11,0.35);">
+            <span>▶ ऐका (Listen Morning Prayer)</span>
+          </button>
+        </div>
+
+        <!-- Morning Grounding Checkpoints -->
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <span style="font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Daily Source Grounding:</span>
+          <div style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 10px; background: var(--bg); border: 1px solid var(--border);">
+            <span style="font-size: 16px;">✨</span>
+            <span style="font-size: 13px; font-weight: 700; color: var(--text);">१. कृतज्ञता (Gratitude for Life & Grace)</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 10px; background: var(--bg); border: 1px solid var(--border);">
+            <span style="font-size: 16px;">📖</span>
+            <span style="font-size: 13px; font-weight: 700; color: var(--text);">२. देवाचे जिवंत वचन (Grounding in Truth)</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 10px; background: var(--bg); border: 1px solid var(--border);">
+            <span style="font-size: 16px;">🕊️</span>
+            <span style="font-size: 13px; font-weight: 700; color: var(--text);">३. आत्मिक शांती व समर्पण (Surrender for the Day)</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding: 14px 20px; border-top: 1px solid var(--border); background: var(--bg); display: flex; justify-content: space-between; align-items: center;">
+        <button onclick="openReader('lamentations', 3); closeHeadwatersModal();" style="background: var(--primary); color: #ffffff; padding: 8px 16px; border-radius: 10px; font-weight: 700; border: none; cursor: pointer; font-size: 13px;">
+          📖 Open in Bible (विलापगीते ३)
+        </button>
+        <button onclick="closeHeadwatersModal()" style="background: none; border: 1px solid var(--border); padding: 8px 16px; border-radius: 10px; font-weight: 700; color: var(--text); cursor: pointer; font-size: 13px;">
+          Close / बंद करा
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       MODAL 2: THE DAILY CONFLUENCE (EMOTIONAL FLOW SCRIPTURE SANCTUARY)
+       ========================================================================== -->
+  <div id="modal-confluence-flow" class="app-modal-backdrop" onclick="if(event.target === this) closeConfluenceModal();" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 99999; backdrop-filter: blur(6px); justify-content: center; align-items: center; padding: 16px;">
+    <div class="modal-card-sheet" style="background: var(--surface, #ffffff); border-radius: 22px; width: 100%; max-width: 620px; max-height: 88vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.4); border: 1.5px solid rgba(45, 212, 191, 0.45);">
+      <!-- Header with sage/teal confluence theme -->
+      <div style="padding: 18px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <img src="assets/icons/confluence_stream.svg" alt="Confluence" style="width: 36px; height: 36px; object-fit: contain;">
+          <div>
+            <h3 style="margin: 0; font-size: 17px; font-weight: 800; color: #0f766e;">The Daily Confluence • आत्मिक संगम</h3>
+            <span style="font-size: 12px; color: #115e59; font-weight: 600;">Where is Your Soul Flowing Today?</span>
+          </div>
+        </div>
+        <button onclick="closeConfluenceModal()" style="background: rgba(0,0,0,0.06); border: none; font-size: 20px; width: 34px; height: 34px; border-radius: 50%; color: #0f766e; cursor: pointer; display: flex; align-items: center; justify-content: center;">&times;</button>
+      </div>
+
+      <!-- Soul Flow Selector Tabs -->
+      <div style="padding: 12px 20px 8px 20px; background: var(--bg); border-bottom: 1px solid var(--border); display: flex; gap: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch;">
+        <button class="confluence-tab-btn" data-flow="restless" onclick="switchConfluenceTab('restless')" style="padding: 7px 14px; border-radius: 20px; font-size: 12.5px; font-weight: 800; border: 1.5px solid #0d9488; background: #0d9488; color: #fff; cursor: pointer; white-space: nowrap;">🌊 Restless (अस्वस्थ)</button>
+        <button class="confluence-tab-btn" data-flow="heavy" onclick="switchConfluenceTab('heavy')" style="padding: 7px 14px; border-radius: 20px; font-size: 12.5px; font-weight: 700; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; white-space: nowrap;">🌧️ Heavy (जड/उदास)</button>
+        <button class="confluence-tab-btn" data-flow="thirsty" onclick="switchConfluenceTab('thirsty')" style="padding: 7px 14px; border-radius: 20px; font-size: 12.5px; font-weight: 700; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; white-space: nowrap;">🏜️ Thirsty (तृषार्त)</button>
+        <button class="confluence-tab-btn" data-flow="peace" onclick="switchConfluenceTab('peace')" style="padding: 7px 14px; border-radius: 20px; font-size: 12.5px; font-weight: 700; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; white-space: nowrap;">🕊️ Peaceful (शांत)</button>
+        <button class="confluence-tab-btn" data-flow="gratitude" onclick="switchConfluenceTab('gratitude')" style="padding: 7px 14px; border-radius: 20px; font-size: 12.5px; font-weight: 700; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; white-space: nowrap;">✨ Grateful (कृतज्ञ)</button>
+      </div>
+
+      <div class="modal-body-scroller" id="confluence-flow-body-container" style="padding: 20px; overflow-y: auto; flex: 1;">
+        <!-- Populated dynamically by app.js -->
+      </div>
+
+      <div style="padding: 14px 20px; border-top: 1px solid var(--border); background: var(--bg); display: flex; justify-content: flex-end;">
+        <button onclick="closeConfluenceModal()" style="background: none; border: 1px solid var(--border); padding: 8px 18px; border-radius: 10px; font-weight: 700; color: var(--text); cursor: pointer; font-size: 13px;">
+          Close / बंद करा
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       MODAL 3: LIVING WATER RESET (INSTANT REFRESH & ACOUSTIC BREATH PAUSE)
+       ========================================================================== -->
+  <div id="modal-living-water-reset" class="app-modal-backdrop" onclick="if(event.target === this) closeLivingWaterResetModal();" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 99999; backdrop-filter: blur(10px); justify-content: center; align-items: center; padding: 16px;">
+    <div class="modal-card-sheet" style="background: linear-gradient(180deg, #09333f 0%, #042f2e 100%); color: #ffffff; border-radius: 24px; width: 100%; max-width: 520px; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 25px 60px rgba(0,0,0,0.7); border: 1.5px solid rgba(45, 212, 191, 0.4);">
+      <!-- Header -->
+      <div style="padding: 18px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03);">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <img src="assets/icons/living_water_drop.svg" alt="Living Water" style="width: 36px; height: 36px; object-fit: contain;">
+          <div>
+            <h3 style="margin: 0; font-size: 17px; font-weight: 800; color: #67e8f9;">Living Water Reset • जिवंत पाण्याचा विसावा</h3>
+            <span style="font-size: 12px; color: #a5f3fc; font-weight: 600;">Instant Refresh for the Day</span>
+          </div>
+        </div>
+        <button onclick="closeLivingWaterResetModal()" style="background: rgba(255,255,255,0.1); border: none; font-size: 20px; width: 34px; height: 34px; border-radius: 50%; color: #ffffff; cursor: pointer; display: flex; align-items: center; justify-content: center;">&times;</button>
+      </div>
+
+      <div class="modal-body-scroller" style="padding: 24px 20px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 18px;">
+        
+        <!-- Animated Breathing Orb -->
+        <div style="position: relative; width: 160px; height: 160px; display: flex; align-items: center; justify-content: center; margin: 10px 0;">
+          <div class="breathing-orb-animation" style="position: absolute; inset: 10px; border-radius: 50%; background: radial-gradient(circle, rgba(45, 212, 191, 0.4) 0%, rgba(13, 148, 136, 0.2) 60%, transparent 80%);"></div>
+          <div style="position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center;">
+            <span style="font-size: 32px; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4));">💧</span>
+            <span id="reset-breath-instruction" style="font-size: 14px; font-weight: 800; color: #67e8f9; margin-top: 4px;">श्वास घ्या (Inhale)</span>
+            <span id="reset-timer-countdown" style="font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.7);">02:00</span>
+          </div>
+        </div>
+
+        <!-- Scripture Banner -->
+        <div style="background: rgba(255,255,255,0.06); border: 1px solid rgba(45,212,191,0.3); border-radius: 16px; padding: 16px; width: 100%; box-sizing: border-box;">
+          <span style="font-size: 11px; font-weight: 800; color: #fef08a; text-transform: uppercase; letter-spacing: 0.5px;">योहान ७:३७-३८ (John 7:37-38)</span>
+          <p style="font-family: var(--font-body); font-size: 15px; font-weight: 700; line-height: 1.6; color: #ffffff; margin: 6px 0 4px 0;">
+            "जो कोणी तहानलेला आहे त्याने माझ्याकडे यावे आणि प्यावे... त्याच्या अंतःकरणातून जिवंत पाण्याचे झरे वाहतील."
+          </p>
+          <span style="font-size: 12px; color: rgba(255,255,255,0.75); font-style: italic;">
+            "Let anyone who is thirsty come to me and drink... rivers of living water will flow from within them."
+          </span>
+        </div>
+
+        <!-- Duration Selector Chips -->
+        <div style="display: flex; gap: 8px; width: 100%; justify-content: center;">
+          <button class="reset-duration-btn" data-sec="60" onclick="setResetDuration(60, this)" style="padding: 6px 14px; border-radius: 12px; font-size: 12px; font-weight: 700; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: #fff; cursor: pointer;">1 Min (जलद विसावा)</button>
+          <button class="reset-duration-btn active" data-sec="120" onclick="setResetDuration(120, this)" style="padding: 6px 14px; border-radius: 12px; font-size: 12px; font-weight: 800; background: #0d9488; border: 1.5px solid #2dd4bf; color: #fff; cursor: pointer;">2 Min (संतुलित)</button>
+          <button class="reset-duration-btn" data-sec="180" onclick="setResetDuration(180, this)" style="padding: 6px 14px; border-radius: 12px; font-size: 12px; font-weight: 700; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: #fff; cursor: pointer;">3 Min (गहन मनन)</button>
+        </div>
+
+        <!-- Controls (Start / Pause Audio & Water Sound) -->
+        <div style="display: flex; gap: 12px; width: 100%;">
+          <button id="btn-toggle-living-water-reset" onclick="toggleLivingWaterResetSession()" style="flex: 1; padding: 14px; border-radius: 14px; font-weight: 800; font-size: 14px; background: linear-gradient(135deg, #2dd4bf, #0d9488); border: none; color: #042f2e; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 16px rgba(45,212,191,0.4);">
+            <span id="reset-btn-icon">▶</span>
+            <span id="reset-btn-label">Start Living Water Reset / सुरू करा</span>
+          </button>
+        </div>
+
+      </div>
+
+      <div style="padding: 12px 20px; border-top: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-size: 12px; color: #a5f3fc;">🕊️ River of Life Acoustic Sanctuary</span>
+        <button onclick="closeLivingWaterResetModal()" style="background: none; border: 1px solid rgba(255,255,255,0.2); padding: 6px 14px; border-radius: 8px; font-weight: 700; color: #fff; cursor: pointer; font-size: 12px;">
+          Done / पूर्ण
+        </button>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
 

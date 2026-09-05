@@ -1,5 +1,10 @@
-﻿*.zip
+*.zip
 backups/
 river_of_life_backup_*.zip
 node_modules/
 *.log
+.env
+.env.*
+__pycache__/
+verified_*.png
+test_*.py

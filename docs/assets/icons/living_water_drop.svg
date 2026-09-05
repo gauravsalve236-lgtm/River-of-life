@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
+  <defs>
+    <!-- Pearl Droplet Radial 3D Shader -->
+    <radialGradient id="pearl3D" cx="36%" cy="34%" r="62%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="25%" stop-color="#f0fdfa" />
+      <stop offset="55%" stop-color="#ccfbf1" />
+      <stop offset="78%" stop-color="#5eead4" />
+      <stop offset="92%" stop-color="#0f766e" />
+      <stop offset="100%" stop-color="#134e4a" />
+    </radialGradient>
+    <!-- Specular Highlight -->
+    <linearGradient id="specularGleam" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+    </linearGradient>
+    <filter id="dropShadowGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="6" stdDeviation="5" flood-color="#042f2e" flood-opacity="0.5" />
+      <feGaussianBlur stdDeviation="1" result="glow" />
+      <feComposite in="SourceGraphic" in2="glow" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- 3D Pearl Teardrop Droplet -->
+  <path d="M 50 12 C 50 12 22 46 22 66 A 28 28 0 0 0 78 66 C 78 46 50 12 50 12 Z" fill="url(#pearl3D)" filter="url(#dropShadowGlow)" />
+
+  <!-- Top-Left Gloss Specular Glint -->
+  <ellipse cx="40" cy="44" rx="8" ry="14" transform="rotate(-28 40 44)" fill="url(#specularGleam)" />
+
+  <!-- Secondary Bottom Rim Reflective Glow -->
+  <path d="M 32 74 A 20 20 0 0 0 68 74" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.6" />
+  
+  <circle cx="36" cy="36" r="3" fill="#ffffff" opacity="0.9" />
+</svg>

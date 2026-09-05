@@ -14,6 +14,7 @@ const deviceRoutes = require('./routes/device.routes');
 const searchRoutes = require('./routes/search.routes');
 const adminRoutes = require('./routes/admin.routes');
 const cmsRoutes = require('./routes/cms.routes');
+const ttsRoutes = require('./routes/tts.routes');
 
 const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
 const { apiLimiter } = require('./middleware/rateLimiter');
@@ -41,6 +42,7 @@ app.use('/api/devices', deviceRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/cms', cmsRoutes);
+app.use('/api/tts', ttsRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
