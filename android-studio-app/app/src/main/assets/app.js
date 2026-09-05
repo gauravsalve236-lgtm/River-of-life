@@ -2444,8 +2444,7 @@ window.switchHomeTab = function(tab) {
 
 window.readVODChapter = function() {
   const { vod } = getCurrentVOD();
-  openReader(vod.book, vod.chapter);
-  switchTab("reader");
+  openReaderAndNavigate(vod.book, vod.chapter, vod.verse);
 };
 
 function fallbackToDirectPlay(mp3Url) {
@@ -3323,10 +3322,56 @@ function getVerseRef(bookKey, ch, v) {
   return `${bookKey} ${ch}:${v}`;
 }
 
-window.openReaderAndNavigate = function(book, ch) {
-  openReader(book, ch);
+window.openReaderAndNavigate = async function(book, ch, verse) {
+  // 1. Close any open modals and drawers
+  if (typeof closeHeadwatersModal === 'function') closeHeadwatersModal();
+  if (typeof closeConfluenceModal === 'function') closeConfluenceModal();
+  if (typeof closeLivingWaterResetModal === 'function') closeLivingWaterResetModal();
+  if (typeof closeImmersivePrayerModal === 'function') closeImmersivePrayerModal();
+  if (typeof closeBibleQuizModal === 'function') closeBibleQuizModal();
+  if (typeof closeAllDrawers === 'function') closeAllDrawers();
+  if (typeof toggleTenCommandmentsModal === 'function') {
+    const tModal = document.getElementById("modal-ten-commandments");
+    if (tModal && tModal.style.display === "flex") tModal.style.display = "none";
+  }
+  if (typeof closeVodMoreSheet === 'function') closeVodMoreSheet();
+  if (typeof closeFullscreenVOD === 'function') closeFullscreenVOD();
+
+  // Force close any remaining modal overlay
+  document.querySelectorAll(".app-modal-backdrop, .modal-overlay-fullscreen, .prayer-sanctuary-modal-overlay").forEach(m => {
+    if (m.style.display === "flex" || m.style.display === "block" || m.classList.contains("active")) {
+      m.style.display = "none";
+      m.classList.remove("active");
+    }
+  });
+
+  // 2. Switch tab to reader view directly
+  if (typeof switchTab === 'function') {
+    switchTab('reader');
+  }
   window.location.hash = "#/reader";
+
+  // 3. Open the target scripture chapter
+  const bookKey = book || 'lamentations';
+  const chap = parseInt(ch) || 1;
+  if (typeof openReader === 'function') {
+    await openReader(bookKey, chap);
+  }
+
+  // 4. Smoothly scroll to target verse if specified
+  if (verse) {
+    setTimeout(() => {
+      const vKey = `${bookKey}_${chap}_${verse}`;
+      const vEl = document.querySelector(`.verse-row[data-verse-id="${vKey}"]`);
+      if (vEl) {
+        vEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        vEl.classList.add('highlight-target');
+        setTimeout(() => vEl.classList.remove('highlight-target'), 2500);
+      }
+    }, 350);
+  }
 };
+
 
 function renderActivityFeed(filter = "all") {
   const listEl = document.getElementById("you-activity-feed-list");
@@ -6060,12 +6105,7 @@ function openPrayerChapter() {
   if (!data || !data.bookKey) return;
   
   closeImmersivePrayerModal();
-  if (typeof switchTab === "function") {
-    switchTab("read");
-  }
-  if (typeof openReader === "function") {
-    openReader(data.bookKey, data.chapter || 1);
-  }
+  openReaderAndNavigate(data.bookKey, data.chapter || 1, 1);
 }
 
 function switchPrayerLang(lang) {
@@ -12705,7 +12745,7 @@ window.selectMood = function(moodKey) {
           </div>
 
           <div style="display: flex; justify-content: flex-end; gap: 8px;">
-            <button onclick="openReader('${v.bookKey}', ${v.chapter}); setTimeout(() => { const el = document.querySelector('.verse-row[data-verse-id=\"${v.bookKey}_${v.chapter}_${v.verse}\"]'); if(el) el.scrollIntoView({behavior: 'smooth', block: 'center'}); }, 500);" style="background: var(--primary); color: #ffffff; border: none; padding: 6px 14px; border-radius: 8px; font-size: 12.5px; font-weight: 700; cursor: pointer;">
+            <button onclick="openReaderAndNavigate('${v.bookKey}', ${v.chapter}, ${v.verse}); // const el = document.querySelector('.verse-row[data-verse-id=\"${v.bookKey}_${v.chapter}_${v.verse}\"]'); if(el) el.scrollIntoView({behavior: 'smooth', block: 'center'}); }, 500);" style="background: var(--primary); color: #ffffff; border: none; padding: 6px 14px; border-radius: 8px; font-size: 12.5px; font-weight: 700; cursor: pointer;">
               📖 बायबलमध्ये वाचा (Open in Bible)
             </button>
           </div>
@@ -13798,7 +13838,7 @@ window.switchConfluenceTab = function(flowKey) {
           </div>
 
           <div style="display: flex; justify-content: flex-end; gap: 8px;">
-            <button onclick="openReader('${v.bookKey}', ${v.chapter}); closeConfluenceModal();" style="background: var(--primary); color: #ffffff; border: none; padding: 7px 16px; border-radius: 10px; font-size: 12.5px; font-weight: 700; cursor: pointer;">
+            <button onclick="openReaderAndNavigate('${v.bookKey}', ${v.chapter}, ${v.verse});" style="background: var(--primary); color: #ffffff; border: none; padding: 7px 16px; border-radius: 10px; font-size: 12.5px; font-weight: 700; cursor: pointer;">
               📖 बायबलमध्ये वाचा (Open in Bible)
             </button>
           </div>
