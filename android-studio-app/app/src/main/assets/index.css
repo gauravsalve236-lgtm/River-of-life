@@ -9961,3 +9961,15 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
 .breathing-orb-animation {
   animation: breathingPulse 8s infinite ease-in-out;
 }
+
+/* Sleek Modern Audio Player Track in Devotional Modals */
+.sleek-audio-player-track {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.sleek-audio-player-track:hover {
+  border-color: rgba(245, 158, 11, 0.65) !important;
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.2) !important;
+}
+.sleek-audio-player-track button:active {
+  transform: scale(0.92);
+}

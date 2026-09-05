@@ -13479,7 +13479,7 @@ window.copyDailyVerseText = function() {
    RIVER OF LIFE 3-CARD SPIRITUAL FLOW LOGIC (HEADWATERS, CONFLUENCE, RESET)
    ========================================================================== */
 
-// 1. THE HEADWATERS MODAL LOGIC
+// 1. THE HEADWATERS MODAL LOGIC (ELEVATED SLEEK AUDIO TRACK & PROGRESS)
 window.openHeadwatersModal = function() {
   const modal = document.getElementById("modal-headwaters-sanctuary");
   if (modal) modal.style.display = "flex";
@@ -13488,12 +13488,142 @@ window.openHeadwatersModal = function() {
 window.closeHeadwatersModal = function() {
   const modal = document.getElementById("modal-headwaters-sanctuary");
   if (modal) modal.style.display = "none";
+  
+  if (window.headwatersAudioInstance) {
+    try { window.headwatersAudioInstance.pause(); } catch(e) {}
+    window.headwatersAudioInstance = null;
+  }
+  if (window.headwatersProgressInterval) {
+    clearInterval(window.headwatersProgressInterval);
+    window.headwatersProgressInterval = null;
+  }
+  const icon = document.getElementById("headwaters-play-icon");
+  if (icon) {
+    icon.innerHTML = '<polygon points="6 4 20 12 6 20 6 4"></polygon>';
+  }
+  const progressBar = document.getElementById("headwaters-progress-bar");
+  if (progressBar) progressBar.style.width = '0%';
+  const timeEl = document.getElementById("headwaters-audio-time");
+  if (timeEl) timeEl.textContent = '0:45';
 };
 
 window.playHeadwatersMorningAudio = function(btnElement) {
-  const btn = btnElement || document.getElementById("btn-play-headwaters-audio");
+  const icon = document.getElementById("headwaters-play-icon");
+  const progressBar = document.getElementById("headwaters-progress-bar");
+  const timeEl = document.getElementById("headwaters-audio-time");
+  
   const text = "हे स्वर्गीय पित्या... या नवीन दिवसाच्या उषःकाली, मी माझे संपूर्ण मन व जीवन तुझ्या हातात सोपवतो. विलापगीते सांगते, की तुझ्या दया रोज सकाळी नव्या असतात... तुझा विश्वासूपणा महान आहे. आजचा प्रत्येक निर्णय, विचार आणि शब्द, तुझ्या प्रीतीचा सुगंध पसरवणारा असू दे... येशूच्या नावात, आमेन.";
-  playSingleVerseAudio(text, btn, "assets/audio/devotional/headwaters_morning.mp3");
+  
+  // Toggle Pause if already playing
+  if (window.headwatersAudioInstance && !window.headwatersAudioInstance.paused) {
+    window.headwatersAudioInstance.pause();
+    if (icon) {
+      icon.innerHTML = '<polygon points="6 4 20 12 6 20 6 4"></polygon>';
+    }
+    if (window.headwatersProgressInterval) {
+      clearInterval(window.headwatersProgressInterval);
+      window.headwatersProgressInterval = null;
+    }
+    showToast("⏸ ऑडिओ थांबवला (Audio Paused)");
+    return;
+  }
+  
+  // Stop any other active audio
+  if (window.currentSingleAudio && window.currentSingleAudio !== window.headwatersAudioInstance) {
+    try { window.currentSingleAudio.pause(); } catch(e) {}
+    window.currentSingleAudio = null;
+  }
+  
+  if (icon) {
+    icon.innerHTML = '<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>';
+  }
+  if (progressBar && progressBar.style.width === '0%') progressBar.style.width = '4%';
+  if (timeEl) timeEl.textContent = '0:01 / 0:45';
+  
+  const audioSrc = "assets/audio/devotional/headwaters_morning.mp3";
+  try {
+    const audio = new Audio(audioSrc);
+    window.headwatersAudioInstance = audio;
+    window.currentSingleAudio = audio;
+    
+    let totalSec = 45;
+    
+    audio.onloadedmetadata = () => {
+      if (audio.duration && !isNaN(audio.duration) && audio.duration > 0) {
+        totalSec = Math.round(audio.duration);
+      }
+    };
+    
+    audio.ontimeupdate = () => {
+      const cur = audio.currentTime || 0;
+      const dur = audio.duration || totalSec;
+      const pct = Math.min(100, Math.max(0, (cur / dur) * 100));
+      if (progressBar) progressBar.style.width = pct + '%';
+      const mCur = Math.floor(cur / 60);
+      const sCur = Math.floor(cur % 60).toString().padStart(2, '0');
+      const mDur = Math.floor(dur / 60);
+      const sDur = Math.floor(dur % 60).toString().padStart(2, '0');
+      if (timeEl) timeEl.textContent = `${mCur}:${sCur} / ${mDur}:${sDur}`;
+    };
+    
+    audio.onplay = () => {
+      if (icon) icon.innerHTML = '<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>';
+      showToast("🔊 सकाळची प्रार्थना सुरू आहे (Natural Devotional Marathi Voice) ✨");
+    };
+    
+    audio.onended = () => {
+      if (icon) icon.innerHTML = '<polygon points="6 4 20 12 6 20 6 4"></polygon>';
+      if (progressBar) progressBar.style.width = '0%';
+      if (timeEl) timeEl.textContent = '0:45';
+      window.headwatersAudioInstance = null;
+      window.currentSingleAudio = null;
+    };
+    
+    audio.onerror = () => {
+      console.warn("Direct audio not found, fallback to speech synthesis with dynamic track animation");
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = 'mr-IN';
+        utter.rate = 0.9;
+        
+        let startT = Date.now();
+        const estDuration = 22000;
+        
+        if (window.headwatersProgressInterval) clearInterval(window.headwatersProgressInterval);
+        window.headwatersProgressInterval = setInterval(() => {
+          const elapsed = Date.now() - startT;
+          const pct = Math.min(100, (elapsed / estDuration) * 100);
+          if (progressBar) progressBar.style.width = pct + '%';
+          const sec = Math.floor(elapsed / 1000);
+          if (timeEl) timeEl.textContent = `0:${sec.toString().padStart(2, '0')} / 0:22`;
+          if (pct >= 100) {
+            clearInterval(window.headwatersProgressInterval);
+            window.headwatersProgressInterval = null;
+          }
+        }, 200);
+        
+        utter.onend = () => {
+          if (icon) icon.innerHTML = '<polygon points="6 4 20 12 6 20 6 4"></polygon>';
+          if (progressBar) progressBar.style.width = '0%';
+          if (timeEl) timeEl.textContent = '0:45';
+          if (window.headwatersProgressInterval) {
+            clearInterval(window.headwatersProgressInterval);
+            window.headwatersProgressInterval = null;
+          }
+        };
+        
+        window.speechSynthesis.speak(utter);
+        showToast("🔊 सकाळची प्रार्थना सुरू आहे (Natural Devotional Marathi Voice) ✨");
+      }
+    };
+    
+    audio.play().catch(e => {
+      if (audio.onerror) audio.onerror();
+    });
+  } catch (err) {
+    console.error(err);
+  }
 };
 
 // 2. THE DAILY CONFLUENCE LOGIC
