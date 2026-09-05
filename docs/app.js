@@ -13519,16 +13519,699 @@ window.copyDailyVerseText = function() {
    RIVER OF LIFE 3-CARD SPIRITUAL FLOW LOGIC (HEADWATERS, CONFLUENCE, RESET)
    ========================================================================== */
 
-// 1. THE HEADWATERS MODAL LOGIC (GUIDED AUDIO PRAYER, WAVEFORM, 1-MIN BREATH & JOURNAL)
-let headwatersBreathTimer = null;
-let headwatersBreathSecRemaining = 60;
-let headwatersBreathPhaseInterval = null;
+// 1. THE HEADWATERS: DYNAMIC 31-DAY GUIDED PRAYER DATABASE
+const DAILY_HEADWATERS_PRAYERS = [
+  {
+    "id": 1,
+    "themeMr": "दैवी कृपा व नवी सुरुवात",
+    "themeEn": "Divine Grace & Fresh Beginnings",
+    "refMr": "विलापगीते ३:२२-२३",
+    "refEn": "Lamentations 3:22-23",
+    "bookKey": "lamentations",
+    "chapter": 3,
+    "verse": 22,
+    "paragraphsMr": [
+      "हे दयाळू आणि सर्वसमर्थ स्वर्गीय पित्या, या नव्या दिवसाच्या उषःकाली मी अत्यंत कृतज्ञ अंतःकरणाने तुझ्या पवित्र चरणांशी नतमस्तक होतो. कालच्या सर्व चिंता, अपयश आणि थकवा मागे सारून, आज तुझ्या नव्या कृपेचा आणि करुणेचा प्रकाश मी माझ्या जीवनात स्वीकारतो.",
+      "प्रभू, आजचा माझा प्रत्येक विचार, प्रत्येक उच्चारलेला शब्द आणि प्रत्येक घेतलेला निर्णय तुझ्या दैवी इच्छेनुसार असू दे. मी जिथे जाईन तिथे तुझ्या प्रेमाचा आणि शांतीचा सुगंध पसरू दे, आणि मला भेटणाऱ्या प्रत्येकाला तुझ्या दयेचा अनुभव येऊ दे.",
+      "माझे कुटुंब, माझे कार्यक्षेत्र आणि माझी सर्व कामे तुझ्या बलवान हातात समर्पित करतो; येशू ख्रिस्ताच्या सामर्थी नावात ही प्रार्थना करतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "Heavenly Father, as this new dawn breaks, I come before You with a heart full of reverence and deep gratitude. Leaving behind the worries and fatigue of yesterday, I receive Your mercies which are fresh and new this morning.",
+      "Lord, let every thought I think, every word I speak, and every choice I make align with Your divine purpose. Fill me with Your peace so that wherever I walk today, I may reflect Your radiant love and gentleness to everyone I meet.",
+      "I surrender my family, my labor, and all my plans into Your faithful hands; in Jesus' mighty name I pray, Amen."
+    ]
+  },
+  {
+    "id": 2,
+    "themeMr": "स्वर्गीय मार्गदर्शन व प्रकाशाचा दिवा",
+    "themeEn": "Divine Guidance & Light for the Path",
+    "refMr": "स्तोत्रसंहिता ११९:१०५",
+    "refEn": "Psalm 119:105",
+    "bookKey": "psalms",
+    "chapter": 119,
+    "verse": 105,
+    "paragraphsMr": [
+      "हे माझ्या परमेश्वरा, तुझे पवित्र वचन माझ्या पावलांसाठी दिवा आणि माझ्या मार्गासाठी तेजस्वी प्रकाश आहे. या जगातील दिशाभूल करणाऱ्या मार्गांवरून चालताना, मला तुझ्या सत्याच्या वाटेवर चालण्याची बुद्धी आणि विवेक दे.",
+      "प्रभू, माझ्या मनातील संशय आणि अंधार दूर कर आणि आजच्या प्रत्येक पावलावर तुझा आवाज ओळखण्याची संवेदनशीलता मला दे. माझ्या स्वतःच्या समजूतीवर विसंबून न राहता, मी तुझ्या मार्गदर्शनावर पूर्ण भरवसा ठेवून पुढे जाऊ शकेन असे कर.",
+      "माझा आजचा सर्व प्रवास तुझ्या संरक्षणाच्या पंखांखाली सुरक्षित असू दे; येशूच्या पवित्र नावात मागतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "O Lord, Your holy Word is a lamp to my feet and a clear light unto my path. Amidst the confusing noises and distractions of this world, grant me divine clarity to walk steadfastly in Your truth.",
+      "Dispel every shadow of doubt from my heart, Lord, and make my spirit attentive to the gentle whisper of Your Holy Spirit at every crossroad. Teach me not to lean on my own understanding, but to trust wholly in Your perfect guidance.",
+      "Guard my going out and my coming in today under the shadow of Your wings; in Jesus' precious name, Amen."
+    ]
+  },
+  {
+    "id": 3,
+    "themeMr": "हृदयातील स्वर्गीय शांती",
+    "themeEn": "Peace That Surpasses Understanding",
+    "refMr": "फिलिप्पैकरांस ४:६-७",
+    "refEn": "Philippians 4:6-7",
+    "bookKey": "philippians",
+    "chapter": 4,
+    "verse": 6,
+    "paragraphsMr": [
+      "हे शांतीचा दाता असलेल्या प्रभू येशू, आजच्या सकाळच्या या शांत क्षणी मी माझी सर्व चिंता, अस्वस्थता आणि मनाचे ओझे तुझ्या चरणांवर ठेवतो. जगातील कोणत्याही संकटापेक्षा तुझी उपस्थिती माझ्या जीवनात कितीतरी पटीने मोठी आहे याची जाणीव मला करून दे.",
+      "सर्व बुद्धीच्या पलीकडची तुझी दैवी शांती आज माझ्या मनाचा आणि हृदयाचा ताबा घेवो. कामाच्या धकाधकीत आणि आव्हानांच्या वादळातही माझे मन स्थिर आणि शांत राहू दे, जेणेकरून मी इतरांसाठी शांतीचा दूत बनू शकेन.",
+      "तुझ्या अपार प्रेमात मला विसावा लाभो आणि माझा दिवस तुझ्या आशीर्वादाने भरून जावो; येशूच्या नावात प्रार्थना करतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "Lord Jesus, Prince of Peace, in the quiet stillness of this morning I lay down every anxious thought and heavy burden at Your feet. Remind my soul that Your constant presence is far greater than any storm I might face today.",
+      "Let Your supernatural peace, which surpasses all human understanding, guard my heart and my thoughts throughout this day. Keep me anchored and calm amidst daily pressures so I may be a source of encouragement and peace to those around me.",
+      "May my soul find sweet rest in Your unfailing love; in Jesus' holy name I pray, Amen."
+    ]
+  },
+  {
+    "id": 4,
+    "themeMr": "गरुडासारखे नवे आत्मिक सामर्थ्य",
+    "themeEn": "Renewed Strength Like Eagles",
+    "refMr": "यशया ४०:३१",
+    "refEn": "Isaiah 40:31",
+    "bookKey": "isaiah",
+    "chapter": 40,
+    "verse": 31,
+    "paragraphsMr": [
+      "हे सर्वशक्तिमान परमेश्वरा, जे तुझी वाट पाहतात त्यांना तू नवे सामर्थ्य देतोस आणि ते गरुडासारख्या पंखांनी उंच भरारी घेतात. माझ्या स्वतःच्या मर्यादित शक्तीवर अवलंबून न राहता, मी तुझ्या अपरिमित स्वर्गीय शक्तीवर विसंबून राहतो.",
+      "आजच्या सर्व शारीरिक व मानसिक श्रमांत मला थकवा न येवो, तर तुझ्या आत्म्याच्या सामर्थ्याने मी प्रत्येक जबाबदारी उत्साहाने पार पाडू शकेन. जेव्हा जेव्हा मला अशक्तपणा जाणवेल, तेव्हा तुझी कृपा मला सावरून धरेल असा विश्वास मी व्यक्त करतो.",
+      "माझे सामर्थ्य, माझी आशा आणि माझा विजय केवळ तुझ्यातच आहे; येशूच्या विजयी नावात प्रार्थना करतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "Almighty Father, You promise that those who hope in the Lord will renew their strength and soar on wings like eagles. Rather than relying on my own finite strength, I lean entirely on Your infinite power today.",
+      "Grant me endurance through physical and mental tasks, empowering me to fulfill every duty with joy and spiritual vigor. Whenever weariness attempts to creep in, let Your sustaining grace lift me higher.",
+      "My strength, my hope, and my victory belong to You alone; in Jesus' triumphant name, Amen."
+    ]
+  },
+  {
+    "id": 5,
+    "themeMr": "उत्तम मेंढपाळाची कृपाळू सोबत",
+    "themeEn": "The Good Shepherd's Caring Presence",
+    "refMr": "स्तोत्रसंहिता २३:१-३",
+    "refEn": "Psalm 23:1-3",
+    "bookKey": "psalms",
+    "chapter": 23,
+    "verse": 1,
+    "paragraphsMr": [
+      "हे प्रभू येशू, तू माझा उत्तम मेंढपाळ आहेस आणि तुझ्या सान्निध्यात मला कशाचीही उणीव भासणार नाही. तू मला हिरव्यागार कुरणांत विसावा देतोस आणि संथ पाण्याच्या झऱ्यांजवळ शांततेने चालवतोस.",
+      "माझ्या थकलेल्या आत्म्याला आज तू नवा तजेला दे आणि तुझ्या नावाच्या गौरवासाठी मला नीतिमत्तेच्या मार्गांवरून चालव. आजच्या दिवसात कोणताही भय किंवा एकाकीपणा मला स्पर्श करू शकणार नाही, कारण तुझा हात सतत माझ्या सोबत आहे.",
+      "तुझे उपकार आणि तुझी करुणा माझ्या आयुष्याच्या सर्व दिवसांत माझ्या पाठीशी राहोत; येशूच्या नावात प्रार्थना करतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "Lord Jesus, You are my faithful Shepherd, and in Your pasture I shall lack no good thing. You lead me beside peaceful waters and cause my soul to rest in green pastures.",
+      "Restore my inner soul this morning and guide my steps along paths of righteousness for Your name's sake. No fear or loneliness can overtake me today, for Your comforting rod and staff are ever near.",
+      "May Your goodness and unfailing mercy follow me all the days of my life; in Jesus' blessed name, Amen."
+    ]
+  },
+  {
+    "id": 6,
+    "themeMr": "मनाचे दैवी नवीकरण व शुद्धता",
+    "themeEn": "Renewal of the Mind & Purity",
+    "refMr": "रोमकरांस १२:२",
+    "refEn": "Romans 12:2",
+    "bookKey": "romans",
+    "chapter": 12,
+    "verse": 2,
+    "paragraphsMr": [
+      "हे पवित्र देवाने, या जगाच्या नाशिवंत आणि नकारात्मक प्रभावांपासून माझ्या मनाचे रक्षण कर. आज माझे विचार शुद्ध, उदात्त आणि तुझ्या पवित्र वचनाशी सुसंगत राहण्यासाठी माझ्या अंतःकरणाचे नवीकरण कर.",
+      "देवा, तुझी उत्तम, संतोषकारक आणि परिपूर्ण इच्छा काय आहे हे समजून घेण्याची अंतर्दृष्टी मला दे. मी कोणाचाही न्याय न करता किंवा कटुता न बाळगता प्रत्येकाशी ख्रिस्ताच्या प्रेमाने वागावे अशी कृपा मला दे.",
+      "माझे संपूर्ण जीवन तुझ्या समोर एक जिवंत आणि पवित्र यज्ञ म्हणून अर्पण करतो; येशूच्या नावात मागतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "Holy God, protect my mind from the negative patterns and fleeting distractions of this world. Transform my thoughts today so they remain pure, noble, and pleasing in Your sight.",
+      "Grant me spiritual discernment to recognize Your good, pleasing, and perfect will in every circumstance. Guard my heart against bitterness and help me extend Christlike love to every soul I encounter.",
+      "I present my life today as a living and holy sacrifice to You; in Jesus' precious name, Amen."
+    ]
+  },
+  {
+    "id": 7,
+    "themeMr": "जीवनाच्या प्रत्येक वळणावर स्वर्गीय ज्ञान",
+    "themeEn": "Heavenly Wisdom for Every Step",
+    "refMr": "याकोब १:५",
+    "refEn": "James 1:5",
+    "bookKey": "james",
+    "chapter": 1,
+    "verse": 5,
+    "paragraphsMr": [
+      "हे ज्ञानाचा अमर्याद सागर असलेल्या परमेश्वरा, जेव्हा जेव्हा मला जीवनात मार्ग समजत नाही, तेव्हा तू मला भरभरून ज्ञान देण्याचे अभिवचन दिले आहेस. आजच्या प्रत्येक गुंतागुंतीच्या निर्णयात मला स्वर्गीय बुद्धी दे.",
+      "प्रभू, मानवी युक्तीपेक्षा तुझ्या आत्म्याच्या मार्गदर्शनावर चालण्याची शिकवण मला दे. माझ्या कामात, संभाषणात आणि नात्यांमध्ये विवेक आणि समंजसपणा प्रकट होऊ दे.",
+      "तू दाखवलेल्या वाटेवर न डगमगता चालण्याचे धैर्य मला लाभो; येशू ख्रिस्ताच्या नावात ही प्रार्थना करतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "O God of all wisdom, You generously give insight to all who ask without reproach. As I face decisions and complex situations today, shower me with discernment from above.",
+      "Teach me to rely not on earthly wisdom, but on the prompting of Your Spirit. Let prudence, patience, and integrity shine through all my conversations, work, and relationships.",
+      "Grant me bold courage to walk steadfastly in the path You make plain; in Jesus' name I pray, Amen."
+    ]
+  },
+  {
+    "id": 8,
+    "themeMr": "अढळ विश्वास आणि संपूर्ण समर्पण",
+    "themeEn": "Steadfast Trust & Wholehearted Surrender",
+    "refMr": "नीतीसूत्रे ३:५-६",
+    "refEn": "Proverbs 3:5-6",
+    "bookKey": "proverbs",
+    "chapter": 3,
+    "verse": 5,
+    "paragraphsMr": [
+      "हे विश्वासू देवा, मी माझ्या संपूर्ण अंतःकरणाने तुझ्यावर भरवसा ठेवतो आणि स्वतःच्या ज्ञानावर विसंबून राहत नाही. आजच्या दिवसातील माझे सर्व मार्ग तुझ्या स्वाधीन करतो, जेणेकरून तूच माझी पावले सरळ करशील.",
+      "प्रभू, अनपेक्षित परिस्थिती किंवा अडचणी आल्या तरी माझा विश्वास डगमगू नये. तू माझ्या पाठीशी उभा आहेस आणि सर्व गोष्टी माझ्या कल्याणासाठीच घडवून आणत आहेस यावर माझा ठाम विश्वास आहे.",
+      "तुझ्या अद्भुत योजनेवर माझे मन शांत आणि आश्वस्त राहो; येशूच्या नावात प्रार्थना करतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "Faithful Lord, with all my heart I place my trust in You, refusing to lean solely upon my own limited understanding. In all my ways I acknowledge You, confident that You will make my paths straight.",
+      "Even if unexpected obstacles arise, let my faith remain unshaken. I hold fast to the truth that You are working all things together for my good and for Your ultimate glory.",
+      "May my spirit rest securely in Your sovereign and loving hands; in Jesus' name, Amen."
+    ]
+  },
+  {
+    "id": 9,
+    "themeMr": "सार्वकालिक व अखंड प्रीतीची जाणीव",
+    "themeEn": "Eternal & Unfailing Love",
+    "refMr": "स्तोत्रसंहिता १३६:१-३",
+    "refEn": "Psalm 136:1-3",
+    "bookKey": "psalms",
+    "chapter": 136,
+    "verse": 1,
+    "paragraphsMr": [
+      "हे परमेश्वरा, मी तुझे उपकार मानतो कारण तू चांगला आहेस; तुझी दया व प्रीती युगानुयुग टिकणारी आहे. आज सकाळच्या पहिल्या किरणासोबत तुझ्या अथांग प्रेमाची जाणीव माझ्या हृदयात पुन्हा जागृत कर.",
+      "प्रभू, तुझ्या प्रेमाने मला कोणत्याही भीतीत अथवा अपराधीपणात राहू न देता, मुक्तीचा आणि आनंदाचा श्वास घेऊ दिला आहे. मी आज जे काही करेन ते केवळ तुझ्या प्रेमाच्या प्रतिसादात आणि इतरांच्या कल्याणासाठी करेन.",
+      "तुझ्या निरंतर दयेचा गौरव माझ्या मुखातून अखंड वाहू दे; येशूच्या नावात ही प्रार्थना करतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "O Give thanks to the Lord, for He is good, and His steadfast love endures forever! With the first rays of morning light, awaken my heart to the depth and beauty of Your boundless mercy.",
+      "Your unconditional love frees me from all condemnation and anxiety, filling me with boundless hope. May every task I undertake today be an outpouring of the grace and generosity You have shown me.",
+      "Let songs of thanksgiving continually dwell upon my lips; in the sweet name of Jesus, Amen."
+    ]
+  },
+  {
+    "id": 10,
+    "themeMr": "सर्वसमर्थाच्या छायेत अभेद्य संरक्षण",
+    "themeEn": "Refuge & Shield Under Almighty Wings",
+    "refMr": "स्तोत्रसंहिता ९१:१-४",
+    "refEn": "Psalm 91:1-4",
+    "bookKey": "psalms",
+    "chapter": 91,
+    "verse": 1,
+    "paragraphsMr": [
+      "हे सर्वोच्च देवा, जो तुझ्या गुप्त स्थानात राहतो तो सर्वसमर्थाच्या छायेत सुरक्षित विसावा पावतो. आज मी तुला माझा आश्रयदुर्ग, माझा किल्ला आणि माझा परमेश्वर म्हणतो, ज्याच्यावर मी पूर्ण विश्वास ठेवतो.",
+      "प्रभू, दिवसाच्या कोणत्याही धोक्यापासून, रोगापासून आणि अंधारातील भयापासून तू माझे व माझ्या कुटुंबाचे रक्षण कर. तुझे स्वर्गीय दूत आमच्या प्रत्येक पावलावर आम्हाला सांभाळतील असा विश्वास मी बाळगतो.",
+      "तुझ्या पंखांखाली मला पूर्ण सुरक्षा आणि निर्भयता लाभो; येशू ख्रिस्ताच्या सामर्थी नावात आमेन."
+    ],
+    "paragraphsEn": [
+      "Most High God, he who dwells in Your secret shelter finds refuge beneath the shadow of the Almighty. I declare today that You alone are my refuge, my fortress, and my God in whom I trust.",
+      "Shield my family and me from every unseen snare, every pestilence, and every assault of fear throughout this day. Send Your holy angels to guard our steps and keep us safe in all our ways.",
+      "Under the shadow of Your wings I find perfect peace and absolute protection; in Jesus' name, Amen."
+    ]
+  },
+  {
+    "id": 11,
+    "themeMr": "आत्म्याला तृप्त करणारा जिवंत पाण्याचा झरा",
+    "themeEn": "Living Water for the Thirsty Soul",
+    "refMr": "योहान ४:१४",
+    "refEn": "John 4:14",
+    "bookKey": "john",
+    "chapter": 4,
+    "verse": 14,
+    "paragraphsMr": [
+      "हे प्रभू येशू, जगातील कोणतीही संपत्ती किंवा आनंद आत्म्याची तहान भागवू शकत नाही; केवळ तूच जिवंत पाण्याचा निरंतर झरा आहेस. आजच्या या प्रभाती माझ्या तहानलेल्या अंतःकरणाला तुझ्या आत्म्याच्या पाण्याने तृप्त कर.",
+      "प्रभू, माझ्या जीवनातून इतरांसाठीही आशेचे, प्रेमाचे आणि उत्तेजनाचे जिवंत झरे वाहू दे. कोरडेपणा आणि निराशा दूर करून मला स्वर्गीय आनंदाने आणि उत्साहाने परिपूर्ण कर.",
+      "तुझ्या सान्निध्यात माझा आत्मा सदैव टवटवीत आणि समृद्ध राहो; येशूच्या नावात ही प्रार्थना, आमेन."
+    ],
+    "paragraphsEn": [
+      "Lord Jesus, nothing this world offers can satisfy the deepest thirst of the soul; You alone are the spring of living water welling up to eternal life. Quench my spirit with Your presence this morning.",
+      "Let streams of living hope, grace, and joy flow through my life into the lives of those around me. Wash away every trace of weariness and revive my spirit with fresh devotion.",
+      "In Your fellowship my soul finds enduring delight and refreshment; in Jesus' holy name, Amen."
+    ]
+  },
+  {
+    "id": 12,
+    "themeMr": "जगात अंधारावर मात करणारा प्रकाश",
+    "themeEn": "Light That Overcomes the Darkness",
+    "refMr": "मत्तय ५:१४-१६",
+    "refEn": "Matthew 5:14",
+    "bookKey": "matthew",
+    "chapter": 5,
+    "verse": 14,
+    "paragraphsMr": [
+      "हे जगाच्या तेजस्वी प्रकाशा, तू आम्हाला पर्वतावरील शहरासारखे जगाचा प्रकाश बनवले आहेस. आजच्या दिवसात माझे वर्तन, माझी प्रामाणिकता आणि माझे प्रेम असा प्रकाश पाडू दे की लोकांनी स्वर्गातील पित्याचे गौरव करावे.",
+      "प्रभू, माझ्या अंतःकरणातील स्वार्थ, राग आणि कटुता यांचा अंधार तुझ्या पवित्र प्रकाशाने नाहीसा कर. मी अंधारात भटकणाऱ्यांसाठी आशेचा किरण आणि आधार बनू शकेन असा विवेक मला दे.",
+      "तुझा गौरव माझ्या संपूर्ण जीवनातून प्रकट होवो; येशूच्या पवित्र नावात ही प्रार्थना करतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "Lord Jesus, Light of the World, You have called us to shine like a city set on a hill that cannot be hidden. Let my words, my deeds, and my integrity reflect Your brilliant goodness today so that God is glorified.",
+      "Dispel every darkness of selfishness, anger, and impatience from my heart with Your blazing truth. Make me an instrument of hope and warmth to anyone walking through difficult valleys.",
+      "May Your light shine brightly through my life in everything I say and do; in Jesus' name, Amen."
+    ]
+  },
+  {
+    "id": 13,
+    "themeMr": "पवित्र आत्म्याची मधुर व समृद्ध फळे",
+    "themeEn": "Fruit of the Holy Spirit",
+    "refMr": "गलतीकरांस ५:२२-२३",
+    "refEn": "Galatians 5:22-23",
+    "bookKey": "galatians",
+    "chapter": 5,
+    "verse": 22,
+    "paragraphsMr": [
+      "हे स्वर्गीय पित्या, आजच्या दिवसात तुझ्या पवित्र आत्म्याने माझे हृदय पूर्णपणे भरून टाक. माझ्या जीवनात प्रीती, आनंद, शांती, सहनशीलता, दयाळूपणा, भलाई, विश्वासूपणा, सौम्यता आणि आत्मसंयम ही फळे विपुल प्रमाणात बहरू दे.",
+      "प्रभू, रागाच्या किंवा उतावळेपणाच्या क्षणी मला शांत राहण्याचा आणि समंजसपणे उत्तर देण्याचा संयम दे. माझ्या बोलण्याने कोणाचेही मन न दुखावता, प्रत्येकाला ख्रिस्ताच्या दयेचा स्पर्श व्हावा अशी माझी इच्छा आहे.",
+      "माझे जीवन तुझ्या गौरवाचे मधुर फळ देणारे झाड बनू दे; येशूच्या नावात प्रार्थना करतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "Heavenly Father, fill me anew with Your Holy Spirit today. Cultivate within me the precious fruit of love, joy, peace, patience, kindness, goodness, faithfulness, gentleness, and self-control.",
+      "In moments of pressure or provocation, grant me the restraint to respond with grace and wisdom. Keep my tongue from harsh words and let my speech build others up in the knowledge of Christ.",
+      "May my life be a fruitful branch bearing eternal blessing; in the glorious name of Jesus, Amen."
+    ]
+  },
+  {
+    "id": 14,
+    "themeMr": "भयावर विजय, प्रीती आणि संयमाचा आत्मा",
+    "themeEn": "Spirit of Power, Love & Sound Mind",
+    "refMr": "२ तीमथ्य १:७",
+    "refEn": "2 Timothy 1:7",
+    "bookKey": "2-timothy",
+    "chapter": 1,
+    "verse": 7,
+    "paragraphsMr": [
+      "हे सामर्थी परमेश्वरा, तू आम्हाला भीतीचा आणि दुर्बलतेचा आत्मा दिलेला नाही, तर सामर्थ्याचा, प्रीतीचा आणि संयमाचा आत्मा दिला आहे. आज कोणत्याही अज्ञात भविष्याचे किंवा संकटाचे भय माझ्या मनावर अधिकार गाजवू शकत नाही.",
+      "प्रभू, जेव्हा जेव्हा संशय किंवा भीती माझ्या दारावर ठोठावेल, तेव्हा तुझा अढळ विश्वास माझ्या हृदयात धैर्याची मशाल पेटवून देईल. तुझ्या सामर्थ्याने मी प्रत्येक आव्हानाला आत्मविश्वासाने आणि शांततेने तोंड देईन.",
+      "माझा पूर्ण भरवसा केवळ तुझ्याच विजयावर आहे; येशूच्या विजयी नावात प्रार्थना करतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "Mighty God, You have not given us a spirit of fear, but of power, love, and a sound mind. No shadow of dread or uncertainty about tomorrow has authority over my heart today.",
+      "Whenever doubt knocks at the door of my mind, let Your steadfast promises kindle bold courage within me. Through Your strengthening Spirit, I will face every task and challenge with dignity and calm assurance.",
+      "My confidence rests securely upon Your victorious arm; in Jesus' triumphant name, Amen."
+    ]
+  },
+  {
+    "id": 15,
+    "themeMr": "शुद्ध हृदय आणि तारणाचा नवा हर्ष",
+    "themeEn": "Clean Heart & Joy of Salvation",
+    "refMr": "स्तोत्रसंहिता ५१:१०-१२",
+    "refEn": "Psalm 51:10-12",
+    "bookKey": "psalms",
+    "chapter": 51,
+    "verse": 10,
+    "paragraphsMr": [
+      "हे दयाळू देवा, माझ्यामध्ये शुद्ध हृदय निर्माण कर आणि माझ्या अंतरात्म्यात नवा व स्थिर आत्मा स्थापित कर. माझ्या सर्व चुका, उणिवा आणि नकळत घडलेली पापे तुझ्या पवित्र रक्ताने धुऊन मला निष्कलंक कर.",
+      "प्रभू, तुझ्या तारणाचा हर्ष माझ्या हृदयात पुन्हा जागृत कर आणि तुझ्या उदार आत्म्याने मला सतत आधार दे. आजचा माझा संपूर्ण दिवस तुझ्या स्तुतीचा आणि आनंदाचा अखंड उत्सव असू दे.",
+      "तुझ्या सान्निध्याच्या पवित्र प्रकाशात मला नित्य चालव; येशूच्या नावात मागतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "Gracious Lord, create in me a clean heart and renew a steadfast spirit within me. Wash away every hidden fault and cleanse my thoughts so I may stand before You in holiness and purity.",
+      "Restore unto me the uncontainable joy of Your salvation and uphold me with a willing spirit. Let this entire day resonate with songs of gratitude, joy, and deep adoration for Your unfailing goodness.",
+      "Keep me continually in the light of Your sacred presence; in Jesus' precious name, Amen."
+    ]
+  },
+  {
+    "id": 16,
+    "themeMr": "सर्व परिस्थितीत निरंतर उपकारस्तुती",
+    "themeEn": "Continual Thanksgiving in All Circumstances",
+    "refMr": "१ थेस्सलनीकाकरांस ५:१६-१८",
+    "refEn": "1 Thessalonians 5:16-18",
+    "bookKey": "1-thessalonians",
+    "chapter": 5,
+    "verse": 16,
+    "paragraphsMr": [
+      "हे उपकार मानण्यास योग्य असलेल्या स्वर्गीय पित्या, मी सर्व परिस्थितीत निरंतर आनंद करण्यास, न चुकता प्रार्थना करण्यास आणि उपकार मानण्यास शिकू इच्छितो. कारण ख्रिस्त येशूमध्ये आमच्याविषयीची हीच तुझी पवित्र इच्छा आहे.",
+      "प्रभू, आजच्या दिवसातील लहान-मोठ्या प्रत्येक आशीर्वादासाठी, आरोग्यासाठी आणि अन्नासाठी मी तुझे आभार मानतो. तक्रार किंवा नाराजी न करता समाधानी आणि कृतज्ञ अंतःकरणाने जगण्याची कृपा मला दे.",
+      "माझे संपूर्ण जीवन तुझ्या अनंत उपकारांचे आभारगान बनो; येशूच्या नावात प्रार्थना करतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "Heavenly Father, worthy of all praise, teach me to rejoice always, pray without ceasing, and give thanks in all circumstances, for this is Your will for us in Christ Jesus.",
+      "I thank You for every breath, every provision, good health, and the fellowship of loved ones today. Guard my spirit against discontent and grumbling, filling me instead with cheerful gratitude.",
+      "May my daily walk be a living hymn of thanksgiving to You; in Jesus' blessed name, Amen."
+    ]
+  },
+  {
+    "id": 17,
+    "themeMr": "कुटुंबावर व घरावर स्वर्गीय आशीर्वाद",
+    "themeEn": "Blessing & Dedication Over the Household",
+    "refMr": "यहोशवा २४:१५",
+    "refEn": "Joshua 24:15",
+    "bookKey": "joshua",
+    "chapter": 24,
+    "verse": 15,
+    "paragraphsMr": [
+      "हे घरादाराचा निर्माणकर्ता आणि रक्षणकर्ता असलेल्या प्रभू, मी आणि माझे घराणे सर्वदा केवळ परमेश्वराचीच सेवा करू हा दृढ निश्चय मी आज पुन्हा व्यक्त करतो. माझ्या घरावर आणि कुटुंबातील प्रत्येक व्यक्तीवर तुझा स्वर्गीय आशीर्वाद असो.",
+      "प्रभू, आमच्या घरात प्रेम, एकोपा, शांती आणि आरोग्य सदैव वास करो. कोणत्याही दुहीपासून, वादापासून आणि वाईट प्रभावांपासून आमच्या घराचे रक्षण कर आणि आम्हा सर्वांना तुझ्या भयात वाढव.",
+      "आमचे घर तुझ्या पवित्र उपस्थितीचे सुंदर मंदिर बनू दे; येशू ख्रिस्ताच्या नावात ही प्रार्थना करतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "Lord God, Builder and Protector of the home, as for me and my household, we declare anew today that we will serve the Lord alone. Let Your peace and heavenly favor rest upon every corner of our home.",
+      "Fill our relationships with mutual understanding, deep affection, unity, and sound health. Guard our home from strife, division, and every harmful influence, anchoring us together in Your love.",
+      "May our dwelling place be a sanctuary of Your presence; in the precious name of Jesus, Amen."
+    ]
+  },
+  {
+    "id": 18,
+    "themeMr": "नम्रता, करुणा आणि प्रीतीचे वस्त्र",
+    "themeEn": "Garment of Humility, Compassion & Love",
+    "refMr": "कलस्सैकरांस ३:१२-१४",
+    "refEn": "Colossians 3:12-14",
+    "bookKey": "colossians",
+    "chapter": 3,
+    "verse": 12,
+    "paragraphsMr": [
+      "हे परमेश्वराच्या निवडलेल्या पवित्र आणि प्रिय जनांनो, आज मला करुणा, दया, नम्रता, सौम्यता आणि धीरज यांचे वस्त्र परिधान करण्याची कृपा दे. जशी प्रभूने मला असीम क्षमा केली आहे, तशीच इतरांना क्षमा करण्याची विशालता माझ्या हृदयात दे.",
+      "प्रभू, या सर्वांवर प्रीतीचे बंधन घाल, जे सर्वांना परिपूर्णतेत एकत्र बांधून ठेवते. कोणाशीही कटुता न ठेवता, सर्वांशी आदर आणि प्रेमाने वागण्याचे सामर्थ्य मला दे.",
+      "माझे वर्तन तुझ्या गौरवासाठी आदर्श ठरो; येशूच्या नावात ही प्रार्थना करतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "Gracious Lord, clothe me this morning with tenderhearted compassion, kindness, humility, gentleness, and patience. Just as You have freely forgiven all my transgressions, grant me a heart eager to forgive others.",
+      "Above all these virtues, bind me with perfect love, which holds everything together in complete harmony. Let no malice or irritation reside in my soul, but let grace overflow in every interaction.",
+      "May my conduct bring glory to Your holy name; in Jesus' sweet name, Amen."
+    ]
+  },
+  {
+    "id": 19,
+    "themeMr": "जगावर विजय मिळवणारा अढळ विश्वास",
+    "themeEn": "Victorious Faith Overcoming the World",
+    "refMr": "१ योहान ५:४",
+    "refEn": "1 John 5:4",
+    "bookKey": "1-john",
+    "chapter": 5,
+    "verse": 4,
+    "paragraphsMr": [
+      "हे सामर्थी प्रभू, जो कोणी देवापासून जन्मलेला आहे तो जगावर विजय मिळवतो, आणि जगावर विजय मिळवणारे आपले शस्त्र म्हणजे आपला विश्वास आहे. आज कोणत्याही आव्हानाला किंवा भीतीला मी पराभूत मानसिकतेने पाहणार नाही.",
+      "प्रभू, ख्रिस्तामध्ये मी विजयी पेक्षाही अधिक मोठा विजेता आहे याची जाणीव मला दे. संकटातही माझा विश्वास स्थिर राहो आणि तुझ्या अभिवचनांवर माझी पावले घट्ट उभी राहोत.",
+      "तुझ्या सामर्थ्याने मला प्रत्येक क्षेत्रात गौरवशाली विजय प्राप्त होवो; येशूच्या विजयी नावात प्रार्थना करतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "Mighty Lord, everyone born of God overcomes the world, and this is the victory that has overcome the world—our faith. I refuse to look at today's challenges with defeat or discouragement.",
+      "Remind my soul that through Christ who loves me, I am more than a conqueror. Strengthen my resolve to stand unshakeable on Your promises, no matter what storms blow against me.",
+      "May Your mighty hand lead me to triumphant victory; in Jesus' glorious name, Amen."
+    ]
+  },
+  {
+    "id": 20,
+    "themeMr": "थकलेल्या व कष्टी मनाला खरा विसावा",
+    "themeEn": "Rest & Refreshment for the Weary Soul",
+    "refMr": "मत्तय ११:२८-३०",
+    "refEn": "Matthew 11:28",
+    "bookKey": "matthew",
+    "chapter": 11,
+    "verse": 28,
+    "paragraphsMr": [
+      "हे प्रेमळ येशू, तू म्हणालास की 'अहो कष्टी व ओझे वाहणारे सर्व लोकहो, माझ्याकडे या म्हणजे मी तुम्हांला विसावा देईन.' आज सकाळच्या या क्षणी मी माझे सर्व थकलेले विचार आणि जड ओझे तुझ्या प्रेमळ हातांत सोपवतो.",
+      "प्रभू, तुझे जू हलके आणि सुलभ आहे; तुझ्याकडून नम्रता आणि लीनता शिकण्याची बुद्धी मला दे. तुझ्या स्वर्गीय विसाव्यात माझ्या आत्म्याला नवा ताजेतवाना श्वास आणि शांती लाभू दे.",
+      "माझे मन तुझ्या उपस्थितीत अखंड सुरक्षित राहो; येशूच्या नावात ही प्रार्थना करतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "Loving Jesus, You extend the gentlest invitation: 'Come to Me, all you who are weary and burdened, and I will give you rest.' In this sacred hour, I surrender my exhausting burdens into Your caring hands.",
+      "Your yoke is easy and Your burden is light; teach me the gentleness and humility of Your heart. Let my weary spirit find deep renewal, restoring my hope and vitality for the road ahead.",
+      "I dwell in the quiet shelter of Your resting place; in Jesus' name I pray, Amen."
+    ]
+  },
+  {
+    "id": 21,
+    "themeMr": "पाण्याच्या प्रवाहांजवळ लावलेले हिरवेगार झाड",
+    "themeEn": "Rooted & Flourishing by Living Streams",
+    "refMr": "स्तोत्रसंहिता १:१-३",
+    "refEn": "Psalm 1:1-3",
+    "bookKey": "psalms",
+    "chapter": 1,
+    "verse": 1,
+    "paragraphsMr": [
+      "हे नीतीमान परमेश्वरा, जो तुझ्या नियमशास्त्रात रात्रंदिवस मनन करतो तो पाण्याच्या प्रवाहांजवळ लावलेल्या झाडासारखा होतो, ज्याची पाने कधीही कोमेजत नाहीत आणि तो आपल्या ऋतूत भरपूर फळ देतो.",
+      "प्रभू, माझे मूळ तुझ्या पवित्र वचनाच्या खोल झऱ्यांमध्ये रुजवून ठेव, जेणेकरून संकटांच्या उन्हातही मी हिरवागार आणि आशावादी राहीन. आज मी जे काही हाती घेईन त्या सर्व कामांना तुझ्या आशीर्वादाचे यश लाभू दे.",
+      "माझे जीवन इतरांसाठी सावली आणि फळांचा आशीर्वाद ठरो; येशूच्या नावात मागतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "Righteous God, blessed is the person whose delight is in the law of the Lord. Make me like a tree firmly planted by streams of water, yielding fruit in season whose leaf never withers.",
+      "Anchor the roots of my heart deeply into the truth of Your scriptures, so that no scorching drought of adversity can wither my hope. Prosper the work of my hands today according to Your will.",
+      "Let my life provide shade, comfort, and nourishment to all in need; in Jesus' precious name, Amen."
+    ]
+  },
+  {
+    "id": 22,
+    "themeMr": "देवाचे नित्य सान्निध्य व अखंड साथ",
+    "themeEn": "The Everlasting & Faithful Presence of God",
+    "refMr": "इब्री लोकांस १३:५-६",
+    "refEn": "Hebrews 13:5-6",
+    "bookKey": "hebrews",
+    "chapter": 13,
+    "verse": 5,
+    "paragraphsMr": [
+      "हे विश्वासू देवा, तू अभिवचन दिले आहेस की 'मी तुला कधीही सोडणार नाही व कधीही टाकणार नाही.' या असीम सत्यावर विसंबून मी आज अत्यंत धैर्याने म्हणतो की परमेश्वर माझा साहाय्यकर्ता आहे, मला कोणाचीही भीती नाही.",
+      "प्रभू, आजच्या माझ्या सर्व प्रवासात, बैठकांत आणि संभाषणांत तुझी पवित्र उपस्थिती माझ्या सोबत चालू दे. मी कधीही एकटा नाही तर सर्व जगाचा निर्माणकर्ता माझ्या पाठीशी उभा आहे ही खात्री मला दे.",
+      "तुझ्या नित्य सान्निध्यात मी न डगमगता मार्गक्रमण करू शकेन; येशूच्या नावात प्रार्थना करतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "Faithful Father, You have promised with unwavering certainty: 'Never will I leave you; never will I forsake you.' Clinging to this promise, I boldly say today that the Lord is my helper; I will not fear.",
+      "Let Your comforting presence accompany me into every room, meeting, and conversation today. Banish every thought of isolation, reminding me that the Maker of heaven and earth walks right beside me.",
+      "In Your steadfast companionship I move forward with unbroken peace; in Jesus' mighty name, Amen."
+    ]
+  },
+  {
+    "id": 23,
+    "themeMr": "संकटात मनाला स्थिर ठेवणारी जीवनाची आशा",
+    "themeEn": "An Anchor for the Soul, Firm & Secure",
+    "refMr": "इब्री लोकांस ६:१९",
+    "refEn": "Hebrews 6:19",
+    "bookKey": "hebrews",
+    "chapter": 6,
+    "verse": 19,
+    "paragraphsMr": [
+      "हे सार्वकालिक परमेश्वरा, ख्रिस्तामधील आमची आशा ही आमच्या आत्म्यासाठी एका भक्कम, अचल आणि अभेद्य नांगरासारखी आहे. जेव्हा जीवनाचा समुद्र वादळांनी खवळलेला असतो, तेव्हा हीच आशा माझे मन स्थिर ठेवते.",
+      "प्रभू, माझ्या भोवतालची परिस्थिती कशीही असली तरी माझी नजर तुझ्या वचनावर आणि स्वर्गीय प्रतिफळावर खिळलेली राहू दे. आज मी ज्या कोणाला भेटेन त्यांनाही या जिवंत आशेचा संदेश देऊ शकेन असा उत्साह मला दे.",
+      "तुझ्या अढळ वचनावर माझी संपूर्ण श्रद्धा कायम राहो; येशूच्या पवित्र नावात ही प्रार्थना, आमेन."
+    ],
+    "paragraphsEn": [
+      "Eternal God, the living hope we have in Christ is an anchor for the soul, firm and secure. When the turbulent winds of life blow fiercely, this divine hope keeps my heart anchored in Your grace.",
+      "Regardless of outward circumstances, fix my eyes upon Your eternal glory and unshakable Kingdom. Use me today to inspire and uplift those who are searching for light and anchor in their own storms.",
+      "May my trust in Your faithfulness stand unwavering; in Jesus' holy name I pray, Amen."
+    ]
+  },
+  {
+    "id": 24,
+    "themeMr": "देवाच्या सर्व उपकारांचे कृतज्ञतेने स्मरण",
+    "themeEn": "Remembering All His Tender Benefits",
+    "refMr": "स्तोत्रसंहिता १०३:१-५",
+    "refEn": "Psalm 103:1-5",
+    "bookKey": "psalms",
+    "chapter": 103,
+    "verse": 1,
+    "paragraphsMr": [
+      "हे माझ्या आत्म्या, परमेश्वराचा धन्यवाद कर आणि माझ्या अंतरातील सर्व काही त्याच्या पवित्र नावाचा जयजयकार करो! त्याच्या कोणत्याही उपकारांचा विसर मला पडू नये, कारण तोच माझे सर्व अपराध क्षमा करतो आणि माझे रोग बरे करतो.",
+      "प्रभू, तू माझे जीवन विनाशापासून सोडवतोस आणि मला दया व करुणेचा मुकुट घालतोस. आजच्या या संपूर्ण दिवसात माझे तोंड तुझ्या उपकारांच्या स्तुतीने आणि माझ्या अंतःकरणातील समाधानाने भरून वाहू दे.",
+      "माझे तारुण्य गरुडासारखे ताजेतवाने आणि बलवान राहो; येशूच्या नावात ही प्रार्थना करतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "Praise the Lord, my soul; all my inmost being, praise His holy name! Let me never forget the abundant benefits of my God, who forgives all my iniquities and heals all my diseases.",
+      "You redeem my life from the pit and crown me with tender love and compassion. Throughout this day, let my heart overflow with joyful remembrance of Your goodness, protection, and gracious provision.",
+      "Renew my youth and strength like the eagle; in Jesus' precious and worthy name, Amen."
+    ]
+  },
+  {
+    "id": 25,
+    "themeMr": "शारीरिक व आत्मिक संपूर्ण आरोग्य",
+    "themeEn": "Healing & Complete Restoration",
+    "refMr": "यिर्मया ३०:१७",
+    "refEn": "Jeremiah 30:17",
+    "bookKey": "jeremiah",
+    "chapter": 30,
+    "verse": 17,
+    "paragraphsMr": [
+      "हे सर्व रोगांवर विजय मिळवणाऱ्या आरोग्यदाता प्रभू येशू, तू म्हणालास की 'मी तुझे आरोग्य परत आणीन आणि तुझ्या जखमा बऱ्या करीन.' आज मी तुझ्या स्पर्श करणाऱ्या पवित्र हातांची याचना करतो.",
+      "प्रभू, माझ्या शरीरातील प्रत्येक अवयवाला, माझ्या मनातील प्रत्येक थकव्याला आणि आत्म्यातील प्रत्येक जखमेला तुझा दैवी स्पर्श लाभो. माझे कुटुंब आणि आजारी असलेल्या सर्व प्रियजनांना ख्रिस्ताच्या रक्ताद्वारे संपूर्ण आरोग्य आणि ताजेतवानेपण प्राप्त होवो.",
+      "तुझ्या पुनरुत्थानाच्या सामर्थ्यात मी पूर्ण निरोगी आणि बलवान चालतो; येशूच्या नावात आमेन."
+    ],
+    "paragraphsEn": [
+      "Lord Jesus, Great Physician and Healer, You declared: 'I will restore you to health and heal your wounds.' I reach out in simple faith this morning for Your healing and rejuvenating touch.",
+      "Let Your restorative power flow through every cell of my body, reviving my physical strength, calming my mind, and binding up every hidden wound. Bestow full recovery and radiant health upon my family and loved ones.",
+      "I walk forward in the vitality of Your resurrection life; in Jesus' healing name, Amen."
+    ]
+  },
+  {
+    "id": 26,
+    "themeMr": "कामात आणि परिश्रमात दैवी यश",
+    "themeEn": "Excellence & Diligence in Daily Work",
+    "refMr": "कलस्सैकरांस ३:२३-२४",
+    "refEn": "Colossians 3:23-24",
+    "bookKey": "colossians",
+    "chapter": 3,
+    "verse": 23,
+    "paragraphsMr": [
+      "हे माझ्या निर्मितीकर्त्या पित्या, मी जे काही काम करीन ते माणसांसाठी नव्हे तर साक्षात प्रभूसाठी करतो असे समजून मनापासून करण्याची प्रेरणा मला दे. कारण माझ्या परिश्रमाचे खरे प्रतिफळ स्वर्गातील देवाकडूनच मिळणार आहे.",
+      "प्रभू, आज माझ्या कामात प्रामाणिकपणा, उत्कृष्टता, कल्पकता आणि एकाग्रता प्रकट होऊ दे. माझ्या हातांच्या सर्व कामांना यश दे आणि माझ्या सहकाऱ्यांशी व ग्राहकांशी संवाद साधताना मला कृपा आणि सौजन्य लाभू दे.",
+      "माझा प्रत्येक श्रम तुझ्या नावाच्या गौरवासाठी उपयोगी ठरो; येशूच्या नावात ही प्रार्थना करतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "Heavenly Father, whatever work I put my hands to today, inspire me to do it with all my heart as working for the Lord and not for human masters, knowing my ultimate reward comes from You.",
+      "Impart excellence, creativity, integrity, and focus into all my labor. Prosper the works of my hands and let my demeanor with colleagues and clients reflect Christ's warmth and professional grace.",
+      "May every achievement today be dedicated to Your honor; in Jesus' holy name I pray, Amen."
+    ]
+  },
+  {
+    "id": 27,
+    "themeMr": "क्षमाशीलता आणि अंतःकरणातील कोमलता",
+    "themeEn": "Forgiving Heart & Tender Kindness",
+    "refMr": "इफिसकरांस ४:३१-३२",
+    "refEn": "Ephesians 4:31-32",
+    "bookKey": "ephesians",
+    "chapter": 4,
+    "verse": 31,
+    "paragraphsMr": [
+      "हे दयाळू देवाने, माझ्या अंतःकरणातून सर्व कटुता, राग, क्रोधाचा आवेग आणि निंदानालस्ती संपूर्णपणे काढून टाक. जशी देवाने ख्रिस्तामध्ये मला क्षमा केली आहे, तशीच इतरांप्रती कोमल अंतःकरणाची दया आणि क्षमाशीलता माझ्या मनात ओत.",
+      "प्रभू, जर आज कोणाचे शब्द मला दुखावणारे असतील, तर मी सूड न घेता प्रेमाने आणि आशीर्वादाने उत्तर देऊ शकेन असा ख्रिस्ती स्वभाव मला दे. माझे हृदय कोणत्याही कडू मुळापासून पूर्णपणे मुक्त ठेव.",
+      "तुझ्या स्वर्गीय शांतीने माझे अंतःकरण सदैव उजळून निघो; येशूच्या नावात ही प्रार्थना, आमेन."
+    ],
+    "paragraphsEn": [
+      "Compassionate God, eradicate all bitterness, rage, anger, brawling, and slander from my heart, along with every form of malice. Make me kind, compassionate, and forgiving to others, just as in Christ You forgave me.",
+      "If difficult words come my way today, grant me the inner strength to respond with blessing rather than retaliation. Guard my spirit so that no root of bitterness may take hold in my life.",
+      "Let Your heavenly grace soften and purify my heart continually; in Jesus' precious name, Amen."
+    ]
+  },
+  {
+    "id": 28,
+    "themeMr": "दैवी आत्मिक शस्त्रसामग्रीचे संरक्षण",
+    "themeEn": "Standing Firm in the Full Armor of God",
+    "refMr": "इफिसकरांस ६:१०-११",
+    "refEn": "Ephesians 6:10-11",
+    "bookKey": "ephesians",
+    "chapter": 6,
+    "verse": 10,
+    "paragraphsMr": [
+      "हे सर्वशक्तिमान प्रभो, मी तुझ्यात आणि तुझ्या पराक्रमाच्या सामर्थ्यात बलवान होतो. आजच्या या दिवसात मी देवाचे संपूर्ण आत्मिक शस्त्रसामग्री धारण करतो, जेणेकरून शत्रूच्या सर्व दुष्ट युक्तींवर आणि बाणांवर मी अढळ विजय मिळवू शकेन.",
+      "सत्याचा पट्टा, नीतिमत्तेचे चिलखत, शांतीच्या सुवार्तेची पादत्राणे, विश्वासाची ढाल आणि तारणाचा शिरस्त्राण घालून मी आत्मविश्वासाने उभा राहतो. तुझ्या पवित्र वचनाची तलवार माझ्या हातात धरून मी अंधाराच्या सर्व शक्तींवर जय मिळवतो.",
+      "माझे संपूर्ण रक्षण तुझ्या सामर्थी नावात सुरक्षित आहे; येशूच्या विजयी नावात आमेन."
+    ],
+    "paragraphsEn": [
+      "Almighty Lord, I stand strong in the power of Your boundless might. This morning I put on the full armor of God so that I can stand firm against every scheme and fiery dart of the enemy.",
+      "I gird myself with the belt of truth, the breastplate of righteousness, the gospel of peace, the shield of faith, the helmet of salvation, and the sword of the Spirit which is Your living Word.",
+      "I am fully covered and utterly secure in Your victorious name; in Jesus' mighty name, Amen."
+    ]
+  },
+  {
+    "id": 29,
+    "themeMr": "दैनंदिन गरजा आणि स्वर्गीय राज्याची प्राथमिकता",
+    "themeEn": "Daily Provision & Seeking His Kingdom First",
+    "refMr": "मत्तय ६:११-३३",
+    "refEn": "Matthew 6:33",
+    "bookKey": "matthew",
+    "chapter": 6,
+    "verse": 33,
+    "paragraphsMr": [
+      "हे आमच्या स्वर्गीय पित्या, तू आकाशातील पाखरांना खाऊ घालतोस आणि रानातील फुलांना राजापेक्षाही सुंदर वस्त्रे देतोस. आजच्या दिवसाची आमची रोजची भाकर तू आम्हाला दे आणि आमच्या सर्व गरजा तुझ्या विपुल समृद्धीनुसार पूर्ण कर.",
+      "प्रभू, अन्नाची किंवा पैशांची व्यर्थ चिंता करण्याऐवजी प्रथम देवाचे राज्य आणि त्याचे नीतीमत्व शोधण्याचे ध्येय मला दे. माझी सर्व काळजी तुझ्यावर टाकून मी समाधानाने आणि आनंदाने दिवस व्यतीत करू शकेन अशी कृपा मला दे.",
+      "तुझा विश्वासूपणा माझ्या आयुष्याचा अढळ पाया आहे; येशूच्या नावात ही प्रार्थना करतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "Our Heavenly Father, You feed the birds of the air and clothe the lilies of the field in breathtaking beauty. Give us this day our daily bread and meet all our needs according to Your riches in glory.",
+      "Free my mind from fretful anxiety about tomorrow, helping me instead to seek first Your Kingdom and Your righteousness. In quiet trust, I rest assured that You will add everything I need at the right time.",
+      "Your faithful provision is the solid foundation of my life; in Jesus' blessed name, Amen."
+    ]
+  },
+  {
+    "id": 30,
+    "themeMr": "खऱ्या द्राक्षवेलीमध्ये नित्य जीवन",
+    "themeEn": "Abiding Deeply in Christ the True Vine",
+    "refMr": "योहान १५:४-५",
+    "refEn": "John 15:4-5",
+    "bookKey": "john",
+    "chapter": 15,
+    "verse": 4,
+    "paragraphsMr": [
+      "हे प्रभू येशू, तू खरी द्राक्षवेल आहेस आणि आम्ही तुझ्या फांद्या आहोत; तुझ्याशिवाय आम्ही स्वतःहून काहीही करू शकत नाही. आजच्या या संपूर्ण दिवसात माझे मन आणि आत्मा तुझ्यात खोलवर जोडलेले राहू दे.",
+      "प्रभू, तुझ्या पवित्र आत्म्याचा जीवनरस माझ्या जीवनातून अखंड वाहू दे, जेणेकरून माझ्याद्वारे खूप चांगले फळ निर्माण होईल आणि पित्याचे गौरव होईल. जगातील कोणत्याही प्रलोभनाने मला तुझ्यापासून वेगळे करू नये अशी कृपा मला दे.",
+      "तुझ्यात राहूनच मला जीवनाची परिपूर्णता लाभते; येशूच्या पवित्र नावात प्रार्थना करतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "Lord Jesus, You are the True Vine and we are the branches; apart from You we can do nothing of eternal value. Keep my spirit deeply and continuously united with You throughout this day.",
+      "Let the sap of Your Holy Spirit flow freely through my life, producing abundant, lasting fruit that brings great glory to the Father. Protect me from any temptation or distraction that seeks to sever my focus from You.",
+      "In You alone my soul finds complete life and overflowing joy; in Jesus' lovely name, Amen."
+    ]
+  },
+  {
+    "id": 31,
+    "themeMr": "सार्वकालिक आशा आणि स्वर्गीय आनंद",
+    "themeEn": "Eternal Hope & Heavenly Joy",
+    "refMr": "प्रकटीकरण २१:३-४",
+    "refEn": "Revelation 21:3-4",
+    "bookKey": "revelation",
+    "chapter": 21,
+    "verse": 3,
+    "paragraphsMr": [
+      "हे सार्वकालिक आणि गौरवी राजा, आम्ही त्या दिवसाची वाट पाहत आहोत जेव्हा तू आमच्या डोळ्यांतील प्रत्येक अश्रू पुसून घेशील आणि दुःख, विलाप किंवा वेदना राहणार नाहीत. या अद्भुत स्वर्गीय आशेने माझे हृदय आज नव्या उत्साहाने भरून काढ.",
+      "प्रभू, तात्पुरत्या संकटांकडे न पाहता सार्वकालिक गौरवाकडे पाहून जगण्याचे आत्मिक सामर्थ्य मला दे. आज मी जिथे जाईन तिथे या चिरंतन आशेचा आणि तारणाचा आनंद माझ्या मुखातून आणि कार्यातून व्यक्त होऊ दे.",
+      "तुझे राज्य लवकर येवो आणि तुझे नाव सर्व जगात उंचावले जावो; येशूच्या सामर्थी नावात आमेन."
+    ],
+    "paragraphsEn": [
+      "Glorious and Eternal King, we eagerly anticipate the day when You will wipe every tear from our eyes and there will be no more sorrow, crying, or pain. Fill my heart today with the radiant joy of this eternal hope.",
+      "Help me look beyond the temporary troubles of this present age to the exceeding weight of glory prepared for us. May my speech, my conduct, and my demeanor reflect the unshakable joy of heaven today.",
+      "May Your Kingdom come and Your holy name be exalted in all the earth; in Jesus' mighty name, Amen."
+    ]
+  }
+];
+
+window.getTodayHeadwatersPrayer = function() {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const diff = now - start;
+  const oneDay = 1000 * 60 * 60 * 24;
+  const dayOfYear = Math.floor(diff / oneDay);
+  const offset = (window.state && window.state.vodDayOffset) ? window.state.vodDayOffset : 0;
+  
+  const len = DAILY_HEADWATERS_PRAYERS.length;
+  const idx = ((dayOfYear + offset) % len + len) % len;
+  return DAILY_HEADWATERS_PRAYERS[idx];
+};
+
+window.renderHeadwatersModalContent = function() {
+  const prayer = window.getTodayHeadwatersPrayer();
+  if (!prayer) return;
+  
+  const isEng = (window.state && window.state.translation === "eng");
+  
+  // Theme badge & Title
+  const themeBadge = document.getElementById("headwaters-theme-badge");
+  if (themeBadge) {
+    themeBadge.textContent = isEng ? `✨ ${prayer.themeEn}` : `✨ ${prayer.themeMr}`;
+  }
+  
+  const titleEl = document.getElementById("headwaters-prayer-title");
+  if (titleEl) {
+    titleEl.textContent = isEng ? "Today's Guided Prayer" : "आजची सकाळची प्रार्थना";
+  }
+  
+  // Render Paragraphs
+  const container = document.getElementById("headwaters-prayer-container");
+  if (container) {
+    const paragraphs = isEng ? prayer.paragraphsEn : prayer.paragraphsMr;
+    container.innerHTML = paragraphs.map(p => `<p style="margin: 0; line-height: 1.75;">"${p}"</p>`).join("");
+  }
+  
+  // Dynamic Open in Bible button text
+  const btnText = document.getElementById("headwaters-btn-text");
+  if (btnText) {
+    btnText.textContent = isEng ? `Open in Bible • ${prayer.refEn}` : `Open in Bible • ${prayer.refMr} वाचा`;
+  }
+  
+  // Audio time estimate
+  const timeEl = document.getElementById("headwaters-audio-time");
+  if (timeEl) {
+    const allText = (isEng ? prayer.paragraphsEn : prayer.paragraphsMr).join(" ");
+    const words = allText.split(/\s+/).length;
+    const estSec = Math.max(35, Math.min(75, Math.round(words / 2.2)));
+    const m = Math.floor(estSec / 60);
+    const s = (estSec % 60).toString().padStart(2, "0");
+    timeEl.textContent = `0:${s}` === "0:60" ? "1:00" : `${m}:${s}`;
+  }
+};
+
+window.openCurrentHeadwatersBibleChapter = function() {
+  const prayer = window.getTodayHeadwatersPrayer();
+  if (prayer && prayer.bookKey) {
+    openReaderAndNavigate(prayer.bookKey, prayer.chapter, prayer.verse);
+  } else {
+    openReaderAndNavigate("lamentations", 3, 22);
+  }
+};
 
 window.openHeadwatersModal = function() {
   const modal = document.getElementById("modal-headwaters-sanctuary");
   if (modal) {
     modal.style.display = "flex";
-    loadHeadwatersPersonalPrayer();
+    renderHeadwatersModalContent();
   }
 };
 
@@ -13544,6 +14227,9 @@ window.closeHeadwatersModal = function() {
     clearInterval(window.headwatersProgressInterval);
     window.headwatersProgressInterval = null;
   }
+  if (window.speechSynthesis) {
+    window.speechSynthesis.cancel();
+  }
   const icon = document.getElementById("headwaters-play-icon");
   if (icon) {
     icon.innerHTML = '<polygon points="6 4 20 12 6 20 6 4"></polygon>';
@@ -13552,9 +14238,6 @@ window.closeHeadwatersModal = function() {
   if (progressBar) progressBar.style.width = '0%';
   const playerBox = document.getElementById("headwaters-audio-player-box");
   if (playerBox) playerBox.classList.remove("playing");
-  
-  // Stop breath pause if running
-  stopHeadwatersBreathPause();
 };
 
 window.playHeadwatersMorningAudio = function(btnElement) {
@@ -13563,18 +14246,28 @@ window.playHeadwatersMorningAudio = function(btnElement) {
   const timeEl = document.getElementById("headwaters-audio-time");
   const playerBox = document.getElementById("headwaters-audio-player-box");
   
-  const text = "हे स्वर्गीय पित्या... या नवीन दिवसाच्या उषःकाली, मी माझे संपूर्ण मन व जीवन तुझ्या हातात सोपवतो. विलापगीते सांगते, की तुझ्या दया रोज सकाळी नव्या असतात... तुझा विश्वासूपणा महान आहे. आजचा प्रत्येक निर्णय, विचार आणि शब्द, तुझ्या प्रीतीचा सुगंध पसरवणारा असू दे... येशूच्या नावात, आमेन.";
+  const prayer = window.getTodayHeadwatersPrayer();
+  const isEng = (window.state && window.state.translation === "eng");
+  const prayerParagraphs = (prayer && (isEng ? prayer.paragraphsEn : prayer.paragraphsMr)) || [
+    "हे दयाळू आणि सर्वसमर्थ स्वर्गीय पित्या, या नव्या दिवसाच्या उषःकाली मी अत्यंत कृतज्ञ अंतःकरणाने तुझ्या पवित्र चरणांशी नतमस्तक होतो."
+  ];
+  const fullPrayerText = prayerParagraphs.join(" ");
   
   // Toggle Pause if already playing
-  if (window.headwatersAudioInstance && !window.headwatersAudioInstance.paused) {
-    window.headwatersAudioInstance.pause();
+  if ((window.headwatersAudioInstance && !window.headwatersAudioInstance.paused) || (window.speechSynthesis && window.speechSynthesis.speaking)) {
+    if (window.headwatersAudioInstance) {
+      window.headwatersAudioInstance.pause();
+    }
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
     if (icon) icon.innerHTML = '<polygon points="6 4 20 12 6 20 6 4"></polygon>';
     if (playerBox) playerBox.classList.remove("playing");
     if (window.headwatersProgressInterval) {
       clearInterval(window.headwatersProgressInterval);
       window.headwatersProgressInterval = null;
     }
-    showToast("⏸ ऑडिओ थांबवला (Audio Paused)");
+    showToast(isEng ? "⏸ Audio Paused" : "⏸ ऑडिओ थांबवला (Audio Paused)");
     return;
   }
   
@@ -13588,214 +14281,70 @@ window.playHeadwatersMorningAudio = function(btnElement) {
     icon.innerHTML = '<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>';
   }
   if (playerBox) playerBox.classList.add("playing");
-  if (progressBar && progressBar.style.width === '0%') progressBar.style.width = '4%';
-  if (timeEl) timeEl.textContent = '0:01 / 0:45';
+  if (progressBar && progressBar.style.width === '0%') progressBar.style.width = '3%';
   
-  const audioSrc = "assets/audio/devotional/headwaters_morning.mp3";
-  try {
-    const audio = new Audio(audioSrc);
-    window.headwatersAudioInstance = audio;
-    window.currentSingleAudio = audio;
+  // Use natural speech synthesis for daily dynamic text
+  if (window.speechSynthesis) {
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(fullPrayerText);
+    utter.lang = isEng ? 'en-US' : 'mr-IN';
+    utter.rate = 0.88;
     
-    let totalSec = 45;
+    // Estimate total time based on length
+    const words = fullPrayerText.split(/\s+/).length;
+    const estDurationMs = Math.max(30000, Math.round((words / 2.2) * 1000));
+    let startT = Date.now();
     
-    audio.onloadedmetadata = () => {
-      if (audio.duration && !isNaN(audio.duration) && audio.duration > 0) {
-        totalSec = Math.round(audio.duration);
-      }
-    };
-    
-    audio.ontimeupdate = () => {
-      const cur = audio.currentTime || 0;
-      const dur = audio.duration || totalSec;
-      const pct = Math.min(100, Math.max(0, (cur / dur) * 100));
+    if (window.headwatersProgressInterval) clearInterval(window.headwatersProgressInterval);
+    window.headwatersProgressInterval = setInterval(() => {
+      const elapsed = Date.now() - startT;
+      const pct = Math.min(100, (elapsed / estDurationMs) * 100);
       if (progressBar) progressBar.style.width = pct + '%';
-      const mCur = Math.floor(cur / 60);
-      const sCur = Math.floor(cur % 60).toString().padStart(2, '0');
-      const mDur = Math.floor(dur / 60);
-      const sDur = Math.floor(dur % 60).toString().padStart(2, '0');
-      if (timeEl) timeEl.textContent = `${mCur}:${sCur} / ${mDur}:${sDur}`;
-    };
+      
+      const secElapsed = Math.floor(elapsed / 1000);
+      const totalSec = Math.floor(estDurationMs / 1000);
+      const mCur = Math.floor(secElapsed / 60);
+      const sCur = (secElapsed % 60).toString().padStart(2, '0');
+      const mTot = Math.floor(totalSec / 60);
+      const sTot = (totalSec % 60).toString().padStart(2, '0');
+      if (timeEl) timeEl.textContent = `${mCur}:${sCur} / ${mTot}:${sTot}`;
+      
+      if (pct >= 100) {
+        clearInterval(window.headwatersProgressInterval);
+        window.headwatersProgressInterval = null;
+      }
+    }, 200);
     
-    audio.onplay = () => {
-      if (icon) icon.innerHTML = '<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>';
-      if (playerBox) playerBox.classList.add("playing");
-      showToast("🔊 सकाळची प्रार्थना सुरू आहे (Natural Devotional Marathi Voice) ✨");
-    };
-    
-    audio.onended = () => {
+    utter.onend = () => {
       if (icon) icon.innerHTML = '<polygon points="6 4 20 12 6 20 6 4"></polygon>';
       if (playerBox) playerBox.classList.remove("playing");
       if (progressBar) progressBar.style.width = '0%';
-      if (timeEl) timeEl.textContent = '0:45';
-      window.headwatersAudioInstance = null;
-      window.currentSingleAudio = null;
-    };
-    
-    audio.onerror = () => {
-      console.warn("Direct audio not found, fallback to speech synthesis with dynamic wave rhythm");
-      if (window.speechSynthesis) {
-        window.speechSynthesis.cancel();
-        const utter = new SpeechSynthesisUtterance(text);
-        utter.lang = 'mr-IN';
-        utter.rate = 0.9;
-        
-        let startT = Date.now();
-        const estDuration = 22000;
-        
-        if (playerBox) playerBox.classList.add("playing");
-        if (window.headwatersProgressInterval) clearInterval(window.headwatersProgressInterval);
-        window.headwatersProgressInterval = setInterval(() => {
-          const elapsed = Date.now() - startT;
-          const pct = Math.min(100, (elapsed / estDuration) * 100);
-          if (progressBar) progressBar.style.width = pct + '%';
-          const sec = Math.floor(elapsed / 1000);
-          if (timeEl) timeEl.textContent = `0:${sec.toString().padStart(2, '0')} / 0:22`;
-          if (pct >= 100) {
-            clearInterval(window.headwatersProgressInterval);
-            window.headwatersProgressInterval = null;
-          }
-        }, 200);
-        
-        utter.onend = () => {
-          if (icon) icon.innerHTML = '<polygon points="6 4 20 12 6 20 6 4"></polygon>';
-          if (playerBox) playerBox.classList.remove("playing");
-          if (progressBar) progressBar.style.width = '0%';
-          if (timeEl) timeEl.textContent = '0:45';
-          if (window.headwatersProgressInterval) {
-            clearInterval(window.headwatersProgressInterval);
-            window.headwatersProgressInterval = null;
-          }
-        };
-        
-        window.speechSynthesis.speak(utter);
-        showToast("🔊 सकाळची प्रार्थना सुरू आहे (Natural Devotional Marathi Voice) ✨");
+      const totalSec = Math.floor(estDurationMs / 1000);
+      const mTot = Math.floor(totalSec / 60);
+      const sTot = (totalSec % 60).toString().padStart(2, '0');
+      if (timeEl) timeEl.textContent = `${mTot}:${sTot}`;
+      if (window.headwatersProgressInterval) {
+        clearInterval(window.headwatersProgressInterval);
+        window.headwatersProgressInterval = null;
       }
     };
     
-    audio.play().catch(e => {
-      if (audio.onerror) audio.onerror();
-    });
-  } catch (err) {
-    console.error(err);
-  }
-};
-
-// 1-MIN MINDFUL BREATH & REFLECTION LOGIC
-window.toggleHeadwatersBreathPause = function() {
-  if (headwatersBreathTimer) {
-    stopHeadwatersBreathPause();
-    showToast("⏹ Breath Pause Stopped / विसावा थांबवला");
-    return;
-  }
-  startHeadwatersBreathPause();
-};
-
-function startHeadwatersBreathPause() {
-  headwatersBreathSecRemaining = 60;
-  const btnIcon = document.getElementById("headwaters-breath-btn-icon");
-  const timerText = document.getElementById("headwaters-breath-timer-text");
-  const instruction = document.getElementById("headwaters-breath-instruction");
-  const orb = document.getElementById("headwaters-breath-orb");
-
-  if (btnIcon) btnIcon.textContent = "⏸";
-  if (timerText) timerText.textContent = "1:00";
-  showToast("🧘 १ मिनिटांचा शांत विसावा सुरू झाला (Inhale Peace)");
-
-  let breathCycle = 0; // 0: inhale, 1: hold, 2: exhale
-  const runBreathPhase = () => {
-    if (!orb || !instruction) return;
-    if (breathCycle % 3 === 0) {
-      instruction.textContent = "श्वास घ्या (Inhale Peace & Life)...";
-      orb.className = "headwaters-breath-orb inhale";
-    } else if (breathCycle % 3 === 1) {
-      instruction.textContent = "शांत व्हा व देवाची उपस्थिती अनुभवा (Be Still)...";
-      orb.className = "headwaters-breath-orb";
-    } else {
-      instruction.textContent = "हळूवार श्वास सोडा (Exhale Stress & Worries)...";
-      orb.className = "headwaters-breath-orb exhale";
-    }
-    breathCycle++;
-  };
-
-  runBreathPhase();
-  headwatersBreathPhaseInterval = setInterval(runBreathPhase, 4000);
-
-  headwatersBreathTimer = setInterval(() => {
-    headwatersBreathSecRemaining--;
-    if (timerText) {
-      const s = headwatersBreathSecRemaining.toString().padStart(2, '0');
-      timerText.textContent = `0:${s}`;
-    }
-    if (headwatersBreathSecRemaining <= 0) {
-      stopHeadwatersBreathPause();
-      if (instruction) instruction.textContent = "✨ विसावा पूर्ण झाला! देव तुमच्या पाठीशी आहे.";
-      showToast("✨ १ मिनिटांचा शांत विसावा पूर्ण झाला (Peace & Strength Received)");
-    }
-  }, 1000);
-}
-
-function stopHeadwatersBreathPause() {
-  if (headwatersBreathTimer) {
-    clearInterval(headwatersBreathTimer);
-    headwatersBreathTimer = null;
-  }
-  if (headwatersBreathPhaseInterval) {
-    clearInterval(headwatersBreathPhaseInterval);
-    headwatersBreathPhaseInterval = null;
-  }
-  const btnIcon = document.getElementById("headwaters-breath-btn-icon");
-  const timerText = document.getElementById("headwaters-breath-timer-text");
-  const instruction = document.getElementById("headwaters-breath-instruction");
-  const orb = document.getElementById("headwaters-breath-orb");
-
-  if (btnIcon) btnIcon.textContent = "▶";
-  if (timerText) timerText.textContent = "1 Min";
-  if (instruction) instruction.textContent = "श्वास घ्या व देवाची शांती अनुभवा (Inhale Peace)";
-  if (orb) orb.className = "headwaters-breath-orb";
-}
-
-// PERSONAL JOURNAL PROMPT & PERSISTENCE
-window.saveHeadwatersPersonalPrayer = function() {
-  const input = document.getElementById("headwaters-personal-prayer-input");
-  const status = document.getElementById("headwaters-journal-status");
-  if (!input) return;
-
-  const todayStr = new Date().toISOString().split("T")[0];
-  const val = input.value.trim();
-  localStorage.setItem(`river_headwaters_prayer_${todayStr}`, val);
-
-  if (status) {
-    status.textContent = "💾 Saved / जतन झाले";
-    status.style.color = "#16a34a";
-    setTimeout(() => {
-      if (status) {
-        status.textContent = "💾 Autosaved";
-        status.style.color = "var(--text-muted)";
+    utter.onerror = () => {
+      if (icon) icon.innerHTML = '<polygon points="6 4 20 12 6 20 6 4"></polygon>';
+      if (playerBox) playerBox.classList.remove("playing");
+      if (window.headwatersProgressInterval) {
+        clearInterval(window.headwatersProgressInterval);
+        window.headwatersProgressInterval = null;
       }
-    }, 1800);
-  }
-};
-
-window.loadHeadwatersPersonalPrayer = function() {
-  const input = document.getElementById("headwaters-personal-prayer-input");
-  if (!input) return;
-  const todayStr = new Date().toISOString().split("T")[0];
-  const saved = localStorage.getItem(`river_headwaters_prayer_${todayStr}`) || "";
-  input.value = saved;
-};
-
-window.appendHeadwatersPrompt = function(promptText) {
-  const input = document.getElementById("headwaters-personal-prayer-input");
-  if (!input) return;
-  if (input.value && !input.value.endsWith(" ")) {
-    input.value += " " + promptText;
+    };
+    
+    window.speechSynthesis.speak(utter);
+    showToast(isEng ? "🔊 Guided Morning Prayer playing ✨" : "🔊 सकाळची प्रार्थना सुरू आहे (Daily Guided Prayer) ✨");
   } else {
-    input.value += promptText;
+    showToast("ऑडिओ उपलब्ध नाही (Audio not supported on this device)");
   }
-  input.focus();
-  saveHeadwatersPersonalPrayer();
 };
+
 
 // 2. THE DAILY CONFLUENCE LOGIC
 const CONFLUENCE_SOUL_DB = {
