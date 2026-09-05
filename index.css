@@ -9973,3 +9973,19 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
 .sleek-audio-player-track button:active {
   transform: scale(0.92);
 }
+
+/* Headwaters Native Modal Button Polishes */
+.headwaters-close-btn:hover {
+  background: rgba(154, 52, 18, 0.2) !important;
+  transform: scale(1.08);
+}
+.headwaters-close-btn:active {
+  transform: scale(0.92);
+}
+.headwaters-primary-btn:hover {
+  box-shadow: 0 6px 24px rgba(158, 22, 34, 0.45) !important;
+  transform: translateY(-1px);
+}
+.headwaters-primary-btn:active {
+  transform: scale(0.985);
+}
