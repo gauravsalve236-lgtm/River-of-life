@@ -1018,7 +1018,7 @@ const I18N_DICTIONARY = {
     // Navigation & Header (English UI navigation & greetings as requested)
     "pull_refresh": "Pull to refresh",
     "tab_today": "Today",
-    "tab_community": "Community",
+    "tab_community": "Fellowship Hub",
     "greeting_morning": "Good morning",
     "greeting_afternoon": "Good afternoon",
     "greeting_evening": "Good evening",
@@ -1131,7 +1131,7 @@ const I18N_DICTIONARY = {
     // Navigation & Header
     "pull_refresh": "Pull to refresh",
     "tab_today": "Today",
-    "tab_community": "Community",
+    "tab_community": "Fellowship Hub",
     "greeting_morning": "Good morning",
     "greeting_afternoon": "Good afternoon",
     "greeting_evening": "Good evening",
