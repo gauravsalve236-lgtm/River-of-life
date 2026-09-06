@@ -2436,14 +2436,96 @@ window.switchHomeTab = function(tab) {
     if (btnToday) btnToday.classList.remove("active");
     if (btnComm) btnComm.classList.add("active");
     if (feedToday) feedToday.style.display = "none";
-    if (feedComm) feedComm.style.display = "block";
-    switchTab("meetings");
+    if (feedComm) feedComm.style.display = "flex";
+    
+    const scrollEl = document.getElementById("home-view-scroll-content") || document.querySelector("#view-home .screen-content");
+    if (scrollEl) scrollEl.scrollTop = 0;
   } else {
     if (btnComm) btnComm.classList.remove("active");
     if (btnToday) btnToday.classList.add("active");
     if (feedComm) feedComm.style.display = "none";
     if (feedToday) feedToday.style.display = "block";
+    
+    const scrollEl = document.getElementById("home-view-scroll-content") || document.querySelector("#view-home .screen-content");
+    if (scrollEl) scrollEl.scrollTop = 0;
   }
+};
+
+window.filterFellowshipHub = function(category, btn) {
+  const allChips = document.querySelectorAll(".fellowship-category-chip");
+  allChips.forEach(chip => chip.classList.remove("active"));
+  if (btn) btn.classList.add("active");
+
+  const items = document.querySelectorAll("#home-feed-community-container .fellowship-item");
+  items.forEach(item => {
+    if (category === "all" || item.getAttribute("data-category") === category) {
+      item.style.display = "block";
+    } else {
+      item.style.display = "none";
+    }
+  });
+};
+
+window.prayAmen = function(btn, countId) {
+  if (!btn) return;
+  const countSpan = document.getElementById(countId);
+  const currentCount = parseInt(countSpan ? countSpan.textContent : "0") || 0;
+  
+  if (!btn.classList.contains("prayed")) {
+    btn.classList.add("prayed");
+    if (countSpan) countSpan.textContent = currentCount + 1;
+    showToast("🙏 प्रार्थना आमेन! तुम्ही या प्रार्थनेत सहभागी झाला आहात. (Standing in faith!)");
+  } else {
+    btn.classList.remove("prayed");
+    if (countSpan && currentCount > 0) countSpan.textContent = currentCount - 1;
+  }
+};
+
+window.submitFellowshipDiscussion = function() {
+  const input = document.getElementById("fellowship-discussion-input");
+  if (!input || !input.value.trim()) {
+    showToast("कृपया तुमचे विचार किंवा साक्ष लिहा (Please enter reflection)");
+    return;
+  }
+  const text = input.value.trim();
+  const stream = document.getElementById("fellowship-comments-stream");
+  if (stream) {
+    const commentCard = document.createElement("div");
+    commentCard.style.cssText = "background: var(--pill-bg, #FAFAF8); border-radius: 12px; padding: 10px 12px; animation: fadeInFellowship 0.3s ease;";
+    commentCard.innerHTML = `
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+        <strong style="font-size: 12.5px; color: var(--text);">Gaurav S. (You)</strong>
+        <span style="font-size: 11px; color: var(--steel-muted, #A3A6AE);">Just now</span>
+      </div>
+      <p style="font-size: 12.5px; color: var(--text-muted); margin: 0; line-height: 1.45;">${text}</p>
+    `;
+    stream.prepend(commentCard);
+    input.value = "";
+    showToast("✨ तुमचे विचार मंडळीसोबत शेअर करण्यात आले आहेत! (Posted to Church Community)");
+  }
+};
+
+window.openSubmitPrayerModal = function() {
+  openDrawer("drawer-submit-prayer");
+};
+
+window.submitPrayerRequest = function() {
+  const nameInput = document.getElementById("prayer-req-name");
+  const catSelect = document.getElementById("prayer-req-category");
+  const detailInput = document.getElementById("prayer-req-details");
+
+  const name = nameInput?.value.trim() || "Gaurav S.";
+  const cat = catSelect?.value || "Spiritual Growth";
+  const details = detailInput?.value.trim();
+
+  if (!details) {
+    showToast("कृपया प्रार्थनेचा विषय लिहा (Please enter prayer details)");
+    return;
+  }
+
+  closeDrawer("drawer-submit-prayer");
+  if (detailInput) detailInput.value = "";
+  showToast("🙏 तुमची प्रार्थना विनंती प्रार्थना भिंतीवर जोडली गेली आहे! (Prayer submitted)");
 };
 
 window.readVODChapter = function() {

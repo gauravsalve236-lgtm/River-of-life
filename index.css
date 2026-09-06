@@ -51,27 +51,30 @@
 
 /* Theme 2: River Pure Light (Default & Main Theme) */
 .ios-theme-light {
-  --bg: #ffffff;           /* Clean Pure White Canvas */
-  --bg-content: #ffffff;   /* Pure White Cards */
-  --bg-rgb: 255, 255, 255;
-  --drawer-bg: #ffffff;
+  --bg: #FAF9F5;           /* Porcelain: Soft Warm Canvas */
+  --bg-content: #FCFBF9;   /* White: Elevated Card Surface */
+  --bg-rgb: 250, 249, 245;
+  --drawer-bg: #FAF9F5;
+  --surface: #FCFBF9;      /* Pure Card Background */
   --text: #1e293b;         /* Deep Slate Text */
   --text-muted: #64748b;   /* Refined Muted Text */
-  --primary: #9e1622;      /* Holy Royal Crimson Primary */
-  --primary-dark: #7a111a; /* Deep Crimson Shade */
-  --primary-light: rgba(158, 22, 34, 0.08);
-  --primary-glow: rgba(158, 22, 34, 0.2);
+  --steel-muted: #A3A6AE;  /* Cool Steel */
+  --bright-snow: #FAFAF8;  /* Bright Snow */
+  --primary: #C76140;      /* Rosy Copper Primary Brand */
+  --primary-dark: #a84c2f; /* Deep Rosy Shade */
+  --primary-light: rgba(199, 97, 64, 0.08);
+  --primary-glow: rgba(199, 97, 64, 0.22);
   --accent-gold: #c98a2c;  /* Warm Sacred Gold Accent */
   --accent-gold-light: rgba(201, 138, 44, 0.12);
   --accent-teal: #0d9488;  /* Living Stream Teal */
-  --accent-teal-light: rgba(100, 181, 205, 0.12);
-  --border: #f1ede6;       /* Clean Soft Border */
-  --border-rgb: 241, 237, 230;
-  --pill-bg: #faf7f2;
-  --card-bg: #ffffff;
-  --card-border: #f1ede6;
+  --accent-teal-light: rgba(13, 148, 136, 0.12);
+  --border: #e8e6df;       /* Soft Cool Steel Border Tone */
+  --border-rgb: 232, 230, 223;
+  --pill-bg: #FAFAF8;      /* Bright Snow Pill Background */
+  --card-bg: #FCFBF9;
+  --card-border: #e8e6df;
   --danger: #dc2626;
-  --sidebar-hover: #faf7f2;
+  --sidebar-hover: #FAFAF8;
 }
 
 /* Theme 3: Warm River Sepia (Sacred Parchment) */
@@ -8387,7 +8390,7 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
   left: 0;
   width: 100%;
   height: 3px;
-  background: #dc2626; /* YouVersion Brand Red Indicator */
+  background: var(--primary, #C76140); /* Rosy Copper River Brand Indicator */
   border-radius: 3px;
 }
 
@@ -9600,7 +9603,7 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
   left: 0 !important;
   right: 0 !important;
   height: 3px !important;
-  background: #e11d48 !important;
+  background: var(--primary, #C76140) !important;
   border-radius: 3px !important;
 }
 
@@ -10393,3 +10396,173 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
     max-height: 145px !important;
   }
 }
+
+/* ==========================================================================
+   FELLOWSHIP HUB COMPONENT STYLES (PORCELAIN & ROSY COPPER PALETTE)
+   ========================================================================== */
+.fellowship-feed-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-bottom: 24px;
+  animation: fadeInFellowship 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeInFellowship {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fellowship-filter-scroll {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 0 10px 0;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.fellowship-filter-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.fellowship-category-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: var(--font-ui);
+  white-space: nowrap;
+  background: var(--pill-bg, #FAFAF8);
+  color: var(--text-muted, #64748b);
+  border: 1.5px solid var(--border, #e8e6df);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.fellowship-category-chip:hover {
+  border-color: var(--primary, #C76140);
+  color: var(--text, #1e293b);
+}
+
+.fellowship-category-chip.active {
+  background: var(--primary, #C76140);
+  color: #ffffff;
+  border-color: var(--primary, #C76140);
+  box-shadow: 0 3px 10px rgba(199, 97, 64, 0.25);
+}
+
+.fellowship-card {
+  background: var(--surface, #FCFBF9);
+  border: 1.5px solid var(--border, #e8e6df);
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.03);
+  position: relative;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.fellowship-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+.fellowship-live-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(220, 38, 38, 0.1);
+  color: #dc2626;
+  border: 1px solid rgba(220, 38, 38, 0.25);
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11.5px;
+  font-weight: 800;
+}
+
+.fellowship-live-tag .pulse-dot {
+  width: 7px;
+  height: 7px;
+  background-color: #dc2626;
+  border-radius: 50%;
+  animation: pulseLiveDot 1.4s infinite;
+}
+
+@keyframes pulseLiveDot {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); }
+  70% { transform: scale(1.1); box-shadow: 0 0 0 6px rgba(220, 38, 38, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+}
+
+.fellowship-btn-primary {
+  background: var(--primary, #C76140);
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 18px;
+  font-size: 13.5px;
+  font-weight: 800;
+  font-family: var(--font-ui);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-shadow: 0 3px 10px rgba(199, 97, 64, 0.25);
+  transition: all 0.2s ease;
+}
+
+.fellowship-btn-primary:hover {
+  background: var(--primary-dark, #a84c2f);
+  transform: translateY(-1px);
+}
+
+.fellowship-btn-secondary {
+  background: var(--pill-bg, #FAFAF8);
+  color: var(--text, #1e293b);
+  border: 1.5px solid var(--border, #e8e6df);
+  border-radius: 12px;
+  padding: 9px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: var(--font-ui);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.fellowship-btn-secondary:hover {
+  border-color: var(--primary, #C76140);
+}
+
+.fellowship-amen-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--pill-bg, #FAFAF8);
+  border: 1.5px solid var(--border, #e8e6df);
+  border-radius: 14px;
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text, #1e293b);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.fellowship-amen-btn.prayed {
+  background: rgba(199, 97, 64, 0.12);
+  border-color: var(--primary, #C76140);
+  color: var(--primary, #C76140);
+}
+
+.fellowship-amen-btn.prayed .amen-icon {
+  transform: scale(1.2);
+}
+

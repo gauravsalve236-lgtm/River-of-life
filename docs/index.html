@@ -8,7 +8,7 @@
   <script>
     // Force immediate hard purge of all stale Service Workers and CacheStorage
     (function() {
-      const CURRENT_VER = "v104_FELLOWSHIP_HUB_TAB";
+      const CURRENT_VER = "v105_FELLOWSHIP_HUB_PAGE_AND_PALETTE";
       if (localStorage.getItem("rol_app_ver") !== CURRENT_VER) {
         localStorage.setItem("rol_app_ver", CURRENT_VER);
         if ('serviceWorker' in navigator) {
@@ -265,60 +265,61 @@
               </div>
             </div>
 
-            <!-- 3-STEP GUIDED DAILY SPIRITUAL FLOW TRACK -->
-            <div class="daily-flow-journey-card" style="background: var(--surface, #ffffff); border: 1.5px solid var(--border, rgba(0,0,0,0.08)); border-radius: 20px; padding: 14px 16px; margin: 0 0 16px 0; box-shadow: 0 4px 18px rgba(0,0,0,0.03); position: relative; z-index: 2;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                <div style="display: flex; align-items: center; gap: 6px;">
-                  <span style="font-size: 15px;">🌊</span>
-                  <strong style="font-size: 13.5px; font-weight: 800; color: var(--text);">Daily Spiritual Flow • आजचा आत्मिक प्रवास</strong>
-                </div>
-                <span id="daily-flow-progress-badge" style="font-size: 11.5px; font-weight: 800; color: var(--primary); background: rgba(158,22,34,0.08); padding: 3px 9px; border-radius: 12px; border: 1px solid rgba(158,22,34,0.15);">
-                  0/3 Complete
-                </span>
-              </div>
-              
-              <!-- 3-Step Action Pills Row -->
-              <div class="daily-flow-steps-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
-                <!-- Step 1: Pray -->
-                <button class="flow-step-btn" id="step-btn-pray" onclick="triggerDailyFlowStep('pray')" style="background: linear-gradient(135deg, rgba(254,243,199,0.7) 0%, rgba(254,215,170,0.5) 100%); border: 1px solid rgba(245,158,11,0.4); border-radius: 14px; padding: 10px 8px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; transition: all 0.2s ease;">
-                  <div style="display: flex; align-items: center; gap: 4px;">
-                    <span class="flow-step-icon">🌅</span>
-                    <span class="flow-step-status" id="step-status-pray" style="font-size: 11.5px; font-weight: 800; color: #9a3412;">1. Pray</span>
-                  </div>
-                  <span style="font-size: 11px; color: #7c2d12; font-weight: 700; white-space: nowrap;">सकाळची प्रार्थना</span>
-                </button>
-
-                <!-- Step 2: Read -->
-                <button class="flow-step-btn" id="step-btn-read" onclick="triggerDailyFlowStep('read')" style="background: linear-gradient(135deg, rgba(240,253,250,0.7) 0%, rgba(204,251,241,0.5) 100%); border: 1px solid rgba(13,148,136,0.35); border-radius: 14px; padding: 10px 8px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; transition: all 0.2s ease;">
-                  <div style="display: flex; align-items: center; gap: 4px;">
-                    <span class="flow-step-icon">📖</span>
-                    <span class="flow-step-status" id="step-status-read" style="font-size: 11.5px; font-weight: 800; color: #0f766e;">2. Read</span>
-                  </div>
-                  <span style="font-size: 11px; color: #115e59; font-weight: 700; white-space: nowrap;">आजचे वचन</span>
-                </button>
-
-                <!-- Step 3: Learn -->
-                <button class="flow-step-btn" id="step-btn-learn" onclick="triggerDailyFlowStep('learn')" style="background: linear-gradient(135deg, rgba(245,243,255,0.7) 0%, rgba(237,233,254,0.5) 100%); border: 1px solid rgba(124,58,237,0.35); border-radius: 14px; padding: 10px 8px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; transition: all 0.2s ease;">
-                  <div style="display: flex; align-items: center; gap: 4px;">
-                    <span class="flow-step-icon">💡</span>
-                    <span class="flow-step-status" id="step-status-learn" style="font-size: 11.5px; font-weight: 800; color: #6d28d9;">3. Learn</span>
-                  </div>
-                  <span style="font-size: 11px; color: #5b21b6; font-weight: 700; white-space: nowrap;">मूळ शब्द व मनन</span>
-                </button>
-              </div>
-            </div>
-
-            <!-- Prominent Home Search Input Field -->
-            <div class="home-search-bar-container" style="margin: 0 0 16px 0;">
-              <div class="home-prominent-search-box" onclick="switchTab('discover'); setTimeout(() => document.getElementById('search-input-main')?.focus(), 150);" style="display: flex; align-items: center; gap: 12px; background: var(--surface, #ffffff); border: 1.5px solid var(--border, rgba(0,0,0,0.08)); border-radius: 16px; padding: 13px 18px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); cursor: pointer; transition: all 0.2s ease;">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--text-muted, #64748b)" stroke-width="2.3"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                <span id="home-search-placeholder-text" data-i18n="search_placeholder" style="flex: 1; font-size: 14.5px; font-weight: 600; color: var(--text-muted, #64748b); font-family: var(--font-ui);">Search Bible, Topics, or Questions...</span>
-                <span id="home-search-explore-badge" data-i18n="search_explore" style="font-size: 11.5px; font-weight: 800; color: var(--primary); background: rgba(143,18,29,0.08); padding: 4px 9px; border-radius: 8px;">Explore</span>
-              </div>
-            </div>
-
             <!-- TODAY TAB FEED -->
             <div id="home-feed-today-container">
+
+              <!-- 3-STEP GUIDED DAILY SPIRITUAL FLOW TRACK -->
+              <div class="daily-flow-journey-card" style="background: var(--surface, #ffffff); border: 1.5px solid var(--border, rgba(0,0,0,0.08)); border-radius: 20px; padding: 14px 16px; margin: 0 0 16px 0; box-shadow: 0 4px 18px rgba(0,0,0,0.03); position: relative; z-index: 2;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                  <div style="display: flex; align-items: center; gap: 6px;">
+                    <span style="font-size: 15px;">🌊</span>
+                    <strong style="font-size: 13.5px; font-weight: 800; color: var(--text);">Daily Spiritual Flow • आजचा आत्मिक प्रवास</strong>
+                  </div>
+                  <span id="daily-flow-progress-badge" style="font-size: 11.5px; font-weight: 800; color: var(--primary); background: rgba(158,22,34,0.08); padding: 3px 9px; border-radius: 12px; border: 1px solid rgba(158,22,34,0.15);">
+                    0/3 Complete
+                  </span>
+                </div>
+                
+                <!-- 3-Step Action Pills Row -->
+                <div class="daily-flow-steps-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+                  <!-- Step 1: Pray -->
+                  <button class="flow-step-btn" id="step-btn-pray" onclick="triggerDailyFlowStep('pray')" style="background: linear-gradient(135deg, rgba(254,243,199,0.7) 0%, rgba(254,215,170,0.5) 100%); border: 1px solid rgba(245,158,11,0.4); border-radius: 14px; padding: 10px 8px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; transition: all 0.2s ease;">
+                    <div style="display: flex; align-items: center; gap: 4px;">
+                      <span class="flow-step-icon">🌅</span>
+                      <span class="flow-step-status" id="step-status-pray" style="font-size: 11.5px; font-weight: 800; color: #9a3412;">1. Pray</span>
+                    </div>
+                    <span style="font-size: 11px; color: #7c2d12; font-weight: 700; white-space: nowrap;">सकाळची प्रार्थना</span>
+                  </button>
+
+                  <!-- Step 2: Read -->
+                  <button class="flow-step-btn" id="step-btn-read" onclick="triggerDailyFlowStep('read')" style="background: linear-gradient(135deg, rgba(240,253,250,0.7) 0%, rgba(204,251,241,0.5) 100%); border: 1px solid rgba(13,148,136,0.35); border-radius: 14px; padding: 10px 8px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; transition: all 0.2s ease;">
+                    <div style="display: flex; align-items: center; gap: 4px;">
+                      <span class="flow-step-icon">📖</span>
+                      <span class="flow-step-status" id="step-status-read" style="font-size: 11.5px; font-weight: 800; color: #0f766e;">2. Read</span>
+                    </div>
+                    <span style="font-size: 11px; color: #115e59; font-weight: 700; white-space: nowrap;">आजचे वचन</span>
+                  </button>
+
+                  <!-- Step 3: Learn -->
+                  <button class="flow-step-btn" id="step-btn-learn" onclick="triggerDailyFlowStep('learn')" style="background: linear-gradient(135deg, rgba(245,243,255,0.7) 0%, rgba(237,233,254,0.5) 100%); border: 1px solid rgba(124,58,237,0.35); border-radius: 14px; padding: 10px 8px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; transition: all 0.2s ease;">
+                    <div style="display: flex; align-items: center; gap: 4px;">
+                      <span class="flow-step-icon">💡</span>
+                      <span class="flow-step-status" id="step-status-learn" style="font-size: 11.5px; font-weight: 800; color: #6d28d9;">3. Learn</span>
+                    </div>
+                    <span style="font-size: 11px; color: #5b21b6; font-weight: 700; white-space: nowrap;">मूळ शब्द व मनन</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Prominent Home Search Input Field -->
+              <div class="home-search-bar-container" style="margin: 0 0 16px 0;">
+                <div class="home-prominent-search-box" onclick="switchTab('discover'); setTimeout(() => document.getElementById('search-input-main')?.focus(), 150);" style="display: flex; align-items: center; gap: 12px; background: var(--surface, #ffffff); border: 1.5px solid var(--border, rgba(0,0,0,0.08)); border-radius: 16px; padding: 13px 18px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); cursor: pointer; transition: all 0.2s ease;">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--text-muted, #64748b)" stroke-width="2.3"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                  <span id="home-search-placeholder-text" data-i18n="search_placeholder" style="flex: 1; font-size: 14.5px; font-weight: 600; color: var(--text-muted, #64748b); font-family: var(--font-ui);">Search Bible, Topics, or Questions...</span>
+                  <span id="home-search-explore-badge" data-i18n="search_explore" style="font-size: 11.5px; font-weight: 800; color: var(--primary); background: rgba(143,18,29,0.08); padding: 4px 9px; border-radius: 8px;">Explore</span>
+                </div>
+              </div>
+
               <!-- YouVersion Style Verse of the Day Card (Directly below Greeting) -->
               <div class="youversion-vod-card" id="card-daily-verse-home" onclick="openFullscreenVOD()" style="position: relative; overflow: hidden; border-radius: 22px; min-height: 340px; background-color: #0b0f19; margin: 0 0 16px 0; box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: flex; flex-direction: column; justify-content: space-between; cursor: pointer;" title="Tap to open full image, save to gallery or share status">
                 <div class="youversion-vod-bg" id="vod-dynamic-bg" style="position: absolute; inset: 0; background-size: cover; background-position: center; background-image: url('assets/daily_verses/stars.png');"></div>
@@ -462,9 +463,8 @@
                   <img src="assets/icons/living_water_drop.svg" alt="Droplet" style="width: 58px; height: 58px; object-fit: contain; filter: drop-shadow(0 4px 12px rgba(45,212,191,0.5));">
                 </div>
               </div>
-              </div>
 
-                            <!-- EDUCATIONAL BIBLICAL MICRO-LEARNING SECTION (WORD OF THE DAY & CONTEXT) -->
+              <!-- EDUCATIONAL BIBLICAL MICRO-LEARNING SECTION (WORD OF THE DAY & CONTEXT) -->
               <div class="educational-microlearning-section" id="educational-microlearning-section" style="margin: 0 0 16px 0;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                   <div>
@@ -718,8 +718,223 @@
                 </div>
                 <button class="btn-play-quiz" data-i18n="quiz_card_btn">Play Quiz &rarr;</button>
               </div>
-
             </div> <!-- /.home-grid-layout -->
+            </div> <!-- /#home-feed-today-container -->
+
+            <!-- FELLOWSHIP HUB FEED (COMMUNITY & CHURCHES) -->
+            <div id="home-feed-community-container" class="fellowship-feed-container" style="display: none;">
+              
+              <!-- Fellowship Hub Category Filter Pills -->
+              <div class="fellowship-filter-scroll">
+                <button class="fellowship-category-chip active" onclick="filterFellowshipHub('all', this)">🏛️ All Churches (सर्व)</button>
+                <button class="fellowship-category-chip" onclick="filterFellowshipHub('live', this)">🔴 Live Services (थेट सभा)</button>
+                <button class="fellowship-category-chip" onclick="filterFellowshipHub('discussions', this)">💬 Faith Discussions (चर्चा)</button>
+                <button class="fellowship-category-chip" onclick="filterFellowshipHub('prayer', this)">🙏 Prayer Wall (प्रार्थना भिंत)</button>
+                <button class="fellowship-category-chip" onclick="filterFellowshipHub('photos', this)">📸 Photo Stream (सामायिक क्षण)</button>
+              </div>
+
+              <!-- Hero Spotlight: Church of the Day & Live Stream Alert -->
+              <div class="fellowship-card fellowship-item" data-category="live" style="background: var(--surface, #FCFBF9); border: 1.5px solid var(--border); overflow: hidden;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                  <span class="fellowship-live-tag">
+                    <span class="pulse-dot"></span>
+                    <span>LIVE NOW • थेट सुरू</span>
+                  </span>
+                  <span style="font-size: 12px; font-weight: 700; color: var(--steel-muted, #A3A6AE);">👥 84 Active Worshippers</span>
+                </div>
+                
+                <h3 style="font-family: var(--font-ui); font-size: 18px; font-weight: 800; color: var(--text); margin: 0 0 6px 0;">
+                  Friday Family Prayer & Praise Fellowship
+                </h3>
+                <p style="font-size: 13.5px; color: var(--text-muted); line-height: 1.5; margin: 0 0 14px 0;">
+                  शुक्रवारची कौटुंबिक प्रार्थना व पवित्र वचन अभ्यास • Pastor John & Sister Mary (Bethel AG Church, Pune)
+                </p>
+
+                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                  <button class="fellowship-btn-primary" onclick="openLiveMeetingRoom('Friday Family Prayer', 'Bethel AG Church')">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+                    <span>Join Live Gathering / सभेत सामील व्हा</span>
+                  </button>
+                  <button class="fellowship-btn-secondary" onclick="shareMeetingLink('Friday Family Prayer', 'https://meet.jit.si/RiverOfLife_Fellowship')">
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                    <span>Share / शेअर करा</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Church Scripture & Pastor Discussion Card -->
+              <div class="fellowship-card fellowship-item" data-category="discussions">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                  <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(199,97,64,0.12); color: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px;">
+                    PW
+                  </div>
+                  <div>
+                    <h4 style="font-size: 14.5px; font-weight: 800; margin: 0; color: var(--text);">Pastor Samuel Waghmare</h4>
+                    <span style="font-size: 11.5px; color: var(--steel-muted, #A3A6AE); font-weight: 600;">Grace Fellowship Church • 2h ago</span>
+                  </div>
+                  <span style="margin-left: auto; font-size: 11.5px; font-weight: 800; color: var(--primary); background: rgba(199,97,64,0.08); padding: 3px 8px; border-radius: 8px;">
+                    Scripture Talk
+                  </span>
+                </div>
+
+                <h3 style="font-size: 16.5px; font-weight: 800; color: var(--text); margin: 0 0 8px 0; line-height: 1.4;">
+                  "तुमच्या जीवनात 'जीवनाचे पाणी' (River of Life) म्हणजे काय? रोजच्या संघर्षात ख्रिस्ताची शांती कशी अनुभवता?"
+                </h3>
+                <p style="font-size: 13.5px; color: var(--text-muted); line-height: 1.55; margin: 0 0 14px 0;">
+                  योहान ४:१४ — "मी जे पाणी त्याला देईन ते त्याच्यामध्ये निरंतर जीवनासाठी उसळणाऱ्या पाण्याचा झरा होईल." मंडळीतील सर्व बंधू-भगिनींनी आपले आत्मिक अनुभव कमेंटमध्ये सांगावेत.
+                </p>
+
+                <!-- Interactive Comment Input Field -->
+                <div style="display: flex; gap: 8px; margin-bottom: 14px;">
+                  <input type="text" id="fellowship-discussion-input" placeholder="तुमचे विचार किंवा साक्ष लिहा (Share your thoughts)..." style="flex: 1; background: var(--pill-bg, #FAFAF8); border: 1.5px solid var(--border); border-radius: 12px; padding: 10px 14px; font-size: 13px; font-family: var(--font-ui); color: var(--text); outline: none;">
+                  <button class="fellowship-btn-primary" onclick="submitFellowshipDiscussion()" style="padding: 10px 16px;">
+                    Post
+                  </button>
+                </div>
+
+                <!-- Featured Community Comments Stream -->
+                <div id="fellowship-comments-stream" style="display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--border); padding-top: 12px;">
+                  <div style="background: var(--pill-bg, #FAFAF8); border-radius: 12px; padding: 10px 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                      <strong style="font-size: 12.5px; color: var(--text);">Sister Rachel K.</strong>
+                      <span style="font-size: 11px; color: var(--steel-muted, #A3A6AE);">35m ago</span>
+                    </div>
+                    <p style="font-size: 12.5px; color: var(--text-muted); margin: 0; line-height: 1.45;">
+                      कठीण परिस्थितीत जेव्हा आपण देवाच्या वचनावर विश्वास ठेवतो, तेव्हा खरोखर अंतःकरणात एक अद्भुत शांती व तृप्ती मिळते. प्रभूचे आभार!
+                    </p>
+                  </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px; font-size: 12.5px; color: var(--steel-muted, #A3A6AE);">
+                  <button class="fellowship-amen-btn" onclick="prayAmen(this, 'discuss-likes-count')">
+                    <span class="amen-icon">❤️</span>
+                    <span id="discuss-likes-count">142</span>
+                    <span>Encourage / स्तुती</span>
+                  </button>
+                  <span style="font-weight: 600;">💬 28 Community Responses</span>
+                </div>
+              </div>
+
+              <!-- Community Prayer Wall Section -->
+              <div class="fellowship-card fellowship-item" data-category="prayer">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                  <div style="display: flex; align-items: center; gap: 6px;">
+                    <span style="font-size: 18px;">🙏</span>
+                    <h3 style="font-size: 16.5px; font-weight: 800; color: var(--text); margin: 0;">Community Prayer Wall • प्रार्थना भिंत</h3>
+                  </div>
+                  <button class="fellowship-btn-secondary" onclick="openSubmitPrayerModal()" style="font-size: 12px; padding: 6px 12px;">
+                    + Request Prayer
+                  </button>
+                </div>
+
+                <!-- Prayer Request Item 1 -->
+                <div style="background: var(--pill-bg, #FAFAF8); border: 1px solid var(--border); border-radius: 14px; padding: 12px 14px; margin-bottom: 10px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <span style="font-size: 13px; font-weight: 800; color: var(--text);">Sunita S. (Pune)</span>
+                    <span style="font-size: 11px; font-weight: 700; color: #d97706; background: rgba(245,158,11,0.12); padding: 2px 8px; border-radius: 6px;">Healing / आरोग्य</span>
+                  </div>
+                  <p style="font-size: 13px; color: var(--text-muted); line-height: 1.5; margin: 0 0 10px 0;">
+                    माझ्या आईच्या शस्त्रक्रियेनंतरच्या उत्तम आरोग्यासाठी व लवकर बरी होण्यासाठी मंडळीने एकत्र प्रार्थना करावी ही नम्र विनंती.
+                  </p>
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <button class="fellowship-amen-btn" onclick="prayAmen(this, 'amen-count-1')">
+                      <span class="amen-icon">🙏</span>
+                      <span id="amen-count-1">84</span>
+                      <span>Pray Amen / आमेन</span>
+                    </button>
+                    <span style="font-size: 11.5px; color: var(--steel-muted, #A3A6AE); font-weight: 600;">84 Believers Standing in Faith</span>
+                  </div>
+                </div>
+
+                <!-- Prayer Request Item 2 -->
+                <div style="background: var(--pill-bg, #FAFAF8); border: 1px solid var(--border); border-radius: 14px; padding: 12px 14px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <span style="font-size: 13px; font-weight: 800; color: var(--text);">Rahul & Family (Nashik)</span>
+                    <span style="font-size: 11px; font-weight: 700; color: #0f766e; background: rgba(13,148,136,0.12); padding: 2px 8px; border-radius: 6px;">Wisdom & Exams / ज्ञान</span>
+                  </div>
+                  <p style="font-size: 13px; color: var(--text-muted); line-height: 1.5; margin: 0 0 10px 0;">
+                    मुलांच्या आगामी स्पर्धा परीक्षांसाठी देवाचे आत्मिक ज्ञान व मार्गदर्शन लाभावे म्हणून प्रार्थना करा.
+                  </p>
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <button class="fellowship-amen-btn" onclick="prayAmen(this, 'amen-count-2')">
+                      <span class="amen-icon">🙏</span>
+                      <span id="amen-count-2">62</span>
+                      <span>Pray Amen / आमेन</span>
+                    </button>
+                    <span style="font-size: 11.5px; color: var(--steel-muted, #A3A6AE); font-weight: 600;">62 Believers Standing in Faith</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Shared Moments & Church Photo Stream -->
+              <div class="fellowship-card fellowship-item" data-category="photos">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                  <div style="display: flex; align-items: center; gap: 6px;">
+                    <span style="font-size: 18px;">📸</span>
+                    <h3 style="font-size: 16.5px; font-weight: 800; color: var(--text); margin: 0;">Moments of Grace • सामायिक क्षण</h3>
+                  </div>
+                  <span style="font-size: 12px; font-weight: 700; color: var(--primary);">River Fellowship Stream</span>
+                </div>
+
+                <!-- Visual Photo Card with River Stars Artwork -->
+                <div style="position: relative; border-radius: 16px; overflow: hidden; height: 180px; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); margin-bottom: 12px; display: flex; align-items: flex-end; padding: 16px; box-sizing: border-box;">
+                  <div style="position: absolute; inset: 0; background-image: url('assets/daily_verses/stars.png'); background-size: cover; opacity: 0.5;"></div>
+                  <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.85) 100%);"></div>
+                  
+                  <div style="position: relative; z-index: 2;">
+                    <span style="font-size: 11px; font-weight: 800; color: #f59e0b; background: rgba(0,0,0,0.5); padding: 2px 8px; border-radius: 6px; display: inline-block; margin-bottom: 4px;">
+                      Worship Night Highlights
+                    </span>
+                    <h4 style="font-size: 15px; font-weight: 800; color: #ffffff; margin: 0 0 2px 0;">Youth Praise & Marathi Hymns Fellowship</h4>
+                    <span style="font-size: 12px; color: rgba(255,255,255,0.8);">St. Paul Church Youth Group, Mumbai • 120+ Gathered</span>
+                  </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <button class="fellowship-amen-btn" onclick="prayAmen(this, 'photo-likes-count')">
+                    <span class="amen-icon">❤️</span>
+                    <span id="photo-likes-count">215</span>
+                    <span>Bless / स्तुती</span>
+                  </button>
+                  <button class="fellowship-btn-secondary" onclick="showToast('Photo uploaded to fellowship stream! 📸')" style="font-size: 12px; padding: 6px 12px;">
+                    📸 Share Church Photo
+                  </button>
+                </div>
+              </div>
+
+              <!-- Upcoming Church Gatherings & Sunday Services Directory -->
+              <div class="fellowship-card fellowship-item" data-category="live">
+                <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 14px;">
+                  <span style="font-size: 18px;">🏛️</span>
+                  <h3 style="font-size: 16.5px; font-weight: 800; color: var(--text); margin: 0;">Upcoming Sunday Services • आगामी रविवारच्या सभा</h3>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                  <!-- Church 1 -->
+                  <div style="background: var(--pill-bg, #FAFAF8); border: 1px solid var(--border); border-radius: 14px; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                      <h4 style="font-size: 14px; font-weight: 800; color: var(--text); margin: 0 0 2px 0;">River of Life Central Fellowship, Pune</h4>
+                      <span style="font-size: 12px; color: var(--text-muted);">Sunday Marathi Service • 10:00 AM IST</span>
+                    </div>
+                    <button class="fellowship-btn-secondary" onclick="showToast('Reminder set for Sunday 10:00 AM 🔔')" style="padding: 6px 12px; font-size: 12px;">
+                      🔔 Remind
+                    </button>
+                  </div>
+
+                  <!-- Church 2 -->
+                  <div style="background: var(--pill-bg, #FAFAF8); border: 1px solid var(--border); border-radius: 14px; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                      <h4 style="font-size: 14px; font-weight: 800; color: var(--text); margin: 0 0 2px 0;">Bethel AG Church, Camp Pune</h4>
+                      <span style="font-size: 12px; color: var(--text-muted);">Sunday Holy Communion • 09:30 AM IST</span>
+                    </div>
+                    <button class="fellowship-btn-secondary" onclick="showToast('Reminder set for Sunday 09:30 AM 🔔')" style="padding: 6px 12px; font-size: 12px;">
+                      🔔 Remind
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+            </div> <!-- /#home-feed-community-container -->
           </div> <!-- /#home-view-scroll-content -->
         </section>
 
@@ -2791,6 +3006,42 @@
       </div>
     </div>
 
+    <!-- Submit Prayer Request Drawer -->
+    <div id="drawer-submit-prayer" class="drawer-overlay">
+      <div class="ios-drawer-sheet modal-height" style="max-height: 80%;">
+        <div class="drawer-header-row">
+          <div class="grabber-bar"></div>
+          <h3>Submit Prayer Request / प्रार्थना विनंती</h3>
+          <button class="close-drawer-btn" onclick="closeDrawer('drawer-submit-prayer')">&times;</button>
+        </div>
+        <div class="drawer-body-settings" style="padding: 16px 20px; overflow-y: auto;">
+          <form onsubmit="return false;" style="display: flex; flex-direction: column; gap: 14px; text-align: left;">
+            <div class="form-input-group" style="display: flex; flex-direction: column; gap: 4px;">
+              <label style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Your Name & Church / नाव व मंडळी</label>
+              <input type="text" id="prayer-req-name" placeholder="e.g. Gaurav S. (Pune)" class="dropdown-selector" style="width: 100%; text-align: left; padding: 12px 14px; background: var(--bg); border: 1.5px solid var(--border); border-radius: 12px;">
+            </div>
+            <div class="form-input-group" style="display: flex; flex-direction: column; gap: 4px;">
+              <label style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Category / विषय</label>
+              <select id="prayer-req-category" class="dropdown-selector" style="width: 100%; padding: 12px 14px; background: var(--bg); border: 1.5px solid var(--border); border-radius: 12px;">
+                <option value="Healing">Healing / आरोग्य व रोगनिवारण</option>
+                <option value="Family">Family / कुटुंब व शांती</option>
+                <option value="Spiritual Growth">Spiritual Growth / आत्मिक वाढ</option>
+                <option value="Guidance & Exams">Guidance & Exams / शिक्षण व मार्गदर्शन</option>
+                <option value="Praise Report">Praise Report / उपकारस्तुती व साक्ष</option>
+              </select>
+            </div>
+            <div class="form-input-group" style="display: flex; flex-direction: column; gap: 4px;">
+              <label style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Prayer Details / प्रार्थनेचा विषय</label>
+              <textarea id="prayer-req-details" placeholder="तुमचा प्रार्थना विषय येथे लिहा (Describe your prayer need)..." class="dropdown-selector" style="width: 100%; height: 90px; text-align: left; padding: 12px 14px; background: var(--bg); border: 1.5px solid var(--border); border-radius: 12px; resize: none; font-family: inherit;"></textarea>
+            </div>
+            <button type="button" onclick="submitPrayerRequest()" class="fellowship-btn-primary" style="width: 100%; padding: 14px; font-size: 15px; margin-top: 6px;">
+              🙏 Submit to Community Prayer Wall
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
     <!-- Schedule Meeting Drawer -->
     <div id="drawer-schedule-meeting" class="drawer-overlay">
       <div class="ios-drawer-sheet modal-height" style="max-height: 85%;">
@@ -3528,9 +3779,9 @@
       <span id="toast-message">Copied to clipboard!</span>
     </div>
 
-  <!-- App Main Logic (Cache-Busted for Version 104 Fellowship Hub Tab) -->
-  <script src="sarvam-tts.js?v=104_FELLOWSHIP_HUB_TAB"></script>
-  <script src="app.js?v=104_FELLOWSHIP_HUB_TAB"></script>
+  <!-- App Main Logic (Cache-Busted for Version 105 Fellowship Hub Page & River Palette) -->
+  <script src="sarvam-tts.js?v=105_FELLOWSHIP_HUB_PAGE_AND_PALETTE"></script>
+  <script src="app.js?v=105_FELLOWSHIP_HUB_PAGE_AND_PALETTE"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 4.5s no matter what
