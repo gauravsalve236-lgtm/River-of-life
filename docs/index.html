@@ -8,7 +8,7 @@
   <script>
     // Force immediate hard purge of all stale Service Workers and CacheStorage
     (function() {
-      const CURRENT_VER = "v100_ORIGINAL_MIDDLE_SPLASH";
+      const CURRENT_VER = "v101_GET_STARTED_SPLASH_CTA";
       if (localStorage.getItem("rol_app_ver") !== CURRENT_VER) {
         localStorage.setItem("rol_app_ver", CURRENT_VER);
         if ('serviceWorker' in navigator) {
@@ -44,8 +44,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   
-  <!-- Main Stylesheet (Cache-Busted for Version 100 Original Middle Splash) -->
-  <link rel="stylesheet" href="index.css?v=100_ORIGINAL_MIDDLE_SPLASH">
+  <!-- Main Stylesheet (Cache-Busted for Version 101 Get Started Splash CTA) -->
+  <link rel="stylesheet" href="index.css?v=101_GET_STARTED_SPLASH_CTA">
 
   <!-- Official LiveKit WebRTC Client SDK -->
   <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.0.8/dist/livekit-client.umd.min.js"></script>
@@ -110,9 +110,13 @@
         <blockquote id="splash-verse-text">"तू जलांतून चालशील तेव्हा मी तुझ्याबरोबर असेन..."</blockquote>
         <cite id="splash-verse-ref">यशया ४३:२</cite>
       </div>
-      <div class="splash-loading-bar">
-        <div class="splash-loading-fill"></div>
-      </div>
+      <button id="splash-get-started-btn" class="splash-get-started-btn" aria-label="Get Started">
+        <span>Get Started</span>
+        <svg class="splash-arrow-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h14"></path>
+          <path d="M12 5l7 7-7 7"></path>
+        </svg>
+      </button>
     </div>
 
     <div class="splash-characters-container">

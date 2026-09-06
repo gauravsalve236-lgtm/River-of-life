@@ -10140,8 +10140,8 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
   -webkit-backdrop-filter: blur(16px) !important;
   border: 1.5px solid rgba(201, 138, 44, 0.35) !important;
   border-radius: 18px !important;
-  padding: 16px 22px !important;
-  margin-bottom: 24px !important;
+  padding: 14px 22px !important;
+  margin-bottom: 16px !important;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(201, 138, 44, 0.08) !important;
 }
 
@@ -10157,6 +10157,65 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
   color: #c98a2c !important;
   font-weight: 800 !important;
   text-shadow: none !important;
+}
+
+.splash-get-started-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  background: linear-gradient(135deg, #9e1622 0%, #c98a2c 100%) !important;
+  color: #ffffff !important;
+  font-family: var(--font-ui) !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px !important;
+  padding: 11px 26px !important;
+  border-radius: 28px !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.45) !important;
+  box-shadow: 0 6px 20px rgba(158, 22, 34, 0.32), 0 2px 8px rgba(201, 138, 44, 0.22) !important;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  animation: pulseGetStarted 2.6s ease-in-out infinite alternate !important;
+  z-index: 20 !important;
+  margin: 0 !important;
+  outline: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+.splash-get-started-btn:hover {
+  transform: translateY(-2px) scale(1.03) !important;
+  box-shadow: 0 10px 28px rgba(158, 22, 34, 0.42), 0 4px 14px rgba(201, 138, 44, 0.3) !important;
+}
+
+.splash-get-started-btn:active {
+  transform: translateY(1px) scale(0.97) !important;
+}
+
+.splash-get-started-btn .splash-arrow-icon {
+  width: 18px !important;
+  height: 18px !important;
+  stroke: #ffffff !important;
+  stroke-width: 2.5 !important;
+  transition: transform 0.25s ease !important;
+  animation: arrowNudge 1.6s ease-in-out infinite alternate !important;
+}
+
+@keyframes pulseGetStarted {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 4px 16px rgba(158, 22, 34, 0.3);
+  }
+  100% {
+    transform: scale(1.03);
+    box-shadow: 0 8px 24px rgba(158, 22, 34, 0.45), 0 0 14px rgba(201, 138, 44, 0.28);
+  }
+}
+
+@keyframes arrowNudge {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(4px); }
 }
 
 .splash-loading-bar {
@@ -10345,6 +10404,36 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
 }
 
 @media (max-width: 600px) {
+  .splash-logo-wrapper {
+    width: 80px !important;
+    height: 80px !important;
+    margin-bottom: 10px !important;
+  }
+  .splash-title {
+    font-size: 26px !important;
+    margin: 0 0 2px 0 !important;
+  }
+  .splash-subtitle {
+    font-size: 13px !important;
+    margin: 0 0 14px 0 !important;
+  }
+  .splash-verse-container {
+    padding: 12px 18px !important;
+    margin-bottom: 14px !important;
+    border-radius: 15px !important;
+  }
+  #splash-verse-text {
+    font-size: 13.5px !important;
+    line-height: 1.5 !important;
+  }
+  #splash-verse-ref {
+    font-size: 11.5px !important;
+  }
+  .splash-get-started-btn {
+    padding: 10px 22px !important;
+    font-size: 14px !important;
+    gap: 8px !important;
+  }
   .splash-characters-container {
     bottom: 14px !important;
     padding: 0 16px !important;
