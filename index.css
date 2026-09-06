@@ -10034,3 +10034,75 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
   transform: scale(0.92);
   box-shadow: 0 0 6px rgba(45, 212, 191, 0.2);
 }
+
+/* ==========================================================================
+   MODERN SPIRITUAL & EDUCATIONAL UI/UX PATTERNS (DAYPARTING & GLASS)
+   ========================================================================== */
+
+/* 1. Time-Aware Dayparting Atmospheric Glow */
+.ambient-dayparting-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 380px;
+  pointer-events: none;
+  z-index: 0;
+  transition: background 1s ease, opacity 1s ease;
+  opacity: 0.7;
+}
+.ambient-dayparting-glow.daypart-morning {
+  background: radial-gradient(circle at 50% -10%, rgba(245, 158, 11, 0.28) 0%, rgba(254, 240, 138, 0.15) 45%, transparent 75%);
+}
+.ambient-dayparting-glow.daypart-afternoon {
+  background: radial-gradient(circle at 50% -10%, rgba(13, 148, 136, 0.24) 0%, rgba(204, 251, 241, 0.14) 45%, transparent 75%);
+}
+.ambient-dayparting-glow.daypart-night {
+  background: radial-gradient(circle at 50% -10%, rgba(49, 46, 129, 0.38) 0%, rgba(30, 27, 75, 0.2) 50%, transparent 75%);
+}
+
+/* 2. Daily Flow Journey Buttons & Checkmark States */
+.flow-step-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+.flow-step-btn:active {
+  transform: scale(0.96);
+}
+.flow-step-btn.completed {
+  border-color: #22c55e !important;
+  background: linear-gradient(135deg, rgba(220,252,231,0.8) 0%, rgba(187,247,208,0.5) 100%) !important;
+}
+.flow-step-btn.completed .flow-step-status {
+  color: #15803d !important;
+}
+
+/* 3. Floating Devotional Mini-Player */
+.floating-devotional-miniplayer {
+  animation: slideUpFloat 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes slideUpFloat {
+  from {
+    transform: translateY(60px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+.miniplayer-disc.spinning {
+  animation: rotateDisc 4s linear infinite;
+}
+@keyframes rotateDisc {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* 4. Educational Microlearning Card Polish */
+.microlearning-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.microlearning-card:hover {
+  box-shadow: 0 6px 24px rgba(124,58,237,0.12);
+}

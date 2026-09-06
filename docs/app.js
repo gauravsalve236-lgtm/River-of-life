@@ -2256,6 +2256,10 @@ function getCurrentVOD() {
 }
 
 function renderDailyDevotion() {
+  if (typeof updateDaypartingAtmosphere === 'function') updateDaypartingAtmosphere();
+  if (typeof renderBiblicalMicroLearning === 'function') renderBiblicalMicroLearning();
+  if (typeof renderDailyFlowTrack === 'function') renderDailyFlowTrack();
+
   const now = new Date();
   const isEng = (state && state.translation === "eng");
   const options = { weekday: 'long', month: 'long', day: 'numeric' };
@@ -14239,6 +14243,663 @@ window.closeHeadwatersModal = function() {
   const playerBox = document.getElementById("headwaters-audio-player-box");
   if (playerBox) playerBox.classList.remove("playing");
 };
+
+/* ==========================================================================
+   MODERN SPIRITUAL & EDUCATIONAL CONTROLLERS
+   ========================================================================== */
+
+// 1. 31-DAY BIBLICAL WORD OF THE DAY & CONTEXT DATABASE
+const DAILY_BIBLICAL_WORDS_DB = [
+  {
+    "id": 1,
+    "term": "Agape (ἀγάπη)",
+    "origin": "Greek (ग्रीक)",
+    "pronunciation": "अगापे",
+    "meaningMr": "निस्वार्थी, बिनशर्त आणि आत्मसमर्पक दैवी प्रीती",
+    "meaningEn": "Unconditional, sacrificial divine love of God",
+    "insightMr": "मानवी प्रेम परिस्थितीवर अवलंबून असते, परंतु 'अगापे' प्रेम आपल्या योग्यतेवर नव्हे तर देवाच्या स्वभावधर्मावर आधारलेले आहे. हे प्रेम स्वतःचा त्याग करून इतरांचे कल्याण शोधते.",
+    "refMr": "१ योहान ४:८ • 'देव प्रीती आहे'",
+    "refEn": "1 John 4:8",
+    "bookKey": "1-john",
+    "chapter": 4,
+    "verse": 8
+  },
+  {
+    "id": 2,
+    "term": "Shalom (שָׁלוֹם)",
+    "origin": "Hebrew (हिब्रू)",
+    "pronunciation": "शालोम",
+    "meaningMr": "परिपूर्ण स्वर्गीय शांती, संपूर्णता आणि आरोग्य",
+    "meaningEn": "Completeness, wholeness, health and deep peace",
+    "insightMr": "'शालोम' म्हणजे केवळ संघर्षाचा अभाव नव्हे, तर जीवनातील सर्व क्षेत्रांत—मन, शरीर, नातेसंबंध आणि आत्मा—देवाने दिलेली परिपूर्ण सुसंवादता व समाधान.",
+    "refMr": "योहान १४:२७ • 'मी माझी शांती तुम्हांस देतो'",
+    "refEn": "John 14:27",
+    "bookKey": "john",
+    "chapter": 14,
+    "verse": 27
+  },
+  {
+    "id": 3,
+    "term": "Hesed (חֶסֶד)",
+    "origin": "Hebrew (हिब्रू)",
+    "pronunciation": "हेसेद",
+    "meaningMr": "अखंड, विश्वासू, दयाळूपूर्ण आणि कराराची अढळ प्रीती",
+    "meaningEn": "Steadfast, loyal, covenant love and tender mercy",
+    "insightMr": "जुना करारातील हा सर्वात श्रीमंत शब्द आहे. जेव्हा मानव अविश्वासू ठरतो, तेव्हाही देव आपल्या 'हेसेद' (अखंड कृपेमुळे) कराराला कधीही मोडत नाही.",
+    "refMr": "विलापगीते ३:२२-२३ • 'त्याच्या दया रोज सकाळी नव्या असतात'",
+    "refEn": "Lamentations 3:22",
+    "bookKey": "lamentations",
+    "chapter": 3,
+    "verse": 22
+  },
+  {
+    "id": 4,
+    "term": "Rhema (ῥῆμα)",
+    "origin": "Greek (ग्रीक)",
+    "pronunciation": "रेमा",
+    "meaningMr": "विशिष्ट क्षणी आत्म्याने उच्चारलेले जिवंत व सामर्थी वचन",
+    "meaningEn": "The spoken, living word tailored for the present moment",
+    "insightMr": "लिखित शास्त्रवचन जेव्हा पवित्र आत्म्याच्या प्रकाशाने थेट तुमच्या आजच्या परिस्थितीशी बोलते, तेव्हा ते 'रेमा' बनते आणि संकटांवर विजय मिळवण्याचे सामर्थ्य देते.",
+    "refMr": "रोमकरांस १०:१७ • 'विश्वास वचनाच्या ऐकण्याने येतो'",
+    "refEn": "Romans 10:17",
+    "bookKey": "romans",
+    "chapter": 10,
+    "verse": 17
+  },
+  {
+    "id": 5,
+    "term": "Ruach (רוּחַ)",
+    "origin": "Hebrew (हिब्रू)",
+    "pronunciation": "रुआख",
+    "meaningMr": "देवाचा श्वास, वारा आणि जीवन देणारा पवित्र आत्मा",
+    "meaningEn": "Breath of God, wind, and life-giving Holy Spirit",
+    "insightMr": "उत्पत्तीमध्ये देवाने मानवाच्या नाकपुड्यांत जो श्वास फुंकला तोच 'रुआख' आहे. हाच आत्मा आजही कोरड्या आणि थकलेल्या हाडांना नवे जीवन देतो.",
+    "refMr": "यहेज्केल ३७:९ • 'हे आत्म्या, ये व या मृतांवर फुंकर घाल'",
+    "refEn": "Ezekiel 37:9",
+    "bookKey": "ezekiel",
+    "chapter": 37,
+    "verse": 9
+  },
+  {
+    "id": 6,
+    "term": "Koinonia (κοινωνία)",
+    "origin": "Greek (ग्रीक)",
+    "pronunciation": "कोयोनिया",
+    "meaningMr": "ख्रिस्तामधील घनिष्ठ सहभागिता, ऐक्य आणि आत्मिक नाते",
+    "meaningEn": "Intimate fellowship, communion, and shared life in Christ",
+    "insightMr": "हे केवळ औपचारिक भेटणे नव्हे, तर एकमेकांची दुःखे व आनंद वाटून घेणे, प्रार्थना करणे आणि ख्रिस्ताच्या एकाच शरीराचे अवयव म्हणून प्रेमाने जगणे आहे.",
+    "refMr": "प्रेषितांची कृत्ये २:४२ • 'ते सहभागितेत तत्पर राहिले'",
+    "refEn": "Acts 2:42",
+    "bookKey": "acts",
+    "chapter": 2,
+    "verse": 42
+  },
+  {
+    "id": 7,
+    "term": "Makarios (μακάριος)",
+    "origin": "Greek (ग्रीक)",
+    "pronunciation": "मकारिओस",
+    "meaningMr": "परिस्थितीपलीकडची स्वर्गीय धन्यता आणि आंतरिक समाधान",
+    "meaningEn": "Supreme blessedness and inward joy independent of worldly circumstances",
+    "insightMr": "डोंगरावरील प्रवचनात येशूने 'धन्य' (मकारिओस) म्हटले. हे सुख बाह्य संपत्तीवर नव्हे तर देवाच्या सान्निध्यात असण्यावर अवलंबून असते.",
+    "refMr": "मत्तय ५:३ • 'जे आत्म्यात दीन ते धन्य'",
+    "refEn": "Matthew 5:3",
+    "bookKey": "matthew",
+    "chapter": 5,
+    "verse": 3
+  },
+  {
+    "id": 8,
+    "term": "Emunah (אֱמוּנָה)",
+    "origin": "Hebrew (हिब्रू)",
+    "pronunciation": "एमुना",
+    "meaningMr": "स्थिर, अढळ आणि कृतीमध्ये प्रकट होणारा विश्वासूपणा",
+    "meaningEn": "Steadfast faith, firmness, and active loyalty",
+    "insightMr": "बायबलमधील विश्वास ही केवळ बौद्धिक सहमती नाही, तर संकटातही देवाला घट्ट धरून ठेवण्याची आणि त्याच्या वचनानुसार चालण्याची स्थिर कृती आहे.",
+    "refMr": "हबक्कूक २:४ • 'नीतिमान आपल्या विश्वासाने जगेल'",
+    "refEn": "Habakkuk 2:4",
+    "bookKey": "habakkuk",
+    "chapter": 2,
+    "verse": 4
+  },
+  {
+    "id": 9,
+    "term": "Charis (χάρις)",
+    "origin": "Greek (ग्रीक)",
+    "pronunciation": "खारिस",
+    "meaningMr": "अपात्र मानवाला विनामूल्य मिळणारी देवाची उद्धारक कृपा",
+    "meaningEn": "Unmerited favor, divine grace and goodwill of God",
+    "insightMr": "न्याय म्हणजे जे आपण कमावले ते मिळणे; दया म्हणजे जी शिक्षा आपल्याला मिळायला हवी ती न मिळणे; आणि कृपा म्हणजे जे आपण कधीही कमवू शकत नाही ते स्वर्गीय दान मिळणे.",
+    "refMr": "इफिसकरांस २:८ • 'कृपेनेच विश्वासाच्या द्वारे तुमचे तारण झाले आहे'",
+    "refEn": "Ephesians 2:8",
+    "bookKey": "ephesians",
+    "chapter": 2,
+    "verse": 8
+  },
+  {
+    "id": 10,
+    "term": "Yireh (יִרְאֶה)",
+    "origin": "Hebrew (हिब्रू)",
+    "pronunciation": "यिरेह (यहोवा-यिरे)",
+    "meaningMr": "परमेश्वर स्वतः काळजी घेतो आणि वेळेवर अद्भुत पुरवठा करतो",
+    "meaningEn": "The Lord will see and provide in the exact time of need",
+    "insightMr": "अब्राहामाने मोरीया पर्वतावर परमेश्वराला 'यहोवा-यिरे' म्हटले. देव आपल्या गरजा आधीच पाहतो आणि आपल्या कल्पनेपेक्षा उत्तम पुरवठा करतो.",
+    "refMr": "उत्पत्ती २२:१४ • 'परमेश्वराच्या पर्वतावर पुरवले जाईल'",
+    "refEn": "Genesis 22:14",
+    "bookKey": "genesis",
+    "chapter": 22,
+    "verse": 14
+  },
+  {
+    "id": 11,
+    "term": "Metanoia (μετάνοια)",
+    "origin": "Greek (ग्रीक)",
+    "pronunciation": "मेटानोया",
+    "meaningMr": "विचारांचे, दृष्टीकोनाचे आणि जीवनाचे आमूलाग्र दैवी परिवर्तन",
+    "meaningEn": "A transformative change of heart, mind, and direction towards God",
+    "insightMr": "हे केवळ पश्चात्तापाचे अश्रू नव्हे, तर जुन्या स्वार्थी मार्गापासून १८० अंश फिरून ख्रिस्ताच्या दिशेने नव्या मनाने चालणे आहे.",
+    "refMr": "रोमकरांस १२:२ • 'आपल्या मनाच्या नवीकरणाने रूपांतरित व्हा'",
+    "refEn": "Romans 12:2",
+    "bookKey": "romans",
+    "chapter": 12,
+    "verse": 2
+  },
+  {
+    "id": 12,
+    "term": "Dunamis (δύναμις)",
+    "origin": "Greek (ग्रीक)",
+    "pronunciation": "दुनामिस",
+    "meaningMr": "अशक्य गोष्टी शक्य करणारे पवित्र आत्म्याचे चमत्कारिक सामर्थ्य",
+    "meaningEn": "Miraculous, inherent divine power and explosive ability",
+    "insightMr": "इंग्रजीतील 'Dynamite' शब्द या ग्रीक शब्दावरून आला आहे. जेव्हा पवित्र आत्मा आपल्यात येतो, तेव्हा तो संकटांवर मात करण्याचे अलौकिक सामर्थ्य देतो.",
+    "refMr": "प्रेषितांची कृत्ये १:८ • 'पवित्र आत्मा तुमच्यावर येईल तेव्हा सामर्थ्य पावाल'",
+    "refEn": "Acts 1:8",
+    "bookKey": "acts",
+    "chapter": 1,
+    "verse": 8
+  },
+  {
+    "id": 13,
+    "term": "Rapha (רָפָא)",
+    "origin": "Hebrew (हिब्रू)",
+    "pronunciation": "राफा (यहोवा-राफा)",
+    "meaningMr": "शारीरिक, मानसिक व आत्मिक जखमा बऱ्या करणारा आरोग्यदाता",
+    "meaningEn": "The Lord who heals, restores, and makes whole",
+    "insightMr": "कडू पाण्याचे गोड पाण्यात रूपांतर करणाऱ्या परमेश्वराने अभिवचन दिले: 'मी परमेश्वर तुझा आरोग्यदाता आहे.' तो आजही प्रत्येक आजारातून मुक्ती देतो.",
+    "refMr": "निर्गम १५:२६ • 'मी तुझा आरोग्यदाता परमेश्वर आहे'",
+    "refEn": "Exodus 15:26",
+    "bookKey": "exodus",
+    "chapter": 15,
+    "verse": 26
+  },
+  {
+    "id": 14,
+    "term": "Parakletos (παράκλητος)",
+    "origin": "Greek (ग्रीक)",
+    "pronunciation": "पाराक्लीतोस",
+    "meaningMr": "संकटसमयी पाठीशी उभा राहणारा साहाय्यकर्ता व सांत्वनकर्ता",
+    "meaningEn": "One called alongside to help, advocate, intercessor, comforter",
+    "insightMr": "येशूने पवित्र आत्म्याला 'पाराक्लीतोस' म्हटले—असा जवळचा मित्र जो कोर्टात तुमचा वकील बनतो आणि संकटात तुमचा हात धरून चालवतो.",
+    "refMr": "योहान १४:१६ • 'तो तुम्हांला दुसरा साहाय्यकर्ता देईल'",
+    "refEn": "John 14:16",
+    "bookKey": "john",
+    "chapter": 14,
+    "verse": 16
+  },
+  {
+    "id": 15,
+    "term": "Nissi (נִסִּי)",
+    "origin": "Hebrew (हिब्रू)",
+    "pronunciation": "निस्सी (यहोवा-निस्सी)",
+    "meaningMr": "परमेश्वर आमचा विजयी ध्वज आणि युद्धातील रक्षणकर्ता",
+    "meaningEn": "The Lord is my banner of rallying, defense, and victory",
+    "insightMr": "जेव्हा मोशेने आपले हात वर धरले, तेव्हा इस्राएल विजयी झाले. आमची लढाई मानवाविरुद्ध नाही तर आत्मिक आहे, आणि ख्रिस्तच आमचा विजय आहे.",
+    "refMr": "निर्गम १७:१५ • 'यहोवा-निस्सी (परमेश्वर माझा ध्वज)'",
+    "refEn": "Exodus 17:15",
+    "bookKey": "exodus",
+    "chapter": 17,
+    "verse": 15
+  },
+  {
+    "id": 16,
+    "term": "Zoë (ζωή)",
+    "origin": "Greek (ग्रीक)",
+    "pronunciation": "झोए",
+    "meaningMr": "ख्रिस्तामधील चिरंतन, समृद्ध आणि ईश्वरी जीवन",
+    "meaningEn": "The uncreated, eternal, abundant life of God Himself",
+    "insightMr": "शारीरिक जीवनाला ग्रीकमध्ये 'बायोस' (Bios) म्हणतात, परंतु 'झोए' म्हणजे साक्षात देवाचे अमर आणि समृद्ध जीवन जे ख्रिस्तावर विश्वास ठेवणाऱ्याला लाभते.",
+    "refMr": "योहान १०:१० • 'मी यासाठी आलो की त्यांना जीवन (झोए) मिळावे'",
+    "refEn": "John 10:10",
+    "bookKey": "john",
+    "chapter": 10,
+    "verse": 10
+  },
+  {
+    "id": 17,
+    "term": "El Shaddai (אֵל שַׁדַּי)",
+    "origin": "Hebrew (हिब्रू)",
+    "pronunciation": "एल शद्दाय",
+    "meaningMr": "सर्वसमर्थ आणि अमर्याद विपुलतेने पुरवणारा देव",
+    "meaningEn": "God Almighty, the all-sufficient and all-bountiful One",
+    "insightMr": "हा शब्द देवाच्या अमर्याद मातृवत् पोषणाचा आणि सार्वभौम शक्तीचा परिपाक आहे. आपल्या प्रत्येक कमतरतेपेक्षा देव कितीतरी पटीने मोठा आहे.",
+    "refMr": "उत्पत्ती १७:१ • 'मी सर्वसमर्थ देव आहे; माझ्यासमोर चाल'",
+    "refEn": "Genesis 17:1",
+    "bookKey": "genesis",
+    "chapter": 17,
+    "verse": 1
+  },
+  {
+    "id": 18,
+    "term": "Eucharisteo (εὐχαριστέω)",
+    "origin": "Greek (ग्रीक)",
+    "pronunciation": "युखरिस्तेओ",
+    "meaningMr": "कृपेची जाणीव ठेवून अंतःकरणातून व्यक्त केलेली कृतज्ञता",
+    "meaningEn": "Giving thanks from the recognition of grace (Charis)",
+    "insightMr": "या शब्दात 'खारिस' (कृपा) लपलेली आहे. प्रभू भोजन घेताना येशूने भाकर मोडून प्रथम उपकार मानले (युखरिस्तेओ). कृतज्ञतेत चमत्काराचे बीज असते.",
+    "refMr": "१ थेस्सलनीकाकरांस ५:१८ • 'सर्व परिस्थितीत उपकार माना'",
+    "refEn": "1 Thessalonians 5:18",
+    "bookKey": "1-thessalonians",
+    "chapter": 5,
+    "verse": 18
+  },
+  {
+    "id": 19,
+    "term": "Abba (אַבָּא)",
+    "origin": "Aramaic (अरामी)",
+    "pronunciation": "आब्बा",
+    "meaningMr": "अत्यंत प्रेमळ, विश्वासू आणि घनिष्ठ स्वर्गीय पिता",
+    "meaningEn": "An intimate, tender cry of a child to their loving Father",
+    "insightMr": "हा केवळ औपचारिक देवाचा उल्लेख नव्हे, तर लहान मूल ज्या विश्वासाने आपल्या वडिलांना 'बाबा' म्हणते, तसा घनिष्ठ आणि निर्भय संबंध दर्शवतो.",
+    "refMr": "रोमकरांस ८:१५ • 'ज्याच्याद्वारे आपण आब्बा, पित्या अशी हाक मारतो'",
+    "refEn": "Romans 8:15",
+    "bookKey": "romans",
+    "chapter": 8,
+    "verse": 15
+  },
+  {
+    "id": 20,
+    "term": "Doxa (δόξα)",
+    "origin": "Greek (ग्रीक)",
+    "pronunciation": "दोक्सा",
+    "meaningMr": "देवाचे स्वर्गीय तेज, सौंदर्य, महत्त्व आणि प्रगट झालेले गौरव",
+    "meaningEn": "The manifest glory, splendor, and majestic presence of God",
+    "insightMr": "हिब्रूमधील 'काबोद' (वजन/महत्त्व) आणि ग्रीकमधील 'दोक्सा' हे दर्शवतात की देवाचे गौरव ही काल्पनिक गोष्ट नसून त्याचे सामर्थ्य दृश्यमान होणे आहे.",
+    "refMr": "योहान १:१४ • 'आम्ही त्याचे गौरव पाहिले'",
+    "refEn": "John 1:14",
+    "bookKey": "john",
+    "chapter": 1,
+    "verse": 14
+  },
+  {
+    "id": 21,
+    "term": "Kadosh (קָדוֹשׁ)",
+    "origin": "Hebrew (हिब्रू)",
+    "pronunciation": "कादोश",
+    "meaningMr": "जगापासून वेगळा, अत्यंत शुद्ध, निष्कलंक आणि पवित्र",
+    "meaningEn": "Holy, set apart, sacred, and infinitely pure",
+    "insightMr": "स्वर्गातील देवदूत अखंड गर्जतात: 'कादोश, कादोश, कादोश' (पवित्र, पवित्र, पवित्र). तो सर्व दोषांपासून अलिप्त आणि संपूर्ण नीतीमान आहे.",
+    "refMr": "यशया ६:३ • 'पवित्र, पवित्र, पवित्र सैन्यांचा परमेश्वर'",
+    "refEn": "Isaiah 6:3",
+    "bookKey": "isaiah",
+    "chapter": 6,
+    "verse": 3
+  },
+  {
+    "id": 22,
+    "term": "Hallelujah (הַלְלוּיָהּ)",
+    "origin": "Hebrew (हिब्रू)",
+    "pronunciation": "हल्लेलूयाह",
+    "meaningMr": "अत्यंत उत्साहाने व आदराने परमेश्वराची स्तुती व जयजयकार करा",
+    "meaningEn": "Praise Yahweh! Joyful, exuberant adoration of the Lord",
+    "insightMr": "'हलाल' (उत्साहाने उंचावणे) आणि 'याह' (परमेश्वर) मिळून हा शब्द बनला आहे. ही संपूर्ण विश्वाची देवाप्रती सर्वोच्च स्तुती आहे.",
+    "refMr": "स्तोत्रसंहिता १५०:६ • 'श्वास असणारे सर्व काही परमेश्वराची स्तुती करो!'",
+    "refEn": "Psalm 150:6",
+    "bookKey": "psalms",
+    "chapter": 150,
+    "verse": 6
+  },
+  {
+    "id": 23,
+    "term": "Chara (χαρά)",
+    "origin": "Greek (ग्रीक)",
+    "pronunciation": "खारा",
+    "meaningMr": "संकटातही आतून उसळणारा पवित्र आत्म्याचा अखंड आनंद",
+    "meaningEn": "Supernatural joy springing from faith rather than circumstances",
+    "insightMr": "आनंद (Happiness) घटनांवर अवलंबून असतो, परंतु 'खारा' (Joy) हा आत्म्याचे फळ आहे जो तुरुंगात किंवा वादळातही गाणे गाण्याचे सामर्थ्य देतो.",
+    "refMr": "गलतीकरांस ५:२२ • 'आत्म्याचे फळ प्रीती, आनंद, शांती आहे'",
+    "refEn": "Galatians 5:22",
+    "bookKey": "galatians",
+    "chapter": 5,
+    "verse": 22
+  },
+  {
+    "id": 24,
+    "term": "Hosanna (הוֹשַׁע נָא)",
+    "origin": "Hebrew (हिब्रू)",
+    "pronunciation": "होसान्ना",
+    "meaningMr": "'आता आम्हाला सोडव व विजय दे' - राजाचा जयघोष",
+    "meaningEn": "Save now, we pray! A cry of adoration and plea for deliverance",
+    "insightMr": "यरुशलेमेमध्ये येशूचा प्रवेश होताना लोकांनी झावळ्या पसरून 'होसान्ना' म्हटले. ही केवळ प्रार्थना नव्हे तर तारणावरचा विजयोत्सव आहे.",
+    "refMr": "मत्तय २१:९ • 'दावीदाच्या पुत्राला होसान्ना!'",
+    "refEn": "Matthew 21:9",
+    "bookKey": "matthew",
+    "chapter": 21,
+    "verse": 9
+  },
+  {
+    "id": 25,
+    "term": "Teshuvah (תְּשׁוּבָה)",
+    "origin": "Hebrew (हिब्रू)",
+    "pronunciation": "तेशुव्हा",
+    "meaningMr": "भटकलेल्या मार्गावरून देवाच्या प्रेमळ बाहूंत परत फिरणे",
+    "meaningEn": "Returning, turning back to God with wholehearted repentance",
+    "insightMr": "उडत्या पुत्राने दूर देशातून आपल्या वडिलांच्या घराकडे परत येणे म्हणजे 'तेशुव्हा'. देव आपल्या परत येण्याची वाट पाहत उभा आहे.",
+    "refMr": "लूक १५:२० • 'तो उठून आपल्या बापाकडे गेला'",
+    "refEn": "Luke 15:20",
+    "bookKey": "luke",
+    "chapter": 15,
+    "verse": 20
+  },
+  {
+    "id": 26,
+    "term": "Epiphany (ἐπιφάνεια)",
+    "origin": "Greek (ग्रीक)",
+    "pronunciation": "एपिफनी",
+    "meaningMr": "अंधकारात सत्याचा आणि देवाच्या उपस्थितीचा तेजस्वी प्रकाश पडणे",
+    "meaningEn": "The glorious manifestation and shining forth of divine presence",
+    "insightMr": "जेव्हा जीवनातील गूढ आणि कठीण प्रसंगात देवाची योजना विजेसारखी स्पष्ट होते, तेव्हा आत्म्याला स्वर्गीय समज व दिशा मिळते.",
+    "refMr": "२ तीमथ्य १:१० • 'आपल्या तारणहाराच्या प्रकट होण्याने हे उघड झाले'",
+    "refEn": "2 Timothy 1:10",
+    "bookKey": "2-timothy",
+    "chapter": 1,
+    "verse": 10
+  },
+  {
+    "id": 27,
+    "term": "Logos (λόγος)",
+    "origin": "Greek (ग्रीक)",
+    "pronunciation": "लोगोस",
+    "meaningMr": "देवाची सनातन बुद्धी, योजना आणि देहधारी झालेले जिवंत वचन",
+    "meaningEn": "The eternal Word, Reason, and Mind of God made flesh in Christ",
+    "insightMr": "सुरुवातीला वचन (लोगोस) होते, आणि वचन देवासह होते, आणि वचन म्हणजेच देव होता. ख्रिस्तामध्ये देवाने स्वतःला मानवाला पूर्णपणे प्रगट केले.",
+    "refMr": "योहान १:१ • 'प्रारंभी शब्द होता'",
+    "refEn": "John 1:1",
+    "bookKey": "john",
+    "chapter": 1,
+    "verse": 1
+  },
+  {
+    "id": 28,
+    "term": "Eirene (εἰρήνη)",
+    "origin": "Greek (ग्रीक)",
+    "pronunciation": "इरेने",
+    "meaningMr": "सर्व बुद्धीपलीकडची मनाची आणि आत्म्याची अढळ शांती",
+    "meaningEn": "Peace, tranquility, and harmony with God",
+    "insightMr": "हिब्रूतील 'शालोम'चा ग्रीक समतुल्य शब्द. ही शांती बाह्य परिस्थिती शांत झाल्यावर मिळत नाही, तर वादळातही ख्रिस्तावर विश्वास ठेवल्याने आतून वाहते.",
+    "refMr": "फिलिप्पैकरांस ४:७ • 'देवाची शांती तुमच्या हृदयांचे रक्षण करील'",
+    "refEn": "Philippians 4:7",
+    "bookKey": "philippians",
+    "chapter": 4,
+    "verse": 7
+  },
+  {
+    "id": 29,
+    "term": "Soteria (σωτηρία)",
+    "origin": "Greek (ग्रीक)",
+    "pronunciation": "सोतेरिया",
+    "meaningMr": "पापापासून मुक्ती, आत्मिक संरक्षण आणि सार्वकालिक तारण",
+    "meaningEn": "Complete salvation, deliverance, preservation, and healing",
+    "insightMr": "'सोतेरिया'मध्ये केवळ स्वर्गात जाणे समाविष्ट नाही, तर आजच्या जीवनातील भीती, आजार आणि अंधाराच्या बंधनातून संपूर्ण मुक्ती समाविष्ट आहे.",
+    "refMr": "रोमकरांस १:१६ • 'सुवार्ता ही देवाचे तारणासाठी सामर्थ्य आहे'",
+    "refEn": "Romans 1:16",
+    "bookKey": "romans",
+    "chapter": 1,
+    "verse": 16
+  },
+  {
+    "id": 30,
+    "term": "Pneuma (πνεῦμα)",
+    "origin": "Greek (ग्रीक)",
+    "pronunciation": "न्यूमा",
+    "meaningMr": "मानवी आत्म्याला जिवंत करणारा स्वर्गीय आत्मा",
+    "meaningEn": "Spirit, sacred breath, and immaterial divine life",
+    "insightMr": "वारा कुठे वाहतो हे आपण ऐकतो पण पाहू शकत नाही; तसेच पवित्र आत्मा मानवी अंतःकरणात अदृश्यपणे महान परिवर्तन घडवून आणतो.",
+    "refMr": "योहान ३:८ • 'वारा जेथे पाहतो तेथे वाहतो'",
+    "refEn": "John 3:8",
+    "bookKey": "john",
+    "chapter": 3,
+    "verse": 8
+  },
+  {
+    "id": 31,
+    "term": "Maranatha (μαρὰν ἀθά)",
+    "origin": "Aramaic (अरामी)",
+    "pronunciation": "मारनाथा",
+    "meaningMr": "'हे आमच्या प्रभू, लवकर ये!' - ख्रिस्ताच्या पुनरागमनाची आशा",
+    "meaningEn": "Our Lord, come! An ancient apostolic prayer of longing for Christ",
+    "insightMr": "सुरुवातीच्या ख्रिस्ती मंडळीचे हे अभिवादन होते. प्रत्येक संकटाच्या शेवटी विश्वासी हृदयाची हीच अंतिम प्रार्थना आहे की ख्रिस्ताचे राज्य पूर्णतेस यावे.",
+    "refMr": "१ करिंथकरांस १६:२२ • 'मारनाथा'",
+    "refEn": "1 Corinthians 16:22",
+    "bookKey": "1-corinthians",
+    "chapter": 16,
+    "verse": 22
+  }
+];
+
+window.getTodayBiblicalWord = function() {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const diff = now - start;
+  const oneDay = 1000 * 60 * 60 * 24;
+  const dayOfYear = Math.floor(diff / oneDay);
+  const offset = (window.state && window.state.vodDayOffset) ? window.state.vodDayOffset : 0;
+  
+  const len = DAILY_BIBLICAL_WORDS_DB.length;
+  const idx = ((dayOfYear + offset) % len + len) % len;
+  return DAILY_BIBLICAL_WORDS_DB[idx];
+};
+
+window.renderBiblicalMicroLearning = function() {
+  const word = window.getTodayBiblicalWord();
+  if (!word) return;
+  
+  const isEng = (window.state && window.state.translation === "eng");
+  
+  const termEl = document.getElementById("micro-word-term");
+  const originEl = document.getElementById("micro-word-origin");
+  const pronEl = document.getElementById("micro-word-pronunciation");
+  const meaningEl = document.getElementById("micro-word-meaning");
+  const insightEl = document.getElementById("micro-word-insight");
+  const refEl = document.getElementById("micro-word-ref");
+  const dayBadge = document.getElementById("microlearning-day-badge");
+  
+  if (termEl) termEl.textContent = word.term;
+  if (originEl) originEl.textContent = word.origin;
+  if (pronEl) pronEl.textContent = `उच्चार: ${word.pronunciation}`;
+  if (meaningEl) meaningEl.textContent = isEng ? word.meaningEn : word.meaningMr;
+  if (insightEl) insightEl.textContent = isEng ? word.insightMr : word.insightMr;
+  if (refEl) refEl.textContent = isEng ? word.refEn : word.refMr;
+  if (dayBadge) dayBadge.textContent = `Day ${word.id}`;
+};
+
+window.speakMicroLearningWord = function() {
+  const word = window.getTodayBiblicalWord();
+  if (!word) return;
+  
+  const text = `${word.pronunciation}... ${word.meaningMr}... ${word.insightMr}`;
+  if (window.speechSynthesis) {{
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    const voices = window.speechSynthesis.getVoices() || [];
+    const mrVoice = voices.find(v => v.lang.includes('mr') || v.lang.includes('hi') || v.name.toLowerCase().includes('marathi') || v.name.toLowerCase().includes('hindi') || v.name.toLowerCase().includes('india'));
+    if (mrVoice) {{
+      utter.voice = mrVoice;
+      utter.lang = mrVoice.lang;
+    }} else {{
+      utter.lang = "hi-IN";
+    }}
+    utter.rate = 0.88;
+    window.speechSynthesis.speak(utter);
+    showToast(`🔊 ${word.term} - ${word.meaningMr} ✨`);
+  }} else {{
+    showToast(`📖 ${word.term}: ${word.meaningMr}`);
+  }}
+};
+
+window.openMicroLearningBibleChapter = function() {
+  const word = window.getTodayBiblicalWord();
+  if (word && word.bookKey) {
+    openReaderAndNavigate(word.bookKey, word.chapter, word.verse);
+  }
+};
+
+// 2. TIME-AWARE DAYPARTING ATMOSPHERE CONTROLLER
+window.updateDaypartingAtmosphere = function() {
+  const now = new Date();
+  const hours = now.getHours();
+  const glowEl = document.getElementById("ambient-dayparting-glow");
+  const greetingSubEl = document.getElementById("home-greeting-subtext");
+  const isEng = (window.state && window.state.translation === "eng");
+  
+  let daypart = "morning";
+  let subtextMr = "🌅 सकाळचा पवित्र विसावा व मार्गदर्शन";
+  let subtextEn = "🌅 Morning peace, grace & guidance";
+  
+  if (hours >= 12 && hours < 17) {
+    daypart = "afternoon";
+    subtextMr = "☀️ दुपारच्या प्रवाहात देवाची शांती अनुभवा";
+    subtextEn = "☀️ Walking in divine peace and clarity";
+  } else if (hours >= 17 || hours < 5) {
+    daypart = "night";
+    subtextMr = "🌙 शांत विसावा व कृतज्ञतेने विश्रांती";
+    subtextEn = "🌙 Rest, gratitude & evening blessing";
+  }
+  
+  if (glowEl) {
+    glowEl.className = `ambient-dayparting-glow daypart-${daypart}`;
+  }
+  if (greetingSubEl) {
+    greetingSubEl.textContent = isEng ? subtextEn : subtextMr;
+  }
+};
+
+// 3. 3-STEP GUIDED DAILY SPIRITUAL FLOW CONTROLLER
+window.getDailyFlowState = function() {
+  const todayStr = new Date().toISOString().split("T")[0];
+  const saved = localStorage.getItem(`river_daily_flow_${todayStr}`);
+  return saved ? JSON.parse(saved) : { pray: false, read: false, learn: false };
+};
+
+window.saveDailyFlowStep = function(stepName) {
+  const todayStr = new Date().toISOString().split("T")[0];
+  const current = window.getDailyFlowState();
+  current[stepName] = true;
+  localStorage.setItem(`river_daily_flow_${todayStr}`, JSON.stringify(current));
+  window.renderDailyFlowTrack();
+};
+
+window.renderDailyFlowTrack = function() {
+  const flow = window.getDailyFlowState();
+  const btnPray = document.getElementById("step-btn-pray");
+  const btnRead = document.getElementById("step-btn-read");
+  const btnLearn = document.getElementById("step-btn-learn");
+  const badge = document.getElementById("daily-flow-progress-badge");
+  
+  let count = 0;
+  if (flow.pray) { count++; if (btnPray) btnPray.classList.add("completed"); }
+  if (flow.read) { count++; if (btnRead) btnRead.classList.add("completed"); }
+  if (flow.learn) { count++; if (btnLearn) btnLearn.classList.add("completed"); }
+  
+  if (badge) {
+    badge.textContent = `${count}/3 Complete`;
+    if (count === 3) {
+      badge.textContent = "3/3 Complete 🎉";
+      badge.style.background = "rgba(34,197,94,0.15)";
+      badge.style.color = "#16a34a";
+      badge.style.borderColor = "rgba(34,197,94,0.3)";
+    }
+  }
+};
+
+window.triggerDailyFlowStep = function(stepName) {
+  if (stepName === 'pray') {
+    window.saveDailyFlowStep('pray');
+    openHeadwatersModal();
+  } else if (stepName === 'read') {
+    window.saveDailyFlowStep('read');
+    const vodEl = document.getElementById("card-daily-verse-home");
+    if (vodEl) {
+      vodEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      vodEl.style.transition = 'box-shadow 0.3s ease';
+      vodEl.style.boxShadow = '0 0 30px rgba(245,158,11,0.5)';
+      setTimeout(() => {
+        if (vodEl) vodEl.style.boxShadow = '';
+      }, 1600);
+    }
+    showToast("📖 आजचे वचन (Verse of the Day)");
+  } else if (stepName === 'learn') {
+    window.saveDailyFlowStep('learn');
+    const learnEl = document.getElementById("educational-microlearning-section");
+    if (learnEl) {
+      learnEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    showToast("💡 आजचा मूळ शब्द व मनन (Word of the Day)");
+  }
+};
+
+// 4. FLOATING DEVOTIONAL MINI-PLAYER CONTROLLER
+window.showFloatingMiniPlayer = function(title, subtitle, onToggle, onExpand) {
+  const playerEl = document.getElementById("floating-devotional-miniplayer");
+  if (!playerEl) return;
+  
+  playerEl.style.display = "flex";
+  const titleEl = document.getElementById("miniplayer-title");
+  const subEl = document.getElementById("miniplayer-subtitle");
+  const disc = document.getElementById("miniplayer-disc");
+  
+  if (titleEl) titleEl.textContent = title || "The Headwaters";
+  if (subEl) subEl.textContent = subtitle || "Guided Devotion";
+  if (disc) disc.classList.add("spinning");
+  
+  window._miniPlayerExpandCallback = onExpand;
+  window._miniPlayerToggleCallback = onToggle;
+};
+
+window.updateMiniPlayerState = function(isPlaying, timeStr) {
+  const toggleIcon = document.getElementById("miniplayer-toggle-icon");
+  const disc = document.getElementById("miniplayer-disc");
+  const timeEl = document.getElementById("miniplayer-time");
+  
+  if (toggleIcon) toggleIcon.textContent = isPlaying ? "⏸" : "▶";
+  if (disc) {
+    if (isPlaying) disc.classList.add("spinning");
+    else disc.classList.remove("spinning");
+  }
+  if (timeEl && timeStr) timeEl.textContent = timeStr;
+};
+
+window.toggleMiniPlayerPlayback = function() {
+  if (window._miniPlayerToggleCallback) {
+    window._miniPlayerToggleCallback();
+  } else if (window.playHeadwatersMorningAudio) {
+    window.playHeadwatersMorningAudio();
+  }
+};
+
+window.expandActiveMiniPlayer = function() {
+  if (window._miniPlayerExpandCallback) {
+    window._miniPlayerExpandCallback();
+  } else if (window.openHeadwatersModal) {
+    window.openHeadwatersModal();
+  }
+};
+
+window.dismissMiniPlayer = function() {
+  const playerEl = document.getElementById("floating-devotional-miniplayer");
+  if (playerEl) playerEl.style.display = "none";
+};
+
+
 
 window.headwatersAudioPlayer = {
   isPlaying: false,
