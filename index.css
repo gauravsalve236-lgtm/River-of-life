@@ -10261,7 +10261,7 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
 
 
 /* ==========================================================================
-   SPLASH SCREEN CHARACTERS (GALILEAN BOAT & JESUS WALKING ON LIVING RIVER)
+   SPLASH SCREEN CHARACTERS (PROPORTIONAL SIZING & ZERO WHITE FRINGE)
    ========================================================================== */
 .splash-characters-container {
   position: absolute !important;
@@ -10269,20 +10269,20 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
   left: 50% !important;
   transform: translateX(-50%) !important;
   width: 100% !important;
-  max-width: 780px !important;
-  height: 240px !important;
+  max-width: 960px !important;
+  height: 340px !important;
   display: flex !important;
   justify-content: space-between !important;
   align-items: flex-end !important;
-  padding: 0 36px !important;
+  padding: 0 40px !important;
   box-sizing: border-box !important;
   z-index: 6 !important;
   pointer-events: none !important;
 }
 
 .splash-boat-box {
-  width: 50% !important;
-  max-width: 320px !important;
+  width: 52% !important;
+  max-width: 440px !important;
   height: 100% !important;
   display: flex !important;
   align-items: flex-end !important;
@@ -10293,15 +10293,15 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
 .splash-boat-elem {
   width: 100% !important;
   height: auto !important;
-  max-height: 230px !important;
+  max-height: 330px !important;
   object-fit: contain !important;
   object-position: bottom left !important;
-  filter: drop-shadow(0 4px 14px rgba(13, 148, 136, 0.15)) !important;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.12)) !important;
 }
 
 .splash-jesus-box {
   width: 42% !important;
-  max-width: 220px !important;
+  max-width: 290px !important;
   height: 100% !important;
   display: flex !important;
   align-items: flex-end !important;
@@ -10312,40 +10312,42 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
 .splash-jesus-elem {
   width: 100% !important;
   height: auto !important;
-  max-height: 195px !important;
+  max-height: 270px !important;
   object-fit: contain !important;
   object-position: bottom right !important;
-  filter: drop-shadow(0 4px 16px rgba(245, 158, 11, 0.22)) !important;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.10)) !important;
 }
 
 @keyframes boatFloat {
   0% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-4px) rotate(0.8deg); }
-  100% { transform: translateY(-7px) rotate(-0.5deg); }
+  50% { transform: translateY(-5px) rotate(0.9deg); }
+  100% { transform: translateY(-9px) rotate(-0.6deg); }
 }
 
 @keyframes jesusFloat {
   0% { transform: translateY(0); }
-  100% { transform: translateY(-5px); }
+  100% { transform: translateY(-7px); }
 }
 
 @media (max-width: 600px) {
   .splash-characters-container {
-    bottom: 40px !important;
-    padding: 0 14px !important;
-    height: 185px !important;
+    bottom: 32px !important;
+    padding: 0 10px !important;
+    height: 260px !important;
     max-width: 100% !important;
   }
   .splash-boat-box {
-    width: 55% !important;
+    width: 58% !important;
+    max-width: 240px !important;
   }
   .splash-boat-elem {
-    max-height: 175px !important;
+    max-height: 250px !important;
   }
   .splash-jesus-box {
     width: 42% !important;
+    max-width: 175px !important;
   }
   .splash-jesus-elem {
-    max-height: 145px !important;
+    max-height: 205px !important;
   }
 }
