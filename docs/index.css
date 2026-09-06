@@ -3503,7 +3503,7 @@ body {
   font-size: 22px;
   font-weight: 800;
   letter-spacing: 0.5px;
-  color: #ffffff;
+  color: #1e293b;
   margin: 0 0 6px 0;
 }
 
@@ -5879,7 +5879,7 @@ input, textarea, select, [contenteditable="true"] {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: linear-gradient(160deg, #1c0407 0%, #4a0810 50%, #8f121d 100%);
+  background: linear-gradient(180deg, #ffffff 0%, #fbfaf7 55%, #f4ece1 100%);
   z-index: 99999;
   display: flex;
   flex-direction: column;
@@ -5911,9 +5911,9 @@ input, textarea, select, [contenteditable="true"] {
   height: 100%;
 }
 
-.wave-p1 { fill: rgba(229, 168, 59, 0.15); animation: waveMove1 12s ease-in-out infinite alternate; transform-origin: bottom center; }
+.wave-p1 { fill: rgba(158, 22, 34, 0.12); animation: waveMove1 12s ease-in-out infinite alternate; transform-origin: bottom center; }
 
-.wave-p2 { fill: rgba(255, 211, 105, 0.22); animation: waveMove2 8s ease-in-out infinite alternate; transform-origin: bottom center; }
+.wave-p2 { fill: rgba(201, 138, 44, 0.22); animation: waveMove2 8s ease-in-out infinite alternate; transform-origin: bottom center; }
 
 .splash-content {
   position: relative;
@@ -5961,7 +5961,7 @@ input, textarea, select, [contenteditable="true"] {
   font-family: var(--font-ui);
   font-size: 30px;
   font-weight: 800;
-  color: #ffffff;
+  color: #1e293b;
   margin: 0 0 6px 0;
   letter-spacing: 0.5px;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
@@ -5971,14 +5971,14 @@ input, textarea, select, [contenteditable="true"] {
   font-family: var(--font-sans);
   font-size: 14.5px;
   font-weight: 700;
-  color: #ffd369;
+  color: #9e1622;
   margin: 0 0 28px 0;
   letter-spacing: 1.5px;
   text-shadow: 0 1px 4px rgba(0,0,0,0.3);
 }
 
 .splash-verse-container {
-  background: rgba(30, 4, 8, 0.88);
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1.5px solid rgba(229, 168, 59, 0.45);
@@ -5995,7 +5995,7 @@ input, textarea, select, [contenteditable="true"] {
   line-height: 1.65;
   margin: 0 0 12px 0;
   font-style: italic;
-  color: #f0fdfd;
+  color: #1e293b;
 }
 
 #splash-verse-ref {
@@ -7000,7 +7000,7 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: linear-gradient(160deg, #1c0407 0%, #4a0810 50%, #8f121d 100%);
+  background: linear-gradient(180deg, #ffffff 0%, #fbfaf7 55%, #f4ece1 100%);
   z-index: 99999;
   display: flex;
   flex-direction: column;
@@ -7121,7 +7121,7 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
   font-family: var(--font-ui);
   font-size: 24px;
   font-weight: 800;
-  color: #ffffff;
+  color: #1e293b;
   margin: 0 0 6px 0;
   line-height: 1.25;
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
@@ -7697,7 +7697,7 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
   font-family: var(--font-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
   font-size: 25px;
   font-weight: 800;
-  color: #ffffff;
+  color: #1e293b;
   margin: 0 0 6px 0;
   line-height: 1.25;
   letter-spacing: -0.3px;
@@ -10105,4 +10105,77 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
 }
 .microlearning-card:hover {
   box-shadow: 0 6px 24px rgba(124,58,237,0.12);
+}
+
+
+/* ==============================================================================
+   LIGHT THEME SPLASH SCREEN (WHITE UPPER BACKGROUND & WAVES ON BELOW)
+   ============================================================================== */
+.splash-screen {
+  background: linear-gradient(180deg, #ffffff 0%, #fbfaf7 55%, #f5eee4 100%) !important;
+  color: #1e293b !important;
+}
+
+.splash-logo {
+  filter: drop-shadow(0 10px 24px rgba(158, 22, 34, 0.18)) !important;
+}
+
+.splash-logo-glow {
+  background: radial-gradient(circle, rgba(201, 138, 44, 0.28) 0%, rgba(201, 138, 44, 0) 70%) !important;
+}
+
+.splash-title {
+  color: #1e293b !important;
+  text-shadow: none !important;
+}
+
+.splash-subtitle {
+  color: #9e1622 !important;
+  text-shadow: none !important;
+}
+
+.splash-verse-container {
+  background: rgba(255, 255, 255, 0.92) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1.5px solid rgba(201, 138, 44, 0.35) !important;
+  border-radius: 18px !important;
+  padding: 16px 22px !important;
+  margin-bottom: 24px !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(201, 138, 44, 0.08) !important;
+}
+
+#splash-verse-text {
+  color: #1e293b !important;
+  font-style: italic !important;
+  font-size: 15px !important;
+  line-height: 1.6 !important;
+  text-shadow: none !important;
+}
+
+#splash-verse-ref {
+  color: #c98a2c !important;
+  font-weight: 800 !important;
+  text-shadow: none !important;
+}
+
+.splash-loading-bar {
+  background: rgba(0, 0, 0, 0.08) !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.06) !important;
+}
+
+.splash-loading-fill {
+  background: linear-gradient(90deg, #9e1622 0%, #c98a2c 100%) !important;
+}
+
+.splash-river-bg {
+  bottom: 0 !important;
+}
+
+.wave-p1 {
+  fill: rgba(158, 22, 34, 0.12) !important;
+}
+
+.wave-p2 {
+  fill: rgba(201, 138, 44, 0.22) !important;
 }
