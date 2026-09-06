@@ -10179,3 +10179,82 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
 .wave-p2 {
   fill: rgba(201, 138, 44, 0.22) !important;
 }
+
+
+/* ==============================================================================
+   COOL DYNAMIC MULTI-TIERED RIVER OF LIFE WAVES
+   ============================================================================== */
+.splash-river-bg {
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 280px !important;
+  z-index: 2 !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
+}
+
+.splash-wave-svg {
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+}
+
+.wave-layer {
+  transform-origin: bottom center;
+  transition: transform 0.3s ease;
+}
+
+.wave-layer-1 {
+  animation: riverFlow1 14s ease-in-out infinite alternate !important;
+}
+
+.wave-layer-2 {
+  animation: riverFlow2 9s ease-in-out infinite alternate !important;
+}
+
+.wave-layer-3 {
+  animation: riverFlow3 7s ease-in-out infinite alternate !important;
+}
+
+.wave-crest {
+  animation: riverFlow3 7s ease-in-out infinite alternate !important;
+  filter: drop-shadow(0 2px 8px rgba(251, 191, 36, 0.7)) !important;
+}
+
+@keyframes riverFlow1 {
+  0% {
+    transform: scaleY(1) skewX(0deg) translateY(0);
+  }
+  50% {
+    transform: scaleY(1.08) skewX(-2deg) translateY(-8px);
+  }
+  100% {
+    transform: scaleY(0.96) skewX(2deg) translateY(4px);
+  }
+}
+
+@keyframes riverFlow2 {
+  0% {
+    transform: scaleY(1) skewX(0deg) translateY(0);
+  }
+  50% {
+    transform: scaleY(0.94) skewX(3deg) translateY(6px);
+  }
+  100% {
+    transform: scaleY(1.06) skewX(-3deg) translateY(-6px);
+  }
+}
+
+@keyframes riverFlow3 {
+  0% {
+    transform: scaleY(1) translateY(0);
+  }
+  50% {
+    transform: scaleY(1.05) translateY(-5px);
+  }
+  100% {
+    transform: scaleY(0.97) translateY(3px);
+  }
+}
