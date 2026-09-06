@@ -51,9 +51,9 @@
 
 /* Theme 2: River Pure Light (Default & Main Theme) */
 .ios-theme-light {
-  --bg: #fbfaf7;           /* Clean Warm Ivory / Pure Soft Light */
+  --bg: #ffffff;           /* Clean Pure White Canvas */
   --bg-content: #ffffff;   /* Pure White Cards */
-  --bg-rgb: 251, 250, 247;
+  --bg-rgb: 255, 255, 255;
   --drawer-bg: #ffffff;
   --text: #1e293b;         /* Deep Slate Text */
   --text-muted: #64748b;   /* Refined Muted Text */
@@ -63,13 +63,15 @@
   --primary-glow: rgba(158, 22, 34, 0.2);
   --accent-gold: #c98a2c;  /* Warm Sacred Gold Accent */
   --accent-gold-light: rgba(201, 138, 44, 0.12);
-  --border: #ece7de;       /* Soft Clean Organic Border */
-  --border-rgb: 236, 231, 222;
-  --pill-bg: #f5f1e8;
+  --accent-teal: #0d9488;  /* Living Stream Teal */
+  --accent-teal-light: rgba(100, 181, 205, 0.12);
+  --border: #f1ede6;       /* Clean Soft Border */
+  --border-rgb: 241, 237, 230;
+  --pill-bg: #faf7f2;
   --card-bg: #ffffff;
-  --card-border: #ede8df;
+  --card-border: #f1ede6;
   --danger: #dc2626;
-  --sidebar-hover: #f5f1e8;
+  --sidebar-hover: #faf7f2;
 }
 
 /* Theme 3: Warm River Sepia (Sacred Parchment) */
@@ -10052,13 +10054,13 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
   opacity: 0.7;
 }
 .ambient-dayparting-glow.daypart-morning {
-  background: radial-gradient(circle at 50% -10%, rgba(245, 158, 11, 0.28) 0%, rgba(254, 240, 138, 0.15) 45%, transparent 75%);
+  background: radial-gradient(circle at 50% -10%, rgba(201, 138, 44, 0.14) 0%, rgba(251, 191, 36, 0.06) 45%, transparent 75%);
 }
 .ambient-dayparting-glow.daypart-afternoon {
-  background: radial-gradient(circle at 50% -10%, rgba(13, 148, 136, 0.24) 0%, rgba(204, 251, 241, 0.14) 45%, transparent 75%);
+  background: radial-gradient(circle at 50% -10%, rgba(13, 148, 136, 0.12) 0%, rgba(100, 181, 205, 0.06) 45%, transparent 75%);
 }
 .ambient-dayparting-glow.daypart-night {
-  background: radial-gradient(circle at 50% -10%, rgba(49, 46, 129, 0.38) 0%, rgba(30, 27, 75, 0.2) 50%, transparent 75%);
+  background: radial-gradient(circle at 50% -10%, rgba(158, 22, 34, 0.08) 0%, rgba(201, 138, 44, 0.05) 50%, transparent 75%);
 }
 
 /* 2. Daily Flow Journey Buttons & Checkmark States */
@@ -10157,65 +10159,6 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
   color: #c98a2c !important;
   font-weight: 800 !important;
   text-shadow: none !important;
-}
-
-.splash-get-started-btn {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 10px !important;
-  background: linear-gradient(135deg, #9e1622 0%, #c98a2c 100%) !important;
-  color: #ffffff !important;
-  font-family: var(--font-ui) !important;
-  font-size: 15px !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.5px !important;
-  padding: 11px 26px !important;
-  border-radius: 28px !important;
-  border: 1.5px solid rgba(255, 255, 255, 0.45) !important;
-  box-shadow: 0 6px 20px rgba(158, 22, 34, 0.32), 0 2px 8px rgba(201, 138, 44, 0.22) !important;
-  cursor: pointer !important;
-  pointer-events: auto !important;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
-  animation: pulseGetStarted 2.6s ease-in-out infinite alternate !important;
-  z-index: 20 !important;
-  margin: 0 !important;
-  outline: none !important;
-  -webkit-tap-highlight-color: transparent !important;
-}
-
-.splash-get-started-btn:hover {
-  transform: translateY(-2px) scale(1.03) !important;
-  box-shadow: 0 10px 28px rgba(158, 22, 34, 0.42), 0 4px 14px rgba(201, 138, 44, 0.3) !important;
-}
-
-.splash-get-started-btn:active {
-  transform: translateY(1px) scale(0.97) !important;
-}
-
-.splash-get-started-btn .splash-arrow-icon {
-  width: 18px !important;
-  height: 18px !important;
-  stroke: #ffffff !important;
-  stroke-width: 2.5 !important;
-  transition: transform 0.25s ease !important;
-  animation: arrowNudge 1.6s ease-in-out infinite alternate !important;
-}
-
-@keyframes pulseGetStarted {
-  0% {
-    transform: scale(1);
-    box-shadow: 0 4px 16px rgba(158, 22, 34, 0.3);
-  }
-  100% {
-    transform: scale(1.03);
-    box-shadow: 0 8px 24px rgba(158, 22, 34, 0.45), 0 0 14px rgba(201, 138, 44, 0.28);
-  }
-}
-
-@keyframes arrowNudge {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(4px); }
 }
 
 .splash-loading-bar {
@@ -10428,11 +10371,6 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
   }
   #splash-verse-ref {
     font-size: 11.5px !important;
-  }
-  .splash-get-started-btn {
-    padding: 10px 22px !important;
-    font-size: 14px !important;
-    gap: 8px !important;
   }
   .splash-characters-container {
     bottom: 14px !important;
