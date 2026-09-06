@@ -10258,3 +10258,94 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
     transform: scaleY(0.97) translateY(3px);
   }
 }
+
+
+/* ==========================================================================
+   SPLASH SCREEN CHARACTERS (GALILEAN BOAT & JESUS WALKING ON LIVING RIVER)
+   ========================================================================== */
+.splash-characters-container {
+  position: absolute !important;
+  bottom: 50px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: 100% !important;
+  max-width: 780px !important;
+  height: 240px !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: flex-end !important;
+  padding: 0 36px !important;
+  box-sizing: border-box !important;
+  z-index: 6 !important;
+  pointer-events: none !important;
+}
+
+.splash-boat-box {
+  width: 50% !important;
+  max-width: 320px !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: flex-end !important;
+  justify-content: flex-start !important;
+  animation: boatFloat 4.2s ease-in-out infinite alternate !important;
+}
+
+.splash-boat-elem {
+  width: 100% !important;
+  height: auto !important;
+  max-height: 230px !important;
+  object-fit: contain !important;
+  object-position: bottom left !important;
+  filter: drop-shadow(0 4px 14px rgba(13, 148, 136, 0.15)) !important;
+}
+
+.splash-jesus-box {
+  width: 42% !important;
+  max-width: 220px !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: flex-end !important;
+  justify-content: flex-end !important;
+  animation: jesusFloat 4.8s ease-in-out infinite alternate !important;
+}
+
+.splash-jesus-elem {
+  width: 100% !important;
+  height: auto !important;
+  max-height: 195px !important;
+  object-fit: contain !important;
+  object-position: bottom right !important;
+  filter: drop-shadow(0 4px 16px rgba(245, 158, 11, 0.22)) !important;
+}
+
+@keyframes boatFloat {
+  0% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-4px) rotate(0.8deg); }
+  100% { transform: translateY(-7px) rotate(-0.5deg); }
+}
+
+@keyframes jesusFloat {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-5px); }
+}
+
+@media (max-width: 600px) {
+  .splash-characters-container {
+    bottom: 40px !important;
+    padding: 0 14px !important;
+    height: 185px !important;
+    max-width: 100% !important;
+  }
+  .splash-boat-box {
+    width: 55% !important;
+  }
+  .splash-boat-elem {
+    max-height: 175px !important;
+  }
+  .splash-jesus-box {
+    width: 42% !important;
+  }
+  .splash-jesus-elem {
+    max-height: 145px !important;
+  }
+}
