@@ -10114,16 +10114,6 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
 .splash-screen {
   background: linear-gradient(180deg, #ffffff 0%, #fbfaf7 55%, #f5eee4 100%) !important;
   color: #1e293b !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
-  box-sizing: border-box !important;
-}
-
-.splash-content {
-  margin-top: -70px !important;
-  padding: 16px 20px !important;
 }
 
 .splash-logo {
@@ -10150,8 +10140,8 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
   -webkit-backdrop-filter: blur(16px) !important;
   border: 1.5px solid rgba(201, 138, 44, 0.35) !important;
   border-radius: 18px !important;
-  padding: 14px 20px !important;
-  margin-bottom: 18px !important;
+  padding: 16px 22px !important;
+  margin-bottom: 24px !important;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(201, 138, 44, 0.08) !important;
 }
 
