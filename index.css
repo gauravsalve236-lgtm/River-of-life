@@ -10114,6 +10114,16 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
 .splash-screen {
   background: linear-gradient(180deg, #ffffff 0%, #fbfaf7 55%, #f5eee4 100%) !important;
   color: #1e293b !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+}
+
+.splash-content {
+  margin-top: -70px !important;
+  padding: 16px 20px !important;
 }
 
 .splash-logo {
@@ -10140,8 +10150,8 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
   -webkit-backdrop-filter: blur(16px) !important;
   border: 1.5px solid rgba(201, 138, 44, 0.35) !important;
   border-radius: 18px !important;
-  padding: 16px 22px !important;
-  margin-bottom: 24px !important;
+  padding: 14px 20px !important;
+  margin-bottom: 18px !important;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(201, 138, 44, 0.08) !important;
 }
 
@@ -10219,31 +10229,46 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
 }
 
 .wave-crest {
-  animation: riverFlow3 7s ease-in-out infinite alternate !important;
+  animation: crestGleam 6s ease-in-out infinite alternate !important;
   filter: drop-shadow(0 2px 8px rgba(251, 191, 36, 0.7)) !important;
+}
+
+@keyframes crestGleam {
+  0% {
+    opacity: 0.7;
+    stroke-width: 3.5;
+  }
+  50% {
+    opacity: 1;
+    stroke-width: 4.5;
+  }
+  100% {
+    opacity: 0.8;
+    stroke-width: 3.5;
+  }
 }
 
 @keyframes riverFlow1 {
   0% {
-    transform: scaleY(1) skewX(0deg) translateY(0);
+    transform: scaleY(1) translateY(0);
   }
   50% {
-    transform: scaleY(1.08) skewX(-2deg) translateY(-8px);
+    transform: scaleY(1.08) translateY(-8px);
   }
   100% {
-    transform: scaleY(0.96) skewX(2deg) translateY(4px);
+    transform: scaleY(0.95) translateY(4px);
   }
 }
 
 @keyframes riverFlow2 {
   0% {
-    transform: scaleY(1) skewX(0deg) translateY(0);
+    transform: scaleY(1) translateY(0);
   }
   50% {
-    transform: scaleY(0.94) skewX(3deg) translateY(6px);
+    transform: scaleY(1.12) translateY(-10px);
   }
   100% {
-    transform: scaleY(1.06) skewX(-3deg) translateY(-6px);
+    transform: scaleY(0.92) translateY(6px);
   }
 }
 
@@ -10330,10 +10355,52 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
 }
 
 @media (max-width: 600px) {
+  .splash-screen {
+    justify-content: flex-start !important;
+    padding-top: calc(env(safe-area-inset-top, 0px) + 26px) !important;
+  }
+  .splash-content {
+    margin-top: 0 !important;
+    padding: 8px 16px !important;
+    max-width: 360px !important;
+  }
+  .splash-logo-wrapper {
+    width: 74px !important;
+    height: 74px !important;
+    margin-bottom: 6px !important;
+  }
+  .splash-title {
+    font-size: 24px !important;
+    margin: 0 0 2px 0 !important;
+  }
+  .splash-subtitle {
+    font-size: 13px !important;
+    margin: 0 0 12px 0 !important;
+  }
+  .splash-verse-container {
+    padding: 10px 16px !important;
+    margin-bottom: 12px !important;
+    border-radius: 14px !important;
+  }
+  #splash-verse-text {
+    font-size: 13px !important;
+    line-height: 1.45 !important;
+    margin: 0 0 6px 0 !important;
+  }
+  #splash-verse-ref {
+    font-size: 11.5px !important;
+  }
+  .splash-loading-bar {
+    width: 130px !important;
+    height: 4px !important;
+  }
+  .splash-river-bg {
+    height: 240px !important;
+  }
   .splash-characters-container {
-    bottom: 14px !important;
-    padding: 0 16px !important;
-    height: 175px !important;
+    bottom: 22px !important;
+    padding: 0 14px !important;
+    height: 190px !important;
     max-width: 100% !important;
   }
   .splash-boat-box {
