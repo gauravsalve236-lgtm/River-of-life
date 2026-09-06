@@ -180,8 +180,8 @@
       cleaned = cleaned.replace(/\s*\.\s*/g, '. ');
 
       // Insert subtle devotional breath pauses for key spiritual connectors and vocatives
-      cleaned = cleaned.replace(/(हे स्वर्गीय पित्या|हे प्रभू|हे देवा|प्रियांनो|आमेन)/g, '$1... ');
-      cleaned = cleaned.replace(/\s+(आणि|तेव्हा|म्हणून|कारण|तर|म्हणजे)\s+/g, ', $1 ');
+      cleaned = cleaned.replace(/(हे स्वर्गीय पित्या|हे प्रभू|हे देवा|प्रियांनो|आमेन|परमेश्वरा|पवित्र आत्म्या|येशू ख्रिस्ता)/g, '$1... ');
+      cleaned = cleaned.replace(/\s+(आणि|तेव्हा|म्हणून|कारण|तर|म्हणजे|परंतु|तथापि)\s+/g, ', $1 ');
 
       // Normalize whitespace
       cleaned = cleaned.replace(/\s+/g, ' ').trim();
@@ -547,35 +547,37 @@
 
       var isDevanagari = /[\u0900-\u097F]/.test(text || '');
       var lang = options.lang || (isDevanagari ? 'mr-IN' : 'en-IN');
-      var pace = options.pace !== undefined ? options.pace : 0.92;
+      var pace = options.pace !== undefined ? options.pace : 0.86;
       var cleanText = ScriptureOptimizer.optimizeForNarration(text, lang);
 
       var utterance = new SpeechSynthesisUtterance(cleanText);
-      utterance.lang = lang;
-      utterance.rate = Math.max(0.75, Math.min(1.4, pace));
-      utterance.pitch = 0.85; // Deep male pitch
+      utterance.rate = Math.max(0.75, Math.min(1.2, pace));
+      utterance.pitch = 0.88; // Deep, calm, devotional pitch
 
-      var voices = window.speechSynthesis.getVoices();
+      var voices = (window.speechSynthesis.getVoices && window.speechSynthesis.getVoices()) || [];
       var selectedVoice = null;
       if (isDevanagari) {
-        // Prioritize male voices
+        // Prioritize natural Indian Marathi / Hindi male voices
         selectedVoice = voices.find(function (v) { 
           var n = v.name.toLowerCase();
-          return (v.lang.startsWith('mr') || v.lang.startsWith('hi')) && (n.includes('male') || n.includes('madhav') || n.includes('hemant') || n.includes('manohar') || n.includes('mohan') || n.includes('ravi') || n.includes('david'));
+          return (v.lang.startsWith('mr') || v.lang.startsWith('hi')) && (n.includes('male') || n.includes('madhav') || n.includes('hemant') || n.includes('manohar') || n.includes('mohan') || n.includes('ravi') || n.includes('david') || n.includes('natural') || n.includes('google'));
         }) ||
         voices.find(function (v) { return v.lang === 'mr-IN' || v.lang === 'mr_IN' || v.lang.startsWith('mr'); }) ||
         voices.find(function (v) { return v.lang === 'hi-IN' || v.lang === 'hi_IN' || v.lang.startsWith('hi'); }) ||
-        voices.find(function (v) { return v.lang.includes('IN'); });
+        voices.find(function (v) { return v.lang.includes('IN') || (v.name && v.name.toLowerCase().includes('india')); });
       } else {
         selectedVoice = voices.find(function (v) { 
           var n = v.name.toLowerCase();
-          return (n.includes('male') || n.includes('george') || n.includes('david') || n.includes('guy') || n.includes('brian')) && (v.lang.startsWith('en'));
+          return (n.includes('natural') || n.includes('neural') || n.includes('male') || n.includes('george') || n.includes('david') || n.includes('guy') || n.includes('brian')) && (v.lang.startsWith('en'));
         }) ||
         voices.find(function (v) { return v.lang === 'en-IN' || v.lang === 'en-GB' || v.lang.startsWith('en'); });
       }
 
       if (selectedVoice) {
         utterance.voice = selectedVoice;
+        utterance.lang = selectedVoice.lang;
+      } else {
+        utterance.lang = isDevanagari ? 'mr-IN' : 'en-IN';
       }
 
       utterance.onend = function () {

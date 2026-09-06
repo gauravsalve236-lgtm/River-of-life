@@ -6211,9 +6211,27 @@ async function togglePrayerAudio() {
   // Fallback to Web SpeechSynthesis
   if ('speechSynthesis' in window) {
     window.speechSynthesis.cancel();
-    prayerUtterance = new SpeechSynthesisUtterance(prayerText);
-    prayerUtterance.lang = (activePrayerLang === "en") ? "en-US" : "mr-IN";
-    prayerUtterance.rate = 0.92;
+    const cleanPrayer = (window.SarvamTTS && window.SarvamTTS.optimizer)
+      ? window.SarvamTTS.optimizer.optimizeForNarration(prayerText, langCode)
+      : prayerText;
+    prayerUtterance = new SpeechSynthesisUtterance(cleanPrayer);
+    prayerUtterance.rate = (activePrayerLang === "en") ? 0.90 : 0.86;
+    prayerUtterance.pitch = 0.88;
+    
+    const voices = (window.speechSynthesis.getVoices && window.speechSynthesis.getVoices()) || [];
+    if (activePrayerLang === "mr") {
+      const mrVoice = voices.find(v => (v.lang.startsWith('mr') || v.lang.startsWith('hi')) && (v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('madhav') || v.name.toLowerCase().includes('hemant') || v.name.toLowerCase().includes('manohar') || v.name.toLowerCase().includes('mohan') || v.name.toLowerCase().includes('natural') || v.name.toLowerCase().includes('google'))) ||
+                      voices.find(v => v.lang.includes('mr')) ||
+                      voices.find(v => v.lang.includes('hi'));
+      if (mrVoice) {
+        prayerUtterance.voice = mrVoice;
+        prayerUtterance.lang = mrVoice.lang;
+      } else {
+        prayerUtterance.lang = "mr-IN";
+      }
+    } else {
+      prayerUtterance.lang = "en-US";
+    }
     
     prayerUtterance.onend = () => {
       isPrayerAudioPlaying = false;
@@ -12764,7 +12782,7 @@ window.selectMood = function(moodKey) {
 window.currentSingleAudio = null;
 window.currentAudioButton = null;
 
-window.playSingleVerseAudio = async function(text, btnElement, directAudioSrc) {
+window.playSingleVerseAudio = async function(text, btnElement, directAudioSrc, meta) {
   if (!text || !text.trim()) return;
 
   // Toggle pause only if clicking the SAME button that is already actively playing
@@ -12784,6 +12802,9 @@ window.playSingleVerseAudio = async function(text, btnElement, directAudioSrc) {
     try { window.currentSingleAudio.pause(); } catch(e) {}
     window.currentSingleAudio = null;
   }
+  if (window.speechSynthesis) {
+    try { window.speechSynthesis.cancel(); } catch(e) {}
+  }
   if (window.currentAudioButton && window.currentAudioButton !== btnElement) {
     window.currentAudioButton.innerHTML = `<span>▶ ऐका</span>`;
     window.currentAudioButton = null;
@@ -12794,15 +12815,29 @@ window.playSingleVerseAudio = async function(text, btnElement, directAudioSrc) {
     btnElement.innerHTML = `<span>⏳ लोड होत आहे...</span>`;
   }
 
-  // 1. Direct high-fidelity natural audio file (if provided)
-  if (directAudioSrc) {
+  // 1. Resolve WordProject Authentic Recorded Audio Stream
+  let resolvedAudioSrc = directAudioSrc;
+  if (!resolvedAudioSrc && meta && meta.bookKey) {
+    let bNum = 40;
+    const cleanKey = String(meta.bookKey).toLowerCase().replace(".json", "").trim();
+    const foundMeta = (typeof booksMetadataMr !== 'undefined' && booksMetadataMr.length > 0)
+      ? booksMetadataMr.find(b => b.filename.replace(".json", "").toLowerCase() === cleanKey || b.engName.toLowerCase() === cleanKey)
+      : null;
+    if (foundMeta) {
+      bNum = foundMeta.id;
+    }
+    const chapterNum = meta.chapter || 1;
+    resolvedAudioSrc = `https://audio.wordproject.org/bibles/app/audio/28/${bNum}/${chapterNum}.mp3`;
+  }
+
+  if (resolvedAudioSrc && (resolvedAudioSrc.startsWith("http://") || resolvedAudioSrc.startsWith("https://") || resolvedAudioSrc.endsWith(".mp3") || resolvedAudioSrc.endsWith(".wav"))) {
     try {
-      const audio = new Audio(directAudioSrc);
+      const audio = new Audio(resolvedAudioSrc);
       window.currentSingleAudio = audio;
 
       audio.onplay = () => {
         if (btnElement) btnElement.innerHTML = `<span>⏸ थांबवा</span>`;
-        showToast("🔊 विसावा वाचन सुरू आहे (Natural Devotional Marathi Voice) ✨");
+        showToast("🔊 पवित्र शास्त्र वाचन सुरू आहे (Authentic Marathi Bible Audio) ✨");
       };
 
       audio.onended = () => {
@@ -12812,8 +12847,8 @@ window.playSingleVerseAudio = async function(text, btnElement, directAudioSrc) {
       };
 
       audio.onerror = () => {
-        console.warn("Direct audio file not found, falling back to neural synthesis...");
-        window.playSingleVerseAudio(text, btnElement, null);
+        console.warn("Recorded audio stream notice, falling back to devotional speech synthesis...");
+        fallbackBrowserSpeech(text, btnElement);
       };
 
       await audio.play();
@@ -12823,86 +12858,49 @@ window.playSingleVerseAudio = async function(text, btnElement, directAudioSrc) {
     }
   }
 
-  showToast("⏳ ऑडिओ तयार होत आहे (Natural Devotional Marathi Voice)...");
-
-  try {
-    let audioUrl = null;
-    let voiceName = "Manohar HD (Natural Marathi)";
-
-    // Try MultiEngine TTS client (ElevenLabs / Azure / Sarvam)
-    if (window.SarvamTTS && window.SarvamTTS.client && window.SarvamTTS.client.synthesizeText) {
-      try {
-        const res = await window.SarvamTTS.client.synthesizeText(text, {
-          lang: "mr-IN",
-          speaker: (state && state.sarvamVoice) || "gee_elevenlabs"
-        });
-        if (res && res.audioUrl) {
-          audioUrl = res.audioUrl;
-          voiceName = res.voiceName || "Natural Marathi";
-        }
-      } catch (synErr) {
-        console.warn("TTS synthesis error:", synErr);
-      }
-    }
-
-    if (audioUrl) {
-      if (window.currentSingleAudio) {
-        window.currentSingleAudio.pause();
-      }
-      const audio = new Audio(audioUrl);
-      window.currentSingleAudio = audio;
-      
-      if (btnElement) {
-        btnElement.innerHTML = `<span>⏸ थांबवा</span>`;
-      }
-
-      audio.onplay = () => {
-        showToast(`🔊 वाचन सुरू आहे (${voiceName}) ✨`);
-      };
-
-      audio.onended = () => {
-        if (btnElement) {
-          btnElement.innerHTML = `<span>▶ ऐका</span>`;
-        }
-        window.currentSingleAudio = null;
-        window.currentAudioButton = null;
-      };
-
-      audio.onerror = (e) => {
-        console.error("Audio playback error:", e);
-        fallbackBrowserSpeech(text, btnElement);
-      };
-
-      await audio.play();
-      return;
-    }
-  } catch (err) {
-    console.warn("Audio generation error:", err);
-  }
-
+  // 2. Devotional Speech Narration with Scripture Optimizer & Reverent Tone
   fallbackBrowserSpeech(text, btnElement);
 };
 
 function fallbackBrowserSpeech(text, btnElement) {
-  if ('speechSynthesis' in window) {
+  if (btnElement) {
+    btnElement.innerHTML = `<span>⏸ थांबवा</span>`;
+  }
+
+  if (window.SarvamTTS && window.SarvamTTS.client && window.SarvamTTS.client.speakViaWebSpeech) {
+    showToast("🔊 वाचन सुरू आहे (Natural Devotional Marathi Voice) ✨");
+    window.SarvamTTS.client.speakViaWebSpeech(
+      text,
+      { lang: 'mr-IN', pace: 0.86 },
+      function onEnd() {
+        if (btnElement) btnElement.innerHTML = `<span>▶ ऐका</span>`;
+        window.currentAudioButton = null;
+      },
+      function onError() {
+        if (btnElement) btnElement.innerHTML = `<span>▶ ऐका</span>`;
+        window.currentAudioButton = null;
+      }
+    );
+  } else if ('speechSynthesis' in window) {
     window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
+    const cleanText = (window.SarvamTTS && window.SarvamTTS.optimizer)
+      ? window.SarvamTTS.optimizer.optimizeForNarration(text, 'mr-IN')
+      : text;
+    const utterance = new SpeechSynthesisUtterance(cleanText);
     
-    const voices = window.speechSynthesis.getVoices() || [];
+    const voices = (window.speechSynthesis.getVoices && window.speechSynthesis.getVoices()) || [];
     const mrVoice = voices.find(v => v.lang.includes('mr') || v.lang.includes('hi') || v.name.toLowerCase().includes('marathi') || v.name.toLowerCase().includes('hindi') || v.name.toLowerCase().includes('india'));
     if (mrVoice) {
       utterance.voice = mrVoice;
       utterance.lang = mrVoice.lang;
     } else {
-      utterance.lang = "hi-IN";
+      utterance.lang = "mr-IN";
     }
     
-    utterance.rate = 0.88;
-    if (btnElement) {
-      btnElement.innerHTML = `<span>⏸ थांबवा</span>`;
-    }
+    utterance.rate = 0.86;
+    utterance.pitch = 0.88;
     
-    utterance.onstart = () => showToast("🔊 वाचन सुरू आहे...");
+    utterance.onstart = () => showToast("🔊 वाचन सुरू आहे (Devotional Voice)...");
     utterance.onend = () => {
       if (btnElement) {
         btnElement.innerHTML = `<span>▶ ऐका</span>`;
@@ -12913,12 +12911,14 @@ function fallbackBrowserSpeech(text, btnElement) {
       if (btnElement) {
         btnElement.innerHTML = `<span>▶ ऐका</span>`;
       }
-      showToast("Audio playback completed.");
+      window.currentAudioButton = null;
     };
     
     window.speechSynthesis.speak(utterance);
   } else {
     showToast("Audio speech not supported on this browser.");
+    if (btnElement) btnElement.innerHTML = `<span>▶ ऐका</span>`;
+    window.currentAudioButton = null;
   }
 }
 
@@ -13149,9 +13149,9 @@ const TEN_COMMANDMENTS_DATA = [
 window.playCommandmentAudio = function(cmdIndex, btn) {
   const cmd = TEN_COMMANDMENTS_DATA[cmdIndex];
   if (!cmd) return;
-  const text = `${cmd.num} आज्ञा: ${cmd.titleMr}`;
-  const directPath = `assets/audio/devotional/cmd_${cmdIndex + 1}.mp3`;
-  playSingleVerseAudio(text, btn, directPath);
+  const text = `${cmd.num} आज्ञा: ${cmd.titleMr}... अर्थ: ${cmd.meaning}`;
+  const directPath = `https://audio.wordproject.org/bibles/app/audio/28/2/20.mp3`;
+  playSingleVerseAudio(text, btn, directPath, { bookKey: "exodus", chapter: 20 });
 };
 
 window.toggleTenCommandmentsModal = function() {
@@ -13189,8 +13189,9 @@ window.toggleTenCommandmentsModal = function() {
 };
 
 window.readTenCommandmentsAloud = function(btnElement) {
-  const fullText = "पहिली आज्ञा: माझ्याखेरीज तुला दुसरे देव असू नयेत... दुसरी आज्ञा: आपल्यासाठी कोणतीही कोरलेली मूर्ती करू नको... तिसरी आज्ञा: आपल्या देवाचे नाव व्यर्थ घेऊ नको... चौथी आज्ञा: शब्बाथ वार पवित्र पाळण्यास लक्षात ठेव... पाचवी आज्ञा: आपल्या आईवडिलांचा मान राख... सहावी आज्ञा: मनुष्यघात करू नको... सातवी आज्ञा: व्यभिचार करू नको... आठवी आज्ञा: चोरी करू नको... नववी आज्ञा: आपल्या शेजाऱ्याविरुद्ध खोटी साक्ष देऊ नको... दहावी आज्ञा: आपल्या शेजाऱ्याच्या कोणत्याही गोष्टीचा लोभ धरू नको.";
-  playSingleVerseAudio(fullText, btnElement, "assets/audio/devotional/ten_commandments_complete.mp3");
+  const fullText = "निर्गम २०:१-१७... दहा आज्ञा...";
+  const directPath = "https://audio.wordproject.org/bibles/app/audio/28/2/20.mp3";
+  playSingleVerseAudio(fullText, btnElement, directPath, { bookKey: "exodus", chapter: 20 });
 };
 
 /* ==========================================================================
@@ -14726,24 +14727,21 @@ window.speakMicroLearningWord = function() {
   const word = window.getTodayBiblicalWord();
   if (!word) return;
   
-  const text = `${word.pronunciation}... ${word.meaningMr}... ${word.insightMr}`;
-  if (window.speechSynthesis) {{
+  const text = `${word.pronunciation}... ${word.term}... ${word.meaningMr}... ${word.insightMr}`;
+  showToast(`🔊 ${word.term} - ${word.meaningMr} ✨`);
+
+  if (window.SarvamTTS && window.SarvamTTS.client && window.SarvamTTS.client.speakViaWebSpeech) {
+    window.SarvamTTS.client.speakViaWebSpeech(text, { lang: 'mr-IN', pace: 0.86 });
+  } else if ('speechSynthesis' in window) {
     window.speechSynthesis.cancel();
     const utter = new SpeechSynthesisUtterance(text);
-    const voices = window.speechSynthesis.getVoices() || [];
-    const mrVoice = voices.find(v => v.lang.includes('mr') || v.lang.includes('hi') || v.name.toLowerCase().includes('marathi') || v.name.toLowerCase().includes('hindi') || v.name.toLowerCase().includes('india'));
-    if (mrVoice) {{
-      utter.voice = mrVoice;
-      utter.lang = mrVoice.lang;
-    }} else {{
-      utter.lang = "hi-IN";
-    }}
-    utter.rate = 0.88;
+    utter.lang = "mr-IN";
+    utter.rate = 0.86;
+    utter.pitch = 0.88;
     window.speechSynthesis.speak(utter);
-    showToast(`🔊 ${word.term} - ${word.meaningMr} ✨`);
-  }} else {{
+  } else {
     showToast(`📖 ${word.term}: ${word.meaningMr}`);
-  }}
+  }
 };
 
 window.openMicroLearningBibleChapter = function() {
@@ -15074,28 +15072,22 @@ function executeHeadwatersSpeechSynthesis(fullPrayerText, isEng, thisSessionId) 
   const player = window.headwatersAudioPlayer;
   
   if (window.speechSynthesis) {
-    const cleanText = fullPrayerText
-      .replace(/[—–]/g, ', ')
-      .replace(/[;:]/g, ', ')
-      .replace(/["']/g, '')
-      .replace(/\s+/g, ' ')
-      .trim();
+    const cleanText = (window.SarvamTTS && window.SarvamTTS.optimizer)
+      ? window.SarvamTTS.optimizer.optimizeForNarration(fullPrayerText, isEng ? 'en-IN' : 'mr-IN')
+      : fullPrayerText.replace(/[—–]/g, ', ').replace(/[;:]/g, ', ').replace(/["']/g, '').replace(/\s+/g, ' ').trim();
     
     const utter = new SpeechSynthesisUtterance(cleanText);
-    utter.rate = isEng ? 0.92 : 0.86;
-    utter.pitch = 0.95;
+    utter.rate = isEng ? 0.90 : 0.84;
+    utter.pitch = 0.88;
     
-    const voices = window.speechSynthesis.getVoices() || [];
+    const voices = (window.speechSynthesis.getVoices && window.speechSynthesis.getVoices()) || [];
     let selectedVoice = null;
     
     if (!isEng) {
-      selectedVoice = voices.find(v => (v.lang === 'mr-IN' || v.lang === 'mr_IN' || v.lang.startsWith('mr')));
-      if (!selectedVoice) {
-        selectedVoice = voices.find(v => (v.lang === 'hi-IN' || v.lang === 'hi_IN' || v.lang.startsWith('hi')));
-      }
-      if (!selectedVoice) {
-        selectedVoice = voices.find(v => v.lang.includes('IN') || (v.name && v.name.toLowerCase().includes('india')));
-      }
+      selectedVoice = voices.find(v => (v.lang.startsWith('mr') || v.lang.startsWith('hi')) && (v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('madhav') || v.name.toLowerCase().includes('hemant') || v.name.toLowerCase().includes('manohar') || v.name.toLowerCase().includes('mohan') || v.name.toLowerCase().includes('natural') || v.name.toLowerCase().includes('google'))) ||
+                      voices.find(v => (v.lang === 'mr-IN' || v.lang === 'mr_IN' || v.lang.startsWith('mr'))) ||
+                      voices.find(v => (v.lang === 'hi-IN' || v.lang === 'hi_IN' || v.lang.startsWith('hi'))) ||
+                      voices.find(v => v.lang.includes('IN') || (v.name && v.name.toLowerCase().includes('india')));
       
       if (selectedVoice) {
         utter.voice = selectedVoice;
