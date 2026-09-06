@@ -10261,28 +10261,28 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
 
 
 /* ==========================================================================
-   SPLASH SCREEN CHARACTERS (PROPORTIONAL SIZING & ZERO WHITE FRINGE)
+   SPLASH SCREEN CHARACTERS (MAJESTIC SIZING & ZERO WHITE HIGHLIGHT)
    ========================================================================== */
 .splash-characters-container {
   position: absolute !important;
-  bottom: 50px !important;
+  bottom: 40px !important;
   left: 50% !important;
   transform: translateX(-50%) !important;
   width: 100% !important;
-  max-width: 960px !important;
-  height: 340px !important;
+  max-width: 1040px !important;
+  height: 390px !important;
   display: flex !important;
   justify-content: space-between !important;
   align-items: flex-end !important;
-  padding: 0 40px !important;
+  padding: 0 30px !important;
   box-sizing: border-box !important;
   z-index: 6 !important;
   pointer-events: none !important;
 }
 
 .splash-boat-box {
-  width: 52% !important;
-  max-width: 440px !important;
+  width: 55% !important;
+  max-width: 490px !important;
   height: 100% !important;
   display: flex !important;
   align-items: flex-end !important;
@@ -10293,15 +10293,15 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
 .splash-boat-elem {
   width: 100% !important;
   height: auto !important;
-  max-height: 330px !important;
+  max-height: 380px !important;
   object-fit: contain !important;
   object-position: bottom left !important;
   filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.12)) !important;
 }
 
 .splash-jesus-box {
-  width: 42% !important;
-  max-width: 290px !important;
+  width: 40% !important;
+  max-width: 310px !important;
   height: 100% !important;
   display: flex !important;
   align-items: flex-end !important;
@@ -10312,10 +10312,10 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
 .splash-jesus-elem {
   width: 100% !important;
   height: auto !important;
-  max-height: 270px !important;
+  max-height: 315px !important;
   object-fit: contain !important;
   object-position: bottom right !important;
-  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.10)) !important;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.12)) !important;
 }
 
 @keyframes boatFloat {
@@ -10331,23 +10331,23 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
 
 @media (max-width: 600px) {
   .splash-characters-container {
-    bottom: 32px !important;
-    padding: 0 10px !important;
-    height: 260px !important;
+    bottom: 22px !important;
+    padding: 0 6px !important;
+    height: 290px !important;
     max-width: 100% !important;
   }
   .splash-boat-box {
-    width: 58% !important;
-    max-width: 240px !important;
+    width: 62% !important;
+    max-width: 280px !important;
   }
   .splash-boat-elem {
-    max-height: 250px !important;
+    max-height: 280px !important;
   }
   .splash-jesus-box {
-    width: 42% !important;
-    max-width: 175px !important;
+    width: 38% !important;
+    max-width: 170px !important;
   }
   .splash-jesus-elem {
-    max-height: 205px !important;
+    max-height: 240px !important;
   }
 }
