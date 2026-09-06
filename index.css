@@ -10355,52 +10355,10 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
 }
 
 @media (max-width: 600px) {
-  .splash-screen {
-    justify-content: flex-start !important;
-    padding-top: calc(env(safe-area-inset-top, 0px) + 26px) !important;
-  }
-  .splash-content {
-    margin-top: 0 !important;
-    padding: 8px 16px !important;
-    max-width: 360px !important;
-  }
-  .splash-logo-wrapper {
-    width: 74px !important;
-    height: 74px !important;
-    margin-bottom: 6px !important;
-  }
-  .splash-title {
-    font-size: 24px !important;
-    margin: 0 0 2px 0 !important;
-  }
-  .splash-subtitle {
-    font-size: 13px !important;
-    margin: 0 0 12px 0 !important;
-  }
-  .splash-verse-container {
-    padding: 10px 16px !important;
-    margin-bottom: 12px !important;
-    border-radius: 14px !important;
-  }
-  #splash-verse-text {
-    font-size: 13px !important;
-    line-height: 1.45 !important;
-    margin: 0 0 6px 0 !important;
-  }
-  #splash-verse-ref {
-    font-size: 11.5px !important;
-  }
-  .splash-loading-bar {
-    width: 130px !important;
-    height: 4px !important;
-  }
-  .splash-river-bg {
-    height: 240px !important;
-  }
   .splash-characters-container {
-    bottom: 22px !important;
-    padding: 0 14px !important;
-    height: 190px !important;
+    bottom: 14px !important;
+    padding: 0 16px !important;
+    height: 175px !important;
     max-width: 100% !important;
   }
   .splash-boat-box {
