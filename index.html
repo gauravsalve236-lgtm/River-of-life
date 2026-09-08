@@ -3349,12 +3349,31 @@
         </div>
         <div class="drawer-body-settings" style="padding: 18px 20px 24px 20px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto;">
           
-          <!-- Default Unified Narrator Voice Banner -->
+          <!-- Default Unified Narrator Voice Banner & Selection -->
           <div style="background: rgba(229,168,59,0.08); border: 1.5px solid var(--border); border-radius: 12px; padding: 12px 14px; display: flex; align-items: center; gap: 12px;">
             <span style="font-size: 22px;">🎙️</span>
-            <div>
-              <div style="font-weight: 800; font-size: 13.5px; color: var(--text);">Natural Reverent Male Voice (नैसर्गिक पुरुष वाचक आवाज)</div>
-              <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 2px;">Optimized devotional reading for Marathi & English Bible scriptures</div>
+            <div style="flex: 1;">
+              <div style="font-weight: 800; font-size: 13.5px; color: var(--text);">Natural Marathi Audio Engine (नैसर्गिक मराठी ऑडिओ)</div>
+              <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 2px;">High quality, fluent Marathi narration with verse sync</div>
+            </div>
+          </div>
+
+          <!-- Narrator Voice Selection -->
+          <div class="setting-item-row" id="audio-voice-selection-row">
+            <label style="font-weight: 700; font-size: 13.5px; color: var(--text);">Narrator Voice / वाचक आवाज</label>
+            <select id="audio-narrator-gender-select" class="dropdown-selector" style="background: var(--bg); color: var(--text); border: 1.5px solid var(--border); border-radius: 10px; padding: 10px 12px; font-size: 13px; width: 100%; font-weight: 600;">
+              <option value="google_natural_mr" selected>🌟 नैसर्गिक मराठी आवाज (Natural Marathi - शिफारस केलेले)</option>
+              <option value="shubh">🕊️ शुभ (शांत व गंभीर - Sarvam AI Bulbul V3)</option>
+              <option value="ratan">🎙️ रतन (स्पष्ट व नैसर्गिक - Sarvam AI Bulbul V3)</option>
+              <option value="gee_elevenlabs">✨ GEE (Custom Authentic Marathi - ElevenLabs)</option>
+              <option value="shrey_elevenlabs">✨ Shrey (Deep Marathi Conversational - ElevenLabs)</option>
+              <option value="google_natural_en">📖 Natural English Voice (Google Natural)</option>
+              <option value="device_webspeech">📱 डिव्हाइस आवाज (Device Web Speech)</option>
+            </select>
+            <div style="display: flex; justify-content: flex-end; margin-top: 6px;">
+              <button id="btn-test-natural-voice" type="button" style="padding: 6px 14px; font-size: 11.5px; font-weight: 800; border-radius: 14px; background: rgba(34,197,94,0.12); color: #16a34a; border: 1px solid rgba(34,197,94,0.3); cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                <span>🔊 Test Selected Voice / आवाज ऐका</span>
+              </button>
             </div>
           </div>
 

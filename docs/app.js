@@ -740,7 +740,7 @@ let state = {
   streak: 1,               // daily consecutive streak counter
   userLikes: {},           // map of verse_ref -> liked boolean
   audioSource: 'sarvam',     // 'sarvam' (Sarvam AI Bulbul V3 Indian Voice), 'human' (streaming MP3)
-  sarvamVoice: 'gee_elevenlabs',      // 'shubh' (Calm & Devotional Indian Male - Hindi/Marathi/English)
+  sarvamVoice: 'google_natural_mr',      // 'shubh' (Calm & Devotional Indian Male - Hindi/Marathi/English)
   sarvamPace: 0.92,          // 0.92x peaceful Bible reading speed
   sarvamApiKey: 'sk_odv5l3f4_XdZubK80ecSfBa6YYCLWDCNI', // Preconfigured Sarvam AI API Key
   quizHighscore: 0,        // High score in a single quiz session
@@ -994,7 +994,7 @@ function loadStateFromLocalStorage() {
   // Force migration to Sarvam AI Bulbul V3 Indian Voice Narration
   state.audioSource = "sarvam";
   if (!state.sarvamVoice) {
-    state.sarvamVoice = state.sarvamVoice || "gee_elevenlabs";
+    if (!state.sarvamVoice || state.sarvamVoice === "google_natural_mr" || state.sarvamVoice === "shrey_elevenlabs") { state.sarvamVoice = "google_natural_mr"; }
   }
   state.sarvamPace = state.sarvamPace || 0.92;
 }
@@ -2616,6 +2616,7 @@ function fallbackToDirectPlay(mp3Url) {
    Universal Bible Scripture Audio Engine (100% Full Chapter Narration)
    ========================================================================== */
 function startSpeechNarration(startVerseIndex = 0) {
+  if (window.SarvamTTS && window.SarvamTTS.unlockAudio) window.SarvamTTS.unlockAudio();
   closeModal("modal-audio-settings");
   
   if (audioPlayerInstance) {
@@ -2745,7 +2746,7 @@ function startSpeechNarration(startVerseIndex = 0) {
   }
 
   const langCode = isDevanagari ? "mr-IN" : "en-IN";
-  const selectedVoiceId = (state.sarvamVoice || "gee_elevenlabs").toLowerCase();
+  const selectedVoiceId = (state.sarvamVoice || "google_natural_mr").toLowerCase();
 
   if (window.SarvamTTS && window.SarvamTTS.queue) {
     window.SarvamTTS.queue.setListeners({
@@ -2988,7 +2989,7 @@ function playDailyVerseAudio() {
 
   const isDevanagari = (state.translation !== "eng");
   const langCode = isDevanagari ? "mr-IN" : "en-IN";
-  const selectedVoiceId = (state.sarvamVoice || "gee_elevenlabs").toLowerCase();
+  const selectedVoiceId = (state.sarvamVoice || "google_natural_mr").toLowerCase();
 
   if (window.SarvamTTS && window.SarvamTTS.queue) {
     window.SarvamTTS.queue.setListeners({
@@ -3121,7 +3122,7 @@ function updateAudioToneSettings() {
 }
 
 function initAudioVoices() {
-  const currentVoice = state.sarvamVoice || "gee_elevenlabs";
+  const currentVoice = state.sarvamVoice || "google_natural_mr";
   state.sarvamVoice = currentVoice;
 
   if (window.SarvamTTS && window.SarvamTTS.queue) {
@@ -4742,13 +4743,30 @@ function setupEventListeners() {
   });
 
   // Test ElevenLabs Shrey Voice button in Narration Settings
+    // Test Selected Natural Voice button
+  const btnTestNaturalVoice = document.getElementById("btn-test-natural-voice");
+  if (btnTestNaturalVoice) {
+    btnTestNaturalVoice.addEventListener("click", async () => {
+      const selectedVoice = state.sarvamVoice || "google_natural_mr";
+      showToast("🔊 आवाज चाचणी सुरू आहे...");
+      try {
+        if (window.SarvamTTS && window.SarvamTTS.testVoice) {
+          const res = await window.SarvamTTS.testVoice(selectedVoice);
+          if (res && res.message) showToast(res.message);
+        }
+      } catch (err) {
+        showToast("चाचणी आवाज सुरू झाला.");
+      }
+    });
+  }
+
   const btnTestElevenLabs = document.getElementById("btn-test-elevenlabs-voice");
   if (btnTestElevenLabs) {
     btnTestElevenLabs.addEventListener("click", async () => {
       showToast("🔊 Testing Shrey (ElevenLabs v3) Marathi Voice...");
       try {
         if (window.SarvamTTS && window.SarvamTTS.testVoice) {
-          const res = await window.SarvamTTS.testVoice("gee_elevenlabs");
+          const res = await window.SarvamTTS.testVoice("google_natural_mr");
           const badge = document.getElementById("elevenlabs-key-status-badge");
           if (res && res.success && res.audioUrl) {
             const testAudio = new Audio(res.audioUrl);
@@ -4815,7 +4833,7 @@ function setupEventListeners() {
   const btnTestSarvamVoice = document.getElementById("btn-test-sarvam-voice");
   if (btnTestSarvamVoice) {
     btnTestSarvamVoice.addEventListener("click", async () => {
-      const selectedVoice = state.sarvamVoice || "gee_elevenlabs";
+      const selectedVoice = state.sarvamVoice || "google_natural_mr";
       showToast(`🔊 Testing Sarvam ${selectedVoice} Voice...`);
       try {
         if (window.SarvamTTS && window.SarvamTTS.testVoice) {
@@ -6373,7 +6391,7 @@ async function togglePrayerAudio() {
   
   const prayerText = (activePrayerLang === "en") ? data.prayerEn : data.prayerMr;
   const langCode = (activePrayerLang === "en") ? "en-IN" : "mr-IN";
-  const speaker = (state && state.sarvamVoice) ? state.sarvamVoice : "gee_elevenlabs";
+  const speaker = (state && state.sarvamVoice) ? state.sarvamVoice : "google_natural_mr";
 
   // Try Sarvam AI Audio synthesis first
   if (window.SarvamTTS && window.SarvamTTS.speakText) {

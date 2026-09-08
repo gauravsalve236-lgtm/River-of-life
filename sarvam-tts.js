@@ -1,35 +1,44 @@
 /* ==========================================================================
-   sarvam-tts.js — Multi-Engine TTS Client (ElevenLabs & Sarvam AI)
-   River of Life Bible App - Modern Devotional Audio System
+   sarvam-tts.js — Multi-Engine Scripture Narration System
+   River of Life Bible App - Natural Marathi & Multi-Voice Audio System
    
-   Supported Voices:
-     - Shrey - Deep Marathi Conversational (ElevenLabs eleven_v3: C9v09R5AIM6tOX6Fn06I)
-     - Shubh (Sarvam AI Bulbul V3: Devotional Marathi)
-     - Ratan (Sarvam AI Bulbul V3: Natural Marathi/English)
-     - Aditya, Priya, Aravind (Sarvam AI Bulbul V3)
-     - High-Quality Marathi Device Voice (Offline Fallback)
+   Supported Voice Engines:
+     - Google Natural Marathi Neural Voice (Fast, 100% Free, Authentic Marathi)
+     - Sarvam AI Bulbul V3 (Shubh, Ratan, Aditya, Priya - Devotional Marathi)
+     - ElevenLabs (GEE: QWwKUPVe8SndiTgtz6yz, Shrey: C9v09R5AIM6tOX6Fn06I)
+     - High-Quality Device Web Speech (Offline Fallback)
    ========================================================================== */
 
 (function (window) {
   'use strict';
 
-  // 1. Default Configuration
+  // 1. Master Configuration
   var TTS_CONFIG = {
+    // Default Voice Selection
+    defaultVoice: 'google_natural_mr',
+
+    // Google Natural Audio Engine Specs
+    google_natural: {
+      endpoint: 'https://translate.google.com/translate_tts',
+      client: 'tw-ob',
+      maxChunkLen: 160
+    },
+
     // ElevenLabs Specs
     elevenlabs: {
       endpoint: 'https://api.elevenlabs.io/v1/text-to-speech',
       defaultVoiceId: 'QWwKUPVe8SndiTgtz6yz', // GEE - Custom Authentic Marathi Voice
       defaultModelId: 'eleven_multilingual_v2',
       defaultVoiceSettings: {
-        stability: 0.38,           // Natural human pitch inflection and warmth
-        similarity_boost: 0.82,    // High vocal timbre fidelity with smooth texture
-        style: 0.42,               // Expressive, soulful devotional cadence
+        stability: 0.38,
+        similarity_boost: 0.82,
+        style: 0.42,
         use_speaker_boost: true
       },
-      defaultPace: 0.86,
+      defaultPace: 0.88,
       getApiKey: function () {
         var localKey = (typeof localStorage !== 'undefined') ? localStorage.getItem('rol_elevenlabs_api_key') : null;
-        return localKey || (typeof window !== 'undefined' && window.ELEVENLABS_API_KEY) || (typeof window !== 'undefined' && window.state && window.state.elevenlabsApiKey) || 'sk_53532f375cb8723144f7c3d6f10520e60043fc74cb1552d4';
+        return localKey || (typeof window !== 'undefined' && window.ELEVENLABS_API_KEY) || (typeof window !== 'undefined' && window.state && window.state.elevenlabsApiKey) || '';
       },
       setApiKey: function (key) {
         if (typeof localStorage !== 'undefined') {
@@ -46,7 +55,7 @@
     sarvam: {
       endpoint: 'https://api.sarvam.ai/text-to-speech',
       model: 'bulbul:v3',
-      defaultPace: 0.86,           // Solemn devotional reading speed
+      defaultPace: 0.86,
       loudness: 1.1,
       speechSampleRate: 24000,
       enablePreprocessing: true,
@@ -57,7 +66,7 @@
       },
       getApiKey: function () {
         var localKey = (typeof localStorage !== 'undefined') ? localStorage.getItem('rol_sarvam_api_key') : null;
-        return localKey || (typeof window !== 'undefined' && window.SARVAM_API_KEY) || (typeof window !== 'undefined' && window.state && window.state.sarvamApiKey) || 'sk_odv5l3f4_XdZubK80ecSfBa6YYCLWDCNI';
+        return localKey || (typeof window !== 'undefined' && window.SARVAM_API_KEY) || (typeof window !== 'undefined' && window.state && window.state.sarvamApiKey) || '';
       },
       setApiKey: function (key) {
         if (typeof localStorage !== 'undefined') {
@@ -71,11 +80,14 @@
     },
 
     availableVoices: [
-      { id: 'gee_elevenlabs', name: '🎙️ GEE - Custom Marathi Voice (Your ElevenLabs Account)', lang: 'mr-IN', provider: 'elevenlabs', voiceId: 'QWwKUPVe8SndiTgtz6yz', modelId: 'eleven_multilingual_v2' },
-      { id: 'shrey_elevenlabs', name: '✨ Shrey - Deep Marathi Conversational (ElevenLabs eleven_v3)', lang: 'mr-IN', provider: 'elevenlabs', voiceId: 'C9v09R5AIM6tOX6Fn06I', modelId: 'eleven_v3' },
-      { id: 'brian_elevenlabs', name: '📖 Brian - Deep Reverent Resonant (ElevenLabs)', lang: 'mr-IN', provider: 'elevenlabs', voiceId: 'nPczCjzI2devNBz1zQrb', modelId: 'eleven_multilingual_v2' },
+      { id: 'google_natural_mr', name: '🌟 नैसर्गिक मराठी आवाज (Google Natural Marathi - Recommended)', lang: 'mr-IN', provider: 'google_natural' },
       { id: 'shubh', name: '🕊️ Shubh (शांत, गंभीर व भावपूर्ण मराठी आवाज - Sarvam AI)', lang: 'mr-IN', provider: 'sarvam' },
-      { id: 'ratan', name: '🎙️ Ratan (नैसर्गिक व स्पष्ट मराठी आवाज - Sarvam AI)', lang: 'mr-IN', provider: 'sarvam' }
+      { id: 'ratan', name: '🎙️ Ratan (नैसर्गिक व स्पष्ट मराठी आवाज - Sarvam AI)', lang: 'mr-IN', provider: 'sarvam' },
+      { id: 'gee_elevenlabs', name: '🎙️ GEE - Custom Marathi Voice (ElevenLabs)', lang: 'mr-IN', provider: 'elevenlabs', voiceId: 'QWwKUPVe8SndiTgtz6yz', modelId: 'eleven_multilingual_v2' },
+      { id: 'shrey_elevenlabs', name: '✨ Shrey - Deep Marathi Conversational (ElevenLabs)', lang: 'mr-IN', provider: 'elevenlabs', voiceId: 'C9v09R5AIM6tOX6Fn06I', modelId: 'eleven_v3' },
+      { id: 'google_natural_en', name: '📖 Natural English Voice (Google Natural)', lang: 'en-US', provider: 'google_natural' },
+      { id: 'google_natural_hi', name: '🕊️ Natural Hindi Voice (Google Natural)', lang: 'hi-IN', provider: 'google_natural' },
+      { id: 'device_webspeech', name: '📱 डिव्हाइस आवाज (Device Web Speech)', lang: 'mr-IN', provider: 'webspeech' }
     ]
   };
 
@@ -90,7 +102,7 @@
         return;
       }
       try {
-        var req = indexedDB.open('RiverOfLife_Universal_TTS_Cache', 2);
+        var req = indexedDB.open('RiverOfLife_Universal_TTS_Cache', 3);
         req.onupgradeneeded = function (e) {
           var db = e.target.result;
           if (!db.objectStoreNames.contains('audio_blobs')) {
@@ -117,7 +129,7 @@
       hash = ((hash << 5) - hash) + str.charCodeAt(i);
       hash |= 0;
     }
-    return 'tts_v4_' + hash;
+    return 'tts_v6_' + hash;
   }
 
   async function getCachedAudio(key) {
@@ -161,7 +173,27 @@
     }
   }
 
-  // 3. Bible Text Optimizer & Scripture Normalizer
+  // 3. AudioContext Unlocker for Mobile WebKit / Chrome
+  var globalAudioCtx = null;
+  function unlockAudioContext() {
+    try {
+      var AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtxClass && !globalAudioCtx) {
+        globalAudioCtx = new AudioCtxClass();
+      }
+      if (globalAudioCtx && globalAudioCtx.state === 'suspended') {
+        globalAudioCtx.resume();
+      }
+    } catch (e) {}
+  }
+
+  if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+    ['touchstart', 'touchend', 'click', 'keydown'].forEach(function(ev) {
+      window.addEventListener(ev, unlockAudioContext, { once: true, passive: true });
+    });
+  }
+
+  // 4. Bible Text Optimizer & Scripture Normalizer
   var ScriptureOptimizer = {
     optimizeForNarration: function (text, lang) {
       if (!text) return '';
@@ -174,13 +206,13 @@
       cleaned = cleaned.replace(/^[\d\u0966-\u096F]+[\.\:\s\-]+/g, '');
 
       // Replace abrupt dashes with devotional pauses
-      cleaned = cleaned.replace(/—|–/g, ', ');
+      cleaned = cleaned.replace(/[—–]/g, ', ');
       cleaned = cleaned.replace(/\s*;\s*/g, ', ');
       cleaned = cleaned.replace(/\s*,\s*/g, ', ');
       cleaned = cleaned.replace(/\s*\.\s*/g, '. ');
 
-      // Insert subtle devotional breath pauses for key spiritual connectors and vocatives
-      cleaned = cleaned.replace(/(हे स्वर्गीय पित्या|हे प्रभू|हे देवा|प्रियांनो|आमेन|परमेश्वरा|पवित्र आत्म्या|येशू ख्रिस्ता)/g, '$1... ');
+      // Insert subtle devotional breath pauses for key spiritual vocatives and connectors
+      cleaned = cleaned.replace(/(हे स्वर्गीय पित्या|हे प्रभू|हे देवा|प्रियांनो|आमेन|परमेश्वरा|पवित्र आत्म्या|येशू ख्रिस्ता)/g, '$1, ');
       cleaned = cleaned.replace(/\s+(आणि|तेव्हा|म्हणून|कारण|तर|म्हणजे|परंतु|तथापि)\s+/g, ', $1 ');
 
       // Normalize whitespace
@@ -194,36 +226,22 @@
     },
 
     chunkPassage: function (text, maxChars) {
-      if (!maxChars) maxChars = 380;
+      if (!maxChars) maxChars = 160;
       if (!text) return [];
       if (text.length <= maxChars) return [text];
 
-      var sentences = text.match(/[^.!?।,;\n]+[.!?।,;\n]*/g) || [text];
+      var parts = text.split(/([,;।\.\?\!]\s*)/);
       var chunks = [];
       var currentChunk = '';
 
-      for (var i = 0; i < sentences.length; i++) {
-        var s = sentences[i].trim();
-        if (!s) continue;
-        
-        if (s.length > maxChars) {
-          var words = s.split(/\s+/);
-          for (var j = 0; j < words.length; j++) {
-            var w = words[j];
-            if ((currentChunk + ' ' + w).length > maxChars) {
-              if (currentChunk.trim()) chunks.push(currentChunk.trim());
-              currentChunk = w;
-            } else {
-              currentChunk += (currentChunk ? ' ' : '') + w;
-            }
-          }
+      for (var i = 0; i < parts.length; i++) {
+        var part = parts[i];
+        if (!part) continue;
+        if ((currentChunk + part).length > maxChars) {
+          if (currentChunk.trim()) chunks.push(currentChunk.trim());
+          currentChunk = part;
         } else {
-          if ((currentChunk + ' ' + s).length > maxChars) {
-            if (currentChunk.trim()) chunks.push(currentChunk.trim());
-            currentChunk = s;
-          } else {
-            currentChunk += (currentChunk ? ' ' : '') + s;
-          }
+          currentChunk += part;
         }
       }
 
@@ -257,25 +275,33 @@
     return new Blob(byteArrays, { type: contentType });
   }
 
-  // 4. Multi-Engine Synthesis Client (ElevenLabs & Sarvam AI)
+  // 5. Multi-Engine Synthesis Client
   var MultiEngineTTSClient = {
-    // Master synthesis entry point (with Auto-Cascade between ElevenLabs and Sarvam AI)
+    // Master synthesis entry point with graceful multi-tier fallback
     synthesizeText: async function (text, options) {
       if (!options) options = {};
       var isDevanagari = /[\u0900-\u097F]/.test(text || '');
       var lang = options.lang || (isDevanagari ? 'mr-IN' : 'en-IN');
-      var speaker = (options.speaker || 'gee_elevenlabs').toLowerCase();
+      var speaker = (options.speaker || TTS_CONFIG.defaultVoice || 'google_natural_mr').toLowerCase();
 
       var voiceDef = TTS_CONFIG.availableVoices.find(function(v) { return v.id.toLowerCase() === speaker; });
 
-      // Prefer ElevenLabs GEE / Shrey for authentic Marathi voice
+      // 1. Google Natural Audio Engine (Default & Rock-solid)
+      if (!voiceDef || voiceDef.provider === 'google_natural' || speaker.includes('google') || speaker === 'natural') {
+        try {
+          return await MultiEngineTTSClient.synthesizeGoogleNatural(text, options);
+        } catch (gErr) {
+          console.warn('[TTS Cascade] Google Natural Audio error, falling back...', gErr);
+        }
+      }
+
+      // 2. ElevenLabs Custom Voice (if user configured)
       if (
         (voiceDef && voiceDef.provider === 'elevenlabs') ||
         speaker.includes('elevenlabs') ||
         speaker === 'gee' ||
         speaker === 'shrey' ||
-        speaker === 'brian' ||
-        options.provider === 'elevenlabs'
+        speaker === 'brian'
       ) {
         var mergedOpts = Object.assign({}, options);
         if (voiceDef) {
@@ -285,39 +311,69 @@
         try {
           return await MultiEngineTTSClient.synthesizeElevenLabs(text, mergedOpts);
         } catch (elErr) {
-          console.warn('[TTS Cascade] ElevenLabs failed, trying Sarvam AI...', elErr);
+          console.warn('[TTS Cascade] ElevenLabs unavailable, auto-cascading to Google Natural Marathi voice...', elErr);
           try {
-            return await MultiEngineTTSClient.synthesizeSarvam(text, Object.assign({}, options, { speaker: 'shubh' }));
-          } catch (sErr) {
-            throw elErr;
+            return await MultiEngineTTSClient.synthesizeGoogleNatural(text, options);
+          } catch (gErr) {
+            console.warn('[TTS Cascade] Fallback to Web Speech...', gErr);
           }
         }
       }
 
-      // If Sarvam AI voice requested, try Sarvam and auto-fallback to ElevenLabs if quota/error
-      try {
-        return await MultiEngineTTSClient.synthesizeSarvam(text, options);
-      } catch (sarvamErr) {
-        console.log('[TTS Cascade] Sarvam AI unavailable, auto-cascading to ElevenLabs GEE...');
+      // 3. Sarvam AI Voice (if user configured)
+      if ((voiceDef && voiceDef.provider === 'sarvam') || speaker === 'shubh' || speaker === 'ratan' || speaker === 'aditya' || speaker === 'priya') {
         try {
-          return await MultiEngineTTSClient.synthesizeElevenLabs(text, Object.assign({}, options, {
-            voiceId: 'QWwKUPVe8SndiTgtz6yz',
-            modelId: 'eleven_multilingual_v2'
-          }));
-        } catch (elErr) {
-          throw sarvamErr;
+          return await MultiEngineTTSClient.synthesizeSarvam(text, options);
+        } catch (sarvamErr) {
+          console.warn('[TTS Cascade] Sarvam AI unavailable, auto-cascading to Google Natural Marathi voice...', sarvamErr);
+          try {
+            return await MultiEngineTTSClient.synthesizeGoogleNatural(text, options);
+          } catch (gErr) {
+            console.warn('[TTS Cascade] Fallback to Web Speech...', gErr);
+          }
         }
       }
+
+      // Default fallback to Google Natural
+      return await MultiEngineTTSClient.synthesizeGoogleNatural(text, options);
     },
 
-    // 4A. ElevenLabs Synthesis (Shrey - Deep Marathi Conversational, Model: eleven_v3)
+    // 5A. Google Natural Audio Synthesis (100% Free, High Quality Marathi MP3)
+    synthesizeGoogleNatural: async function (text, options) {
+      if (!options) options = {};
+      var isDevanagari = /[\u0900-\u097F]/.test(text || '');
+      var lang = (options.lang && options.lang.startsWith('en')) ? 'en' : (options.lang && options.lang.startsWith('hi') ? 'hi' : (isDevanagari ? 'mr' : 'en'));
+      var pace = options.pace !== undefined ? options.pace : 0.92;
+
+      var optimizedText = ScriptureOptimizer.optimizeForNarration(text, (lang === 'mr' ? 'mr-IN' : (lang === 'hi' ? 'hi-IN' : 'en-US')));
+      if (!optimizedText) throw new Error('Empty text provided for narration');
+
+      var chunks = ScriptureOptimizer.chunkPassage(optimizedText, 160);
+      if (chunks.length === 0) chunks = [optimizedText];
+
+      var directAudioUrls = chunks.map(function(c) {
+        return 'https://translate.google.com/translate_tts?ie=UTF-8&tl=' + lang + '&client=tw-ob&q=' + encodeURIComponent(c);
+      });
+
+      var singleUrl = directAudioUrls[0];
+      return {
+        audioUrl: singleUrl,
+        directUrls: directAudioUrls,
+        chunks: chunks,
+        fromCache: false,
+        voiceName: 'नैसर्गिक मराठी आवाज (Natural Marathi)',
+        isDirectStream: true
+      };
+    },
+
+    // 5B. ElevenLabs Synthesis
     synthesizeElevenLabs: async function (text, options) {
       if (!options) options = {};
       var isDevanagari = /[\u0900-\u097F]/.test(text || '');
       var lang = options.lang || (isDevanagari ? 'mr-IN' : 'en-IN');
       var voiceId = options.voiceId || TTS_CONFIG.elevenlabs.defaultVoiceId;
       var modelId = options.modelId || TTS_CONFIG.elevenlabs.defaultModelId;
-      var pace = options.pace !== undefined ? options.pace : 0.92;
+      var pace = options.pace !== undefined ? options.pace : 0.88;
 
       var optimizedText = ScriptureOptimizer.optimizeForNarration(text, lang);
       if (!optimizedText) throw new Error('Empty text provided for narration');
@@ -328,100 +384,49 @@
         return {
           audioUrl: URL.createObjectURL(cachedBlob),
           fromCache: true,
-          voiceName: 'Shrey - Deep Marathi Conversational'
+          voiceName: 'GEE (Authentic Marathi Voice)'
         };
       }
 
       var apiKey = TTS_CONFIG.elevenlabs.getApiKey();
-
-      // 1. Try Backend Node API Proxy first if available
-      try {
-        var backendResp = await fetch('/api/tts/convert', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            text: optimizedText,
-            voiceId: voiceId,
-            modelId: modelId
-          })
-        });
-        if (backendResp.ok) {
-          var data = await backendResp.json();
-          if (data.audioBase64) {
-            var blob = base64ToBlob(data.audioBase64, 'audio/mpeg');
-            await setCachedAudio(cacheKey, blob);
-            return {
-              audioUrl: URL.createObjectURL(blob),
-              fromCache: false,
-              voiceName: 'Shrey - Deep Marathi Conversational'
-            };
-          }
-        }
-      } catch (be) {}
-
-      // 2. Direct ElevenLabs API Call
       if (!apiKey) {
         var errNoKey = new Error('NO_ELEVENLABS_KEY');
         errNoKey.isAuthError = true;
-        errNoKey.friendlyMessage = 'Please enter your ElevenLabs API Key in Audio Settings for Shrey voice.';
+        errNoKey.friendlyMessage = 'Please enter ElevenLabs API Key in Settings.';
         throw errNoKey;
       }
 
-      var directUrl = `${TTS_CONFIG.elevenlabs.endpoint}/${voiceId}`;
-      var response = await fetch(directUrl, {
+      var payload = {
+        text: optimizedText,
+        model_id: modelId,
+        voice_settings: {
+          stability: 0.38,
+          similarity_boost: 0.82,
+          style: 0.42,
+          use_speaker_boost: true
+        }
+      };
+
+      var response = await fetch(TTS_CONFIG.elevenlabs.endpoint + '/' + voiceId, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'xi-api-key': apiKey
         },
-        body: JSON.stringify({
-          text: optimizedText,
-          model_id: modelId,
-          voice_settings: TTS_CONFIG.elevenlabs.defaultVoiceSettings
-        })
+        body: JSON.stringify(payload)
       });
 
       if (!response.ok) {
         var errBody = await response.text();
-        console.warn('[ElevenLabs API Error]', response.status, errBody);
-
-        // Auto-cascade: If Library voice Shrey hits 402 (paid plan required), cascade to GEE (your account Marathi voice) or Brian!
-        if (response.status === 402 || errBody.includes('paid_plan_required')) {
-          if (!options._cascaded) {
-            console.log('[ElevenLabs] Auto-cascading to GEE (Custom Account Marathi Voice)...');
-            try {
-              return await MultiEngineTTSClient.synthesizeElevenLabs(text, Object.assign({}, options, {
-                voiceId: 'QWwKUPVe8SndiTgtz6yz', // GEE
-                modelId: 'eleven_multilingual_v2',
-                _cascaded: true
-              }));
-            } catch (geeErr) {
-              console.log('[ElevenLabs] Auto-cascading to Brian (Premade)...');
-              try {
-                return await MultiEngineTTSClient.synthesizeElevenLabs(text, Object.assign({}, options, {
-                  voiceId: 'nPczCjzI2devNBz1zQrb', // Brian
-                  modelId: 'eleven_multilingual_v2',
-                  _cascaded: true
-                }));
-              } catch (brianErr) {
-                console.log('[ElevenLabs] Cascading to Sarvam AI Shubh...');
-                return await MultiEngineTTSClient.synthesizeSarvam(text, Object.assign({}, options, { speaker: 'shubh' }));
-              }
-            }
-          }
-        }
-
-        var customErr = new Error(`ElevenLabs ${response.status}`);
+        var customErr = new Error('ElevenLabs ' + response.status);
         customErr.status = response.status;
         customErr.rawBody = errBody;
         if (response.status === 401 || errBody.includes('invalid_api_key')) {
           customErr.isAuthError = true;
-          customErr.friendlyMessage = 'Invalid ElevenLabs API Key. Please verify key in Settings.';
+          customErr.friendlyMessage = 'Invalid ElevenLabs API Key.';
         } else if (response.status === 402 || errBody.includes('quota_exceeded') || errBody.includes('credits')) {
           customErr.isQuotaExhausted = true;
-          customErr.friendlyMessage = 'ElevenLabs credits quota exceeded. Using Marathi voice.';
-        } else {
-          customErr.friendlyMessage = `ElevenLabs error (${response.status}). Using Marathi voice.`;
+          customErr.friendlyMessage = 'ElevenLabs credits quota exceeded.';
         }
         throw customErr;
       }
@@ -429,15 +434,14 @@
       var finalBlob = await response.blob();
       await setCachedAudio(cacheKey, finalBlob);
 
-      var voiceDisplayName = (voiceId === 'QWwKUPVe8SndiTgtz6yz') ? 'GEE (Authentic Marathi)' : ((voiceId === 'C9v09R5AIM6tOX6Fn06I') ? 'Shrey (Deep Marathi)' : 'ElevenLabs Voice');
       return {
         audioUrl: URL.createObjectURL(finalBlob),
         fromCache: false,
-        voiceName: voiceDisplayName
+        voiceName: 'GEE (Authentic Marathi Voice)'
       };
     },
 
-    // 4B. Sarvam AI Synthesis (Shubh, Ratan, Aditya, Priya, Aravind)
+    // 5C. Sarvam AI Synthesis (Bulbul V3)
     synthesizeSarvam: async function (text, options) {
       if (!options) options = {};
       var isDevanagari = /[\u0900-\u097F]/.test(text || '');
@@ -460,7 +464,7 @@
 
       var apiKey = TTS_CONFIG.sarvam.getApiKey();
       if (!apiKey) {
-        var errNoKey = new Error('NO_API_KEY');
+        var errNoKey = new Error('NO_SARVAM_KEY');
         errNoKey.isAuthError = true;
         errNoKey.friendlyMessage = 'कृपया Sarvam AI API Key प्रविष्ट करा.';
         throw errNoKey;
@@ -496,22 +500,13 @@
         const bodyText = await response.text();
 
         if (!response.ok) {
-          console.warn('[Sarvam AI API]', response.status, bodyText);
-          var customErr = new Error(`Sarvam ${response.status}`);
+          var customErr = new Error('Sarvam ' + response.status);
           customErr.status = response.status;
           customErr.rawBody = bodyText;
-
           if (response.status === 402 || bodyText.includes('insufficient_quota') || bodyText.includes('No credits')) {
             customErr.isQuotaExhausted = true;
-            customErr.friendlyMessage = 'Sarvam AI quota exhausted. Using high-quality Marathi device voice.';
-          } else if (response.status === 401 || bodyText.includes('Unauthorized') || bodyText.includes('invalid_api_key')) {
+          } else if (response.status === 401 || bodyText.includes('Unauthorized')) {
             customErr.isAuthError = true;
-            customErr.friendlyMessage = 'Invalid Sarvam AI Key. Using high-quality Marathi device voice.';
-          } else if (response.status === 429) {
-            customErr.isRateLimit = true;
-            customErr.friendlyMessage = 'Sarvam AI busy. Using high-quality Marathi device voice.';
-          } else {
-            customErr.friendlyMessage = `Sarvam error (${response.status}). Using Marathi device voice.`;
           }
           throw customErr;
         }
@@ -534,7 +529,7 @@
       };
     },
 
-    // 4C. High-Quality Web Speech Synthesis Fallback
+    // 5D. High-Quality Web Speech Synthesis Fallback
     speakViaWebSpeech: function (text, options, onEnd, onError) {
       if (typeof window === 'undefined' || !window.speechSynthesis) {
         if (onError) onError(new Error('SpeechSynthesis not supported'));
@@ -550,20 +545,19 @@
 
       var isDevanagari = /[\u0900-\u097F]/.test(text || '');
       var lang = (options && options.lang) || (isDevanagari ? 'mr-IN' : 'en-IN');
-      var pace = (options && options.pace !== undefined) ? options.pace : 0.86;
+      var pace = (options && options.pace !== undefined) ? options.pace : 0.88;
       var cleanText = ScriptureOptimizer.optimizeForNarration(text, lang);
 
       var utterance = new SpeechSynthesisUtterance(cleanText);
       utterance.rate = Math.max(0.75, Math.min(1.2, pace));
-      utterance.pitch = 0.88; // Deep, calm, devotional pitch
+      utterance.pitch = 0.90;
 
       var voices = (window.speechSynthesis.getVoices && window.speechSynthesis.getVoices()) || [];
       var selectedVoice = null;
       if (isDevanagari) {
-        // Prioritize natural Indian Marathi / Hindi male voices
         selectedVoice = voices.find(function (v) { 
           var n = v.name.toLowerCase();
-          return (v.lang.startsWith('mr') || v.lang.startsWith('hi')) && (n.includes('male') || n.includes('madhav') || n.includes('hemant') || n.includes('manohar') || n.includes('mohan') || n.includes('ravi') || n.includes('david') || n.includes('natural') || n.includes('google'));
+          return (v.lang.startsWith('mr') || v.lang.startsWith('hi')) && (n.includes('male') || n.includes('madhav') || n.includes('hemant') || n.includes('manohar') || n.includes('mohan') || n.includes('ravi') || n.includes('natural') || n.includes('google'));
         }) ||
         voices.find(function (v) { return v.lang === 'mr-IN' || v.lang === 'mr_IN' || v.lang.startsWith('mr'); }) ||
         voices.find(function (v) { return v.lang === 'hi-IN' || v.lang === 'hi_IN' || v.lang.startsWith('hi'); }) ||
@@ -571,7 +565,7 @@
       } else {
         selectedVoice = voices.find(function (v) { 
           var n = v.name.toLowerCase();
-          return (n.includes('natural') || n.includes('neural') || n.includes('male') || n.includes('george') || n.includes('david') || n.includes('guy') || n.includes('brian')) && (v.lang.startsWith('en'));
+          return (n.includes('natural') || n.includes('neural') || n.includes('male') || n.includes('george') || n.includes('david') || n.includes('brian')) && (v.lang.startsWith('en'));
         }) ||
         voices.find(function (v) { return v.lang === 'en-IN' || v.lang === 'en-GB' || v.lang.startsWith('en'); });
       }
@@ -583,15 +577,26 @@
         utterance.lang = isDevanagari ? 'mr-IN' : 'en-IN';
       }
 
+      var keepAliveTimer = setInterval(function () {
+        if (window.speechSynthesis.speaking) {
+          window.speechSynthesis.pause();
+          window.speechSynthesis.resume();
+        } else {
+          clearInterval(keepAliveTimer);
+        }
+      }, 10000);
+
       utterance.onend = function () {
+        clearInterval(keepAliveTimer);
         window._activeSpeechUtterance = null;
         if (onEnd) onEnd();
       };
 
       utterance.onerror = function (e) {
+        clearInterval(keepAliveTimer);
         window._activeSpeechUtterance = null;
         if (e.error === 'canceled' || e.error === 'interrupted') return;
-        console.warn('[WebSpeech Fallback] Error:', e);
+        console.warn('[WebSpeech Fallback] Notice:', e);
         if (onError) onError(e);
       };
 
@@ -601,7 +606,7 @@
     }
   };
 
-  // 5. Universal Playback Queue & Gapless Narration Controller
+  // 6. Universal Narration Queue (Smooth Verse-by-Verse Scripture Reader)
   class UniversalNarrationQueue {
     constructor() {
       this.verses = [];
@@ -610,26 +615,29 @@
       this.isPaused = false;
       this.currentAudio = null;
       this.activeUtterance = null;
-      this.fallbackMode = false;
-      this.fallbackNotified = false;
-      this.prefetchMap = new Map();
       this.options = {
+        speaker: 'google_natural_mr',
         lang: 'mr-IN',
-        speaker: 'shubh',
-        pace: 0.86
+        pace: 0.90
       };
       this.listeners = {
         onVerseChange: null,
         onStateChange: null,
         onComplete: null,
-        onError: null,
-        onFallbackActive: null
+        onError: null
       };
+      this.prefetchMap = new Map();
+      this.fallbackMode = false;
     }
 
     setOptions(opts) {
       if (!opts) opts = {};
       this.options = Object.assign(this.options, opts);
+      if (this.currentAudio && opts.pace) {
+        try {
+          this.currentAudio.playbackRate = opts.pace;
+        } catch(e) {}
+      }
     }
 
     setListeners(listeners) {
@@ -646,11 +654,12 @@
       this.options = Object.assign(this.options, options);
       this.prefetchMap.clear();
       this.fallbackMode = false;
-      this.fallbackNotified = false;
     }
 
     async play() {
       if (this.verses.length === 0) return;
+      unlockAudioContext();
+
       if (this.isPaused) {
         this.resume();
         return;
@@ -676,6 +685,7 @@
 
     resume() {
       if (!this.isPaused && this.isPlaying) return;
+      unlockAudioContext();
       this.isPaused = false;
       this.isPlaying = true;
 
@@ -686,7 +696,7 @@
           this._playVerse(this.currentIndex);
         }
       } else if (this.currentAudio) {
-        this.currentAudio.play();
+        this.currentAudio.play().catch(function() {});
       } else {
         this._playVerse(this.currentIndex);
       }
@@ -698,12 +708,14 @@
       this.isPlaying = false;
       this.isPaused = false;
       if (this.currentAudio) {
-        this.currentAudio.pause();
-        this.currentAudio.src = '';
+        try {
+          this.currentAudio.pause();
+          this.currentAudio.src = '';
+        } catch(e) {}
         this.currentAudio = null;
       }
       if (typeof window.speechSynthesis !== 'undefined') {
-        window.speechSynthesis.cancel();
+        try { window.speechSynthesis.cancel(); } catch(e) {}
       }
       this.prefetchMap.clear();
       if (this.listeners.onStateChange) this.listeners.onStateChange('stopped');
@@ -711,13 +723,16 @@
 
     async jumpToVerse(index) {
       if (index < 0 || index >= this.verses.length) return;
+      unlockAudioContext();
       this.currentIndex = index;
       if (this.currentAudio) {
-        this.currentAudio.pause();
+        try {
+          this.currentAudio.pause();
+        } catch(e) {}
         this.currentAudio = null;
       }
       if (typeof window.speechSynthesis !== 'undefined') {
-        window.speechSynthesis.cancel();
+        try { window.speechSynthesis.cancel(); } catch(e) {}
       }
 
       if (this.isPlaying) {
@@ -738,19 +753,6 @@
       if (this.currentIndex - 1 >= 0) {
         this.jumpToVerse(this.currentIndex - 1);
       }
-    }
-
-    _prefetchVerse(index) {
-      if (this.fallbackMode) return;
-      if (index < 0 || index >= this.verses.length) return;
-      if (this.prefetchMap.has(index)) return;
-
-      var verse = this.verses[index];
-      var promise = MultiEngineTTSClient.synthesizeText(verse.text, this.options)
-        .then(function (res) { return res.audioUrl; })
-        .catch(function () { return null; });
-
-      this.prefetchMap.set(index, promise);
     }
 
     async _playVerse(index) {
@@ -778,45 +780,59 @@
       }
 
       try {
-        var audioUrl = null;
-        if (this.prefetchMap.has(index)) {
-          audioUrl = await this.prefetchMap.get(index);
-          this.prefetchMap.delete(index);
-        }
-
-        if (!audioUrl) {
-          var res = await MultiEngineTTSClient.synthesizeText(verse.text, this.options);
-          audioUrl = res.audioUrl;
-        }
-
+        var res = await MultiEngineTTSClient.synthesizeText(verse.text, this.options);
         if (!this.isPlaying) return;
 
-        var audio = new Audio(audioUrl);
-        this.currentAudio = audio;
-
-        if (index + 1 < this.verses.length) {
-          this._prefetchVerse(index + 1);
-        }
-
-        audio.onplay = function () {
-          if (self.listeners.onStateChange) self.listeners.onStateChange('playing');
-        };
-
-        audio.onended = function () {
-          if (self.isPlaying) {
-            self.next();
-          }
-        };
-
-        audio.onerror = function (e) {
-          console.warn('[Audio Playback Error] Falling back to Web Speech:', e);
-          self._activateFallbackAndPlay(index, verse);
-        };
-
-        await audio.play();
+        var audioUrls = (res && res.directUrls && res.directUrls.length > 0) ? res.directUrls : [res.audioUrl];
+        self._playAudioSequence(audioUrls, 0, index, verse);
       } catch (err) {
         console.warn('[Audio Synthesis Error] Verse ' + index + ':', err);
         self._activateFallbackAndPlay(index, verse, err);
+      }
+    }
+
+    _playAudioSequence(urls, urlIndex, verseIndex, verse) {
+      var self = this;
+      if (!this.isPlaying || urlIndex >= urls.length) {
+        if (self.isPlaying) self.next();
+        return;
+      }
+
+      var currentUrl = urls[urlIndex];
+      var audio = new Audio();
+      this.currentAudio = audio;
+
+      audio.oncanplay = function () {
+        try {
+          audio.playbackRate = self.options.pace || 0.90;
+        } catch(e) {}
+      };
+
+      audio.onplay = function () {
+        if (self.listeners.onStateChange) self.listeners.onStateChange('playing');
+      };
+
+      audio.onended = function () {
+        if (!self.isPlaying) return;
+        if (urlIndex + 1 < urls.length) {
+          self._playAudioSequence(urls, urlIndex + 1, verseIndex, verse);
+        } else {
+          self.next();
+        }
+      };
+
+      audio.onerror = function (e) {
+        console.warn('[Audio Chunk Error] Falling back to Web Speech:', e);
+        self._activateFallbackAndPlay(verseIndex, verse);
+      };
+
+      audio.src = currentUrl;
+      var playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(function (err) {
+          console.warn('[Audio Play Promise Error]:', err);
+          self._activateFallbackAndPlay(verseIndex, verse, err);
+        });
       }
     }
 
@@ -849,12 +865,13 @@
   // Create singleton queue instance
   var narrationQueueInstance = new UniversalNarrationQueue();
 
-  // Export to Global Window (Supporting both SarvamTTS & ElevenLabsTTS interfaces)
-  window.SarvamTTS = {
+  // Export to Global Window
+  var SarvamTTSObj = {
     config: TTS_CONFIG.sarvam,
     optimizer: ScriptureOptimizer,
     client: MultiEngineTTSClient,
     queue: narrationQueueInstance,
+    unlockAudio: unlockAudioContext,
     
     speakText: async function (text, options) {
       try {
@@ -866,38 +883,53 @@
     },
 
     testVoice: async function (voiceId) {
-      var speaker = voiceId || 'shrey_elevenlabs';
+      var speaker = voiceId || 'google_natural_mr';
       var sampleText = 'परमेश्वर माझा मेंढपाळ आहे, मला काही उणे पडणार नाही.';
       try {
         var res = await MultiEngineTTSClient.synthesizeText(sampleText, {
           lang: 'mr-IN',
           speaker: speaker,
-          pace: 0.92
+          pace: 0.90
         });
+        
+        if (res && res.audioUrl) {
+          var audio = new Audio(res.audioUrl);
+          audio.playbackRate = 0.90;
+          audio.play().catch(function() {});
+        }
+        
         return {
           success: true,
           audioUrl: res.audioUrl,
           fromCache: res.fromCache,
-          voiceName: res.voiceName || speaker
+          voiceName: res.voiceName || speaker,
+          message: '✨ आवाज यशस्वीरीत्या सुरू झाला!'
         };
       } catch (err) {
-        MultiEngineTTSClient.speakViaWebSpeech(sampleText, { lang: 'mr-IN', pace: 0.92 });
+        MultiEngineTTSClient.speakViaWebSpeech(sampleText, { lang: 'mr-IN', pace: 0.90 });
         return {
           success: false,
           quotaExhausted: !!err.isQuotaExhausted,
           authError: !!err.isAuthError,
-          noKey: (err.message === 'NO_ELEVENLABS_KEY' || err.message === 'NO_API_KEY'),
-          message: err.friendlyMessage || 'Previewing via Marathi voice.'
+          message: err.friendlyMessage || 'Previewing via Device Marathi voice.'
         };
       }
     }
   };
 
-  window.ElevenLabsTTS = {
+  var ElevenLabsTTSObj = {
     config: TTS_CONFIG.elevenlabs,
     synthesizeVerse: async function (text, options) {
       return MultiEngineTTSClient.synthesizeElevenLabs(text, options);
     }
   };
 
-})(window);
+  if (typeof window !== 'undefined') {
+    window.SarvamTTS = SarvamTTSObj;
+    window.ElevenLabsTTS = ElevenLabsTTSObj;
+  }
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { SarvamTTS: SarvamTTSObj, ElevenLabsTTS: ElevenLabsTTSObj };
+  }
+
+})(typeof window !== 'undefined' ? window : global);
