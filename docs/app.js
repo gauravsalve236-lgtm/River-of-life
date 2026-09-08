@@ -1431,16 +1431,22 @@ function switchTab(rawRoute) {
     adjustHeaderForRoute(route);
     
     // Reload specific data lists on tab changes
+    const staticTitleEl = document.getElementById("static-header-title");
+    if (staticTitleEl) {
+      if (route === "hymns") {
+        staticTitleEl.textContent = state.translation === "eng" ? "Hymns & Worship" : "उपासना संगीत • Hymns";
+      } else if (route === "home") {
+        staticTitleEl.textContent = "River of Life";
+      } else if (route === "prayers") {
+        staticTitleEl.textContent = "प्रार्थना • Prayers";
+      }
+    }
+
     if (route === "hymns") {
       renderHymnsView();
     } else if (route === "you") {
       renderYouProfile();
-    } else if (route === "hymns") {
-          staticTitle.textContent = "उपासना संगीत • Hymns";
-        } else if (route === "home") {
-        staticTitle.textContent = "River of Life";
-      } else if (route === "hymns") {
-        staticTitle.textContent = state.translation === "eng" ? "Hymns & Worship" : "उपासना संगीत • Hymns";
+    } else if (route === "home") {
       renderDailyDevotion();
       if (typeof renderHomeAnnouncementBanner === "function") renderHomeAnnouncementBanner();
     } else if (route === "plans") {
@@ -1545,7 +1551,7 @@ function adjustHeaderForRoute(route) {
       } else if (route === "discover") {
         staticTitle.textContent = state.translation === "eng" ? "Discover Scriptures" : "बायबल शोधा";
       } else if (route === "prayers") {
-        staticTitle.textContent = state.translation === "eng" ? "Prayers & Meetings" : "प्रार्थना व सभा • Prayers";
+        staticTitle.textContent = state.translation === "eng" ? "Prayer Circle" : "प्रार्थना विनंत्या";
       } else if (route === "meetings") {
         staticTitle.textContent = state.translation === "eng" ? "Prayer Meetings" : "प्रार्थना सभा";
       } else if (route === "admin") {
@@ -8724,75 +8730,22 @@ function getMeetingsFromStorage() {
   try {
     let meetings = JSON.parse(localStorage.getItem("river_of_life_meetings"));
     
-    // Validate or populate genuine official River of Life meetings
-    if (!meetings || !Array.isArray(meetings) || meetings.length === 0 || meetings.some(m => m.id === "meeting_1")) {
+    if (!meetings) {
       const today = new Date();
       const formatDate = (d) => d.toISOString().split('T')[0];
       
       meetings = [
         {
-          id: "RiverOfLife_DailySanctuary",
-          title: "Daily Live Prayer Meeting & Fellowship / दैनंदिन थेट व्हिडिओ प्रार्थना सभा",
-          description: "Live prayer sanctuary, worship, Marathi scripture study, and personal intercession with pastors.",
+          id: "meeting_1",
+          title: "Friday Family Prayer / शुक्रवारची कौटुंबिक प्रार्थना",
+          description: "Live family prayer, praise, worship and Marathi scripture study.",
           host: "Pastor John",
           date: formatDate(today),
-          time: "06:00 & 20:30",
+          time: "20:00",
           duration: "60",
-          repeat: "daily",
+          repeat: "weekly",
           visibility: "public",
           status: "live",
-          createdAt: Date.now()
-        },
-        {
-          id: "RiverOfLife_MorningPrayer",
-          title: "Morning Dawn Prayer / प्रभात प्रार्थना",
-          description: "Start each morning in the secret place with prayer, thanksgiving, and Psalm 91 meditation.",
-          host: "Pastor John",
-          date: formatDate(today),
-          time: "06:00",
-          duration: "60",
-          repeat: "daily",
-          visibility: "public",
-          status: "scheduled",
-          createdAt: Date.now()
-        },
-        {
-          id: "RiverOfLife_EveningPrayer",
-          title: "Evening Family Prayer / कौटुंबिक प्रार्थना",
-          description: "Nightly family altar, intercession for families, church, and youth.",
-          host: "Pastor John",
-          date: formatDate(today),
-          time: "20:30",
-          duration: "60",
-          repeat: "daily",
-          visibility: "public",
-          status: "scheduled",
-          createdAt: Date.now()
-        },
-        {
-          id: "RiverOfLife_FastingPrayer",
-          title: "Friday Fasting & Healing Prayer / उपवास व आरोग्य प्रार्थना",
-          description: "Weekly fasting, spiritual breakthrough, and healing prayer service.",
-          host: "Pastor John",
-          date: formatDate(today),
-          time: "19:00",
-          duration: "90",
-          repeat: "weekly",
-          visibility: "public",
-          status: "scheduled",
-          createdAt: Date.now()
-        },
-        {
-          id: "RiverOfLife_SundayWorship",
-          title: "Sunday Main Worship / रविवारची मुख्य उपासना",
-          description: "Sunday morning celebration service with praise, worship, and Bible preaching.",
-          host: "Pastor John",
-          date: formatDate(today),
-          time: "10:00",
-          duration: "150",
-          repeat: "weekly",
-          visibility: "public",
-          status: "scheduled",
           createdAt: Date.now()
         }
       ];
@@ -9176,8 +9129,12 @@ function initMeetings() {
 // Persistent User Registry Database for Profiles & Invitations
 function getRegisteredUserDatabase() {
   const defaultMembers = [
-    { id: "usr_pastor", username: "Pastor John", email: "pastor@riveroflife.org", role: "Pastor", isPastor: true },
-    { id: "usr_admin", username: "River of Life Admin", email: "admin@riveroflife.org", role: "Admin", isAdmin: true }
+    { id: "usr_1", username: "Pastor John", email: "pastorjohn@riveroflife.org", role: "Pastor", isPastor: true },
+    { id: "usr_2", username: "Pastor Sunil", email: "sunil@riveroflife.org", role: "Pastor", isPastor: true },
+    { id: "usr_3", username: "Leader Samuel", email: "samuel@riveroflife.org", role: "Leader", isLeader: true },
+    { id: "usr_4", username: "Sister Sarah", email: "sarah@riveroflife.org", role: "Member" },
+    { id: "usr_5", username: "Gaurav Salve", email: "gaurav@riveroflife.org", role: "Member" },
+    { id: "usr_6", username: "Ruth Shinde", email: "ruth@riveroflife.org", role: "Member" }
   ];
 
   try {
@@ -13067,140 +13024,42 @@ let ambientGainNode = null;
 let isAmbientPlaying = false;
 
 window.switchPrayersSubtab = function(subtab) {
-  if (!subtab) subtab = "meetings";
-  
-  const btnMeetings = document.getElementById("btn-prayers-subtab-meetings");
   const btnMeditation = document.getElementById("btn-prayers-subtab-meditation");
   const btnRequests = document.getElementById("btn-prayers-subtab-requests");
-
-  const panelMeetings = document.getElementById("prayers-panel-meetings");
   const panelMeditation = document.getElementById("prayers-panel-meditation");
   const panelRequests = document.getElementById("prayers-panel-requests");
 
-  const subtabs = [
-    { name: "meetings", btn: btnMeetings, panel: panelMeetings },
-    { name: "meditation", btn: btnMeditation, panel: panelMeditation },
-    { name: "requests", btn: btnRequests, panel: panelRequests }
-  ];
-
-  subtabs.forEach(item => {
-    if (item.name === subtab) {
-      if (item.btn) {
-        item.btn.classList.add("active");
-        item.btn.style.background = "var(--primary, #8f121d)";
-        item.btn.style.color = "#ffffff";
-        item.btn.style.borderColor = "var(--primary, #8f121d)";
-      }
-      if (item.panel) {
-        item.panel.classList.add("active");
-        item.panel.style.display = "block";
-      }
-    } else {
-      if (item.btn) {
-        item.btn.classList.remove("active");
-        item.btn.style.background = "var(--bg-content, #ffffff)";
-        item.btn.style.color = "var(--text, #1e293b)";
-        item.btn.style.borderColor = "var(--border, rgba(0,0,0,0.1))";
-      }
-      if (item.panel) {
-        item.panel.classList.remove("active");
-        item.panel.style.display = "none";
-      }
+  if (subtab === "meditation") {
+    if (btnMeditation) {
+      btnMeditation.classList.add("active");
+      btnMeditation.style.background = "var(--primary)";
+      btnMeditation.style.color = "#ffffff";
+      btnMeditation.style.border = "none";
     }
-  });
-
-  if (subtab === "requests") {
-    renderPrayersScreen();
-  }
-};
-
-window.joinPrayerVideoMeeting = function(roomSlug, meetingTitle) {
-  if (!roomSlug) roomSlug = "RiverOfLife_DailySanctuary";
-  if (!meetingTitle) meetingTitle = "Daily Video Prayer Meeting";
-
-  const loggedIn = (state && state.currentUser) ? state.currentUser.username : "Fellow Believer";
-  const cleanRoomSlug = roomSlug.replace(/[^a-zA-Z0-9_-]/g, "_");
-  const roomUrl = "https://p2p.mirotalk.com/join/" + cleanRoomSlug + "?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&autojoin=true&p2p=true&codec=opus&layout=grid&grid=1&name=" + encodeURIComponent(loggedIn);
-
-  // Detect iOS (iPhone/iPad) to bypass WebKit iframe microphone blocking
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  if (isIOS) {
-    if (typeof showToast === "function") showToast("Opening Video Prayer Room... 🙏");
-    window.location.href = roomUrl;
-    return;
-  }
-
-  // Create virtual meeting object for in-app video room modal
-  const meetingObj = {
-    id: cleanRoomSlug,
-    title: meetingTitle + " (थेट प्रार्थना सभा)",
-    host: "Pastor John",
-    status: "live"
-  };
-
-  if (typeof showToast === "function") showToast("Connecting to Live Video Sanctuary... 🕊️");
-  
-  if (typeof triggerJoinMeetingFlow === "function") {
-    try {
-      const meetings = (typeof getMeetingsFromStorage === "function") ? getMeetingsFromStorage() : [];
-      let existing = meetings.find(m => m.id === cleanRoomSlug);
-      if (!existing) {
-        existing = meetingObj;
-        meetings.unshift(existing);
-        localStorage.setItem("river_of_life_meetings", JSON.stringify(meetings));
-      }
-    } catch(e) {}
-    triggerJoinMeetingFlow(cleanRoomSlug);
+    if (btnRequests) {
+      btnRequests.classList.remove("active");
+      btnRequests.style.background = "var(--bg-content)";
+      btnRequests.style.color = "var(--text)";
+      btnRequests.style.border = "1.5px solid var(--border)";
+    }
+    if (panelMeditation) panelMeditation.style.display = "block";
+    if (panelRequests) panelRequests.style.display = "none";
   } else {
-    window.open(roomUrl, "_blank");
+    if (btnRequests) {
+      btnRequests.classList.add("active");
+      btnRequests.style.background = "var(--primary)";
+      btnRequests.style.color = "#ffffff";
+      btnRequests.style.border = "none";
+    }
+    if (btnMeditation) {
+      btnMeditation.classList.remove("active");
+      btnMeditation.style.background = "var(--bg-content)";
+      btnMeditation.style.color = "var(--text)";
+      btnMeditation.style.border = "1.5px solid var(--border)";
+    }
+    if (panelMeditation) panelMeditation.style.display = "none";
+    if (panelRequests) panelRequests.style.display = "block";
   }
-};
-
-window.sharePrayerMeetingWhatsApp = function(meetingTitle, timeStr) {
-  const currentUrl = window.location.origin + window.location.pathname;
-  const inviteText = "🙏 *River of Life - Live Video Prayer Meeting*\n*थेट व्हिडिओ प्रार्थना सभा*\n\n🕊️ *विषय / Topic:* " + (meetingTitle || "Daily Family Prayer & Fellowship") + "\n⏰ *वेळ / Time:* " + (timeStr || "Daily 6:00 AM & 8:30 PM IST") + "\n\n📹 *व्हिडिओ प्रार्थनेत थेट सामील होण्यासाठी खालील लिंकवर क्लिक करा:*\n" + currentUrl + "#/prayers\n\n_\"कारण जेथे दोघे अथवा तिघे माझ्या नावाने जमले आहेत, तेथे त्यांच्या मध्यभागी मी आहे.\" — मत्तय १८:२०_";
-  
-  const waUrl = "https://api.whatsapp.com/send?text=" + encodeURIComponent(inviteText);
-  window.open(waUrl, "_blank");
-};
-
-window.copyPrayerMeetingLink = function(roomSlug) {
-  const currentUrl = window.location.origin + window.location.pathname + "#/prayers";
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(currentUrl).then(() => {
-      if (typeof showToast === "function") showToast("प्रार्थना सभेची लिंक कॉपी झाली! (Link Copied) 📋");
-    }).catch(() => {
-      if (typeof showToast === "function") showToast("Link: " + currentUrl);
-    });
-  } else {
-    if (typeof showToast === "function") showToast("Link: " + currentUrl);
-  }
-};
-
-window.joinCustomPrayerRoom = function() {
-  const input = document.getElementById("input-custom-prayer-room");
-  const val = input ? input.value.trim() : "";
-  if (!val) {
-    if (typeof showToast === "function") showToast("कृपया प्रार्थना कक्षाचे नाव टाका (Enter room code)");
-    if (input) input.focus();
-    return;
-  }
-  const cleanCode = "RiverOfLife_" + val.replace(/[^a-zA-Z0-9_-]/g, "_");
-  joinPrayerVideoMeeting(cleanCode, "Private Room: " + val);
-};
-
-window.openExternalMeetingLink = function() {
-  const input = document.getElementById("input-external-meeting-url");
-  let url = input ? input.value.trim() : "";
-  if (!url) {
-    if (typeof showToast === "function") showToast("कृपया मिटिंग लिंक टाका (Enter Meet/Zoom URL)");
-    if (input) input.focus();
-    return;
-  }
-  if (!url.startsWith("http://") && !url.startsWith("https://")) {
-    url = "https://" + url;
-  }
-  window.open(url, "_blank");
 };
 
 window.toggleAmbientMusic = function() {
@@ -16065,9 +15924,9 @@ const defaultAdminAnnouncements = [
 ];
 
 const defaultAdminMeetings = [
-  { id: "RiverOfLife_SundayWorship", title: "Sunday Holy Worship & Word", titleMr: "रविवार पवित्र उपासना व वचन", host: "Pastor John", time: "Every Sunday 10:00 AM IST", roomId: "RiverOfLife_SundayWorship", active: true },
-  { id: "RiverOfLife_DailySanctuary", title: "Daily Live Prayer Meeting & Fellowship", titleMr: "दैनंदिन थेट व्हिडिओ प्रार्थना सभा व संगती", host: "Pastor John", time: "Daily 6:00 AM & 8:30 PM IST", roomId: "RiverOfLife_DailySanctuary", active: true },
-  { id: "RiverOfLife_FastingPrayer", title: "Friday Fasting & Healing Prayer Call", titleMr: "शुक्रवार उपवास व आरोग्य प्रार्थना सभा", host: "Pastor John", time: "Every Friday 7:00 PM IST", roomId: "RiverOfLife_FastingPrayer", active: true }
+  { id: "meet_1", title: "Sunday Holy Communion Fellowship", titleMr: "रविवार पवित्र मेज व उपासना", host: "Pastor John", time: "Every Sunday 10:00 AM", roomId: "rol-sunday-service", active: true },
+  { id: "meet_2", title: "Wednesday Fasting & Intercession", titleMr: "बुधवार उपवास व मध्यस्थी प्रार्थना", host: "Pastor Sunil", time: "Wednesdays 8:00 PM", roomId: "rol-intercession", active: true },
+  { id: "meet_3", title: "Youth Revival Fellowship Call", titleMr: "तरुण मंडळी जागृती सभा", host: "Esther (Youth Leader)", time: "Friday 7:30 PM", roomId: "rol-youth-revival", active: true }
 ];
 
 function getAdminMembers() {
@@ -17856,141 +17715,143 @@ window.copyCurrentHymnLyrics = copyCurrentHymnLyrics;
 window.shareCurrentHymnLyrics = shareCurrentHymnLyrics;
 
 
-// ==========================================
-// DAILY GUIDED PRAYERS SPOTLIGHT CAROUSEL (ZERO SCREEN MOVEMENT)
-// ==========================================
+/* ==========================================================================
+   DAILY GUIDED PRAYERS SPOTLIGHT CAROUSEL & ZERO SCREEN MOVEMENT CONTROLLER
+   ========================================================================== */
 const HOME_SPOTLIGHT_PRAYERS = [
   {
-    id: "morning_grace",
-    badge: "🌅 MORNING GRACE",
-    badgeBg: "rgba(245, 158, 11, 0.3)",
-    badgeBorder: "rgba(245, 158, 11, 0.6)",
-    badgeColor: "#fef08a",
-    title: "Morning Awakening & Grace",
-    titleMr: "सकाळची कृपा व संरक्षण",
-    refMr: "स्तोत्रसंहिता ९१:१-४",
-    verse: "जो परात्पराच्या गुप्त स्थानी राहतो, तो सर्वसमर्थाच्या सावलीत विसावा पावेल...",
-    img: "assets/images/golden_dawn.png"
+    id: 'morning_grace',
+    title: 'Morning Awakening & Grace',
+    titleMr: 'प्रभात कृपा व संरक्षण',
+    verse: 'जो परात्पराच्या गुप्त स्थानी राहतो, तो सर्वसमर्थाच्या सावलीत विसावा पावेल...',
+    ref: 'Psalm 91:1-4',
+    refMr: 'स्तोत्रसंहिता ९१:१-४',
+    badge: '🌅 सकाळची प्रार्थना',
+    badgeBg: 'rgba(245, 158, 11, 0.3)',
+    badgeBorder: 'rgba(245, 158, 11, 0.6)',
+    badgeColor: '#fef08a',
+    img: 'assets/images/golden_dawn.png'
   },
   {
-    id: "peace_anxiety",
-    badge: "🛡️ PEACE & REFUGE",
-    badgeBg: "rgba(59, 130, 246, 0.3)",
-    badgeBorder: "rgba(59, 130, 246, 0.6)",
-    badgeColor: "#bfdbfe",
-    title: "Peace Over Anxiety",
-    titleMr: "सर्व बुद्धीपलीकडची देवाची शांती",
-    refMr: "फिलिप्पैकरांस ४:६-७",
-    verse: "कशाविषयीही चिंता करू नका, तर सर्व गोष्टींत प्रार्थना व उपकारस्तुतीसह मागणी देवाला कळवा...",
-    img: "assets/images/peace_anxiety.png"
+    id: 'peace_anxiety',
+    title: 'Peace Over Anxiety',
+    titleMr: 'शांती व चिंतामुक्ती',
+    verse: 'कशाविषयीही चिंता करू नका; तर सर्व गोष्टींविषयी प्रार्थना व विनंती करून देवाचे आभार माना...',
+    ref: 'Philippians 4:6-7',
+    refMr: 'फिलिप्पैकरांस ४:६-७',
+    badge: '🛡️ शांती व धीर',
+    badgeBg: 'rgba(56, 189, 248, 0.3)',
+    badgeBorder: 'rgba(56, 189, 248, 0.6)',
+    badgeColor: '#bae6fd',
+    img: 'assets/images/peace_anxiety.png'
   },
   {
-    id: "healing_restoration",
-    badge: "🌿 DIVINE HEALING",
-    badgeBg: "rgba(16, 185, 129, 0.3)",
-    badgeBorder: "rgba(16, 185, 129, 0.6)",
-    badgeColor: "#a7f3d0",
-    title: "Healing & Health",
-    titleMr: "येशूच्या फटक्यांनी मिळालेले आरोग्य",
-    refMr: "यशाया ५३:५",
-    verse: "त्याच्या मार खाण्याने आपल्याला आरोग्य मिळाले आहे...",
-    img: "assets/images/healing_light.png"
+    id: 'healing_restoration',
+    title: 'Healing & Physical Renewal',
+    titleMr: 'आरोग्य व शारीरिक पुनरुज्जीवन',
+    verse: 'त्याच्या जखमांनी आपल्याला आरोग्य प्राप्त झाले आहे...',
+    ref: 'Isaiah 53:5',
+    refMr: 'यशाया ५३:५',
+    badge: '🌿 आरोग्य',
+    badgeBg: 'rgba(34, 197, 94, 0.3)',
+    badgeBorder: 'rgba(34, 197, 94, 0.6)',
+    badgeColor: '#bbf7d0',
+    img: 'assets/images/healing_light.png'
   },
   {
-    id: "wedding_cana",
-    badge: "🕊️ MIRACLE & PROVISION",
-    badgeBg: "rgba(168, 85, 247, 0.3)",
-    badgeBorder: "rgba(168, 85, 247, 0.6)",
-    badgeColor: "#e9d5ff",
-    title: "Miracle in Scarcity",
-    titleMr: "कमीपणाच्या वेळी अद्भुत पुरवठा",
-    refMr: "योहान २:१-११",
-    verse: "येशूने आपल्या चिन्हांचा आरंभ काना येथे केला आणि आपले सामर्थ्य प्रकट केले...",
-    img: "assets/images/wedding_cana_miracle.jpg"
+    id: 'wedding_cana',
+    title: 'Miracle in Scarcity (Cana)',
+    titleMr: 'टंचाईत देवाचा चमत्कार',
+    verse: 'येशू म्हणाला, हे रांजण पाण्याने भरा. आणि त्यांनी ते काठोकाठ भरले...',
+    ref: 'John 2:1-11',
+    refMr: 'योहान २:१-११',
+    badge: '🕊️ विश्वास व पुरवठा',
+    badgeBg: 'rgba(168, 85, 247, 0.3)',
+    badgeBorder: 'rgba(168, 85, 247, 0.6)',
+    badgeColor: '#e9d5ff',
+    img: 'assets/images/wedding_cana_miracle.jpg'
   },
   {
-    id: "family_blessing",
-    badge: "👨‍👩‍👧‍👦 FAMILY & HOME",
-    badgeBg: "rgba(236, 72, 153, 0.3)",
-    badgeBorder: "rgba(236, 72, 153, 0.6)",
-    badgeColor: "#fbcfe8",
-    title: "Family Blessing & Unity",
-    titleMr: "माझे घर व मी प्रभूची सेवा करू",
-    refMr: "यहोशवा २४:१५",
-    verse: "मी व माझे घराने आम्ही परमेश्वराचीच सेवा करू...",
-    img: "assets/images/family_blessing.png"
+    id: 'family_blessing',
+    title: 'Family Harmony & Blessing',
+    titleMr: 'कुटुंबाचे आणि घराचे आशीर्वाद',
+    verse: 'पण मी आणि माझे घराने तर परमेश्वराचीच सेवा करू...',
+    ref: 'Joshua 24:15',
+    refMr: 'यहोशवा २४:१५',
+    badge: '👨‍👩‍👧‍👦 कुटुंब',
+    badgeBg: 'rgba(244, 63, 94, 0.3)',
+    badgeBorder: 'rgba(244, 63, 94, 0.6)',
+    badgeColor: '#fecdd3',
+    img: 'assets/images/family_blessing.png'
   },
   {
-    id: "strength_trials",
-    badge: "🔥 STRENGTH & FAITH",
-    badgeBg: "rgba(239, 68, 68, 0.3)",
-    badgeBorder: "rgba(239, 68, 68, 0.6)",
-    badgeColor: "#fecaca",
-    title: "Strength in Trials",
-    titleMr: "थकलेल्याला नवीन बळ देणारा देव",
-    refMr: "यशाया ४०:२९-३१",
-    verse: "जे परमेश्वराची वाट पाहतात, त्यांना नवीन सामर्थ्य प्राप्त होईल...",
-    img: "assets/images/mount_zion.png"
+    id: 'strength_trials',
+    title: 'Strength in Trials & Mount Zion',
+    titleMr: 'कठीण प्रसंगी सामर्थ्य',
+    verse: 'जे परमेश्वराची वाट पाहतात, त्यांना नवे सामर्थ्य प्राप्त होईल; ते गरुडासारख्या पंखांनी वर उडतील...',
+    ref: 'Isaiah 40:29-31',
+    refMr: 'यशाया ४०:२९-३१',
+    badge: '🔥 सामर्थ्य',
+    badgeBg: 'rgba(234, 88, 12, 0.3)',
+    badgeBorder: 'rgba(234, 88, 12, 0.6)',
+    badgeColor: '#fed7aa',
+    img: 'assets/images/mount_zion.png'
   },
   {
-    id: "wisdom_guidance",
-    badge: "👑 WISDOM & PATH",
-    badgeBg: "rgba(14, 165, 233, 0.3)",
-    badgeBorder: "rgba(14, 165, 233, 0.6)",
-    badgeColor: "#bae6fd",
-    title: "Wisdom & Direction",
-    titleMr: "योग्य निर्णयांसाठी स्वर्गीय बुद्धी",
-    refMr: "याकोब १:५",
-    verse: "जर तुमच्यातील कोणाला बुद्धीची उणीव असेल, तर त्याने ती देवाजवळ मागावी...",
-    img: "assets/images/wisdom_guidance.png"
+    id: 'wisdom_guidance',
+    title: 'Divine Wisdom & Direction',
+    titleMr: 'ज्ञानासाठी व योग्य निर्णयासाठी',
+    verse: 'तुमच्यातील कोणाला ज्ञानाची उणीव असेल तर त्याने देवाजवळ मागावे, जो सर्वांना उदारपणे देतो...',
+    ref: 'James 1:5',
+    refMr: 'याकोब १:५',
+    badge: '👑 मार्गदर्शन',
+    badgeBg: 'rgba(234, 179, 8, 0.3)',
+    badgeBorder: 'rgba(234, 179, 8, 0.6)',
+    badgeColor: '#fef08a',
+    img: 'assets/images/wisdom_guidance.png'
   },
   {
-    id: "evening_rest",
-    badge: "🌙 NIGHT REST",
-    badgeBg: "rgba(99, 102, 241, 0.3)",
-    badgeBorder: "rgba(99, 102, 241, 0.6)",
-    badgeColor: "#c7d2fe",
-    title: "Night Peace & Sleep",
-    titleMr: "मी शांतीने पडेन व लगेच झोपेन",
-    refMr: "स्तोत्रसंहिता ४:८",
-    verse: "मी शांतीने पडेन व लगेच झोपेन; कारण केवळ तूच मला सुरक्षित ठेवतोस...",
-    img: "assets/images/candlelight.png"
+    id: 'evening_rest',
+    title: 'Night Peace & Sound Sleep',
+    titleMr: 'रात्रीची शांती व गाढ झोप',
+    verse: 'मी शांतीने झोपी जाईन व मला गाढ झोप लागेल, कारण हे परमेश्वरा, केवळ तूच मला सुरक्षित ठेवतोस...',
+    ref: 'Psalm 4:8',
+    refMr: 'स्तोत्रसंहिता ४:८',
+    badge: '🌙 रात्रीची प्रार्थना',
+    badgeBg: 'rgba(99, 102, 241, 0.3)',
+    badgeBorder: 'rgba(99, 102, 241, 0.6)',
+    badgeColor: '#c7d2fe',
+    img: 'assets/images/candlelight.png'
   }
 ];
 
 let currentHomePrayerIndex = 0;
 
 window.renderHomePrayerSpotlight = function(index) {
-  if (typeof index === "number") {
-    currentHomePrayerIndex = (index + HOME_SPOTLIGHT_PRAYERS.length) % HOME_SPOTLIGHT_PRAYERS.length;
-  }
-  const item = HOME_SPOTLIGHT_PRAYERS[currentHomePrayerIndex];
-  if (!item) return;
+  if (index < 0) index = HOME_SPOTLIGHT_PRAYERS.length - 1;
+  if (index >= HOME_SPOTLIGHT_PRAYERS.length) index = 0;
+  currentHomePrayerIndex = index;
 
+  const item = HOME_SPOTLIGHT_PRAYERS[index];
   const bgEl = document.getElementById("home-prayer-card-bg");
-  if (bgEl) bgEl.style.backgroundImage = "url('" + item.img + "')";
-
   const badgeEl = document.getElementById("home-prayer-card-badge");
+  const counterEl = document.getElementById("home-prayer-card-counter");
+  const titleEl = document.getElementById("home-prayer-card-title");
+  const marathiEl = document.getElementById("home-prayer-card-marathi");
+  const verseEl = document.getElementById("home-prayer-card-verse");
+  const refEl = document.getElementById("home-prayer-card-ref");
+
+  if (bgEl) bgEl.style.backgroundImage = "url('" + item.img + "')";
   if (badgeEl) {
     badgeEl.textContent = item.badge;
     badgeEl.style.background = item.badgeBg;
     badgeEl.style.borderColor = item.badgeBorder;
     badgeEl.style.color = item.badgeColor;
   }
-
-  const counterEl = document.getElementById("home-prayer-card-counter");
-  if (counterEl) counterEl.textContent = (currentHomePrayerIndex + 1) + " / " + HOME_SPOTLIGHT_PRAYERS.length;
-
-  const titleEl = document.getElementById("home-prayer-card-title");
+  if (counterEl) counterEl.textContent = (index + 1) + " / " + HOME_SPOTLIGHT_PRAYERS.length;
   if (titleEl) titleEl.textContent = item.title;
-
-  const marathiEl = document.getElementById("home-prayer-card-marathi");
   if (marathiEl) marathiEl.textContent = item.titleMr;
-
-  const verseEl = document.getElementById("home-prayer-card-verse");
   if (verseEl) verseEl.textContent = '"' + item.verse + '"';
-
-  const refEl = document.getElementById("home-prayer-card-ref");
   if (refEl) refEl.textContent = item.refMr;
 
   renderHomePrayerDots();
@@ -18072,7 +17933,7 @@ window.closeAllPrayersModal = function() {
   if (modal) modal.style.display = "none";
 };
 
-// Auto-initialize spotlight card on page load
+// Initialize spotlight card on page load
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", () => {
     if (typeof renderHomePrayerSpotlight === "function") renderHomePrayerSpotlight(0);
