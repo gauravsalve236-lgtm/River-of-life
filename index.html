@@ -8,7 +8,7 @@
   <script>
     // Force immediate hard purge of all stale Service Workers and CacheStorage
     (function() {
-      const CURRENT_VER = "v106_LIGHT_THEME_HYMNS_4TABS";
+      const CURRENT_VER = "v107_SAVE_GALLERY_WIDGET_NOTIFS";
       if (localStorage.getItem("rol_app_ver") !== CURRENT_VER) {
         localStorage.setItem("rol_app_ver", CURRENT_VER);
         if ('serviceWorker' in navigator) {
@@ -44,8 +44,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   
-  <!-- Main Stylesheet (Cache-Busted for Version 106 Light Theme Hymns 4Tabs) -->
-  <link rel="stylesheet" href="index.css?v=106_LIGHT_THEME_HYMNS_4TABS">
+  <!-- Main Stylesheet (Cache-Busted for Version 107 Save Gallery Widget Notifs) -->
+  <link rel="stylesheet" href="index.css?v=107_SAVE_GALLERY_WIDGET_NOTIFS">
 
   <!-- Official LiveKit WebRTC Client SDK -->
   <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.0.8/dist/livekit-client.umd.min.js"></script>
@@ -2893,24 +2893,24 @@
           </cite>
         </div>
         
-        <!-- Bottom Action Studio Controls (Save to Gallery, WhatsApp, Copy, Read) -->
-        <div class="fullscreen-vod-actions" style="position: relative; z-index: 2; display: flex; flex-direction: column; gap: 10px;">
+        <!-- Bottom Action Studio Controls (Save to Gallery, WhatsApp, Copy, Read, Widget, Notifications) -->
+        <div class="fullscreen-vod-actions" style="position: relative; z-index: 2; display: flex; flex-direction: column; gap: 8px;">
           
           <!-- Primary Save & Share Buttons Row -->
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <button onclick="saveExactDailyVerseImage()" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #ffffff; border: none; padding: 13px 14px; border-radius: 14px; font-weight: 800; font-size: 13.5px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(37,99,235,0.4); transition: transform 0.15s ease;">
-              <span style="font-size: 18px;">📥</span>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <button onclick="saveExactDailyVerseImage()" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #ffffff; border: none; padding: 12px 14px; border-radius: 14px; font-weight: 800; font-size: 13.5px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(37,99,235,0.4); transition: transform 0.15s ease;">
+              <span style="font-size: 17px;">📥</span>
               <span>Save to Gallery</span>
             </button>
 
-            <button onclick="shareDailyVerseToWhatsApp()" style="background: linear-gradient(135deg, #22c55e, #16a34a); color: #ffffff; border: none; padding: 13px 14px; border-radius: 14px; font-weight: 800; font-size: 13.5px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(34,197,94,0.4); transition: transform 0.15s ease;">
-              <span style="font-size: 18px;">💬</span>
+            <button onclick="shareDailyVerseToWhatsApp()" style="background: linear-gradient(135deg, #22c55e, #16a34a); color: #ffffff; border: none; padding: 12px 14px; border-radius: 14px; font-weight: 800; font-size: 13.5px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(34,197,94,0.4); transition: transform 0.15s ease;">
+              <span style="font-size: 17px;">💬</span>
               <span>WhatsApp Status</span>
             </button>
           </div>
 
-          <!-- Secondary Quick Tools Row (Copy text, Read Chapter, Wallpaper) -->
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <!-- Secondary Quick Tools Row (Copy text, Read Chapter) -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
             <button onclick="copyDailyVerseText()" style="background: rgba(255,255,255,0.14); backdrop-filter: blur(10px); color: #ffffff; border: 1px solid rgba(255,255,255,0.25); padding: 10px 12px; border-radius: 12px; font-weight: 700; font-size: 12.5px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
               <span>📋 Copy Verse</span>
             </button>
@@ -2920,6 +2920,235 @@
             </button>
           </div>
 
+          <!-- Tertiary Integration Tools Row (Daily Verse Notification Reminder & Mobile Home Screen Widget) -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <button onclick="openNotificationSettingsModal()" style="background: rgba(245, 158, 11, 0.18); backdrop-filter: blur(10px); color: #fef08a; border: 1px solid rgba(245, 158, 11, 0.45); padding: 9px 10px; border-radius: 12px; font-weight: 700; font-size: 11.5px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+              <span>🔔 Daily Reminder</span>
+            </button>
+
+            <button onclick="openWidgetGuideModal()" style="background: rgba(59, 130, 246, 0.18); backdrop-filter: blur(10px); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.45); padding: 9px 10px; border-radius: 12px; font-weight: 700; font-size: 11.5px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+              <span>📱 Home Widget</span>
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 1. HIGH-RES VERSE IMAGE PREVIEW & DIRECT GALLERY SAVE MODAL -->
+    <div id="modal-image-preview-save" class="modal-overlay-fullscreen" onclick="if(event.target === this) closeImagePreviewModal();" style="display: none; position: fixed; inset: 0; background-color: rgba(0,0,0,0.92); z-index: 999999; backdrop-filter: blur(10px); justify-content: center; align-items: center; padding: 16px;">
+      <div style="width: 100%; max-width: 480px; max-height: 92vh; background: #181b22; border-radius: 24px; border: 1px solid rgba(255,255,255,0.15); display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 25px 50px rgba(0,0,0,0.8);">
+        
+        <!-- Header -->
+        <div style="padding: 14px 18px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 20px;">🖼️</span>
+            <div>
+              <h4 style="margin: 0; font-size: 15px; font-weight: 800; color: #ffffff;">Save to Photos / गॅलरीमध्ये सेव्ह करा</h4>
+              <p style="margin: 2px 0 0; font-size: 11px; color: #94a3b8;">High-Resolution (1080x1350) Devotional Card</p>
+            </div>
+          </div>
+          <button onclick="closeImagePreviewModal()" style="background: rgba(255,255,255,0.12); border: none; width: 32px; height: 32px; border-radius: 50%; color: #fff; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;">&times;</button>
+        </div>
+
+        <!-- Rendered Image Container -->
+        <div style="flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; background: #0f1117;">
+          <img id="vod-preview-rendered-img" src="" alt="Daily Verse Image" style="width: 100%; max-height: 52vh; object-fit: contain; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.15);" />
+          
+          <div style="background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 12px; padding: 10px 14px; width: 100%; box-sizing: border-box; text-align: center;">
+            <p style="margin: 0; font-size: 12px; color: #fde68a; font-weight: 600; line-height: 1.4;">
+              💡 <strong>मोबाईल युझर्ससाठी टीप:</strong> खालील "Download Image" बटण दाबा किंवा वरील फोटोवर २ सेकंद दाबून धरून <strong>"Save Image / फोटो सेव्ह करा"</strong> निवडा.
+            </p>
+          </div>
+        </div>
+
+        <!-- Action Buttons Footer -->
+        <div style="padding: 14px 18px; border-top: 1px solid rgba(255,255,255,0.1); display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #181b22;">
+          <button id="btn-download-preview-file" onclick="downloadRenderedVodImage()" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; border: none; padding: 12px 14px; border-radius: 12px; font-size: 13.5px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 4px 12px rgba(37,99,235,0.4);">
+            <span>📥 Download Image</span>
+          </button>
+          
+          <button onclick="shareRenderedVodImage()" style="background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; border: none; padding: 12px 14px; border-radius: 12px; font-size: 13.5px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 4px 12px rgba(34,197,94,0.4);">
+            <span>💬 WhatsApp Share</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 2. DAILY BIBLE VERSE NOTIFICATIONS MODAL -->
+    <div id="modal-notification-settings" class="drawer-overlay" onclick="if (event.target === this) closeNotificationSettingsModal();" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 99999; backdrop-filter: blur(6px); justify-content: center; align-items: flex-end;">
+      <div class="ios-drawer-sheet" style="max-width: 500px; width: 100%; border-radius: 26px 26px 0 0; background: #FFFFFF; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 -10px 40px rgba(0,0,0,0.2);">
+        
+        <!-- Header -->
+        <div class="drawer-header-row" style="padding: 16px 20px; border-bottom: 1px solid #EAEAEA; display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 22px;">🔔</span>
+            <div>
+              <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #1F2937;">Daily Verse Reminder / दैनिक वचन सूचना</h3>
+              <p style="margin: 2px 0 0; font-size: 11.5px; color: #6B7280;">दररोज सकाळी तुमच्या मोबाईलवर ताजे वचन मिळवा</p>
+            </div>
+          </div>
+          <button onclick="closeNotificationSettingsModal()" style="background: #F3F4F6; border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 18px; color: #4B5563; cursor: pointer;">&times;</button>
+        </div>
+
+        <!-- Body Content -->
+        <div style="padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px;">
+          
+          <!-- Enable Notification Toggle Card -->
+          <div style="background: #F9FAFB; border: 1.5px solid #E5E7EB; border-radius: 16px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <strong style="font-size: 14.5px; color: #111827; display: block;">दैनिक वचन सूचना चालू करा (Enable Reminders)</strong>
+              <span style="font-size: 12px; color: #6B7280;">दररोज नवीन आत्मिक वचन व आशीर्वाद</span>
+            </div>
+            <label style="position: relative; display: inline-block; width: 50px; height: 28px;">
+              <input type="checkbox" id="notif-toggle-enable" checked style="opacity: 0; width: 0; height: 0;" onchange="handleNotificationToggleChange(this.checked)">
+              <span id="notif-toggle-slider" style="position: absolute; cursor: pointer; inset: 0; background-color: #22c55e; border-radius: 28px; transition: .3s; display: block;">
+                <span style="position: absolute; content: ''; height: 22px; width: 22px; left: 25px; bottom: 3px; background-color: white; border-radius: 50%; transition: .3s; display: block;" id="notif-toggle-knob"></span>
+              </span>
+            </label>
+          </div>
+
+          <!-- Time Picker Card -->
+          <div style="background: #F9FAFB; border: 1.5px solid #E5E7EB; border-radius: 16px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <strong style="font-size: 14px; color: #111827; display: block;">सूचनेची वेळ (Reminder Time)</strong>
+              <span style="font-size: 11.5px; color: #6B7280;">सकाळची प्रार्थना व भक्तीची वेळ</span>
+            </div>
+            <input type="time" id="notif-time-picker" value="07:00" style="font-size: 15px; font-weight: 700; color: #1F2937; background: #FFFFFF; border: 1.5px solid #D1D5DB; border-radius: 10px; padding: 6px 12px; outline: none;">
+          </div>
+
+          <!-- Language Card -->
+          <div style="background: #F9FAFB; border: 1.5px solid #E5E7EB; border-radius: 16px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <strong style="font-size: 14px; color: #111827; display: block;">भाषेची निवड (Language)</strong>
+              <span style="font-size: 11.5px; color: #6B7280;">मराठी (BSI) किंवा इंग्रजी (NLT)</span>
+            </div>
+            <select id="notif-lang-select" style="font-size: 13.5px; font-weight: 700; color: #1F2937; background: #FFFFFF; border: 1.5px solid #D1D5DB; border-radius: 10px; padding: 6px 10px; outline: none;">
+              <option value="mr" selected>मराठी (Marathi)</option>
+              <option value="eng">English (इंग्रजी)</option>
+            </select>
+          </div>
+
+          <!-- Test Notification Button -->
+          <div style="background: rgba(247, 0, 47, 0.05); border: 1.5px dashed rgba(247, 0, 47, 0.3); border-radius: 16px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <span style="font-size: 13px; font-weight: 700; color: #F7002F;">⚡ त्वरित चाचणी सूचना पाठवा</span>
+              <button onclick="sendTestVerseNotification()" style="background: #F7002F; color: #ffffff; border: none; padding: 8px 14px; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer; box-shadow: 0 3px 10px rgba(247, 0, 47, 0.3);">
+                Test Now
+              </button>
+            </div>
+            <p style="margin: 0; font-size: 11px; color: #6B7280; line-height: 1.4;">
+              यावर क्लिक केल्यास तुमच्या फोनवर लगेच आजच्या दैनिक वचनाची सूचना येईल.
+            </p>
+          </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div style="padding: 14px 20px; border-top: 1px solid #EAEAEA; background: #FFFFFF;">
+          <button onclick="saveNotificationSettings()" style="width: 100%; background: #F7002F; color: #ffffff; border: none; padding: 13px; border-radius: 14px; font-size: 14.5px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 14px rgba(247,0,47,0.35);">
+            ✓ Save Settings / सेव्ह करा
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 3. MOBILE HOME SCREEN WIDGET STUDIO & INSTALL GUIDE MODAL -->
+    <div id="modal-widget-guide" class="drawer-overlay" onclick="if (event.target === this) closeWidgetGuideModal();" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 99999; backdrop-filter: blur(8px); justify-content: center; align-items: flex-end;">
+      <div class="ios-drawer-sheet" style="max-width: 520px; width: 100%; border-radius: 26px 26px 0 0; background: #FFFFFF; max-height: 88vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 -10px 40px rgba(0,0,0,0.25);">
+        
+        <!-- Header -->
+        <div class="drawer-header-row" style="padding: 16px 20px; border-bottom: 1px solid #EAEAEA; display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 22px;">📱</span>
+            <div>
+              <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #1F2937;">Mobile Home Screen Widget</h3>
+              <p style="margin: 2px 0 0; font-size: 11.5px; color: #6B7280;">मोबाईलच्या होम स्क्रीनवर दैनिक वचन जोडा</p>
+            </div>
+          </div>
+          <button onclick="closeWidgetGuideModal()" style="background: #F3F4F6; border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 18px; color: #4B5563; cursor: pointer;">&times;</button>
+        </div>
+
+        <!-- Body Content -->
+        <div style="padding: 18px 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px;">
+          
+          <!-- Widget Size Selector Tabs -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; background: #F3F4F6; padding: 4px; border-radius: 12px; gap: 4px;">
+            <button id="tab-widget-compact" onclick="selectWidgetSize('compact')" style="border: none; background: #FFFFFF; color: #1F2937; padding: 8px; border-radius: 9px; font-size: 12px; font-weight: 800; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.08);">
+              Compact (2x2)
+            </button>
+            <button id="tab-widget-wide" onclick="selectWidgetSize('wide')" style="border: none; background: transparent; color: #6B7280; padding: 8px; border-radius: 9px; font-size: 12px; font-weight: 700; cursor: pointer;">
+              Wide (4x2)
+            </button>
+            <button id="tab-widget-sanctuary" onclick="selectWidgetSize('sanctuary')" style="border: none; background: transparent; color: #6B7280; padding: 8px; border-radius: 9px; font-size: 12px; font-weight: 700; cursor: pointer;">
+              Sanctuary (4x4)
+            </button>
+          </div>
+
+          <!-- Live Interactive Widget Preview Canvas -->
+          <div id="widget-live-preview-box" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%); border-radius: 20px; padding: 18px 16px; color: #ffffff; position: relative; overflow: hidden; box-shadow: 0 12px 28px rgba(30,27,75,0.3); border: 1.5px solid rgba(255,255,255,0.15);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span style="font-size: 10.5px; font-weight: 800; color: #fbbf24; background: rgba(251,191,36,0.18); padding: 3px 8px; border-radius: 12px; border: 1px solid rgba(251,191,36,0.35); text-transform: uppercase;">
+                ✝ ROL DAILY VERSE
+              </span>
+              <span style="font-size: 10px; color: rgba(255,255,255,0.7); font-weight: 600;">LIVE FEED</span>
+            </div>
+            
+            <p id="widget-preview-verse-text" style="font-family: 'Noto Serif Devanagari', serif; font-size: 14.5px; line-height: 1.5; color: #ffffff; font-weight: 700; margin: 0 0 8px 0;">
+              "तू जलांतून चालशील तेव्हा मी तुझ्याबरोबर असेन; आणि नद्यांतून चालशील तेव्हा त्या तुला बुडवणार नाहीत."
+            </p>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span id="widget-preview-verse-ref" style="font-size: 12px; font-weight: 800; color: #fef08a;">यशया ४३:२ MARVBSI</span>
+              <span style="font-size: 10.5px; color: rgba(255,255,255,0.8); font-weight: 600;">River of Life</span>
+            </div>
+          </div>
+
+          <!-- OS Setup Instructions (iOS / Android Tabs) -->
+          <div style="background: #F9FAFB; border: 1.5px solid #E5E7EB; border-radius: 16px; padding: 14px 16px;">
+            <div style="display: flex; gap: 8px; border-bottom: 1px solid #E5E7EB; padding-bottom: 8px; margin-bottom: 12px;">
+              <button id="btn-guide-ios" onclick="switchWidgetGuideOS('ios')" style="background: #1F2937; color: #fff; border: none; padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 800; cursor: pointer;">
+                🍎 iPhone (iOS)
+              </button>
+              <button id="btn-guide-android" onclick="switchWidgetGuideOS('android')" style="background: transparent; color: #4B5563; border: 1px solid #D1D5DB; padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;">
+                🤖 Android
+              </button>
+            </div>
+
+            <!-- iOS Steps -->
+            <div id="widget-guide-content-ios" style="display: block; font-size: 12.5px; color: #374151; line-height: 1.6;">
+              <ol style="margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px;">
+                <li><strong>Safari PWA Shortcut:</strong> Safari मध्ये Share चिन्हावर क्लिक करून <em>"Add to Home Screen"</em> निवडा.</li>
+                <li><strong>Apple Shortcuts / Widgy विजेट:</strong> खालील Live JSON Feed URL कॉपी करून Widgy किंवा Shortcuts विजेटमध्ये पेस्ट करा.</li>
+                <li>होम स्क्रीनवर रिकाम्या जागी २ सेकंद दाबून धरा, <strong>'+'</strong> चिन्हावर क्लिक करून विजेट निवडा.</li>
+              </ol>
+            </div>
+
+            <!-- Android Steps -->
+            <div id="widget-guide-content-android" style="display: none; font-size: 12.5px; color: #374151; line-height: 1.6;">
+              <ol style="margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px;">
+                <li><strong>Chrome PWA Widget:</strong> Chrome मेनूवर (⋮) क्लिक करून <em>"Install App / Add to Home Screen"</em> निवडा.</li>
+                <li><strong>KWGT / Web Widget:</strong> खालील Daily Verse JSON Feed लिंक कॉपी करा व KWGT विजेटमध्ये सेट करा.</li>
+                <li>होम स्क्रीनवर दाबून धरा, <strong>"Widgets"</strong> निवडा आणि River of Life विजेट होम स्क्रीनवर ठेवा.</li>
+              </ol>
+            </div>
+          </div>
+
+          <!-- Copy Live Feed URL Button -->
+          <button onclick="copyWidgetFeedUrl()" style="background: #F3F4F6; border: 1.5px solid #D1D5DB; color: #1F2937; padding: 11px 14px; border-radius: 12px; font-size: 12.5px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <span>📋 Copy Daily Verse Live JSON Feed URL</span>
+          </button>
+
+        </div>
+
+        <!-- Footer -->
+        <div style="padding: 14px 20px; border-top: 1px solid #EAEAEA; background: #FFFFFF;">
+          <button onclick="closeWidgetGuideModal()" style="width: 100%; background: #1F2937; color: #ffffff; border: none; padding: 13px; border-radius: 14px; font-size: 14px; font-weight: 800; cursor: pointer;">
+            समजले (Got it)
+          </button>
         </div>
 
       </div>

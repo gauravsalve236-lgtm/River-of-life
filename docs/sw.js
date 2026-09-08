@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v106-LIGHT-THEME-HYMNS-4TABS';
+const CACHE_NAME = 'river-of-life-cache-v107-SAVE-GALLERY-WIDGET-NOTIFS';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
@@ -17,6 +17,22 @@ self.addEventListener('activate', (event) => {
     })
   );
   self.clients.claim();
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if (client.url && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      if (clients.openWindow) {
+        return clients.openWindow('./index.html#today');
+      }
+    })
+  );
 });
 
 self.addEventListener('fetch', (event) => {

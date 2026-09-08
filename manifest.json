@@ -1,7 +1,7 @@
 {
-  "name": "River of Life",
+  "name": "River of Life - Marathi & English Bible",
   "short_name": "River of Life",
-  "description": "Bilingual Marathi & English Bible",
+  "description": "Bilingual Marathi & English Bible, Daily Devotional & Hymnal Sanctuary",
   "start_url": "./index.html",
   "display": "standalone",
   "display_override": [
@@ -9,9 +9,39 @@
     "minimal-ui",
     "window-controls-overlay"
   ],
-  "background_color": "#e91c1e",
-  "theme_color": "#e91c1e",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
   "orientation": "portrait-primary",
+  "shortcuts": [
+    {
+      "name": "Daily Verse (दैनिक वचन)",
+      "short_name": "Verse",
+      "description": "Read today's Marathi Bible Verse of the Day",
+      "url": "./index.html#today",
+      "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Bible Reader (बायबल वाचा)",
+      "short_name": "Bible",
+      "description": "Open Marathi & English Scripture Reader",
+      "url": "./index.html#reader",
+      "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Marathi Hymns (उपासना संगीत)",
+      "short_name": "Hymns",
+      "description": "Browse 20+ Marathi Christian Hymns & Lyrics",
+      "url": "./index.html#hymns",
+      "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Prayer Sanctuary (प्रार्थना)",
+      "short_name": "Prayers",
+      "description": "Live prayer requests and fellowship",
+      "url": "./index.html#meetings",
+      "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
   "permissions": [
     "camera",
     "microphone",
@@ -32,5 +62,5 @@
       "purpose": "any maskable"
     }
   ],
-  "version": "2323.2"
+  "version": "2323.3"
 }

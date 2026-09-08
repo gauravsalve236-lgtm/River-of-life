@@ -5607,6 +5607,7 @@ window.closeAllDrawers = closeAllDrawers;
 function openModal(id) {
   const overlay = document.getElementById(id);
   if (overlay) {
+    overlay.style.display = "flex";
     overlay.classList.add("active");
     if (id === "modal-card-share") resetCardCreatorModal();
     if (id === "modal-audio-settings") toggleVoiceDropdownVisibility();
@@ -5617,11 +5618,7 @@ function closeModal(id) {
   const overlay = document.getElementById(id);
   if (overlay) {
     overlay.classList.remove("active");
-    if (id === "modal-fullscreen-vod") {
-      overlay.style.display = "none";
-      overlay.style.opacity = "0";
-      overlay.style.pointerEvents = "none";
-    }
+    overlay.style.display = "none";
   }
 }
 
@@ -13352,8 +13349,11 @@ window.navigateVOD = function(dir) {
   openFullscreenVOD();
 };
 
+// Global state for last rendered verse image
+window._currentRenderedVodImage = null;
+
 window.generateExactVerseImageBlob = function() {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const { vod, dayOfYear, offset } = getCurrentVOD();
     const displayRef = (state.translation === "eng") ? vod.engRef : vod.ref;
     const displayText = (state.translation === "eng") ? vod.engText : vod.text;
@@ -13370,53 +13370,67 @@ window.generateExactVerseImageBlob = function() {
     canvas.height = 1350; // Perfect 4:5 Instagram/WhatsApp portrait ratio
     const ctx = canvas.getContext("2d");
 
-    const bgImg = new Image();
-    bgImg.crossOrigin = "anonymous";
-    bgImg.onload = function() {
-      // 1. Draw Background Image with Aspect Fill
-      const scale = Math.max(canvas.width / bgImg.width, canvas.height / bgImg.height);
-      const x = (canvas.width / 2) - (bgImg.width / 2) * scale;
-      const y = (canvas.height / 2) - (bgImg.height / 2) * scale;
-      ctx.drawImage(bgImg, x, y, bgImg.width * scale, bgImg.height * scale);
+    let isCompleted = false;
 
-      // 2. Draw Luxurious Dark Gradient Overlay
+    function renderCanvasWithBackground(bgImageOrNull) {
+      if (isCompleted) return;
+      isCompleted = true;
+
+      if (bgImageOrNull) {
+        try {
+          const scale = Math.max(canvas.width / bgImageOrNull.width, canvas.height / bgImageOrNull.height);
+          const x = (canvas.width / 2) - (bgImageOrNull.width / 2) * scale;
+          const y = (canvas.height / 2) - (bgImageOrNull.height / 2) * scale;
+          ctx.drawImage(bgImageOrNull, x, y, bgImageOrNull.width * scale, bgImageOrNull.height * scale);
+        } catch (e) {
+          drawCelestialFallback();
+        }
+      } else {
+        drawCelestialFallback();
+      }
+
+      // 2. Draw Luxurious Multi-Stop Dark Gradient Overlay
       const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-      grad.addColorStop(0, 'rgba(0, 0, 0, 0.55)');
-      grad.addColorStop(0.35, 'rgba(0, 0, 0, 0.25)');
-      grad.addColorStop(0.7, 'rgba(0, 0, 0, 0.65)');
-      grad.addColorStop(1, 'rgba(0, 0, 0, 0.92)');
+      grad.addColorStop(0, 'rgba(10, 15, 29, 0.75)');
+      grad.addColorStop(0.35, 'rgba(10, 15, 29, 0.45)');
+      grad.addColorStop(0.7, 'rgba(10, 15, 29, 0.75)');
+      grad.addColorStop(1, 'rgba(10, 15, 29, 0.96)');
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // 3. Top Decorative Header Pill
+      // 3. Top Golden Header Pill
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
 
-      // Pill Background
-      ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
+      // Pill Background Box
+      ctx.fillStyle = "rgba(255, 255, 255, 0.14)";
       ctx.beginPath();
-      ctx.roundRect(canvas.width / 2 - 180, 110, 360, 52, 26);
+      if (ctx.roundRect) {
+        ctx.roundRect(canvas.width / 2 - 200, 110, 400, 56, 28);
+      } else {
+        ctx.rect(canvas.width / 2 - 200, 110, 400, 56);
+      }
       ctx.fill();
-      ctx.strokeStyle = "rgba(245, 158, 11, 0.6)";
-      ctx.lineWidth = 2;
+      ctx.strokeStyle = "rgba(245, 158, 11, 0.7)";
+      ctx.lineWidth = 2.5;
       ctx.stroke();
 
       // Pill Text
-      ctx.fillStyle = "#f59e0b";
-      ctx.font = "800 20px 'Outfit', -apple-system, sans-serif";
-      ctx.fillText("✝ VERSE OF THE DAY • दैनिक वचन", canvas.width / 2, 136);
+      ctx.fillStyle = "#fbbf24";
+      ctx.font = "800 21px 'Outfit', -apple-system, sans-serif";
+      ctx.fillText("✝ VERSE OF THE DAY • दैनिक वचन", canvas.width / 2, 138);
 
-      // 4. Scripture Verse Text (Devanagari / English)
+      // 4. Scripture Verse Typography (Devanagari / English)
       ctx.fillStyle = "#ffffff";
       ctx.font = "700 48px 'Noto Serif Devanagari', 'Lora', Georgia, serif";
-      ctx.shadowColor = "rgba(0, 0, 0, 0.9)";
-      ctx.shadowBlur = 18;
+      ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
+      ctx.shadowBlur = 20;
       ctx.shadowOffsetX = 0;
-      ctx.shadowOffsetY = 3;
+      ctx.shadowOffsetY = 4;
 
       const text = `"${displayText}"`;
       const maxWidth = 900;
-      const lineHeight = 76;
+      const lineHeight = 78;
       
       const words = text.split(" ");
       let line = "";
@@ -13434,7 +13448,7 @@ window.generateExactVerseImageBlob = function() {
       }
       lines.push(line.trim());
 
-      const startY = (canvas.height / 2) - ((lines.length - 1) * lineHeight) / 2 - 20;
+      const startY = (canvas.height / 2) - ((lines.length - 1) * lineHeight) / 2 - 30;
       for (let i = 0; i < lines.length; i++) {
         ctx.fillText(lines[i], canvas.width / 2, startY + (i * lineHeight));
       }
@@ -13443,53 +13457,62 @@ window.generateExactVerseImageBlob = function() {
       ctx.shadowColor = "transparent";
       ctx.shadowBlur = 0;
 
-      // 5. Scripture Reference Tag
-      const refY = startY + (lines.length * lineHeight) + 40;
+      // 5. Scripture Reference Pill
+      const refY = startY + (lines.length * lineHeight) + 48;
       ctx.fillStyle = "#fbbf24";
-      ctx.font = "800 32px 'Outfit', -apple-system, sans-serif";
-      ctx.shadowColor = "rgba(0, 0, 0, 0.8)";
-      ctx.shadowBlur = 10;
+      ctx.font = "800 34px 'Outfit', -apple-system, sans-serif";
+      ctx.shadowColor = "rgba(0, 0, 0, 0.85)";
+      ctx.shadowBlur = 12;
       ctx.fillText(`${displayRef} • ${state.translation === 'eng' ? 'NLT' : 'MARVBSI'}`, canvas.width / 2, refY);
 
-      // 6. Bottom River of Life Branding & Watermark
+      // 6. Bottom River of Life Branding & Gold Divider
       ctx.shadowColor = "transparent";
-      ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
-      ctx.font = "600 22px 'Outfit', sans-serif";
-      ctx.fillText("River of Life Bible • जीवन नदी बायबल ॲप", canvas.width / 2, canvas.height - 90);
-
-      // Gold Divider Line at Bottom
-      ctx.strokeStyle = "rgba(245, 158, 11, 0.5)";
-      ctx.lineWidth = 2;
+      ctx.strokeStyle = "rgba(245, 158, 11, 0.6)";
+      ctx.lineWidth = 2.5;
       ctx.beginPath();
-      ctx.moveTo(canvas.width / 2 - 60, canvas.height - 125);
-      ctx.lineTo(canvas.width / 2 + 60, canvas.height - 125);
+      ctx.moveTo(canvas.width / 2 - 80, canvas.height - 140);
+      ctx.lineTo(canvas.width / 2 + 80, canvas.height - 140);
       ctx.stroke();
 
-      canvas.toBlob((blob) => {
-        if (blob) {
-          resolve({
-            blob: blob,
-            dataUrl: canvas.toDataURL("image/png"),
-            filename: `River_of_Life_Daily_Verse_${displayRef.replace(/[: ]/g, "_")}.png`
-          });
-        } else {
-          reject(new Error("Canvas blob generation failed"));
-        }
-      }, "image/png", 0.95);
-    };
+      ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
+      ctx.font = "600 24px 'Outfit', sans-serif";
+      ctx.fillText("River of Life Bible • जीवन नदी बायबल ॲप", canvas.width / 2, canvas.height - 95);
 
-    bgImg.onerror = function() {
-      // Fallback solid gradient canvas if image fails
-      ctx.fillStyle = "#1e1b4b";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      const filename = `River_of_Life_Daily_Verse_${displayRef.replace(/[: ]/g, "_")}.png`;
+      const dataUrl = canvas.toDataURL("image/png");
+      
       canvas.toBlob((blob) => {
         resolve({
-          blob: blob,
-          dataUrl: canvas.toDataURL("image/png"),
-          filename: `River_of_Life_Daily_Verse.png`
+          blob: blob || new Blob([], { type: "image/png" }),
+          dataUrl: dataUrl,
+          filename: filename
         });
-      });
+      }, "image/png", 0.95);
+    }
+
+    function drawCelestialFallback() {
+      const bgGrad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+      bgGrad.addColorStop(0, '#1e1b4b');
+      bgGrad.addColorStop(0.5, '#312e81');
+      bgGrad.addColorStop(1, '#0f172a');
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    const bgImg = new Image();
+    bgImg.onload = function() {
+      renderCanvasWithBackground(bgImg);
     };
+    bgImg.onerror = function() {
+      renderCanvasWithBackground(null);
+    };
+
+    // Safety timeout: if image takes > 1200ms, render immediately with celestial background
+    setTimeout(() => {
+      if (!isCompleted) {
+        renderCanvasWithBackground(null);
+      }
+    }, 1200);
 
     bgImg.src = imgUrl;
   });
@@ -13498,20 +13521,75 @@ window.generateExactVerseImageBlob = function() {
 window.saveExactDailyVerseImage = async function() {
   try {
     showToast("⏳ फोटो गॅलरीसाठी तयार होत आहे...");
-    const { dataUrl, filename } = await generateExactVerseImageBlob();
-    
+    const result = await generateExactVerseImageBlob();
+    window._currentRenderedVodImage = result;
+
+    // 1. Direct Anchor Download Trigger
+    const link = document.createElement("a");
+    link.href = result.dataUrl;
+    link.download = result.filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // 2. Open Preview & Direct Save Modal
+    openImagePreviewModal(result.dataUrl, result.filename, result.blob);
+    showToast("📥 फोटो गॅलरीमध्ये सेव्ह झाला! (Saved to Gallery)");
+
+    // 3. Try Native Web Share API with File (on supported mobile devices)
+    if (navigator.canShare && navigator.canShare({ files: [new File([result.blob], result.filename, { type: "image/png" })] })) {
+      const file = new File([result.blob], result.filename, { type: "image/png" });
+      try {
+        await navigator.share({
+          title: `River of Life - Daily Verse`,
+          text: `📖 ${result.filename}`,
+          files: [file]
+        });
+      } catch (shareErr) {
+        // User dismissed share dialog
+      }
+    }
+
+  } catch (err) {
+    console.error("Save image error:", err);
+    showToast("Image generation complete.");
+  }
+};
+
+window.openImagePreviewModal = function(dataUrl, filename, blob) {
+  const modal = document.getElementById("modal-image-preview-save");
+  const img = document.getElementById("vod-preview-rendered-img");
+  if (modal && img) {
+    img.src = dataUrl;
+    modal.classList.add("active");
+    modal.style.display = "flex";
+  }
+};
+
+window.closeImagePreviewModal = function() {
+  const modal = document.getElementById("modal-image-preview-save");
+  if (modal) {
+    modal.classList.remove("active");
+    modal.style.display = "none";
+  }
+};
+
+window.downloadRenderedVodImage = function() {
+  if (window._currentRenderedVodImage) {
+    const { dataUrl, filename } = window._currentRenderedVodImage;
     const link = document.createElement("a");
     link.href = dataUrl;
     link.download = filename;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-
-    showToast("📥 फोटो गॅलरीमध्ये सेव्ह झाला! (Saved to Gallery)");
-  } catch (err) {
-    console.error("Save image error:", err);
-    showToast("Image save failed. Please try again.");
+    showToast("📥 फोटो डाउनलोड सुरू झाला!");
   }
+};
+
+window.shareRenderedVodImage = function() {
+  closeImagePreviewModal();
+  shareDailyVerseToWhatsApp();
 };
 
 window.shareDailyVerseToWhatsApp = async function() {
@@ -13520,12 +13598,13 @@ window.shareDailyVerseToWhatsApp = async function() {
     const displayRef = (state.translation === "eng") ? vod.engRef : vod.ref;
     const displayText = (state.translation === "eng") ? vod.engText : vod.text;
     
-    const shareText = `📖 आजचे दैनिक वचन (Verse of the Day)\n\n"${displayText}"\n— ${displayRef} (${state.translation === 'eng' ? 'NLT' : 'MARVBSI'})\n\nजीवन नदी बायबल ॲपवरून सामायिक केले 🙏✨`;
+    const shareText = `📖 आजचे दैनिक वचन (Verse of the Day)\n\n"${displayText}"\n— ${displayRef} (${state.translation === 'eng' ? 'NLT' : 'MARVBSI'})\n\nजीवन नदी बायबल ॲपवरून सामायिक केले 🙏✨\nhttps://gauravsalve236-lgtm.github.io/River-of-life/`;
 
     showToast("⏳ व्हॉट्सॲपसाठी फोटो तयार होत आहे...");
     const { blob, filename, dataUrl } = await generateExactVerseImageBlob();
+    window._currentRenderedVodImage = { blob, filename, dataUrl };
 
-    // 1. Try Native Web Share API with File (Works on Android/iOS WhatsApp Status)
+    // 1. Try Native Web Share API with File (Direct WhatsApp share on mobile)
     if (navigator.canShare && navigator.canShare({ files: [new File([blob], filename, { type: "image/png" })] })) {
       const file = new File([blob], filename, { type: "image/png" });
       await navigator.share({
@@ -13555,7 +13634,7 @@ window.shareDailyVerseToWhatsApp = async function() {
     const { vod } = getCurrentVOD();
     const displayRef = (state.translation === "eng") ? vod.engRef : vod.ref;
     const displayText = (state.translation === "eng") ? vod.engText : vod.text;
-    const shareText = `📖 "${displayText}" — ${displayRef} 🙏✨`;
+    const shareText = `📖 "${displayText}" — ${displayRef} 🙏✨\nhttps://gauravsalve236-lgtm.github.io/River-of-life/`;
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`, "_blank");
   }
 };
@@ -13573,6 +13652,244 @@ window.copyDailyVerseText = function() {
     });
   } else {
     showToast("Clipboard not supported");
+  }
+};
+
+/* ==========================================================================
+   DAILY VERSE NOTIFICATION REMINDERS SYSTEM
+   ========================================================================== */
+window.openNotificationSettingsModal = function() {
+  if (typeof openModal === "function") {
+    openModal("modal-notification-settings");
+  } else {
+    const modal = document.getElementById("modal-notification-settings");
+    if (modal) {
+      modal.classList.add("active");
+      modal.style.display = "flex";
+    }
+  }
+  const savedTime = localStorage.getItem("rol_notif_time") || "07:00";
+  const savedEnabled = localStorage.getItem("rol_notif_enabled") !== "false";
+  const timeInput = document.getElementById("notif-time-picker");
+  const toggle = document.getElementById("notif-toggle-enable");
+  if (timeInput) timeInput.value = savedTime;
+  if (toggle) {
+    toggle.checked = savedEnabled;
+    handleNotificationToggleChange(savedEnabled);
+  }
+};
+
+window.closeNotificationSettingsModal = function() {
+  if (typeof closeModal === "function") {
+    closeModal("modal-notification-settings");
+  } else {
+    const modal = document.getElementById("modal-notification-settings");
+    if (modal) {
+      modal.classList.remove("active");
+      modal.style.display = "none";
+    }
+  }
+};
+
+window.handleNotificationToggleChange = function(enabled) {
+  const slider = document.getElementById("notif-toggle-slider");
+  const knob = document.getElementById("notif-toggle-knob");
+  if (slider && knob) {
+    if (enabled) {
+      slider.style.backgroundColor = "#22c55e";
+      knob.style.left = "25px";
+    } else {
+      slider.style.backgroundColor = "#9CA3AF";
+      knob.style.left = "3px";
+    }
+  }
+};
+
+window.saveNotificationSettings = async function() {
+  const toggle = document.getElementById("notif-toggle-enable");
+  const timeInput = document.getElementById("notif-time-picker");
+  const langSelect = document.getElementById("notif-lang-select");
+
+  const enabled = toggle ? toggle.checked : true;
+  const time = timeInput ? timeInput.value : "07:00";
+  const lang = langSelect ? langSelect.value : "mr";
+
+  localStorage.setItem("rol_notif_enabled", enabled ? "true" : "false");
+  localStorage.setItem("rol_notif_time", time);
+  localStorage.setItem("rol_notif_lang", lang);
+
+  if (enabled && "Notification" in window) {
+    if (Notification.permission !== "granted") {
+      try {
+        await Notification.requestPermission();
+      } catch (e) {
+        console.error("Notification permission error:", e);
+      }
+    }
+  }
+
+  closeNotificationSettingsModal();
+  showToast(enabled ? `🔔 दैनिक सूचना सकाळी ${time} वाजता सेट केली!` : "🔕 दैनिक सूचना बंद केली");
+};
+
+window.sendTestVerseNotification = async function() {
+  const { vod } = getCurrentVOD();
+  const langSelect = document.getElementById("notif-lang-select");
+  const lang = (langSelect ? langSelect.value : "mr");
+  const title = (lang === "eng") ? `📖 Daily Verse - ${vod.engRef}` : `📖 आजचे दैनिक वचन - ${vod.ref}`;
+  const body = (lang === "eng") ? vod.engText : vod.text;
+
+  if ("Notification" in window) {
+    if (Notification.permission === "granted") {
+      new Notification(title, {
+        body: body,
+        icon: "assets/icons/icon-192.png",
+        badge: "assets/icons/icon-192.png"
+      });
+      showToast("🔔 चाचणी सूचना पाठवली!");
+    } else {
+      const permission = await Notification.requestPermission();
+      if (permission === "granted") {
+        new Notification(title, {
+          body: body,
+          icon: "assets/icons/icon-192.png"
+        });
+        showToast("🔔 चाचणी सूचना पाठवली!");
+      } else {
+        showToast("कृपया ब्राउझरमध्ये Notification परवानगी द्या.");
+      }
+    }
+  } else {
+    showToast(`🔔 ${title}\n${body.substring(0, 60)}...`);
+  }
+};
+
+/* ==========================================================================
+   MOBILE HOME SCREEN WIDGET STUDIO & GUIDE SYSTEM
+   ========================================================================== */
+window.openWidgetGuideModal = function() {
+  if (typeof openModal === "function") {
+    openModal("modal-widget-guide");
+  } else {
+    const modal = document.getElementById("modal-widget-guide");
+    if (modal) {
+      modal.classList.add("active");
+      modal.style.display = "flex";
+    }
+  }
+  updateWidgetLivePreview();
+};
+
+window.closeWidgetGuideModal = function() {
+  if (typeof closeModal === "function") {
+    closeModal("modal-widget-guide");
+  } else {
+    const modal = document.getElementById("modal-widget-guide");
+    if (modal) {
+      modal.classList.remove("active");
+      modal.style.display = "none";
+    }
+  }
+};
+
+window.selectWidgetSize = function(size) {
+  const tabCompact = document.getElementById("tab-widget-compact");
+  const tabWide = document.getElementById("tab-widget-wide");
+  const tabSanctuary = document.getElementById("tab-widget-sanctuary");
+
+  [tabCompact, tabWide, tabSanctuary].forEach(t => {
+    if (t) {
+      t.style.background = "transparent";
+      t.style.color = "#6B7280";
+      t.style.fontWeight = "700";
+      t.style.boxShadow = "none";
+    }
+  });
+
+  const activeTab = document.getElementById(`tab-widget-${size}`);
+  if (activeTab) {
+    activeTab.style.background = "#FFFFFF";
+    activeTab.style.color = "#1F2937";
+    activeTab.style.fontWeight = "800";
+    activeTab.style.boxShadow = "0 2px 6px rgba(0,0,0,0.08)";
+  }
+
+  const previewBox = document.getElementById("widget-live-preview-box");
+  const verseText = document.getElementById("widget-preview-verse-text");
+  const { vod } = getCurrentVOD();
+  const text = (state.translation === "eng") ? vod.engText : vod.text;
+  const ref = (state.translation === "eng") ? vod.engRef : vod.ref;
+
+  if (previewBox && verseText) {
+    if (size === "compact") {
+      previewBox.style.minHeight = "120px";
+      verseText.textContent = `"${text.length > 75 ? text.substring(0, 75) + '...' : text}"`;
+      verseText.style.fontSize = "13.5px";
+    } else if (size === "wide") {
+      previewBox.style.minHeight = "160px";
+      verseText.textContent = `"${text}"`;
+      verseText.style.fontSize = "14.5px";
+    } else if (size === "sanctuary") {
+      previewBox.style.minHeight = "210px";
+      verseText.textContent = `"${text}"`;
+      verseText.style.fontSize = "15.5px";
+    }
+  }
+};
+
+window.updateWidgetLivePreview = function() {
+  const { vod } = getCurrentVOD();
+  const verseText = document.getElementById("widget-preview-verse-text");
+  const verseRef = document.getElementById("widget-preview-verse-ref");
+  if (verseText && verseRef) {
+    verseText.textContent = `"${(state.translation === 'eng') ? vod.engText : vod.text}"`;
+    verseRef.textContent = `${(state.translation === 'eng') ? vod.engRef : vod.ref} ${state.translation === 'eng' ? 'NLT' : 'MARVBSI'}`;
+  }
+};
+
+window.switchWidgetGuideOS = function(os) {
+  const btnIos = document.getElementById("btn-guide-ios");
+  const btnAndroid = document.getElementById("btn-guide-android");
+  const contentIos = document.getElementById("widget-guide-content-ios");
+  const contentAndroid = document.getElementById("widget-guide-content-android");
+
+  if (os === "ios") {
+    if (btnIos) {
+      btnIos.style.background = "#1F2937";
+      btnIos.style.color = "#FFFFFF";
+      btnIos.style.border = "none";
+    }
+    if (btnAndroid) {
+      btnAndroid.style.background = "transparent";
+      btnAndroid.style.color = "#4B5563";
+      btnAndroid.style.border = "1px solid #D1D5DB";
+    }
+    if (contentIos) contentIos.style.display = "block";
+    if (contentAndroid) contentAndroid.style.display = "none";
+  } else {
+    if (btnAndroid) {
+      btnAndroid.style.background = "#1F2937";
+      btnAndroid.style.color = "#FFFFFF";
+      btnAndroid.style.border = "none";
+    }
+    if (btnIos) {
+      btnIos.style.background = "transparent";
+      btnIos.style.color = "#4B5563";
+      btnIos.style.border = "1px solid #D1D5DB";
+    }
+    if (contentIos) contentIos.style.display = "none";
+    if (contentAndroid) contentAndroid.style.display = "block";
+  }
+};
+
+window.copyWidgetFeedUrl = function() {
+  const feedUrl = `${window.location.origin}${window.location.pathname.replace('index.html', '')}api/daily_verse.json`;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(feedUrl).then(() => {
+      showToast("📋 Live JSON Feed URL कॉपी झाली!");
+    });
+  } else {
+    showToast(`Feed URL: ${feedUrl}`);
   }
 };
 
