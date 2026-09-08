@@ -2792,11 +2792,12 @@ body {
   max-width: 100% !important;
   transform: none !important;
   margin: 0 !important;
-  min-height: calc(58px + env(safe-area-inset-bottom, 16px)) !important;
+  min-height: calc(58px + env(safe-area-inset-bottom, 20px)) !important;
   height: auto !important;
   padding-top: 6px !important;
-  padding-bottom: max(env(safe-area-inset-bottom, 16px), 16px) !important;
+  padding-bottom: max(env(safe-area-inset-bottom, 20px), 20px) !important;
   background: #FFFFFF !important;
+  background-color: #FFFFFF !important;
   border-top: 1.5px solid #EAEAEA !important;
   border-left: none !important;
   border-right: none !important;
@@ -7182,7 +7183,10 @@ input, textarea, select, [contenteditable="true"] {
   justify-content: space-between !important;
 }
 
-#modal-live-meeting:not(.active) {
+#modal-live-meeting:not(.active),
+#floating-audio-playbar:not(.active),
+#modal-fullscreen-vod:not(.active),
+.modal-overlay-fullscreen:not(.active) {
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
