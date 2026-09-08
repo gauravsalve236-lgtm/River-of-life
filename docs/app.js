@@ -8724,22 +8724,75 @@ function getMeetingsFromStorage() {
   try {
     let meetings = JSON.parse(localStorage.getItem("river_of_life_meetings"));
     
-    if (!meetings) {
+    // Validate or populate genuine official River of Life meetings
+    if (!meetings || !Array.isArray(meetings) || meetings.length === 0 || meetings.some(m => m.id === "meeting_1")) {
       const today = new Date();
       const formatDate = (d) => d.toISOString().split('T')[0];
       
       meetings = [
         {
-          id: "meeting_1",
-          title: "Friday Family Prayer / शुक्रवारची कौटुंबिक प्रार्थना",
-          description: "Live family prayer, praise, worship and Marathi scripture study.",
+          id: "RiverOfLife_DailySanctuary",
+          title: "Daily Live Prayer Meeting & Fellowship / दैनंदिन थेट व्हिडिओ प्रार्थना सभा",
+          description: "Live prayer sanctuary, worship, Marathi scripture study, and personal intercession with pastors.",
           host: "Pastor John",
           date: formatDate(today),
-          time: "20:00",
+          time: "06:00 & 20:30",
           duration: "60",
-          repeat: "weekly",
+          repeat: "daily",
           visibility: "public",
           status: "live",
+          createdAt: Date.now()
+        },
+        {
+          id: "RiverOfLife_MorningPrayer",
+          title: "Morning Dawn Prayer / प्रभात प्रार्थना",
+          description: "Start each morning in the secret place with prayer, thanksgiving, and Psalm 91 meditation.",
+          host: "Pastor John",
+          date: formatDate(today),
+          time: "06:00",
+          duration: "60",
+          repeat: "daily",
+          visibility: "public",
+          status: "scheduled",
+          createdAt: Date.now()
+        },
+        {
+          id: "RiverOfLife_EveningPrayer",
+          title: "Evening Family Prayer / कौटुंबिक प्रार्थना",
+          description: "Nightly family altar, intercession for families, church, and youth.",
+          host: "Pastor John",
+          date: formatDate(today),
+          time: "20:30",
+          duration: "60",
+          repeat: "daily",
+          visibility: "public",
+          status: "scheduled",
+          createdAt: Date.now()
+        },
+        {
+          id: "RiverOfLife_FastingPrayer",
+          title: "Friday Fasting & Healing Prayer / उपवास व आरोग्य प्रार्थना",
+          description: "Weekly fasting, spiritual breakthrough, and healing prayer service.",
+          host: "Pastor John",
+          date: formatDate(today),
+          time: "19:00",
+          duration: "90",
+          repeat: "weekly",
+          visibility: "public",
+          status: "scheduled",
+          createdAt: Date.now()
+        },
+        {
+          id: "RiverOfLife_SundayWorship",
+          title: "Sunday Main Worship / रविवारची मुख्य उपासना",
+          description: "Sunday morning celebration service with praise, worship, and Bible preaching.",
+          host: "Pastor John",
+          date: formatDate(today),
+          time: "10:00",
+          duration: "150",
+          repeat: "weekly",
+          visibility: "public",
+          status: "scheduled",
           createdAt: Date.now()
         }
       ];
@@ -9123,12 +9176,8 @@ function initMeetings() {
 // Persistent User Registry Database for Profiles & Invitations
 function getRegisteredUserDatabase() {
   const defaultMembers = [
-    { id: "usr_1", username: "Pastor John", email: "pastorjohn@riveroflife.org", role: "Pastor", isPastor: true },
-    { id: "usr_2", username: "Pastor Sunil", email: "sunil@riveroflife.org", role: "Pastor", isPastor: true },
-    { id: "usr_3", username: "Leader Samuel", email: "samuel@riveroflife.org", role: "Leader", isLeader: true },
-    { id: "usr_4", username: "Sister Sarah", email: "sarah@riveroflife.org", role: "Member" },
-    { id: "usr_5", username: "Gaurav Salve", email: "gaurav@riveroflife.org", role: "Member" },
-    { id: "usr_6", username: "Ruth Shinde", email: "ruth@riveroflife.org", role: "Member" }
+    { id: "usr_pastor", username: "Pastor John", email: "pastor@riveroflife.org", role: "Pastor", isPastor: true },
+    { id: "usr_admin", username: "River of Life Admin", email: "admin@riveroflife.org", role: "Admin", isAdmin: true }
   ];
 
   try {
@@ -16016,9 +16065,9 @@ const defaultAdminAnnouncements = [
 ];
 
 const defaultAdminMeetings = [
-  { id: "meet_1", title: "Sunday Holy Communion Fellowship", titleMr: "रविवार पवित्र मेज व उपासना", host: "Pastor John", time: "Every Sunday 10:00 AM", roomId: "rol-sunday-service", active: true },
-  { id: "meet_2", title: "Wednesday Fasting & Intercession", titleMr: "बुधवार उपवास व मध्यस्थी प्रार्थना", host: "Pastor Sunil", time: "Wednesdays 8:00 PM", roomId: "rol-intercession", active: true },
-  { id: "meet_3", title: "Youth Revival Fellowship Call", titleMr: "तरुण मंडळी जागृती सभा", host: "Esther (Youth Leader)", time: "Friday 7:30 PM", roomId: "rol-youth-revival", active: true }
+  { id: "RiverOfLife_SundayWorship", title: "Sunday Holy Worship & Word", titleMr: "रविवार पवित्र उपासना व वचन", host: "Pastor John", time: "Every Sunday 10:00 AM IST", roomId: "RiverOfLife_SundayWorship", active: true },
+  { id: "RiverOfLife_DailySanctuary", title: "Daily Live Prayer Meeting & Fellowship", titleMr: "दैनंदिन थेट व्हिडिओ प्रार्थना सभा व संगती", host: "Pastor John", time: "Daily 6:00 AM & 8:30 PM IST", roomId: "RiverOfLife_DailySanctuary", active: true },
+  { id: "RiverOfLife_FastingPrayer", title: "Friday Fasting & Healing Prayer Call", titleMr: "शुक्रवार उपवास व आरोग्य प्रार्थना सभा", host: "Pastor John", time: "Every Friday 7:00 PM IST", roomId: "RiverOfLife_FastingPrayer", active: true }
 ];
 
 function getAdminMembers() {
