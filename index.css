@@ -12238,19 +12238,3 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
 
 
 
-
-
-/* Strictly lock horizontal viewport */
-html, body, #app, .main-layout-container, .content-view-viewport, .view-scroll-content, #view-home {
-  max-width: 100vw !important;
-  overflow-x: hidden !important;
-}
-
-/* Prayers Subtab Navigation */
-.prayers-subnav-row::-webkit-scrollbar {
-  display: none;
-}
-.prayers-subnav-row {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}

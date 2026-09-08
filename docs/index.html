@@ -565,83 +565,153 @@
 
               <div class="home-grid-layout">
 
-              
-              <!-- Daily Guided Prayers Spotlight Carousel (Zero Screen Movement) -->
-              <div class="prayer-topics-section-container" style="margin-bottom: 20px; width: 100%; box-sizing: border-box;">
-                <div class="section-title-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                  <div>
-                    <span class="section-tag-gold" style="font-size: 10px; font-weight: 800; letter-spacing: 0.5px; color: #F7002F;">DAILY SCRIPTURE PRAYERS</span>
-                    <h3 class="section-main-heading" style="font-size: 17px; font-weight: 800; margin: 2px 0 0 0; color: #000000;">Daily Guided Prayers</h3>
+              <!-- 3RD OPTION: Topics for Prayers (Top 4 Featured with View All Button) -->
+              <div class="prayer-topics-section-container">
+                <div class="section-title-row" style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 14px;">
+                  <div class="section-title-left">
+                    <span class="section-tag-gold" data-i18n="tag_prayer_sanctuary">PRAYER SANCTUARY</span>
+                    <h3 class="section-main-heading" data-i18n="prayers_section_title">Daily Guided Prayers</h3>
+                    <p class="section-sub-heading" data-i18n="prayers_section_sub">बायबल आधारित प्रार्थना आणि आत्मिक मनन</p>
                   </div>
-                  <button type="button" class="btn-see-more-prayers" onclick="openAllPrayersModal()" style="padding: 6px 12px; border-radius: 12px; font-size: 11.5px; font-weight: 800; background: rgba(247, 0, 47, 0.08); color: #F7002F; border: 1.5px solid rgba(247, 0, 47, 0.25); cursor: pointer; display: flex; align-items: center; gap: 4px; white-space: nowrap;">
-                    <span>See All (८)</span> &rarr;
+                  <button class="btn-section-view-all" id="btn-view-all-prayers" onclick="toggleViewAllPrayers()" data-i18n="btn_view_all_prayers">View All Prayers (8+) →</button>
+                </div>
+
+                <!-- Live Prayer Sanctuary Fellowship Banner -->
+                <div class="prayer-sanctuary-banner-card" style="margin-bottom: 18px; border-radius: 20px; overflow: hidden; background: #ffffff; color: #000000; padding: 20px; box-shadow: var(--shadow-sm); border: 1.5px solid var(--border); display: flex; flex-direction: column; gap: 14px; position: relative;">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span class="badge-success" style="font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 20px; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 6px;">
+                      <span class="status-dot status-dot-success" style="width: 7px; height: 7px;"></span>
+                      🔴 LIVE FELLOWSHIP NOW
+                    </span>
+                    <span style="font-size: 12px; color: var(--text-muted); font-weight: 700;" data-i18n="daily_sanctuary_tag">Daily Sanctuary</span>
+                  </div>
+
+                  <div>
+                    <h4 style="margin: 0 0 6px 0; font-size: 18px; font-weight: 800; color: #000000;" data-i18n="live_fellowship_title">Daily Prayer & Scripture Fellowship</h4>
+                    <p style="margin: 0; font-size: 13.5px; color: var(--text-muted); line-height: 1.5;" data-i18n="live_fellowship_sub">
+                      थेट भक्ती, स्तुती आणि शास्त्रवचनांच्या मननामध्ये सहभागी व्हा.
+                    </p>
+                  </div>
+
+                  <button class="btn-primary-block" onclick="switchTab('meetings')" style="background: var(--primary); color: #ffffff; border: none; border-radius: 12px; padding: 12px 18px; font-size: 14.5px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px var(--primary-glow); transition: transform 0.15s ease;">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2"></rect></svg>
+                    <span data-i18n="btn_join_fellowship">Join Prayer Sanctuary</span>
                   </button>
                 </div>
 
-                <!-- Spotlight Single-Card Carousel (Controlled In-Place Card Switching) -->
-                <div class="prayer-spotlight-carousel-card" id="home-prayer-spotlight-box" style="position: relative; width: 100%; border-radius: 20px; overflow: hidden; box-shadow: 0 6px 20px rgba(0,0,0,0.1); border: 1.5px solid rgba(0,0,0,0.08); background: #1e1b4b; min-height: 200px; box-sizing: border-box;">
-                  
-                  <!-- Card Background Layer -->
-                  <div id="home-prayer-card-bg" style="position: absolute; inset: 0; background-size: cover; background-position: center; transition: background-image 0.3s ease-in-out; background-image: url('assets/images/golden_dawn.png');">
-                    <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(15, 23, 42, 0.35) 0%, rgba(15, 23, 42, 0.88) 100%);"></div>
-                  </div>
-
-                  <!-- Card Interactive Content Overlay -->
-                  <div style="position: relative; z-index: 2; padding: 14px 16px; display: flex; flex-direction: column; justify-content: space-between; min-height: 200px; box-sizing: border-box;">
-                    
-                    <!-- Top Row: Category Badge & Slide Counter -->
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                      <span id="home-prayer-card-badge" style="font-size: 10.5px; font-weight: 800; letter-spacing: 0.5px; padding: 3px 9px; border-radius: 8px; background: rgba(245, 158, 11, 0.3); border: 1px solid rgba(245, 158, 11, 0.6); color: #fef08a; text-transform: uppercase;">
-                        🌅 MORNING DEVOTIONAL
-                      </span>
-                      <span id="home-prayer-card-counter" style="font-size: 11px; font-weight: 800; padding: 2px 7px; border-radius: 8px; background: rgba(0,0,0,0.5); color: #ffffff; border: 1px solid rgba(255,255,255,0.25);">
-                        १ / ८
-                      </span>
-                    </div>
-
-                    <!-- Middle Content: Clickable Devotional Preview -->
-                    <div style="margin: 8px 0 6px 0; cursor: pointer;" onclick="openCurrentHomePrayerSpotlight()">
-                      <h4 id="home-prayer-card-title" style="font-family: var(--font-ui); font-size: 16.5px; font-weight: 800; color: #ffffff; margin: 0 0 2px 0; line-height: 1.3;">
-                        Morning Awakening & Grace
-                      </h4>
-                      <p id="home-prayer-card-marathi" style="font-size: 13px; font-weight: 700; color: #fde047; margin: 0 0 4px 0; line-height: 1.35;">
-                        सर्वसमर्थाच्या सावलीत विसावा
-                      </p>
-                      <p id="home-prayer-card-verse" style="font-family: var(--font-body); font-size: 12px; color: rgba(255,255,255,0.9); margin: 0; line-height: 1.45; font-style: italic;">
-                        "जो परात्पराच्या गुप्त स्थानी राहतो, तो सर्वसमर्थाच्या सावलीत विसावा पावेल..."
-                      </p>
-                    </div>
-
-                    <!-- Bottom Row: Navigation Arrows + Scripture Badge + Read Button -->
-                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.15);">
-                      
-                      <!-- Prev / Next Controls -->
-                      <div style="display: flex; gap: 6px;">
-                        <button type="button" aria-label="Previous Prayer" onclick="prevHomePrayerSpotlight(event)" style="width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.35); color: #ffffff; font-size: 16px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(8px);">
-                          &#x2039;
-                        </button>
-                        <button type="button" aria-label="Next Prayer" onclick="nextHomePrayerSpotlight(event)" style="width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.35); color: #ffffff; font-size: 16px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(8px);">
-                          &#x203A;
-                        </button>
+                <div class="prayer-topics-grid" id="prayer-topics-grid-container">
+                  <!-- Topic 1: Water Turned into Wine (Wedding at Cana Miracle) -->
+                  <div class="prayer-topic-card" onclick="openImmersivePrayerModal('wedding_cana')" style="background-image: url('assets/images/wedding_cana_miracle.jpg');">
+                    <div class="prayer-topic-overlay"></div>
+                    <div class="prayer-topic-badge" data-i18n="prayer_cana_badge">MIRACLE & PROVISION</div>
+                    <div class="prayer-topic-content">
+                      <h4 data-i18n="prayer_cana_title">Water Turned into Wine</h4>
+                      <p class="topic-en-title" data-i18n="prayer_cana_sub">कमीपणाच्या वेळी अद्भुत पुरवठा</p>
+                      <div class="topic-meta-row">
+                        <span class="topic-scripture" data-i18n="prayer_cana_ref">John 2:1-11</span>
+                        <span class="topic-open-btn" data-i18n="btn_pray_now">Pray Now</span>
                       </div>
-
-                      <!-- Scripture Ref -->
-                      <span id="home-prayer-card-ref" style="font-size: 11px; font-weight: 800; color: #fef08a; background: rgba(245, 158, 11, 0.2); padding: 4px 8px; border-radius: 8px; border: 1px solid rgba(245, 158, 11, 0.35); white-space: nowrap;">
-                        स्तोत्रसंहिता ९१:१-४
-                      </span>
-
-                      <!-- Read Prayer Action Button -->
-                      <button type="button" onclick="openCurrentHomePrayerSpotlight()" style="padding: 6px 12px; border-radius: 10px; font-size: 11.5px; font-weight: 800; background: #F7002F; color: #ffffff; border: none; cursor: pointer; display: flex; align-items: center; gap: 4px; box-shadow: 0 4px 12px rgba(247,0,47,0.4); white-space: nowrap;">
-                        <span>प्रार्थना वाचा</span> &rarr;
-                      </button>
                     </div>
-
                   </div>
-                </div>
 
-                <!-- Navigation Indicator Dots (8 dots) -->
-                <div id="home-prayer-dots-container" style="display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 8px;">
-                  <!-- Dynamically rendered -->
+                  <!-- Topic 2: Peace Over Anxiety -->
+                  <div class="prayer-topic-card" onclick="openImmersivePrayerModal('peace_anxiety')" style="background-image: url('assets/images/peace_anxiety.png');">
+                    <div class="prayer-topic-overlay"></div>
+                    <div class="prayer-topic-badge" data-i18n="prayer_peace_badge">PEACE & CALM</div>
+                    <div class="prayer-topic-content">
+                      <h4 data-i18n="prayer_peace_title">Peace Over Anxiety</h4>
+                      <p class="topic-en-title" data-i18n="prayer_peace_sub">सर्व बुद्धीपलीकडची देवाची शांती</p>
+                      <div class="topic-meta-row">
+                        <span class="topic-scripture" data-i18n="prayer_peace_ref">Philippians 4:6-7</span>
+                        <span class="topic-open-btn" data-i18n="btn_pray_now">Pray Now</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Topic 3: Morning Grace & Divine Protection -->
+                  <div class="prayer-topic-card" onclick="openImmersivePrayerModal('morning_grace')" style="background-image: url('assets/images/golden_dawn.png');">
+                    <div class="prayer-topic-overlay"></div>
+                    <div class="prayer-topic-badge" data-i18n="prayer_morning_badge">MORNING BLESSING</div>
+                    <div class="prayer-topic-content">
+                      <h4 data-i18n="prayer_morning_title">Morning Grace & Protection</h4>
+                      <p class="topic-en-title" data-i18n="prayer_morning_sub">सर्वसमर्थाच्या सावलीत विसावा</p>
+                      <div class="topic-meta-row">
+                        <span class="topic-scripture" data-i18n="prayer_morning_ref">Psalm 91:1-4</span>
+                        <span class="topic-open-btn" data-i18n="btn_pray_now">Pray Now</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Topic 4: Divine Healing & Restoration -->
+                  <div class="prayer-topic-card" onclick="openImmersivePrayerModal('healing_restoration')" style="background-image: url('assets/images/healing_light.png');">
+                    <div class="prayer-topic-overlay"></div>
+                    <div class="prayer-topic-badge" data-i18n="prayer_healing_badge">HEALING & HEALTH</div>
+                    <div class="prayer-topic-content">
+                      <h4 data-i18n="prayer_healing_title">Divine Healing & Restoration</h4>
+                      <p class="topic-en-title" data-i18n="prayer_healing_sub">येशूच्या फटक्यांनी मिळालेले आरोग्य</p>
+                      <div class="topic-meta-row">
+                        <span class="topic-scripture" data-i18n="prayer_healing_ref">Isaiah 53:5</span>
+                        <span class="topic-open-btn" data-i18n="btn_pray_now">Pray Now</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Extra Topics 5-8 (Toggled by View All) -->
+                  <!-- Topic 5: Family Blessing & Harmony -->
+                  <div class="prayer-topic-card prayer-topic-extra" onclick="openImmersivePrayerModal('family_blessing')" style="display: none; background-image: url('assets/images/family_blessing.png');">
+                    <div class="prayer-topic-overlay"></div>
+                    <div class="prayer-topic-badge" data-i18n="prayer_family_badge">FAMILY & HOME</div>
+                    <div class="prayer-topic-content">
+                      <h4 data-i18n="prayer_family_title">Family Blessing & Unity</h4>
+                      <p class="topic-en-title" data-i18n="prayer_family_sub">घरामध्ये प्रेम, शांती व देवाचे भय</p>
+                      <div class="topic-meta-row">
+                        <span class="topic-scripture" data-i18n="prayer_family_ref">Joshua 24:15</span>
+                        <span class="topic-open-btn" data-i18n="btn_pray_now">Pray Now</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Topic 6: Strength in Hard Times -->
+                  <div class="prayer-topic-card prayer-topic-extra" onclick="openImmersivePrayerModal('strength_trials')" style="display: none; background-image: url('assets/images/mount_zion.png');">
+                    <div class="prayer-topic-overlay"></div>
+                    <div class="prayer-topic-badge" data-i18n="prayer_strength_badge">STRENGTH & FAITH</div>
+                    <div class="prayer-topic-content">
+                      <h4 data-i18n="prayer_strength_title">Strength in Hard Times</h4>
+                      <p class="topic-en-title" data-i18n="prayer_strength_sub">थकलेल्याला नवीन बळ देणारा देव</p>
+                      <div class="topic-meta-row">
+                        <span class="topic-scripture" data-i18n="prayer_strength_ref">Isaiah 40:29-31</span>
+                        <span class="topic-open-btn" data-i18n="btn_pray_now">Pray Now</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Topic 7: Wisdom & Career Guidance -->
+                  <div class="prayer-topic-card prayer-topic-extra" onclick="openImmersivePrayerModal('wisdom_guidance')" style="display: none; background-image: url('assets/images/wisdom_guidance.png');">
+                    <div class="prayer-topic-overlay"></div>
+                    <div class="prayer-topic-badge" data-i18n="prayer_wisdom_badge">WISDOM & GUIDANCE</div>
+                    <div class="prayer-topic-content">
+                      <h4 data-i18n="prayer_wisdom_title">Wisdom & Career Guidance</h4>
+                      <p class="topic-en-title" data-i18n="prayer_wisdom_sub">योग्य निर्णयांसाठी स्वर्गीय बुद्धी</p>
+                      <div class="topic-meta-row">
+                        <span class="topic-scripture" data-i18n="prayer_wisdom_ref">James 1:5</span>
+                        <span class="topic-open-btn" data-i18n="btn_pray_now">Pray Now</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Topic 8: Evening Thanksgiving & Rest -->
+                  <div class="prayer-topic-card prayer-topic-extra" onclick="openImmersivePrayerModal('evening_rest')" style="display: none; background-image: url('assets/images/candlelight.png');">
+                    <div class="prayer-topic-overlay"></div>
+                    <div class="prayer-topic-badge" data-i18n="prayer_evening_badge">EVENING REST</div>
+                    <div class="prayer-topic-content">
+                      <h4 data-i18n="prayer_evening_title">Evening Thanksgiving & Rest</h4>
+                      <p class="topic-en-title" data-i18n="prayer_evening_sub">सुरक्षिततेत शांत विश्रांती</p>
+                      <div class="topic-meta-row">
+                        <span class="topic-scripture" data-i18n="prayer_evening_ref">Psalm 4:8</span>
+                        <span class="topic-open-btn" data-i18n="btn_pray_now">Pray Now</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -1562,103 +1632,6 @@
                 </div>
 
               </div>
-            </div>
-
-            
-            <!-- SUBTAB 3: LIVE VIDEO PRAYER MEETINGS (Official River of Life Sanctuary) -->
-            <div id="prayers-panel-meetings" class="prayers-subtab-panel" style="display: none;">
-              
-              <!-- Hero Live Prayer Sanctuary Card -->
-              <div style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); border-radius: 20px; padding: 20px; color: #ffffff; margin-bottom: 20px; box-shadow: 0 8px 24px rgba(30, 27, 75, 0.25); border: 1.5px solid rgba(255,255,255,0.15);">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                  <span style="font-size: 11px; font-weight: 800; color: #fde047; background: rgba(253, 224, 71, 0.2); padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(253, 224, 71, 0.4); display: inline-flex; align-items: center; gap: 5px;">
-                    <span style="width: 8px; height: 8px; border-radius: 50%; background: #22c55e; display: inline-block;"></span>
-                    LIVE SANCTUARY • थेट प्रार्थना
-                  </span>
-                  <span style="font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.85);">Daily 6:00 AM & 8:30 PM</span>
-                </div>
-                <h3 style="font-family: var(--font-ui); font-size: 20px; font-weight: 800; margin: 0 0 6px 0; color: #ffffff;">
-                  River of Life Live Prayer Sanctuary
-                </h3>
-                <p style="font-size: 13.5px; color: rgba(255,255,255,0.9); line-height: 1.5; margin: 0 0 16px 0;">
-                  पवित्र प्रार्थनेत एकत्र सहभागी व्हा. ऑडिओ/व्हिडिओ कॉलद्वारे मंडळीतील बंधू-भगिनींसोबत प्रार्थना करा.
-                </p>
-                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                  <button type="button" onclick="openLiveMeetingRoom('Daily Prayer Sanctuary', 'River of Life Church')" style="flex: 1; min-width: 160px; background: #F7002F; border: none; color: #ffffff; padding: 12px 18px; border-radius: 12px; font-weight: 800; font-size: 13.5px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 14px rgba(247, 0, 47, 0.4);">
-                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M23 7l-7 5 7 5V7z"></path><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
-                    <span>Join Video Call / सामील व्हा</span>
-                  </button>
-                  <button type="button" onclick="shareMeetingLink('Daily Prayer Sanctuary', 'https://meet.jit.si/RiverOfLife_DailySanctuary')" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: #ffffff; padding: 12px 16px; border-radius: 12px; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; backdrop-filter: blur(10px);">
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
-                    <span>Invite / निमंत्रण</span>
-                  </button>
-                </div>
-              </div>
-
-              <!-- Scheduled Prayer Gatherings Directory -->
-              <h4 style="font-size: 15px; font-weight: 800; color: var(--text); margin: 0 0 12px 0;">
-                📅 Scheduled Prayer Gatherings / प्रार्थना वेळापत्रक
-              </h4>
-
-              <div style="display: flex; flex-direction: column; gap: 12px;">
-                <!-- Meeting 1: Morning Prayer -->
-                <div style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 16px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
-                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-                    <div>
-                      <span style="font-size: 10.5px; font-weight: 800; color: #d97706; background: #fef3c7; padding: 3px 8px; border-radius: 6px;">DAILY MORNING</span>
-                      <h4 style="font-size: 16px; font-weight: 800; color: var(--text); margin: 4px 0 2px 0;">प्रभात प्रार्थना (Morning Dawn Prayer)</h4>
-                      <p style="font-size: 12.5px; color: var(--text-muted); margin: 0;">दररोज सकाळी ०६:०० ते ०७:००</p>
-                    </div>
-                    <button type="button" onclick="openLiveMeetingRoom('Morning Dawn Prayer', 'River of Life')" style="background: var(--primary-light); color: var(--primary); border: 1px solid var(--primary); padding: 8px 14px; border-radius: 10px; font-size: 12.5px; font-weight: 800; cursor: pointer;">
-                      Join &rarr;
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Meeting 2: Evening Family Prayer -->
-                <div style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 16px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
-                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-                    <div>
-                      <span style="font-size: 10.5px; font-weight: 800; color: #2563eb; background: #eff6ff; padding: 3px 8px; border-radius: 6px;">DAILY EVENING</span>
-                      <h4 style="font-size: 16px; font-weight: 800; color: var(--text); margin: 4px 0 2px 0;">कौटुंबिक संध्याकाळ प्रार्थना (Family Prayer)</h4>
-                      <p style="font-size: 12.5px; color: var(--text-muted); margin: 0;">दररोज रात्री ०८:३० ते ०९:३०</p>
-                    </div>
-                    <button type="button" onclick="openLiveMeetingRoom('Family Evening Prayer', 'River of Life')" style="background: var(--primary-light); color: var(--primary); border: 1px solid var(--primary); padding: 8px 14px; border-radius: 10px; font-size: 12.5px; font-weight: 800; cursor: pointer;">
-                      Join &rarr;
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Meeting 3: Friday Fasting & Healing -->
-                <div style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 16px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
-                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-                    <div>
-                      <span style="font-size: 10.5px; font-weight: 800; color: #7c3aed; background: #f5f3ff; padding: 3px 8px; border-radius: 6px;">FRIDAY FASTING</span>
-                      <h4 style="font-size: 16px; font-weight: 800; color: var(--text); margin: 4px 0 2px 0;">उपवास व आरोग्य प्रार्थना (Fasting & Healing)</h4>
-                      <p style="font-size: 12.5px; color: var(--text-muted); margin: 0;">दर शुक्रवारी संध्याकाळी ०७:००</p>
-                    </div>
-                    <button type="button" onclick="openLiveMeetingRoom('Friday Fasting Prayer', 'River of Life')" style="background: var(--primary-light); color: var(--primary); border: 1px solid var(--primary); padding: 8px 14px; border-radius: 10px; font-size: 12.5px; font-weight: 800; cursor: pointer;">
-                      Join &rarr;
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Meeting 4: Sunday Main Worship -->
-                <div style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 16px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
-                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-                    <div>
-                      <span style="font-size: 10.5px; font-weight: 800; color: #16a34a; background: #f0fdf4; padding: 3px 8px; border-radius: 6px;">SUNDAY SERVICE</span>
-                      <h4 style="font-size: 16px; font-weight: 800; color: var(--text); margin: 4px 0 2px 0;">रविवार मुख्य उपासना (Sunday Main Worship)</h4>
-                      <p style="font-size: 12.5px; color: var(--text-muted); margin: 0;">दर रविवारी सकाळी १०:०० IST</p>
-                    </div>
-                    <button type="button" onclick="openLiveMeetingRoom('Sunday Main Worship', 'River of Life')" style="background: var(--primary-light); color: var(--primary); border: 1px solid var(--primary); padding: 8px 14px; border-radius: 10px; font-size: 12.5px; font-weight: 800; cursor: pointer;">
-                      Join &rarr;
-                    </button>
-                  </div>
-                </div>
-
-              </div>
-
             </div>
 
             <!-- SUBTAB 2: CHURCH PRAYER REQUESTS (Community circle) -->
@@ -4938,22 +4911,6 @@
     </div>
   </div>
 
-
-  <!-- ALL PRAYERS FULL MODAL -->
-  <div id="modal-all-prayers" class="app-modal-backdrop" style="display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 16px;">
-    <div style="background: #ffffff; border-radius: 24px; width: 100%; max-width: 520px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.3);">
-      <div style="padding: 18px 20px; border-bottom: 1.5px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
-        <div>
-          <h3 style="font-size: 18px; font-weight: 800; margin: 0; color: #000000;">Daily Scripture Prayers</h3>
-          <p style="font-size: 12px; color: var(--text-muted); margin: 2px 0 0 0;">सर्व दैनिक बायबल आधारित प्रार्थना (८)</p>
-        </div>
-        <button type="button" onclick="closeAllPrayersModal()" style="background: var(--pill-bg); border: none; width: 34px; height: 34px; border-radius: 50%; font-size: 18px; font-weight: 800; color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center;">✕</button>
-      </div>
-      <div id="modal-all-prayers-list" style="padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; flex: 1;">
-        <!-- Dynamically rendered -->
-      </div>
-    </div>
-  </div>
 </body>
 </html>
 
