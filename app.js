@@ -17854,3 +17854,229 @@ window.navigateHymn = navigateHymn;
 window.adjustHymnFontSize = adjustHymnFontSize;
 window.copyCurrentHymnLyrics = copyCurrentHymnLyrics;
 window.shareCurrentHymnLyrics = shareCurrentHymnLyrics;
+
+
+// ==========================================
+// DAILY GUIDED PRAYERS SPOTLIGHT CAROUSEL (ZERO SCREEN MOVEMENT)
+// ==========================================
+const HOME_SPOTLIGHT_PRAYERS = [
+  {
+    id: "morning_grace",
+    badge: "🌅 MORNING GRACE",
+    badgeBg: "rgba(245, 158, 11, 0.3)",
+    badgeBorder: "rgba(245, 158, 11, 0.6)",
+    badgeColor: "#fef08a",
+    title: "Morning Awakening & Grace",
+    titleMr: "सकाळची कृपा व संरक्षण",
+    refMr: "स्तोत्रसंहिता ९१:१-४",
+    verse: "जो परात्पराच्या गुप्त स्थानी राहतो, तो सर्वसमर्थाच्या सावलीत विसावा पावेल...",
+    img: "assets/images/golden_dawn.png"
+  },
+  {
+    id: "peace_anxiety",
+    badge: "🛡️ PEACE & REFUGE",
+    badgeBg: "rgba(59, 130, 246, 0.3)",
+    badgeBorder: "rgba(59, 130, 246, 0.6)",
+    badgeColor: "#bfdbfe",
+    title: "Peace Over Anxiety",
+    titleMr: "सर्व बुद्धीपलीकडची देवाची शांती",
+    refMr: "फिलिप्पैकरांस ४:६-७",
+    verse: "कशाविषयीही चिंता करू नका, तर सर्व गोष्टींत प्रार्थना व उपकारस्तुतीसह मागणी देवाला कळवा...",
+    img: "assets/images/peace_anxiety.png"
+  },
+  {
+    id: "healing_restoration",
+    badge: "🌿 DIVINE HEALING",
+    badgeBg: "rgba(16, 185, 129, 0.3)",
+    badgeBorder: "rgba(16, 185, 129, 0.6)",
+    badgeColor: "#a7f3d0",
+    title: "Healing & Health",
+    titleMr: "येशूच्या फटक्यांनी मिळालेले आरोग्य",
+    refMr: "यशाया ५३:५",
+    verse: "त्याच्या मार खाण्याने आपल्याला आरोग्य मिळाले आहे...",
+    img: "assets/images/healing_light.png"
+  },
+  {
+    id: "wedding_cana",
+    badge: "🕊️ MIRACLE & PROVISION",
+    badgeBg: "rgba(168, 85, 247, 0.3)",
+    badgeBorder: "rgba(168, 85, 247, 0.6)",
+    badgeColor: "#e9d5ff",
+    title: "Miracle in Scarcity",
+    titleMr: "कमीपणाच्या वेळी अद्भुत पुरवठा",
+    refMr: "योहान २:१-११",
+    verse: "येशूने आपल्या चिन्हांचा आरंभ काना येथे केला आणि आपले सामर्थ्य प्रकट केले...",
+    img: "assets/images/wedding_cana_miracle.jpg"
+  },
+  {
+    id: "family_blessing",
+    badge: "👨‍👩‍👧‍👦 FAMILY & HOME",
+    badgeBg: "rgba(236, 72, 153, 0.3)",
+    badgeBorder: "rgba(236, 72, 153, 0.6)",
+    badgeColor: "#fbcfe8",
+    title: "Family Blessing & Unity",
+    titleMr: "माझे घर व मी प्रभूची सेवा करू",
+    refMr: "यहोशवा २४:१५",
+    verse: "मी व माझे घराने आम्ही परमेश्वराचीच सेवा करू...",
+    img: "assets/images/family_blessing.png"
+  },
+  {
+    id: "strength_trials",
+    badge: "🔥 STRENGTH & FAITH",
+    badgeBg: "rgba(239, 68, 68, 0.3)",
+    badgeBorder: "rgba(239, 68, 68, 0.6)",
+    badgeColor: "#fecaca",
+    title: "Strength in Trials",
+    titleMr: "थकलेल्याला नवीन बळ देणारा देव",
+    refMr: "यशाया ४०:२९-३१",
+    verse: "जे परमेश्वराची वाट पाहतात, त्यांना नवीन सामर्थ्य प्राप्त होईल...",
+    img: "assets/images/mount_zion.png"
+  },
+  {
+    id: "wisdom_guidance",
+    badge: "👑 WISDOM & PATH",
+    badgeBg: "rgba(14, 165, 233, 0.3)",
+    badgeBorder: "rgba(14, 165, 233, 0.6)",
+    badgeColor: "#bae6fd",
+    title: "Wisdom & Direction",
+    titleMr: "योग्य निर्णयांसाठी स्वर्गीय बुद्धी",
+    refMr: "याकोब १:५",
+    verse: "जर तुमच्यातील कोणाला बुद्धीची उणीव असेल, तर त्याने ती देवाजवळ मागावी...",
+    img: "assets/images/wisdom_guidance.png"
+  },
+  {
+    id: "evening_rest",
+    badge: "🌙 NIGHT REST",
+    badgeBg: "rgba(99, 102, 241, 0.3)",
+    badgeBorder: "rgba(99, 102, 241, 0.6)",
+    badgeColor: "#c7d2fe",
+    title: "Night Peace & Sleep",
+    titleMr: "मी शांतीने पडेन व लगेच झोपेन",
+    refMr: "स्तोत्रसंहिता ४:८",
+    verse: "मी शांतीने पडेन व लगेच झोपेन; कारण केवळ तूच मला सुरक्षित ठेवतोस...",
+    img: "assets/images/candlelight.png"
+  }
+];
+
+let currentHomePrayerIndex = 0;
+
+window.renderHomePrayerSpotlight = function(index) {
+  if (typeof index === "number") {
+    currentHomePrayerIndex = (index + HOME_SPOTLIGHT_PRAYERS.length) % HOME_SPOTLIGHT_PRAYERS.length;
+  }
+  const item = HOME_SPOTLIGHT_PRAYERS[currentHomePrayerIndex];
+  if (!item) return;
+
+  const bgEl = document.getElementById("home-prayer-card-bg");
+  if (bgEl) bgEl.style.backgroundImage = "url('" + item.img + "')";
+
+  const badgeEl = document.getElementById("home-prayer-card-badge");
+  if (badgeEl) {
+    badgeEl.textContent = item.badge;
+    badgeEl.style.background = item.badgeBg;
+    badgeEl.style.borderColor = item.badgeBorder;
+    badgeEl.style.color = item.badgeColor;
+  }
+
+  const counterEl = document.getElementById("home-prayer-card-counter");
+  if (counterEl) counterEl.textContent = (currentHomePrayerIndex + 1) + " / " + HOME_SPOTLIGHT_PRAYERS.length;
+
+  const titleEl = document.getElementById("home-prayer-card-title");
+  if (titleEl) titleEl.textContent = item.title;
+
+  const marathiEl = document.getElementById("home-prayer-card-marathi");
+  if (marathiEl) marathiEl.textContent = item.titleMr;
+
+  const verseEl = document.getElementById("home-prayer-card-verse");
+  if (verseEl) verseEl.textContent = '"' + item.verse + '"';
+
+  const refEl = document.getElementById("home-prayer-card-ref");
+  if (refEl) refEl.textContent = item.refMr;
+
+  renderHomePrayerDots();
+};
+
+window.nextHomePrayerSpotlight = function(e) {
+  if (e) e.stopPropagation();
+  renderHomePrayerSpotlight(currentHomePrayerIndex + 1);
+};
+
+window.prevHomePrayerSpotlight = function(e) {
+  if (e) e.stopPropagation();
+  renderHomePrayerSpotlight(currentHomePrayerIndex - 1);
+};
+
+window.jumpToHomePrayerSpotlight = function(idx) {
+  renderHomePrayerSpotlight(idx);
+};
+
+window.openCurrentHomePrayerSpotlight = function() {
+  const item = HOME_SPOTLIGHT_PRAYERS[currentHomePrayerIndex];
+  if (item && typeof openImmersivePrayerModal === "function") {
+    openImmersivePrayerModal(item.id);
+  }
+};
+
+function renderHomePrayerDots() {
+  const container = document.getElementById("home-prayer-dots-container");
+  if (!container) return;
+
+  container.innerHTML = "";
+  HOME_SPOTLIGHT_PRAYERS.forEach((_, i) => {
+    const dot = document.createElement("button");
+    dot.type = "button";
+    dot.ariaLabel = "Go to prayer " + (i + 1);
+    const isActive = i === currentHomePrayerIndex;
+    dot.style.cssText = "width: " + (isActive ? "18px" : "6px") + "; height: 6px; border-radius: 999px; background: " + (isActive ? "var(--primary, #8f121d)" : "var(--border, rgba(0,0,0,0.15))") + "; border: none; padding: 0; cursor: pointer; transition: all 0.25s ease;";
+    dot.onclick = () => jumpToHomePrayerSpotlight(i);
+    container.appendChild(dot);
+  });
+}
+
+window.openAllPrayersModal = function() {
+  const modal = document.getElementById("modal-all-prayers");
+  const list = document.getElementById("modal-all-prayers-list");
+  if (!modal || !list) return;
+
+  list.innerHTML = "";
+  HOME_SPOTLIGHT_PRAYERS.forEach((item, i) => {
+    const card = document.createElement("div");
+    card.style.cssText = "position: relative; border-radius: 16px; overflow: hidden; padding: 14px; background: url('" + item.img + "') center/cover no-repeat; border: 1.5px solid var(--border); cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.06);";
+    card.onclick = () => {
+      closeAllPrayersModal();
+      if (typeof openImmersivePrayerModal === "function") {
+        openImmersivePrayerModal(item.id);
+      }
+    };
+
+    card.innerHTML = `
+      <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(15,23,42,0.4) 0%, rgba(15,23,42,0.85) 100%); pointer-events: none;"></div>
+      <div style="position: relative; z-index: 2;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <span style="font-size: 9.5px; font-weight: 800; padding: 3px 8px; border-radius: 8px; background: ${item.badgeBg}; border: 1px solid ${item.badgeBorder}; color: ${item.badgeColor};">${item.badge}</span>
+          <span style="font-size: 11px; font-weight: 800; color: #fde047;">${item.refMr}</span>
+        </div>
+        <h4 style="font-size: 15px; font-weight: 800; color: #ffffff; margin: 0 0 2px 0;">${item.title}</h4>
+        <p style="font-size: 12px; color: #fde047; font-weight: 600; margin: 0 0 6px 0;">${item.titleMr}</p>
+        <p style="font-size: 11.5px; color: rgba(255,255,255,0.85); margin: 0; font-style: italic;">"${item.verse}"</p>
+      </div>
+    `;
+    list.appendChild(card);
+  });
+
+  modal.style.display = "flex";
+};
+
+window.closeAllPrayersModal = function() {
+  const modal = document.getElementById("modal-all-prayers");
+  if (modal) modal.style.display = "none";
+};
+
+// Auto-initialize spotlight card on page load
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", () => {
+    if (typeof renderHomePrayerSpotlight === "function") renderHomePrayerSpotlight(0);
+  });
+} else {
+  if (typeof renderHomePrayerSpotlight === "function") renderHomePrayerSpotlight(0);
+}
