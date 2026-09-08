@@ -1545,7 +1545,7 @@ function adjustHeaderForRoute(route) {
       } else if (route === "discover") {
         staticTitle.textContent = state.translation === "eng" ? "Discover Scriptures" : "बायबल शोधा";
       } else if (route === "prayers") {
-        staticTitle.textContent = state.translation === "eng" ? "Prayer Circle" : "प्रार्थना विनंत्या";
+        staticTitle.textContent = state.translation === "eng" ? "Prayers & Meetings" : "प्रार्थना व सभा • Prayers";
       } else if (route === "meetings") {
         staticTitle.textContent = state.translation === "eng" ? "Prayer Meetings" : "प्रार्थना सभा";
       } else if (route === "admin") {
@@ -13018,42 +13018,140 @@ let ambientGainNode = null;
 let isAmbientPlaying = false;
 
 window.switchPrayersSubtab = function(subtab) {
+  if (!subtab) subtab = "meetings";
+  
+  const btnMeetings = document.getElementById("btn-prayers-subtab-meetings");
   const btnMeditation = document.getElementById("btn-prayers-subtab-meditation");
   const btnRequests = document.getElementById("btn-prayers-subtab-requests");
+
+  const panelMeetings = document.getElementById("prayers-panel-meetings");
   const panelMeditation = document.getElementById("prayers-panel-meditation");
   const panelRequests = document.getElementById("prayers-panel-requests");
 
-  if (subtab === "meditation") {
-    if (btnMeditation) {
-      btnMeditation.classList.add("active");
-      btnMeditation.style.background = "var(--primary)";
-      btnMeditation.style.color = "#ffffff";
-      btnMeditation.style.border = "none";
+  const subtabs = [
+    { name: "meetings", btn: btnMeetings, panel: panelMeetings },
+    { name: "meditation", btn: btnMeditation, panel: panelMeditation },
+    { name: "requests", btn: btnRequests, panel: panelRequests }
+  ];
+
+  subtabs.forEach(item => {
+    if (item.name === subtab) {
+      if (item.btn) {
+        item.btn.classList.add("active");
+        item.btn.style.background = "var(--primary, #8f121d)";
+        item.btn.style.color = "#ffffff";
+        item.btn.style.borderColor = "var(--primary, #8f121d)";
+      }
+      if (item.panel) {
+        item.panel.classList.add("active");
+        item.panel.style.display = "block";
+      }
+    } else {
+      if (item.btn) {
+        item.btn.classList.remove("active");
+        item.btn.style.background = "var(--bg-content, #ffffff)";
+        item.btn.style.color = "var(--text, #1e293b)";
+        item.btn.style.borderColor = "var(--border, rgba(0,0,0,0.1))";
+      }
+      if (item.panel) {
+        item.panel.classList.remove("active");
+        item.panel.style.display = "none";
+      }
     }
-    if (btnRequests) {
-      btnRequests.classList.remove("active");
-      btnRequests.style.background = "var(--bg-content)";
-      btnRequests.style.color = "var(--text)";
-      btnRequests.style.border = "1.5px solid var(--border)";
-    }
-    if (panelMeditation) panelMeditation.style.display = "block";
-    if (panelRequests) panelRequests.style.display = "none";
-  } else {
-    if (btnRequests) {
-      btnRequests.classList.add("active");
-      btnRequests.style.background = "var(--primary)";
-      btnRequests.style.color = "#ffffff";
-      btnRequests.style.border = "none";
-    }
-    if (btnMeditation) {
-      btnMeditation.classList.remove("active");
-      btnMeditation.style.background = "var(--bg-content)";
-      btnMeditation.style.color = "var(--text)";
-      btnMeditation.style.border = "1.5px solid var(--border)";
-    }
-    if (panelMeditation) panelMeditation.style.display = "none";
-    if (panelRequests) panelRequests.style.display = "block";
+  });
+
+  if (subtab === "requests") {
+    renderPrayersScreen();
   }
+};
+
+window.joinPrayerVideoMeeting = function(roomSlug, meetingTitle) {
+  if (!roomSlug) roomSlug = "RiverOfLife_DailySanctuary";
+  if (!meetingTitle) meetingTitle = "Daily Video Prayer Meeting";
+
+  const loggedIn = (state && state.currentUser) ? state.currentUser.username : "Fellow Believer";
+  const cleanRoomSlug = roomSlug.replace(/[^a-zA-Z0-9_-]/g, "_");
+  const roomUrl = "https://p2p.mirotalk.com/join/" + cleanRoomSlug + "?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&autojoin=true&p2p=true&codec=opus&layout=grid&grid=1&name=" + encodeURIComponent(loggedIn);
+
+  // Detect iOS (iPhone/iPad) to bypass WebKit iframe microphone blocking
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if (isIOS) {
+    if (typeof showToast === "function") showToast("Opening Video Prayer Room... 🙏");
+    window.location.href = roomUrl;
+    return;
+  }
+
+  // Create virtual meeting object for in-app video room modal
+  const meetingObj = {
+    id: cleanRoomSlug,
+    title: meetingTitle + " (थेट प्रार्थना सभा)",
+    host: "Pastor John",
+    status: "live"
+  };
+
+  if (typeof showToast === "function") showToast("Connecting to Live Video Sanctuary... 🕊️");
+  
+  if (typeof triggerJoinMeetingFlow === "function") {
+    try {
+      const meetings = (typeof getMeetingsFromStorage === "function") ? getMeetingsFromStorage() : [];
+      let existing = meetings.find(m => m.id === cleanRoomSlug);
+      if (!existing) {
+        existing = meetingObj;
+        meetings.unshift(existing);
+        localStorage.setItem("river_of_life_meetings", JSON.stringify(meetings));
+      }
+    } catch(e) {}
+    triggerJoinMeetingFlow(cleanRoomSlug);
+  } else {
+    window.open(roomUrl, "_blank");
+  }
+};
+
+window.sharePrayerMeetingWhatsApp = function(meetingTitle, timeStr) {
+  const currentUrl = window.location.origin + window.location.pathname;
+  const inviteText = "🙏 *River of Life - Live Video Prayer Meeting*\n*थेट व्हिडिओ प्रार्थना सभा*\n\n🕊️ *विषय / Topic:* " + (meetingTitle || "Daily Family Prayer & Fellowship") + "\n⏰ *वेळ / Time:* " + (timeStr || "Daily 6:00 AM & 8:30 PM IST") + "\n\n📹 *व्हिडिओ प्रार्थनेत थेट सामील होण्यासाठी खालील लिंकवर क्लिक करा:*\n" + currentUrl + "#/prayers\n\n_\"कारण जेथे दोघे अथवा तिघे माझ्या नावाने जमले आहेत, तेथे त्यांच्या मध्यभागी मी आहे.\" — मत्तय १८:२०_";
+  
+  const waUrl = "https://api.whatsapp.com/send?text=" + encodeURIComponent(inviteText);
+  window.open(waUrl, "_blank");
+};
+
+window.copyPrayerMeetingLink = function(roomSlug) {
+  const currentUrl = window.location.origin + window.location.pathname + "#/prayers";
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(currentUrl).then(() => {
+      if (typeof showToast === "function") showToast("प्रार्थना सभेची लिंक कॉपी झाली! (Link Copied) 📋");
+    }).catch(() => {
+      if (typeof showToast === "function") showToast("Link: " + currentUrl);
+    });
+  } else {
+    if (typeof showToast === "function") showToast("Link: " + currentUrl);
+  }
+};
+
+window.joinCustomPrayerRoom = function() {
+  const input = document.getElementById("input-custom-prayer-room");
+  const val = input ? input.value.trim() : "";
+  if (!val) {
+    if (typeof showToast === "function") showToast("कृपया प्रार्थना कक्षाचे नाव टाका (Enter room code)");
+    if (input) input.focus();
+    return;
+  }
+  const cleanCode = "RiverOfLife_" + val.replace(/[^a-zA-Z0-9_-]/g, "_");
+  joinPrayerVideoMeeting(cleanCode, "Private Room: " + val);
+};
+
+window.openExternalMeetingLink = function() {
+  const input = document.getElementById("input-external-meeting-url");
+  let url = input ? input.value.trim() : "";
+  if (!url) {
+    if (typeof showToast === "function") showToast("कृपया मिटिंग लिंक टाका (Enter Meet/Zoom URL)");
+    if (input) input.focus();
+    return;
+  }
+  if (!url.startsWith("http://") && !url.startsWith("https://")) {
+    url = "https://" + url;
+  }
+  window.open(url, "_blank");
 };
 
 window.toggleAmbientMusic = function() {
