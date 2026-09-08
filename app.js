@@ -1431,18 +1431,13 @@ function switchTab(rawRoute) {
     adjustHeaderForRoute(route);
     
     // Reload specific data lists on tab changes
-    if (route === "hymns") {
+    if (route === "home") {
+      renderDailyDevotion();
+      if (typeof renderHomeAnnouncementBanner === "function") renderHomeAnnouncementBanner();
+    } else if (route === "hymns") {
       renderHymnsView();
     } else if (route === "you") {
       renderYouProfile();
-    } else if (route === "hymns") {
-          staticTitle.textContent = "उपासना संगीत • Hymns";
-        } else if (route === "home") {
-        staticTitle.textContent = "River of Life";
-      } else if (route === "hymns") {
-        staticTitle.textContent = state.translation === "eng" ? "Hymns & Worship" : "उपासना संगीत • Hymns";
-      renderDailyDevotion();
-      if (typeof renderHomeAnnouncementBanner === "function") renderHomeAnnouncementBanner();
     } else if (route === "plans") {
       renderReadingPlansTab();
     } else if (route === "prayers") {
@@ -13019,41 +13014,69 @@ let isAmbientPlaying = false;
 
 window.switchPrayersSubtab = function(subtab) {
   const btnMeditation = document.getElementById("btn-prayers-subtab-meditation");
+  const btnMeetings = document.getElementById("btn-prayers-subtab-meetings");
   const btnRequests = document.getElementById("btn-prayers-subtab-requests");
   const panelMeditation = document.getElementById("prayers-panel-meditation");
+  const panelMeetings = document.getElementById("prayers-panel-meetings");
   const panelRequests = document.getElementById("prayers-panel-requests");
 
-  if (subtab === "meditation") {
-    if (btnMeditation) {
-      btnMeditation.classList.add("active");
-      btnMeditation.style.background = "var(--primary)";
-      btnMeditation.style.color = "#ffffff";
-      btnMeditation.style.border = "none";
+  const subtabs = [
+    { name: 'meditation', btn: btnMeditation, panel: panelMeditation },
+    { name: 'meetings', btn: btnMeetings, panel: panelMeetings },
+    { name: 'requests', btn: btnRequests, panel: panelRequests }
+  ];
+
+  subtabs.forEach(item => {
+    if (item.name === subtab) {
+      if (item.btn) {
+        item.btn.classList.add("active");
+        item.btn.style.background = "var(--primary)";
+        item.btn.style.color = "#ffffff";
+        item.btn.style.border = "none";
+      }
+      if (item.panel) item.panel.style.display = "block";
+    } else {
+      if (item.btn) {
+        item.btn.classList.remove("active");
+        item.btn.style.background = "var(--bg-content)";
+        item.btn.style.color = "var(--text)";
+        item.btn.style.border = "1.5px solid var(--border)";
+      }
+      if (item.panel) item.panel.style.display = "none";
     }
-    if (btnRequests) {
-      btnRequests.classList.remove("active");
-      btnRequests.style.background = "var(--bg-content)";
-      btnRequests.style.color = "var(--text)";
-      btnRequests.style.border = "1.5px solid var(--border)";
+  });
+};
+
+window.joinPrayerMeetingDirect = function(roomCode, title) {
+  try {
+    if (typeof triggerJoinMeetingFlow === 'function') {
+      const meetings = (typeof getMeetingsFromStorage === 'function') ? getMeetingsFromStorage() : [];
+      let m = meetings.find(x => x.id === roomCode || x.roomId === roomCode);
+      if (!m) {
+        m = {
+          id: roomCode,
+          title: title || 'River of Life Prayer Sanctuary',
+          host: 'River of Life Pastoral Team',
+          time: 'Active Now',
+          status: 'live',
+          roomId: roomCode
+        };
+      }
+      triggerJoinMeetingFlow(m.id || roomCode);
+    } else {
+      showToast(`Connecting to ${title}... 🎥`);
     }
-    if (panelMeditation) panelMeditation.style.display = "block";
-    if (panelRequests) panelRequests.style.display = "none";
-  } else {
-    if (btnRequests) {
-      btnRequests.classList.add("active");
-      btnRequests.style.background = "var(--primary)";
-      btnRequests.style.color = "#ffffff";
-      btnRequests.style.border = "none";
-    }
-    if (btnMeditation) {
-      btnMeditation.classList.remove("active");
-      btnMeditation.style.background = "var(--bg-content)";
-      btnMeditation.style.color = "var(--text)";
-      btnMeditation.style.border = "1.5px solid var(--border)";
-    }
-    if (panelMeditation) panelMeditation.style.display = "none";
-    if (panelRequests) panelRequests.style.display = "block";
+  } catch (e) {
+    console.error(e);
+    showToast(`Joining ${title}... 🎥`);
   }
+};
+
+window.sharePrayerMeetingWhatsApp = function(title, time, roomCode) {
+  const joinUrl = `https://meet.jit.si/RiverOfLife_${roomCode || 'Sanctuary'}`;
+  const text = `🕊️ *River of Life Church Prayer Meeting*\n\n🙏 *${title}*\n🕒 *Time:* ${time}\n\n🎥 *Join Live Video Room:*\n${joinUrl}\n\n_All are welcome to join in prayer and fellowship!_`;
+  const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+  window.open(waUrl, '_blank');
 };
 
 window.toggleAmbientMusic = function() {

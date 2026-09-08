@@ -1494,13 +1494,16 @@
         <section id="view-prayers" class="app-view" style="display: none;">
           <div class="view-scroll-content" style="padding-bottom: 90px;">
             
-            <!-- Top Segmented Subnav for Prayers View -->
-            <div class="prayers-subnav-row" style="display: flex; gap: 8px; margin-bottom: 18px; border-bottom: 1.5px solid var(--border); padding-bottom: 12px;">
-              <button class="prayers-subnav-btn active" id="btn-prayers-subtab-meditation" onclick="switchPrayersSubtab('meditation')" style="flex: 1; padding: 10px 14px; border-radius: 12px; font-size: 13.5px; font-weight: 800; border: none; background: var(--primary); color: #ffffff; cursor: pointer; transition: all 0.2s ease;">
-                🧘 Daily Meditation (दैनंदिन ध्यान)
+            <!-- Top Segmented Subnav for Prayers View (3 Subtabs) -->
+            <div class="prayers-subnav-row" style="display: flex; gap: 8px; margin-bottom: 18px; border-bottom: 1.5px solid var(--border); padding-bottom: 12px; overflow-x: auto; scrollbar-width: none;">
+              <button class="prayers-subnav-btn active" id="btn-prayers-subtab-meditation" onclick="switchPrayersSubtab('meditation')" style="flex: 1; min-width: 100px; padding: 10px 8px; border-radius: 12px; font-size: 12.5px; font-weight: 800; border: none; background: var(--primary); color: #ffffff; cursor: pointer; transition: all 0.2s ease; white-space: nowrap;">
+                🧘 Devotions (मनन)
               </button>
-              <button class="prayers-subnav-btn" id="btn-prayers-subtab-requests" onclick="switchPrayersSubtab('requests')" style="flex: 1; padding: 10px 14px; border-radius: 12px; font-size: 13.5px; font-weight: 700; border: 1.5px solid var(--border); background: var(--bg-content); color: var(--text); cursor: pointer; transition: all 0.2s ease;">
-                ⛪ Prayer Requests (मंडळी विनंत्या)
+              <button class="prayers-subnav-btn" id="btn-prayers-subtab-meetings" onclick="switchPrayersSubtab('meetings')" style="flex: 1.2; min-width: 135px; padding: 10px 8px; border-radius: 12px; font-size: 12.5px; font-weight: 700; border: 1.5px solid var(--border); background: var(--bg-content); color: var(--text); cursor: pointer; transition: all 0.2s ease; white-space: nowrap;">
+                🎥 Meetings (प्रार्थना सभा)
+              </button>
+              <button class="prayers-subnav-btn" id="btn-prayers-subtab-requests" onclick="switchPrayersSubtab('requests')" style="flex: 1; min-width: 100px; padding: 10px 8px; border-radius: 12px; font-size: 12.5px; font-weight: 700; border: 1.5px solid var(--border); background: var(--bg-content); color: var(--text); cursor: pointer; transition: all 0.2s ease; white-space: nowrap;">
+                🙏 Requests (विनंत्या)
               </button>
             </div>
 
@@ -1634,7 +1637,129 @@
               </div>
             </div>
 
-            <!-- SUBTAB 2: CHURCH PRAYER REQUESTS (Community circle) -->
+            <!-- SUBTAB 2: LIVE VIDEO PRAYER MEETINGS (Fellowship Sanctuary) -->
+            <div id="prayers-panel-meetings" class="prayers-subtab-panel" style="display: none;">
+              <!-- Header Card -->
+              <div style="background: linear-gradient(135deg, #1e1b2e 0%, #311339 50%, #1e293b 100%); color: #fff; border-radius: 20px; padding: 20px; margin-bottom: 18px; border: 1.5px solid rgba(247,0,47,0.3); box-shadow: 0 8px 30px rgba(0,0,0,0.12);">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                  <span style="background: rgba(247,0,47,0.25); border: 1px solid rgba(247,0,47,0.5); color: #ff8fa3; font-size: 10.5px; font-weight: 800; padding: 3px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px;">🎥 LIVE FELLOWSHIP</span>
+                  <span style="background: rgba(34,197,94,0.2); border: 1px solid rgba(34,197,94,0.5); color: #86efac; font-size: 10.5px; font-weight: 800; padding: 3px 10px; border-radius: 20px;">RIVER OF LIFE SANCTUARY</span>
+                </div>
+                <h3 style="font-size: 21px; font-weight: 800; margin: 0 0 6px 0; color: #ffffff;">Church Prayer Meetings (प्रार्थना सभा)</h3>
+                <p style="font-size: 13px; color: rgba(255,255,255,0.85); margin: 0; line-height: 1.45;">Join our pastoral live prayer calls, morning dawn fellowship, and fasting prayers via video room.</p>
+              </div>
+
+              <!-- Prayer Meetings Schedule Cards List -->
+              <div style="display: flex; flex-direction: column; gap: 14px;">
+                
+                <!-- 1. Daily Morning Sanctuary -->
+                <div class="meeting-schedule-card" style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 18px; padding: 18px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 12px;">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
+                    <div>
+                      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                        <span style="background: rgba(245, 158, 11, 0.15); color: #d97706; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px;">🌅 DAILY MORNING • रोज सकाळी</span>
+                        <span style="background: rgba(34, 197, 94, 0.15); color: #16a34a; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px;">🔴 LIVE DAILY</span>
+                      </div>
+                      <h4 style="margin: 0 0 4px 0; font-size: 16.5px; font-weight: 800; color: var(--text);">Morning Dawn Sanctuary (पहाटेची प्रार्थना सभा)</h4>
+                      <p style="margin: 0; font-size: 12px; color: var(--text-muted); font-weight: 600;">Time: 6:00 AM – 7:00 AM IST (सकाळी ६:०० ते ७:००)</p>
+                    </div>
+                    <div style="font-size: 26px;">🌅</div>
+                  </div>
+                  <p style="margin: 0; font-size: 13px; color: var(--text); line-height: 1.45; background: var(--bg); padding: 10px 12px; border-radius: 10px; border-left: 3px solid #f59e0b; font-style: italic;">
+                    "माझ्या देवा, पहाटे मी तुझा शोध करीन; माझे मन तुझ्यासाठी तहानलेले आहे." — स्तोत्रसंहिता ६३:१
+                  </p>
+                  <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button onclick="joinPrayerMeetingDirect('sanctuary-dawn', 'पहाटेची प्रार्थना सभा (Morning Dawn)');" class="btn-primary-mini" style="flex: 1.4; padding: 11px 16px; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                      <span>🎥 Join Video Call (कॉलमध्ये जोडा)</span>
+                    </button>
+                    <button onclick="sharePrayerMeetingWhatsApp('Morning Dawn Prayer (पहाटेची प्रार्थना)', 'Daily 6:00 AM - 7:00 AM', 'sanctuary-dawn');" class="btn-secondary-mini" style="flex: 1; padding: 11px 14px; border-radius: 12px; font-size: 12.5px; font-weight: 700; border: 1.5px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                      <span>💬 Invite (निमंत्रण)</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- 2. Evening Family Fellowship -->
+                <div class="meeting-schedule-card" style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 18px; padding: 18px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 12px;">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
+                    <div>
+                      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                        <span style="background: rgba(139, 92, 246, 0.15); color: #7c3aed; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px;">🌙 DAILY NIGHT • रोज रात्री</span>
+                        <span style="background: rgba(59, 130, 246, 0.15); color: #2563eb; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px;">FAMILY FELLOWSHIP</span>
+                      </div>
+                      <h4 style="margin: 0 0 4px 0; font-size: 16.5px; font-weight: 800; color: var(--text);">Evening Family Fellowship (कौटुंबिक प्रार्थना व संगती)</h4>
+                      <p style="margin: 0; font-size: 12px; color: var(--text-muted); font-weight: 600;">Time: 8:30 PM – 9:30 PM IST (रात्री ८:३० ते ९:३०)</p>
+                    </div>
+                    <div style="font-size: 26px;">🌙</div>
+                  </div>
+                  <p style="margin: 0; font-size: 13px; color: var(--text); line-height: 1.45; background: var(--bg); padding: 10px 12px; border-radius: 10px; border-left: 3px solid #7c3aed; font-style: italic;">
+                    "कारण जेथे दोघे किंवा तिघे माझ्या नावाने एकत्र जमले आहेत, तेथे मी त्यांच्यामध्ये आहे." — मत्तय १८:२०
+                  </p>
+                  <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button onclick="joinPrayerMeetingDirect('fellowship-evening', 'कौटुंबिक प्रार्थना व संगती (Evening Fellowship)');" class="btn-primary-mini" style="flex: 1.4; padding: 11px 16px; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                      <span>🎥 Join Video Call (कॉलमध्ये जोडा)</span>
+                    </button>
+                    <button onclick="sharePrayerMeetingWhatsApp('Evening Family Fellowship (कौटुंबिक प्रार्थना)', 'Daily 8:30 PM - 9:30 PM', 'fellowship-evening');" class="btn-secondary-mini" style="flex: 1; padding: 11px 14px; border-radius: 12px; font-size: 12.5px; font-weight: 700; border: 1.5px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                      <span>💬 Invite (निमंत्रण)</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- 3. Friday Fasting & Deliverance -->
+                <div class="meeting-schedule-card" style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 18px; padding: 18px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 12px;">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
+                    <div>
+                      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                        <span style="background: rgba(239, 68, 68, 0.15); color: #dc2626; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px;">🔥 EVERY FRIDAY • दर शुक्रवारी</span>
+                        <span style="background: rgba(247, 0, 47, 0.15); color: #F7002F; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px;">DELIVERANCE PRAYER</span>
+                      </div>
+                      <h4 style="margin: 0 0 4px 0; font-size: 16.5px; font-weight: 800; color: var(--text);">Friday Fasting & Deliverance (उपवास व मुक्ती प्रार्थना)</h4>
+                      <p style="margin: 0; font-size: 12px; color: var(--text-muted); font-weight: 600;">Time: 11:00 AM – 1:00 PM IST (सकाळी ११:०० ते दुपारी १:००)</p>
+                    </div>
+                    <div style="font-size: 26px;">🔥</div>
+                  </div>
+                  <p style="margin: 0; font-size: 13px; color: var(--text); line-height: 1.45; background: var(--bg); padding: 10px 12px; border-radius: 10px; border-left: 3px solid #dc2626; font-style: italic;">
+                    "उपवास आणि एकाग्र प्रार्थनेने बंधने तुटतात आणि आत्मिक मुक्ती मिळते." — यशया ५८:६
+                  </p>
+                  <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button onclick="joinPrayerMeetingDirect('fasting-friday', 'शुक्रवार उपवास प्रार्थना (Friday Fasting)');" class="btn-primary-mini" style="flex: 1.4; padding: 11px 16px; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                      <span>🎥 Join Video Call (कॉलमध्ये जोडा)</span>
+                    </button>
+                    <button onclick="sharePrayerMeetingWhatsApp('Friday Fasting Prayer (उपवास प्रार्थना)', 'Every Friday 11:00 AM - 1:00 PM', 'fasting-friday');" class="btn-secondary-mini" style="flex: 1; padding: 11px 14px; border-radius: 12px; font-size: 12.5px; font-weight: 700; border: 1.5px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                      <span>💬 Invite (निमंत्रण)</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- 4. Sunday Morning Worship -->
+                <div class="meeting-schedule-card" style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 18px; padding: 18px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 12px;">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
+                    <div>
+                      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                        <span style="background: rgba(16, 185, 129, 0.15); color: #059669; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px;">✝ EVERY SUNDAY • दर रविवारी</span>
+                        <span style="background: rgba(16, 185, 129, 0.15); color: #059669; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px;">SUNDAY SERVICE</span>
+                      </div>
+                      <h4 style="margin: 0 0 4px 0; font-size: 16.5px; font-weight: 800; color: var(--text);">Sunday Worship & Word (रविवार उपासना सभा)</h4>
+                      <p style="margin: 0; font-size: 12px; color: var(--text-muted); font-weight: 600;">Time: 9:30 AM – 12:00 PM IST (सकाळी ९:३० ते १२:००)</p>
+                    </div>
+                    <div style="font-size: 26px;">⛪</div>
+                  </div>
+                  <p style="margin: 0; font-size: 13px; color: var(--text); line-height: 1.45; background: var(--bg); padding: 10px 12px; border-radius: 10px; border-left: 3px solid #059669; font-style: italic;">
+                    "परमेश्वराच्या घरात आपण जाऊ असे मला म्हणाले तेव्हा मला आनंद झाला." — स्तोत्रसंहिता १२२:१
+                  </p>
+                  <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button onclick="joinPrayerMeetingDirect('sunday-worship', 'रविवार उपासना सभा (Sunday Worship)');" class="btn-primary-mini" style="flex: 1.4; padding: 11px 16px; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                      <span>🎥 Join Video Call (कॉलमध्ये जोडा)</span>
+                    </button>
+                    <button onclick="sharePrayerMeetingWhatsApp('Sunday Worship Service (रविवार उपासना)', 'Every Sunday 9:30 AM - 12:00 PM', 'sunday-worship');" class="btn-secondary-mini" style="flex: 1; padding: 11px 14px; border-radius: 12px; font-size: 12.5px; font-weight: 700; border: 1.5px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                      <span>💬 Invite (निमंत्रण)</span>
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- SUBTAB 3: CHURCH PRAYER REQUESTS (Community circle) -->
             <div id="prayers-panel-requests" class="prayers-subtab-panel" style="display: none;">
               
               <!-- Lock state (Logged Out) -->
@@ -2536,8 +2661,8 @@
           </section>
         </main>
 
-        <!-- 3. MOBILE BOTTOM NAVIGATION TAB BAR (Docked Bottom Menu on All Screen Sizes - 4 Tabs) -->
-        <nav class="mobile-bottom-tabs four-tabs">
+        <!-- 3. MOBILE BOTTOM NAVIGATION TAB BAR (Docked Bottom Menu on All Screen Sizes - 5 Tabs) -->
+        <nav class="mobile-bottom-tabs five-tabs">
           <button class="tab-btn active" data-tab="home" onclick="switchTab('home')">
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
             <span class="tab-label" data-i18n="nav_home">Home</span>
@@ -2545,6 +2670,10 @@
           <button class="tab-btn" data-tab="reader" onclick="switchTab('reader')">
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
             <span class="tab-label" data-i18n="nav_bible">Bible</span>
+          </button>
+          <button class="tab-btn" data-tab="prayers" onclick="switchTab('prayers')">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path></svg>
+            <span class="tab-label" data-i18n="nav_prayers">Prayers</span>
           </button>
           <button class="tab-btn" data-tab="hymns" onclick="switchTab('hymns')">
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
