@@ -3343,76 +3343,34 @@
           <div class="grabber-bar"></div>
           <div style="display: flex; align-items: center; gap: 8px;">
             <span style="font-size: 20px;">🎙️</span>
-            <h3 style="margin: 0; font-size: 17px; font-weight: 800; color: var(--text);">AI Voice Narration (ElevenLabs & Sarvam)</h3>
+            <h3 style="margin: 0; font-size: 17px; font-weight: 800; color: var(--text);">मराठी ऑडिओ बायबल (Marathi Audio Bible)</h3>
           </div>
           <button class="close-drawer-btn" id="btn-close-audio-settings" onclick="closeModal('modal-audio-settings')" style="background: var(--pill-bg); border: none; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; color: var(--text);">&times;</button>
         </div>
         <div class="drawer-body-settings" style="padding: 18px 20px 24px 20px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto;">
           
-          <!-- Default Unified Narrator Voice Banner & Selection -->
-          <div style="background: rgba(229,168,59,0.08); border: 1.5px solid var(--border); border-radius: 12px; padding: 12px 14px; display: flex; align-items: center; gap: 12px;">
-            <span style="font-size: 22px;">🎙️</span>
+          <!-- Authentic Male Narrator Voice Card -->
+          <div style="background: linear-gradient(135deg, rgba(229,168,59,0.18), rgba(139,24,40,0.12)); border: 1.5px solid var(--border); border-radius: 14px; padding: 14px 16px; display: flex; align-items: center; gap: 14px;">
+            <span style="font-size: 26px;">🎙️</span>
             <div style="flex: 1;">
-              <div style="font-weight: 800; font-size: 13.5px; color: var(--text);">Natural Marathi Audio Engine (नैसर्गिक मराठी ऑडिओ)</div>
-              <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 2px;">High quality, fluent Marathi narration with verse sync</div>
+              <div style="font-weight: 800; font-size: 14.5px; color: var(--text);">अस्सल मराठी पुरुष वाचक आवाज (Authentic Male Voice)</div>
+              <div style="font-size: 12px; color: var(--text-muted); margin-top: 3px;">सर्व ६६ पुस्तके - जुना करार व नवा करार (All 66 Books - Old & New Testament)</div>
             </div>
+            <span style="font-size: 11px; font-weight: 800; background: var(--primary); color: #1e1b4b; padding: 4px 10px; border-radius: 12px;">Default</span>
           </div>
 
-          <!-- Narrator Voice Selection -->
-          <div class="setting-item-row" id="audio-voice-selection-row">
-            <label style="font-weight: 700; font-size: 13.5px; color: var(--text);">Narrator Voice / वाचक आवाज</label>
-            <select id="audio-narrator-gender-select" class="dropdown-selector" style="background: var(--bg); color: var(--text); border: 1.5px solid var(--border); border-radius: 10px; padding: 10px 12px; font-size: 13px; width: 100%; font-weight: 600;">
-              <option value="google_natural_mr" selected>🌟 नैसर्गिक मराठी आवाज (Natural Marathi - शिफारस केलेले)</option>
-              <option value="shubh">🕊️ शुभ (शांत व गंभीर - Sarvam AI Bulbul V3)</option>
-              <option value="ratan">🎙️ रतन (स्पष्ट व नैसर्गिक - Sarvam AI Bulbul V3)</option>
-              <option value="gee_elevenlabs">✨ GEE (Custom Authentic Marathi - ElevenLabs)</option>
-              <option value="shrey_elevenlabs">✨ Shrey (Deep Marathi Conversational - ElevenLabs)</option>
-              <option value="google_natural_en">📖 Natural English Voice (Google Natural)</option>
-              <option value="device_webspeech">📱 डिव्हाइस आवाज (Device Web Speech)</option>
-            </select>
-            <div style="display: flex; justify-content: flex-end; margin-top: 6px;">
-              <button id="btn-test-natural-voice" type="button" style="padding: 6px 14px; font-size: 11.5px; font-weight: 800; border-radius: 14px; background: rgba(34,197,94,0.12); color: #16a34a; border: 1px solid rgba(34,197,94,0.3); cursor: pointer; display: flex; align-items: center; gap: 4px;">
-                <span>🔊 Test Selected Voice / आवाज ऐका</span>
-              </button>
-            </div>
+          <div style="display: flex; justify-content: flex-end; margin-top: -4px;">
+            <button id="btn-test-natural-voice" type="button" style="padding: 8px 16px; font-size: 12px; font-weight: 800; border-radius: 14px; background: rgba(34,197,94,0.12); color: #16a34a; border: 1px solid rgba(34,197,94,0.3); cursor: pointer; display: flex; align-items: center; gap: 6px;">
+              <span>🔊 आवाज चाचणी ऐका / Test Male Voice</span>
+            </button>
           </div>
 
           <!-- Reading Speed Slider -->
           <div class="setting-item-row">
             <label style="font-weight: 700; font-size: 13.5px; color: var(--text);">Reading Pace / वाचनाचा वेग</label>
             <div class="slider-wrapper" style="display: flex; align-items: center; gap: 12px;">
-              <input type="range" id="tts-speed-slider" min="0.75" max="1.50" step="0.05" value="0.92" class="speed-slider" style="flex: 1;">
-              <span id="tts-speed-val" style="font-weight: 800; font-size: 13px; color: var(--primary); min-width: 44px; text-align: right;">0.92x</span>
-            </div>
-          </div>
-
-          <!-- ElevenLabs API Configuration Card -->
-          <div style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <span style="font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">ElevenLabs API Key (Shrey Voice)</span>
-              <span id="elevenlabs-key-status-badge" style="font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 12px; background: rgba(59,130,246,0.15); color: #3b82f6;">Ready</span>
-            </div>
-            <input type="text" id="elevenlabs-api-key-input" placeholder="Enter ElevenLabs API Key" autocomplete="off" style="width: 100%; box-sizing: border-box; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 12px; font-family: monospace;">
-            <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 2px;">
-              <span style="font-size: 11px; color: var(--text-muted);">Model: eleven_v3 | Voice: Shrey</span>
-              <button id="btn-test-elevenlabs-voice" type="button" style="padding: 6px 14px; font-size: 11.5px; font-weight: 800; border-radius: 14px; background: rgba(59,130,246,0.15); color: #2563eb; border: 1px solid rgba(59,130,246,0.3); cursor: pointer; display: flex; align-items: center; gap: 4px;">
-                <span>🔊 Test Shrey / ऐका</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Sarvam AI API Configuration Card -->
-          <div style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <span style="font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Sarvam AI API Key</span>
-              <span id="sarvam-key-status-badge" style="font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 12px; background: rgba(34,197,94,0.15); color: #22c55e;">Key Ready</span>
-            </div>
-            <input type="text" id="sarvam-api-key-input" placeholder="Enter Sarvam API Key (sk_...)" autocomplete="off" style="width: 100%; box-sizing: border-box; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 12px; font-family: monospace;">
-            <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 2px;">
-              <span style="font-size: 11px; color: var(--text-muted);">Bulbul V3 Indian Voice Narration</span>
-              <button id="btn-test-sarvam-voice" type="button" style="padding: 6px 14px; font-size: 11.5px; font-weight: 800; border-radius: 14px; background: rgba(229,168,59,0.15); color: var(--primary); border: 1px solid rgba(229,168,59,0.3); cursor: pointer; display: flex; align-items: center; gap: 4px;">
-                <span>🔊 Test Sarvam / ऐका</span>
-              </button>
+              <input type="range" id="tts-speed-slider" min="0.75" max="1.50" step="0.05" value="1.0" class="speed-slider" style="flex: 1;">
+              <span id="tts-speed-val" style="font-weight: 800; font-size: 13px; color: var(--primary); min-width: 44px; text-align: right;">1.0x</span>
             </div>
           </div>
 

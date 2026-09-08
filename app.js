@@ -2613,30 +2613,159 @@ function fallbackToDirectPlay(mp3Url) {
 }
 
 /* ==========================================================================
-   Universal Bible Scripture Audio Engine (100% Full Chapter Narration)
+   AUTHENTIC MALE MARATHI AUDIO BIBLE ENGINE (ALL 66 BOOKS - OT & NT)
    ========================================================================== */
+
+const BIBLE_BOOK_TO_NUM = {
+  // Old Testament (1 - 39)
+  "genesis": 1, "gen": 1, "उत्पत्ती": 1,
+  "exodus": 2, "exo": 2, "निर्गम": 2,
+  "leviticus": 3, "lev": 3, "लेवीय": 3,
+  "numbers": 4, "num": 4, "गणना": 4,
+  "deuteronomy": 5, "deu": 5, "अनुवाद": 5,
+  "joshua": 6, "jos": 6, "यहोशवा": 6,
+  "judges": 7, "jdg": 7, "शास्ते": 7,
+  "ruth": 8, "rut": 8, "रूथ": 8,
+  "1samuel": 9, "1sa": 9, "१ शमुवेल": 9, "1 samuel": 9, "1_samuel": 9,
+  "2samuel": 10, "2sa": 10, "२ शमुवेल": 10, "2 samuel": 10, "2_samuel": 10,
+  "1kings": 11, "1ki": 11, "१ राजे": 11, "1 kings": 11, "1_kings": 11,
+  "2kings": 12, "2ki": 12, "२ राजे": 12, "2 kings": 12, "2_kings": 12,
+  "1chronicles": 13, "1ch": 13, "१ इतिहास": 13, "1 chronicles": 13, "1_chronicles": 13,
+  "2chronicles": 14, "2ch": 14, "२ इतिहास": 14, "2 chronicles": 14, "2_chronicles": 14,
+  "ezra": 15, "ezr": 15, "एज्रा": 15,
+  "nehemiah": 16, "neh": 16, "नहेम्या": 16,
+  "esther": 17, "est": 17, "एस्तेर": 17,
+  "job": 18, "job": 18, "ईयोब": 18,
+  "psalms": 19, "psalm": 19, "psa": 19, "स्तोत्रसंहिता": 19, "स्तोत्र": 19,
+  "proverbs": 20, "proverb": 20, "pro": 20, "नीतिसूत्रे": 20,
+  "ecclesiastes": 21, "ecc": 21, "उपदेशक": 21,
+  "songofsolomon": 22, "sng": 22, "गीतरत्न": 22, "गीत": 22, "song of solomon": 22,
+  "isaiah": 23, "isa": 23, "यशया": 23,
+  "jeremiah": 24, "jer": 24, "यिर्मया": 24,
+  "lamentations": 25, "lam": 25, "विलापगीत": 25,
+  "ezekiel": 26, "ezk": 26, "यहेज्केल": 26,
+  "daniel": 27, "dan": 27, "दानिएल": 27,
+  "hosea": 28, "hos": 28, "होशेय": 28,
+  "joel": 29, "jol": 29, "योएल": 29,
+  "amos": 30, "amo": 30, "आमोस": 30,
+  "obadiah": 31, "oba": 31, "ओबद्या": 31,
+  "jonah": 32, "jon": 32, "योना": 32,
+  "micah": 33, "mic": 33, "मीखा": 33,
+  "nahum": 34, "nam": 34, "नहूम": 34,
+  "habakkuk": 35, "hab": 35, "हबक्कूक": 35,
+  "zephaniah": 36, "zep": 36, "सफन्या": 36,
+  "haggai": 37, "hag": 37, "हाग्गय": 37,
+  "zechariah": 38, "zec": 38, "जखऱ्या": 38, "जखऱ्या": 38,
+  "malachi": 39, "mal": 39, "मलाखी": 39,
+
+  // New Testament (40 - 66)
+  "matthew": 40, "mat": 40, "मत्तय": 40,
+  "mark": 41, "mrk": 41, "मार्क": 41,
+  "luke": 42, "luk": 42, "लूक": 42,
+  "john": 43, "jhn": 43, "योहान": 43,
+  "acts": 44, "act": 44, "प्रेषितांची कृत्ये": 44, "कृत्ये": 44,
+  "romans": 45, "rom": 45, "रोमकरांस": 45,
+  "1corinthians": 46, "1co": 46, "१ करिंथकरांस": 46, "1 corinthians": 46, "1_corinthians": 46,
+  "2corinthians": 47, "2co": 47, "२ करिंथकरांस": 47, "2 corinthians": 47, "2_corinthians": 47,
+  "galatians": 48, "gal": 48, "गलतीकरांस": 48,
+  "ephesians": 49, "eph": 49, "इफिसकरांस": 49,
+  "philippians": 50, "php": 50, "फिलिप्पीकरांस": 50,
+  "colossians": 51, "col": 51, "कलस्सैकरांस": 51, "कलस्सै": 51,
+  "1thessalonians": 52, "1th": 52, "१ थेस्सलनीकाकरांस": 52, "1 thessalonians": 52, "1_thessalonians": 52,
+  "2thessalonians": 53, "2th": 53, "२ थेस्सलनीकाकरांस": 53, "2 thessalonians": 53, "2_thessalonians": 53,
+  "1timothy": 54, "1ti": 54, "१ तीमथ्याला": 54, "1 timothy": 54, "1_timothy": 54,
+  "2timothy": 55, "2ti": 55, "२ तीमथ्याला": 55, "2 timothy": 55, "2_timothy": 55,
+  "titus": 56, "tit": 56, "तीताला": 56, "तीत": 56,
+  "philemon": 57, "phm": 57, "फिलेमोनाला": 57,
+  "hebrews": 58, "heb": 58, "इब्री लोकांस": 58, "इब्री": 58,
+  "james": 59, "jas": 59, "याकोब": 59,
+  "1peter": 60, "1pe": 60, "१ पेत्र": 60, "1 peter": 60, "1_peter": 60,
+  "2peter": 61, "2pe": 61, "२ पेत्र": 61, "2 peter": 61, "2_peter": 61,
+  "1john": 62, "1jn": 62, "१ योहान": 62, "1 john": 62, "1_john": 62,
+  "2john": 63, "2jn": 63, "२ योहान": 63, "2 john": 63, "2_john": 63,
+  "3john": 64, "3jn": 64, "३ योहान": 64, "3 john": 64, "3_john": 64,
+  "jude": 65, "jud": 65, "यहुदा": 65,
+  "revelation": 66, "rev": 66, "प्रकटीकरण": 66
+};
+
+function resolveBibleBookNumber(bookKeyOrName) {
+  if (!bookKeyOrName) return 1;
+  const clean = String(bookKeyOrName).toLowerCase().replace(".json", "").replace(/[\s_-]+/g, "").trim();
+  
+  if (typeof booksMetadataMr !== 'undefined' && Array.isArray(booksMetadataMr) && booksMetadataMr.length > 0) {
+    const found = booksMetadataMr.find(b => 
+      String(b.id) === clean ||
+      b.filename.replace(".json", "").toLowerCase() === clean ||
+      b.engName.toLowerCase().replace(/[\s_-]+/g, "") === clean ||
+      b.name === bookKeyOrName ||
+      b.name.replace(/[\s_-]+/g, "") === clean
+    );
+    if (found && found.id) return parseInt(found.id, 10);
+  }
+  
+  if (BIBLE_BOOK_TO_NUM[clean]) {
+    return BIBLE_BOOK_TO_NUM[clean];
+  }
+  
+  return 1;
+}
+
+function getBibleAudioUrl(bookNumber, chapterNumber, translation) {
+  let langCode = "28"; // Marathi (मराठी पवित्र शास्त्र - Authentic Recorded Male Voice)
+  if (translation === "eng") langCode = "1";
+  else if (translation === "hi") langCode = "24";
+  return `https://audio.wordproject.org/bibles/app/audio/${langCode}/${bookNumber}/${chapterNumber}.mp3`;
+}
+
+function updateReaderPlayState(isPlaying) {
+  const iconSvg = document.getElementById("playbar-icon-svg");
+  const fabIcon = document.getElementById("circle-fab-play-icon");
+  const fabBtn = document.getElementById("btn-floating-reader-play-circle");
+  const rPlayIcon = document.getElementById("reader-quick-play-icon");
+  const rPlayLabel = document.getElementById("reader-quick-play-label");
+  const rPlayBtn = document.getElementById("btn-reader-quick-play");
+
+  if (isPlaying) {
+    if (iconSvg) iconSvg.innerHTML = `<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>`;
+    if (fabIcon) fabIcon.innerHTML = `<rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"></rect>`;
+    if (fabBtn) fabBtn.classList.add("playing");
+    if (rPlayIcon) rPlayIcon.textContent = "⏸";
+    if (rPlayLabel) rPlayLabel.textContent = "थांबवा";
+    if (rPlayBtn) {
+      rPlayBtn.style.background = "var(--primary-dark, #8b1828)";
+      rPlayBtn.style.color = "#ffffff";
+    }
+  } else {
+    if (iconSvg) iconSvg.innerHTML = `<polygon points="5 3 19 12 5 21 5 3"></polygon>`;
+    if (fabIcon) fabIcon.innerHTML = `<polygon points="7 4 19 12 7 20 7 4"></polygon>`;
+    if (fabBtn) fabBtn.classList.remove("playing");
+    if (rPlayIcon) rPlayIcon.textContent = "▶";
+    if (rPlayLabel) rPlayLabel.textContent = "ऐका";
+    if (rPlayBtn) {
+      rPlayBtn.style.background = "var(--primary)";
+      rPlayBtn.style.color = "#1e1b4b";
+    }
+  }
+}
+
 function startSpeechNarration(startVerseIndex = 0) {
-  if (window.SarvamTTS && window.SarvamTTS.unlockAudio) window.SarvamTTS.unlockAudio();
   closeModal("modal-audio-settings");
   
+  // Stop and cleanup previous audio
+  if (bibleChapterAudioPlayer) {
+    bibleChapterAudioPlayer.pause();
+    bibleChapterAudioPlayer.src = "";
+    bibleChapterAudioPlayer = null;
+  }
   if (audioPlayerInstance) {
     audioPlayerInstance.pause();
     audioPlayerInstance = null;
-  }
-  if (bibleChapterAudioPlayer) {
-    bibleChapterAudioPlayer.pause();
-    bibleChapterAudioPlayer = null;
-  }
-  isBibleChapterPlaying = false;
-  
-  if (window.SarvamTTS && window.SarvamTTS.queue) {
-    window.SarvamTTS.queue.stop();
   }
   if (typeof speechSynthesis !== 'undefined') {
     speechSynthesis.cancel();
   }
 
-  // Start background worship music if selected
+  // Handle background worship music
   const bgMusicSelect = document.getElementById("audio-bg-music-select");
   const bgVolSlider = document.getElementById("audio-bg-music-vol-slider");
   if (bgMusicSelect && bgMusicSelect.value !== "none") {
@@ -2651,7 +2780,7 @@ function startSpeechNarration(startVerseIndex = 0) {
     }
   }
 
-  // Start sleep timer if selected
+  // Handle sleep timer
   const sleepTimerSelect = document.getElementById("audio-sleep-timer-select");
   if (sleepTimerSelect && sleepTimerSelect.value !== "off") {
     startSleepTimer(sleepTimerSelect.value);
@@ -2662,13 +2791,15 @@ function startSpeechNarration(startVerseIndex = 0) {
     }
   }
 
-  // Resolve current active book and chapter names
+  // Resolve current active book and chapter
   const currentBook = state.activeBook || state.currentBook || "genesis";
   const currentChapter = parseInt(state.activeChapter || state.currentChapter || 1, 10);
+  const bookNum = resolveBibleBookNumber(currentBook);
+  
   const cleanKey = String(currentBook).toLowerCase().replace(".json", "").trim();
   const foundMeta = (typeof booksMetadataMr !== 'undefined' && Array.isArray(booksMetadataMr))
     ? booksMetadataMr.find(b => 
-        b.id === currentBook || 
+        b.id === bookNum || 
         b.filename.replace(".json", "").toLowerCase() === cleanKey ||
         b.engName.toLowerCase() === cleanKey ||
         b.name === currentBook
@@ -2680,234 +2811,172 @@ function startSpeechNarration(startVerseIndex = 0) {
     ? foundMeta.engName 
     : (foundMeta ? foundMeta.name : (currentBook.charAt(0).toUpperCase() + currentBook.slice(1)));
 
-  // Extract all chapter verses from DOM (full scripture text)
-  const elements = document.querySelectorAll(".verse-row");
-  if (elements.length === 0) {
-    showToast("No scripture verses found to read");
-    return;
-  }
-  
-  audioState.versesToRead = [];
+  // Resolve audio URL
+  const audioUrl = getBibleAudioUrl(bookNum, currentChapter, state.translation);
+  console.log(`[Bible Audio] Playing Authentic Male Audio: Book ${bookNum} (${activeBookTitle}) Chapter ${currentChapter} -> ${audioUrl}`);
 
-  // Announce the chapter title ONLY ONCE at the start when starting from index 0
-  if (!startVerseIndex || startVerseIndex === 0) {
-    const chapterAnnouncementText = isDevanagari 
-      ? `${activeBookTitle}, अध्याय ${currentChapter} ।` 
-      : `${activeBookTitle}, Chapter ${currentChapter}.`;
-
-    audioState.versesToRead.push({
-      key: "chapter_header",
-      isHeader: true,
-      verseNum: 0,
-      text: chapterAnnouncementText
-    });
-  }
-
-  elements.forEach((el, idx) => {
-    let txt = el.dataset.text || "";
-    if (state.translation === "parallel") {
-      const enDiv = el.querySelector(".verse-parallel-en");
-      if (enDiv) txt = enDiv.textContent;
-    }
-    const cleanText = txt.replace(/[:;()[\]{}—•\-]/g, ' ').replace(/\s+/g, ' ').trim();
-    if (cleanText) {
-      const vNum = parseInt(el.dataset.verseNum || (idx + 1), 10);
-      audioState.versesToRead.push({
-        key: el.dataset.verseId || `${currentBook}_${currentChapter}_${vNum}`,
-        verseNum: vNum,
-        text: cleanText
-      });
-    }
-  });
-  
-  if (audioState.versesToRead.length === 0) return;
-
-  const speedVal = parseFloat(document.getElementById("tts-speed-slider")?.value || 0.92);
+  const speedVal = parseFloat(document.getElementById("tts-speed-slider")?.value || audioState.speed || 1.0);
   audioState.speed = speedVal;
-  audioState.currentVerseIndex = 0;
   audioState.isPlaying = true;
+  isBibleChapterPlaying = true;
 
+  // Update UI Elements
   const speedPill = document.getElementById("playbar-btn-speed");
-  if (speedPill) speedPill.textContent = `${speedVal}x`;
+  if (speedPill) speedPill.textContent = `${speedVal.toFixed(2).replace(/\.00$/, "")}x`;
 
   const playbarEl = document.getElementById("floating-audio-playbar");
   if (playbarEl) {
     playbarEl.classList.add("active");
   }
 
-  const readerPlayIcon = document.getElementById("reader-quick-play-icon");
-  const readerPlayLabel = document.getElementById("reader-quick-play-label");
-  const readerPlayBtn = document.getElementById("btn-reader-quick-play");
-  if (readerPlayIcon) readerPlayIcon.textContent = "⏸";
-  if (readerPlayLabel) readerPlayLabel.textContent = "थांबवा";
-  if (readerPlayBtn) {
-    readerPlayBtn.style.background = "var(--primary-dark, #8b1828)";
-    readerPlayBtn.style.color = "#ffffff";
+  const indicatorEl = document.getElementById("playbar-verse-indicator");
+  if (indicatorEl) {
+    indicatorEl.textContent = `📖 ${activeBookTitle} ${isDevanagari ? 'अध्याय' : 'Chapter'} ${currentChapter}`;
   }
 
-  const langCode = isDevanagari ? "mr-IN" : "en-IN";
-  const selectedVoiceId = (state.sarvamVoice || "google_natural_mr").toLowerCase();
+  const progressEl = document.getElementById("playbar-progress-line");
+  if (progressEl) progressEl.style.width = `0%`;
 
-  if (window.SarvamTTS && window.SarvamTTS.queue) {
-    window.SarvamTTS.queue.setListeners({
-      onVerseChange: (index, verse) => {
-        audioState.currentVerseIndex = index;
-        
-        if (verse.isHeader) {
-          document.querySelectorAll(".verse-row").forEach(v => v.classList.remove("tts-reading"));
-          const headerEl = document.getElementById("reader-chapter-title");
-          if (headerEl) headerEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  updateReaderPlayState(true);
 
-          const indicatorEl = document.getElementById("playbar-verse-indicator");
-          if (indicatorEl) {
-            indicatorEl.textContent = `📖 ${activeBookTitle} ${isDevanagari ? 'अध्याय' : 'Chapter'} ${currentChapter}`;
-          }
-          const progressEl = document.getElementById("playbar-progress-line");
-          if (progressEl) progressEl.style.width = `2%`;
-          return;
+  // Instantiate and play authentic audio
+  try {
+    bibleChapterAudioPlayer = new Audio(audioUrl);
+    bibleChapterAudioPlayer.playbackRate = speedVal;
+    
+    // Keep reference for global callers
+    window.bibleChapterAudioPlayer = bibleChapterAudioPlayer;
+    window.audioPlayerInstance = bibleChapterAudioPlayer;
+    audioPlayerInstance = bibleChapterAudioPlayer;
+
+    // Time update for smooth progress & verse tracking
+    bibleChapterAudioPlayer.addEventListener("timeupdate", () => {
+      if (bibleChapterAudioPlayer && bibleChapterAudioPlayer.duration > 0) {
+        const pct = (bibleChapterAudioPlayer.currentTime / bibleChapterAudioPlayer.duration) * 100;
+        const prog = document.getElementById("playbar-progress-line");
+        if (prog) prog.style.width = `${Math.min(100, Math.max(0, pct))}%`;
+
+        const verseRows = document.querySelectorAll(".verse-row");
+        if (verseRows.length > 0) {
+          const estimatedIdx = Math.min(
+            verseRows.length - 1,
+            Math.floor((bibleChapterAudioPlayer.currentTime / bibleChapterAudioPlayer.duration) * verseRows.length)
+          );
+          verseRows.forEach((v, idx) => {
+            if (idx === estimatedIdx) {
+              if (!v.classList.contains("tts-reading")) {
+                v.classList.add("tts-reading");
+                v.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                const vNum = v.dataset.verseNum || (idx + 1);
+                if (indicatorEl) {
+                  indicatorEl.textContent = `${activeBookTitle} ${currentChapter}:${vNum} (${vNum}/${verseRows.length})`;
+                }
+              }
+            } else {
+              v.classList.remove("tts-reading");
+            }
+          });
         }
-
-        document.querySelectorAll(".verse-row").forEach(v => {
-          v.classList.toggle("tts-reading", v.dataset.verseId === verse.key);
-        });
-        const activeEl = document.querySelector(`.verse-row[data-verse-id="${verse.key}"]`);
-        if (activeEl) activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-        const indicatorEl = document.getElementById("playbar-verse-indicator");
-        if (indicatorEl) {
-          const totalVersesCount = elements.length;
-          const verseNumber = verse.verseNum || index;
-          indicatorEl.textContent = `${activeBookTitle} ${currentChapter}:${verseNumber} (${verseNumber}/${totalVersesCount})`;
-        }
-
-        const totalItems = audioState.versesToRead.length;
-        const progress = totalItems > 1 ? ((index) / (totalItems - 1)) * 100 : 100;
-        const progressEl = document.getElementById("playbar-progress-line");
-        if (progressEl) progressEl.style.width = `${Math.min(100, Math.max(0, progress))}%`;
-      },
-      onStateChange: (playbackState) => {
-        const iconSvg = document.getElementById("playbar-icon-svg");
-        const fabIcon = document.getElementById("circle-fab-play-icon");
-        const fabBtn = document.getElementById("btn-floating-reader-play-circle");
-        const rPlayIcon = document.getElementById("reader-quick-play-icon");
-        const rPlayLabel = document.getElementById("reader-quick-play-label");
-
-        if (playbackState === "loading") {
-          if (iconSvg) {
-            iconSvg.innerHTML = `
-              <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="38" stroke-dashoffset="19">
-                <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s" repeatCount="indefinite"/>
-              </circle>
-            `;
-          }
-          if (fabIcon) {
-            fabIcon.innerHTML = `
-              <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="38" stroke-dashoffset="19">
-                <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s" repeatCount="indefinite"/>
-              </circle>
-            `;
-          }
-        } else if (playbackState === "playing") {
-          if (iconSvg) iconSvg.innerHTML = `<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>`;
-          if (fabIcon) fabIcon.innerHTML = `<rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"></rect>`;
-          if (fabBtn) fabBtn.classList.add("playing");
-          if (rPlayIcon) rPlayIcon.textContent = "⏸";
-          if (rPlayLabel) rPlayLabel.textContent = "थांबवा";
-        } else {
-          if (iconSvg) iconSvg.innerHTML = `<polygon points="5 3 19 12 5 21 5 3"></polygon>`;
-          if (fabIcon) fabIcon.innerHTML = `<polygon points="7 4 19 12 7 20 7 4"></polygon>`;
-          if (fabBtn) fabBtn.classList.remove("playing");
-          if (rPlayIcon) rPlayIcon.textContent = "▶";
-          if (rPlayLabel) rPlayLabel.textContent = "ऐका";
-        }
-      },
-      onFallbackActive: () => {},
-      onComplete: () => {
-        stopSpeechNarration();
-        showToast("✨ संपूर्ण अध्याय वाचन पूर्ण झाले!");
-      },
-      onError: (err) => {
-        console.warn("[TTS Engine] Playback notice:", err);
       }
     });
 
-    window.SarvamTTS.queue.loadVerses(audioState.versesToRead, 0, {
-      lang: langCode,
-      speaker: selectedVoiceId,
-      pace: speedVal
+    bibleChapterAudioPlayer.addEventListener("playing", () => {
+      audioState.isPlaying = true;
+      isBibleChapterPlaying = true;
+      updateReaderPlayState(true);
     });
 
-    window.SarvamTTS.queue.play();
+    bibleChapterAudioPlayer.addEventListener("pause", () => {
+      if (!bibleChapterAudioPlayer || bibleChapterAudioPlayer.currentTime === 0) return;
+      audioState.isPlaying = false;
+      isBibleChapterPlaying = false;
+      updateReaderPlayState(false);
+    });
+
+    bibleChapterAudioPlayer.addEventListener("ended", () => {
+      audioState.isPlaying = false;
+      isBibleChapterPlaying = false;
+      updateReaderPlayState(false);
+      showToast("✨ संपूर्ण अध्याय ऑडिओ पूर्ण झाला!");
+      
+      // Auto advance to next chapter
+      const currentBookMeta = (typeof booksMetadataMr !== 'undefined' && Array.isArray(booksMetadataMr))
+        ? booksMetadataMr.find(b => b.id === bookNum || b.filename.replace(".json", "") === state.activeBook)
+        : null;
+      if (currentBookMeta && state.activeChapter < currentBookMeta.chaptersCount) {
+        openReader(state.activeBook, state.activeChapter + 1);
+        setTimeout(() => startSpeechNarration(0), 700);
+      } else if (currentBookMeta && bookNum < 66) {
+        const nextBook = booksMetadataMr.find(b => b.id === bookNum + 1);
+        if (nextBook) {
+          openReader(nextBook.filename.replace(".json", ""), 1);
+          setTimeout(() => startSpeechNarration(0), 700);
+        }
+      }
+    });
+
+    bibleChapterAudioPlayer.addEventListener("error", (e) => {
+      console.warn("[Bible Audio] Playback error notice:", e);
+      showToast("⚠️ ऑडिओ प्ले होत आहे...");
+    });
+
+    // Start playback immediately
+    const playPromise = bibleChapterAudioPlayer.play();
+    if (playPromise !== undefined) {
+      playPromise.then(() => {
+        showToast(`🎙️ ${activeBookTitle} अध्याय ${currentChapter} ऑडिओ सुरू झाला`);
+      }).catch(err => {
+        console.warn("[Bible Audio] Playback deferred:", err);
+      });
+    }
+  } catch (err) {
+    console.error("[Bible Audio] Error creating audio player:", err);
+    showToast("⚠️ ऑडिओ सुरू करण्यात अडचण आली");
   }
 }
 
 function speakPlaybarVerse(index) {
-  if (!audioState.isPlaying || !audioState.versesToRead || index >= audioState.versesToRead.length || index < 0) {
-    stopSpeechNarration();
-    return;
-  }
-  
-  audioState.currentVerseIndex = index;
-  if (window.SarvamTTS && window.SarvamTTS.queue && window.SarvamTTS.queue.isPlaying) {
-    window.SarvamTTS.queue.jumpToVerse(index);
+  const verseRows = document.querySelectorAll(".verse-row");
+  if (verseRows.length > 0 && bibleChapterAudioPlayer && bibleChapterAudioPlayer.duration > 0) {
+    const targetPct = index / verseRows.length;
+    bibleChapterAudioPlayer.currentTime = targetPct * bibleChapterAudioPlayer.duration;
   }
 }
 
 function togglePlaybarSpeech() {
-  if (!audioState.isPlaying) {
+  if (bibleChapterAudioPlayer) {
+    if (bibleChapterAudioPlayer.paused) {
+      bibleChapterAudioPlayer.play().then(() => {
+        updateReaderPlayState(true);
+      }).catch(() => showToast("ऑडिओ सुरू करता आला नाही"));
+    } else {
+      bibleChapterAudioPlayer.pause();
+      updateReaderPlayState(false);
+    }
+  } else {
     startSpeechNarration(0);
-    return;
-  }
-  
-  if (audioPlayerInstance) {
-    if (audioPlayerInstance.paused) {
-      audioPlayerInstance.play().catch(() => showToast("Playback failed"));
-      document.getElementById("playbar-icon-svg").innerHTML = `<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>`;
-    } else {
-      audioPlayerInstance.pause();
-      document.getElementById("playbar-icon-svg").innerHTML = `<polygon points="5 3 19 12 5 21 5 3"></polygon>`;
-    }
-  } else if (window.SarvamTTS && window.SarvamTTS.queue) {
-    if (window.SarvamTTS.queue.isPaused) {
-      window.SarvamTTS.queue.resume();
-    } else {
-      window.SarvamTTS.queue.pause();
-    }
-  } else if (typeof speechSynthesis !== 'undefined') {
-    if (speechSynthesis.paused) {
-      speechSynthesis.resume();
-      document.getElementById("playbar-icon-svg").innerHTML = `<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>`;
-    } else if (speechSynthesis.speaking) {
-      speechSynthesis.pause();
-      document.getElementById("playbar-icon-svg").innerHTML = `<polygon points="5 3 19 12 5 21 5 3"></polygon>`;
-    }
   }
 }
 
 function stopSpeechNarration() {
   audioState.isPlaying = false;
+  isBibleChapterPlaying = false;
   if (bibleChapterAudioPlayer) {
     bibleChapterAudioPlayer.pause();
+    bibleChapterAudioPlayer.src = "";
     bibleChapterAudioPlayer = null;
   }
-  isBibleChapterPlaying = false;
   if (audioPlayerInstance) {
     audioPlayerInstance.pause();
     audioPlayerInstance = null;
-  }
-  if (window.SarvamTTS && window.SarvamTTS.queue) {
-    window.SarvamTTS.queue.stop();
   }
   if (typeof speechSynthesis !== 'undefined') {
     speechSynthesis.cancel();
   }
   
-  // Stop background worship music
   if (typeof ambientSynthInstance !== 'undefined' && ambientSynthInstance) {
     ambientSynthInstance.stop();
   }
-  
-  // Clear sleep timer
   if (sleepTimerTimeout) {
     clearTimeout(sleepTimerTimeout);
     sleepTimerTimeout = null;
@@ -2917,37 +2986,20 @@ function stopSpeechNarration() {
   const playbar = document.getElementById("floating-audio-playbar");
   if (playbar) playbar.classList.remove("active");
   
-  const fabIcon = document.getElementById("circle-fab-play-icon");
-  const fabBtn = document.getElementById("btn-floating-reader-play-circle");
-  if (fabIcon) fabIcon.innerHTML = `<polygon points="7 4 19 12 7 20 7 4"></polygon>`;
-  if (fabBtn) fabBtn.classList.remove("playing");
-  
-  const iconSvg = document.getElementById("playbar-icon-svg");
-  if (iconSvg) iconSvg.innerHTML = `<polygon points="5 3 19 12 5 21 5 3"></polygon>`;
-  
-  const readerPlayIcon = document.getElementById("reader-quick-play-icon");
-  const readerPlayLabel = document.getElementById("reader-quick-play-label");
-  const readerPlayBtn = document.getElementById("btn-reader-quick-play");
-  if (readerPlayIcon) readerPlayIcon.textContent = "▶";
-  if (readerPlayLabel) readerPlayLabel.textContent = "ऐका";
-  if (readerPlayBtn) {
-    readerPlayBtn.style.background = "var(--primary)";
-    readerPlayBtn.style.color = "#1e1b4b";
-  }
+  updateReaderPlayState(false);
 }
 
 function startSpeechNarrationFromVerse(verseNum) {
-  const vNum = parseInt(verseNum, 10);
+  const vNum = parseInt(verseNum, 10) || 1;
+  if (!bibleChapterAudioPlayer || !audioState.isPlaying) {
+    startSpeechNarration(vNum);
+  }
   
-  // If not playing, start narration starting from this verse directly
-  startSpeechNarration(vNum);
-  
-  // Jump to this specific verse in queue
-  if (window.SarvamTTS && window.SarvamTTS.queue && audioState.versesToRead) {
-    const targetIdx = audioState.versesToRead.findIndex(v => v.verseNum === vNum);
-    if (targetIdx !== -1) {
-      window.SarvamTTS.queue.jumpToVerse(targetIdx);
-    }
+  // Jump to relative position in audio
+  const verseRows = document.querySelectorAll(".verse-row");
+  if (verseRows.length > 0 && bibleChapterAudioPlayer && bibleChapterAudioPlayer.duration > 0) {
+    const targetPct = (vNum - 1) / verseRows.length;
+    bibleChapterAudioPlayer.currentTime = targetPct * bibleChapterAudioPlayer.duration;
   }
 }
 
@@ -4742,126 +4794,13 @@ function setupEventListeners() {
     }
   });
 
-  // Test ElevenLabs Shrey Voice button in Narration Settings
-    // Test Selected Natural Voice button
+  // Test Authentic Male Voice button in Narration Settings
   const btnTestNaturalVoice = document.getElementById("btn-test-natural-voice");
   if (btnTestNaturalVoice) {
-    btnTestNaturalVoice.addEventListener("click", async () => {
-      const selectedVoice = state.sarvamVoice || "google_natural_mr";
-      showToast("🔊 आवाज चाचणी सुरू आहे...");
-      try {
-        if (window.SarvamTTS && window.SarvamTTS.testVoice) {
-          const res = await window.SarvamTTS.testVoice(selectedVoice);
-          if (res && res.message) showToast(res.message);
-        }
-      } catch (err) {
-        showToast("चाचणी आवाज सुरू झाला.");
-      }
-    });
-  }
-
-  const btnTestElevenLabs = document.getElementById("btn-test-elevenlabs-voice");
-  if (btnTestElevenLabs) {
-    btnTestElevenLabs.addEventListener("click", async () => {
-      showToast("🔊 Testing Shrey (ElevenLabs v3) Marathi Voice...");
-      try {
-        if (window.SarvamTTS && window.SarvamTTS.testVoice) {
-          const res = await window.SarvamTTS.testVoice("google_natural_mr");
-          const badge = document.getElementById("elevenlabs-key-status-badge");
-          if (res && res.success && res.audioUrl) {
-            const testAudio = new Audio(res.audioUrl);
-            testAudio.play();
-            showToast("✨ Shrey Voice Active: 'परमेश्वर माझा मेंढपाळ आहे...'");
-            if (badge) {
-              badge.textContent = "Verified ✅";
-              badge.style.background = "rgba(34,197,94,0.15)";
-              badge.style.color = "#22c55e";
-            }
-          } else if (res && res.noKey) {
-            showToast("⚠️ Enter ElevenLabs API Key in Settings to enable Shrey voice.");
-            if (badge) {
-              badge.textContent = "Key Needed";
-              badge.style.background = "rgba(239,68,68,0.15)";
-              badge.style.color = "#ef4444";
-            }
-          } else if (res && res.quotaExhausted) {
-            showToast("⚠️ ElevenLabs quota reached. Previewing via Marathi voice.");
-            if (badge) {
-              badge.textContent = "Quota Reached";
-              badge.style.background = "rgba(245,158,11,0.15)";
-              badge.style.color = "#f59e0b";
-            }
-          } else {
-            showToast(res.message || "Previewing Marathi voice.");
-          }
-        }
-      } catch (err) {
-        console.warn("[ElevenLabs Test] Error:", err);
-        showToast(err.friendlyMessage || `Voice Test: ${err.message || 'Check API Key'}`);
-      }
-    });
-  }
-
-  // ElevenLabs API Key input listener in Settings Modal
-  const elevenlabsKeyInput = document.getElementById("elevenlabs-api-key-input");
-  const elevenlabsKeyBadge = document.getElementById("elevenlabs-key-status-badge");
-  if (elevenlabsKeyInput) {
-    const currentElevenKey = (window.ElevenLabsTTS && window.ElevenLabsTTS.config) ? window.ElevenLabsTTS.config.getApiKey() : (state.elevenlabsApiKey || "");
-    elevenlabsKeyInput.value = currentElevenKey;
-    if (elevenlabsKeyBadge) {
-      elevenlabsKeyBadge.textContent = currentElevenKey ? "Key Configured" : "Ready";
-      elevenlabsKeyBadge.style.background = currentElevenKey ? "rgba(34,197,94,0.15)" : "rgba(59,130,246,0.15)";
-      elevenlabsKeyBadge.style.color = currentElevenKey ? "#22c55e" : "#3b82f6";
-    }
-
-    elevenlabsKeyInput.addEventListener("input", (e) => {
-      const val = e.target.value.trim();
-      state.elevenlabsApiKey = val;
-      if (window.ElevenLabsTTS && window.ElevenLabsTTS.config) {
-        window.ElevenLabsTTS.config.setApiKey(val);
-      }
-      if (elevenlabsKeyBadge) {
-        elevenlabsKeyBadge.textContent = val ? "Key Configured" : "Ready";
-        elevenlabsKeyBadge.style.background = val ? "rgba(34,197,94,0.15)" : "rgba(59,130,246,0.15)";
-        elevenlabsKeyBadge.style.color = val ? "#22c55e" : "#3b82f6";
-      }
-      saveStateToLocalStorage();
-    });
-  }
-
-  // Test Sarvam AI Voice button in Narration Settings
-  const btnTestSarvamVoice = document.getElementById("btn-test-sarvam-voice");
-  if (btnTestSarvamVoice) {
-    btnTestSarvamVoice.addEventListener("click", async () => {
-      const selectedVoice = state.sarvamVoice || "google_natural_mr";
-      showToast(`🔊 Testing Sarvam ${selectedVoice} Voice...`);
-      try {
-        if (window.SarvamTTS && window.SarvamTTS.testVoice) {
-          const res = await window.SarvamTTS.testVoice(selectedVoice);
-          const badge = document.getElementById("sarvam-key-status-badge");
-          if (res && res.success && res.audioUrl) {
-            const testAudio = new Audio(res.audioUrl);
-            testAudio.play();
-            showToast("✨ Sarvam Voice Active: 'परमेश्वर माझा मेंढपाळ आहे...'");
-            if (badge) {
-              badge.textContent = "Key Verified ✅";
-              badge.style.background = "rgba(34,197,94,0.15)";
-              badge.style.color = "#22c55e";
-            }
-          } else if (res && res.quotaExhausted) {
-            showToast("⚠️ Sarvam AI: 0 credits left on key (402). Playing via Marathi device voice preview.");
-            if (badge) {
-              badge.textContent = "Credits Needed (402)";
-              badge.style.background = "rgba(245,158,11,0.15)";
-              badge.style.color = "#f59e0b";
-            }
-          } else {
-            showToast(res.message || "Previewing Marathi voice.");
-          }
-        }
-      } catch (err) {
-        console.warn("[Sarvam Test] Error:", err);
-        showToast(err.friendlyMessage || `Voice Test: ${err.message || 'Check API Key'}`);
+    btnTestNaturalVoice.addEventListener("click", () => {
+      showToast("🔊 अस्सल मराठी पुरुष वाचक ऑडिओ सुरू होत आहे...");
+      if (typeof startSpeechNarration === "function") {
+        startSpeechNarration(0);
       }
     });
   }
@@ -4869,9 +4808,9 @@ function setupEventListeners() {
   const speedPillBtn = document.getElementById("playbar-btn-speed");
   if (speedPillBtn) {
     speedPillBtn.addEventListener("click", () => {
-      const speeds = [0.92, 1.0, 1.15, 1.25, 0.85];
-      let currIdx = speeds.indexOf(audioState.speed || 0.92);
-      if (currIdx === -1) currIdx = 0;
+      const speeds = [0.75, 0.90, 1.0, 1.25, 1.50];
+      let currIdx = speeds.indexOf(audioState.speed || 1.0);
+      if (currIdx === -1) currIdx = 2; // default 1.0
       const nextSpeed = speeds[(currIdx + 1) % speeds.length];
       audioState.speed = nextSpeed;
       speedPillBtn.textContent = `${nextSpeed}x`;
@@ -4880,28 +4819,22 @@ function setupEventListeners() {
       const valDisp = document.getElementById("tts-speed-val");
       if (valDisp) valDisp.textContent = `${nextSpeed}x`;
       
-      if (audioPlayerInstance) {
-        audioPlayerInstance.playbackRate = nextSpeed;
-      } else if (window.SarvamTTS && window.SarvamTTS.queue && window.SarvamTTS.queue.isPlaying) {
-        window.SarvamTTS.queue.setOptions({ pace: nextSpeed });
+      if (bibleChapterAudioPlayer) {
+        bibleChapterAudioPlayer.playbackRate = nextSpeed;
       }
-      showToast(`Narration speed set to ${nextSpeed}x`);
+      showToast(`वाचन वेग: ${nextSpeed}x`);
     });
   }
 
   document.getElementById("playbar-btn-prev")?.addEventListener("click", () => {
-    if (audioPlayerInstance) {
-      audioPlayerInstance.currentTime = Math.max(0, audioPlayerInstance.currentTime - 10);
-    } else if (window.SarvamTTS && window.SarvamTTS.queue) {
-      window.SarvamTTS.queue.previous();
+    if (bibleChapterAudioPlayer) {
+      bibleChapterAudioPlayer.currentTime = Math.max(0, bibleChapterAudioPlayer.currentTime - 15);
     }
   });
   
   document.getElementById("playbar-btn-next")?.addEventListener("click", () => {
-    if (audioPlayerInstance) {
-      audioPlayerInstance.currentTime = Math.min(audioPlayerInstance.duration || 9999, audioPlayerInstance.currentTime + 10);
-    } else if (window.SarvamTTS && window.SarvamTTS.queue) {
-      window.SarvamTTS.queue.next();
+    if (bibleChapterAudioPlayer) {
+      bibleChapterAudioPlayer.currentTime = Math.min(bibleChapterAudioPlayer.duration || 9999, bibleChapterAudioPlayer.currentTime + 15);
     }
   });
   
@@ -4911,10 +4844,8 @@ function setupEventListeners() {
       const val = parseFloat(e.target.value).toFixed(2);
       document.getElementById("tts-speed-val").textContent = `${val}x`;
       audioState.speed = parseFloat(val);
-      if (audioPlayerInstance) {
-        audioPlayerInstance.playbackRate = audioState.speed;
-      } else if (window.SarvamTTS && window.SarvamTTS.queue) {
-        window.SarvamTTS.queue.setOptions({ pace: audioState.speed });
+      if (bibleChapterAudioPlayer) {
+        bibleChapterAudioPlayer.playbackRate = audioState.speed;
       }
     });
   }
