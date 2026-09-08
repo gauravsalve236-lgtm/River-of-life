@@ -49,32 +49,65 @@
   --sidebar-hover: #1c202c;
 }
 
-/* Theme 2: River Pure Light (Default & Main Theme) */
-.ios-theme-light {
-  --bg: #FAF9F5;           /* Porcelain: Soft Warm Canvas */
-  --bg-content: #FCFBF9;   /* White: Elevated Card Surface */
-  --bg-rgb: 250, 249, 245;
-  --drawer-bg: #FAF9F5;
-  --surface: #FCFBF9;      /* Pure Card Background */
-  --text: #1e293b;         /* Deep Slate Text */
-  --text-muted: #64748b;   /* Refined Muted Text */
-  --steel-muted: #A3A6AE;  /* Cool Steel */
-  --bright-snow: #FAFAF8;  /* Bright Snow */
-  --primary: #C76140;      /* Rosy Copper Primary Brand */
-  --primary-dark: #a84c2f; /* Deep Rosy Shade */
-  --primary-light: rgba(199, 97, 64, 0.08);
-  --primary-glow: rgba(199, 97, 64, 0.22);
-  --accent-gold: #c98a2c;  /* Warm Sacred Gold Accent */
-  --accent-gold-light: rgba(201, 138, 44, 0.12);
-  --accent-teal: #0d9488;  /* Living Stream Teal */
+/* Theme 2: River Pure 60-30-10 System (Default & Main Theme) */
+.ios-theme-light, :root {
+  /* 60% Dominant Canvas (Pure White) */
+  --bg: #FFFFFF;
+  --bg-content: #FFFFFF;
+  --bg-rgb: 255, 255, 255;
+  --drawer-bg: #FFFFFF;
+  --surface: #FFFFFF;
+  --card-bg: #FFFFFF;
+  --pill-bg: #F5F5F7;
+  --bright-snow: #FFFFFF;
+  
+  /* 30% Secondary Typography & Structure (Solid Black & Dark Grayscale) */
+  --text: #000000;
+  --text-primary: #000000;
+  --text-muted: #444444;
+  --text-subtle: #666666;
+  --steel-muted: #888888;
+  --border: #EAEAEA;
+  --border-rgb: 234, 234, 234;
+  --card-border: #EAEAEA;
+  --sidebar-hover: #F8F8F8;
+  
+  /* 10% Brand Color Accent (Vivid Red #F7002F) */
+  --primary: #F7002F;
+  --primary-dark: #D40028;
+  --primary-light: rgba(247, 0, 47, 0.08);
+  --primary-glow: rgba(247, 0, 47, 0.25);
+  --accent-red: #F7002F;
+  --accent-gold: #D4AF37;
+  --accent-gold-light: rgba(212, 175, 55, 0.12);
+  --accent-teal: #0D9488;
   --accent-teal-light: rgba(13, 148, 136, 0.12);
-  --border: #e8e6df;       /* Soft Cool Steel Border Tone */
-  --border-rgb: 232, 230, 223;
-  --pill-bg: #FAFAF8;      /* Bright Snow Pill Background */
-  --card-bg: #FCFBF9;
-  --card-border: #e8e6df;
-  --danger: #dc2626;
-  --sidebar-hover: #FAFAF8;
+  
+  /* Semantic Status Color System */
+  /* Green: Success */
+  --color-success: #16A34A;
+  --color-success-dark: #15803D;
+  --color-success-bg: rgba(22, 163, 74, 0.1);
+  --color-success-border: rgba(22, 163, 74, 0.25);
+  
+  /* Yellow / Orange: Warning */
+  --color-warning: #F59E0B;
+  --color-warning-dark: #D97706;
+  --color-warning-bg: rgba(245, 158, 11, 0.1);
+  --color-warning-border: rgba(245, 158, 11, 0.25);
+  
+  /* Red: Dangerous / Error Situations */
+  --color-danger: #DC2626;
+  --color-danger-dark: #B91C1C;
+  --color-danger-bg: rgba(220, 38, 38, 0.1);
+  --color-danger-border: rgba(220, 38, 38, 0.25);
+  --danger: #DC2626;
+  
+  /* Blue: Neutral Information */
+  --color-info: #2563EB;
+  --color-info-dark: #1D4ED8;
+  --color-info-bg: rgba(37, 99, 235, 0.1);
+  --color-info-border: rgba(37, 99, 235, 0.25);
 }
 
 /* Theme 3: Warm River Sepia (Sacred Parchment) */
@@ -120,6 +153,141 @@
   --sidebar-hover: #123336;
 }
 
+/* ==========================================================================
+   SEMANTIC STATUS COLOR SYSTEM UTILITIES (60-30-10 COMPLIANT)
+   Green: Success (#16A34A)
+   Yellow / Orange: Warnings (#F59E0B)
+   Red: Dangerous situation like error (#DC2626)
+   Blue: Neutral information (#2563EB)
+   ========================================================================== */
+
+/* 1. Text Utilities */
+.text-success { color: var(--color-success, #16A34A) !important; }
+.text-warning { color: var(--color-warning-dark, #D97706) !important; }
+.text-danger, .text-error { color: var(--color-danger, #DC2626) !important; }
+.text-info { color: var(--color-info, #2563EB) !important; }
+.text-brand { color: var(--primary, #F7002F) !important; }
+.text-dark { color: #000000 !important; }
+
+/* 2. Badge & Chip Utilities */
+.badge-success, .badge-semantic-success {
+  background-color: var(--color-success-bg, rgba(22, 163, 74, 0.1)) !important;
+  color: var(--color-success, #16A34A) !important;
+  border: 1px solid var(--color-success-border, rgba(22, 163, 74, 0.25)) !important;
+  font-weight: 700;
+  border-radius: 9999px;
+  padding: 4px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+}
+
+.badge-warning, .badge-semantic-warning {
+  background-color: var(--color-warning-bg, rgba(245, 158, 11, 0.1)) !important;
+  color: var(--color-warning-dark, #D97706) !important;
+  border: 1px solid var(--color-warning-border, rgba(245, 158, 11, 0.25)) !important;
+  font-weight: 700;
+  border-radius: 9999px;
+  padding: 4px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+}
+
+.badge-danger, .badge-error, .badge-semantic-danger {
+  background-color: var(--color-danger-bg, rgba(220, 38, 38, 0.1)) !important;
+  color: var(--color-danger, #DC2626) !important;
+  border: 1px solid var(--color-danger-border, rgba(220, 38, 38, 0.25)) !important;
+  font-weight: 700;
+  border-radius: 9999px;
+  padding: 4px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+}
+
+.badge-info, .badge-semantic-info {
+  background-color: var(--color-info-bg, rgba(37, 99, 235, 0.1)) !important;
+  color: var(--color-info, #2563EB) !important;
+  border: 1px solid var(--color-info-border, rgba(37, 99, 235, 0.25)) !important;
+  font-weight: 700;
+  border-radius: 9999px;
+  padding: 4px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+}
+
+.badge-brand {
+  background-color: var(--primary-light, rgba(247, 0, 47, 0.08)) !important;
+  color: var(--primary, #F7002F) !important;
+  border: 1px solid rgba(247, 0, 47, 0.2) !important;
+  font-weight: 800;
+  border-radius: 9999px;
+  padding: 4px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+}
+
+/* 3. Alert Boxes */
+.alert-box {
+  border-radius: 14px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.alert-success {
+  background-color: var(--color-success-bg, rgba(22, 163, 74, 0.08));
+  color: #14532d;
+  border: 1px solid var(--color-success-border, rgba(22, 163, 74, 0.25));
+  border-left: 4px solid var(--color-success, #16A34A);
+}
+
+.alert-warning {
+  background-color: var(--color-warning-bg, rgba(245, 158, 11, 0.08));
+  color: #78350f;
+  border: 1px solid var(--color-warning-border, rgba(245, 158, 11, 0.25));
+  border-left: 4px solid var(--color-warning, #F59E0B);
+}
+
+.alert-danger, .alert-error {
+  background-color: var(--color-danger-bg, rgba(220, 38, 38, 0.08));
+  color: #7f1d1d;
+  border: 1px solid var(--color-danger-border, rgba(220, 38, 38, 0.25));
+  border-left: 4px solid var(--color-danger, #DC2626);
+}
+
+.alert-info {
+  background-color: var(--color-info-bg, rgba(37, 99, 235, 0.08));
+  color: #1e3a8a;
+  border: 1px solid var(--color-info-border, rgba(37, 99, 235, 0.25));
+  border-left: 4px solid var(--color-info, #2563EB);
+}
+
+/* 4. Semantic Status Indicators */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.status-dot-success { background-color: var(--color-success, #16A34A); box-shadow: 0 0 6px rgba(22, 163, 74, 0.5); }
+.status-dot-warning { background-color: var(--color-warning, #F59E0B); box-shadow: 0 0 6px rgba(245, 158, 11, 0.5); }
+.status-dot-danger { background-color: var(--color-danger, #DC2626); box-shadow: 0 0 6px rgba(220, 38, 38, 0.5); }
+.status-dot-info { background-color: var(--color-info, #2563EB); box-shadow: 0 0 6px rgba(37, 99, 235, 0.5); }
+
 /* Base Styles */
 * {
   box-sizing: border-box;
@@ -142,101 +310,49 @@ body {
 /* Main Layout Grid */
 #app {
   display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   height: 100vh;
   width: 100vw;
   overflow: hidden;
   position: relative;
+  background-color: var(--bg-canvas, #f6f3ed);
 }
 
-/* 1. Left Sidebar Navigation (Desktop) */
+/* 1. Left Sidebar Navigation (Completely Hidden on ALL screens so menus are always on the bottom) */
 .desktop-sidebar {
   display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  position: absolute !important;
+  left: -9999px !important;
 }
 
-.sidebar-header {
-  padding: 24px 20px;
-  border-bottom: 1px solid var(--border);
-}
-
-.sidebar-logo {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.logo-img {
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
-  box-shadow: var(--shadow-sm);
-}
-
-.logo-text {
-  font-family: var(--font-ui);
-  font-size: 18px;
-  font-weight: 800;
-  letter-spacing: -0.5px;
-  background: linear-gradient(135deg, var(--primary), #ec4899);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.sidebar-nav {
-  padding: 24px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  flex: 1;
-}
-
-.desktop-sidebar .nav-item {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 12px 16px;
-  border-radius: 14px;
-  border: none;
-  background: none;
-  color: var(--text-muted);
-  font-family: var(--font-ui);
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  text-align: left;
-  transition: all 0.2s;
-}
-
-.desktop-sidebar .nav-item:hover {
-  background-color: var(--sidebar-hover);
-  color: var(--text);
-}
-
-.desktop-sidebar .nav-item.active {
-  background-color: var(--primary-light);
-  color: var(--primary);
-}
-
-.avatar-nav-mini {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: var(--primary);
-  color: #000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
-  font-size: 11px;
-}
-
-/* 2. Main Layout Container */
+/* 2. Main Layout Container (Centered mobile frame on desktop, 100% full viewport on mobile) */
 .main-layout-container {
   display: flex;
   flex-direction: column;
   flex: 1;
+  width: 100%;
+  max-width: 600px;
   height: 100%;
   overflow: hidden;
   position: relative;
+  background-color: var(--bg-content, #ffffff);
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.08);
+}
+
+@media (max-width: 600px) {
+  .main-layout-container {
+    max-width: 100%;
+    box-shadow: none;
+  }
 }
 
 /* App Top Navigation Bar */
@@ -2540,28 +2656,63 @@ body {
   width: 40px;
 }
 
-/* Toast */
+/* Toast Notifications */
 .app-toast {
   position: fixed;
   bottom: 100px;
   left: 50%;
   transform: translate(-50%, 100px);
-  background-color: var(--text);
-  color: var(--bg);
+  background-color: #000000;
+  color: #ffffff;
   font-family: var(--font-ui);
   font-weight: 700;
-  font-size: 13px;
-  padding: 10px 20px;
-  border-radius: 20px;
+  font-size: 13.5px;
+  padding: 11px 22px;
+  border-radius: 9999px;
   opacity: 0;
   pointer-events: none;
-  z-index: 200;
+  z-index: 2000;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s;
 }
 
 .app-toast.active {
   opacity: 1;
   transform: translate(-50%, 0);
+}
+
+.app-toast.toast-success {
+  background-color: #0d2818;
+  color: #bbf7d0;
+  border: 1px solid #16A34A;
+  box-shadow: 0 10px 30px rgba(22, 163, 74, 0.35);
+}
+
+.app-toast.toast-warning {
+  background-color: #2e1d08;
+  color: #fef08a;
+  border: 1px solid #F59E0B;
+  box-shadow: 0 10px 30px rgba(245, 158, 11, 0.35);
+}
+
+.app-toast.toast-danger,
+.app-toast.toast-error {
+  background-color: #2b0b0e;
+  color: #fecaca;
+  border: 1px solid #DC2626;
+  box-shadow: 0 10px 30px rgba(220, 38, 38, 0.35);
+}
+
+.app-toast.toast-info {
+  background-color: #0c1c38;
+  color: #bfdbfe;
+  border: 1px solid #2563EB;
+  box-shadow: 0 10px 30px rgba(37, 99, 235, 0.35);
 }
 
 /* Fullscreen Live Room Container — Perfect Fit for iOS Dynamic Viewport */
@@ -2615,33 +2766,51 @@ body {
   white-space: nowrap !important;
 }
 
-/* Mobile Bottom Tab Bar Navigation (Modern App-Like Docked Nav) */
+/* Mobile Bottom Tab Bar Navigation (Clean White Dock with Brand Accent) */
 .mobile-bottom-tabs {
   position: fixed !important;
   bottom: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
   width: 100% !important;
-  height: calc(66px + env(safe-area-inset-bottom, 16px));
-  padding-bottom: calc(env(safe-area-inset-bottom, 16px) + 6px);
-  padding-top: 4px;
-  background-color: rgba(var(--bg-rgb, 251, 250, 247), 0.94);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border-top: 1px solid var(--border);
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  justify-items: center;
-  align-items: center;
-  z-index: 9999;
-  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.06);
-  box-sizing: border-box;
+  max-width: 600px !important;
+  height: calc(66px + env(safe-area-inset-bottom, 16px)) !important;
+  padding-bottom: calc(env(safe-area-inset-bottom, 16px) + 6px) !important;
+  padding-top: 6px !important;
+  background: rgba(255, 255, 255, 0.96) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  border-top: 1.5px solid #EAEAEA !important;
+  border-left: 1px solid #EAEAEA !important;
+  border-right: 1px solid #EAEAEA !important;
+  border-top-left-radius: 22px !important;
+  border-top-right-radius: 22px !important;
+  display: grid !important;
+  grid-template-columns: repeat(5, 1fr) !important;
+  justify-items: center !important;
+  align-items: center !important;
+  box-sizing: border-box !important;
+  z-index: 1000 !important;
+  box-shadow: 0 -6px 28px rgba(0, 0, 0, 0.07) !important;
+}
+
+@media (max-width: 600px) {
+  .mobile-bottom-tabs {
+    left: 0 !important;
+    transform: none !important;
+    max-width: 100% !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-radius: 22px 22px 0 0 !important;
+  }
 }
 
 .mobile-bottom-tabs.four-tabs {
   grid-template-columns: repeat(4, 1fr) !important;
+}
+
+.mobile-bottom-tabs.five-tabs {
+  grid-template-columns: repeat(5, 1fr) !important;
 }
 
 .mobile-bottom-tabs .tab-btn {
@@ -2650,12 +2819,13 @@ body {
   align-items: center;
   justify-content: center;
   gap: 3px;
-  width: 86%;
+  width: 90%;
   height: 52px;
   border: none;
   border-radius: 14px;
   background: transparent;
-  color: var(--text-muted);
+  color: #1F2937;
+  opacity: 0.78;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   font-family: var(--font-ui);
@@ -2667,6 +2837,7 @@ body {
   height: 22px;
   stroke-width: 2.2;
   flex-shrink: 0;
+  stroke: #1F2937;
   transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), stroke 0.2s ease;
 }
 
@@ -2680,25 +2851,34 @@ body {
   max-width: 100%;
   line-height: 1.1;
   text-align: center;
+  color: #1F2937;
   transition: color 0.2s ease, font-weight 0.2s ease;
 }
 
 .mobile-bottom-tabs .tab-btn:hover {
-  color: var(--text);
-  background: rgba(var(--border-rgb), 0.25);
+  opacity: 1;
+  color: #000000;
+}
+.mobile-bottom-tabs .tab-btn:hover svg {
+  stroke: #000000;
+}
+.mobile-bottom-tabs .tab-btn:hover .tab-label {
+  color: #000000;
 }
 
 .mobile-bottom-tabs .tab-btn.active {
-  color: var(--primary);
-  background: var(--primary-light);
+  color: #F7002F !important;
+  opacity: 1 !important;
+  background: rgba(247, 0, 47, 0.08) !important;
 }
 
 .mobile-bottom-tabs .tab-btn.active .tab-label {
-  font-weight: 800;
-  color: var(--primary);
+  font-weight: 800 !important;
+  color: #F7002F !important;
 }
 
 .mobile-bottom-tabs .tab-btn.active svg {
+  stroke: #F7002F !important;
   stroke-width: 2.6;
   transform: translateY(-2px) scale(1.08);
 }
@@ -6548,28 +6728,32 @@ input, textarea, select, [contenteditable="true"] {
   justify-content: center !important;
 }
 
-/* Light Theme Modal & Drawer Overrides */
+/* Light Theme Modal & Drawer Overrides (60-30-10 Palette) */
 .ios-theme-light .centered-modal-card {
   background-color: #ffffff !important;
-  border: 1px solid rgba(0, 0, 0, 0.04);
+  border: 1.5px solid var(--border) !important;
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.15) !important;
+  border-radius: 24px !important;
 }
 .ios-theme-light .centered-modal-card h3 {
-  color: #0f172a !important;
+  color: #000000 !important;
 }
 .ios-theme-light .centered-modal-card h4 {
-  color: #475569 !important;
+  color: #444444 !important;
 }
 .ios-theme-light .centered-modal-card p {
-  color: #64748b !important;
+  color: #444444 !important;
 }
 .ios-theme-light .centered-modal-card .btn-primary-block {
-  background-color: #d97706 !important;
+  background-color: var(--primary) !important;
   color: #ffffff !important;
+  box-shadow: 0 4px 15px var(--primary-glow) !important;
 }
 .ios-theme-light .centered-modal-card .btn-secondary-mini {
-  color: #475569 !important;
-  border-color: #cbd5e1 !important;
+  color: #000000 !important;
+  border-color: var(--border) !important;
   background-color: transparent !important;
+  font-weight: 700 !important;
 }
 .ios-theme-light .ios-drawer-sheet {
   background-color: #ffffff !important;
@@ -8818,8 +9002,8 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
   height: 32px !important;
   padding: 0 12px !important;
   border-radius: 16px !important;
-  background: linear-gradient(135deg, #d4af37, #b8860b) !important;
-  color: #1e1b4b !important;
+  background: var(--primary, #F7002F) !important;
+  color: #ffffff !important;
   border: none !important;
   font-size: 12px !important;
   font-weight: 800 !important;
@@ -8828,27 +9012,28 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
   align-items: center !important;
   gap: 5px !important;
   white-space: nowrap !important;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.12) !important;
+  box-shadow: 0 2px 8px rgba(247, 0, 47, 0.25) !important;
   cursor: pointer !important;
   transition: all 0.2s ease !important;
   flex-shrink: 0 !important;
 }
 
 .reader-quick-play-pill.playing {
-  background: #ef4444 !important;
+  background: var(--primary-dark, #D40028) !important;
   color: #ffffff !important;
 }
 
-/* Floating Bottom Audio Play Button (Sarvam Shubh Voice) */
+/* Floating Bottom Audio Play Button (Universal Voice) */
 .floating-reader-play-btn {
   position: fixed;
   bottom: calc(85px + env(safe-area-inset-bottom, 0px));
   right: 24px;
-  background: linear-gradient(135deg, #8B1D24 0%, #680d14 100%);
+  background: var(--primary, #F7002F);
   color: #ffffff;
-  border: 1.5px solid rgba(229, 168, 59, 0.5);
+  border: 1.5px solid #ffffff;
   border-radius: 30px;
   padding: 10px 18px 10px 14px;
+  box-shadow: 0 8px 24px rgba(247, 0, 47, 0.35);
   display: flex;
   align-items: center;
   gap: 10px;
@@ -9006,34 +9191,32 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #8B1D24 0%, #680d14 100%);
+  background: var(--primary, #F7002F);
   color: #ffffff;
-  border: 2px solid rgba(229, 168, 59, 0.6);
-  box-shadow: 0 10px 28px rgba(139, 29, 36, 0.4), 0 0 16px rgba(229, 168, 59, 0.25);
+  border: 2px solid #ffffff;
+  box-shadow: 0 8px 24px rgba(247, 0, 47, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   z-index: 45;
   transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s;
-  animation: floatPulseCenter 3s ease-in-out infinite;
 }
 
 .floating-circle-play-fab:hover {
-  transform: translateX(-50%) scale(1.1) translateY(-2px);
-  box-shadow: 0 14px 34px rgba(139, 29, 36, 0.55);
+  transform: translateX(-50%) scale(1.08) translateY(-2px);
+  box-shadow: 0 12px 30px rgba(247, 0, 47, 0.55);
 }
 
 .floating-circle-play-fab svg {
   margin-left: 3px;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
 }
 
 .floating-circle-play-fab.playing {
-  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
-  border-color: rgba(255, 255, 255, 0.8);
-  box-shadow: 0 10px 30px rgba(220, 38, 38, 0.6), 0 0 20px rgba(239, 68, 68, 0.4);
-  animation: playPulse 1.5s ease-in-out infinite;
+  background: var(--primary-dark, #D40028);
+  border-color: #ffffff;
+  box-shadow: 0 10px 30px rgba(247, 0, 47, 0.6);
 }
 
 .floating-circle-play-fab.playing svg {
@@ -9882,19 +10065,27 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
   transform: scale(0.985);
 }
 
-/* 1. Headwaters Card (Soft Sunlit Gold) */
+/* 1. Headwaters Card (Clean 60-30-10 Theme) */
 .headwaters-card {
-  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 40%, #fed7aa 75%, #fdba74 100%);
-  border: 1.5px solid rgba(251, 191, 36, 0.45);
-  box-shadow: 0 4px 18px rgba(245, 158, 11, 0.12);
+  background: #FFFFFF;
+  border: 1.5px solid #EAEAEA;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
 }
 
-/* 2. Daily Confluence Card (Misty Sage) */
+.headwaters-card:hover {
+  border-color: #000000;
+}
+
+/* 2. Daily Confluence Card (Clean 60-30-10 Theme) */
 .confluence-card {
-  background: linear-gradient(135deg, #f0fdfa 0%, #e6f4f1 35%, #ccfbf1 70%, #99f6e4 100%);
-  border: 1.5px solid rgba(45, 212, 191, 0.45);
-  box-shadow: 0 4px 18px rgba(15, 118, 110, 0.12);
+  background: #FFFFFF;
+  border: 1.5px solid #EAEAEA;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
   min-height: 104px;
+}
+
+.confluence-card:hover {
+  border-color: #000000;
 }
 
 .confluence-chip-pill {
@@ -9902,93 +10093,61 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
   border-radius: 14px;
   font-size: 12px;
   font-weight: 700;
-  background: rgba(255, 255, 255, 0.75);
-  border: 1px solid rgba(15, 118, 110, 0.25);
-  color: #334155;
+  background: #F8F8F8;
+  border: 1px solid #EAEAEA;
+  color: #000000;
   cursor: pointer;
-  backdrop-filter: blur(4px);
   transition: all 0.2s ease;
 }
 
 .confluence-chip-pill:hover {
-  background: rgba(255, 255, 255, 0.95);
-  border-color: #0d9488;
+  background: #EEEEEE;
+  border-color: #000000;
 }
 
 .confluence-chip-pill.active {
-  background: rgba(204, 251, 241, 0.95) !important;
-  border: 1.5px solid #0d9488 !important;
-  color: #0f766e !important;
-  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.3) !important;
+  background: #F7002F !important;
+  border: 1.5px solid #F7002F !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 2px 8px rgba(247, 0, 47, 0.3) !important;
 }
 
-/* 3. Living Water Reset Card (Deep Vibrant Teal) */
-.living-water-reset-card {
-  background: linear-gradient(135deg, #09333f 0%, #0f4c5c 35%, #115e59 70%, #042f2e 100%);
-  border: 1.5px solid rgba(45, 212, 191, 0.35);
-  box-shadow: 0 6px 22px rgba(4, 47, 46, 0.35);
-  color: #ffffff;
+/* Word of the Day Highlight Styling */
+.word-of-day-highlight-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(247, 0, 47, 0.06);
+  border: 1.5px solid rgba(247, 0, 47, 0.25);
+  border-radius: 14px;
+  padding: 8px 16px;
+  margin: 4px 0;
 }
 
-/* Ripple Animation Rings */
-@keyframes ripplePulse {
-  0% {
-    transform: scale(0.6);
-    opacity: 0.85;
-  }
-  50% {
-    opacity: 0.45;
-  }
-  100% {
-    transform: scale(1.45);
-    opacity: 0;
-  }
-}
-
-.ripple-ring {
-  position: absolute;
-  border-radius: 50%;
-  pointer-events: none;
-}
-
-/* Breathing Orb Animation for Living Water Reset Modal */
-@keyframes breathingPulse {
-  0%, 100% {
-    transform: scale(0.85);
-    box-shadow: 0 0 20px rgba(45, 212, 191, 0.3);
-  }
-  50% {
-    transform: scale(1.15);
-    box-shadow: 0 0 50px rgba(45, 212, 191, 0.7);
-  }
-}
-
-.breathing-orb-animation {
-  animation: breathingPulse 8s infinite ease-in-out;
-}
-
-/* Sleek Modern Audio Player Track in Devotional Modals */
-.sleek-audio-player-track {
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.sleek-audio-player-track:hover {
-  border-color: rgba(245, 158, 11, 0.65) !important;
-  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.2) !important;
-}
-.sleek-audio-player-track button:active {
-  transform: scale(0.92);
+.word-of-day-highlight-term {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 24px;
+  font-weight: 800;
+  color: #F7002F;
+  margin: 0;
+  letter-spacing: -0.2px;
 }
 
 /* Headwaters Native Modal Button Polishes */
 .headwaters-close-btn:hover {
-  background: rgba(154, 52, 18, 0.2) !important;
+  background: rgba(0, 0, 0, 0.08) !important;
   transform: scale(1.08);
 }
 .headwaters-close-btn:active {
   transform: scale(0.92);
 }
+.headwaters-primary-btn {
+  background: #F7002F !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 16px rgba(247, 0, 47, 0.28) !important;
+}
 .headwaters-primary-btn:hover {
-  box-shadow: 0 6px 24px rgba(158, 22, 34, 0.45) !important;
+  box-shadow: 0 6px 24px rgba(247, 0, 47, 0.42) !important;
   transform: translateY(-1px);
 }
 .headwaters-primary-btn:active {
@@ -10104,12 +10263,13 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
   to { transform: rotate(360deg); }
 }
 
-/* 4. Educational Microlearning Card Polish */
+/* 4. Educational Microlearning Card Polish (Warm Gold & Velvet Crimson Theme) */
 .microlearning-card {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
 }
 .microlearning-card:hover {
-  box-shadow: 0 6px 24px rgba(124,58,237,0.12);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(158, 22, 34, 0.08) !important;
 }
 
 
@@ -10565,4 +10725,1365 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
 .fellowship-amen-btn.prayed .amen-icon {
   transform: scale(1.2);
 }
+
+/* ==========================================================================
+   ADMIN & PASTOR CONSOLE STYLES
+   ========================================================================== */
+
+.admin-subnav-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  margin-bottom: 18px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.admin-subnav-row::-webkit-scrollbar {
+  display: none;
+}
+
+.admin-subnav-btn {
+  border: 1px solid var(--border);
+  background: var(--surface, #ffffff);
+  color: var(--text-muted);
+  padding: 9px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  font-family: var(--font-ui);
+}
+
+.admin-subnav-btn:hover {
+  background: var(--bg);
+  color: var(--text);
+}
+
+.admin-subnav-btn.active {
+  background: var(--primary, #e0535f);
+  color: #ffffff;
+  border-color: var(--primary, #e0535f);
+  box-shadow: 0 4px 14px rgba(224, 83, 95, 0.3);
+}
+
+.admin-subtab-panel {
+  display: none;
+  animation: fadeInAdmin 0.25s ease forwards;
+}
+
+.admin-subtab-panel.active {
+  display: block;
+}
+
+@keyframes fadeInAdmin {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.admin-member-card {
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  transition: all 0.2s ease;
+}
+
+.admin-member-card:hover {
+  border-color: var(--primary);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+}
+
+.role-badge-admin {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 12px;
+}
+
+.role-badge-pastor {
+  background: rgba(245, 158, 11, 0.15);
+  color: #d97706;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 12px;
+}
+
+.role-badge-leader {
+  background: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 12px;
+}
+
+.role-badge-member {
+  background: rgba(34, 197, 94, 0.15);
+  color: #16a34a;
+  border: 1px solid rgba(34, 197, 94, 0.4);
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 12px;
+}
+
+.church-announcement-banner {
+  background: linear-gradient(135deg, rgba(224, 83, 95, 0.12) 0%, rgba(245, 158, 11, 0.12) 100%);
+  border: 1.5px solid rgba(224, 83, 95, 0.35);
+  border-radius: 16px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  box-shadow: 0 4px 20px rgba(224, 83, 95, 0.1);
+  animation: pulseBanner 4s infinite ease-in-out;
+}
+
+@keyframes pulseBanner {
+  0%, 100% { border-color: rgba(224, 83, 95, 0.35); }
+  50% { border-color: rgba(245, 158, 11, 0.6); }
+}
+
+.admin-quick-action-btn {
+  transition: all 0.2s ease;
+}
+
+.admin-quick-action-btn:hover {
+  border-color: var(--primary) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* ==========================================================================
+   FIGMA REDESIGN SYSTEM (MATCHING FIGMA SPECIFICATION)
+   60% Pure White (#FFFFFF) Canvas
+   30% Solid Black (#000000) Hero Card & Typography
+   10% Brand Red (#F7002F) Accents
+   ========================================================================== */
+
+/* 1. Header */
+.figma-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 12px 18px;
+  background-color: #FFFFFF;
+  border-bottom: 1px solid var(--border);
+  box-sizing: border-box;
+}
+
+.figma-header-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.figma-logo-box {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  margin-right: 4px;
+}
+
+.figma-logo-img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.08));
+}
+
+.figma-app-title {
+  font-family: 'Lora', Georgia, 'Times New Roman', serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: #000000;
+  letter-spacing: -0.3px;
+  margin: 0;
+}
+
+.figma-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.figma-icon-circle-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1.5px solid #EAEAEA;
+  background-color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000000;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.figma-icon-circle-btn:hover {
+  background-color: #F8F8F8;
+  border-color: #D4D4D4;
+}
+
+.figma-avatar-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1.5px solid #EAEAEA;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #0f172a;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.figma-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 2. Hero Verse of the Day Card */
+.figma-hero-card {
+  background-color: #0a0a0f;
+  background-image: url('assets/daily_verses/golden_dawn.png');
+  background-size: cover;
+  background-position: center;
+  color: #FFFFFF;
+  border-radius: 26px;
+  padding: 22px 22px 18px 22px;
+  margin: 16px 0 22px 0;
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.18);
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.figma-hero-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.68) 100%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.figma-hero-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  position: relative;
+  z-index: 2;
+}
+
+.figma-hero-badge {
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  color: #FFFFFF;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 800;
+  padding: 5px 14px;
+  border-radius: 9999px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+}
+
+.figma-hero-share-btn {
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #FFFFFF;
+  cursor: pointer;
+  padding: 7px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease, background 0.15s ease;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.figma-hero-share-btn:hover {
+  transform: scale(1.1);
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.figma-hero-scripture {
+  font-family: 'Lora', Georgia, serif;
+  font-size: 18px;
+  line-height: 1.55;
+  color: #FFFFFF;
+  font-weight: 500;
+  margin: 0 0 18px 0;
+  letter-spacing: -0.1px;
+  position: relative;
+  z-index: 2;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+}
+
+.figma-hero-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 4px;
+  position: relative;
+  z-index: 2;
+}
+
+.figma-hero-ref {
+  color: #FFFFFF;
+  font-size: 14.5px;
+  font-weight: 800;
+  font-family: var(--font-ui);
+  cursor: pointer;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.7);
+  letter-spacing: 0.2px;
+}
+
+.figma-hero-ref:hover {
+  text-decoration: underline;
+  opacity: 0.9;
+}
+
+.figma-hero-likes {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #FFFFFF;
+  font-size: 13.5px;
+  font-weight: 700;
+  font-family: var(--font-ui);
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 9999px;
+  padding: 4px 10px;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+}
+
+.figma-hero-likes svg {
+  fill: #FFFFFF;
+  color: #FFFFFF;
+}
+
+/* 3. 4-Pill Quick Actions Grid */
+.figma-quick-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.figma-quick-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: none;
+}
+
+.figma-quick-icon-box {
+  width: 60px;
+  height: 60px;
+  border-radius: 18px;
+  border: 1.5px solid #EAEAEA;
+  background: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000000;
+  margin-bottom: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Quick Actions Light Theme Color Tints */
+.figma-quick-icon-box.quick-icon-bible {
+  background: linear-gradient(135deg, #FFFFFF 0%, #FFF1F2 100%);
+  border-color: #FECDD3;
+  color: #F7002F;
+}
+.figma-quick-item:hover .figma-quick-icon-box.quick-icon-bible {
+  background: #FFF1F2;
+  border-color: #F7002F;
+  box-shadow: 0 6px 16px rgba(247, 0, 47, 0.18);
+}
+
+.figma-quick-icon-box.quick-icon-devotionals {
+  background: linear-gradient(135deg, #FFFFFF 0%, #FFFBEB 100%);
+  border-color: #FDE68A;
+  color: #D97706;
+}
+.figma-quick-item:hover .figma-quick-icon-box.quick-icon-devotionals {
+  background: #FFFBEB;
+  border-color: #D97706;
+  box-shadow: 0 6px 16px rgba(217, 119, 6, 0.18);
+}
+
+.figma-quick-icon-box.quick-icon-prayer {
+  background: linear-gradient(135deg, #FFFFFF 0%, #ECFDF5 100%);
+  border-color: #A7F3D0;
+  color: #059669;
+}
+.figma-quick-item:hover .figma-quick-icon-box.quick-icon-prayer {
+  background: #ECFDF5;
+  border-color: #059669;
+  box-shadow: 0 6px 16px rgba(5, 150, 105, 0.18);
+}
+
+.figma-quick-icon-box.quick-icon-bookmarks {
+  background: linear-gradient(135deg, #FFFFFF 0%, #F0F9FF 100%);
+  border-color: #BAE6FD;
+  color: #0284C7;
+}
+.figma-quick-item:hover .figma-quick-icon-box.quick-icon-bookmarks {
+  background: #F0F9FF;
+  border-color: #0284C7;
+  box-shadow: 0 6px 16px rgba(2, 132, 199, 0.18);
+}
+
+.figma-quick-label {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 700;
+  color: #000000;
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* 4. Your Reading Plan Card (Dynamic 3-Tier Progress Colors: Orange 0-33%, Green 34-66%, Blue 67-100%) */
+.figma-plan-card {
+  background: linear-gradient(135deg, #FFFFFF 0%, #F6FDF8 65%, #E8F9EE 100%);
+  border: 1.5px solid #BBF7D0;
+  border-radius: 20px;
+  padding: 18px 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.3s ease, background 0.3s ease;
+}
+
+.figma-plan-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.figma-plan-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.figma-plan-heading {
+  font-family: var(--font-ui);
+  font-size: 15px;
+  font-weight: 800;
+  color: #000000;
+  margin: 0;
+}
+
+.figma-plan-continue-btn {
+  font-family: var(--font-ui);
+  font-size: 13.5px;
+  font-weight: 800;
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 4px 12px;
+  transition: all 0.2s ease;
+}
+
+.figma-plan-title {
+  font-family: 'Lora', Georgia, serif;
+  font-size: 17.5px;
+  font-weight: 700;
+  color: #000000;
+  margin: 4px 0 10px 0;
+}
+
+.figma-plan-metrics {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-ui);
+  font-size: 12.5px;
+  margin-bottom: 8px;
+}
+
+.figma-plan-day {
+  color: #666666;
+  font-weight: 600;
+}
+
+.figma-plan-percent {
+  font-weight: 800;
+  transition: color 0.3s ease;
+}
+
+.figma-plan-track {
+  height: 7px;
+  border-radius: 9999px;
+  overflow: hidden;
+  transition: background-color 0.3s ease;
+}
+
+.figma-plan-fill {
+  height: 100%;
+  border-radius: 9999px;
+  width: 50%;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s ease;
+}
+
+/* --- TIER 1: ORANGE (0 - 33% Progress) --- */
+.figma-plan-card.plan-tier-orange,
+.figma-plan-card[data-tier="orange"] {
+  background: linear-gradient(135deg, #FFFFFF 0%, #FFFDF7 60%, #FFF3E0 100%);
+  border-color: #FED7AA;
+  box-shadow: 0 4px 18px rgba(249, 115, 22, 0.08);
+}
+.figma-plan-card.plan-tier-orange .figma-plan-continue-btn,
+.figma-plan-card[data-tier="orange"] .figma-plan-continue-btn {
+  color: #EA580C;
+  background: rgba(234, 88, 12, 0.08);
+  border: 1px solid rgba(234, 88, 12, 0.25);
+}
+.figma-plan-card.plan-tier-orange .figma-plan-continue-btn:hover,
+.figma-plan-card[data-tier="orange"] .figma-plan-continue-btn:hover {
+  background: #EA580C;
+  color: #FFFFFF;
+}
+.figma-plan-card.plan-tier-orange .figma-plan-percent,
+.figma-plan-card[data-tier="orange"] .figma-plan-percent {
+  color: #EA580C;
+}
+.figma-plan-card.plan-tier-orange .figma-plan-track,
+.figma-plan-card[data-tier="orange"] .figma-plan-track {
+  background-color: #FFEDD5;
+}
+.figma-plan-card.plan-tier-orange .figma-plan-fill,
+.figma-plan-card[data-tier="orange"] .figma-plan-fill {
+  background: linear-gradient(90deg, #EA580C 0%, #FB923C 100%) !important;
+  animation: progressGlowOrange 2.5s ease-in-out infinite !important;
+}
+
+/* --- TIER 2: GREEN (34 - 66% Progress) --- */
+.figma-plan-card.plan-tier-green,
+.figma-plan-card[data-tier="green"],
+.figma-plan-card:not(.plan-tier-orange):not(.plan-tier-blue) {
+  background: linear-gradient(135deg, #FFFFFF 0%, #F6FDF8 60%, #E8F9EE 100%);
+  border-color: #BBF7D0;
+  box-shadow: 0 4px 18px rgba(22, 163, 74, 0.08);
+}
+.figma-plan-card.plan-tier-green .figma-plan-continue-btn,
+.figma-plan-card[data-tier="green"] .figma-plan-continue-btn,
+.figma-plan-card:not(.plan-tier-orange):not(.plan-tier-blue) .figma-plan-continue-btn {
+  color: #16A34A;
+  background: rgba(22, 163, 74, 0.08);
+  border: 1px solid rgba(22, 163, 74, 0.25);
+}
+.figma-plan-card.plan-tier-green .figma-plan-continue-btn:hover,
+.figma-plan-card[data-tier="green"] .figma-plan-continue-btn:hover,
+.figma-plan-card:not(.plan-tier-orange):not(.plan-tier-blue) .figma-plan-continue-btn:hover {
+  background: #16A34A;
+  color: #FFFFFF;
+}
+.figma-plan-card.plan-tier-green .figma-plan-percent,
+.figma-plan-card[data-tier="green"] .figma-plan-percent,
+.figma-plan-card:not(.plan-tier-orange):not(.plan-tier-blue) .figma-plan-percent {
+  color: #16A34A;
+}
+.figma-plan-card.plan-tier-green .figma-plan-track,
+.figma-plan-card[data-tier="green"] .figma-plan-track,
+.figma-plan-card:not(.plan-tier-orange):not(.plan-tier-blue) .figma-plan-track {
+  background-color: #DCFCE7;
+}
+.figma-plan-card.plan-tier-green .figma-plan-fill,
+.figma-plan-card[data-tier="green"] .figma-plan-fill,
+.figma-plan-card:not(.plan-tier-orange):not(.plan-tier-blue) .figma-plan-fill {
+  background: linear-gradient(90deg, #16A34A 0%, #34D399 100%) !important;
+  animation: progressGlowGreen 2.5s ease-in-out infinite !important;
+}
+
+/* --- TIER 3: BLUE (67 - 100% Progress) --- */
+.figma-plan-card.plan-tier-blue,
+.figma-plan-card[data-tier="blue"] {
+  background: linear-gradient(135deg, #FFFFFF 0%, #F5F9FF 60%, #E0EEFE 100%);
+  border-color: #BFDBFE;
+  box-shadow: 0 4px 18px rgba(37, 99, 235, 0.08);
+}
+.figma-plan-card.plan-tier-blue .figma-plan-continue-btn,
+.figma-plan-card[data-tier="blue"] .figma-plan-continue-btn {
+  color: #2563EB;
+  background: rgba(37, 99, 235, 0.08);
+  border: 1px solid rgba(37, 99, 235, 0.25);
+}
+.figma-plan-card.plan-tier-blue .figma-plan-continue-btn:hover,
+.figma-plan-card[data-tier="blue"] .figma-plan-continue-btn:hover {
+  background: #2563EB;
+  color: #FFFFFF;
+}
+.figma-plan-card.plan-tier-blue .figma-plan-percent,
+.figma-plan-card[data-tier="blue"] .figma-plan-percent {
+  color: #2563EB;
+}
+.figma-plan-card.plan-tier-blue .figma-plan-track,
+.figma-plan-card[data-tier="blue"] .figma-plan-track {
+  background-color: #DBEAFE;
+}
+.figma-plan-card.plan-tier-blue .figma-plan-fill,
+.figma-plan-card[data-tier="blue"] .figma-plan-fill {
+  background: linear-gradient(90deg, #2563EB 0%, #60A5FA 100%) !important;
+  animation: progressGlowBlue 2.5s ease-in-out infinite !important;
+}
+
+/* 5. Section Headers */
+.figma-section-title {
+  font-family: var(--font-ui);
+  font-size: 18px;
+  font-weight: 800;
+  color: #000000;
+  margin: 0 0 14px 0;
+}
+
+/* 6. Recently Read Horizontal Scroller */
+.figma-recent-scroller {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  padding-right: 16px;
+  margin-bottom: 24px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.figma-recent-scroller::-webkit-scrollbar {
+  display: none;
+}
+
+.figma-recent-card {
+  min-width: 145px;
+  width: 145px;
+  flex-shrink: 0;
+  background: #FFFFFF;
+  border: 1.5px solid #EAEAEA;
+  border-radius: 20px;
+  overflow: hidden;
+  padding: 0;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s ease, border-color 0.22s ease;
+  box-sizing: border-box;
+}
+
+.figma-recent-card:hover {
+  transform: translateY(-4px);
+}
+
+.figma-recent-cover-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background: #FFFFFF;
+}
+
+.figma-recent-cover-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.figma-recent-card:hover .figma-recent-cover-img {
+  transform: scale(1.05);
+}
+
+.figma-recent-ch-badge {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #FFFFFF;
+  font-family: var(--font-ui);
+  font-size: 10.5px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  letter-spacing: 0.3px;
+}
+
+.figma-recent-meta {
+  padding: 10px 12px 12px 12px;
+  background: #FFFFFF;
+  border-top: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.figma-recent-book {
+  font-family: var(--font-ui);
+  font-size: 14.5px;
+  font-weight: 800;
+  color: #000000;
+  margin: 0 0 2px 0;
+  line-height: 1.2;
+}
+
+.figma-recent-ch {
+  font-family: var(--font-ui);
+  font-size: 11.5px;
+  color: #666666;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* Recently Read Light Theme Tints */
+.figma-recent-card.recent-card-psalms {
+  border-color: #BAE6FD;
+}
+.figma-recent-card.recent-card-psalms:hover {
+  border-color: #0284C7;
+  box-shadow: 0 8px 22px rgba(2, 132, 199, 0.16);
+}
+.figma-recent-card.recent-card-psalms .figma-recent-meta {
+  background: linear-gradient(180deg, #FFFFFF 0%, #F0F9FF 100%);
+}
+
+.figma-recent-card.recent-card-proverbs {
+  border-color: #FDE68A;
+}
+.figma-recent-card.recent-card-proverbs:hover {
+  border-color: #D97706;
+  box-shadow: 0 8px 22px rgba(217, 119, 6, 0.16);
+}
+.figma-recent-card.recent-card-proverbs .figma-recent-meta {
+  background: linear-gradient(180deg, #FFFFFF 0%, #FFFBEB 100%);
+}
+
+.figma-recent-card.recent-card-matthew {
+  border-color: #FECDD3;
+}
+.figma-recent-card.recent-card-matthew:hover {
+  border-color: #F7002F;
+  box-shadow: 0 8px 22px rgba(247, 0, 47, 0.16);
+}
+.figma-recent-card.recent-card-matthew .figma-recent-meta {
+  background: linear-gradient(180deg, #FFFFFF 0%, #FFF1F2 100%);
+}
+
+/* 7. Discover Horizontal Topic Cards */
+.figma-discover-scroller {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  margin-bottom: 28px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.figma-discover-scroller::-webkit-scrollbar {
+  display: none;
+}
+
+.figma-discover-card {
+  min-width: 175px;
+  height: 115px;
+  border-radius: 18px;
+  position: relative;
+  overflow: hidden;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+  flex-shrink: 0;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  box-sizing: border-box;
+  background-size: cover;
+  background-position: center;
+  transition: transform 0.2s ease;
+}
+
+.figma-discover-card:hover {
+  transform: translateY(-2px);
+}
+
+.figma-discover-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.78) 100%);
+  z-index: 1;
+}
+
+.figma-discover-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.figma-discover-topic-badge {
+  color: #FFFFFF;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  font-family: var(--font-ui);
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 6px;
+  display: inline-block;
+  width: fit-content;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.figma-discover-title {
+  font-family: 'Lora', Georgia, serif;
+  font-size: 19px;
+  font-weight: 600;
+  color: #FFFFFF;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.figma-discover-sub {
+  font-family: var(--font-ui);
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 2px 0 0 0;
+}
+
+/* ==========================================================================
+   8. 60-30-10 THEMATIC CARD BACKGROUNDS
+   ========================================================================== */
+
+/* The Headwaters Morning Dawn Radiant Background */
+.headwaters-card {
+  background: linear-gradient(135deg, #FFFFFF 0%, #FFF5F6 60%, #FFEBF0 100%) !important;
+  border: 1.5px solid #FEE2E2 !important;
+  border-radius: 20px !important;
+  box-shadow: 0 4px 18px rgba(247, 0, 47, 0.05) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+.headwaters-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(247, 0, 47, 0.1) !important;
+}
+
+/* The Daily Confluence Stream Fresh Flow Background */
+.confluence-card {
+  background: linear-gradient(135deg, #FFFFFF 0%, #F0F9FF 60%, #E0F2FE 100%) !important;
+  border: 1.5px solid #BAE6FD !important;
+  border-radius: 20px !important;
+  box-shadow: 0 4px 18px rgba(14, 165, 233, 0.05) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+.confluence-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(14, 165, 233, 0.1) !important;
+}
+
+/* Word of the Day Illumination Parchment Card */
+.microlearning-card {
+  background: linear-gradient(135deg, #FFFFFF 0%, #FFFDF7 60%, #FFF8E7 100%) !important;
+  border: 1.5px solid #FDE68A !important;
+  border-left: 4.5px solid #F7002F !important;
+  border-radius: 20px !important;
+  box-shadow: 0 4px 18px rgba(247, 0, 47, 0.04) !important;
+}
+
+/* The 10 Commandments Sacred Covenant Card */
+.home-commandments-feed-card {
+  background: linear-gradient(135deg, #FFFFFF 0%, #FAF5FF 60%, #F3E8FF 100%) !important;
+  border: 1.5px solid #E9D5FF !important;
+  border-radius: 20px !important;
+  box-shadow: 0 4px 18px rgba(168, 85, 247, 0.05) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+.home-commandments-feed-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(168, 85, 247, 0.1) !important;
+}
+
+/* Live Prayer Sanctuary Fellowship Banner (Peaceful Emerald Oasis) */
+.prayer-sanctuary-banner-card {
+  background: linear-gradient(135deg, #FFFFFF 0%, #F0FDF4 55%, #DCFCE7 100%) !important;
+  border: 1.5px solid #86EFAC !important;
+  border-radius: 20px !important;
+  padding: 20px !important;
+  margin-bottom: 18px !important;
+  box-shadow: 0 4px 18px rgba(16, 185, 129, 0.08) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+.prayer-sanctuary-banner-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.14) !important;
+}
+
+/* Fellowship Feed Cards Light Theme */
+.fellowship-card {
+  background: #FFFFFF;
+  border: 1.5px solid #EAEAEA;
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.02);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.fellowship-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+}
+.fellowship-card[data-category="live"] {
+  background: linear-gradient(135deg, #FFFFFF 0%, #FFF5F6 100%);
+  border-color: #FECDD3;
+}
+.fellowship-card[data-category="discussions"] {
+  background: linear-gradient(135deg, #FFFFFF 0%, #FAF5FF 100%);
+  border-color: #E9D5FF;
+}
+.fellowship-card[data-category="prayer"] {
+  background: linear-gradient(135deg, #FFFFFF 0%, #F0FDF4 100%);
+  border-color: #BBF7D0;
+}
+.fellowship-card[data-category="photos"] {
+  background: linear-gradient(135deg, #FFFFFF 0%, #FFFDF7 100%);
+  border-color: #FDE68A;
+}
+
+/* ==========================================================================
+   9. REDESIGNED PRAYER REQUEST CARDS (ILLUSTRATED CATEGORY ARTWORK)
+   ========================================================================== */
+.fellowship-prayer-card {
+  background: linear-gradient(135deg, #FFFFFF 0%, #FAFAFA 100%);
+  border: 1.5px solid #EAEAEA;
+  border-radius: 20px;
+  padding: 18px 20px;
+  margin-bottom: 14px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+.fellowship-prayer-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.06);
+}
+
+.prayer-card-header-illustrated {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.prayer-user-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.prayer-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 14px;
+  color: #FFFFFF;
+  flex-shrink: 0;
+}
+
+/* Animated / Illustrated Category Badges */
+.prayer-art-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 12px;
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+}
+
+.prayer-art-badge.healing {
+  background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+  color: #92400E;
+  border: 1px solid #FCD34D;
+}
+.prayer-art-badge.family {
+  background: linear-gradient(135deg, #FEE2E2 0%, #FECDD3 100%);
+  color: #9F1239;
+  border: 1px solid #FDA4AF;
+}
+.prayer-art-badge.wisdom {
+  background: linear-gradient(135deg, #CCFBF1 0%, #99F6E4 100%);
+  color: #115E59;
+  border: 1px solid #5EEAD4;
+}
+.prayer-art-badge.protection {
+  background: linear-gradient(135deg, #E0E7FF 0%, #C7D2FE 100%);
+  color: #3730A3;
+  border: 1px solid #A5B4FC;
+}
+.prayer-art-badge.provision {
+  background: linear-gradient(135deg, #DCFCE7 0%, #BBF7D0 100%);
+  color: #166534;
+  border: 1px solid #86EFAC;
+}
+.prayer-art-badge.peace {
+  background: linear-gradient(135deg, #E0F2FE 0%, #BAE6FD 100%);
+  color: #075985;
+  border: 1px solid #7DD3FC;
+}
+
+.prayer-amen-action-btn {
+  background: #FFFFFF;
+  border: 1.5px solid #F7002F;
+  color: #F7002F;
+  border-radius: 12px;
+  padding: 8px 16px;
+  font-weight: 800;
+  font-size: 12.5px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+.prayer-amen-action-btn:hover, .prayer-amen-action-btn.prayed {
+  background: #F7002F;
+  color: #FFFFFF;
+  box-shadow: 0 4px 14px rgba(247, 0, 47, 0.3);
+}
+
+/* ==========================================================================
+   10. BIBLE QUIZ 60-30-10 DESIGN OVERHAUL
+   ========================================================================== */
+.bible-quiz-promo-card {
+  background: linear-gradient(135deg, #FFFFFF 0%, #FFF5F6 100%);
+  border: 1.5px solid #EAEAEA;
+  border-radius: 22px;
+  padding: 18px 20px;
+  margin: 18px 0;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.03);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.bible-quiz-promo-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(247, 0, 47, 0.08);
+  border-color: #F7002F;
+}
+
+.quiz-card-art {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: rgba(247, 0, 47, 0.08);
+  border: 1.5px solid rgba(247, 0, 47, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  flex-shrink: 0;
+}
+
+.quiz-badge-gold {
+  background: #F7002F;
+  color: #FFFFFF;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 3px 9px;
+  border-radius: 6px;
+  letter-spacing: 0.5px;
+}
+
+.btn-play-quiz {
+  background: #F7002F;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 18px;
+  font-weight: 800;
+  font-size: 13.5px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(247, 0, 47, 0.25);
+  transition: transform 0.15s ease;
+}
+
+/* Quiz Modal & Sheets (60-30-10 Theme) */
+.quiz-drawer-sheet {
+  background: #FFFFFF !important;
+  color: #000000 !important;
+  border-radius: 26px 26px 0 0 !important;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.2) !important;
+}
+
+.quiz-level-card {
+  background: #FFFFFF !important;
+  border: 1.5px solid #EAEAEA !important;
+  border-radius: 16px !important;
+  padding: 14px !important;
+  color: #000000 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+.quiz-level-card.active {
+  border-color: #F7002F !important;
+  background: rgba(247, 0, 47, 0.04) !important;
+  box-shadow: 0 4px 14px rgba(247, 0, 47, 0.15) !important;
+}
+
+.quiz-choice-btn {
+  background: #FFFFFF !important;
+  border: 1.5px solid #EAEAEA !important;
+  border-radius: 14px !important;
+  padding: 14px 16px !important;
+  color: #000000 !important;
+  font-weight: 700 !important;
+  font-size: 14.5px !important;
+  cursor: pointer !important;
+  transition: all 0.18s ease !important;
+  text-align: left !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  margin-bottom: 10px !important;
+}
+
+.quiz-choice-btn:hover {
+  border-color: #000000 !important;
+  background: #FAFAFA !important;
+}
+
+.quiz-choice-btn.correct {
+  background: #ECFDF5 !important;
+  border-color: #10B981 !important;
+  color: #065F46 !important;
+}
+
+.quiz-choice-btn.incorrect {
+  background: #FEF2F2 !important;
+  border-color: #EF4444 !important;
+  color: #991B1B !important;
+}
+
+.quiz-progress-fill {
+  background: #F7002F !important;
+}
+
+.btn-start-quiz-prominent, .btn-next-quiz-btn {
+  background: #F7002F !important;
+  color: #FFFFFF !important;
+  border-radius: 14px !important;
+  font-weight: 800 !important;
+  font-size: 15px !important;
+  box-shadow: 0 4px 18px rgba(247, 0, 47, 0.3) !important;
+}
+
+/* ==========================================================================
+   11. PREMIUM SPECIAL EFFECTS & MICRO-ANIMATIONS
+   ========================================================================== */
+
+/* 1. Ken Burns Ambient Breathing Animation on Hero VOD */
+@keyframes kenBurnsSubtle {
+  0% { transform: scale(1) translate(0, 0); }
+  50% { transform: scale(1.04) translate(-1%, -1%); }
+  100% { transform: scale(1) translate(0, 0); }
+}
+
+.figma-hero-card {
+  position: relative;
+  overflow: hidden;
+}
+
+/* 2. Periodic Divine Glass Light Sweep Shimmer on Hero Card */
+@keyframes lightSweep {
+  0% { transform: translateX(-150%) skewX(-20deg); opacity: 0; }
+  15% { opacity: 0.6; }
+  30% { transform: translateX(250%) skewX(-20deg); opacity: 0; }
+  100% { transform: translateX(250%) skewX(-20deg); opacity: 0; }
+}
+
+.figma-hero-card::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.18) 50%, transparent 100%);
+  z-index: 2;
+  pointer-events: none;
+  animation: lightSweep 12s infinite cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 3. Sunrise Breathing Aura on Headwaters */
+@keyframes sunrisePulse {
+  0% { transform: scale(1) rotate(0deg); filter: drop-shadow(0 2px 6px rgba(245, 158, 11, 0.25)); }
+  50% { transform: scale(1.08) rotate(3deg); filter: drop-shadow(0 4px 14px rgba(245, 158, 11, 0.45)); }
+  100% { transform: scale(1) rotate(0deg); filter: drop-shadow(0 2px 6px rgba(245, 158, 11, 0.25)); }
+}
+
+.headwaters-card img {
+  animation: sunrisePulse 4s ease-in-out infinite;
+}
+
+/* 4. Fluid Living Stream Float on Confluence */
+@keyframes streamFlow {
+  0% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-3px) scale(1.04); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+.confluence-card img {
+  animation: streamFlow 3.5s ease-in-out infinite;
+}
+
+/* 5. Sacred Root Word Breathing Glow */
+@keyframes sacredWordGlow {
+  0% { box-shadow: 0 0 10px rgba(247, 0, 47, 0.08), inset 0 0 8px rgba(247, 0, 47, 0.04); }
+  50% { box-shadow: 0 0 20px rgba(247, 0, 47, 0.22), inset 0 0 12px rgba(247, 0, 47, 0.08); border-color: rgba(247, 0, 47, 0.45); }
+  100% { box-shadow: 0 0 10px rgba(247, 0, 47, 0.08), inset 0 0 8px rgba(247, 0, 47, 0.04); }
+}
+
+.word-of-day-highlight-box {
+  animation: sacredWordGlow 3s ease-in-out infinite;
+}
+
+/* 6. Dynamic Tier Animated Progress Glows */
+@keyframes progressGlowOrange {
+  0% { filter: drop-shadow(0 0 3px rgba(249, 115, 22, 0.3)); }
+  50% { filter: drop-shadow(0 0 8px rgba(249, 115, 22, 0.65)); }
+  100% { filter: drop-shadow(0 0 3px rgba(249, 115, 22, 0.3)); }
+}
+
+@keyframes progressGlowGreen {
+  0% { filter: drop-shadow(0 0 3px rgba(22, 163, 74, 0.3)); }
+  50% { filter: drop-shadow(0 0 8px rgba(22, 163, 74, 0.65)); }
+  100% { filter: drop-shadow(0 0 3px rgba(22, 163, 74, 0.3)); }
+}
+
+@keyframes progressGlowBlue {
+  0% { filter: drop-shadow(0 0 3px rgba(37, 99, 235, 0.3)); }
+  50% { filter: drop-shadow(0 0 8px rgba(37, 99, 235, 0.65)); }
+  100% { filter: drop-shadow(0 0 3px rgba(37, 99, 235, 0.3)); }
+}
+
+/* 7. Quick Action Spring Press Feedback */
+.figma-quick-item {
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s ease !important;
+}
+.figma-quick-item:active {
+  transform: scale(0.93) translateY(2px) !important;
+}
+.figma-quick-item:hover .figma-quick-icon-box {
+  border-color: #F7002F;
+  color: #F7002F;
+  transform: translateY(-2px);
+}
+
+/* 8. Floating Prayer Blessing Particle Reaction */
+.floating-amen-particle {
+  position: fixed;
+  pointer-events: none;
+  font-size: 22px;
+  z-index: 99999;
+  animation: floatAmenUp 1.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  will-change: transform, opacity;
+}
+
+@keyframes floatAmenUp {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(0.8);
+  }
+  50% {
+    opacity: 0.95;
+    transform: translateY(-45px) scale(1.25);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-110px) scale(1);
+  }
+}
+
+/* 9. Category Badge Ambient Shimmer */
+@keyframes badgeShimmer {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-1.5px); }
+  100% { transform: translateY(0); }
+}
+
+.prayer-art-badge {
+  animation: badgeShimmer 3s ease-in-out infinite;
+}
+
+/* 10. Quiz Trophy Golden Shine Animation */
+@keyframes trophyShine {
+  0% { transform: scale(1) rotate(0deg); filter: drop-shadow(0 2px 8px rgba(247, 0, 47, 0.2)); }
+  25% { transform: scale(1.08) rotate(-4deg); filter: drop-shadow(0 4px 14px rgba(247, 0, 47, 0.4)); }
+  50% { transform: scale(1) rotate(0deg); }
+  75% { transform: scale(1.08) rotate(4deg); filter: drop-shadow(0 4px 14px rgba(247, 0, 47, 0.4)); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+.quiz-card-art {
+  animation: trophyShine 5s ease-in-out infinite;
+}
+
+
+
 

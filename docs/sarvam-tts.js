@@ -543,11 +543,14 @@
 
       try {
         window.speechSynthesis.cancel();
+        if (window.speechSynthesis.paused) {
+          window.speechSynthesis.resume();
+        }
       } catch (e) {}
 
       var isDevanagari = /[\u0900-\u097F]/.test(text || '');
-      var lang = options.lang || (isDevanagari ? 'mr-IN' : 'en-IN');
-      var pace = options.pace !== undefined ? options.pace : 0.86;
+      var lang = (options && options.lang) || (isDevanagari ? 'mr-IN' : 'en-IN');
+      var pace = (options && options.pace !== undefined) ? options.pace : 0.86;
       var cleanText = ScriptureOptimizer.optimizeForNarration(text, lang);
 
       var utterance = new SpeechSynthesisUtterance(cleanText);
@@ -581,15 +584,18 @@
       }
 
       utterance.onend = function () {
+        window._activeSpeechUtterance = null;
         if (onEnd) onEnd();
       };
 
       utterance.onerror = function (e) {
+        window._activeSpeechUtterance = null;
         if (e.error === 'canceled' || e.error === 'interrupted') return;
         console.warn('[WebSpeech Fallback] Error:', e);
         if (onError) onError(e);
       };
 
+      window._activeSpeechUtterance = utterance;
       window.speechSynthesis.speak(utterance);
       return utterance;
     }

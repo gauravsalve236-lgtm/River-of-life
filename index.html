@@ -133,33 +133,37 @@
         </div>
       </div>
       <nav class="sidebar-nav">
-        <button class="nav-item active" data-tab="home">
+        <button class="nav-item active" data-tab="home" onclick="switchTab('home')">
           <svg viewBox="0 0 24 24" class="nav-icon" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
           <span class="nav-label">Today</span>
         </button>
-        <button class="nav-item" data-tab="reader">
+        <button class="nav-item" data-tab="reader" onclick="switchTab('reader')">
           <svg viewBox="0 0 24 24" class="nav-icon" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
           <span class="nav-label">Bible</span>
         </button>
-        <button class="nav-item" data-tab="plans">
+        <button class="nav-item" data-tab="plans" onclick="switchTab('plans')">
           <svg viewBox="0 0 24 24" class="nav-icon" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><path d="M9 16l2 2 4-4"></path></svg>
           <span class="nav-label">Plans</span>
         </button>
-        <button class="nav-item" data-tab="prayers">
+        <button class="nav-item" data-tab="prayers" onclick="switchTab('prayers')">
           <svg viewBox="0 0 24 24" class="nav-icon" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
           <span class="nav-label">Prayers</span>
         </button>
-        <button class="nav-item" data-tab="meetings">
+        <button class="nav-item" data-tab="meetings" onclick="switchTab('meetings')">
           <svg viewBox="0 0 24 24" class="nav-icon" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M23 7l-7 5 7 5V7z"></path><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
           <span class="nav-label">Meetings</span>
         </button>
-        <button class="nav-item" data-tab="discover">
+        <button class="nav-item" data-tab="discover" onclick="switchTab('discover')">
           <svg viewBox="0 0 24 24" class="nav-icon" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
           <span class="nav-label">Search</span>
         </button>
-        <button class="nav-item" data-tab="you">
+        <button class="nav-item" data-tab="you" onclick="switchTab('you')">
           <div class="avatar-nav-mini" id="sidebar-you-avatar">U</div>
           <span class="nav-label">You</span>
+        </button>
+        <button class="nav-item" data-tab="admin" id="sidebar-admin-nav-item" onclick="switchTab('admin')">
+          <svg viewBox="0 0 24 24" class="nav-icon" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+          <span class="nav-label">Admin</span>
         </button>
       </nav>
     </aside>
@@ -169,7 +173,7 @@
       
       <!-- Top Navigation/Header Bar (Responsive) -->
       <header class="app-header">
-        <div id="nav-reader-controls" class="header-pane active">
+        <div id="nav-reader-controls" class="header-pane" style="display: none;">
           <div class="header-left">
             <button id="btn-history-trigger" class="header-icon-btn" title="Reading History">
               <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
@@ -205,16 +209,20 @@
           </div>
         </div>
         
-        <div id="nav-static-controls" class="header-pane" style="display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 0 16px; box-sizing: border-box;">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <img src="assets/icons/app-logo.png" alt="River of Life Logo" style="width: 32px; height: 32px; object-fit: contain; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.25));">
-            <h1 id="static-header-title" style="margin: 0; font-size: 18px; font-weight: 800; color: var(--text);">Today</h1>
+        <div id="nav-static-controls" class="header-pane figma-header" style="display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 10px 18px; box-sizing: border-box;">
+          <div class="figma-header-brand" onclick="switchTab('home')" style="cursor: pointer;">
+            <div class="figma-logo-box">
+              <img src="assets/icons/River_of_life_logo.png" alt="River of Life Logo" class="figma-logo-img">
+            </div>
+            <h1 class="figma-app-title">River Of Life</h1>
           </div>
-          <div class="header-right" style="display: flex; align-items: center; gap: 8px;">
-            <button id="static-header-auth-btn" onclick="openDrawer('drawer-account-settings')" class="header-auth-capsule-btn" title="Profile & Settings / खाते व सेटिंग्ज" style="padding: 5px 12px; border-radius: 20px; font-size: 13px; font-weight: 800; background: rgba(229, 168, 59, 0.15); border: 1.5px solid rgba(229, 168, 59, 0.4); color: var(--text); cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
-              <span id="static-auth-label" style="font-weight: 700;">Account</span>
-              <div id="static-auth-avatar" class="avatar-circle-header" style="width: 24px; height: 24px; border-radius: 50%; background: #22c55e; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; line-height: 1;">P</div>
+          <div class="figma-header-actions">
+            <button class="figma-icon-circle-btn" onclick="openNotificationModal()" title="Notifications" aria-label="Notifications">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
             </button>
+            <div class="figma-avatar-circle" onclick="openDrawer('drawer-account-settings')" title="Account Settings">
+              <img src="assets/icons/user_profile_avatar.svg" alt="User Profile" class="figma-avatar-img" id="figma-user-avatar">
+            </div>
           </div>
         </div>
       </header>
@@ -248,167 +256,209 @@
             <!-- Ambient Dayparting Glow Aura -->
             <div id="ambient-dayparting-glow" class="ambient-dayparting-glow daypart-morning"></div>
 
-            <div class="youversion-greeting-row" style="display: flex; justify-content: space-between; align-items: flex-start; padding: 8px 0 10px 0; position: relative; z-index: 2;">
-              <div>
-                <h1 class="youversion-greeting-title" id="home-greeting-user" style="font-size: 23px; font-weight: 800; margin: 0 0 2px 0; color: var(--text); letter-spacing: -0.3px;">Good morning, Gaurav</h1>
-                <span id="home-greeting-subtext" style="font-size: 12.5px; font-weight: 700; color: var(--text-muted); display: flex; align-items: center; gap: 4px;">🌅 सकाळचा पवित्र विसावा व मार्गदर्शन</span>
-              </div>
-              <div class="youversion-greeting-actions" style="display: flex; align-items: center; gap: 12px; padding-top: 4px;">
-                <div class="youversion-streak-indicator" id="home-streak-pill" title="Daily Streak" onclick="showToast('Active Daily Devotion Streak: 1 Day 🔥')" style="display: flex; align-items: center; gap: 4px; font-size: 14.5px; font-weight: 800; cursor: pointer; background: rgba(245,158,11,0.12); padding: 4px 10px; border-radius: 12px; border: 1px solid rgba(245,158,11,0.3);">
-                  <svg viewBox="0 0 24 24" width="17" height="17" fill="#f59e0b"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                  <span id="home-streak-count" style="color: #d97706;">1</span>
-                </div>
-                <button class="youversion-bell-btn" onclick="openNotificationModal()" title="Notifications" style="background: none; border: none; padding: 0; cursor: pointer; position: relative; display: flex; align-items: center; justify-content: center; color: var(--text);">
-                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-                  <span class="bell-badge-count">8</span>
-                </button>
-              </div>
+            <div class="youversion-greeting-row" style="padding: 8px 0 6px 0; position: relative; z-index: 2;">
+              <h1 class="youversion-greeting-title" id="home-greeting-user" style="font-size: 23px; font-weight: 800; margin: 0 0 2px 0; color: var(--text); letter-spacing: -0.3px;">Good morning, Gaurav</h1>
+              <span id="home-greeting-subtext" style="font-size: 12.5px; font-weight: 700; color: var(--text-muted); display: flex; align-items: center; gap: 4px;">🌅 सकाळचा पवित्र विसावा व मार्गदर्शन</span>
             </div>
 
-            <!-- TODAY TAB FEED -->
+            <!-- LIVE CHURCH ANNOUNCEMENTS BROADCAST (Dynamic Admin Alerts) -->
+            <div id="church-announcement-container" style="display: none; margin-bottom: 12px; position: relative; z-index: 2;"></div>
+
+            <!-- TODAY TAB FEED (FIGMA DESIGN SYSTEM) -->
             <div id="home-feed-today-container">
 
-              <!-- 3-STEP GUIDED DAILY SPIRITUAL FLOW TRACK -->
-              <div class="daily-flow-journey-card" style="background: var(--surface, #ffffff); border: 1.5px solid var(--border, rgba(0,0,0,0.08)); border-radius: 20px; padding: 14px 16px; margin: 0 0 16px 0; box-shadow: 0 4px 18px rgba(0,0,0,0.03); position: relative; z-index: 2;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                  <div style="display: flex; align-items: center; gap: 6px;">
-                    <span style="font-size: 15px;">🌊</span>
-                    <strong style="font-size: 13.5px; font-weight: 800; color: var(--text);">Daily Spiritual Flow • आजचा आत्मिक प्रवास</strong>
-                  </div>
-                  <span id="daily-flow-progress-badge" style="font-size: 11.5px; font-weight: 800; color: var(--primary); background: rgba(158,22,34,0.08); padding: 3px 9px; border-radius: 12px; border: 1px solid rgba(158,22,34,0.15);">
-                    0/3 Complete
-                  </span>
+              <!-- 1. FIGMA HERO VERSE OF THE DAY CARD (With Daily Scripture Scenic Image) -->
+              <div class="figma-hero-card" id="card-daily-verse-home" onclick="openFullscreenVOD()" title="Tap to open full image or share status" style="background-image: url('assets/daily_verses/golden_dawn.png');">
+                <div class="figma-hero-card-overlay"></div>
+                <div class="figma-hero-top">
+                  <span class="figma-hero-badge" data-i18n="vod_label">VERSE OF THE DAY</span>
+                  <button class="figma-hero-share-btn" onclick="event.stopPropagation(); shareDailyVerseToWhatsApp();" title="Share Verse / वचन शेअर करा" aria-label="Share Verse">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                  </button>
                 </div>
-                
-                <!-- 3-Step Action Pills Row -->
-                <div class="daily-flow-steps-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
-                  <!-- Step 1: Pray -->
-                  <button class="flow-step-btn" id="step-btn-pray" onclick="triggerDailyFlowStep('pray')" style="background: linear-gradient(135deg, rgba(254,243,199,0.7) 0%, rgba(254,215,170,0.5) 100%); border: 1px solid rgba(245,158,11,0.4); border-radius: 14px; padding: 10px 8px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; transition: all 0.2s ease;">
-                    <div style="display: flex; align-items: center; gap: 4px;">
-                      <span class="flow-step-icon">🌅</span>
-                      <span class="flow-step-status" id="step-status-pray" style="font-size: 11.5px; font-weight: 800; color: #9a3412;">1. Pray</span>
-                    </div>
-                    <span style="font-size: 11px; color: #7c2d12; font-weight: 700; white-space: nowrap;">सकाळची प्रार्थना</span>
-                  </button>
-
-                  <!-- Step 2: Read -->
-                  <button class="flow-step-btn" id="step-btn-read" onclick="triggerDailyFlowStep('read')" style="background: linear-gradient(135deg, rgba(240,253,250,0.7) 0%, rgba(204,251,241,0.5) 100%); border: 1px solid rgba(13,148,136,0.35); border-radius: 14px; padding: 10px 8px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; transition: all 0.2s ease;">
-                    <div style="display: flex; align-items: center; gap: 4px;">
-                      <span class="flow-step-icon">📖</span>
-                      <span class="flow-step-status" id="step-status-read" style="font-size: 11.5px; font-weight: 800; color: #0f766e;">2. Read</span>
-                    </div>
-                    <span style="font-size: 11px; color: #115e59; font-weight: 700; white-space: nowrap;">आजचे वचन</span>
-                  </button>
-
-                  <!-- Step 3: Learn -->
-                  <button class="flow-step-btn" id="step-btn-learn" onclick="triggerDailyFlowStep('learn')" style="background: linear-gradient(135deg, rgba(245,243,255,0.7) 0%, rgba(237,233,254,0.5) 100%); border: 1px solid rgba(124,58,237,0.35); border-radius: 14px; padding: 10px 8px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; transition: all 0.2s ease;">
-                    <div style="display: flex; align-items: center; gap: 4px;">
-                      <span class="flow-step-icon">💡</span>
-                      <span class="flow-step-status" id="step-status-learn" style="font-size: 11.5px; font-weight: 800; color: #6d28d9;">3. Learn</span>
-                    </div>
-                    <span style="font-size: 11px; color: #5b21b6; font-weight: 700; white-space: nowrap;">मूळ शब्द व मनन</span>
+                <blockquote class="figma-hero-scripture" id="home-vod-text">
+                  “The Lord is my shepherd; I shall not want. He makes me lie down in green pastures. He leads me beside still waters.”
+                </blockquote>
+                <div class="figma-hero-bottom">
+                  <span class="figma-hero-ref" id="home-vod-ref">Psalm 23:1-2</span>
+                  <button class="figma-hero-likes" id="btn-vod-like-trigger" onclick="event.stopPropagation(); toggleVodLike();" title="Like / पसंत करा">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                    <span id="home-vod-likes-count">1.2k</span>
                   </button>
                 </div>
               </div>
 
-              <!-- Prominent Home Search Input Field -->
-              <div class="home-search-bar-container" style="margin: 0 0 16px 0;">
-                <div class="home-prominent-search-box" onclick="switchTab('discover'); setTimeout(() => document.getElementById('search-input-main')?.focus(), 150);" style="display: flex; align-items: center; gap: 12px; background: var(--surface, #ffffff); border: 1.5px solid var(--border, rgba(0,0,0,0.08)); border-radius: 16px; padding: 13px 18px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); cursor: pointer; transition: all 0.2s ease;">
-                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--text-muted, #64748b)" stroke-width="2.3"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                  <span id="home-search-placeholder-text" data-i18n="search_placeholder" style="flex: 1; font-size: 14.5px; font-weight: 600; color: var(--text-muted, #64748b); font-family: var(--font-ui);">Search Bible, Topics, or Questions...</span>
-                  <span id="home-search-explore-badge" data-i18n="search_explore" style="font-size: 11.5px; font-weight: 800; color: var(--primary); background: rgba(143,18,29,0.08); padding: 4px 9px; border-radius: 8px;">Explore</span>
+              <!-- 2. FIGMA 4-PILL QUICK ACTIONS GRID -->
+              <div class="figma-quick-actions-grid">
+                <!-- 1. Read Bible -->
+                <button class="figma-quick-item" onclick="switchTab('reader')" title="Read Bible / बायबल वाचा">
+                  <div class="figma-quick-icon-box quick-icon-bible">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                  </div>
+                  <span class="figma-quick-label" data-i18n="quick_read_bible">Read Bible</span>
+                </button>
+
+                <!-- 2. Devotionals -->
+                <button class="figma-quick-item" onclick="document.getElementById('card-word-of-the-day-home')?.scrollIntoView({behavior:'smooth'})" title="Devotionals / भक्ती व मनन">
+                  <div class="figma-quick-icon-box quick-icon-devotionals">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                  </div>
+                  <span class="figma-quick-label" data-i18n="quick_devotionals">Devotionals</span>
+                </button>
+
+                <!-- 3. Prayer List -->
+                <button class="figma-quick-item" onclick="switchTab('meetings')" title="Prayer List / प्रार्थना सूची">
+                  <div class="figma-quick-icon-box quick-icon-prayer">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                  </div>
+                  <span class="figma-quick-label" data-i18n="quick_prayer_list">Prayer List</span>
+                </button>
+
+                <!-- 4. Bookmarks -->
+                <button class="figma-quick-item" onclick="openBookmarksDrawer()" title="Bookmarks / जतन केलेली वचने">
+                  <div class="figma-quick-icon-box quick-icon-bookmarks">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+                  </div>
+                  <span class="figma-quick-label" data-i18n="quick_bookmarks">Bookmarks</span>
+                </button>
+              </div>
+
+              <!-- 3. FIGMA YOUR READING PLAN CARD (Dynamic 3-Tier: Orange 0-33%, Green 34-66%, Blue 67-100%) -->
+              <div class="figma-plan-card plan-tier-green" data-tier="green">
+                <div class="figma-plan-header">
+                  <h3 class="figma-plan-heading" data-i18n="reading_plan_heading">Your Reading Plan</h3>
+                  <button class="figma-plan-continue-btn" onclick="startDivineGrowthPlan()" data-i18n="btn_continue">Continue</button>
+                </div>
+                <h4 class="figma-plan-title" id="home-plan-title" data-i18n="reading_plan_title">Through the New Testament</h4>
+                <div class="figma-plan-metrics">
+                  <span class="figma-plan-day" id="home-plan-day" data-i18n="reading_plan_day">Day 15 of 30</span>
+                  <span class="figma-plan-percent" id="home-plan-percent">50% Complete</span>
+                </div>
+                <div class="figma-plan-track">
+                  <div class="figma-plan-fill" id="home-plan-progress-fill" style="width: 50%;"></div>
                 </div>
               </div>
 
-              <!-- YouVersion Style Verse of the Day Card (Directly below Greeting) -->
-              <div class="youversion-vod-card" id="card-daily-verse-home" onclick="openFullscreenVOD()" style="position: relative; overflow: hidden; border-radius: 22px; min-height: 340px; background-color: #0b0f19; margin: 0 0 16px 0; box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: flex; flex-direction: column; justify-content: space-between; cursor: pointer;" title="Tap to open full image, save to gallery or share status">
-                <div class="youversion-vod-bg" id="vod-dynamic-bg" style="position: absolute; inset: 0; background-size: cover; background-position: center; background-image: url('assets/daily_verses/stars.png');"></div>
-                <div class="youversion-vod-overlay" style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.42) 0%, rgba(0,0,0,0.25) 40%, rgba(0,0,0,0.85) 100%); z-index: 2;"></div>
-                
-                <div class="youversion-vod-content" style="position: relative; z-index: 3; padding: 22px 20px 16px 20px; display: flex; flex-direction: column; justify-content: space-between; min-height: 340px; box-sizing: border-box;">
-                  <div class="youversion-vod-top-meta" style="margin-bottom: 16px;">
-                    <span class="youversion-vod-label" data-i18n="vod_label" style="font-size: 13px; color: rgba(255,255,255,0.75); font-weight: 600; display: block; margin-bottom: 4px;">VERSE OF THE DAY</span>
-                    <h2 class="youversion-vod-ref" id="home-vod-ref" style="font-size: 18px; font-weight: 800; color: #ffffff; margin: 0;">स्तोत्रसंहिता २३:१ MARVBSI</h2>
+              <!-- 4. FIGMA RECENTLY READ SECTION (With User Custom Book Cover Designs) -->
+              <div class="figma-recent-section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                  <h3 class="figma-section-title" style="margin: 0;" data-i18n="recently_read_title">Recently Read</h3>
+                  <span style="font-size: 11.5px; font-weight: 700; color: #666666;">Continue Scriptures</span>
+                </div>
+                <div class="figma-recent-scroller">
+                  <!-- Card 1: Psalms 23 -->
+                  <div class="figma-recent-card recent-card-psalms" onclick="openReaderAndNavigate('psalms', 23, 1)" title="Open Psalms 23">
+                    <div class="figma-recent-cover-wrapper">
+                      <img src="assets/images/book_psalms_cover.png" alt="Book of Psalms" class="figma-recent-cover-img">
+                      <span class="figma-recent-ch-badge">Ch 23</span>
+                    </div>
+                    <div class="figma-recent-meta">
+                      <h4 class="figma-recent-book">Psalms</h4>
+                      <p class="figma-recent-ch">स्तोत्रसंहिता २३</p>
+                    </div>
                   </div>
 
-                  <blockquote class="youversion-vod-text" id="home-vod-text" style="font-family: var(--font-body, 'Noto Serif Devanagari', serif); font-size: 21px; line-height: 1.6; color: #ffffff; font-weight: 700; margin: 0 0 20px 0; text-shadow: 0 2px 8px rgba(0,0,0,0.7);">
-                    "परमेश्वर माझा मेंढपाळ आहे; मला काहीही कमी पडणार नाही."
-                  </blockquote>
+                  <!-- Card 2: Proverbs 3 -->
+                  <div class="figma-recent-card recent-card-proverbs" onclick="openReaderAndNavigate('proverbs', 3, 1)" title="Open Proverbs 3">
+                    <div class="figma-recent-cover-wrapper">
+                      <img src="assets/images/book_proverbs_cover.jpg" alt="Book of Proverbs" class="figma-recent-cover-img">
+                      <span class="figma-recent-ch-badge">Ch 3</span>
+                    </div>
+                    <div class="figma-recent-meta">
+                      <h4 class="figma-recent-book">Proverbs</h4>
+                      <p class="figma-recent-ch">नीतिसूत्रे ३</p>
+                    </div>
+                  </div>
 
-                  <div class="youversion-vod-actions" style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 12px;">
-                    <button class="youversion-action-btn" id="btn-vod-like-trigger">
-                      <svg id="home-vod-heart-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                      <span id="home-vod-likes-count">12.9L</span>
-                    </button>
-                    <button class="youversion-action-btn" onclick="openStudyPanel(state.activeBook, state.activeChapter)">
-                      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                      <span>22.7K</span>
-                    </button>
-                    <button class="youversion-action-btn" id="btn-vod-share-trigger" onclick="event.stopPropagation(); shareDailyVerseToWhatsApp();" title="Share to WhatsApp Status / व्हॉट्सॲपवर शेअर करा">
-                      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
-                      <span>5.8L</span>
-                    </button>
-                    <button class="youversion-action-btn" id="btn-vod-more" onclick="openVodMoreSheet()">
-                      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1.5"></circle><circle cx="6" cy="12" r="1.5"></circle><circle cx="18" cy="12" r="1.5"></circle></svg>
-                      <span>More</span>
-                    </button>
+                  <!-- Card 3: Matthew 5 -->
+                  <div class="figma-recent-card recent-card-matthew" onclick="openReaderAndNavigate('matthew', 5, 1)" title="Open Matthew 5">
+                    <div class="figma-recent-cover-wrapper">
+                      <img src="assets/images/book_matthew_cover.jpg" alt="The Gospel of Matthew" class="figma-recent-cover-img">
+                      <span class="figma-recent-ch-badge">Ch 5</span>
+                    </div>
+                    <div class="figma-recent-meta">
+                      <h4 class="figma-recent-book">Matthew</h4>
+                      <p class="figma-recent-ch">मत्तय ५</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 5. FIGMA DISCOVER TOPIC CARDS SECTION (Dynamic Daily Words & Direct Chapter Navigation) -->
+              <div class="figma-discover-section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                  <h3 class="figma-section-title" style="margin: 0;" data-i18n="discover_topics_title">Discover</h3>
+                  <span style="font-size: 11.5px; font-weight: 700; color: #666666;">Daily Word Inspiration</span>
+                </div>
+                <div class="figma-discover-scroller" id="figma-discover-cards-container">
+                  <!-- Topic 1: Faith -->
+                  <div class="figma-discover-card" onclick="openDiscoverTopicDirect('hebrews', 11, 1, 'Faith')" style="background-image: url('assets/daily_verses/misty_mountains.jpg');">
+                    <div class="figma-discover-overlay"></div>
+                    <div class="figma-discover-content">
+                      <span class="figma-discover-topic-badge">TOPIC</span>
+                      <div>
+                        <h4 class="figma-discover-title">Faith</h4>
+                        <p class="figma-discover-sub">Overcoming fear • Hebrews 11</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Topic 2: Hope -->
+                  <div class="figma-discover-card" onclick="openDiscoverTopicDirect('romans', 8, 24, 'Hope')" style="background-image: url('assets/daily_verses/freedom_field.jpg');">
+                    <div class="figma-discover-overlay"></div>
+                    <div class="figma-discover-content">
+                      <span class="figma-discover-topic-badge">TOPIC</span>
+                      <div>
+                        <h4 class="figma-discover-title">Hope</h4>
+                        <p class="figma-discover-sub">A constant anchor • Romans 8</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Topic 3: Joy -->
+                  <div class="figma-discover-card" onclick="openDiscoverTopicDirect('psalms', 16, 11, 'Joy')" style="background-image: url('assets/daily_verses/joy_rain.jpg');">
+                    <div class="figma-discover-overlay"></div>
+                    <div class="figma-discover-content">
+                      <span class="figma-discover-topic-badge">TOPIC</span>
+                      <div>
+                        <h4 class="figma-discover-title">Joy</h4>
+                        <p class="figma-discover-sub">Fullness of joy • Psalms 16</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
 
               <!-- ==========================================================================
-                   RIVER OF LIFE 3-CARD SPIRITUAL FLOW SERIES (IMAGE 2 MATCH)
+                   RIVER OF LIFE SPIRITUAL FLOW SERIES (60-30-10 DESIGN THEME)
                    ========================================================================== -->
 
               <!-- 1. The Headwaters: Foundational Morning Check-in -->
-              <div class="river-flow-card headwaters-card" onclick="openHeadwatersModal()" title="सकाळचा पवित्र विसावा">
-                <!-- Scenic River to Sunrise Background Graphic -->
-                <div class="card-scenic-bg headwaters-bg" style="position: absolute; right: 60px; top: 0; bottom: 0; width: 160px; pointer-events: none; opacity: 0.85; background: radial-gradient(circle at 65% 50%, rgba(255,255,255,0.9) 0%, rgba(254,240,138,0.4) 35%, transparent 70%);">
-                  <svg viewBox="0 0 160 96" preserveAspectRatio="none" style="width: 100%; height: 100%; position: absolute; inset: 0;">
-                    <circle cx="110" cy="48" r="22" fill="#ffffff" opacity="0.95" />
-                    <circle cx="110" cy="48" r="32" fill="#fef08a" opacity="0.45" />
-                    <path d="M 0 96 Q 50 65 110 70 Q 140 73 160 96 Z" fill="#ea580c" opacity="0.35" />
-                    <path d="M 40 96 Q 85 78 160 82 L 160 96 Z" fill="#f97316" opacity="0.45" />
-                    <path d="M 20 96 Q 60 82 110 55 L 115 55 Q 80 84 45 96 Z" fill="#e0f2fe" opacity="0.85" />
-                    <path d="M 30 96 Q 65 83 112 55 L 114 55 Q 75 85 40 96 Z" fill="#ffffff" opacity="0.95" />
-                  </svg>
-                </div>
-
-                <div style="position: relative; z-index: 3; flex: 1; padding-right: 12px;">
-                  <div style="font-size: 12px; font-weight: 800; color: #9a3412; margin-bottom: 4px; letter-spacing: 0.5px; text-transform: uppercase;">
+              <div class="river-flow-card headwaters-card" onclick="openHeadwatersModal()" title="सकाळचा पवित्र विसावा" style="background: #FFFFFF; border: 1.5px solid #EAEAEA; border-radius: 18px; padding: 16px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+                <div style="flex: 1; padding-right: 12px;">
+                  <div style="font-size: 11px; font-weight: 800; color: #F7002F; margin-bottom: 4px; letter-spacing: 0.5px; text-transform: uppercase;">
                     <span data-i18n="headwaters_cat">THE HEADWATERS</span>
                   </div>
-                  <h3 data-i18n="headwaters_title" style="font-size: 18px; font-weight: 800; color: #1e293b; margin: 0 0 6px 0; line-height: 1.3; letter-spacing: -0.2px;">
-                    सकाळचा पवित्र विसावा
+                  <h3 data-i18n="headwaters_title" style="font-size: 17px; font-weight: 800; color: #000000; margin: 0 0 4px 0; line-height: 1.3;">
+                    सकाळचा पवित्र विसावा • Morning Guided Prayer
                   </h3>
-                  <div style="font-size: 12px; font-weight: 700; color: #c2410c; display: flex; align-items: center; gap: 4px;">
-                    <span data-i18n="headwaters_time">▶ 3-5 min</span>
+                  <div style="font-size: 12px; font-weight: 700; color: #666666; display: flex; align-items: center; gap: 4px;">
+                    <span style="color: #F7002F;">▶</span>
+                    <span data-i18n="headwaters_time">3-5 min • Manna at the Source</span>
                   </div>
                 </div>
-
-                <div style="position: relative; z-index: 3; width: 68px; height: 68px; min-width: 68px; max-width: 68px; display: flex; align-items: center; justify-content: center;">
-                  <img src="assets/icons/headwaters_sunrise.svg" alt="Sunrise" style="width: 62px; height: 62px; object-fit: contain; filter: drop-shadow(0 4px 10px rgba(245,158,11,0.35));">
+                <div style="width: 52px; height: 52px; min-width: 52px; display: flex; align-items: center; justify-content: center;">
+                  <img src="assets/icons/headwaters_sunrise.svg" alt="Sunrise" style="width: 48px; height: 48px; object-fit: contain;">
                 </div>
               </div>
 
               <!-- 2. The Daily Confluence: Interactive Emotional Flow Picker -->
-              <div class="river-flow-card confluence-card" onclick="openConfluenceModal()" title="दैनंदिन संगम">
-                <!-- Scenic River Confluence Background Graphic -->
-                <div class="card-scenic-bg confluence-bg" style="position: absolute; right: 50px; top: 0; bottom: 0; width: 170px; pointer-events: none; opacity: 0.8; background: radial-gradient(circle at 60% 50%, rgba(255,255,255,0.85) 0%, rgba(204,251,241,0.4) 40%, transparent 75%);">
-                  <svg viewBox="0 0 170 104" preserveAspectRatio="none" style="width: 100%; height: 100%; position: absolute; inset: 0;">
-                    <path d="M 0 0 Q 60 30 75 104 L 0 104 Z" fill="#047857" opacity="0.25" />
-                    <path d="M 40 0 Q 95 38 120 104 L 75 104 Q 60 30 0 0 Z" fill="#0d9488" opacity="0.35" />
-                    <path d="M 120 0 Q 135 45 170 85 L 170 104 L 120 104 Q 95 38 40 0 Z" fill="#059669" opacity="0.2" />
-                    <path d="M 25 0 Q 80 32 95 104 L 105 104 Q 90 32 35 0 Z" fill="#ccfbf1" opacity="0.9" />
-                    <path d="M 30 0 Q 82 32 98 104 L 102 104 Q 86 32 34 0 Z" fill="#ffffff" opacity="0.95" />
-                  </svg>
-                </div>
-
-                <div style="position: relative; z-index: 3; flex: 1;">
-                  <div style="font-size: 12px; font-weight: 800; color: #047857; margin-bottom: 4px; letter-spacing: 0.5px; text-transform: uppercase;">
+              <div class="river-flow-card confluence-card" onclick="openConfluenceModal()" title="दैनंदिन संगम" style="background: #FFFFFF; border: 1.5px solid #EAEAEA; border-radius: 18px; padding: 16px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+                <div style="flex: 1; padding-right: 12px;">
+                  <div style="font-size: 11px; font-weight: 800; color: #F7002F; margin-bottom: 4px; letter-spacing: 0.5px; text-transform: uppercase;">
                     <span data-i18n="confluence_cat">THE DAILY CONFLUENCE</span>
                   </div>
-                  <h3 data-i18n="confluence_title" style="font-size: 17.5px; font-weight: 800; color: #0f172a; margin: 0 0 10px 0; line-height: 1.3; letter-spacing: -0.2px;">
+                  <h3 data-i18n="confluence_title" style="font-size: 17px; font-weight: 800; color: #000000; margin: 0 0 10px 0; line-height: 1.3;">
                     तुमचा आत्मा आज कसा वाहत आहे?
                   </h3>
                   
@@ -433,78 +483,55 @@
                   </div>
                 </div>
 
-                <div style="position: relative; z-index: 3; width: 56px; height: 56px; min-width: 56px; max-width: 56px; display: flex; align-items: center; justify-content: center; margin-left: 6px;">
-                  <img src="assets/icons/confluence_stream.svg" alt="Streams" style="width: 50px; height: 50px; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(13,148,136,0.3));">
-                </div>
-              </div>
-
-              <!-- 3. Living Water Reset: Vibrant Deep Teal Module with Dynamic Ripple Effect -->
-              <div class="river-flow-card living-water-reset-card" onclick="openLivingWaterResetModal()" title="जीवन जल विश्रांती">
-                <!-- Dynamic Water Ripple Animation Background Graphic -->
-                <div class="card-scenic-bg living-water-bg" style="position: absolute; right: 55px; top: 0; bottom: 0; width: 170px; pointer-events: none; display: flex; align-items: center; justify-content: center;">
-                  <div class="ripple-ring r1" style="width: 40px; height: 20px; border: 1.5px solid rgba(94, 234, 212, 0.6); animation: ripplePulse 3s infinite ease-out;"></div>
-                  <div class="ripple-ring r2" style="width: 80px; height: 40px; border: 1.5px solid rgba(94, 234, 212, 0.4); animation: ripplePulse 3s infinite 1s ease-out;"></div>
-                  <div class="ripple-ring r3" style="width: 120px; height: 60px; border: 1.5px solid rgba(94, 234, 212, 0.2); animation: ripplePulse 3s infinite 2s ease-out;"></div>
-                </div>
-
-                <div style="position: relative; z-index: 3; flex: 1; padding-right: 12px;">
-                  <div style="font-size: 12px; font-weight: 800; color: #67e8f9; margin-bottom: 4px; letter-spacing: 0.5px; text-transform: uppercase;">
-                    <span data-i18n="living_water_cat">LIVING WATER RESET</span>
-                  </div>
-                  <h3 data-i18n="living_water_title" style="font-size: 18px; font-weight: 800; color: #fef08a; margin: 0 0 6px 0; line-height: 1.3; letter-spacing: -0.2px; text-shadow: 0 2px 8px rgba(0,0,0,0.5);">
-                    पवित्र शांतीचा झरा
-                  </h3>
-                  <div style="font-size: 12px; font-weight: 700; color: #a5f3fc; display: flex; align-items: center; gap: 4px;">
-                    <span data-i18n="living_water_sub">▶ 1-3 min • 432Hz Ambient Meditation</span>
-                  </div>
-                </div>
-
-                <div style="position: relative; z-index: 3; width: 68px; height: 68px; min-width: 68px; max-width: 68px; display: flex; align-items: center; justify-content: center;">
-                  <img src="assets/icons/living_water_drop.svg" alt="Droplet" style="width: 58px; height: 58px; object-fit: contain; filter: drop-shadow(0 4px 12px rgba(45,212,191,0.5));">
+                <div style="width: 52px; height: 52px; min-width: 52px; display: flex; align-items: center; justify-content: center;">
+                  <img src="assets/icons/confluence_stream.svg" alt="Streams" style="width: 48px; height: 48px; object-fit: contain;">
                 </div>
               </div>
 
               <!-- EDUCATIONAL BIBLICAL MICRO-LEARNING SECTION (WORD OF THE DAY & CONTEXT) -->
               <div class="educational-microlearning-section" id="educational-microlearning-section" style="margin: 0 0 16px 0;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                  <div>
-                    <span style="font-size: 11px; font-weight: 800; color: #7c3aed; letter-spacing: 0.5px; text-transform: uppercase;">BIBLICAL MICRO-LEARNING</span>
-                    <h3 style="margin: 2px 0 0 0; font-size: 17.5px; font-weight: 800; color: var(--text);">आजचा मूळ शब्द • Word of the Day</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 0 2px;">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 11px; font-weight: 800; color: #F7002F; background: rgba(247, 0, 47, 0.08); padding: 3px 10px; border-radius: 10px; letter-spacing: 0.5px; text-transform: uppercase;">WORD STUDY</span>
+                    <h3 style="margin: 0; font-size: 17.5px; font-weight: 800; color: var(--text);">आजचा मूळ शब्द • Word of the Day</h3>
                   </div>
-                  <span id="microlearning-day-badge" style="font-size: 11px; font-weight: 800; color: #7c3aed; background: rgba(124,58,237,0.12); padding: 4px 10px; border-radius: 10px; border: 1px solid rgba(124,58,237,0.25);">Day 1</span>
+                  <span id="microlearning-day-badge" style="font-size: 11px; font-weight: 800; color: var(--text-muted); background: var(--pill-bg); padding: 3px 10px; border-radius: 10px; border: 1px solid var(--border);">Day 1</span>
                 </div>
 
-                <!-- Interactive Greek/Hebrew Insight Card -->
-                <div class="microlearning-card" style="background: linear-gradient(135deg, rgba(245,243,255,0.9) 0%, rgba(237,233,254,0.65) 100%); border: 1.5px solid rgba(124,58,237,0.3); border-radius: 20px; padding: 18px; box-shadow: 0 4px 18px rgba(124,58,237,0.08); display: flex; flex-direction: column; gap: 12px;">
+                <!-- Premium Biblical Word of the Day Card (60-30-10 Ratio) -->
+                <div class="microlearning-card" style="background: #ffffff; border: 1.5px solid var(--border); border-radius: 20px; padding: 18px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04); display: flex; flex-direction: column; gap: 12px;">
                   
-                  <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                    <div>
-                      <div style="display: flex; align-items: center; gap: 8px;">
-                        <span id="micro-word-origin" style="font-size: 11px; font-weight: 800; color: #6d28d9; background: rgba(124,58,237,0.15); padding: 2px 8px; border-radius: 6px;">Greek (ग्रीक)</span>
-                        <span id="micro-word-pronunciation" style="font-size: 12.5px; font-weight: 700; color: #5b21b6;">उच्चार: अगापे</span>
-                      </div>
-                      <h4 id="micro-word-term" style="margin: 6px 0 2px 0; font-size: 20px; font-weight: 800; color: #4c1d95; font-family: var(--font-sans);">Agape (ἀγάπη)</h4>
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <span id="micro-word-origin" style="font-size: 11px; font-weight: 800; color: #F7002F; background: rgba(247, 0, 47, 0.08); padding: 3px 9px; border-radius: 8px; border: 1px solid rgba(247, 0, 47, 0.2);">Greek (ग्रीक)</span>
+                      <span id="micro-word-pronunciation" style="font-size: 13px; font-weight: 700; color: var(--text-muted);">उच्चार: अगापे</span>
                     </div>
-                    <button onclick="speakMicroLearningWord()" title="उच्चार व मनन ऐका" style="width: 40px; height: 40px; border-radius: 50%; background: #7c3aed; border: none; color: #ffffff; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 10px rgba(124,58,237,0.35); transition: transform 0.2s ease;">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
-                    </button>
                   </div>
 
-                  <div style="background: rgba(255,255,255,0.75); border: 1px solid rgba(124,58,237,0.2); border-radius: 12px; padding: 10px 12px;">
-                    <strong style="font-size: 11.5px; color: #6d28d9; display: block; margin-bottom: 2px;">अर्थ (Biblical Meaning):</strong>
-                    <p id="micro-word-meaning" style="margin: 0; font-size: 13.5px; font-weight: 700; color: #1e1b4b; line-height: 1.5;">निस्वार्थी, बिनशर्त आणि आत्मसमर्पक दैवी प्रीती</p>
+                  <!-- Highlighted Word Container -->
+                  <div class="word-of-day-highlight-box" style="display: inline-flex; align-items: center; gap: 10px; background: rgba(247, 0, 47, 0.06); border: 1.5px solid rgba(247, 0, 47, 0.25); border-radius: 14px; padding: 10px 18px; align-self: flex-start;">
+                    <span style="font-size: 20px;">✨</span>
+                    <h4 id="micro-word-term" class="word-of-day-highlight-term" style="margin: 0; font-size: 24px; font-weight: 800; color: #F7002F; font-family: 'Playfair Display', Georgia, serif; letter-spacing: -0.3px;">Agape (ἀγάπη)</h4>
                   </div>
 
-                  <div>
-                    <strong style="font-size: 11.5px; color: #6d28d9; display: block; margin-bottom: 2px;">आत्मिक रहस्य व जीवनात लागू (Spiritual Insight):</strong>
-                    <p id="micro-word-insight" style="margin: 0; font-size: 13px; color: #334155; line-height: 1.6; font-weight: 550;">
+                  <div style="background: #F8F8F8; border: 1px solid var(--border); border-left: 3.5px solid #F7002F; border-radius: 12px; padding: 10px 14px;">
+                    <strong style="font-size: 11.5px; color: #000000; display: block; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.4px;">अर्थ (Biblical Meaning):</strong>
+                    <p id="micro-word-meaning" style="margin: 0; font-size: 14px; font-weight: 700; color: #000000; line-height: 1.5;">निस्वार्थी, बिनशर्त आणि आत्मसमर्पक दैवी प्रीती</p>
+                  </div>
+
+                  <div style="padding: 2px 2px;">
+                    <strong style="font-size: 11.5px; color: #F7002F; display: block; margin-bottom: 3px; letter-spacing: 0.3px;">आत्मिक रहस्य व जीवनात लागू (Spiritual Insight):</strong>
+                    <p id="micro-word-insight" style="margin: 0; font-size: 13.5px; color: #222222; line-height: 1.65; font-weight: 500;">
                       मानवी प्रेम परिस्थितीवर अवलंबून असते, परंतु 'अगापे' प्रेम आपल्या योग्यतेवर नव्हे तर देवाच्या स्वभावधर्मावर आधारलेले आहे. हे प्रेम स्वतःचा त्याग करून इतरांचे कल्याण शोधते.
                     </p>
                   </div>
 
-                  <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(124,58,237,0.2); padding-top: 10px; margin-top: 2px;">
-                    <span id="micro-word-ref" style="font-size: 12px; font-weight: 700; color: #6d28d9;">१ योहान ४:८ • 'देव प्रीती आहे'</span>
-                    <button id="micro-word-nav-btn" onclick="openMicroLearningBibleChapter()" style="background: rgba(124,58,237,0.1); border: 1px solid rgba(124,58,237,0.25); color: #6d28d9; padding: 4px 12px; border-radius: 10px; font-weight: 800; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 12px; margin-top: 2px;">
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F7002F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                      <span id="micro-word-ref" style="font-size: 12.5px; font-weight: 700; color: #F7002F;">१ योहान ४:८ • 'देव प्रीती आहे'</span>
+                    </div>
+                    <button id="micro-word-nav-btn" onclick="openMicroLearningBibleChapter()" style="background: #F7002F; border: none; color: #ffffff; padding: 7px 16px; border-radius: 10px; font-weight: 800; font-size: 12.5px; cursor: pointer; display: flex; align-items: center; gap: 4px; box-shadow: 0 3px 10px rgba(247, 0, 47, 0.25); transition: transform 0.15s ease;">
                       <span>बायबलमध्ये वाचा &rarr;</span>
                     </button>
                   </div>
@@ -513,27 +540,22 @@
               </div>
 
               <!-- 10 COMMANDMENTS (दहा आज्ञा) COMPACT FEATURED CARD ON HOME -->
-              <div class="youversion-feed-card home-commandments-feed-card" onclick="toggleTenCommandmentsModal()" style="margin: 0 0 14px 0; background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 16px 18px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.03); transition: transform 0.2s ease, box-shadow 0.2s ease;">
-                <div class="feed-card-content" style="flex: 1; padding-right: 14px;">
+              <div class="youversion-feed-card home-commandments-feed-card" onclick="toggleTenCommandmentsModal()" style="margin: 0 0 16px 0; background: linear-gradient(135deg, #FFFFFF 0%, #FAF5FF 60%, #F3E8FF 100%); border: 1.5px solid #E9D5FF; border-radius: 20px; padding: 16px 18px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; box-shadow: 0 4px 18px rgba(168, 85, 247, 0.05); transition: transform 0.2s ease, box-shadow 0.2s ease;">
+                <div class="feed-card-content" style="flex: 1; padding-right: 12px;">
                   <div class="feed-card-badge-row" style="display: flex; align-items: center; gap: 6px; margin-bottom: 5px;">
-                    <span class="feed-card-pill" data-i18n="commandments_ref" style="display: inline-flex; align-items: center; gap: 3px; background: rgba(229, 168, 59, 0.15); padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 800; color: var(--accent-gold, #c98a2c);">Exodus 20:1-17</span>
-                    <span class="feed-card-label" data-i18n="commandments_cat" style="font-size: 12px; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">BIBLICAL LAW</span>
+                    <span class="feed-card-pill" data-i18n="commandments_ref" style="display: inline-flex; align-items: center; gap: 3px; background: rgba(247, 0, 47, 0.08); padding: 3px 9px; border-radius: 10px; font-size: 11px; font-weight: 800; color: #F7002F; border: 1px solid rgba(247, 0, 47, 0.2);">Exodus 20:1-17</span>
+                    <span class="feed-card-label" data-i18n="commandments_cat" style="font-size: 11.5px; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">BIBLICAL LAW</span>
                   </div>
-                  <h3 class="feed-card-title" data-i18n="commandments_title" style="font-size: 17px; font-weight: 800; color: var(--text); margin: 0 0 4px 0; line-height: 1.35;">The 10 Commandments</h3>
-                  <p data-i18n="commandments_sub" style="font-size: 12.5px; color: var(--text-muted); margin: 0 0 6px 0; line-height: 1.4;">
+                  <h3 class="feed-card-title" data-i18n="commandments_title" style="font-size: 17.5px; font-weight: 800; color: #000000; margin: 0 0 4px 0; line-height: 1.35;">The 10 Commandments (दहा आज्ञा)</h3>
+                  <p data-i18n="commandments_sub" style="font-size: 12.5px; color: #555555; margin: 0 0 8px 0; line-height: 1.45; font-weight: 500;">
                     सीनाय पर्वतावर देवाने दिलेला शाश्वत नियम आणि येशूने सांगितलेला सारांश.
                   </p>
-                  <span class="feed-card-sub" data-i18n="commandments_action" style="font-size: 12px; color: var(--primary); font-weight: 800; display: inline-flex; align-items: center; gap: 4px;">
-                    ▶ सर्व १० आज्ञा उघडा व ऐका &rarr;
+                  <span class="feed-card-sub" data-i18n="commandments_action" style="font-size: 12.5px; color: #F7002F; font-weight: 800; display: inline-flex; align-items: center; gap: 4px;">
+                    सर्व १० आज्ञा वाचा &rarr;
                   </span>
                 </div>
-                <div class="feed-card-media" style="width: 72px; height: 72px; min-width: 72px; max-width: 72px; border-radius: 14px; overflow: hidden; position: relative; flex-shrink: 0; background: linear-gradient(135deg, #1e1b4b, #312e81); display: flex; align-items: center; justify-content: center; border: 1.5px solid rgba(229, 168, 59, 0.35); box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-                  <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="#f59e0b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                    <line x1="10" y1="6" x2="16" y2="6"></line>
-                    <line x1="10" y1="10" x2="16" y2="10"></line>
-                  </svg>
+                <div class="feed-card-character-box" style="width: 80px; height: 96px; min-width: 80px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: #FFFFFF; border: 1.5px solid #E9D5FF; border-radius: 16px; box-shadow: 0 4px 14px rgba(168, 85, 247, 0.08); overflow: hidden; padding: 4px;">
+                  <img src="assets/images/moses_ten_commandments.png" alt="Moses Holding Ten Commandments" style="width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.08)); transition: transform 0.25s ease;">
                 </div>
               </div>
 
@@ -551,23 +573,23 @@
                 </div>
 
                 <!-- Live Prayer Sanctuary Fellowship Banner -->
-                <div class="prayer-sanctuary-banner-card" style="margin-bottom: 18px; border-radius: 20px; overflow: hidden; background: linear-gradient(135deg, #1c0407 0%, #3b0a11 50%, #5c0f1b 100%); color: #ffffff; padding: 20px; box-shadow: 0 10px 25px rgba(92,15,27,0.25); border: 1px solid rgba(229,168,59,0.3); display: flex; flex-direction: column; gap: 12px; position: relative;">
+                <div class="prayer-sanctuary-banner-card" style="margin-bottom: 18px; border-radius: 20px; overflow: hidden; background: #ffffff; color: #000000; padding: 20px; box-shadow: var(--shadow-sm); border: 1.5px solid var(--border); display: flex; flex-direction: column; gap: 14px; position: relative;">
                   <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="background: linear-gradient(135deg, #16a34a, #22c55e); color: #fff; font-size: 11px; font-weight: 800; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 4px;">
-                      <span style="width: 7px; height: 7px; border-radius: 50%; background: #ffffff; display: inline-block;"></span>
+                    <span class="badge-success" style="font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 20px; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 6px;">
+                      <span class="status-dot status-dot-success" style="width: 7px; height: 7px;"></span>
                       🔴 LIVE FELLOWSHIP NOW
                     </span>
-                    <span style="font-size: 12px; color: rgba(255,255,255,0.75); font-weight: 600;" data-i18n="daily_sanctuary_tag">Daily Sanctuary</span>
+                    <span style="font-size: 12px; color: var(--text-muted); font-weight: 700;" data-i18n="daily_sanctuary_tag">Daily Sanctuary</span>
                   </div>
 
                   <div>
-                    <h4 style="margin: 0 0 6px 0; font-size: 18px; font-weight: 800; color: #ffffff;" data-i18n="live_fellowship_title">Daily Prayer & Scripture Fellowship</h4>
-                    <p style="margin: 0; font-size: 13px; color: rgba(255,255,255,0.85); line-height: 1.4;" data-i18n="live_fellowship_sub">
+                    <h4 style="margin: 0 0 6px 0; font-size: 18px; font-weight: 800; color: #000000;" data-i18n="live_fellowship_title">Daily Prayer & Scripture Fellowship</h4>
+                    <p style="margin: 0; font-size: 13.5px; color: var(--text-muted); line-height: 1.5;" data-i18n="live_fellowship_sub">
                       थेट भक्ती, स्तुती आणि शास्त्रवचनांच्या मननामध्ये सहभागी व्हा.
                     </p>
                   </div>
 
-                  <button class="btn-primary-block" onclick="switchTab('meetings')" style="background: linear-gradient(135deg, #dfa938 0%, #c99328 100%); color: #172116; border: none; border-radius: 12px; padding: 12px 18px; font-size: 14.5px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(223,169,56,0.35);">
+                  <button class="btn-primary-block" onclick="switchTab('meetings')" style="background: var(--primary); color: #ffffff; border: none; border-radius: 12px; padding: 12px 18px; font-size: 14.5px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px var(--primary-glow); transition: transform 0.15s ease;">
                     <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2"></rect></svg>
                     <span data-i18n="btn_join_fellowship">Join Prayer Sanctuary</span>
                   </button>
@@ -689,34 +711,38 @@
                 </div>
               </div>
 
-              <!-- 4TH OPTION: Bible Quiz with 4 Difficulty Levels -->
-              <div class="bible-quiz-promo-card" id="btn-open-bible-quiz">
-                <div class="quiz-card-content">
-                  <div class="quiz-card-art">🏆</div>
-                  <div class="quiz-card-details">
+              <!-- 4TH OPTION: Bible Quiz with 4 Difficulty Levels (60-30-10 Theme) -->
+              <div class="bible-quiz-promo-card" id="btn-open-bible-quiz" onclick="openBibleQuizModal()">
+                <div class="quiz-card-content" style="display: flex; align-items: center; gap: 16px; margin-bottom: 14px;">
+                  <div class="quiz-card-art" style="background: rgba(247, 0, 47, 0.08); border: 1.5px solid rgba(247, 0, 47, 0.2); border-radius: 16px; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; font-size: 26px;">🏆</div>
+                  <div class="quiz-card-details" style="flex: 1;">
                     <div class="quiz-badge-row" style="display: flex; gap: 6px; align-items: center; margin-bottom: 4px;">
-                      <span class="quiz-badge-gold" data-i18n="quiz_badge_trivia">BIBLE TRIVIA</span>
-                      <span class="quiz-badge-sub" data-i18n="quiz_badge_levels" style="font-size: 10.5px; font-weight: 700; color: #8B1D24; background: rgba(139,29,36,0.1); padding: 2px 8px; border-radius: 10px;">4 LEVELS</span>
+                      <span class="quiz-badge-gold" data-i18n="quiz_badge_trivia" style="background: #F7002F; color: #FFFFFF; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 6px; letter-spacing: 0.5px;">BIBLE TRIVIA</span>
+                      <span class="quiz-badge-sub" data-i18n="quiz_badge_levels" style="font-size: 10.5px; font-weight: 700; color: #F7002F; background: rgba(247, 0, 47, 0.08); padding: 2px 8px; border-radius: 6px;">4 DIFFICULTY LEVELS</span>
                     </div>
-                    <h5 data-i18n="quiz_card_title">Daily Bible Quiz Challenge</h5>
-                    <p data-i18n="quiz_card_sub">दैनिक बायबल प्रश्नमंजुषा • ४ कठीणता स्तर • बॅजेस</p>
-                    
-                    <!-- Level pills preview -->
-                    <div class="quiz-level-pills-row">
-                      <span class="quiz-level-pill lvl-1" data-i18n="quiz_lvl_1">🌱 नवशिक्या</span>
-                      <span class="quiz-level-pill lvl-2" data-i18n="quiz_lvl_2">⚔️ मध्यम</span>
-                      <span class="quiz-level-pill lvl-3" data-i18n="quiz_lvl_3">👑 प्रगत</span>
-                      <span class="quiz-level-pill lvl-4" data-i18n="quiz_lvl_4">🏆 पारंगत</span>
-                    </div>
-
-                    <div class="quiz-card-stats">
-                      <span id="quiz-stat-points">Total: 0 pts</span>
-                      <span class="dot-separator">•</span>
-                      <span id="quiz-stat-highscore">High Score: 0 pts</span>
-                    </div>
+                    <h4 style="margin: 0 0 2px 0; font-size: 16px; font-weight: 800; color: #000000;" data-i18n="quiz_card_title">Daily Bible Quiz Challenge</h4>
+                    <p style="margin: 0; font-size: 12px; font-weight: 600; color: #666666;" data-i18n="quiz_card_sub">दैनिक बायबल प्रश्नमंजुषा • ४ कठीणता स्तर • गुण व बॅजेस</p>
                   </div>
                 </div>
-                <button class="btn-play-quiz" data-i18n="quiz_card_btn">Play Quiz &rarr;</button>
+
+                <!-- Level pills preview -->
+                <div class="quiz-level-pills-row" style="display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap;">
+                  <span style="font-size: 11px; font-weight: 700; background: #FAFAFA; border: 1px solid #EAEAEA; padding: 3px 8px; border-radius: 8px; color: #000000;" data-i18n="quiz_lvl_1">🌱 नवशिक्या (Beginner)</span>
+                  <span style="font-size: 11px; font-weight: 700; background: #FAFAFA; border: 1px solid #EAEAEA; padding: 3px 8px; border-radius: 8px; color: #000000;" data-i18n="quiz_lvl_2">⚔️ मध्यम (Medium)</span>
+                  <span style="font-size: 11px; font-weight: 700; background: #FAFAFA; border: 1px solid #EAEAEA; padding: 3px 8px; border-radius: 8px; color: #000000;" data-i18n="quiz_lvl_3">👑 प्रगत (Advanced)</span>
+                  <span style="font-size: 11px; font-weight: 700; background: #FAFAFA; border: 1px solid #EAEAEA; padding: 3px 8px; border-radius: 8px; color: #000000;" data-i18n="quiz_lvl_4">🏆 पारंगत (Master)</span>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #EAEAEA; padding-top: 10px;">
+                  <div class="quiz-card-stats" style="font-size: 12px; font-weight: 700; color: #666666; display: flex; align-items: center; gap: 8px;">
+                    <span id="quiz-stat-points">Total: 0 pts</span>
+                    <span>•</span>
+                    <span id="quiz-stat-highscore">High Score: 0 pts</span>
+                  </div>
+                  <button class="btn-play-quiz" data-i18n="quiz_card_btn" style="background: #F7002F; color: #ffffff; border: none; border-radius: 10px; padding: 8px 16px; font-weight: 800; font-size: 12.5px; cursor: pointer; display: flex; align-items: center; gap: 4px; box-shadow: 0 3px 10px rgba(247, 0, 47, 0.25);">
+                    Play Quiz &rarr;
+                  </button>
+                </div>
               </div>
             </div> <!-- /.home-grid-layout -->
             </div> <!-- /#home-feed-today-container -->
@@ -815,53 +841,102 @@
                 </div>
               </div>
 
-              <!-- Community Prayer Wall Section -->
-              <div class="fellowship-card fellowship-item" data-category="prayer">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-                  <div style="display: flex; align-items: center; gap: 6px;">
-                    <span style="font-size: 18px;">🙏</span>
-                    <h3 style="font-size: 16.5px; font-weight: 800; color: var(--text); margin: 0;">Community Prayer Wall • प्रार्थना भिंत</h3>
+              <!-- Community Prayer Wall Section (Illustrated Category Cards) -->
+              <div class="fellowship-card fellowship-item" data-category="prayer" style="background: #FFFFFF; border: 1.5px solid #EAEAEA; border-radius: 24px; padding: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 20px;">🙏</span>
+                    <div>
+                      <h3 style="font-size: 17px; font-weight: 800; color: #000000; margin: 0;">Community Prayer Wall • प्रार्थना भिंत</h3>
+                      <span style="font-size: 11.5px; color: #666666; font-weight: 600;">Stand in agreement with believers across Maharashtra</span>
+                    </div>
                   </div>
-                  <button class="fellowship-btn-secondary" onclick="openSubmitPrayerModal()" style="font-size: 12px; padding: 6px 12px;">
+                  <button class="fellowship-btn-primary" onclick="openSubmitPrayerModal()" style="font-size: 12px; padding: 7px 14px; background: #F7002F;">
                     + Request Prayer
                   </button>
                 </div>
 
-                <!-- Prayer Request Item 1 -->
-                <div style="background: var(--pill-bg, #FAFAF8); border: 1px solid var(--border); border-radius: 14px; padding: 12px 14px; margin-bottom: 10px;">
-                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                    <span style="font-size: 13px; font-weight: 800; color: var(--text);">Sunita S. (Pune)</span>
-                    <span style="font-size: 11px; font-weight: 700; color: #d97706; background: rgba(245,158,11,0.12); padding: 2px 8px; border-radius: 6px;">Healing / आरोग्य</span>
+                <!-- Prayer Request Item 1: Healing (Illustrated Badge) -->
+                <div class="fellowship-prayer-card" style="background: #FFFFFF; border: 1.5px solid #EAEAEA; border-radius: 18px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">
+                  <div class="prayer-card-header-illustrated">
+                    <div class="prayer-user-meta">
+                      <div class="prayer-avatar" style="background: linear-gradient(135deg, #EF4444, #F7002F);">SS</div>
+                      <div>
+                        <h4 style="margin: 0; font-size: 14px; font-weight: 800; color: #000000;">Sunita S.</h4>
+                        <span style="font-size: 11.5px; color: #666666; font-weight: 600;">Bethel Church, Pune • 1h ago</span>
+                      </div>
+                    </div>
+                    <span class="prayer-art-badge healing">
+                      <span>🩺✨</span>
+                      <span>Healing / आरोग्य</span>
+                    </span>
                   </div>
-                  <p style="font-size: 13px; color: var(--text-muted); line-height: 1.5; margin: 0 0 10px 0;">
+                  <p style="font-size: 13.5px; color: #111111; line-height: 1.55; margin: 0 0 12px 0; font-weight: 500;">
                     माझ्या आईच्या शस्त्रक्रियेनंतरच्या उत्तम आरोग्यासाठी व लवकर बरी होण्यासाठी मंडळीने एकत्र प्रार्थना करावी ही नम्र विनंती.
                   </p>
-                  <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <button class="fellowship-amen-btn" onclick="prayAmen(this, 'amen-count-1')">
-                      <span class="amen-icon">🙏</span>
+                  <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #F0F0F0; padding-top: 10px;">
+                    <button class="prayer-amen-action-btn" onclick="prayAmen(this, 'amen-count-1')">
+                      <span>🙏</span>
                       <span id="amen-count-1">84</span>
                       <span>Pray Amen / आमेन</span>
                     </button>
-                    <span style="font-size: 11.5px; color: var(--steel-muted, #A3A6AE); font-weight: 600;">84 Believers Standing in Faith</span>
+                    <span style="font-size: 11.5px; color: #666666; font-weight: 700;">84 Believers Praying</span>
                   </div>
                 </div>
 
-                <!-- Prayer Request Item 2 -->
-                <div style="background: var(--pill-bg, #FAFAF8); border: 1px solid var(--border); border-radius: 14px; padding: 12px 14px;">
-                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                    <span style="font-size: 13px; font-weight: 800; color: var(--text);">Rahul & Family (Nashik)</span>
-                    <span style="font-size: 11px; font-weight: 700; color: #0f766e; background: rgba(13,148,136,0.12); padding: 2px 8px; border-radius: 6px;">Wisdom & Exams / ज्ञान</span>
+                <!-- Prayer Request Item 2: Family & Blessing (Illustrated Badge) -->
+                <div class="fellowship-prayer-card" style="background: #FFFFFF; border: 1.5px solid #EAEAEA; border-radius: 18px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">
+                  <div class="prayer-card-header-illustrated">
+                    <div class="prayer-user-meta">
+                      <div class="prayer-avatar" style="background: linear-gradient(135deg, #EC4899, #BE185D);">JM</div>
+                      <div>
+                        <h4 style="margin: 0; font-size: 14px; font-weight: 800; color: #000000;">Joseph & Martha</h4>
+                        <span style="font-size: 11.5px; color: #666666; font-weight: 600;">Grace Fellowship, Mumbai • 3h ago</span>
+                      </div>
+                    </div>
+                    <span class="prayer-art-badge family">
+                      <span>👨‍👩‍👧‍👦💖</span>
+                      <span>Family / कुटुंब</span>
+                    </span>
                   </div>
-                  <p style="font-size: 13px; color: var(--text-muted); line-height: 1.5; margin: 0 0 10px 0;">
-                    मुलांच्या आगामी स्पर्धा परीक्षांसाठी देवाचे आत्मिक ज्ञान व मार्गदर्शन लाभावे म्हणून प्रार्थना करा.
+                  <p style="font-size: 13.5px; color: #111111; line-height: 1.55; margin: 0 0 12px 0; font-weight: 500;">
+                    आमच्या कुटुंबात देवाचा पवित्र विसावा, ऐक्य आणि नव्या घरासाठी देवाच्या आशीर्वादासाठी प्रार्थना विनंती.
                   </p>
-                  <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <button class="fellowship-amen-btn" onclick="prayAmen(this, 'amen-count-2')">
-                      <span class="amen-icon">🙏</span>
-                      <span id="amen-count-2">62</span>
+                  <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #F0F0F0; padding-top: 10px;">
+                    <button class="prayer-amen-action-btn" onclick="prayAmen(this, 'amen-count-2')">
+                      <span>🙏</span>
+                      <span id="amen-count-2">96</span>
                       <span>Pray Amen / आमेन</span>
                     </button>
-                    <span style="font-size: 11.5px; color: var(--steel-muted, #A3A6AE); font-weight: 600;">62 Believers Standing in Faith</span>
+                    <span style="font-size: 11.5px; color: #666666; font-weight: 700;">96 Believers Praying</span>
+                  </div>
+                </div>
+
+                <!-- Prayer Request Item 3: Wisdom & Exams (Illustrated Badge) -->
+                <div class="fellowship-prayer-card" style="background: #FFFFFF; border: 1.5px solid #EAEAEA; border-radius: 18px; padding: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">
+                  <div class="prayer-card-header-illustrated">
+                    <div class="prayer-user-meta">
+                      <div class="prayer-avatar" style="background: linear-gradient(135deg, #0EA5E9, #0284C7);">RF</div>
+                      <div>
+                        <h4 style="margin: 0; font-size: 14px; font-weight: 800; color: #000000;">Rahul & Family</h4>
+                        <span style="font-size: 11.5px; color: #666666; font-weight: 600;">Nashik Fellowship • 5h ago</span>
+                      </div>
+                    </div>
+                    <span class="prayer-art-badge wisdom">
+                      <span>🎓💡</span>
+                      <span>Wisdom / ज्ञान व यश</span>
+                    </span>
+                  </div>
+                  <p style="font-size: 13.5px; color: #111111; line-height: 1.55; margin: 0 0 12px 0; font-weight: 500;">
+                    मुलांच्या आगामी स्पर्धा परीक्षांसाठी देवाचे आत्मिक ज्ञान, एकाग्रता व मार्गदर्शन लाभावे म्हणून प्रार्थना करा.
+                  </p>
+                  <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #F0F0F0; padding-top: 10px;">
+                    <button class="prayer-amen-action-btn" onclick="prayAmen(this, 'amen-count-3')">
+                      <span>🙏</span>
+                      <span id="amen-count-3">72</span>
+                      <span>Pray Amen / आमेन</span>
+                    </button>
+                    <span style="font-size: 11.5px; color: #666666; font-weight: 700;">72 Believers Praying</span>
                   </div>
                 </div>
               </div>
@@ -1375,27 +1450,27 @@
                 </h4>
                 
                 <!-- 10 Commandments Card -->
-                <div class="commandments-hub-card" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-radius: 18px; padding: 20px; color: #ffffff; border: 1.5px solid rgba(229, 168, 59, 0.35); box-shadow: var(--shadow-md);">
+                <div class="commandments-hub-card" style="background: #ffffff; border-radius: 18px; padding: 20px; color: #000000; border: 1.5px solid var(--border); box-shadow: var(--shadow-sm);">
                   <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
                     <div>
-                      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                        <span style="font-size: 11px; font-weight: 800; background: var(--accent-gold, #e5a83b); color: #1e1b4b; padding: 3px 8px; border-radius: 6px;">EXODUS 20 • निर्गम २०</span>
-                        <span style="font-size: 11.5px; color: rgba(255,255,255,0.75);">The Moral Law</span>
+                      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                        <span class="badge-brand" style="font-size: 11px; font-weight: 800; padding: 3px 9px; border-radius: 6px;">EXODUS 20 • निर्गम २०</span>
+                        <span style="font-size: 11.5px; color: var(--text-muted); font-weight: 600;">The Moral Law</span>
                       </div>
-                      <h3 style="font-size: 20px; font-weight: 800; margin: 0; color: #ffffff;">The 10 Commandments (दहा आज्ञा)</h3>
+                      <h3 style="font-size: 20px; font-weight: 800; margin: 0; color: #000000;">The 10 Commandments (दहा आज्ञा)</h3>
                     </div>
                     <span style="font-size: 32px;">📜</span>
                   </div>
-                  <p style="font-size: 13.5px; color: rgba(255,255,255,0.85); margin: 0 0 16px 0; line-height: 1.5;">
+                  <p style="font-size: 13.5px; color: var(--text-muted); margin: 0 0 16px 0; line-height: 1.5;">
                     God's eternal covenant given at Mount Sinai (Exodus 20 / Deuteronomy 5) and fulfilled in Christ's Great Commandment of love (Matthew 22:37-40).
                   </p>
                   
                   <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <button onclick="toggleTenCommandmentsModal()" style="background: var(--accent-gold, #e5a83b); color: #1e1b4b; font-weight: 800; border: none; padding: 9px 18px; border-radius: 10px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                    <button onclick="toggleTenCommandmentsModal()" style="background: var(--primary); color: #ffffff; font-weight: 800; border: none; padding: 10px 18px; border-radius: 10px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px var(--primary-glow);">
                       <span>Explore All 10 Commandments (सर्व १० आज्ञा वाचा)</span>
                       <span>&rarr;</span>
                     </button>
-                    <button onclick="openReaderAndNavigate('exodus', 20, 1);" style="background: rgba(255,255,255,0.12); color: #ffffff; font-weight: 700; border: 1px solid rgba(255,255,255,0.25); padding: 9px 14px; border-radius: 10px; font-size: 13px; cursor: pointer;">
+                    <button onclick="openReaderAndNavigate('exodus', 20, 1);" style="background: #000000; color: #ffffff; font-weight: 700; border: none; padding: 10px 14px; border-radius: 10px; font-size: 13px; cursor: pointer;">
                       Open Exodus 20 in Bible 📖
                     </button>
                   </div>
@@ -1742,6 +1817,20 @@
         <section id="view-you" class="app-view">
           <div class="view-scroll-content">
             
+            <!-- Admin & Pastor Console Quick Entry Card (Always visible on You view) -->
+            <div id="you-admin-panel-card" class="profile-badges-card-new" style="max-width: 680px; margin: 0 auto 16px auto; padding: 14px 18px; border: 1.5px solid rgba(224, 83, 95, 0.35); background: linear-gradient(135deg, rgba(224, 83, 95, 0.08), rgba(217, 119, 6, 0.08)); cursor: pointer; border-radius: 16px;" onclick="switchTab('admin')">
+              <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <div style="width: 40px; height: 40px; border-radius: 10px; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 4px 12px rgba(224,83,95,0.3);">🛡️</div>
+                  <div>
+                    <h4 style="margin: 0; font-size: 15px; font-weight: 800; color: var(--text);">Admin & Pastor Console / व्यवस्थापन</h4>
+                    <span style="font-size: 12px; color: var(--text-muted);">Manage Members, VOD, Meetings, Prayers & Alerts</span>
+                  </div>
+                </div>
+                <button class="btn-primary-mini" style="margin: 0; padding: 8px 14px; font-size: 12px; border-radius: 8px; font-weight: 800; cursor: pointer;">Open Console &rarr;</button>
+              </div>
+            </div>
+
             <!-- A. Logged Out Auth Screen Container -->
             <div id="you-logged-out-container">
               <div class="auth-card" style="background-color: var(--bg-content); border: 1px solid var(--border); border-radius: 20px; padding: 24px; box-shadow: var(--shadow-md); max-width: 480px; margin: 40px auto;">
@@ -2038,25 +2127,385 @@
             
           </div>
         </section>
+
+        <!-- ==========================================================================
+             VIEW 8: DEDICATED ADMIN & PASTOR CONSOLE
+             ========================================================================== -->
+        <section id="view-admin" class="app-view" style="display: none;">
+          <div class="view-scroll-content" style="max-width: 1040px; margin: 0 auto; padding-bottom: 90px;">
+            
+            <!-- Admin Header Banner -->
+            <div class="welcome-header-card" style="background: linear-gradient(135deg, #1e1b2e 0%, #2d1624 50%, #1a2332 100%); color: #fff; border: 1.5px solid rgba(224,83,95,0.4); border-radius: 20px; padding: 22px; margin-bottom: 18px; box-shadow: 0 8px 30px rgba(0,0,0,0.3); position: relative; overflow: hidden;">
+              <div style="position: absolute; right: -20px; top: -20px; width: 140px; height: 140px; background: radial-gradient(circle, rgba(224,83,95,0.2) 0%, transparent 70%); border-radius: 50%; pointer-events: none;"></div>
+              
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap;">
+                <div>
+                  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                    <span style="background: rgba(224,83,95,0.2); border: 1px solid rgba(224,83,95,0.5); color: #fca5a5; font-size: 11px; font-weight: 800; padding: 3px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px;">🛡️ Church Administration</span>
+                    <span id="admin-security-status-badge" style="background: rgba(34,197,94,0.2); border: 1px solid rgba(34,197,94,0.4); color: #86efac; font-size: 11px; font-weight: 800; padding: 3px 10px; border-radius: 20px;">PIN Verified (2323)</span>
+                  </div>
+                  <h2 style="font-size: 24px; font-weight: 800; margin: 0 0 4px 0; color: #fff;">Admin & Pastor Console</h2>
+                  <p style="font-size: 13px; color: rgba(255,255,255,0.75); margin: 0;">Manage congregation members, daily scripture (VOD), video meetings, pastoral prayer moderation & live church announcements.</p>
+                </div>
+
+                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                  <button id="btn-admin-elevate-quick" onclick="elevateCurrentSessionToAdmin()" style="background: linear-gradient(135deg, #e0535f 0%, #c93b48 100%); color: #fff; border: none; padding: 9px 15px; border-radius: 12px; font-size: 12.5px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(224,83,95,0.4);">
+                    <span>🔑 Admin Mode</span>
+                  </button>
+                  <button onclick="switchTab('home')" style="background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 9px 14px; border-radius: 12px; font-size: 12.5px; font-weight: 700; cursor: pointer;">
+                    &larr; Exit to App
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Admin Subtabs Carousel Navigation -->
+            <div class="admin-subnav-row" style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 18px; scrollbar-width: none;">
+              <button class="admin-subnav-btn active" data-admin-subtab="overview" onclick="switchAdminSubtab('overview')">📊 Overview</button>
+              <button class="admin-subnav-btn" data-admin-subtab="members" onclick="switchAdminSubtab('members')">👥 Members & Roles</button>
+              <button class="admin-subnav-btn" data-admin-subtab="vod" onclick="switchAdminSubtab('vod')">📖 Verse of Day (VOD)</button>
+              <button class="admin-subnav-btn" data-admin-subtab="meetings" onclick="switchAdminSubtab('meetings')">📹 Video Meetings</button>
+              <button class="admin-subnav-btn" data-admin-subtab="prayers" onclick="switchAdminSubtab('prayers')">🙏 Pastoral Prayers</button>
+              <button class="admin-subnav-btn" data-admin-subtab="announcements" onclick="switchAdminSubtab('announcements')">📢 Announcements</button>
+              <button class="admin-subnav-btn" data-admin-subtab="settings" onclick="switchAdminSubtab('settings')">⚙️ Security & PIN</button>
+            </div>
+
+            <!-- SUBPANEL 1: OVERVIEW -->
+            <div id="admin-panel-overview" class="admin-subtab-panel active">
+              <!-- KPI Metrics Grid -->
+              <div class="admin-metrics-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 20px;">
+                <div class="admin-stat-card" style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 4px 16px rgba(0,0,0,0.03);">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Members</span>
+                    <span style="font-size: 18px;">👥</span>
+                  </div>
+                  <div id="admin-stat-members-count" style="font-size: 28px; font-weight: 900; color: var(--text);">7</div>
+                  <span style="font-size: 11.5px; color: #22c55e; font-weight: 700;">Active Congregation</span>
+                </div>
+
+                <div class="admin-stat-card" style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 4px 16px rgba(0,0,0,0.03);">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Prayer Requests</span>
+                    <span style="font-size: 18px;">🙏</span>
+                  </div>
+                  <div id="admin-stat-prayers-count" style="font-size: 28px; font-weight: 900; color: var(--primary);">4</div>
+                  <span id="admin-stat-prayers-sub" style="font-size: 11.5px; color: var(--text-muted); font-weight: 600;">2 Pending • 2 Answered</span>
+                </div>
+
+                <div class="admin-stat-card" style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 4px 16px rgba(0,0,0,0.03);">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Meetings</span>
+                    <span style="font-size: 18px;">📹</span>
+                  </div>
+                  <div id="admin-stat-meetings-count" style="font-size: 28px; font-weight: 900; color: #3b82f6;">3</div>
+                  <span style="font-size: 11.5px; color: #3b82f6; font-weight: 700;">WebRTC Rooms Ready</span>
+                </div>
+
+                <div class="admin-stat-card" style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 4px 16px rgba(0,0,0,0.03);">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Marathi Audio TTS</span>
+                    <span style="font-size: 18px;">🎙️</span>
+                  </div>
+                  <div style="font-size: 20px; font-weight: 900; color: #10b981; margin-top: 4px;">Online</div>
+                  <span style="font-size: 11.5px; color: var(--text-muted); font-weight: 600;">Manohar Neural / Sarvam</span>
+                </div>
+              </div>
+
+              <!-- Quick Operations Row -->
+              <div class="settings-card-group" style="padding: 20px; margin-bottom: 20px;">
+                <h4 style="font-size: 14px; font-weight: 800; text-transform: uppercase; margin-bottom: 14px; color: var(--primary);">Quick Administration Actions</h4>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                  <button onclick="openAdminAddMemberModal()" class="admin-quick-action-btn" style="padding: 14px; border-radius: 12px; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-weight: 700; font-size: 13px; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 20px;">👤➕</span>
+                    <div>
+                      <div>Add Member / User</div>
+                      <div style="font-size: 11px; color: var(--text-muted); font-weight: 500;">Register new leader/pastor</div>
+                    </div>
+                  </button>
+
+                  <button onclick="switchAdminSubtab('vod')" class="admin-quick-action-btn" style="padding: 14px; border-radius: 12px; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-weight: 700; font-size: 13px; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 20px;">📖✏️</span>
+                    <div>
+                      <div>Edit Today's Verse</div>
+                      <div style="font-size: 11px; color: var(--text-muted); font-weight: 500;">Customize daily scripture</div>
+                    </div>
+                  </button>
+
+                  <button onclick="switchAdminSubtab('meetings')" class="admin-quick-action-btn" style="padding: 14px; border-radius: 12px; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-weight: 700; font-size: 13px; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 20px;">📹✨</span>
+                    <div>
+                      <div>Create Meeting</div>
+                      <div style="font-size: 11px; color: var(--text-muted); font-weight: 500;">Launch instant prayer room</div>
+                    </div>
+                  </button>
+
+                  <button onclick="openAdminAddAnnouncementModal()" class="admin-quick-action-btn" style="padding: 14px; border-radius: 12px; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-weight: 700; font-size: 13px; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 20px;">📢⚡</span>
+                    <div>
+                      <div>Post Announcement</div>
+                      <div style="font-size: 11px; color: var(--text-muted); font-weight: 500;">Publish broadcast banner</div>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              <!-- System Health Status -->
+              <div class="settings-card-group" style="padding: 20px;">
+                <h4 style="font-size: 14px; font-weight: 800; text-transform: uppercase; margin-bottom: 14px; color: var(--primary);">System Health & Storage</h4>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 8px; border-bottom: 1px solid var(--border);">
+                    <span style="font-size: 13px; color: var(--text); font-weight: 600;">Active Session User</span>
+                    <span id="admin-current-user-name" style="font-size: 13px; font-weight: 800; color: var(--primary);">Admin (Superuser)</span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 8px; border-bottom: 1px solid var(--border);">
+                    <span style="font-size: 13px; color: var(--text); font-weight: 600;">Local Database Storage</span>
+                    <span style="font-size: 13px; font-weight: 700; color: #22c55e;">Synchronized (IndexedDB & LocalStorage)</span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 13px; color: var(--text); font-weight: 600;">Application Version</span>
+                    <span style="font-size: 13px; font-weight: 700; color: var(--text-muted);">River of Life v105 (Enterprise)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- SUBPANEL 2: MEMBERS & ROLES -->
+            <div id="admin-panel-members" class="admin-subtab-panel" style="display: none;">
+              <div class="settings-card-group" style="padding: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+                  <div>
+                    <h3 style="margin: 0; font-size: 17px; font-weight: 800; color: var(--text);">Church Congregation & Team Directory</h3>
+                    <p style="margin: 2px 0 0 0; font-size: 12px; color: var(--text-muted);">Assign roles, manage pastors, leaders, and congregation members.</p>
+                  </div>
+                  <button onclick="openAdminAddMemberModal()" class="btn-primary-mini" style="margin: 0; padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 800; cursor: pointer;">
+                    + Add New Member
+                  </button>
+                </div>
+
+                <!-- Search and Filter Bar -->
+                <div style="display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap;">
+                  <input type="text" id="admin-member-search" placeholder="Search members by name or email..." style="flex: 1; min-width: 200px; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 13px;" oninput="filterAdminMembers()">
+                  <select id="admin-member-role-filter" style="padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 13px; font-weight: 700;" onchange="filterAdminMembers()">
+                    <option value="all">All Roles</option>
+                    <option value="Admin">Admin</option>
+                    <option value="Pastor">Pastor</option>
+                    <option value="Leader">Leader</option>
+                    <option value="Member">Member</option>
+                  </select>
+                </div>
+
+                <!-- Members List Container -->
+                <div id="admin-members-list-container" style="display: flex; flex-direction: column; gap: 10px;">
+                  <!-- Rendered dynamically -->
+                </div>
+              </div>
+            </div>
+
+            <!-- SUBPANEL 3: VERSE OF THE DAY (VOD) -->
+            <div id="admin-panel-vod" class="admin-subtab-panel" style="display: none;">
+              <div class="settings-card-group" style="padding: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+                  <div>
+                    <h3 style="margin: 0; font-size: 17px; font-weight: 800; color: var(--text);">Daily Scripture Customizer (VOD)</h3>
+                    <p style="margin: 2px 0 0 0; font-size: 12px; color: var(--text-muted);">Override and publish today's daily Bible verse displayed across all devices.</p>
+                  </div>
+                  <button onclick="resetAdminVODToDefault()" class="btn-secondary-mini" style="margin: 0; font-size: 12px; border: 1px solid var(--border); background: transparent; color: var(--text);">Reset to Default</button>
+                </div>
+
+                <form id="admin-vod-form" onsubmit="saveAdminVOD(event); return false;" style="display: flex; flex-direction: column; gap: 16px;">
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                    <div class="form-input-group" style="display: flex; flex-direction: column; gap: 6px;">
+                      <label style="font-size: 12.5px; font-weight: 700; color: var(--text-muted);">Scripture Reference (Marathi)</label>
+                      <input type="text" id="admin-vod-ref-mar" value="यिर्मया २९:११" required style="padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 13.5px; font-weight: 700;" oninput="updateAdminVODPreview()">
+                    </div>
+                    <div class="form-input-group" style="display: flex; flex-direction: column; gap: 6px;">
+                      <label style="font-size: 12.5px; font-weight: 700; color: var(--text-muted);">Scripture Reference (English)</label>
+                      <input type="text" id="admin-vod-ref-eng" value="Jeremiah 29:11" required style="padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 13.5px; font-weight: 700;">
+                    </div>
+                  </div>
+
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                    <div class="form-input-group" style="display: flex; flex-direction: column; gap: 6px;">
+                      <label style="font-size: 12.5px; font-weight: 700; color: var(--text-muted);">Target Book ID</label>
+                      <select id="admin-vod-book-id" style="padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 13.5px;">
+                        <option value="jer">Jeremiah (यिर्मया)</option>
+                        <option value="psa">Psalms (स्तोत्रसंहिता)</option>
+                        <option value="pro">Proverbs (नीतिसूत्रे)</option>
+                        <option value="mat">Matthew (मत्तय)</option>
+                        <option value="joh">John (योहान)</option>
+                        <option value="rom">Romans (रोमकरांस)</option>
+                        <option value="phi">Philippians (फिलिप्पीकरांस)</option>
+                        <option value="isa">Isaiah (यशया)</option>
+                      </select>
+                    </div>
+                    <div class="form-input-group" style="display: flex; flex-direction: column; gap: 6px;">
+                      <label style="font-size: 12.5px; font-weight: 700; color: var(--text-muted);">Target Chapter Number</label>
+                      <input type="number" id="admin-vod-chapter" value="29" min="1" max="150" required style="padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 13.5px;">
+                    </div>
+                  </div>
+
+                  <div class="form-input-group" style="display: flex; flex-direction: column; gap: 6px;">
+                    <label style="font-size: 12.5px; font-weight: 700; color: var(--text-muted);">Marathi Verse Text (मराठी पवित्र वचन)</label>
+                    <textarea id="admin-vod-text-mar" rows="3" required style="padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; resize: vertical;" oninput="updateAdminVODPreview()">कारण जे संकल्प मी तुमच्याविषयी योजिले आहेत ते मी जाणतो; ते तुमचे कल्याण करण्याचे आहेत, हानी करण्याचे नाहीत, असे परमेश्वर म्हणतो.</textarea>
+                  </div>
+
+                  <div class="form-input-group" style="display: flex; flex-direction: column; gap: 6px;">
+                    <label style="font-size: 12.5px; font-weight: 700; color: var(--text-muted);">English Verse Text</label>
+                    <textarea id="admin-vod-text-eng" rows="3" required style="padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; resize: vertical;">"For I know the plans I have for you," declares the Lord, "plans to prosper you and not to harm you, plans to give you hope and a future."</textarea>
+                  </div>
+
+                  <div class="form-input-group" style="display: flex; flex-direction: column; gap: 6px;">
+                    <label style="font-size: 12.5px; font-weight: 700; color: var(--text-muted);">Theme Background Artwork</label>
+                    <select id="admin-vod-theme" style="padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 13.5px;" onchange="updateAdminVODPreview()">
+                      <option value="crimson">River Crimson & Gold (Default)</option>
+                      <option value="cana">Wedding at Cana (Miracle Artwork)</option>
+                      <option value="dawn">Morning Dawn Glow</option>
+                      <option value="evening">Evening Peace Sunset</option>
+                      <option value="nature">Living Waters Stream</option>
+                    </select>
+                  </div>
+
+                  <!-- Live Preview Card -->
+                  <div style="border-top: 1px solid var(--border); padding-top: 14px; margin-top: 4px;">
+                    <strong style="font-size: 12px; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 8px;">Live Card Preview (How members see it):</strong>
+                    <div id="admin-vod-preview-box" style="background: linear-gradient(135deg, #2d1624, #1e1b2e); color: #fff; padding: 18px; border-radius: 16px; border: 1.5px solid rgba(224,83,95,0.4); box-shadow: 0 4px 16px rgba(0,0,0,0.2);">
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="font-size: 11px; font-weight: 800; color: #fca5a5; letter-spacing: 0.5px;">✉ DAILY BIBLE VERSE</span>
+                        <span id="admin-preview-ref" style="font-size: 12px; font-weight: 800; color: #fde047;">यिर्मया २९:११</span>
+                      </div>
+                      <p id="admin-preview-text" style="font-size: 14px; line-height: 1.5; margin: 0 0 10px 0; font-style: italic;">"कारण जे संकल्प मी तुमच्याविषयी योजिले आहेत..."</p>
+                      <div style="display: flex; gap: 8px;">
+                        <button type="button" class="btn-primary-mini" style="font-size: 11px; padding: 4px 10px;">Read Chapter</button>
+                        <button type="button" class="btn-secondary-mini" style="font-size: 11px; padding: 4px 10px; border: 1px solid rgba(255,255,255,0.3); background: transparent; color: #fff;">Share</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button type="submit" class="btn-primary-block" style="padding: 14px; border-radius: 12px; font-size: 14px; font-weight: 800; margin-top: 10px;">
+                    💾 Save & Publish Daily Verse / वचन प्रकाशित करा
+                  </button>
+                </form>
+              </div>
+            </div>
+
+            <!-- SUBPANEL 4: MEETINGS -->
+            <div id="admin-panel-meetings" class="admin-subtab-panel" style="display: none;">
+              <div class="settings-card-group" style="padding: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+                  <div>
+                    <h3 style="margin: 0; font-size: 17px; font-weight: 800; color: var(--text);">Manage Church Prayer Meetings</h3>
+                    <p style="margin: 2px 0 0 0; font-size: 12px; color: var(--text-muted);">Schedule fellowships, manage hosts, WebRTC room IDs, and broadcast links.</p>
+                  </div>
+                  <button onclick="openAdminCreateMeetingModal()" class="btn-primary-mini" style="margin: 0; padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 800; cursor: pointer;">
+                    + Schedule Meeting
+                  </button>
+                </div>
+
+                <div id="admin-meetings-list-container" style="display: flex; flex-direction: column; gap: 12px;">
+                  <!-- Rendered dynamically -->
+                </div>
+              </div>
+            </div>
+
+            <!-- SUBPANEL 5: PASTORAL PRAYERS -->
+            <div id="admin-panel-prayers" class="admin-subtab-panel" style="display: none;">
+              <div class="settings-card-group" style="padding: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+                  <div>
+                    <h3 style="margin: 0; font-size: 17px; font-weight: 800; color: var(--text);">Pastoral Prayer Moderation Console</h3>
+                    <p style="margin: 2px 0 0 0; font-size: 12px; color: var(--text-muted);">Review congregation requests, write pastoral blessings, and mark answered prayers.</p>
+                  </div>
+                  <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                    <button class="btn-secondary-mini active" data-admin-prayer-filter="all" onclick="filterAdminPrayers('all')">All</button>
+                    <button class="btn-secondary-mini" data-admin-prayer-filter="pending" onclick="filterAdminPrayers('pending')">Pending</button>
+                    <button class="btn-secondary-mini" data-admin-prayer-filter="acknowledged" onclick="filterAdminPrayers('acknowledged')">Acknowledged</button>
+                    <button class="btn-secondary-mini" data-admin-prayer-filter="answered" onclick="filterAdminPrayers('answered')">Answered</button>
+                  </div>
+                </div>
+
+                <div id="admin-prayers-list-container" style="display: flex; flex-direction: column; gap: 12px;">
+                  <!-- Rendered dynamically -->
+                </div>
+              </div>
+            </div>
+
+            <!-- SUBPANEL 6: ANNOUNCEMENTS -->
+            <div id="admin-panel-announcements" class="admin-subtab-panel" style="display: none;">
+              <div class="settings-card-group" style="padding: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+                  <div>
+                    <h3 style="margin: 0; font-size: 17px; font-weight: 800; color: var(--text);">Live Church Announcements Broadcast</h3>
+                    <p style="margin: 2px 0 0 0; font-size: 12px; color: var(--text-muted);">Post banners that appear across church members' home dashboards.</p>
+                  </div>
+                  <button onclick="openAdminAddAnnouncementModal()" class="btn-primary-mini" style="margin: 0; padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 800; cursor: pointer;">
+                    + Create Announcement
+                  </button>
+                </div>
+
+                <div id="admin-announcements-list-container" style="display: flex; flex-direction: column; gap: 12px;">
+                  <!-- Rendered dynamically -->
+                </div>
+              </div>
+            </div>
+
+            <!-- SUBPANEL 7: SECURITY & PIN -->
+            <div id="admin-panel-settings" class="admin-subtab-panel" style="display: none;">
+              <div class="settings-card-group" style="padding: 20px; margin-bottom: 20px;">
+                <h3 style="margin: 0 0 4px 0; font-size: 17px; font-weight: 800; color: var(--text);">Admin Security & PIN Management</h3>
+                <p style="margin: 0 0 16px 0; font-size: 12.5px; color: var(--text-muted);">Configure admin access PIN (Default PIN: <strong>2323</strong>).</p>
+
+                <div style="display: flex; flex-direction: column; gap: 14px; max-width: 400px;">
+                  <div class="form-input-group" style="display: flex; flex-direction: column; gap: 6px;">
+                    <label style="font-size: 12.5px; font-weight: 700; color: var(--text-muted);">Current / New Admin PIN</label>
+                    <input type="password" id="admin-pin-input-field" value="2323" maxlength="8" style="padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 16px; font-weight: 800; letter-spacing: 2px;">
+                  </div>
+                  <button onclick="saveAdminPIN()" class="btn-primary-block" style="padding: 12px; border-radius: 10px; font-size: 13.5px; font-weight: 800;">
+                    Update Admin PIN / पिन बदला
+                  </button>
+                </div>
+              </div>
+
+              <!-- Backup & Restore -->
+              <div class="settings-card-group" style="padding: 20px;">
+                <h3 style="margin: 0 0 4px 0; font-size: 17px; font-weight: 800; color: var(--text);">Backup & Data Recovery</h3>
+                <p style="margin: 0 0 16px 0; font-size: 12.5px; color: var(--text-muted);">Export or restore church settings, custom VOD, and announcements JSON data.</p>
+
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                  <button onclick="exportAdminDataBackup()" class="btn-secondary-mini" style="padding: 10px 18px; font-size: 13px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text);">
+                    📥 Export JSON Backup
+                  </button>
+                  <button onclick="resetAllAdminDataToFactory()" class="btn-danger-mini" style="padding: 10px 18px; font-size: 13px; border-radius: 8px;">
+                    ⚠️ Reset Admin Overrides
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
       </main>
 
-      <!-- 3. MOBILE BOTTOM NAVIGATION TAB BAR (Exactly 4 Tabs: Home page, Bible, Meetings, More) -->
-      <nav class="mobile-bottom-tabs four-tabs">
-        <button class="tab-btn active" data-tab="home">
+      <!-- 3. MOBILE BOTTOM NAVIGATION TAB BAR (Docked Bottom Menu on All Screen Sizes) -->
+      <nav class="mobile-bottom-tabs five-tabs">
+        <button class="tab-btn active" data-tab="home" onclick="switchTab('home')">
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-          <span class="tab-label" data-i18n="nav_home">मुख्यपृष्ठ</span>
+          <span class="tab-label" data-i18n="nav_home">Home</span>
         </button>
-        <button class="tab-btn" data-tab="reader">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
-          <span class="tab-label" data-i18n="nav_bible">बायबल</span>
+        <button class="tab-btn" data-tab="discover" onclick="switchTab('discover')">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <span class="tab-label" data-i18n="nav_discover">Search</span>
         </button>
-        <button class="tab-btn" data-tab="meetings">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
-          <span class="tab-label" data-i18n="nav_meetings">सभा</span>
+        <button class="tab-btn" data-tab="reader" onclick="switchTab('reader')">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M3 18v-6a9 9 0 0 1 18 0v6"></path><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path></svg>
+          <span class="tab-label" data-i18n="nav_audio">Audio</span>
+        </button>
+        <button class="tab-btn" data-tab="meetings" onclick="switchTab('meetings')">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          <span class="tab-label" data-i18n="nav_community">Community</span>
         </button>
         <button class="tab-btn" data-tab="more" id="btn-tab-more" onclick="openMoreMenu()">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="12" cy="12" r="2"></circle><circle cx="19" cy="12" r="2"></circle><circle cx="5" cy="12" r="2"></circle></svg>
-          <span class="tab-label" data-i18n="nav_more">अधिक</span>
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          <span class="tab-label" data-i18n="nav_settings">Settings</span>
         </button>
       </nav>
 
@@ -2147,6 +2596,17 @@
             <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(245,158,11,0.15); display: flex; align-items: center; justify-content: center; font-size: 18px;">🏆</div>
             <h4 style="margin: 0; font-size: 14px; font-weight: 800; color: var(--text);">Bible Quiz</h4>
             <span style="font-size: 11.5px; color: var(--text-muted);">Trivia challenge, points & badges</span>
+          </div>
+
+          <!-- 7. Admin & Pastor Console -->
+          <div class="more-card-item" onclick="closeDrawer('drawer-more-menu'); switchTab('admin');" style="background: var(--surface); border: 1.5px solid rgba(224, 83, 95, 0.4); border-radius: 16px; padding: 14px; cursor: pointer; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); grid-column: span 2;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(224,83,95,0.15); display: flex; align-items: center; justify-content: center; font-size: 18px;">🛡️</div>
+              <div>
+                <h4 style="margin: 0; font-size: 14px; font-weight: 800; color: var(--text);">Admin & Pastor Console / व्यवस्थापन</h4>
+                <span style="font-size: 11.5px; color: var(--text-muted);">Manage members, VOD, meetings, prayers & alerts</span>
+              </div>
+            </div>
           </div>
 
           <!-- 7. You Profile -->
@@ -2710,14 +3170,7 @@
           </div>
 
           <!-- Bottom Floating Action Bar -->
-          <div class="prayer-sanctuary-actions-bar">
-            <!-- Audio Play/Pause Button -->
-            <button class="prayer-action-btn primary" id="btn-prayer-audio-play" onclick="togglePrayerAudio()">
-              <svg id="prayer-audio-play-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                <polygon points="5 3 19 12 5 21 5 3"></polygon>
-              </svg>
-              <span id="prayer-audio-label">ऐका / Listen</span>
-            </button>
+          <div class="prayer-sanctuary-actions-bar" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
 
             <!-- WhatsApp Share Button (Clean SVG, No Emoji) -->
             <button class="prayer-action-btn secondary" id="btn-prayer-share-whatsapp" onclick="sharePrayerWhatsApp()">
@@ -3774,6 +4227,133 @@
       </div>
     </div>
 
+    <!-- ==========================================================================
+         ADMIN & PASTOR MODALS
+         ========================================================================== -->
+    
+    <!-- Modal 1: Add New Member / Leader / Pastor -->
+    <div id="modal-admin-add-member" class="modal-overlay" style="display: none; align-items: center; justify-content: center; z-index: 2800; background: rgba(0,0,0,0.65); position: fixed; inset: 0;">
+      <div class="modal-dialog-content" style="background: var(--surface); color: var(--text); border: 1.5px solid var(--border); border-radius: 20px; width: 92%; max-width: 440px; padding: 24px; box-shadow: 0 12px 40px rgba(0,0,0,0.35);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <h3 style="margin: 0; font-size: 17px; font-weight: 800;">👤 Add Church Member / Leader</h3>
+          <button onclick="closeModal('modal-admin-add-member')" style="background: transparent; border: none; font-size: 22px; cursor: pointer; color: var(--text);">&times;</button>
+        </div>
+
+        <form id="form-admin-add-member" onsubmit="handleAdminAddMember(event); return false;" style="display: flex; flex-direction: column; gap: 14px;">
+          <div class="form-input-group" style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Full Name / पूर्ण नाव</label>
+            <input type="text" id="admin-input-new-name" required placeholder="e.g. Pastor David / Brother John" style="padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 13.5px;">
+          </div>
+
+          <div class="form-input-group" style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Email / ईमेल</label>
+            <input type="email" id="admin-input-new-email" required placeholder="e.g. member@riveroflife.org" style="padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 13.5px;">
+          </div>
+
+          <div class="form-input-group" style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Assigned Role / पद</label>
+            <select id="admin-input-new-role" style="padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 13.5px; font-weight: 700;">
+              <option value="Member">Member (सामान्य सदस्य)</option>
+              <option value="Leader">Youth / Cell Leader (आघाडी नेते)</option>
+              <option value="Pastor">Pastor (पास्टर / उपदेशक)</option>
+              <option value="Admin">Administrator (प्रशासक)</option>
+            </select>
+          </div>
+
+          <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <button type="button" onclick="closeModal('modal-admin-add-member')" class="btn-secondary-mini" style="flex: 1; padding: 12px; border: 1px solid var(--border); background: transparent; color: var(--text); border-radius: 10px; font-weight: 700;">Cancel</button>
+            <button type="submit" class="btn-primary-mini" style="flex: 1.5; padding: 12px; border-radius: 10px; font-weight: 800; font-size: 13px;">Save Member</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal 2: Create Church Announcement -->
+    <div id="modal-admin-add-announcement" class="modal-overlay" style="display: none; align-items: center; justify-content: center; z-index: 2800; background: rgba(0,0,0,0.65); position: fixed; inset: 0;">
+      <div class="modal-dialog-content" style="background: var(--surface); color: var(--text); border: 1.5px solid var(--border); border-radius: 20px; width: 92%; max-width: 460px; padding: 24px; box-shadow: 0 12px 40px rgba(0,0,0,0.35);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <h3 style="margin: 0; font-size: 17px; font-weight: 800;">📢 Broadcast Church Announcement</h3>
+          <button onclick="closeModal('modal-admin-add-announcement')" style="background: transparent; border: none; font-size: 22px; cursor: pointer; color: var(--text);">&times;</button>
+        </div>
+
+        <form id="form-admin-add-announcement" onsubmit="handleAdminAddAnnouncement(event); return false;" style="display: flex; flex-direction: column; gap: 14px;">
+          <div class="form-input-group" style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Announcement Title / शीर्षक</label>
+            <input type="text" id="admin-ann-title" required placeholder="e.g. Sunday Worship Service 10:00 AM" style="padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 13.5px; font-weight: 700;">
+          </div>
+
+          <div class="form-input-group" style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Message Body / संदेश</label>
+            <textarea id="admin-ann-body" rows="3" required placeholder="Join us this Sunday in-person or live on WebRTC..." style="padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 13.5px; resize: vertical;"></textarea>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div class="form-input-group" style="display: flex; flex-direction: column; gap: 6px;">
+              <label style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Priority Badge</label>
+              <select id="admin-ann-priority" style="padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 13px; font-weight: 700;">
+                <option value="important">⚡ Important (महत्त्वाचे)</option>
+                <option value="urgent">🚨 Urgent Alert</option>
+                <option value="info">ℹ️ General Notice</option>
+              </select>
+            </div>
+            <div class="form-input-group" style="display: flex; flex-direction: column; gap: 6px;">
+              <label style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Icon Emoji</label>
+              <select id="admin-ann-icon" style="padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 13px;">
+                <option value="🕊️">🕊️ Dove (Fellowship)</option>
+                <option value="⛪">⛪ Church</option>
+                <option value="📢">📢 Broadcast</option>
+                <option value="🔥">🔥 Revival</option>
+                <option value="🎉">🎉 Celebration</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <button type="button" onclick="closeModal('modal-admin-add-announcement')" class="btn-secondary-mini" style="flex: 1; padding: 12px; border: 1px solid var(--border); background: transparent; color: var(--text); border-radius: 10px; font-weight: 700;">Cancel</button>
+            <button type="submit" class="btn-primary-mini" style="flex: 1.5; padding: 12px; border-radius: 10px; font-weight: 800; font-size: 13px;">Publish Announcement</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal 3: Create / Schedule Meeting (Admin) -->
+    <div id="modal-admin-create-meeting" class="modal-overlay" style="display: none; align-items: center; justify-content: center; z-index: 2800; background: rgba(0,0,0,0.65); position: fixed; inset: 0;">
+      <div class="modal-dialog-content" style="background: var(--surface); color: var(--text); border: 1.5px solid var(--border); border-radius: 20px; width: 92%; max-width: 440px; padding: 24px; box-shadow: 0 12px 40px rgba(0,0,0,0.35);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <h3 style="margin: 0; font-size: 17px; font-weight: 800;">📹 Schedule Prayer Meeting</h3>
+          <button onclick="closeModal('modal-admin-create-meeting')" style="background: transparent; border: none; font-size: 22px; cursor: pointer; color: var(--text);">&times;</button>
+        </div>
+
+        <form id="form-admin-create-meeting" onsubmit="handleAdminCreateMeeting(event); return false;" style="display: flex; flex-direction: column; gap: 14px;">
+          <div class="form-input-group" style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Meeting Title / सभेचे नाव</label>
+            <input type="text" id="admin-meeting-title" required placeholder="e.g. Wednesday Fasting & Prayer" style="padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 13.5px; font-weight: 700;">
+          </div>
+
+          <div class="form-input-group" style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Host Name / सूत्रसंचालक</label>
+            <input type="text" id="admin-meeting-host" required value="Pastor John" style="padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 13.5px;">
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div class="form-input-group" style="display: flex; flex-direction: column; gap: 6px;">
+              <label style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Meeting Time / वेळ</label>
+              <input type="text" id="admin-meeting-time" required value="Tonight 8:30 PM" style="padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 13px;">
+            </div>
+            <div class="form-input-group" style="display: flex; flex-direction: column; gap: 6px;">
+              <label style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Room Code</label>
+              <input type="text" id="admin-meeting-room-id" required value="rol-prayer-fellowship" style="padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 13px;">
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <button type="button" onclick="closeModal('modal-admin-create-meeting')" class="btn-secondary-mini" style="flex: 1; padding: 12px; border: 1px solid var(--border); background: transparent; color: var(--text); border-radius: 10px; font-weight: 700;">Cancel</button>
+            <button type="submit" class="btn-primary-mini" style="flex: 1.5; padding: 12px; border-radius: 10px; font-weight: 800; font-size: 13px;">Schedule Meeting</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <!-- Toast Notification Overlay -->
     <div id="toast-notification" class="app-toast">
       <span id="toast-message">Copied to clipboard!</span>
@@ -3798,272 +4378,57 @@
          FULL-SCREEN DRAMATIZED STORY THEATER MODAL (SCENE ART + AMBIENT MUSIC)
          ========================================================================== -->
         <!-- ==========================================================================
-         3-VOICE MULTI-CAST DRAMATIZED STORY THEATER MODAL (SHUBH + RATAN + PRIYA)
-         ========================================================================== -->
-    <div id="modal-story-theater" class="story-theater-overlay" style="display: none;">
-      <!-- Dynamic Scenic Background Image with Ken Burns drift -->
-      <div id="story-theater-bg" class="story-theater-backdrop"></div>
-      <div class="story-theater-vignette"></div>
-
-      <!-- Theater Top Bar -->
-      <div class="story-theater-topbar">
-        <div class="story-theater-chapter-badge">
-          <span id="story-theater-book-chapter">शास्ते १३</span>
-          <span id="story-theater-theme-tag" class="story-theme-pill">🦁 शूर शमशोन आणि देवाचे न्यायकर्ते</span>
-        </div>
-
-                <div class="story-theater-top-actions">
-          <!-- Multi-Chapter Story Library Selector -->
-          <div class="story-library-pill">
-            <span class="story-book-icon">📖</span>
-            <select id="story-episode-select" onchange="loadStoryEpisode(this.value)">
-              <option value="samson" selected>🦁 शूर शमशोन (Judges 13)</option>
-              <option value="david_goliath">⚔️ दावीद आणि गल्याथ (1 Sam 17)</option>
-              <option value="wedding_cana">🍷 कानामधील चमत्कार (John 2)</option>
-              <option value="prodigal_son">🕊️ हरवलेला मुलगा (Luke 15)</option>
-            </select>
-          </div>
-
-          <!-- Background Music Selector -->
-          <div class="story-music-control-pill">
-            <span class="music-icon">🎵</span>
-            <select id="story-bg-music-select" onchange="changeStoryMusic(this.value)">
-              <option value="cinematic" selected>🎬 चित्रपट संगीत (Cinematic Score)</option>
-              <option value="harp">🕊️ Harp & Strings</option>
-              <option value="river">🌊 River of Life</option>
-              <option value="pads">🎹 Sacred Pads</option>
-              <option value="flute">🌄 Morning Chimes</option>
-              <option value="none">🔇 Music Off</option>
-            </select>
-          </div>
-
-          <button class="story-theater-close-btn" onclick="closeStoryTheater()" title="Exit Story Mode">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-          </button>
-        </div>
-      </div>
-
-      <!-- Theater Center: Dramatic Scripture Story Text -->
-      <div class="story-theater-content">
-        <!-- Dynamic Glowing Speaker / Character Banner -->
-        <div class="story-active-speaker-badge" id="story-active-speaker-badge">
-          <span class="speaker-avatar-circle" id="story-speaker-avatar">🕊️</span>
-          <div class="speaker-meta">
-            <span class="speaker-role-title" id="story-speaker-role">सूत्रधार (Narrator)</span>
-            <span class="speaker-voice-sub" id="story-speaker-voice">Sarvam Shubh Voice</span>
-          </div>
-        </div>
-
-        <div class="story-verse-display-card">
-          <div class="story-verse-number-badge" id="story-current-verse-num">वचन १ (1/25)</div>
-          <p class="story-verse-marathi-text" id="story-current-verse-text">
-            "इस्राएल लोकांनी दुष्कृत्ये करायला सुरुवात केली आहे असे पुन्हा परमेश्वराच्या लक्षात आले..."
-          </p>
-        </div>
-      </div>
-
-      <!-- Theater Bottom Playback Bar -->
-      <!-- Theater Bottom Playback Bar -->
-      <div class="story-theater-bottom-bar">
-        <div class="story-playback-controls">
-          <button class="story-nav-btn" onclick="storyPrevVerse()" title="Previous Verse">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>
-          </button>
-
-          <button id="btn-story-theater-play" class="story-main-play-fab" onclick="toggleStoryPlayback()" title="Play / Pause">
-            <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor" id="story-fab-icon">
-              <polygon points="7 4 19 12 7 20 7 4"></polygon>
-            </svg>
-          </button>
-
-          <button class="story-nav-btn" onclick="storyNextVerse()" title="Next Verse">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
-          </button>
-        </div>
-
-        <div class="story-footer-info">
-          <span class="story-voice-badge">🕊️ Sarvam AI Shubh</span>
-          <span class="story-audio-status" id="story-theater-status">वाचन तयार आहे (Ready)</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Verse of the Day More Options Bottom Sheet -->
-    <div id="modal-vod-more-sheet" class="meeting-modal-overlay" style="display: none; align-items: flex-end; justify-content: center; z-index: 10006;" onclick="if(event.target === this) closeVodMoreSheet();">
-      <div class="ios-drawer-sheet" style="max-width: 500px; width: 100%; border-radius: 24px 24px 0 0; background: var(--surface); color: var(--text); padding: 20px 24px 32px 24px; box-shadow: 0 -10px 40px rgba(0,0,0,0.3);">
-        <div class="grabber-bar" style="width: 40px; height: 5px; background: var(--border); border-radius: 3px; margin: 0 auto 16px auto;"></div>
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-          <h3 style="margin: 0; font-size: 17px; font-weight: 800;">Verse Options • अधिक पर्याय</h3>
-          <button onclick="closeVodMoreSheet()" style="background: none; border: none; font-size: 20px; color: var(--text-muted); cursor: pointer;">✕</button>
-        </div>
-        
-        <div style="display: flex; flex-direction: column; gap: 10px;">
-          <button class="vod-sheet-option-btn" id="btn-vod-sheet-listen" onclick="playDailyVerseAudio(); closeVodMoreSheet();" style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 14px; background: var(--bg); border: 1px solid var(--border); color: var(--text); cursor: pointer; text-align: left;">
-            <span style="font-size: 22px;">🔊</span>
-            <div>
-              <div style="font-weight: 800; font-size: 14.5px;">Listen with Sarvam Shubh Voice</div>
-              <div style="font-size: 12px; color: var(--text-muted);">मराठी पवित्र वचन ऑडिओ ऐका</div>
-            </div>
-          </button>
-
-          <button class="vod-sheet-option-btn" id="btn-vod-sheet-read" onclick="readVODChapter(); closeVodMoreSheet();" style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 14px; background: var(--bg); border: 1px solid var(--border); color: var(--text); cursor: pointer; text-align: left;">
-            <span style="font-size: 22px;">📖</span>
-            <div>
-              <div style="font-weight: 800; font-size: 14.5px;">Read Full Chapter in Bible</div>
-              <div style="font-size: 12px; color: var(--text-muted);">बायबलमध्ये संपूर्ण अध्याय वाचा</div>
-            </div>
-          </button>
-
-          <button class="vod-sheet-option-btn" onclick="openFullscreenVOD(); closeVodMoreSheet();" style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 14px; background: var(--bg); border: 1px solid var(--border); color: var(--text); cursor: pointer; text-align: left;">
-            <span style="font-size: 22px;">🖼️</span>
-            <div>
-              <div style="font-weight: 800; font-size: 14.5px;">Fullscreen Scenic Artwork</div>
-              <div style="font-size: 12px; color: var(--text-muted);">फुलस्क्रीन आकर्षक वॉलपेपर दृश्य</div>
-            </div>
-          </button>
-
-          <!-- Scenic Wallpaper Switcher Chips inside sheet -->
-          <div style="margin-top: 10px; padding-top: 12px; border-top: 1px solid var(--border);">
-            <span style="font-size: 12.5px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 8px;">Switch Scenic Wallpaper:</span>
-            <div class="vod-wallpaper-chips-row" style="display: flex; gap: 8px; flex-wrap: wrap;">
-              <button class="vod-chip active" onclick="switchVodWallpaper('stars', this); closeVodMoreSheet();">✨ Stars</button>
-              <button class="vod-chip" onclick="switchVodWallpaper('golden_dawn', this); closeVodMoreSheet();">🌅 Dawn</button>
-              <button class="vod-chip" onclick="switchVodWallpaper('mount_zion', this); closeVodMoreSheet();">🏔️ Zion</button>
-              <button class="vod-chip" onclick="switchVodWallpaper('calm_waters', this); closeVodMoreSheet();">🌊 Waters</button>
-              <button class="vod-chip" onclick="switchVodWallpaper('peaceful_pastures', this); closeVodMoreSheet();">🌿 Meadow</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-
-  <!-- 10 Commandments Comprehensive Modal (Feature 5) -->
-  <div id="modal-ten-commandments" class="app-modal-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 9999; backdrop-filter: blur(4px); justify-content: center; align-items: center; padding: 16px;">
-    <div class="modal-card-sheet" style="background: var(--bg-content); border-radius: 22px; width: 100%; max-width: 650px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: var(--shadow-lg); border: 1.5px solid var(--border);">
-      <div style="padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: var(--bg);">
-        <div style="display: flex; align-items: center; gap: 10px;">
-          <span style="font-size: 22px;">📜</span>
-          <div>
-            <h3 style="margin: 0; font-size: 17px; font-weight: 800; color: var(--primary);">दहा आज्ञा • The 10 Commandments</h3>
-            <span style="font-size: 11.5px; color: var(--text-muted); font-weight: 600;">निर्गम २०:१-१७ (Exodus 20:1-17)</span>
-          </div>
-        </div>
-        <button onclick="toggleTenCommandmentsModal()" style="background: none; border: none; font-size: 24px; color: var(--text-muted); cursor: pointer; padding: 4px 8px;">&times;</button>
-      </div>
-
-      <div class="modal-body-scroller" style="padding: 16px 20px; overflow-y: auto; flex: 1;">
-        <!-- The 10 Commandments Clean List -->
-        <div class="commandments-list-accordion" id="commandments-accordion-container" style="display: flex; flex-direction: column; gap: 10px;">
-          <!-- Populated cleanly by app.js -->
-        </div>
-      </div>
-
-      <div style="padding: 14px 20px; border-top: 1px solid var(--border); background: var(--bg); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-        <div style="display: flex; gap: 8px; align-items: center;">
-          <button onclick="readTenCommandmentsAloud(this)" style="background: var(--surface); border: 1.5px solid var(--primary); padding: 8px 14px; border-radius: 10px; font-weight: 800; font-size: 12.5px; color: var(--primary); cursor: pointer; display: flex; align-items: center; gap: 5px; box-shadow: var(--shadow-xs);">
-            <span>▶ संपूर्ण दहा आज्ञा ऐका</span>
-          </button>
-          <button onclick="openReaderAndNavigate('exodus', 20, 1);" class="btn-primary-mini" style="background: var(--primary); color: #ffffff; padding: 8px 14px; border-radius: 10px; font-weight: 700; font-size: 12.5px; border: none; cursor: pointer;">
-            📖 Open in Bible
-          </button>
-        </div>
-        <button onclick="toggleTenCommandmentsModal()" style="background: none; border: 1px solid var(--border); padding: 8px 16px; border-radius: 10px; font-weight: 700; font-size: 12.5px; color: var(--text); cursor: pointer;">
-          Close / बंद करा
-        </button>
-      </div>
-    </div>
-  </div>
-
-
-  <!-- ==========================================================================
-       MODAL 1: THE HEADWATERS (MORNING MANNA AT THE SOURCE)
-       ====================================<!-- ==========================================================================
-       MODAL 1: THE HEADWATERS (MORNING MANNA AT THE SOURCE)
-       ====================================<!-- ==========================================================================
-       MODAL 1: THE HEADWATERS (MORNING MANNA AT THE SOURCE)
-       ====================================<!-- ==========================================================================
-       MODAL 1: THE HEADWATERS (MORNING MANNA AT THE SOURCE)
-       ====================================<!-- ==========================================================================
-       MODAL 1: THE HEADWATERS (MORNING GUIDED PRAYER & BREATH SANCTUARY)
+         3-VOIC  <!-- ==========================================================================
+       MODAL 1: THE HEADWATERS (MORNING GUIDED PRAYER & BREATH SANCTUARY - 60-30-10 THEME)
        ========================================================================== -->
   <div id="modal-headwaters-sanctuary" class="app-modal-backdrop" onclick="if(event.target === this) closeHeadwatersModal();" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.72); z-index: 99999; backdrop-filter: blur(8px); justify-content: center; align-items: center; padding: 16px;">
-    <div class="modal-card-sheet" style="background: var(--surface, #ffffff); border-radius: 24px; width: 100%; max-width: 540px; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 25px 60px rgba(0,0,0,0.45); border: 1.5px solid rgba(245, 158, 11, 0.45);">
-      <!-- Header with sunrise golden theme & Frosted Glass Inward Close Button -->
-      <div style="padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border-top-left-radius: 24px; border-top-right-radius: 24px;">
+    <div class="modal-card-sheet" style="background: #ffffff; border-radius: 24px; width: 100%; max-width: 540px; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 25px 60px rgba(0,0,0,0.25); border: 1.5px solid #eaeaea;">
+      <!-- Header with Clean 60-30-10 Theme & Close Button -->
+      <div style="padding: 16px 20px; border-bottom: 1px solid #eaeaea; display: flex; justify-content: space-between; align-items: center; background: #ffffff; border-top-left-radius: 24px; border-top-right-radius: 24px;">
         <div style="display: flex; align-items: center; gap: 12px;">
-          <img src="assets/icons/headwaters_sunrise.svg" alt="Headwaters" style="width: 38px; height: 38px; object-fit: contain;">
+          <img src="assets/icons/headwaters_sunrise.svg" alt="Headwaters" style="width: 36px; height: 36px; object-fit: contain;">
           <div>
-            <h3 style="margin: 0; font-size: 17px; font-weight: 800; color: #9a3412;">The Headwaters • उगमस्थान</h3>
-            <span style="font-size: 12px; color: #c2410c; font-weight: 600;">Morning Guided Prayer • सकाळची प्रार्थना</span>
+            <h3 style="margin: 0; font-size: 17px; font-weight: 800; color: #000000;">The Headwaters • उगमस्थान</h3>
+            <span style="font-size: 12px; color: #666666; font-weight: 600;">Morning Guided Prayer • सकाळची प्रार्थना</span>
           </div>
         </div>
-        <button class="headwaters-close-btn" onclick="closeHeadwatersModal()" style="background: rgba(154, 52, 18, 0.1); border: 1px solid rgba(154, 52, 18, 0.2); width: 34px; height: 34px; border-radius: 50%; color: #9a3412; cursor: pointer; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: all 0.2s ease; margin-right: 2px;" aria-label="Close" title="बंद करा">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9a3412" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <button class="headwaters-close-btn" onclick="closeHeadwatersModal()" style="background: #f4f4f4; border: none; width: 34px; height: 34px; border-radius: 50%; color: #000000; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;" aria-label="Close" title="बंद करा">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
         </button>
       </div>
 
-      <!-- Laser-Focused Body: Extended Contemplative Multi-Paragraph Prayer + Audio Bar -->
+      <!-- Body: Extended Contemplative Multi-Paragraph Prayer + 60-30-10 Card -->
       <div class="modal-body-scroller" style="padding: 18px 20px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 14px;">
         
-        <div style="background: linear-gradient(135deg, rgba(254,243,199,0.55) 0%, rgba(254,215,170,0.35) 100%); border: 1.5px solid rgba(245, 158, 11, 0.4); border-radius: 22px; padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 4px 16px rgba(245,158,11,0.08);">
+        <div style="background: #FAFAFA; border: 1.5px solid #EAEAEA; border-radius: 20px; padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">
           
           <!-- Prayer Subheader & Dynamic Theme Badge -->
           <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
             <div style="display: flex; align-items: center; gap: 8px;">
               <span style="font-size: 19px;">🌅</span>
-              <strong id="headwaters-prayer-title" style="font-size: 14.5px; font-weight: 800; color: #9a3412;">आजची सकाळची प्रार्थना</strong>
+              <strong id="headwaters-prayer-title" style="font-size: 14.5px; font-weight: 800; color: #000000;">आजची सकाळची प्रार्थना</strong>
             </div>
-            <span id="headwaters-theme-badge" style="font-size: 11.5px; font-weight: 700; color: #c2410c; background: rgba(245,158,11,0.22); padding: 4px 10px; border-radius: 8px; border: 1px solid rgba(245,158,11,0.35);">
+            <span id="headwaters-theme-badge" style="font-size: 11.5px; font-weight: 700; color: #F7002F; background: rgba(247, 0, 47, 0.08); padding: 4px 10px; border-radius: 8px; border: 1px solid rgba(247, 0, 47, 0.2);">
               ✨ दैवी कृपा व नवी सुरुवात
             </span>
           </div>
 
           <!-- Dynamic Multi-Paragraph Contemplative Prayer Flow -->
-          <div id="headwaters-prayer-container" style="display: flex; flex-direction: column; gap: 11px; font-family: var(--font-sans); color: #1e293b; font-size: 14.5px; line-height: 1.75; font-weight: 550;">
+          <div id="headwaters-prayer-container" style="display: flex; flex-direction: column; gap: 11px; font-family: 'Lora', Georgia, serif; color: #111111; font-size: 15px; line-height: 1.75; font-weight: 400;">
             <p style="margin: 0;">"हे दयाळू आणि सर्वसमर्थ स्वर्गीय पित्या, या नव्या दिवसाच्या उषःकाली मी अत्यंत कृतज्ञ अंतःकरणाने तुझ्या पवित्र चरणांशी नतमस्तक होतो. कालच्या सर्व चिंता, अपयश आणि थकवा मागे सारून, आज तुझ्या नव्या कृपेचा आणि करुणेचा प्रकाश मी माझ्या जीवनात स्वीकारतो."</p>
             <p style="margin: 0;">"प्रभू, आजचा माझा प्रत्येक विचार, प्रत्येक उच्चारलेला शब्द आणि प्रत्येक घेतलेला निर्णय तुझ्या दैवी इच्छेनुसार असू दे. मी जिथे जाईन तिथे तुझ्या प्रेमाचा आणि शांतीचा सुगंध पसरू दे, आणि मला भेटणाऱ्या प्रत्येकाला तुझ्या दयेचा अनुभव येऊ दे."</p>
             <p style="margin: 0;">"माझे कुटुंब, माझे कार्यक्षेत्र आणि माझी सर्व कामे तुझ्या बलवान हातात समर्पित करतो; येशू ख्रिस्ताच्या सामर्थी नावात ही प्रार्थना करतो, आमेन."</p>
           </div>
 
-          <!-- Sleek Audio Player Bar with 22-bar Waveform Visualizer -->
-          <div class="sleek-audio-player-track" id="headwaters-audio-player-box" style="background: rgba(255,255,255,0.85); border: 1px solid rgba(245, 158, 11, 0.45); border-radius: 16px; padding: 11px 14px; display: flex; align-items: center; gap: 12px; backdrop-filter: blur(6px); margin-top: 2px;">
-            <!-- Play / Pause Circular Button -->
-            <button id="btn-play-headwaters-audio" onclick="playHeadwatersMorningAudio(this)" style="width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #f59e0b, #d97706); border: none; color: #ffffff; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4); flex-shrink: 0; transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);">
-              <svg id="headwaters-play-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <polygon points="6 4 20 12 6 20 6 4"></polygon>
-              </svg>
-            </button>
-
-            <!-- Waveform Animation Visualizer & Progress -->
-            <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px;">
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span id="headwaters-audio-label" style="font-size: 12.5px; font-weight: 800; color: #9a3412;">ऐका • Guided Audio Prayer</span>
-                <span id="headwaters-audio-time" style="font-size: 11px; font-weight: 700; color: #c2410c; font-family: var(--font-sans);">0:45</span>
-              </div>
-
-              <!-- Animated Soundwave Visualizer Bars -->
-              <div class="headwaters-wave-container" id="headwaters-wave-container" style="display: flex; align-items: center; gap: 3px; height: 24px; padding: 2px 0;">
-                <div class="audio-wave-bar bar-0"></div><div class="audio-wave-bar bar-1"></div><div class="audio-wave-bar bar-2"></div><div class="audio-wave-bar bar-3"></div><div class="audio-wave-bar bar-4"></div><div class="audio-wave-bar bar-5"></div><div class="audio-wave-bar bar-0"></div><div class="audio-wave-bar bar-1"></div><div class="audio-wave-bar bar-2"></div><div class="audio-wave-bar bar-3"></div><div class="audio-wave-bar bar-4"></div><div class="audio-wave-bar bar-5"></div><div class="audio-wave-bar bar-0"></div><div class="audio-wave-bar bar-1"></div><div class="audio-wave-bar bar-2"></div><div class="audio-wave-bar bar-3"></div><div class="audio-wave-bar bar-4"></div><div class="audio-wave-bar bar-5"></div><div class="audio-wave-bar bar-0"></div><div class="audio-wave-bar bar-1"></div><div class="audio-wave-bar bar-2"></div><div class="audio-wave-bar bar-3"></div>
-              </div>
-
-              <!-- Subtle Progress Track -->
-              <div style="position: relative; width: 100%; height: 4px; background: rgba(245, 158, 11, 0.22); border-radius: 2px; overflow: hidden;">
-                <div id="headwaters-progress-bar" style="position: absolute; left: 0; top: 0; bottom: 0; width: 0%; background: linear-gradient(90deg, #f59e0b, #d97706); border-radius: 2px; transition: width 0.2s linear;"></div>
-              </div>
-            </div>
-          </div>
-
         </div>
-
       </div>
 
-      <!-- Clean Anchored Full-Width Primary Action Footer -->
-      <div style="padding: 14px 20px; border-top: 1px solid var(--border); background: var(--bg); display: flex; border-bottom-left-radius: 24px; border-bottom-right-radius: 24px;">
-        <button id="headwaters-open-bible-btn" class="headwaters-primary-btn" onclick="openCurrentHeadwatersBibleChapter();" style="width: 100%; background: linear-gradient(135deg, var(--primary, #9e1622), #b91c1c); color: #ffffff; padding: 14px 20px; border-radius: 16px; font-weight: 800; font-size: 14.5px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 18px rgba(158, 22, 34, 0.3); transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.18s ease;">
+      <!-- Clean Anchored Full-Width Primary Action Footer (Brand Red #F7002F) -->
+      <div style="padding: 14px 20px; border-top: 1px solid #eaeaea; background: #ffffff; display: flex; border-bottom-left-radius: 24px; border-bottom-right-radius: 24px;">
+        <button id="headwaters-open-bible-btn" class="headwaters-primary-btn" onclick="openCurrentHeadwatersBibleChapter();" style="width: 100%; background: #F7002F; color: #ffffff; padding: 14px 20px; border-radius: 16px; font-weight: 800; font-size: 14.5px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 18px rgba(247, 0, 47, 0.3); transition: transform 0.18s ease, box-shadow 0.18s ease;">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
             <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
@@ -4075,37 +4440,37 @@
   </div>
 
   <!-- ==========================================================================
-       MODAL 2: THE DAILY CONFLUENCE (EMOTIONAL FLOW SCRIPTURE SANCTUARY)
+       MODAL 2: THE DAILY CONFLUENCE (EMOTIONAL FLOW SCRIPTURE SANCTUARY - 60-30-10 THEME)
        ========================================================================== -->
   <div id="modal-confluence-flow" class="app-modal-backdrop" onclick="if(event.target === this) closeConfluenceModal();" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 99999; backdrop-filter: blur(6px); justify-content: center; align-items: center; padding: 16px;">
-    <div class="modal-card-sheet" style="background: var(--surface, #ffffff); border-radius: 22px; width: 100%; max-width: 620px; max-height: 88vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.4); border: 1.5px solid rgba(45, 212, 191, 0.45);">
-      <!-- Header with sage/teal confluence theme -->
-      <div style="padding: 18px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);">
+    <div class="modal-card-sheet" style="background: #ffffff; border-radius: 22px; width: 100%; max-width: 620px; max-height: 88vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.25); border: 1.5px solid #eaeaea;">
+      <!-- Header with clean 60-30-10 Theme -->
+      <div style="padding: 18px 20px; border-bottom: 1px solid #eaeaea; display: flex; justify-content: space-between; align-items: center; background: #ffffff;">
         <div style="display: flex; align-items: center; gap: 12px;">
           <img src="assets/icons/confluence_stream.svg" alt="Confluence" style="width: 36px; height: 36px; object-fit: contain;">
           <div>
-            <h3 style="margin: 0; font-size: 17px; font-weight: 800; color: #0f766e;">The Daily Confluence • आत्मिक संगम</h3>
-            <span style="font-size: 12px; color: #115e59; font-weight: 600;">Where is Your Soul Flowing Today?</span>
+            <h3 style="margin: 0; font-size: 17px; font-weight: 800; color: #000000;">The Daily Confluence • आत्मिक संगम</h3>
+            <span style="font-size: 12px; color: #666666; font-weight: 600;">Where is Your Soul Flowing Today?</span>
           </div>
         </div>
-        <button onclick="closeConfluenceModal()" style="background: rgba(0,0,0,0.06); border: none; font-size: 20px; width: 34px; height: 34px; border-radius: 50%; color: #0f766e; cursor: pointer; display: flex; align-items: center; justify-content: center;">&times;</button>
+        <button onclick="closeConfluenceModal()" style="background: #f4f4f4; border: none; font-size: 20px; width: 34px; height: 34px; border-radius: 50%; color: #000000; cursor: pointer; display: flex; align-items: center; justify-content: center;">&times;</button>
       </div>
 
       <!-- Soul Flow Selector Tabs -->
-      <div style="padding: 12px 20px 8px 20px; background: var(--bg); border-bottom: 1px solid var(--border); display: flex; gap: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch;">
-        <button class="confluence-tab-btn" data-flow="restless" onclick="switchConfluenceTab('restless')" style="padding: 7px 14px; border-radius: 20px; font-size: 12.5px; font-weight: 800; border: 1.5px solid #0d9488; background: #0d9488; color: #fff; cursor: pointer; white-space: nowrap;">🌊 Restless (अस्वस्थ)</button>
-        <button class="confluence-tab-btn" data-flow="heavy" onclick="switchConfluenceTab('heavy')" style="padding: 7px 14px; border-radius: 20px; font-size: 12.5px; font-weight: 700; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; white-space: nowrap;">🌧️ Heavy (जड/उदास)</button>
-        <button class="confluence-tab-btn" data-flow="thirsty" onclick="switchConfluenceTab('thirsty')" style="padding: 7px 14px; border-radius: 20px; font-size: 12.5px; font-weight: 700; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; white-space: nowrap;">🏜️ Thirsty (तृषार्त)</button>
-        <button class="confluence-tab-btn" data-flow="peace" onclick="switchConfluenceTab('peace')" style="padding: 7px 14px; border-radius: 20px; font-size: 12.5px; font-weight: 700; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; white-space: nowrap;">🕊️ Peaceful (शांत)</button>
-        <button class="confluence-tab-btn" data-flow="gratitude" onclick="switchConfluenceTab('gratitude')" style="padding: 7px 14px; border-radius: 20px; font-size: 12.5px; font-weight: 700; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; white-space: nowrap;">✨ Grateful (कृतज्ञ)</button>
+      <div style="padding: 12px 20px 8px 20px; background: #ffffff; border-bottom: 1px solid #eaeaea; display: flex; gap: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch;">
+        <button class="confluence-tab-btn" data-flow="restless" onclick="switchConfluenceTab('restless')" style="padding: 7px 14px; border-radius: 20px; font-size: 12.5px; font-weight: 800; border: 1.5px solid #F7002F; background: #F7002F; color: #fff; cursor: pointer; white-space: nowrap;">🌊 Restless (अस्वस्थ)</button>
+        <button class="confluence-tab-btn" data-flow="heavy" onclick="switchConfluenceTab('heavy')" style="padding: 7px 14px; border-radius: 20px; font-size: 12.5px; font-weight: 700; border: 1px solid #eaeaea; background: #fafafa; color: #000000; cursor: pointer; white-space: nowrap;">🌧️ Heavy (जड/उदास)</button>
+        <button class="confluence-tab-btn" data-flow="thirsty" onclick="switchConfluenceTab('thirsty')" style="padding: 7px 14px; border-radius: 20px; font-size: 12.5px; font-weight: 700; border: 1px solid #eaeaea; background: #fafafa; color: #000000; cursor: pointer; white-space: nowrap;">🏜️ Thirsty (तृषार्त)</button>
+        <button class="confluence-tab-btn" data-flow="peace" onclick="switchConfluenceTab('peace')" style="padding: 7px 14px; border-radius: 20px; font-size: 12.5px; font-weight: 700; border: 1px solid #eaeaea; background: #fafafa; color: #000000; cursor: pointer; white-space: nowrap;">🕊️ Peaceful (शांत)</button>
+        <button class="confluence-tab-btn" data-flow="gratitude" onclick="switchConfluenceTab('gratitude')" style="padding: 7px 14px; border-radius: 20px; font-size: 12.5px; font-weight: 700; border: 1px solid #eaeaea; background: #fafafa; color: #000000; cursor: pointer; white-space: nowrap;">✨ Grateful (कृतज्ञ)</button>
       </div>
 
-      <div class="modal-body-scroller" id="confluence-flow-body-container" style="padding: 20px; overflow-y: auto; flex: 1;">
+      <div class="modal-body-scroller" id="confluence-flow-body-container" style="padding: 20px; overflow-y: auto; flex: 1; background: #fafafa;">
         <!-- Populated dynamically by app.js -->
       </div>
 
-      <div style="padding: 14px 20px; border-top: 1px solid var(--border); background: var(--bg); display: flex; justify-content: flex-end;">
-        <button onclick="closeConfluenceModal()" style="background: none; border: 1px solid var(--border); padding: 8px 18px; border-radius: 10px; font-weight: 700; color: var(--text); cursor: pointer; font-size: 13px;">
+      <div style="padding: 14px 20px; border-top: 1px solid #eaeaea; background: #ffffff; display: flex; justify-content: flex-end;">
+        <button onclick="closeConfluenceModal()" style="background: none; border: 1px solid #eaeaea; padding: 8px 18px; border-radius: 10px; font-weight: 700; color: #000000; cursor: pointer; font-size: 13px;">
           Close / बंद करा
         </button>
       </div>
@@ -4113,66 +4478,38 @@
   </div>
 
   <!-- ==========================================================================
-       MODAL 3: LIVING WATER RESET (INSTANT REFRESH & ACOUSTIC BREATH PAUSE)
+       MODAL 3: 10 COMMANDMENTS (दहा आज्ञा - 60-30-10 THEME)
        ========================================================================== -->
-  <div id="modal-living-water-reset" class="app-modal-backdrop" onclick="if(event.target === this) closeLivingWaterResetModal();" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 99999; backdrop-filter: blur(10px); justify-content: center; align-items: center; padding: 16px;">
-    <div class="modal-card-sheet" style="background: linear-gradient(180deg, #09333f 0%, #042f2e 100%); color: #ffffff; border-radius: 24px; width: 100%; max-width: 520px; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 25px 60px rgba(0,0,0,0.7); border: 1.5px solid rgba(45, 212, 191, 0.4);">
-      <!-- Header -->
-      <div style="padding: 18px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03);">
+  <div id="modal-ten-commandments" class="app-modal-backdrop" onclick="if(event.target === this) toggleTenCommandmentsModal();" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 99999; backdrop-filter: blur(6px); justify-content: center; align-items: center; padding: 16px;">
+    <div class="modal-card-sheet" style="background: #ffffff; border-radius: 22px; width: 100%; max-width: 580px; max-height: 88vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.25); border: 1.5px solid #eaeaea;">
+      <div style="padding: 18px 20px; border-bottom: 1px solid #eaeaea; display: flex; justify-content: space-between; align-items: center; background: #ffffff;">
         <div style="display: flex; align-items: center; gap: 12px;">
-          <img src="assets/icons/living_water_drop.svg" alt="Living Water" style="width: 36px; height: 36px; object-fit: contain;">
+          <img src="assets/images/moses_ten_commandments.png" alt="Moses" style="width: 42px; height: 50px; object-fit: contain; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.15));">
           <div>
-            <h3 style="margin: 0; font-size: 17px; font-weight: 800; color: #67e8f9;">Living Water Reset • जिवंत पाण्याचा विसावा</h3>
-            <span style="font-size: 12px; color: #a5f3fc; font-weight: 600;">Instant Refresh for the Day</span>
+            <h3 style="margin: 0; font-size: 17px; font-weight: 800; color: #000000;">The 10 Commandments • दहा आज्ञा</h3>
+            <span style="font-size: 12px; color: #666666; font-weight: 600;">Exodus 20:1-17 • निर्गम २०:१-१७</span>
           </div>
         </div>
-        <button onclick="closeLivingWaterResetModal()" style="background: rgba(255,255,255,0.1); border: none; font-size: 20px; width: 34px; height: 34px; border-radius: 50%; color: #ffffff; cursor: pointer; display: flex; align-items: center; justify-content: center;">&times;</button>
+        <button onclick="toggleTenCommandmentsModal()" style="background: #f4f4f4; border: none; font-size: 20px; width: 34px; height: 34px; border-radius: 50%; color: #000000; cursor: pointer; display: flex; align-items: center; justify-content: center;">&times;</button>
       </div>
 
-      <div class="modal-body-scroller" style="padding: 24px 20px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 18px;">
-        
-        <!-- Animated Breathing Orb -->
-        <div style="position: relative; width: 160px; height: 160px; display: flex; align-items: center; justify-content: center; margin: 10px 0;">
-          <div class="breathing-orb-animation" style="position: absolute; inset: 10px; border-radius: 50%; background: radial-gradient(circle, rgba(45, 212, 191, 0.4) 0%, rgba(13, 148, 136, 0.2) 60%, transparent 80%);"></div>
-          <div style="position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center;">
-            <span style="font-size: 32px; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4));">💧</span>
-            <span id="reset-breath-instruction" style="font-size: 14px; font-weight: 800; color: #67e8f9; margin-top: 4px;">श्वास घ्या (Inhale)</span>
-            <span id="reset-timer-countdown" style="font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.7);">02:00</span>
-          </div>
+      <div class="modal-body-scroller" style="padding: 16px 20px; overflow-y: auto; flex: 1; background: #fafafa;">
+        <div class="commandments-list-accordion" id="commandments-accordion-container" style="display: flex; flex-direction: column; gap: 10px;">
+          <!-- Populated cleanly by app.js -->
         </div>
+      </div>
 
-        <!-- Scripture Banner -->
-        <div style="background: rgba(255,255,255,0.06); border: 1px solid rgba(45,212,191,0.3); border-radius: 16px; padding: 16px; width: 100%; box-sizing: border-box;">
-          <span style="font-size: 11px; font-weight: 800; color: #fef08a; text-transform: uppercase; letter-spacing: 0.5px;">योहान ७:३७-३८ (John 7:37-38)</span>
-          <p style="font-family: var(--font-body); font-size: 15px; font-weight: 700; line-height: 1.6; color: #ffffff; margin: 6px 0 4px 0;">
-            "जो कोणी तहानलेला आहे त्याने माझ्याकडे यावे आणि प्यावे... त्याच्या अंतःकरणातून जिवंत पाण्याचे झरे वाहतील."
-          </p>
-          <span style="font-size: 12px; color: rgba(255,255,255,0.75); font-style: italic;">
-            "Let anyone who is thirsty come to me and drink... rivers of living water will flow from within them."
-          </span>
-        </div>
-
-        <!-- Duration Selector Chips -->
-        <div style="display: flex; gap: 8px; width: 100%; justify-content: center;">
-          <button class="reset-duration-btn" data-sec="60" onclick="setResetDuration(60, this)" style="padding: 6px 14px; border-radius: 12px; font-size: 12px; font-weight: 700; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: #fff; cursor: pointer;">1 Min (जलद विसावा)</button>
-          <button class="reset-duration-btn active" data-sec="120" onclick="setResetDuration(120, this)" style="padding: 6px 14px; border-radius: 12px; font-size: 12px; font-weight: 800; background: #0d9488; border: 1.5px solid #2dd4bf; color: #fff; cursor: pointer;">2 Min (संतुलित)</button>
-          <button class="reset-duration-btn" data-sec="180" onclick="setResetDuration(180, this)" style="padding: 6px 14px; border-radius: 12px; font-size: 12px; font-weight: 700; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: #fff; cursor: pointer;">3 Min (गहन मनन)</button>
-        </div>
-
-        <!-- Controls (Start / Pause Audio & Water Sound) -->
-        <div style="display: flex; gap: 12px; width: 100%;">
-          <button id="btn-toggle-living-water-reset" onclick="toggleLivingWaterResetSession()" style="flex: 1; padding: 14px; border-radius: 14px; font-weight: 800; font-size: 14px; background: linear-gradient(135deg, #2dd4bf, #0d9488); border: none; color: #042f2e; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 16px rgba(45,212,191,0.4);">
-            <span id="reset-btn-icon">▶</span>
-            <span id="reset-btn-label">Start Living Water Reset / सुरू करा</span>
+      <div style="padding: 14px 20px; border-top: 1px solid #eaeaea; background: #ffffff; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <button onclick="readTenCommandmentsAloud(this)" style="background: #ffffff; border: 1.5px solid #F7002F; padding: 8px 14px; border-radius: 10px; font-weight: 800; font-size: 12.5px; color: #F7002F; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+            <span>▶ संपूर्ण दहा आज्ञा ऐका</span>
+          </button>
+          <button onclick="openReaderAndNavigate('exodus', 20, 1);" class="btn-primary-mini" style="background: #F7002F; color: #ffffff; padding: 8px 14px; border-radius: 10px; font-weight: 700; font-size: 12.5px; border: none; cursor: pointer;">
+            📖 Open in Bible
           </button>
         </div>
-
-      </div>
-
-      <div style="padding: 12px 20px; border-top: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); display: flex; justify-content: space-between; align-items: center;">
-        <span style="font-size: 12px; color: #a5f3fc;">🕊️ River of Life Acoustic Sanctuary</span>
-        <button onclick="closeLivingWaterResetModal()" style="background: none; border: 1px solid rgba(255,255,255,0.2); padding: 6px 14px; border-radius: 8px; font-weight: 700; color: #fff; cursor: pointer; font-size: 12px;">
-          Done / पूर्ण
+        <button onclick="toggleTenCommandmentsModal()" style="background: none; border: 1px solid #eaeaea; padding: 8px 16px; border-radius: 10px; font-weight: 700; font-size: 12.5px; color: #000000; cursor: pointer;">
+          Close / बंद करा
         </button>
       </div>
     </div>

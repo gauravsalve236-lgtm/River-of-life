@@ -1030,6 +1030,7 @@ const I18N_DICTIONARY = {
     "nav_home": "Home",
     "nav_bible": "Bible",
     "nav_meetings": "Meetings",
+    "nav_discover": "Search",
     "nav_more": "More",
     
     // Verse of the Day (English Name / Header, Marathi Body inside)
@@ -1059,7 +1060,7 @@ const I18N_DICTIONARY = {
     "commandments_title": "The 10 Commandments",
     "commandments_ref": "Exodus 20:1-17",
     "commandments_sub": "सीनाय पर्वतावर देवाने दिलेला शाश्वत नियम आणि येशूने सांगितलेला सारांश.",
-    "commandments_action": "Read & Listen to All 10 Commandments →",
+    "commandments_action": "सर्व १० आज्ञा वाचा →",
     
     // Ready-Made Prayers Grid Header & Live Fellowship
     "tag_prayer_sanctuary": "PRAYER SANCTUARY",
@@ -1143,6 +1144,7 @@ const I18N_DICTIONARY = {
     "nav_home": "Home",
     "nav_bible": "Bible",
     "nav_meetings": "Meetings",
+    "nav_discover": "Search",
     "nav_more": "More",
     
     // Verse of the Day
@@ -1172,7 +1174,7 @@ const I18N_DICTIONARY = {
     "commandments_title": "The 10 Commandments",
     "commandments_ref": "Exodus 20:1-17",
     "commandments_sub": "God's timeless blueprint given at Mount Sinai and fulfilled in Christ.",
-    "commandments_action": "Read & Listen to All 10 Commandments →",
+    "commandments_action": "Read The 10 Commandments →",
     
     // Ready-Made Prayers Grid Header & Live Fellowship
     "tag_prayer_sanctuary": "PRAYER SANCTUARY",
@@ -1379,8 +1381,17 @@ function applyStylesFromState() {
    ========================================================================== */
 function switchTab(rawRoute) {
   if (!rawRoute) rawRoute = "home";
-  const route = rawRoute.replace("#/", "").split("?")[0].split("/")[0] || "home";
+  const route = String(rawRoute).replace(/^#\/?/, "").split("?")[0].split("/")[0] || "home";
+  console.log("[switchTab] Switching to route:", route, "from rawRoute:", rawRoute);
   
+  // Sync window.location.hash if not in sync
+  try {
+    const expectedHash = `#/${route}`;
+    if (window.location.hash !== expectedHash) {
+      history.replaceState(null, "", expectedHash);
+    }
+  } catch (e) {}
+
   // Hide all view panels
   document.querySelectorAll(".app-view").forEach(view => {
     view.classList.remove("active");
@@ -1405,7 +1416,13 @@ function switchTab(rawRoute) {
     
     // Highlight sidebar & bottom nav items
     document.querySelectorAll(`.nav-item[data-tab="${route}"]`).forEach(btn => btn.classList.add("active"));
-    document.querySelectorAll(`.tab-btn[data-tab="${route}"]`).forEach(btn => btn.classList.add("active"));
+    const activeBottomBtn = document.querySelector(`.tab-btn[data-tab="${route}"]`);
+    if (activeBottomBtn) {
+      activeBottomBtn.classList.add("active");
+    } else if (["plans", "prayers", "you", "admin"].includes(route)) {
+      const moreBtn = document.getElementById("btn-tab-more");
+      if (moreBtn) moreBtn.classList.add("active");
+    }
     
     adjustHeaderForRoute(route);
     
@@ -1414,12 +1431,15 @@ function switchTab(rawRoute) {
       renderYouProfile();
     } else if (route === "home") {
       renderDailyDevotion();
+      if (typeof renderHomeAnnouncementBanner === "function") renderHomeAnnouncementBanner();
     } else if (route === "plans") {
       renderReadingPlansTab();
     } else if (route === "prayers") {
       renderPrayersScreen();
     } else if (route === "meetings") {
       renderMeetingsDashboard();
+    } else if (route === "admin") {
+      if (typeof renderAdminPanel === "function") renderAdminPanel();
     }
   } else {
     // Fallback to home view if route is unmapped
@@ -1431,6 +1451,8 @@ function switchTab(rawRoute) {
     }
   }
 }
+
+window.switchTab = switchTab;
 
 function initRouting() {
   const handleHashChange = () => {
@@ -1515,6 +1537,8 @@ function adjustHeaderForRoute(route) {
         staticTitle.textContent = state.translation === "eng" ? "Prayer Circle" : "प्रार्थना विनंत्या";
       } else if (route === "meetings") {
         staticTitle.textContent = state.translation === "eng" ? "Prayer Meetings" : "प्रार्थना सभा";
+      } else if (route === "admin") {
+        staticTitle.textContent = state.translation === "eng" ? "Admin Console" : "प्रशासकीय नियंत्रण";
       } else if (route === "you") {
         if (state.currentUser && state.currentUser.username) {
           staticTitle.textContent = state.currentUser.username;
@@ -2246,6 +2270,21 @@ function getCurrentVOD() {
   const dayOfYear = Math.floor(diff / oneDay);
   
   const offset = state.vodDayOffset || 0;
+  if (offset === 0) {
+    try {
+      const customSaved = localStorage.getItem("rol_custom_vod");
+      if (customSaved) {
+        const customObj = JSON.parse(customSaved);
+        if (customObj && (customObj.text || customObj.engText)) {
+          return {
+            vod: customObj,
+            dayOfYear: dayOfYear,
+            offset: 0
+          };
+        }
+      }
+    } catch(e) {}
+  }
   const len = VOD_LIST.length;
   const vodIdx = ((dayOfYear + offset) % len + len) % len;
   return {
@@ -2259,6 +2298,7 @@ function renderDailyDevotion() {
   if (typeof updateDaypartingAtmosphere === 'function') updateDaypartingAtmosphere();
   if (typeof renderBiblicalMicroLearning === 'function') renderBiblicalMicroLearning();
   if (typeof renderDailyFlowTrack === 'function') renderDailyFlowTrack();
+  if (typeof updateHomepageReadingPlanCard === 'function') updateHomepageReadingPlanCard();
 
   const now = new Date();
   const isEng = (state && state.translation === "eng");
@@ -2309,9 +2349,9 @@ function renderDailyDevotion() {
   const fsVodTextEl = document.getElementById("fs-vod-text");
   if (fsVodTextEl) fsVodTextEl.textContent = `"${displayText}"`;
   
-  // Expanded Beautiful Rotating Background Wallpapers from assets/daily_verses/
+  // Expanded Luminous Rotating Scenic Wallpapers from assets/daily_verses/
   const images = (window.dailyVersesImageList && window.dailyVersesImageList.length > 0) ? window.dailyVersesImageList : [
-    'stars.png', 'forest.png', 'mist.png', 'mountains.png', 'mount_zion.png', 'ocean.png', 'path.png', 'sunrise.png'
+    'golden_dawn.png', 'sunrise.png', 'mountains.png', 'ocean.png', 'calm_waters.png', 'healing_light.png', 'river_of_life.png'
   ];
   const imgIdx = ((dayOfYear + offset) % images.length + images.length) % images.length;
   window.currentVodImageIndex = imgIdx;
@@ -2320,6 +2360,9 @@ function renderDailyDevotion() {
   
   const bgEl = document.getElementById("vod-dynamic-bg") || document.querySelector(".youversion-vod-bg") || document.querySelector(".daily-verse-card-bg");
   if (bgEl) bgEl.style.backgroundImage = `url('${imgUrl}')`;
+
+  const heroCard = document.getElementById("card-daily-verse-home");
+  if (heroCard) heroCard.style.backgroundImage = `url('${imgUrl}')`;
 
   const fsCapsule = document.querySelector(".fullscreen-vod-capsule");
   if (fsCapsule) fsCapsule.style.backgroundImage = `url('${imgUrl}')`;
@@ -2564,15 +2607,20 @@ function fallbackToDirectPlay(mp3Url) {
 }
 
 /* ==========================================================================
-   Sarvam AI Bulbul V3 Indian Voice Narrator (TTS)
+   Universal Bible Scripture Audio Engine (100% Full Chapter Narration)
    ========================================================================== */
-function startSpeechNarration() {
+function startSpeechNarration(startVerseIndex = 0) {
   closeModal("modal-audio-settings");
   
   if (audioPlayerInstance) {
     audioPlayerInstance.pause();
     audioPlayerInstance = null;
   }
+  if (bibleChapterAudioPlayer) {
+    bibleChapterAudioPlayer.pause();
+    bibleChapterAudioPlayer = null;
+  }
+  isBibleChapterPlaying = false;
   
   if (window.SarvamTTS && window.SarvamTTS.queue) {
     window.SarvamTTS.queue.stop();
@@ -2586,10 +2634,14 @@ function startSpeechNarration() {
   const bgVolSlider = document.getElementById("audio-bg-music-vol-slider");
   if (bgMusicSelect && bgMusicSelect.value !== "none") {
     const vol = bgVolSlider ? parseFloat(bgVolSlider.value) : 0.3;
-    ambientSynthInstance.setVolume(vol);
-    ambientSynthInstance.start(bgMusicSelect.value);
+    if (typeof ambientSynthInstance !== 'undefined' && ambientSynthInstance) {
+      ambientSynthInstance.setVolume(vol);
+      ambientSynthInstance.start(bgMusicSelect.value);
+    }
   } else {
-    ambientSynthInstance.stop();
+    if (typeof ambientSynthInstance !== 'undefined' && ambientSynthInstance) {
+      ambientSynthInstance.stop();
+    }
   }
 
   // Start sleep timer if selected
@@ -2602,32 +2654,49 @@ function startSpeechNarration() {
       sleepTimerTimeout = null;
     }
   }
-  
-  // Check API Key based on active voice engine
-  const activeVoice = (state.sarvamVoice || "gee_elevenlabs").toLowerCase();
-  const isElevenLabsVoice = activeVoice.includes("elevenlabs") || activeVoice === "shrey" || activeVoice === "gee" || activeVoice === "brian";
-  if (isElevenLabsVoice) {
-    const elKey = localStorage.getItem('rol_elevenlabs_api_key') || 'sk_53532f375cb8723144f7c3d6f10520e60043fc74cb1552d4';
-    if (!elKey) {
-      showToast("🔑 Please enter your ElevenLabs API Key in Settings");
-      openModal("modal-audio-settings");
-      return;
-    }
-  } else {
-    const sarvamKey = (window.SarvamTTS && window.SarvamTTS.config) ? window.SarvamTTS.config.getApiKey() : (state.sarvamApiKey || 'sk_odv5l3f4_XdZubK80ecSfBa6YYCLWDCNI');
-    if (!sarvamKey) {
-      showToast("🔑 Please enter your Sarvam AI API Key in Settings");
-      openModal("modal-audio-settings");
-      return;
-    }
-  }
 
-  // Sarvam AI Bulbul V3 Indian Voice Narration
+  // Resolve current active book and chapter names
+  const currentBook = state.activeBook || state.currentBook || "genesis";
+  const currentChapter = parseInt(state.activeChapter || state.currentChapter || 1, 10);
+  const cleanKey = String(currentBook).toLowerCase().replace(".json", "").trim();
+  const foundMeta = (typeof booksMetadataMr !== 'undefined' && Array.isArray(booksMetadataMr))
+    ? booksMetadataMr.find(b => 
+        b.id === currentBook || 
+        b.filename.replace(".json", "").toLowerCase() === cleanKey ||
+        b.engName.toLowerCase() === cleanKey ||
+        b.name === currentBook
+      )
+    : null;
+
+  const isDevanagari = (state.translation !== "eng");
+  const activeBookTitle = (state.translation === "eng" && foundMeta) 
+    ? foundMeta.engName 
+    : (foundMeta ? foundMeta.name : (currentBook.charAt(0).toUpperCase() + currentBook.slice(1)));
+
+  // Extract all chapter verses from DOM (full scripture text)
   const elements = document.querySelectorAll(".verse-row");
-  if (elements.length === 0) return;
+  if (elements.length === 0) {
+    showToast("No scripture verses found to read");
+    return;
+  }
   
   audioState.versesToRead = [];
-  elements.forEach(el => {
+
+  // Announce the chapter title ONLY ONCE at the start when starting from index 0
+  if (!startVerseIndex || startVerseIndex === 0) {
+    const chapterAnnouncementText = isDevanagari 
+      ? `${activeBookTitle}, अध्याय ${currentChapter} ।` 
+      : `${activeBookTitle}, Chapter ${currentChapter}.`;
+
+    audioState.versesToRead.push({
+      key: "chapter_header",
+      isHeader: true,
+      verseNum: 0,
+      text: chapterAnnouncementText
+    });
+  }
+
+  elements.forEach((el, idx) => {
     let txt = el.dataset.text || "";
     if (state.translation === "parallel") {
       const enDiv = el.querySelector(".verse-parallel-en");
@@ -2635,8 +2704,10 @@ function startSpeechNarration() {
     }
     const cleanText = txt.replace(/[:;()[\]{}—•\-]/g, ' ').replace(/\s+/g, ' ').trim();
     if (cleanText) {
+      const vNum = parseInt(el.dataset.verseNum || (idx + 1), 10);
       audioState.versesToRead.push({
-        key: el.dataset.verseId,
+        key: el.dataset.verseId || `${currentBook}_${currentChapter}_${vNum}`,
+        verseNum: vNum,
         text: cleanText
       });
     }
@@ -2652,13 +2723,21 @@ function startSpeechNarration() {
   const speedPill = document.getElementById("playbar-btn-speed");
   if (speedPill) speedPill.textContent = `${speedVal}x`;
 
-  const isReaderViewActive = document.getElementById("view-reader")?.classList.contains("active");
   const playbarEl = document.getElementById("floating-audio-playbar");
-  if (playbarEl && !isReaderViewActive) {
+  if (playbarEl) {
     playbarEl.classList.add("active");
   }
 
-  const isDevanagari = (state.translation !== "eng");
+  const readerPlayIcon = document.getElementById("reader-quick-play-icon");
+  const readerPlayLabel = document.getElementById("reader-quick-play-label");
+  const readerPlayBtn = document.getElementById("btn-reader-quick-play");
+  if (readerPlayIcon) readerPlayIcon.textContent = "⏸";
+  if (readerPlayLabel) readerPlayLabel.textContent = "थांबवा";
+  if (readerPlayBtn) {
+    readerPlayBtn.style.background = "var(--primary-dark, #8b1828)";
+    readerPlayBtn.style.color = "#ffffff";
+  }
+
   const langCode = isDevanagari ? "mr-IN" : "en-IN";
   const selectedVoiceId = (state.sarvamVoice || "gee_elevenlabs").toLowerCase();
 
@@ -2666,6 +2745,21 @@ function startSpeechNarration() {
     window.SarvamTTS.queue.setListeners({
       onVerseChange: (index, verse) => {
         audioState.currentVerseIndex = index;
+        
+        if (verse.isHeader) {
+          document.querySelectorAll(".verse-row").forEach(v => v.classList.remove("tts-reading"));
+          const headerEl = document.getElementById("reader-chapter-title");
+          if (headerEl) headerEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+          const indicatorEl = document.getElementById("playbar-verse-indicator");
+          if (indicatorEl) {
+            indicatorEl.textContent = `📖 ${activeBookTitle} ${isDevanagari ? 'अध्याय' : 'Chapter'} ${currentChapter}`;
+          }
+          const progressEl = document.getElementById("playbar-progress-line");
+          if (progressEl) progressEl.style.width = `2%`;
+          return;
+        }
+
         document.querySelectorAll(".verse-row").forEach(v => {
           v.classList.toggle("tts-reading", v.dataset.verseId === verse.key);
         });
@@ -2674,31 +2768,22 @@ function startSpeechNarration() {
 
         const indicatorEl = document.getElementById("playbar-verse-indicator");
         if (indicatorEl) {
-          const total = audioState.versesToRead.length;
-          if (verse && verse.key === "vod_verse") {
-            indicatorEl.textContent = "🔊 Daily Bible Verse";
-          } else if (verse && verse.key) {
-            const parts = verse.key.split("_");
-            if (parts.length >= 3) {
-              const bMeta = booksMetadataMr.find(b => b.filename.replace(".json", "") === parts[0]);
-              const bName = (state.translation === "eng" && bMeta) ? bMeta.engName : (bMeta ? bMeta.name : parts[0]);
-              indicatorEl.textContent = `${bName} ${parts[1]}:${parts[2]} (${index + 1}/${total})`;
-            } else {
-              indicatorEl.textContent = `Verse ${index + 1} of ${total}`;
-            }
-          } else {
-            indicatorEl.textContent = `Verse ${index + 1} of ${total}`;
-          }
+          const totalVersesCount = elements.length;
+          const verseNumber = verse.verseNum || index;
+          indicatorEl.textContent = `${activeBookTitle} ${currentChapter}:${verseNumber} (${verseNumber}/${totalVersesCount})`;
         }
 
-        const progress = ((index + 1) / audioState.versesToRead.length) * 100;
+        const totalItems = audioState.versesToRead.length;
+        const progress = totalItems > 1 ? ((index) / (totalItems - 1)) * 100 : 100;
         const progressEl = document.getElementById("playbar-progress-line");
-        if (progressEl) progressEl.style.width = `${progress}%`;
+        if (progressEl) progressEl.style.width = `${Math.min(100, Math.max(0, progress))}%`;
       },
       onStateChange: (playbackState) => {
         const iconSvg = document.getElementById("playbar-icon-svg");
         const fabIcon = document.getElementById("circle-fab-play-icon");
         const fabBtn = document.getElementById("btn-floating-reader-play-circle");
+        const rPlayIcon = document.getElementById("reader-quick-play-icon");
+        const rPlayLabel = document.getElementById("reader-quick-play-label");
 
         if (playbackState === "loading") {
           if (iconSvg) {
@@ -2719,15 +2804,20 @@ function startSpeechNarration() {
           if (iconSvg) iconSvg.innerHTML = `<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>`;
           if (fabIcon) fabIcon.innerHTML = `<rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"></rect>`;
           if (fabBtn) fabBtn.classList.add("playing");
+          if (rPlayIcon) rPlayIcon.textContent = "⏸";
+          if (rPlayLabel) rPlayLabel.textContent = "थांबवा";
         } else {
           if (iconSvg) iconSvg.innerHTML = `<polygon points="5 3 19 12 5 21 5 3"></polygon>`;
           if (fabIcon) fabIcon.innerHTML = `<polygon points="7 4 19 12 7 20 7 4"></polygon>`;
           if (fabBtn) fabBtn.classList.remove("playing");
+          if (rPlayIcon) rPlayIcon.textContent = "▶";
+          if (rPlayLabel) rPlayLabel.textContent = "ऐका";
         }
       },
       onFallbackActive: () => {},
       onComplete: () => {
         stopSpeechNarration();
+        showToast("✨ संपूर्ण अध्याय वाचन पूर्ण झाले!");
       },
       onError: (err) => {
         console.warn("[TTS Engine] Playback notice:", err);
@@ -2741,13 +2831,11 @@ function startSpeechNarration() {
     });
 
     window.SarvamTTS.queue.play();
-  } else {
-    speakPlaybarVerse(0);
   }
 }
 
 function speakPlaybarVerse(index) {
-  if (!audioState.isPlaying || index >= audioState.versesToRead.length || index < 0) {
+  if (!audioState.isPlaying || !audioState.versesToRead || index >= audioState.versesToRead.length || index < 0) {
     stopSpeechNarration();
     return;
   }
@@ -2759,7 +2847,10 @@ function speakPlaybarVerse(index) {
 }
 
 function togglePlaybarSpeech() {
-  if (!audioState.isPlaying) return;
+  if (!audioState.isPlaying) {
+    startSpeechNarration(0);
+    return;
+  }
   
   if (audioPlayerInstance) {
     if (audioPlayerInstance.paused) {
@@ -2805,7 +2896,9 @@ function stopSpeechNarration() {
   }
   
   // Stop background worship music
-  ambientSynthInstance.stop();
+  if (typeof ambientSynthInstance !== 'undefined' && ambientSynthInstance) {
+    ambientSynthInstance.stop();
+  }
   
   // Clear sleep timer
   if (sleepTimerTimeout) {
@@ -2837,24 +2930,17 @@ function stopSpeechNarration() {
 }
 
 function startSpeechNarrationFromVerse(verseNum) {
-  const targetIndex = Math.max(0, parseInt(verseNum) - 1);
-  if (!audioState.versesToRead || audioState.versesToRead.length === 0) {
-    startSpeechNarration();
-    return;
-  }
-  if (audioState.versesToRead && targetIndex < audioState.versesToRead.length) {
-    const isReaderViewActive = document.getElementById("view-reader")?.classList.contains("active");
-    const playbarEl = document.getElementById("floating-audio-playbar");
-    if (playbarEl && !isReaderViewActive) {
-      playbarEl.classList.add("active");
+  const vNum = parseInt(verseNum, 10);
+  
+  // If not playing, start narration starting from this verse directly
+  startSpeechNarration(vNum);
+  
+  // Jump to this specific verse in queue
+  if (window.SarvamTTS && window.SarvamTTS.queue && audioState.versesToRead) {
+    const targetIdx = audioState.versesToRead.findIndex(v => v.verseNum === vNum);
+    if (targetIdx !== -1) {
+      window.SarvamTTS.queue.jumpToVerse(targetIdx);
     }
-    if (window.SarvamTTS && window.SarvamTTS.queue && window.SarvamTTS.queue.isPlaying) {
-      window.SarvamTTS.queue.jumpToVerse(targetIndex);
-    } else {
-      startSpeechNarration();
-    }
-  } else {
-    startSpeechNarration();
   }
 }
 
@@ -5529,9 +5615,35 @@ function closeModal(id) {
 }
 
 let toastTimeout = null;
-function showToast(message) {
+function showToast(message, type = null) {
   const toast = document.getElementById("toast-notification");
-  document.getElementById("toast-message").textContent = message;
+  if (!toast) return;
+
+  // Auto-detect semantic type if not explicitly supplied
+  let semanticType = type;
+  if (!semanticType) {
+    const msg = String(message).toLowerCase();
+    if (msg.includes('error') || msg.includes('fail') || msg.includes('delete') || msg.includes('offline') || msg.includes('invalid') || msg.includes('danger') || msg.includes('cancel')) {
+      semanticType = 'danger';
+    } else if (msg.includes('success') || msg.includes('copied') || msg.includes('saved') || msg.includes('activated') || msg.includes('done') || msg.includes('sent') || msg.includes('blessing') || msg.includes('connected') || msg.includes('completed') || msg.includes('elevated') || msg.includes('updated') || msg.includes('answered')) {
+      semanticType = 'success';
+    } else if (msg.includes('warning') || msg.includes('caution') || msg.includes('quota') || msg.includes('deactivated') || msg.includes('reopened') || msg.includes('reset') || msg.includes('alert')) {
+      semanticType = 'warning';
+    } else {
+      semanticType = 'info';
+    }
+  }
+
+  // Remove prior semantic status classes
+  toast.classList.remove("toast-success", "toast-warning", "toast-danger", "toast-error", "toast-info");
+  if (semanticType) {
+    toast.classList.add("toast-" + semanticType);
+  }
+
+  const msgEl = document.getElementById("toast-message");
+  if (msgEl) {
+    msgEl.textContent = message;
+  }
   
   clearTimeout(toastTimeout);
   toast.classList.add("active");
@@ -11614,37 +11726,11 @@ window.submitPastoralPrayerRequest = function(e) {
    ========================================================================== */
 
 window.toggleAudioNarration = function() {
-  const fabIcon = document.getElementById("circle-fab-play-icon");
-  const fabBtn = document.getElementById("btn-floating-reader-play-circle");
-
-  // 1. If native human chapter audio is playing, stop it
-  if (isBibleChapterPlaying && bibleChapterAudioPlayer) {
-    if (!bibleChapterAudioPlayer.paused) {
-      bibleChapterAudioPlayer.pause();
-      isBibleChapterPlaying = false;
-      if (fabIcon) fabIcon.innerHTML = `<polygon points="7 4 19 12 7 20 7 4"></polygon>`;
-      if (fabBtn) fabBtn.classList.remove("playing");
-      document.querySelectorAll(".verse-row").forEach(v => v.classList.remove("tts-reading"));
-      return;
-    }
-  }
-
-  // 2. If TTS synthesis is active, stop it
-  if (window.SarvamTTS && window.SarvamTTS.queue && window.SarvamTTS.queue.isPlaying) {
+  if (audioState.isPlaying || (window.SarvamTTS && window.SarvamTTS.queue && window.SarvamTTS.queue.isPlaying) || (typeof speechSynthesis !== 'undefined' && (speechSynthesis.speaking || speechSynthesis.pending))) {
     stopSpeechNarration();
-    if (fabIcon) fabIcon.innerHTML = `<polygon points="7 4 19 12 7 20 7 4"></polygon>`;
-    if (fabBtn) fabBtn.classList.remove("playing");
-    return;
+  } else {
+    startSpeechNarration(0);
   }
-  if (typeof speechSynthesis !== 'undefined' && speechSynthesis.speaking) {
-    stopSpeechNarration();
-    if (fabIcon) fabIcon.innerHTML = `<polygon points="7 4 19 12 7 20 7 4"></polygon>`;
-    if (fabBtn) fabBtn.classList.remove("playing");
-    return;
-  }
-
-  // 3. Start 100% fluent native human narration for this chapter
-  playBibleChapterScripture();
 };
 
 
@@ -11880,94 +11966,15 @@ function applyBibleAudioMastering(audioEl, bNum) {
 }
 
 window.playBibleChapterScripture = function() {
-  stopAllAudios();
-
-  const currentBook = state.activeBook || state.currentBook || "genesis";
-  const currentChapter = parseInt(state.activeChapter || state.currentChapter || 1, 10);
-
-  // Resolve book number 1 to 66
-  let bNum = 1;
-  const cleanKey = String(currentBook).toLowerCase().replace(".json", "").trim();
-  const foundMeta = booksMetadataMr.find(b => 
-    b.id === currentBook || 
-    b.filename.replace(".json", "").toLowerCase() === cleanKey ||
-    b.engName.toLowerCase() === cleanKey ||
-    b.name === currentBook
-  );
-
-  if (foundMeta) {
-    bNum = foundMeta.id;
-  } else if (BIBLE_BOOK_NUMBERS_MAP && BIBLE_BOOK_NUMBERS_MAP[String(currentBook).toUpperCase()]) {
-    bNum = BIBLE_BOOK_NUMBERS_MAP[String(currentBook).toUpperCase()];
-  }
-
-  // WordProject language code: 28 for Marathi, 1 for English
-  const isEng = (state.translation === "eng");
-  const langCode = isEng ? 1 : 28;
-  const audioUrl = `https://audio.wordproject.org/bibles/app/audio/${langCode}/${bNum}/${currentChapter}.mp3`;
-
-  bibleChapterAudioPlayer = new Audio(audioUrl);
-  window.activeBibleReaderAudio = bibleChapterAudioPlayer;
-  isBibleChapterPlaying = true;
-
-  // Apply Acoustic Mastering & Cadence Harmonization
-  applyBibleAudioMastering(bibleChapterAudioPlayer, bNum);
-
-  const fabIcon = document.getElementById("circle-fab-play-icon");
-  const fabBtn = document.getElementById("btn-floating-reader-play-circle");
-
-  if (fabIcon) fabIcon.innerHTML = '<rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"></rect>';
-  if (fabBtn) fabBtn.classList.add("playing");
-
-  // Synchronized verse scrolling in reader page
-  bibleChapterAudioPlayer.ontimeupdate = () => {
-    if (!bibleChapterAudioPlayer || !bibleChapterAudioPlayer.duration) return;
-    const progress = bibleChapterAudioPlayer.currentTime / bibleChapterAudioPlayer.duration;
-    const verses = document.querySelectorAll(".verse-row");
-    if (verses.length > 0) {
-      const activeIdx = Math.min(verses.length - 1, Math.floor(progress * verses.length));
-      verses.forEach((v, i) => {
-        v.classList.toggle("tts-reading", i === activeIdx);
-      });
-      if (verses[activeIdx]) {
-        verses[activeIdx].scrollIntoView({ behavior: "smooth", block: "center" });
-      }
-    }
-  };
-
-  bibleChapterAudioPlayer.onended = () => {
-    isBibleChapterPlaying = false;
-    if (fabIcon) fabIcon.innerHTML = '<polygon points="7 4 19 12 7 20 7 4"></polygon>';
-    if (fabBtn) fabBtn.classList.remove("playing");
-    document.querySelectorAll(".verse-row").forEach(v => v.classList.remove("tts-reading"));
-  };
-
-  bibleChapterAudioPlayer.onerror = (err) => {
-    console.warn("Audio load error, falling back to TTS:", err);
-    isBibleChapterPlaying = false;
-    if (typeof startSpeechNarration === "function") {
-      startSpeechNarration();
-    }
-  };
-
-  bibleChapterAudioPlayer.play().catch(e => {
-    console.warn("Autoplay block, tap play again:", e);
-  });
+  startSpeechNarration(0);
 };
 
-// Update stopAllAudios to include bibleChapterAudioPlayer
+// Update stopAllAudios to ensure speech narration stops
 const origStopAllAudios = window.stopAllAudios;
 window.stopAllAudios = function() {
-  if (bibleChapterAudioPlayer) {
-    bibleChapterAudioPlayer.pause();
-    bibleChapterAudioPlayer = null;
+  if (typeof stopSpeechNarration === "function") {
+    stopSpeechNarration();
   }
-  isBibleChapterPlaying = false;
-  document.querySelectorAll(".verse-row").forEach(v => v.classList.remove("tts-reading"));
-  const fabIcon = document.getElementById("circle-fab-play-icon");
-  const fabBtn = document.getElementById("btn-floating-reader-play-circle");
-  if (fabIcon) fabIcon.innerHTML = '<polygon points="7 4 19 12 7 20 7 4"></polygon>';
-  if (fabBtn) fabBtn.classList.remove("playing");
   if (origStopAllAudios) origStopAllAudios();
 };
 
@@ -12897,50 +12904,7 @@ window.playSingleVerseAudio = async function(text, btnElement, directAudioSrc, m
     btnElement.innerHTML = `<span>⏳ लोड होत आहे...</span>`;
   }
 
-  // 1. Resolve WordProject Authentic Recorded Audio Stream
-  let resolvedAudioSrc = directAudioSrc;
-  if (!resolvedAudioSrc && meta && meta.bookKey) {
-    let bNum = 40;
-    const cleanKey = String(meta.bookKey).toLowerCase().replace(".json", "").trim();
-    const foundMeta = (typeof booksMetadataMr !== 'undefined' && booksMetadataMr.length > 0)
-      ? booksMetadataMr.find(b => b.filename.replace(".json", "").toLowerCase() === cleanKey || b.engName.toLowerCase() === cleanKey)
-      : null;
-    if (foundMeta) {
-      bNum = foundMeta.id;
-    }
-    const chapterNum = meta.chapter || 1;
-    resolvedAudioSrc = `https://audio.wordproject.org/bibles/app/audio/28/${bNum}/${chapterNum}.mp3`;
-  }
-
-  if (resolvedAudioSrc && (resolvedAudioSrc.startsWith("http://") || resolvedAudioSrc.startsWith("https://") || resolvedAudioSrc.endsWith(".mp3") || resolvedAudioSrc.endsWith(".wav"))) {
-    try {
-      const audio = new Audio(resolvedAudioSrc);
-      window.currentSingleAudio = audio;
-
-      audio.onplay = () => {
-        if (btnElement) btnElement.innerHTML = `<span>⏸ थांबवा</span>`;
-        showToast("🔊 पवित्र शास्त्र वाचन सुरू आहे (Authentic Marathi Bible Audio) ✨");
-      };
-
-      audio.onended = () => {
-        if (btnElement) btnElement.innerHTML = `<span>▶ ऐका</span>`;
-        window.currentSingleAudio = null;
-        window.currentAudioButton = null;
-      };
-
-      audio.onerror = () => {
-        console.warn("Recorded audio stream notice, falling back to devotional speech synthesis...");
-        fallbackBrowserSpeech(text, btnElement);
-      };
-
-      await audio.play();
-      return;
-    } catch (e) {
-      console.warn("Direct audio playback failed:", e);
-    }
-  }
-
-  // 2. Devotional Speech Narration with Scripture Optimizer & Reverent Tone
+  // Direct Devotional Speech Narration with Scripture Optimizer & Reverent Tone
   fallbackBrowserSpeech(text, btnElement);
 };
 
@@ -15597,12 +15561,1240 @@ function stopLivingWaterResetSession() {
   if (breathTextEl) breathTextEl.textContent = "शांत व्हा (Rest in Grace 💧)";
 }
 
+/* ==========================================================================
+   DEDICATED ADMIN & PASTOR CONSOLE LOGIC & STATE
+   ========================================================================== */
 
+const defaultAdminMembers = [
+  { id: "usr_admin_1", username: "Pastor John", email: "pastorjohn@riveroflife.org", role: "Pastor", isPastor: true, isAdmin: true, addedAt: Date.now() - 86400000 * 30 },
+  { id: "usr_admin_2", username: "Pastor Sunil", email: "sunil@riveroflife.org", role: "Pastor", isPastor: true, isAdmin: false, addedAt: Date.now() - 86400000 * 25 },
+  { id: "usr_admin_3", username: "Leader Samuel", email: "samuel@riveroflife.org", role: "Leader", isLeader: true, isAdmin: false, addedAt: Date.now() - 86400000 * 20 },
+  { id: "usr_admin_4", username: "Sister Sarah", email: "sarah@riveroflife.org", role: "Leader", isLeader: true, isAdmin: false, addedAt: Date.now() - 86400000 * 15 },
+  { id: "usr_admin_5", username: "Gaurav Salve", email: "gaurav@riveroflife.org", role: "Admin", isAdmin: true, isPastor: true, addedAt: Date.now() - 86400000 * 10 },
+  { id: "usr_admin_6", username: "Ruth Shinde", email: "ruth@riveroflife.org", role: "Member", isAdmin: false, addedAt: Date.now() - 86400000 * 5 },
+  { id: "usr_admin_7", username: "Esther Salve", email: "esther@riveroflife.org", role: "Leader", isLeader: true, addedAt: Date.now() - 86400000 * 2 }
+];
 
-// Global Window Exports for Localization & River of Life Modules
+const defaultAdminAnnouncements = [
+  {
+    id: "ann_1",
+    title: "Sunday Holy Communion Service • 10:00 AM",
+    body: "Join our church family this Sunday morning in-person or live via fellowship video call. All are welcome!",
+    priority: "important",
+    icon: "🕊️",
+    active: true,
+    createdAt: Date.now() - 3600000 * 4
+  }
+];
+
+const defaultAdminMeetings = [
+  { id: "meet_1", title: "Sunday Holy Communion Fellowship", titleMr: "रविवार पवित्र मेज व उपासना", host: "Pastor John", time: "Every Sunday 10:00 AM", roomId: "rol-sunday-service", active: true },
+  { id: "meet_2", title: "Wednesday Fasting & Intercession", titleMr: "बुधवार उपवास व मध्यस्थी प्रार्थना", host: "Pastor Sunil", time: "Wednesdays 8:00 PM", roomId: "rol-intercession", active: true },
+  { id: "meet_3", title: "Youth Revival Fellowship Call", titleMr: "तरुण मंडळी जागृती सभा", host: "Esther (Youth Leader)", time: "Friday 7:30 PM", roomId: "rol-youth-revival", active: true }
+];
+
+function getAdminMembers() {
+  try {
+    const saved = localStorage.getItem("rol_admin_members");
+    if (saved) return JSON.parse(saved);
+  } catch (e) {}
+  return [...defaultAdminMembers];
+}
+
+function saveAdminMembersList(list) {
+  localStorage.setItem("rol_admin_members", JSON.stringify(list));
+}
+
+function getAdminAnnouncements() {
+  try {
+    const saved = localStorage.getItem("rol_admin_announcements");
+    if (saved) return JSON.parse(saved);
+  } catch (e) {}
+  return [...defaultAdminAnnouncements];
+}
+
+function saveAdminAnnouncementsList(list) {
+  localStorage.setItem("rol_admin_announcements", JSON.stringify(list));
+}
+
+function getAdminMeetings() {
+  try {
+    const saved = localStorage.getItem("rol_admin_meetings");
+    if (saved) return JSON.parse(saved);
+  } catch (e) {}
+  return [...defaultAdminMeetings];
+}
+
+function saveAdminMeetingsList(list) {
+  localStorage.setItem("rol_admin_meetings", JSON.stringify(list));
+}
+
+let currentAdminSubtab = "overview";
+
+function renderAdminPanel() {
+  // Sync state stats & active user
+  const currentUserNameEl = document.getElementById("admin-current-user-name");
+  if (currentUserNameEl) {
+    const activeUser = state.currentUser ? `${state.currentUser.username} (${state.currentUser.role || (state.currentUser.isPastor ? "Pastor" : "Admin")})` : "Admin (Superuser Session)";
+    currentUserNameEl.textContent = activeUser;
+  }
+
+  // Update counts
+  const members = getAdminMembers();
+  const membersCountEl = document.getElementById("admin-stat-members-count");
+  if (membersCountEl) membersCountEl.textContent = members.length;
+
+  const prayers = window._rolPrayers || [
+    { id: "pr_1", username: "Sister Mary", text: "Please pray for my mother's health recovery.", status: "pending", createdAt: Date.now() - 3600000 * 2, isPublic: true },
+    { id: "pr_2", username: "Brother Daniel", text: "Pray for my job interview on Thursday.", status: "acknowledged", pastorNote: "Standing in prayer for divine favor! - Pastor John", createdAt: Date.now() - 3600000 * 12, isPublic: true },
+    { id: "pr_3", username: "Gaurav Salve", text: "Thanking God for family blessings and peace.", status: "answered", createdAt: Date.now() - 86400000 * 2, isPublic: false }
+  ];
+  if (!window._rolPrayers) window._rolPrayers = prayers;
+
+  const prayersCountEl = document.getElementById("admin-stat-prayers-count");
+  const prayersSubEl = document.getElementById("admin-stat-prayers-sub");
+  const pendingCount = prayers.filter(p => p.status === "pending").length;
+  const answeredCount = prayers.filter(p => p.status === "answered").length;
+  if (prayersCountEl) prayersCountEl.textContent = prayers.length;
+  if (prayersSubEl) prayersSubEl.textContent = `${pendingCount} Pending • ${answeredCount} Answered`;
+
+  const meetings = getAdminMeetings();
+  const meetingsCountEl = document.getElementById("admin-stat-meetings-count");
+  if (meetingsCountEl) meetingsCountEl.textContent = meetings.length;
+
+  // Render the currently selected subpanel
+  switchAdminSubtab(currentAdminSubtab);
+}
+
+function switchAdminSubtab(subtab) {
+  currentAdminSubtab = subtab;
+  document.querySelectorAll(".admin-subnav-btn").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.adminSubtab === subtab);
+  });
+
+  document.querySelectorAll(".admin-subtab-panel").forEach(panel => {
+    panel.style.display = "none";
+    panel.classList.remove("active");
+  });
+
+  const targetPanel = document.getElementById(`admin-panel-${subtab}`);
+  if (targetPanel) {
+    targetPanel.style.display = "block";
+    targetPanel.classList.add("active");
+  }
+
+  if (subtab === "overview") {
+    // Overview metrics already updated
+  } else if (subtab === "members") {
+    renderAdminMembers();
+  } else if (subtab === "vod") {
+    renderAdminVODEditor();
+  } else if (subtab === "meetings") {
+    renderAdminMeetings();
+  } else if (subtab === "prayers") {
+    renderAdminPrayers();
+  } else if (subtab === "announcements") {
+    renderAdminAnnouncements();
+  }
+}
+
+/* ── 1. Members Management ── */
+function renderAdminMembers(filterText = "", roleFilter = "all") {
+  const container = document.getElementById("admin-members-list-container");
+  if (!container) return;
+
+  const members = getAdminMembers();
+  const filtered = members.filter(m => {
+    const matchesText = !filterText || m.username.toLowerCase().includes(filterText.toLowerCase()) || m.email.toLowerCase().includes(filterText.toLowerCase());
+    const matchesRole = (roleFilter === "all") || (m.role && m.role.toLowerCase() === roleFilter.toLowerCase());
+    return matchesText && matchesRole;
+  });
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<div class="panel-empty-state" style="padding: 24px 0; text-align: center; color: var(--text-muted);">No members match the search query.</div>`;
+    return;
+  }
+
+  container.innerHTML = filtered.map(m => {
+    const roleLower = (m.role || "member").toLowerCase();
+    let badgeClass = "role-badge-member";
+    if (roleLower === "admin") badgeClass = "role-badge-admin";
+    else if (roleLower === "pastor") badgeClass = "role-badge-pastor";
+    else if (roleLower === "leader") badgeClass = "role-badge-leader";
+
+    const initial = (m.username || "U")[0].toUpperCase();
+
+    return `
+      <div class="admin-member-card">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px;">
+            ${initial}
+          </div>
+          <div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <strong style="font-size: 14.5px; color: var(--text);">${m.username}</strong>
+              <span class="${badgeClass}">${m.role || "Member"}</span>
+            </div>
+            <span style="font-size: 12px; color: var(--text-muted);">${m.email}</span>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <select onchange="updateAdminMemberRole('${m.id}', this.value)" style="padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 12px; font-weight: 700;">
+            <option value="Member" ${m.role === "Member" ? "selected" : ""}>Member</option>
+            <option value="Leader" ${m.role === "Leader" ? "selected" : ""}>Leader</option>
+            <option value="Pastor" ${m.role === "Pastor" ? "selected" : ""}>Pastor</option>
+            <option value="Admin" ${m.role === "Admin" ? "selected" : ""}>Admin</option>
+          </select>
+          <button onclick="deleteAdminMember('${m.id}')" title="Delete member" style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #ef4444; border-radius: 8px; padding: 6px 10px; cursor: pointer; font-size: 12px; font-weight: 700;">
+            ✕
+          </button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function filterAdminMembers() {
+  const text = document.getElementById("admin-member-search")?.value || "";
+  const role = document.getElementById("admin-member-role-filter")?.value || "all";
+  renderAdminMembers(text, role);
+}
+
+function openAdminAddMemberModal() {
+  const modal = document.getElementById("modal-admin-add-member");
+  if (modal) modal.style.display = "flex";
+}
+
+function handleAdminAddMember(e) {
+  if (e) e.preventDefault();
+  const name = document.getElementById("admin-input-new-name")?.value.trim();
+  const email = document.getElementById("admin-input-new-email")?.value.trim();
+  const role = document.getElementById("admin-input-new-role")?.value || "Member";
+
+  if (!name || !email) {
+    showToast("Please provide both name and email / नाव व ईमेल भरा");
+    return;
+  }
+
+  const members = getAdminMembers();
+  const newMember = {
+    id: `usr_${Date.now()}`,
+    username: name,
+    email: email.toLowerCase(),
+    role: role,
+    isPastor: role === "Pastor",
+    isAdmin: role === "Admin",
+    isLeader: role === "Leader",
+    addedAt: Date.now()
+  };
+
+  members.unshift(newMember);
+  saveAdminMembersList(members);
+
+  closeModal("modal-admin-add-member");
+  document.getElementById("form-admin-add-member")?.reset();
+  renderAdminMembers();
+  showToast(`✅ Added ${name} as ${role}!`);
+}
+
+function updateAdminMemberRole(memberId, newRole) {
+  const members = getAdminMembers();
+  const member = members.find(m => m.id === memberId);
+  if (member) {
+    member.role = newRole;
+    member.isPastor = newRole === "Pastor";
+    member.isAdmin = newRole === "Admin";
+    member.isLeader = newRole === "Leader";
+    saveAdminMembersList(members);
+    renderAdminMembers();
+    showToast(`Updated ${member.username}'s role to ${newRole}`);
+  }
+}
+
+function deleteAdminMember(memberId) {
+  let members = getAdminMembers();
+  const member = members.find(m => m.id === memberId);
+  if (!member) return;
+  if (confirm(`Are you sure you want to remove ${member.username} from the directory?`)) {
+    members = members.filter(m => m.id !== memberId);
+    saveAdminMembersList(members);
+    renderAdminMembers();
+    showToast(`Removed ${member.username}`);
+  }
+}
+
+/* ── 2. Verse of the Day (VOD) Manager ── */
+function renderAdminVODEditor() {
+  const vodData = (typeof getCurrentVOD === 'function') ? getCurrentVOD() : null;
+  const vod = vodData ? vodData.vod : null;
+  const refMarInput = document.getElementById("admin-vod-ref-mar");
+  const refEngInput = document.getElementById("admin-vod-ref-eng");
+  const textMarInput = document.getElementById("admin-vod-text-mar");
+  const textEngInput = document.getElementById("admin-vod-text-eng");
+  const bookSelect = document.getElementById("admin-vod-book-id");
+  const chapterInput = document.getElementById("admin-vod-chapter");
+
+  if (vod) {
+    if (refMarInput && vod.ref) refMarInput.value = vod.ref;
+    if (refEngInput && vod.engRef) refEngInput.value = vod.engRef;
+    if (textMarInput && vod.text) textMarInput.value = vod.text;
+    if (textEngInput && vod.engText) textEngInput.value = vod.engText;
+    if (bookSelect && vod.bookId) bookSelect.value = vod.bookId;
+    if (chapterInput && vod.chapter) chapterInput.value = vod.chapter;
+  }
+
+  updateAdminVODPreview();
+}
+
+function updateAdminVODPreview() {
+  const refMar = document.getElementById("admin-vod-ref-mar")?.value || "यिर्मया २९:११";
+  const textMar = document.getElementById("admin-vod-text-mar")?.value || "";
+  const previewRef = document.getElementById("admin-preview-ref");
+  const previewText = document.getElementById("admin-preview-text");
+
+  if (previewRef) previewRef.textContent = refMar;
+  if (previewText) previewText.textContent = `"${textMar}"`;
+}
+
+function saveAdminVOD(e) {
+  if (e) e.preventDefault();
+  const refMar = document.getElementById("admin-vod-ref-mar")?.value.trim();
+  const refEng = document.getElementById("admin-vod-ref-eng")?.value.trim();
+  const textMar = document.getElementById("admin-vod-text-mar")?.value.trim();
+  const textEng = document.getElementById("admin-vod-text-eng")?.value.trim();
+  const bookId = document.getElementById("admin-vod-book-id")?.value || "jer";
+  const chapter = parseInt(document.getElementById("admin-vod-chapter")?.value, 10) || 29;
+  const theme = document.getElementById("admin-vod-theme")?.value || "crimson";
+
+  const customObj = {
+    ref: refMar,
+    engRef: refEng,
+    text: textMar,
+    engText: textEng,
+    bookId: bookId,
+    chapter: chapter,
+    theme: theme,
+    updatedAt: Date.now()
+  };
+
+  localStorage.setItem("rol_custom_vod", JSON.stringify(customObj));
+  renderDailyDevotion();
+  showToast("✅ Verse of the Day updated & published live across the app!");
+}
+
+function resetAdminVODToDefault() {
+  localStorage.removeItem("rol_custom_vod");
+  renderAdminVODEditor();
+  renderDailyDevotion();
+  showToast("Restored Verse of the Day to liturgical schedule");
+}
+
+/* ── 3. Meetings Manager ── */
+function renderAdminMeetings() {
+  const container = document.getElementById("admin-meetings-list-container");
+  if (!container) return;
+
+  const meetings = getAdminMeetings();
+  container.innerHTML = meetings.map(m => `
+    <div style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 16px; padding: 16px; display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap;">
+      <div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 18px;">📹</span>
+          <h4 style="margin: 0; font-size: 15px; font-weight: 800; color: var(--text);">${m.title}</h4>
+          ${m.titleMr ? `<span style="font-size: 12px; color: var(--text-muted);">(${m.titleMr})</span>` : ""}
+        </div>
+        <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px; display: flex; gap: 12px; flex-wrap: wrap;">
+          <span>👤 Host: <strong>${m.host}</strong></span>
+          <span>⏰ <strong>${m.time}</strong></span>
+          <span>🔑 Room: <code>${m.roomId}</code></span>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 8px;">
+        <button onclick="startAdminMeeting('${m.roomId}')" class="btn-primary-mini" style="font-size: 12px; padding: 6px 12px;">
+          Start Call 🔴
+        </button>
+        <button onclick="copyAdminMeetingInvite('${m.roomId}')" class="btn-secondary-mini" style="font-size: 12px; padding: 6px 12px; border: 1px solid var(--border); background: transparent; color: var(--text);">
+          Copy Link 📋
+        </button>
+        <button onclick="deleteAdminMeeting('${m.id}')" class="btn-danger-mini" style="font-size: 12px; padding: 6px 10px;">
+          ✕
+        </button>
+      </div>
+    </div>
+  `).join("");
+}
+
+function openAdminCreateMeetingModal() {
+  const modal = document.getElementById("modal-admin-create-meeting");
+  if (modal) modal.style.display = "flex";
+}
+
+function handleAdminCreateMeeting(e) {
+  if (e) e.preventDefault();
+  const title = document.getElementById("admin-meeting-title")?.value.trim();
+  const host = document.getElementById("admin-meeting-host")?.value.trim();
+  const time = document.getElementById("admin-meeting-time")?.value.trim();
+  const roomId = document.getElementById("admin-meeting-room-id")?.value.trim() || `rol-${Date.now()}`;
+
+  if (!title) return;
+
+  const meetings = getAdminMeetings();
+  meetings.unshift({
+    id: `meet_${Date.now()}`,
+    title: title,
+    titleMr: title,
+    host: host,
+    time: time,
+    roomId: roomId,
+    active: true
+  });
+
+  saveAdminMeetingsList(meetings);
+  closeModal("modal-admin-create-meeting");
+  document.getElementById("form-admin-create-meeting")?.reset();
+  renderAdminMeetings();
+  showToast("✅ Prayer meeting scheduled!");
+}
+
+function deleteAdminMeeting(meetingId) {
+  let meetings = getAdminMeetings();
+  meetings = meetings.filter(m => m.id !== meetingId);
+  saveAdminMeetingsList(meetings);
+  renderAdminMeetings();
+  showToast("Meeting deleted");
+}
+
+function startAdminMeeting(roomId) {
+  window.location.hash = "#/meetings";
+  if (typeof startNativeVideoMeeting === "function") {
+    startNativeVideoMeeting(roomId);
+  }
+}
+
+function copyAdminMeetingInvite(roomId) {
+  const url = `${window.location.origin}/#/meetings?room=${roomId}`;
+  navigator.clipboard.writeText(url).then(() => {
+    showToast("📋 Meeting invite link copied to clipboard!");
+  }).catch(() => {
+    showToast(`Meeting Code: ${roomId}`);
+  });
+}
+
+/* ── 4. Pastoral Prayers Moderation ── */
+let currentAdminPrayerFilter = "all";
+
+function filterAdminPrayers(filter) {
+  currentAdminPrayerFilter = filter;
+  document.querySelectorAll("[data-admin-prayer-filter]").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.adminPrayerFilter === filter);
+  });
+  renderAdminPrayers();
+}
+
+function renderAdminPrayers() {
+  const container = document.getElementById("admin-prayers-list-container");
+  if (!container) return;
+
+  const prayers = window._rolPrayers || [];
+  const filtered = prayers.filter(p => {
+    if (currentAdminPrayerFilter === "all") return true;
+    return p.status === currentAdminPrayerFilter;
+  });
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<div class="panel-empty-state" style="padding: 24px 0; text-align: center; color: var(--text-muted);">No prayer requests in this category.</div>`;
+    return;
+  }
+
+  container.innerHTML = filtered.map(p => {
+    let badgeClass = "role-badge-member";
+    let badgeText = "Pending";
+    if (p.status === "answered") {
+      badgeClass = "role-badge-leader";
+      badgeText = "Answered";
+    } else if (p.status === "acknowledged") {
+      badgeClass = "role-badge-pastor";
+      badgeText = "Acknowledged";
+    }
+
+    const timeStr = formatTimeAgo ? formatTimeAgo(p.createdAt || Date.now()) : "Recently";
+    const privacy = p.isPublic ? "🌐 Congregation Circle" : "🔒 Confidential (Pastor Only)";
+
+    return `
+      <div style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-weight: 800; font-size: 14.5px; color: var(--text);">From: @${p.username || "Anonymous"}</span>
+            <span class="${badgeClass}">${badgeText}</span>
+          </div>
+          <span style="font-size: 12px; color: var(--text-muted);">${timeStr} • ${privacy}</span>
+        </div>
+
+        <p style="font-size: 14px; line-height: 1.5; color: var(--text); margin: 0; background: var(--bg); padding: 12px; border-radius: 10px; border: 1px solid var(--border);">
+          "${p.text}"
+        </p>
+
+        ${p.pastorNote ? `
+          <div style="background: rgba(245,158,11,0.1); border-left: 3px solid #f59e0b; padding: 10px 14px; border-radius: 6px; font-size: 13px; color: var(--text);">
+            <strong>Pastoral Blessing Response:</strong>
+            <div style="margin-top: 2px;">"${p.pastorNote}"</div>
+          </div>
+        ` : ""}
+
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px;">
+          ${p.status !== "answered" ? `
+            <button onclick="adminAcknowledgePrayerPrompt('${p.id}')" class="btn-primary-mini" style="font-size: 12px; padding: 6px 12px;">
+              ✍️ Write Blessing Note & Pray
+            </button>
+            <button onclick="adminToggleAnsweredPrayer('${p.id}')" class="btn-secondary-mini" style="font-size: 12px; padding: 6px 12px; border: 1px solid var(--border); background: transparent; color: var(--text);">
+              ✅ Mark Answered
+            </button>
+          ` : `
+            <button onclick="adminToggleAnsweredPrayer('${p.id}')" class="btn-secondary-mini" style="font-size: 12px; padding: 6px 12px; border: 1px solid var(--border); background: transparent; color: var(--text);">
+              Reopen Request
+            </button>
+          `}
+          <button onclick="adminDeletePrayer('${p.id}')" class="btn-danger-mini" style="font-size: 12px; padding: 6px 10px;">
+            Delete ✕
+          </button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function adminAcknowledgePrayerPrompt(prayerId) {
+  const note = prompt("Enter Pastoral Blessing / संदेश for this prayer request:", "Standing with you in prayer! May the Lord's peace and strength be with you.");
+  if (note && note.trim()) {
+    const prayers = window._rolPrayers || [];
+    const p = prayers.find(x => x.id === prayerId);
+    if (p) {
+      p.status = "acknowledged";
+      p.pastorNote = note.trim();
+      renderAdminPrayers();
+      if (typeof renderPastorPortal === "function") renderPastorPortal();
+      showToast("🙏 Blessing note sent to member!");
+    }
+  }
+}
+
+function adminToggleAnsweredPrayer(prayerId) {
+  const prayers = window._rolPrayers || [];
+  const p = prayers.find(x => x.id === prayerId);
+  if (p) {
+    p.status = p.status === "answered" ? "pending" : "answered";
+    renderAdminPrayers();
+    if (typeof renderPastorPortal === "function") renderPastorPortal();
+    showToast(p.status === "answered" ? "Marked prayer as answered! 🎉" : "Reopened prayer request");
+  }
+}
+
+function adminDeletePrayer(prayerId) {
+  if (confirm("Delete this prayer request?")) {
+    window._rolPrayers = (window._rolPrayers || []).filter(p => p.id !== prayerId);
+    renderAdminPrayers();
+    if (typeof renderPastorPortal === "function") renderPastorPortal();
+    showToast("Prayer request deleted");
+  }
+}
+
+/* ── 5. Announcements & Live Broadcast Banner ── */
+function renderAdminAnnouncements() {
+  const container = document.getElementById("admin-announcements-list-container");
+  if (!container) return;
+
+  const list = getAdminAnnouncements();
+  if (list.length === 0) {
+    container.innerHTML = `<div class="panel-empty-state" style="padding: 24px 0; text-align: center; color: var(--text-muted);">No active announcements. Click '+ Create Announcement' to post one.</div>`;
+    return;
+  }
+
+  container.innerHTML = list.map(a => `
+    <div style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 16px; padding: 18px; display: flex; justify-content: space-between; align-items: flex-start; gap: 14px;">
+      <div style="display: flex; gap: 12px; align-items: flex-start;">
+        <span style="font-size: 24px;">${a.icon || "📢"}</span>
+        <div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <strong style="font-size: 15px; color: var(--text);">${a.title}</strong>
+            <span style="background: ${a.active ? "rgba(34,197,94,0.15)" : "rgba(100,116,139,0.15)"}; color: ${a.active ? "#22c55e" : "var(--text-muted)"}; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 12px;">
+              ${a.active ? "LIVE ON HOME" : "INACTIVE"}
+            </span>
+          </div>
+          <p style="font-size: 13.5px; color: var(--text); margin: 6px 0 0 0; line-height: 1.4;">
+            ${a.body}
+          </p>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 8px;">
+        <button onclick="toggleAdminAnnouncementActive('${a.id}')" class="btn-secondary-mini" style="font-size: 12px; padding: 6px 12px; border: 1px solid var(--border); background: transparent; color: var(--text);">
+          ${a.active ? "Deactivate" : "Activate"}
+        </button>
+        <button onclick="deleteAdminAnnouncement('${a.id}')" class="btn-danger-mini" style="font-size: 12px; padding: 6px 10px;">
+          ✕
+        </button>
+      </div>
+    </div>
+  `).join("");
+}
+
+function openAdminAddAnnouncementModal() {
+  const modal = document.getElementById("modal-admin-add-announcement");
+  if (modal) modal.style.display = "flex";
+}
+
+function handleAdminAddAnnouncement(e) {
+  if (e) e.preventDefault();
+  const title = document.getElementById("admin-ann-title")?.value.trim();
+  const body = document.getElementById("admin-ann-body")?.value.trim();
+  const priority = document.getElementById("admin-ann-priority")?.value || "important";
+  const icon = document.getElementById("admin-ann-icon")?.value || "📢";
+
+  if (!title || !body) return;
+
+  const list = getAdminAnnouncements();
+  list.unshift({
+    id: `ann_${Date.now()}`,
+    title,
+    body,
+    priority,
+    icon,
+    active: true,
+    createdAt: Date.now()
+  });
+
+  saveAdminAnnouncementsList(list);
+  closeModal("modal-admin-add-announcement");
+  document.getElementById("form-admin-add-announcement")?.reset();
+  renderAdminAnnouncements();
+  renderHomeAnnouncementBanner();
+  showToast("📢 Church announcement broadcast live to Home screen!");
+}
+
+function toggleAdminAnnouncementActive(annId) {
+  const list = getAdminAnnouncements();
+  const item = list.find(a => a.id === annId);
+  if (item) {
+    item.active = !item.active;
+    saveAdminAnnouncementsList(list);
+    renderAdminAnnouncements();
+    renderHomeAnnouncementBanner();
+    showToast(item.active ? "Announcement activated" : "Announcement deactivated");
+  }
+}
+
+function deleteAdminAnnouncement(annId) {
+  let list = getAdminAnnouncements();
+  list = list.filter(a => a.id !== annId);
+  saveAdminAnnouncementsList(list);
+  renderAdminAnnouncements();
+  renderHomeAnnouncementBanner();
+  showToast("Announcement deleted");
+}
+
+function renderHomeAnnouncementBanner() {
+  const container = document.getElementById("church-announcement-container");
+  if (!container) return;
+
+  const list = getAdminAnnouncements();
+  const activeAnn = list.find(a => a.active);
+
+  if (!activeAnn) {
+    container.style.display = "none";
+    container.innerHTML = "";
+    return;
+  }
+
+  container.style.display = "block";
+  container.innerHTML = `
+    <div class="church-announcement-banner">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <span style="font-size: 22px;">${activeAnn.icon || "📢"}</span>
+        <div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <strong style="font-size: 13.5px; font-weight: 800; color: var(--text);">${activeAnn.title}</strong>
+            <span style="background: rgba(224,83,95,0.2); color: var(--primary); font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 8px;">ANNOUNCEMENT</span>
+          </div>
+          <p style="font-size: 12px; color: var(--text-muted); margin: 2px 0 0 0; line-height: 1.35;">${activeAnn.body || activeAnn.content || activeAnn.text || ""}</p>
+        </div>
+      </div>
+      <button onclick="document.getElementById('church-announcement-container').style.display='none'" style="background: transparent; border: none; font-size: 18px; color: var(--text-muted); cursor: pointer; padding: 4px 8px;">&times;</button>
+    </div>
+  `;
+}
+
+/* ── 6. Security & Elevation Helpers ── */
+function elevateCurrentSessionToAdmin() {
+  if (!state.currentUser) {
+    state.currentUser = {
+      uid: "admin_local",
+      username: "Admin",
+      displayName: "Administrator",
+      email: "admin@riveroflife.org",
+      role: "Admin",
+      isAdmin: true,
+      isPastor: true,
+      churchName: "River of Life Central Church",
+      location: "Maharashtra, India"
+    };
+  } else {
+    state.currentUser.isAdmin = true;
+    state.currentUser.isPastor = true;
+    state.currentUser.role = "Admin";
+  }
+
+  localStorage.setItem("rol_user_name", state.currentUser.username);
+  updateAuthUI();
+  renderAdminPanel();
+  renderYouProfile();
+  showToast("🛡️ Admin mode activated with full elevated privileges!");
+}
+
+function saveAdminPIN() {
+  const pinInput = document.getElementById("admin-pin-input-field");
+  const newPin = pinInput?.value.trim() || "2323";
+  localStorage.setItem("rol_admin_pin", newPin);
+  showToast(`✅ Admin PIN updated to ${newPin}`);
+}
+
+function exportAdminDataBackup() {
+  const data = {
+    members: getAdminMembers(),
+    announcements: getAdminAnnouncements(),
+    customVOD: localStorage.getItem("rol_custom_vod") ? JSON.parse(localStorage.getItem("rol_custom_vod")) : null,
+    meetings: getAdminMeetings(),
+    exportedAt: new Date().toISOString()
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `river_of_life_admin_backup_${Date.now()}.json`;
+  a.click();
+  showToast("📥 Exported Admin Backup JSON!");
+}
+
+function resetAllAdminDataToFactory() {
+  if (confirm("Reset all admin custom settings, announcements, and VOD overrides?")) {
+    localStorage.removeItem("rol_admin_members");
+    localStorage.removeItem("rol_admin_announcements");
+    localStorage.removeItem("rol_custom_vod");
+    localStorage.removeItem("rol_admin_meetings");
+    localStorage.removeItem("rol_admin_pin");
+    renderAdminPanel();
+    showToast("Reset all admin data to defaults");
+  }
+}
+
+// Global Window Exports for Localization, River of Life Modules & Admin Console
 window.state = state;
 window.I18N_DICTIONARY = I18N_DICTIONARY;
 window.t = t;
 window.applyAppLanguage = applyAppLanguage;
 window.getActiveLanguage = getActiveLanguage;
 window.applyStylesFromState = applyStylesFromState;
+window.renderAdminPanel = renderAdminPanel;
+window.switchAdminSubtab = switchAdminSubtab;
+window.openAdminAddMemberModal = openAdminAddMemberModal;
+window.handleAdminAddMember = handleAdminAddMember;
+window.updateAdminMemberRole = updateAdminMemberRole;
+window.deleteAdminMember = deleteAdminMember;
+window.filterAdminMembers = filterAdminMembers;
+window.renderAdminVODEditor = renderAdminVODEditor;
+window.updateAdminVODPreview = updateAdminVODPreview;
+window.saveAdminVOD = saveAdminVOD;
+window.resetAdminVODToDefault = resetAdminVODToDefault;
+window.openAdminCreateMeetingModal = openAdminCreateMeetingModal;
+window.handleAdminCreateMeeting = handleAdminCreateMeeting;
+window.deleteAdminMeeting = deleteAdminMeeting;
+window.startAdminMeeting = startAdminMeeting;
+window.copyAdminMeetingInvite = copyAdminMeetingInvite;
+window.filterAdminPrayers = filterAdminPrayers;
+window.adminAcknowledgePrayerPrompt = adminAcknowledgePrayerPrompt;
+window.adminToggleAnsweredPrayer = adminToggleAnsweredPrayer;
+window.adminDeletePrayer = adminDeletePrayer;
+window.openAdminAddAnnouncementModal = openAdminAddAnnouncementModal;
+window.handleAdminAddAnnouncement = handleAdminAddAnnouncement;
+window.toggleAdminAnnouncementActive = toggleAdminAnnouncementActive;
+window.deleteAdminAnnouncement = deleteAdminAnnouncement;
+window.renderHomeAnnouncementBanner = renderHomeAnnouncementBanner;
+window.elevateCurrentSessionToAdmin = elevateCurrentSessionToAdmin;
+window.saveAdminPIN = saveAdminPIN;
+window.exportAdminDataBackup = exportAdminDataBackup;
+window.resetAllAdminDataToFactory = resetAllAdminDataToFactory;
+
+/* ==========================================================================
+   RIVER OF LIFE BACKEND API REST BRIDGE & REALTIME SYNC (v105 + PLATFORM)
+   ========================================================================== */
+window.ROL_API_BASE = '/api/v1';
+
+async function syncWithPlatformBackend() {
+  try {
+    console.log('[ROL-BACKEND-SYNC] Connecting to REST API backend...');
+
+    // 1. Sync Verse of the Day
+    try {
+      const vodRes = await fetch(`${window.ROL_API_BASE}/daily-verses/today`).then(r => r.json());
+      if (vodRes && vodRes.success && vodRes.data) {
+        const vod = vodRes.data;
+        console.log('[ROL-BACKEND-SYNC] VOD loaded from backend:', vod.reference);
+        const customObj = {
+          ref: vod.marathiReference || vod.reference,
+          engRef: vod.reference,
+          text: vod.marathiText || vod.text,
+          engText: vod.text,
+          bookId: vod.bookId || 'psa',
+          chapter: vod.chapter || 23,
+          theme: 'crimson',
+          bgImage: vod.backgroundImageUrl || '/uploads/sunrise.png',
+          devotional: vod.devotional || '',
+          updatedAt: Date.now()
+        };
+        localStorage.setItem('rol_custom_vod', JSON.stringify(customObj));
+        if (typeof renderDailyDevotion === 'function') renderDailyDevotion();
+      }
+    } catch(e) { console.warn('[ROL-BACKEND-SYNC] VOD sync notice:', e.message); }
+
+    // 2. Sync Church Announcements
+    try {
+      const annRes = await fetch(`${window.ROL_API_BASE}/announcements`).then(r => r.json());
+      if (annRes && annRes.success && Array.isArray(annRes.data)) {
+        const activeList = annRes.data.map(a => ({
+          id: a.id,
+          title: a.title,
+          body: a.body || a.content || a.text || "",
+          priority: a.priority || 'important',
+          icon: a.priority === 'urgent' ? '🚨' : '📢',
+          active: a.active !== false,
+          createdAt: new Date(a.createdAt).getTime() || Date.now()
+        }));
+        if (typeof saveAdminAnnouncementsList === 'function') saveAdminAnnouncementsList(activeList);
+        if (typeof renderHomeAnnouncementBanner === 'function') renderHomeAnnouncementBanner();
+      }
+    } catch(e) { console.warn('[ROL-BACKEND-SYNC] Announcements sync notice:', e.message); }
+
+    // 3. Sync Prayer Meetings
+    try {
+      const meetRes = await fetch(`${window.ROL_API_BASE}/prayer-meetings`).then(r => r.json());
+      if (meetRes && meetRes.success && Array.isArray(meetRes.data)) {
+        const meetingsList = meetRes.data.map(m => ({
+          id: m.id,
+          title: m.title,
+          titleMr: m.marathiTitle || m.marathi_title || m.title,
+          host: m.coordinator || 'Pastor',
+          time: `${m.dayOfWeek || m.day_of_week || 'Daily'} ${m.time || '06:00 AM'}`,
+          roomId: m.joinLink || m.join_link || 'river-of-life',
+          active: m.active !== false
+        }));
+        if (typeof saveAdminMeetingsList === 'function') saveAdminMeetingsList(meetingsList);
+        if (typeof renderMeetingsDashboard === 'function') renderMeetingsDashboard();
+      }
+    } catch(e) { console.warn('[ROL-BACKEND-SYNC] Meetings sync notice:', e.message); }
+
+    // 4. Sync Community Prayer Wall
+    try {
+      const prayRes = await fetch(`${window.ROL_API_BASE}/prayers`).then(r => r.json());
+      if (prayRes && prayRes.success && Array.isArray(prayRes.data)) {
+        window._rolPrayers = prayRes.data.map(p => ({
+          id: p.id,
+          username: p.name || 'Member',
+          text: `${p.title ? p.title + ': ' : ''}${p.request}`,
+          status: p.status || 'pending',
+          isPublic: true,
+          prayedCount: p.prayedCount || p.prayed_count || 0,
+          createdAt: new Date(p.createdAt).getTime() || Date.now()
+        }));
+        if (typeof renderPrayerWall === 'function') renderPrayerWall();
+      }
+    } catch(e) { console.warn('[ROL-BACKEND-SYNC] Prayers sync notice:', e.message); }
+
+    // 5. Sync Church Profile & Directory
+    try {
+      const churchRes = await fetch(`${window.ROL_API_BASE}/church/info`).then(r => r.json());
+      if (churchRes && churchRes.success && churchRes.data) {
+        const c = churchRes.data;
+        const nameEl = document.getElementById('church-directory-name');
+        if (nameEl && c.name) nameEl.textContent = c.name;
+        const upiEl = document.getElementById('church-giving-upi');
+        if (upiEl && c.givingUpi) upiEl.textContent = c.givingUpi;
+      }
+    } catch(e) { console.warn('[ROL-BACKEND-SYNC] Church info sync notice:', e.message); }
+
+    console.log('[ROL-BACKEND-SYNC] ✅ Live platform synchronization completed.');
+  } catch(err) {
+    console.error('[ROL-BACKEND-SYNC] Error during platform sync:', err);
+  }
+}
+
+// Auto-run platform sync on load
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => setTimeout(syncWithPlatformBackend, 600));
+} else {
+  setTimeout(syncWithPlatformBackend, 600);
+}
+
+window.syncWithPlatformBackend = syncWithPlatformBackend;
+
+/* ==========================================================================
+   FIGMA DESIGN SYSTEM INTERACTIVE HELPERS
+   ========================================================================== */
+function toggleVodLike() {
+  const countEl = document.getElementById('figma-vod-likes-count');
+  const btn = document.querySelector('.figma-hero-likes');
+  let count = parseInt(localStorage.getItem('rol_vod_likes') || '1240', 10);
+  let isLiked = localStorage.getItem('rol_vod_is_liked') === 'true';
+
+  if (!isLiked) {
+    count += 1;
+    localStorage.setItem('rol_vod_is_liked', 'true');
+    if (btn) btn.classList.add('liked');
+    if (typeof showToast === 'function') showToast('❤️ Added to your liked scriptures');
+  } else {
+    count -= 1;
+    localStorage.setItem('rol_vod_is_liked', 'false');
+    if (btn) btn.classList.remove('liked');
+  }
+  localStorage.setItem('rol_vod_likes', count.toString());
+  if (countEl) {
+    countEl.textContent = count >= 1000 ? (count / 1000).toFixed(1) + 'k' : count;
+  }
+}
+window.toggleVodLike = toggleVodLike;
+
+async function shareVerseOfTheDay() {
+  const quoteEl = document.getElementById('figma-vod-quote');
+  const refEl = document.getElementById('figma-vod-ref');
+  const text = `"${quoteEl ? quoteEl.textContent.trim() : 'The LORD is my shepherd; I shall not want.'}" — ${refEl ? refEl.textContent.trim() : 'Psalm 23:1-2'} (River of Life)`;
+
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: 'Verse of the Day - River of Life',
+        text: text,
+        url: window.location.href
+      });
+      return;
+    } catch(e) { /* user dismissed or fallback to clipboard */ }
+  }
+
+  if (navigator.clipboard) {
+    await navigator.clipboard.writeText(text);
+    if (typeof showToast === 'function') showToast('📋 Scripture copied to clipboard!');
+  } else if (typeof showToast === 'function') {
+    showToast('Verse of the day ready to share');
+  }
+}
+window.shareVerseOfTheDay = shareVerseOfTheDay;
+
+function openBookmarksDrawer() {
+  switchTab('you');
+  setTimeout(() => {
+    const bookmarksSection = document.getElementById('you-bookmarks-list') || document.getElementById('bookmarks-tab-content');
+    if (bookmarksSection) {
+      bookmarksSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, 200);
+}
+window.openBookmarksDrawer = openBookmarksDrawer;
+
+function openDiscoverMoodTopic(topic) {
+  switchTab('discover');
+  setTimeout(() => {
+    const searchInput = document.getElementById('discover-search-input');
+    if (searchInput) {
+      searchInput.value = topic;
+      if (typeof handleDiscoverSearch === 'function') {
+        handleDiscoverSearch();
+      }
+    }
+  }, 200);
+}
+window.openDiscoverMoodTopic = openDiscoverMoodTopic;
+
+async function openReaderAndNavigate(bookKey, chapterNum = 1, verseNum = 1) {
+  switchTab('reader');
+  if (typeof openReader === 'function') {
+    await openReader(bookKey, chapterNum);
+    if (verseNum > 1) {
+      setTimeout(() => {
+        const vEl = document.getElementById(`verse-${verseNum}`);
+        if (vEl) {
+          vEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          vEl.classList.add('highlight-flash');
+          setTimeout(() => vEl.classList.remove('highlight-flash'), 2500);
+        }
+      }, 350);
+    }
+  }
+}
+window.openReaderAndNavigate = openReaderAndNavigate;
+
+/* ==========================================================================
+   DYNAMIC DAILY DISCOVER TOPICS & DIRECT CHAPTER OPENER (66 BOOKS ROTATION)
+   ========================================================================== */
+const DISCOVER_DAILY_TOPICS = [
+  {
+    title: "Faith",
+    subtitle: "Overcoming fear • Hebrews 11",
+    book: "hebrews",
+    chapter: 11,
+    verse: 1,
+    image: "assets/daily_verses/misty_mountains.jpg"
+  },
+  {
+    title: "Hope",
+    subtitle: "A constant anchor • Romans 8",
+    book: "romans",
+    chapter: 8,
+    verse: 24,
+    image: "assets/daily_verses/freedom_field.jpg"
+  },
+  {
+    title: "Joy",
+    subtitle: "Fullness of joy • Psalms 16",
+    book: "psalms",
+    chapter: 16,
+    verse: 11,
+    image: "assets/daily_verses/joy_rain.jpg"
+  },
+  {
+    title: "Love",
+    subtitle: "The greatest gift • 1 Corinthians 13",
+    book: "1corinthians",
+    chapter: 13,
+    verse: 13,
+    image: "assets/daily_verses/ocean.png"
+  },
+  {
+    title: "Peace",
+    subtitle: "Surpassing understanding • Philippians 4",
+    book: "philippians",
+    chapter: 4,
+    verse: 7,
+    image: "assets/daily_verses/calm_waters.png"
+  },
+  {
+    title: "Strength",
+    subtitle: "Soaring on wings • Isaiah 40",
+    book: "isaiah",
+    chapter: 40,
+    verse: 31,
+    image: "assets/daily_verses/mount_zion.png"
+  },
+  {
+    title: "Wisdom",
+    subtitle: "Trust with all heart • Proverbs 3",
+    book: "proverbs",
+    chapter: 3,
+    verse: 5,
+    image: "assets/daily_verses/wisdom_guidance.png"
+  },
+  {
+    title: "Grace",
+    subtitle: "Saved through grace • Ephesians 2",
+    book: "ephesians",
+    chapter: 2,
+    verse: 8,
+    image: "assets/daily_verses/joy_rain.jpg"
+  },
+  {
+    title: "Courage",
+    subtitle: "Strong & courageous • Joshua 1",
+    book: "joshua",
+    chapter: 1,
+    verse: 9,
+    image: "assets/daily_verses/forest.png"
+  },
+  {
+    title: "Comfort",
+    subtitle: "The Good Shepherd • Psalms 23",
+    book: "psalms",
+    chapter: 23,
+    verse: 1,
+    image: "assets/daily_verses/peaceful_pastures.png"
+  },
+  {
+    title: "Prayer",
+    subtitle: "Ask and receive • Matthew 6",
+    book: "matthew",
+    chapter: 6,
+    verse: 9,
+    image: "assets/daily_verses/candlelight.png"
+  },
+  {
+    title: "Light",
+    subtitle: "Light of the world • John 8",
+    book: "john",
+    chapter: 8,
+    verse: 12,
+    image: "assets/daily_verses/stars.png"
+  },
+  {
+    title: "Healing",
+    subtitle: "Restore my soul • Jeremiah 17",
+    book: "jeremiah",
+    chapter: 17,
+    verse: 14,
+    image: "assets/daily_verses/river_of_life.png"
+  },
+  {
+    title: "Victory",
+    subtitle: "More than conquerors • Romans 8",
+    book: "romans",
+    chapter: 8,
+    verse: 37,
+    image: "assets/daily_verses/freedom_field.jpg"
+  },
+  {
+    title: "Promises",
+    subtitle: "Unfailing covenant • 2 Peter 1",
+    book: "2peter",
+    chapter: 1,
+    verse: 4,
+    image: "assets/daily_verses/misty_mountains.jpg"
+  }
+];
+window.DISCOVER_DAILY_TOPICS = DISCOVER_DAILY_TOPICS;
+
+async function openDiscoverTopicDirect(bookKey, chapterNum = 1, verseNum = 1, topicTitle = '') {
+  switchTab('reader');
+  if (typeof openReader === 'function') {
+    await openReader(bookKey, parseInt(chapterNum, 10));
+    if (verseNum) {
+      setTimeout(() => {
+        const verseEl = document.getElementById(`verse-${verseNum}`);
+        if (verseEl) {
+          verseEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          verseEl.classList.add('highlight-flash');
+          setTimeout(() => verseEl.classList.remove('highlight-flash'), 2500);
+        }
+      }, 350);
+    }
+    if (typeof showToast === 'function' && topicTitle) {
+      showToast(`📖 ${topicTitle}: Opening ${bookKey.toUpperCase()} Chapter ${chapterNum}`);
+    }
+  }
+}
+window.openDiscoverTopicDirect = openDiscoverTopicDirect;
+
+function renderDiscoverTopicCards() {
+  const container = document.getElementById('figma-discover-cards-container');
+  if (!container) return;
+
+  container.innerHTML = DISCOVER_DAILY_TOPICS.map(topic => `
+    <div class="figma-discover-card" onclick="openDiscoverTopicDirect('${topic.book}', ${topic.chapter}, ${topic.verse}, '${topic.title}')" style="background-image: url('${topic.image}');">
+      <div class="figma-discover-overlay"></div>
+      <div class="figma-discover-content">
+        <span class="figma-discover-topic-badge">TOPIC</span>
+        <div>
+          <h4 class="figma-discover-title">${topic.title}</h4>
+          <p class="figma-discover-sub">${topic.subtitle}</p>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+window.renderDiscoverTopicCards = renderDiscoverTopicCards;
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderDiscoverTopicCards();
+});
+
+/* ==========================================================================
+   INTERACTIVE SPECIAL EFFECTS & PARTICLE EMITTERS
+   ========================================================================== */
+
+function triggerFloatingAmenAnimation(targetEl, emojiList = ['🙏', '✨', '❤️', '🕊️']) {
+  if (!targetEl) return;
+  const rect = targetEl.getBoundingClientRect();
+  const startX = rect.left + rect.width / 2;
+  const startY = rect.top;
+
+  for (let i = 0; i < 5; i++) {
+    setTimeout(() => {
+      const particle = document.createElement('div');
+      particle.className = 'floating-amen-particle';
+      particle.textContent = emojiList[Math.floor(Math.random() * emojiList.length)];
+      
+      const offsetX = (Math.random() - 0.5) * 50;
+      particle.style.left = `${startX + offsetX}px`;
+      particle.style.top = `${startY}px`;
+      
+      document.body.appendChild(particle);
+      setTimeout(() => particle.remove(), 1400);
+    }, i * 110);
+  }
+}
+window.triggerFloatingAmenAnimation = triggerFloatingAmenAnimation;
+
+function prayAmen(btnEl, counterId) {
+  if (!btnEl) return;
+  const counterEl = document.getElementById(counterId);
+  if (counterEl) {
+    let current = parseInt(counterEl.textContent, 10) || 0;
+    current += 1;
+    counterEl.textContent = current;
+  }
+  btnEl.classList.add('prayed');
+  triggerFloatingAmenAnimation(btnEl, ['🙏', '✨', '❤️']);
+  if (typeof showToast === 'function') {
+    showToast('🙏 Amen! You stood in agreement in prayer.');
+  }
+}
+window.prayAmen = prayAmen;
+
+/* ==========================================================================
+   DYNAMIC 3-TIER READING PLAN PROGRESS SYSTEM
+   0-33%: Orange | 34-66%: Green | 67-100%: Blue
+   ========================================================================== */
+function getProgressTier(pct) {
+  if (pct <= 33) return 'orange';
+  if (pct <= 66) return 'green';
+  return 'blue';
+}
+window.getProgressTier = getProgressTier;
+
+function updateHomepageReadingPlanCard() {
+  const card = document.querySelector('.figma-plan-card');
+  const titleEl = document.getElementById('home-plan-title');
+  const dayEl = document.getElementById('home-plan-day');
+  const percentEl = document.getElementById('home-plan-percent');
+  const fillEl = document.getElementById('home-plan-progress-fill');
+  if (!card || !fillEl) return;
+
+  let totalDays = 30;
+  let currentDay = 15;
+  let title = "Through the New Testament";
+
+  if (typeof state !== 'undefined' && state.readingPlan && state.readingPlan !== 'none') {
+    const planInfo = (typeof PLANS_DB !== 'undefined') ? PLANS_DB[state.readingPlan] : null;
+    if (planInfo) {
+      totalDays = planInfo.days || 30;
+      title = planInfo.title || title;
+      currentDay = state.planDay || 1;
+    } else if (state.readingPlan.startsWith("custom_") && state.customPlan) {
+      totalDays = state.customPlan.duration || 30;
+      title = state.customPlan.title || title;
+      currentDay = state.planDay || 1;
+    }
+  }
+
+  const pct = Math.min(100, Math.max(0, Math.round((currentDay / totalDays) * 100)));
+  const tier = getProgressTier(pct);
+
+  card.classList.remove('plan-tier-orange', 'plan-tier-green', 'plan-tier-blue');
+  card.classList.add(`plan-tier-${tier}`);
+  card.setAttribute('data-tier', tier);
+
+  if (titleEl) titleEl.textContent = title;
+  if (dayEl) dayEl.textContent = `Day ${currentDay} of ${totalDays}`;
+  if (percentEl) percentEl.textContent = `${pct}% Complete`;
+  fillEl.style.width = `${pct}%`;
+}
+window.updateHomepageReadingPlanCard = updateHomepageReadingPlanCard;
+
+document.addEventListener('DOMContentLoaded', () => {
+  updateHomepageReadingPlanCard();
+});
