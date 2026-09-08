@@ -1029,9 +1029,11 @@ const I18N_DICTIONARY = {
     // Bottom Navigation (English UI Tabs)
     "nav_home": "Home",
     "nav_bible": "Bible",
+    "nav_hymns": "Hymns",
+    "nav_settings": "Settings",
     "nav_meetings": "Meetings",
     "nav_discover": "Search",
-    "nav_more": "More",
+    "nav_more": "Settings",
     
     // Verse of the Day (English Name / Header, Marathi Body inside)
     "vod_label": "VERSE OF THE DAY",
@@ -1143,9 +1145,11 @@ const I18N_DICTIONARY = {
     // Bottom Navigation
     "nav_home": "Home",
     "nav_bible": "Bible",
+    "nav_hymns": "Hymns",
+    "nav_settings": "Settings",
     "nav_meetings": "Meetings",
     "nav_discover": "Search",
-    "nav_more": "More",
+    "nav_more": "Settings",
     
     // Verse of the Day
     "vod_label": "VERSE OF THE DAY",
@@ -1427,9 +1431,16 @@ function switchTab(rawRoute) {
     adjustHeaderForRoute(route);
     
     // Reload specific data lists on tab changes
-    if (route === "you") {
+    if (route === "hymns") {
+      renderHymnsView();
+    } else if (route === "you") {
       renderYouProfile();
-    } else if (route === "home") {
+    } else if (route === "hymns") {
+          staticTitle.textContent = "उपासना संगीत • Hymns";
+        } else if (route === "home") {
+        staticTitle.textContent = "River of Life";
+      } else if (route === "hymns") {
+        staticTitle.textContent = state.translation === "eng" ? "Hymns & Worship" : "उपासना संगीत • Hymns";
       renderDailyDevotion();
       if (typeof renderHomeAnnouncementBanner === "function") renderHomeAnnouncementBanner();
     } else if (route === "plans") {
@@ -16798,3 +16809,582 @@ window.updateHomepageReadingPlanCard = updateHomepageReadingPlanCard;
 document.addEventListener('DOMContentLoaded', () => {
   updateHomepageReadingPlanCard();
 });
+
+
+
+/* ==========================================================================
+   MARATHI HYMNAL DATABASE & INTERFACE (उपासना संगीत • 20+ CLASSIC HYMNS)
+   ========================================================================== */
+window.MARATHI_HYMNAL = [
+  {
+    id: 1,
+    number: "01",
+    titleMr: "येशू मसीह देवे जीवन",
+    titleEn: "Yeshu Masih Deve Jeevan",
+    category: "worship",
+    categoryLabel: "स्तुती व आराधना",
+    chorus: "येशू मसीह देवे जीवन, येशू मसीह देवे शांती,\nत्याच्या नामाची स्तुती असो, सर्वकाळ तो राजा आहे.",
+    verses: [
+      {
+        num: 1,
+        text: "पापात मी हरवलो होतो, त्याने मला शोधून काढले;\nआपल्या पवित्र रक्ताने धुवून, नवा जन्म मला दिला."
+      },
+      {
+        num: 2,
+        text: "संकट समयी तोच सहारा, अंधारात तो माझा प्रकाश;\nमाझा मेंढपाळ मज नाही काही, उणे पडणार कधी."
+      },
+      {
+        num: 3,
+        text: "आराधना करू या राजाची, ज्याने जीवन दिले आपुला;\nगाऊ जयजयकार आनंदाने, तोच आपला तारणारा."
+      }
+    ]
+  },
+  {
+    id: 2,
+    number: "02",
+    titleMr: "तुझ्यासारखा कोणी नाही",
+    titleEn: "Tujhyasarkha Koni Nahi",
+    category: "worship",
+    categoryLabel: "स्तुती व आराधना",
+    chorus: "तुझ्यासारखा कोणी नाही प्रभू,\nआकाशात किंवा पृथ्वीवर;\nतूच महान आणि सामर्थ्यवान,\nतुझ्या नामाची स्तुती असो.",
+    verses: [
+      {
+        num: 1,
+        text: "माझ्या हृदयाचा तूच विसावा,\nमाझ्या जीवनाचा तूच उद्धार;\nसंकटात तूच माझा आश्रय,\nतुझे प्रेम कधी संपत नाही."
+      },
+      {
+        num: 2,
+        text: "अद्भुत कार्ये तुझी अपार,\nदया तुझी रोज नवी आहे;\nसगळी सृष्टी गाते तुझे गुणगान,\nतूच राजांचा राजा आहेस."
+      }
+    ]
+  },
+  {
+    id: 3,
+    number: "03",
+    titleMr: "कृपा ही पुरेशी आहे मजला",
+    titleEn: "Krupa Hi Pureshi Aahe Majla",
+    category: "grace",
+    categoryLabel: "कृपा व वधस्तंभ",
+    chorus: "कृपा ही पुरेशी आहे मजला,\nप्रभूचे वचन हे सत्य आहे;\nनिर्बळतेमध्ये सामर्थ्य त्याचे,\nपूर्णत्वास येते हे सत्य आहे.",
+    verses: [
+      {
+        num: 1,
+        text: "जेव्हा वादळे मजला घेरती,\nलाटा जेव्हा उसळती;\nत्याच्या हाताचा आधार मजला,\nकधीही सोडणार नाही."
+      },
+      {
+        num: 2,
+        text: "वधस्तंभावर वाहिला रक्ताचा झरा,\nमाझ्या पापांची क्षमा झाली;\nमोफत मिळाली ही स्वर्गीय कृपा,\nमाझे जीवन तृप्त झाले."
+      }
+    ]
+  },
+  {
+    id: 4,
+    number: "04",
+    titleMr: "देवाचे उपकार स्मरा",
+    titleEn: "Devache Upkaar Smara",
+    category: "worship",
+    categoryLabel: "उपकारस्तुती",
+    chorus: "देवाचे उपकार स्मरा,\nत्याचे नाव सदा वाखाणा;\nत्याच्या कृपेला अंत नाही,\nसदासर्वकाळ तो दयाळू आहे.",
+    verses: [
+      {
+        num: 1,
+        text: "त्याने मला संकटातून सोडवले,\nमाझे पाय खडकावर स्थिर केले;\nमाझ्या मुखात नवे गीत घातले,\nआपल्या देवाची स्तुती गाऊ."
+      },
+      {
+        num: 2,
+        text: "दिवसेंदिवस तो भार वाहतो,\nमाझ्या सर्व गरजा पुरवितो;\nत्याच्या प्रेमाचे गोड गाणे,\nमाझ्या हृदयात सदा राहील."
+      }
+    ]
+  },
+  {
+    id: 5,
+    number: "05",
+    titleMr: "माझा मेंढपाळ परमेश्वर आहे (गीत २३)",
+    titleEn: "Majha Mendhpal Parameshwar Aahe",
+    category: "faith",
+    categoryLabel: "विश्वास व शांती",
+    chorus: "माझा मेंढपाळ परमेश्वर आहे,\nमला काही उणे पडणार नाही;\nहिरव्या कुरणात मज बसवितो,\nशांत पाण्याजवळ मज चालवितो.",
+    verses: [
+      {
+        num: 1,
+        text: "तो माझा जीव ताजा करतो,\nआपल्या नावासाठी नीतीच्या मार्गाने चालवितो;\nमृत्यूच्या छायेच्या दरीतून चाललो तरी,\nमी अनिष्टाला भिणार नाही."
+      },
+      {
+        num: 2,
+        text: "कारण तू माझ्या बरोबर आहेस,\nतुझी काठी व तुझा सोटा मला धीर देतात;\nमाझ्या शत्रूंसमोर तू मेज सजवितोस,\nमाझे मस्तक तेलाने माखितोस, माझा प्याला भरून वाहतो."
+      }
+    ]
+  },
+  {
+    id: 6,
+    number: "06",
+    titleMr: "येशू राजा येतो आहे",
+    titleEn: "Yeshu Raja Yeto Aahe",
+    category: "faith",
+    categoryLabel: "आशा व विजय",
+    chorus: "येशू राजा येतो आहे,\nमेघांवर आरूढ होऊन;\nसर्व डोळे त्याला पाहतील,\nप्रत्येक जीभ कबूल करील.",
+    verses: [
+      {
+        num: 1,
+        text: "जागे व्हा ओ संतांनो,\nआपले दिवे तेवत ठेवा;\nवरा येतो आहे सामर्थ्याने,\nआपल्या मंडळीला न्यायला."
+      },
+      {
+        num: 2,
+        text: "नाही दुःख, नाही अश्रू,\nत्याच्या पवित्र राज्यात;\nसदाकाल आपण राहू आनंदात,\nयेशू राजाच्या सान्निध्यात."
+      }
+    ]
+  },
+  {
+    id: 7,
+    number: "07",
+    titleMr: "पवित्र आत्मा ये, मजवर उतरून ये",
+    titleEn: "Pavitra Aatma Ye",
+    category: "prayer",
+    categoryLabel: "पवित्र आत्मा व प्रार्थना",
+    chorus: "पवित्र आत्मा ये, मजवर उतरून ये,\nतुझ्या सामर्थ्याने मजला भरून टाक;\nअग्नीसारखा ये, वाऱ्यासारखा वाह,\nमाझ्या अंतःकरणात नवा जीवन ओत.",
+    verses: [
+      {
+        num: 1,
+        text: "माझ्या निर्बळतेत तूच साहाय्यक,\nप्रार्थना कशी करावी हे शिकव;\nअथांग उसाशांनी मध्यस्थी कर,\nपित्याच्या इच्छेप्रमाणे मज घडव."
+      },
+      {
+        num: 2,
+        text: "तुझी फळे माझ्यात वाढू दे,\nप्रीती, आनंद, शांती, सहनशीलता;\nउपकार, विश्वासूपणा, नम्रता आणि आत्मसंयम,\nतुझ्या प्रकाशात मला चालव."
+      }
+    ]
+  },
+  {
+    id: 8,
+    number: "08",
+    titleMr: "वधस्तंभावर येशूने दिले प्राण",
+    titleEn: "Vadhstambhavar Yeshune Dile Pran",
+    category: "grace",
+    categoryLabel: "कृपा व वधस्तंभ",
+    chorus: "वधस्तंभावर येशूने दिले प्राण,\nमाझ्यासाठी केला महान त्याग;\nत्याच्या जखमांनी मज आरोग्य लाभले,\nत्याच्या रक्ताने मला क्षमा मिळाली.",
+    verses: [
+      {
+        num: 1,
+        text: "काट्यांचा मुकुट त्याच्या माथी,\nखिळे ठोकले दोन्ही हातांवर;\nतरी मुखातून निघाली प्रार्थना,\n'हे पित्या, यांना क्षमा कर.'"
+      },
+      {
+        num: 2,
+        text: "समाप्त झाले सर्व कार्य,\nतिसऱ्या दिवशी तो उठला जिवंत;\nमृत्यूवर मिळवला विजय,\nतोच आमचा जिवंत प्रभू."
+      }
+    ]
+  },
+  {
+    id: 9,
+    number: "09",
+    titleMr: "स्तुती आराधना करतो आम्ही",
+    titleEn: "Stuti Aaradhana Karto Aamhi",
+    category: "worship",
+    categoryLabel: "स्तुती व आराधना",
+    chorus: "स्तुती आराधना करतो आम्ही,\nहात वर करून गातो आम्ही;\nतूच आमचा देव आणि राजा,\nतुझे नाव महान आहे प्रभू.",
+    verses: [
+      {
+        num: 1,
+        text: "तुझ्या मंदिरात आम्ही येतो,\nहृदय पूर्वक नमन करतो;\nतू पवित्र, तू सर्वसमर्थ,\nतुझी महिमा स्वर्गात भरली आहे."
+      },
+      {
+        num: 2,
+        text: "हालेलुयाह, हालेलुयाह,\nहालेलुयाह प्रभू येशूला;\nसर्व आदर, सन्मान आणि गौरव,\nतुलाच असो युगानुयुग."
+      }
+    ]
+  },
+  {
+    id: 10,
+    number: "10",
+    titleMr: "आनंदाने गावो आम्ही",
+    titleEn: "Aanandane Gaavo Aamhi",
+    category: "worship",
+    categoryLabel: "स्तुती व आनंद",
+    chorus: "आनंदाने गावो आम्ही परमेश्वराचे गीत,\nत्याच्या उपस्थितीत येऊ जयघोष करीत;\nतोच आमचा तारण-खडक,\nत्याचे नाव सदा धन्य असो.",
+    verses: [
+      {
+        num: 1,
+        text: "समुद्र त्याचा, त्याने तो बनवला,\nसुकी भूमी त्याच्या हातांनी घडविली;\nया आपण वाकून नमन करू,\nआपल्या उत्पन्नकर्त्यासमोर गुडघे टेकू."
+      },
+      {
+        num: 2,
+        text: "कारण तोच आमचा देव आहे,\nआणि आपण त्याच्या कुरणातील लोक;\nत्याच्या हातातील मेंढरे आपण,\nआज त्याचा आवाज ऐका."
+      }
+    ]
+  },
+  {
+    id: 11,
+    number: "11",
+    titleMr: "येशू नाम अति मधुर",
+    titleEn: "Yeshu Naam Ati Madhur",
+    category: "worship",
+    categoryLabel: "येशूचे नाम",
+    chorus: "येशू नाम अति मधुर,\nसर्व नामांत श्रेष्ठ नाम;\nपाप्यांना मुक्ती देणारे,\nशांती देणारे गोड नाम.",
+    verses: [
+      {
+        num: 1,
+        text: "या नामात सामर्थ्य आहे,\nसैतानाची शक्ती मोडणारे;\nरोग्यांना बरे करणारे,\nअंधांना डोळे देणारे."
+      },
+      {
+        num: 2,
+        text: "सदा गाईन हेच नाम,\nमाझ्या श्वासात येशू नाम;\nस्वर्गात आणि पृथ्वीवर,\nजयजयकार येशू नाम."
+      }
+    ]
+  },
+  {
+    id: 12,
+    number: "12",
+    titleMr: "माझ्या जीवनात तू राहा प्रभू",
+    titleEn: "Majhya Jeevanat Tu Raha Prabhu",
+    category: "prayer",
+    categoryLabel: "समर्पण व प्रार्थना",
+    chorus: "माझ्या जीवनात तू राहा प्रभू,\nमाझे हृदय तुझे मंदिर होवो;\nमाझ्या प्रत्येक पावलावर,\nतुझा प्रकाश सदा चमकत राहो.",
+    verses: [
+      {
+        num: 1,
+        text: "माझे विचार, माझे बोलणे,\nतुला आवडणारे असे होवो;\nजगाच्या मोहात मी न पडता,\nफक्त तुझ्या मार्गाने चालावे."
+      },
+      {
+        num: 2,
+        text: "माझे सर्वस्व तुला समर्पित,\nमाझा देह, आत्मा आणि मन;\nवापर मला तुझ्या सेवेसाठी,\nतुझे राज्य या पृथ्वीवर येवो."
+      }
+    ]
+  },
+  {
+    id: 13,
+    number: "13",
+    titleMr: "मजवर केली प्रीती अपार",
+    titleEn: "Majvar Keli Preeti Apaar",
+    category: "grace",
+    categoryLabel: "कृपा व प्रेम",
+    chorus: "मजवर केली प्रीती अपार,\nयेशूने दिला नवा उद्धार;\nमी कसा फेडू तुझे उपकार,\nजीवनाने गाईन जयजयकार.",
+    verses: [
+      {
+        num: 1,
+        text: "जगातील सर्व सुखांपेक्षा,\nतुझे प्रेम अधिक गोड आहे;\nसंकट समयी तूच सांत्वनदाता,\nतूच माझा खरा सोबती आहेस."
+      }
+    ]
+  },
+  {
+    id: 14,
+    number: "14",
+    titleMr: "मज संकट समयी तूच साह्यकर्ता",
+    titleEn: "Maj Sankat Samayi Tuza Sahyakarta",
+    category: "faith",
+    categoryLabel: "विश्वास व साहाय्य",
+    chorus: "मज संकट समयी तूच साह्यकर्ता,\nमाझा आश्रय, माझा कोट तूच प्रभू;\nतुझ्या पंखांखाली मी सुरक्षित आहे,\nमला कशाचीही भीती नाही.",
+    verses: [
+      {
+        num: 1,
+        text: "डोंगर जरी हलले आणि टेकड्या थरथरल्या,\nतरी तुझी दया मजवरून ढळणार नाही;\nमाझा शांतीचा करार अढळ राहील,\nअसे दयाळू परमेश्वर म्हणतो."
+      }
+    ]
+  },
+  {
+    id: 15,
+    number: "15",
+    titleMr: "सामर्थ्य आहे रक्तामध्ये (Power in the Blood)",
+    titleEn: "Samarthya Aahe Raktamadhye",
+    category: "grace",
+    categoryLabel: "विजय व रक्त",
+    chorus: "सामर्थ्य, सामर्थ्य, अद्भुत सामर्थ्य,\nकोकरूच्या रक्तामध्ये आहे;\nसामर्थ्य, सामर्थ्य, अद्भुत सामर्थ्य,\nयेशूच्या मौल्यवान रक्तामध्ये.",
+    verses: [
+      {
+        num: 1,
+        text: "पापाच्या ओझ्यातून सुटका हवी का?\nयेशूच्या रक्तात सामर्थ्य आहे;\nसैतानावर विजय मिळवायचा का?\nकोकरूच्या रक्तात विजय आहे."
+      }
+    ]
+  },
+  {
+    id: 16,
+    number: "16",
+    titleMr: "अहा किती गोड येशूचे नाव (How Sweet the Name)",
+    titleEn: "Aha Kiti God Yeshuche Naav",
+    category: "worship",
+    categoryLabel: "स्तुती",
+    chorus: "अहा किती गोड येशूचे नाव,\nविश्वासणाऱ्याच्या कानात पडते;\nदुःख हरते, जखम भरते,\nभय सर्व नाहीसे करते.",
+    verses: [
+      {
+        num: 1,
+        text: "भुकेल्या आत्म्याला तृप्त करते,\nथकलेल्या जीवाला विश्रांती देते;\nयेशू माझा मेंढपाळ, माझा मित्र,\nमाझा राजा आणि माझा प्रभू."
+      }
+    ]
+  },
+  {
+    id: 17,
+    number: "17",
+    titleMr: "रात्र झाली शांत झाली (Silent Night)",
+    titleEn: "Silent Night / शांत रात्र",
+    category: "christmas",
+    categoryLabel: "नाताळ (Christmas)",
+    chorus: "शांत रात्र, पवित्र रात्र,\nसर्व शांत, प्रकाश पसरला;\nकुमारी मातेच्या कुशीत बाळ,\nस्वर्गीय शांतीने झोपले बाळ.",
+    verses: [
+      {
+        num: 1,
+        text: "शांत रात्र, पवित्र रात्र,\nमेंढपाळांना स्वर्गीय दर्शन;\nदेवदूतांनी गायिले हालेलुयाह,\nख्रिस्त तारणारा जन्मला आज."
+      }
+    ]
+  },
+  {
+    id: 18,
+    number: "18",
+    titleMr: "जगी आनंद झाला (Joy to the World)",
+    titleEn: "Joy to the World / जगी आनंद",
+    category: "christmas",
+    categoryLabel: "नाताळ (Christmas)",
+    chorus: "जगी आनंद झाला, प्रभू आला राजा!\nप्रत्येक हृदयाने त्याला जागा द्यावी;\nसृष्टीने आनंदाने गावे,\nआकाश आणि पृथ्वीने जयघोष करावा.",
+    verses: [
+      {
+        num: 1,
+        text: "तो न्यायाने आणि प्रेमाने राज्य करतो,\nराष्ट्रांना त्याचे गौरव दाखवितो;\nत्याच्या नीतीचे वैभव,\nआणि त्याच्या प्रेमाचे आश्चर्य."
+      }
+    ]
+  },
+  {
+    id: 19,
+    number: "19",
+    titleMr: "मोठा देव आमचा (Great is the Lord)",
+    titleEn: "Motha Dev Aamcha",
+    category: "worship",
+    categoryLabel: "स्तुती व आराधना",
+    chorus: "मोठा देव आमचा, महान त्याची स्तुती असो,\nत्याच्या पवित्र पर्वतावर, आपल्या देवाच्या नगरात;\nपृथ्वीचा आनंद, सुंदर उंच सियोन पर्वतावर,\nमहान राजाचे नगर आहे.",
+    verses: [
+      {
+        num: 1,
+        text: "आम्ही तुझ्या मंदिराच्या आत,\nतुझ्या प्रेमळ दयेचे मनन करतो;\nजसे तुझे नाव, तसेच तुझे गुणगान,\nपृथ्वीच्या शेवटापर्यंत पोहोचते."
+      }
+    ]
+  },
+  {
+    id: 20,
+    number: "20",
+    titleMr: "माझे जीवन तुला समर्पित (Take My Life)",
+    titleEn: "Take My Life and Let It Be",
+    category: "prayer",
+    categoryLabel: "समर्पण",
+    chorus: "माझे जीवन घे प्रभू,\nतुझ्यासाठी समर्पित असो;\nमाझे क्षण आणि माझे दिवस,\nतुझ्या अखंड स्तुतीत वाहू दे.",
+    verses: [
+      {
+        num: 1,
+        text: "माझे हात घे आणि त्यांना,\nतुझ्या प्रेमाच्या प्रेरणेने हलव;\nमाझे पाय घे आणि त्यांना,\nतुझ्या मार्गात गतिमान कर."
+      },
+      {
+        num: 2,
+        text: "माझा आवाज घे आणि मला,\nकेवळ माझ्या राजासाठी गाऊ दे;\nमाझे ओठ घे आणि ते,\nतुझ्या संदेशाने भरून टाक."
+      }
+    ]
+  }
+];
+
+let _activeHymnCategory = 'all';
+let _activeHymnId = 1;
+let _hymnFontSize = 16;
+
+function renderHymnsView() {
+  filterHymns();
+}
+
+function selectHymnCategory(cat) {
+  _activeHymnCategory = cat || 'all';
+  document.querySelectorAll('.hymn-cat-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.cat === _activeHymnCategory);
+  });
+  filterHymns();
+}
+
+function clearHymnSearch() {
+  const input = document.getElementById('hymn-search-input');
+  const clearBtn = document.getElementById('hymn-search-clear');
+  if (input) {
+    input.value = '';
+    input.focus();
+  }
+  if (clearBtn) clearBtn.style.display = 'none';
+  filterHymns();
+}
+
+function filterHymns() {
+  const container = document.getElementById('hymns-list-container');
+  if (!container) return;
+  
+  const input = document.getElementById('hymn-search-input');
+  const clearBtn = document.getElementById('hymn-search-clear');
+  const query = (input ? input.value : '').trim().toLowerCase();
+  
+  if (clearBtn) {
+    clearBtn.style.display = query.length > 0 ? 'block' : 'none';
+  }
+  
+  const hymns = window.MARATHI_HYMNAL || [];
+  const filtered = hymns.filter(h => {
+    const matchCat = (_activeHymnCategory === 'all' || h.category === _activeHymnCategory);
+    if (!matchCat) return false;
+    
+    if (!query) return true;
+    
+    const numMatch = h.number.includes(query) || String(h.id) === query;
+    const titleMrMatch = (h.titleMr || '').toLowerCase().includes(query);
+    const titleEnMatch = (h.titleEn || '').toLowerCase().includes(query);
+    const chorusMatch = (h.chorus || '').toLowerCase().includes(query);
+    const versesMatch = (h.verses || []).some(v => v.text.toLowerCase().includes(query));
+    
+    return numMatch || titleMrMatch || titleEnMatch || chorusMatch || versesMatch;
+  });
+  
+  const countElem = document.getElementById('hymn-results-count');
+  if (countElem) {
+    countElem.textContent = `Showing ${filtered.length} of ${hymns.length} hymns`;
+  }
+  
+  if (filtered.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 40px 20px; background: var(--bg-content); border-radius: 16px; border: 1.5px dashed var(--border);">
+        <span style="font-size: 32px; display: block; margin-bottom: 8px;">🔍</span>
+        <h4 style="margin: 0 0 4px 0; color: var(--text); font-size: 15px;">कोणतेही गीत सापडले नाही</h4>
+        <p style="margin: 0; color: var(--text-muted); font-size: 13px;">No hymns found matching "${query}". Try searching by song number or keywords.</p>
+      </div>
+    `;
+    return;
+  }
+  
+  container.innerHTML = filtered.map(h => {
+    const preview = h.chorus ? h.chorus.split('\n')[0] : (h.verses[0] ? h.verses[0].text.split('\n')[0] : '');
+    return `
+      <div class="hymn-card-item" onclick="openHymnDetail(${h.id})">
+        <div class="hymn-card-left">
+          <div class="hymn-num-pill">#${h.number}</div>
+          <div class="hymn-card-info">
+            <h4 class="hymn-card-title">${h.titleMr}</h4>
+            <p class="hymn-card-subtitle">${preview}</p>
+          </div>
+        </div>
+        <div class="hymn-card-right">
+          <span class="hymn-badge-category">${h.categoryLabel}</span>
+          <span class="hymn-open-arrow">&rarr;</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function openHymnDetail(hymnId) {
+  _activeHymnId = hymnId;
+  const hymns = window.MARATHI_HYMNAL || [];
+  const hymn = hymns.find(h => h.id === hymnId) || hymns[0];
+  if (!hymn) return;
+  
+  const modal = document.getElementById('modal-hymn-detail');
+  const numBadge = document.getElementById('hymn-modal-number-badge');
+  const title = document.getElementById('hymn-modal-title');
+  const subtitle = document.getElementById('hymn-modal-subtitle');
+  const body = document.getElementById('hymn-modal-lyrics-body');
+  
+  if (numBadge) numBadge.textContent = `#${hymn.number}`;
+  if (title) title.textContent = hymn.titleMr;
+  if (subtitle) subtitle.textContent = `${hymn.categoryLabel} • ${hymn.titleEn}`;
+  
+  if (body) {
+    let html = '';
+    if (hymn.chorus) {
+      html += `
+        <div class="hymn-chorus-box">
+          <div style="font-size: 12px; font-weight: 800; color: #F7002F; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.5px;">ध्रुवपद (Chorus)</div>
+          <div>${hymn.chorus.replace(/\n/g, '<br>')}</div>
+        </div>
+      `;
+    }
+    
+    if (hymn.verses && hymn.verses.length > 0) {
+      hymn.verses.forEach(v => {
+        html += `
+          <div class="hymn-stanza-block">
+            <div style="font-size: 13px; font-weight: 800; color: #F7002F; margin-bottom: 3px;">कडवे ${v.num} :</div>
+            <div style="padding-left: 6px;">${v.text.replace(/\n/g, '<br>')}</div>
+          </div>
+        `;
+      });
+    }
+    
+    body.innerHTML = html;
+    body.style.fontSize = `${_hymnFontSize}px`;
+  }
+  
+  if (modal) {
+    modal.style.setProperty('display', 'flex', 'important');
+    modal.classList.add('active');
+    document.body.classList.add('hymn-modal-open');
+  }
+}
+
+function closeHymnDetail() {
+  const modal = document.getElementById('modal-hymn-detail');
+  if (modal) {
+    modal.style.setProperty('display', 'none', 'important');
+    modal.classList.remove('active');
+    document.body.classList.remove('hymn-modal-open');
+  }
+}
+
+function navigateHymn(delta) {
+  const hymns = window.MARATHI_HYMNAL || [];
+  const currentIndex = hymns.findIndex(h => h.id === _activeHymnId);
+  let nextIndex = currentIndex + delta;
+  if (nextIndex < 0) nextIndex = hymns.length - 1;
+  if (nextIndex >= hymns.length) nextIndex = 0;
+  openHymnDetail(hymns[nextIndex].id);
+}
+
+function adjustHymnFontSize(delta) {
+  _hymnFontSize = Math.max(13, Math.min(26, _hymnFontSize + delta));
+  const body = document.getElementById('hymn-modal-lyrics-body');
+  if (body) {
+    body.style.fontSize = `${_hymnFontSize}px`;
+  }
+}
+
+function getFormattedHymnText(hymn) {
+  if (!hymn) return '';
+  let text = `🎵 ${hymn.titleMr} (#${hymn.number})\n(${hymn.titleEn})\n\n`;
+  if (hymn.chorus) {
+    text += `[ध्रुवपद]\n${hymn.chorus}\n\n`;
+  }
+  if (hymn.verses) {
+    hymn.verses.forEach(v => {
+      text += `[कडवे ${v.num}]\n${v.text}\n\n`;
+    });
+  }
+  text += `— River of Life • उपासना संगीत`;
+  return text;
+}
+
+function copyCurrentHymnLyrics() {
+  const hymns = window.MARATHI_HYMNAL || [];
+  const hymn = hymns.find(h => h.id === _activeHymnId);
+  if (!hymn) return;
+  const text = getFormattedHymnText(hymn);
+  navigator.clipboard.writeText(text).then(() => {
+    if (typeof showToast === 'function') {
+      showToast('Hymn lyrics copied to clipboard! / गीत कॉपी केले!');
+    }
+  }).catch(() => {
+    alert('Copied lyrics!');
+  });
+}
+
+function shareCurrentHymnLyrics() {
+  const hymns = window.MARATHI_HYMNAL || [];
+  const hymn = hymns.find(h => h.id === _activeHymnId);
+  if (!hymn) return;
+  const text = getFormattedHymnText(hymn);
+  const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+  window.open(waUrl, '_blank');
+}
+
+window.renderHymnsView = renderHymnsView;
+window.selectHymnCategory = selectHymnCategory;
+window.clearHymnSearch = clearHymnSearch;
+window.filterHymns = filterHymns;
+window.openHymnDetail = openHymnDetail;
+window.closeHymnDetail = closeHymnDetail;
+window.navigateHymn = navigateHymn;
+window.adjustHymnFontSize = adjustHymnFontSize;
+window.copyCurrentHymnLyrics = copyCurrentHymnLyrics;
+window.shareCurrentHymnLyrics = shareCurrentHymnLyrics;

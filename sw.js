@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v91-PERFECT-MARATHI-RATAN-SARVAM-CHUNKING';
+const CACHE_NAME = 'river-of-life-cache-v106-LIGHT-THEME-HYMNS-4TABS';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

@@ -8,7 +8,7 @@
   <script>
     // Force immediate hard purge of all stale Service Workers and CacheStorage
     (function() {
-      const CURRENT_VER = "v105_FELLOWSHIP_HUB_PAGE_AND_PALETTE";
+      const CURRENT_VER = "v106_LIGHT_THEME_HYMNS_4TABS";
       if (localStorage.getItem("rol_app_ver") !== CURRENT_VER) {
         localStorage.setItem("rol_app_ver", CURRENT_VER);
         if ('serviceWorker' in navigator) {
@@ -44,8 +44,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   
-  <!-- Main Stylesheet (Cache-Busted for Version 102 Pure White Light Theme Splash Palette) -->
-  <link rel="stylesheet" href="index.css?v=102_PURE_WHITE_LIGHT_THEME_SPLASH_PALETTE">
+  <!-- Main Stylesheet (Cache-Busted for Version 106 Light Theme Hymns 4Tabs) -->
+  <link rel="stylesheet" href="index.css?v=106_LIGHT_THEME_HYMNS_4TABS">
 
   <!-- Official LiveKit WebRTC Client SDK -->
   <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.0.8/dist/livekit-client.umd.min.js"></script>
@@ -140,6 +140,10 @@
         <button class="nav-item" data-tab="reader" onclick="switchTab('reader')">
           <svg viewBox="0 0 24 24" class="nav-icon" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
           <span class="nav-label">Bible</span>
+        </button>
+        <button class="nav-item" data-tab="hymns" onclick="switchTab('hymns')">
+          <svg viewBox="0 0 24 24" class="nav-icon" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+          <span class="nav-label">Hymns</span>
         </button>
         <button class="nav-item" data-tab="plans" onclick="switchTab('plans')">
           <svg viewBox="0 0 24 24" class="nav-icon" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><path d="M9 16l2 2 4-4"></path></svg>
@@ -2483,31 +2487,74 @@
 
           </div>
         </section>
-      </main>
 
-      <!-- 3. MOBILE BOTTOM NAVIGATION TAB BAR (Docked Bottom Menu on All Screen Sizes) -->
-      <nav class="mobile-bottom-tabs five-tabs">
-        <button class="tab-btn active" data-tab="home" onclick="switchTab('home')">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-          <span class="tab-label" data-i18n="nav_home">Home</span>
-        </button>
-        <button class="tab-btn" data-tab="discover" onclick="switchTab('discover')">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-          <span class="tab-label" data-i18n="nav_discover">Search</span>
-        </button>
-        <button class="tab-btn" data-tab="reader" onclick="switchTab('reader')">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
-          <span class="tab-label" data-i18n="nav_bible">Bible</span>
-        </button>
-        <button class="tab-btn" data-tab="meetings" onclick="switchTab('meetings')">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-          <span class="tab-label" data-i18n="nav_community">Community</span>
-        </button>
-        <button class="tab-btn" data-tab="more" id="btn-tab-more" onclick="openMoreMenu()">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-          <span class="tab-label" data-i18n="nav_settings">Settings</span>
-        </button>
-      </nav>
+        <!-- ==========================================================================
+             VIEW 9: MARATHI HYMNS & WORSHIP SANCTUARY (उपासना संगीत)
+             ========================================================================== -->
+        <section id="view-hymns" class="app-view" style="display: none;">
+            <div class="view-scroll-content" style="max-width: 900px; margin: 0 auto; padding-bottom: 95px;">
+              
+              <!-- Hymnal Welcome Banner -->
+              <div class="hymns-header-banner" style="background: linear-gradient(135deg, #1e1b2e 0%, #2e1065 50%, #172554 100%); color: #fff; border-radius: 20px; padding: 22px 20px; margin-bottom: 18px; box-shadow: 0 8px 30px rgba(0,0,0,0.12); position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);">
+                <div style="position: absolute; right: -25px; top: -25px; width: 150px; height: 150px; background: radial-gradient(circle, rgba(247,0,47,0.25) 0%, transparent 70%); border-radius: 50%; pointer-events: none;"></div>
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                  <span style="background: rgba(255,255,255,0.18); backdrop-filter: blur(8px); color: #ffffff; font-size: 11px; font-weight: 800; padding: 3px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px;">🎵 उपासना संगीत • MARATHI HYMNAL</span>
+                </div>
+                <h2 style="font-size: 23px; font-weight: 800; margin: 0 0 6px 0; color: #ffffff; letter-spacing: -0.3px;">Hymns & Worship</h2>
+                <p style="font-size: 13px; color: rgba(255,255,255,0.85); margin: 0; line-height: 1.45;">ख्रिस्ती भक्तीगीते, स्तुती व आराधना, ध्रुवपद आणि कडवी • Search songs by number, title, or lyrics.</p>
+              </div>
+
+              <!-- Search Bar for Hymns -->
+              <div class="hymn-search-box" style="position: relative; margin-bottom: 14px;">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.3" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #64748B;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="hymn-search-input" oninput="filterHymns()" placeholder="गीत शोधा (नाव, क्र. किंवा शब्द) / Search hymns..." style="width: 100%; height: 46px; border-radius: 14px; border: 1.5px solid var(--border); background: var(--bg-content); color: var(--text); padding: 0 40px 0 42px; font-size: 14px; font-family: var(--font-sans); outline: none; box-sizing: border-box; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                <button type="button" id="hymn-search-clear" onclick="clearHymnSearch()" style="display: none; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 18px; color: #94A3B8; cursor: pointer; padding: 4px;">&times;</button>
+              </div>
+
+              <!-- Category Filter Chips -->
+              <div class="hymn-category-chips" id="hymn-category-chips" style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 16px; scrollbar-width: none;">
+                <button class="hymn-cat-btn active" data-cat="all" onclick="selectHymnCategory('all')">सर्व (All)</button>
+                <button class="hymn-cat-btn" data-cat="worship" onclick="selectHymnCategory('worship')">स्तुती व आराधना</button>
+                <button class="hymn-cat-btn" data-cat="grace" onclick="selectHymnCategory('grace')">कृपा व वधस्तंभ</button>
+                <button class="hymn-cat-btn" data-cat="faith" onclick="selectHymnCategory('faith')">विश्वास व शांती</button>
+                <button class="hymn-cat-btn" data-cat="prayer" onclick="selectHymnCategory('prayer')">प्रार्थना व समर्पण</button>
+                <button class="hymn-cat-btn" data-cat="christmas" onclick="selectHymnCategory('christmas')">नाताळ (Christmas)</button>
+              </div>
+
+              <!-- Hymns Counter / Summary -->
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 0 4px;">
+                <span id="hymn-results-count" style="font-size: 12.5px; font-weight: 700; color: var(--text-muted);">Showing all hymns</span>
+                <span style="font-size: 11.5px; color: var(--text-muted); display: flex; align-items: center; gap: 4px;">Tap to view full lyrics</span>
+              </div>
+
+              <!-- Hymns Cards Container -->
+              <div id="hymns-list-container" style="display: flex; flex-direction: column; gap: 10px;">
+                <!-- Populated dynamically by app.js -->
+              </div>
+
+            </div>
+          </section>
+        </main>
+
+        <!-- 3. MOBILE BOTTOM NAVIGATION TAB BAR (Docked Bottom Menu on All Screen Sizes - 4 Tabs) -->
+        <nav class="mobile-bottom-tabs four-tabs">
+          <button class="tab-btn active" data-tab="home" onclick="switchTab('home')">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            <span class="tab-label" data-i18n="nav_home">Home</span>
+          </button>
+          <button class="tab-btn" data-tab="reader" onclick="switchTab('reader')">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+            <span class="tab-label" data-i18n="nav_bible">Bible</span>
+          </button>
+          <button class="tab-btn" data-tab="hymns" onclick="switchTab('hymns')">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+            <span class="tab-label" data-i18n="nav_hymns">Hymns</span>
+          </button>
+          <button class="tab-btn" data-tab="more" id="btn-tab-more" onclick="openMoreMenu()">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            <span class="tab-label" data-i18n="nav_settings">Settings</span>
+          </button>
+        </nav>
 
       <!-- Floating playbar capsule above the mobile tab bar / bottom desktop page -->
       <div id="floating-audio-playbar" class="floating-playbar-container">
@@ -4359,9 +4406,9 @@
       <span id="toast-message">Copied to clipboard!</span>
     </div>
 
-  <!-- App Main Logic (Cache-Busted for Version 105 Fellowship Hub Page & River Palette) -->
-  <script src="sarvam-tts.js?v=105_FELLOWSHIP_HUB_PAGE_AND_PALETTE"></script>
-  <script src="app.js?v=105_FELLOWSHIP_HUB_PAGE_AND_PALETTE"></script>
+  <!-- App Main Logic (Cache-Busted for Version 106 Light Theme Hymns 4Tabs) -->
+  <script src="sarvam-tts.js?v=106_LIGHT_THEME_HYMNS_4TABS"></script>
+  <script src="app.js?v=106_LIGHT_THEME_HYMNS_4TABS"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 4.5s no matter what
@@ -4512,6 +4559,55 @@
           Close / बंद करा
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- HYMN LYRICS DETAIL MODAL -->
+  <div id="modal-hymn-detail" class="app-modal-backdrop" onclick="if(event.target === this) closeHymnDetail();" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.72); z-index: 99999; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); justify-content: center; align-items: center; padding: 16px;">
+    <div class="hymn-modal-sheet" style="width: 100%; max-width: 580px; max-height: 88vh; background: var(--bg-content); border-radius: 24px; border: 1.5px solid var(--border); box-shadow: 0 20px 60px rgba(0,0,0,0.3); display: flex; flex-direction: column; overflow: hidden; animation: popInModal 0.28s cubic-bezier(0.16,1,0.3,1);">
+      
+      <!-- Modal Header -->
+      <div style="padding: 16px 20px; border-bottom: 1.5px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: var(--surface);">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span id="hymn-modal-number-badge" style="background: rgba(247,0,47,0.1); color: #F7002F; font-weight: 800; font-size: 12px; padding: 4px 10px; border-radius: 12px; border: 1px solid rgba(247,0,47,0.2);">#01</span>
+          <div>
+            <h3 id="hymn-modal-title" style="margin: 0; font-size: 16px; font-weight: 800; color: var(--text);">Hymn Title</h3>
+            <span id="hymn-modal-subtitle" style="font-size: 12px; color: var(--text-muted);">Category • Transliteration</span>
+          </div>
+        </div>
+        <button onclick="closeHymnDetail()" style="width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg-content); color: var(--text); font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: 700;">&times;</button>
+      </div>
+
+      <!-- Action Toolbar (Font Size & Share) -->
+      <div style="padding: 10px 20px; background: var(--bg); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <span style="font-size: 11.5px; font-weight: 700; color: var(--text-muted); margin-right: 4px;">Font:</span>
+          <button onclick="adjustHymnFontSize(-2)" style="padding: 4px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-weight: 700; font-size: 12px; cursor: pointer;">A-</button>
+          <button onclick="adjustHymnFontSize(2)" style="padding: 4px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-weight: 700; font-size: 12px; cursor: pointer;">A+</button>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button id="btn-copy-hymn-lyrics" onclick="copyCurrentHymnLyrics()" style="padding: 6px 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            <span>Copy</span>
+          </button>
+          <button id="btn-share-hymn-lyrics" onclick="shareCurrentHymnLyrics()" style="padding: 6px 14px; border-radius: 10px; border: none; background: #25D366; color: #ffffff; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+            <span>WhatsApp</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Modal Body (Lyrics) -->
+      <div id="hymn-modal-lyrics-body" style="padding: 22px 24px; overflow-y: auto; flex: 1; font-family: var(--font-marathi), var(--font-sans); line-height: 1.85; font-size: 16px; color: var(--text);">
+        <!-- Populated dynamically by app.js -->
+      </div>
+
+      <!-- Modal Footer -->
+      <div style="padding: 12px 20px; border-top: 1.5px solid var(--border); background: var(--surface); display: flex; justify-content: space-between; align-items: center;">
+        <button id="btn-hymn-prev" onclick="navigateHymn(-1)" style="padding: 8px 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-content); color: var(--text); font-size: 12.5px; font-weight: 700; cursor: pointer;">&larr; Previous</button>
+        <button onclick="closeHymnDetail()" style="padding: 8px 20px; border-radius: 10px; border: none; background: var(--primary); color: #ffffff; font-size: 13px; font-weight: 800; cursor: pointer;">Close / बंद करा</button>
+        <button id="btn-hymn-next" onclick="navigateHymn(1)" style="padding: 8px 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-content); color: var(--text); font-size: 12.5px; font-weight: 700; cursor: pointer;">Next &rarr;</button>
+      </div>
+
     </div>
   </div>
 

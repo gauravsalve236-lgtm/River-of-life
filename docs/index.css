@@ -12084,6 +12084,130 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
   animation: trophyShine 5s ease-in-out infinite;
 }
 
+/* ==========================================================================
+   11. Marathi Hymnal (उपासना संगीत) Component Styles
+   ========================================================================== */
+.hymn-cat-btn {
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 12.5px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: var(--font-ui);
+}
+.hymn-cat-btn:hover {
+  border-color: #F7002F;
+  color: #F7002F;
+}
+.hymn-cat-btn.active {
+  background: #F7002F !important;
+  color: #FFFFFF !important;
+  border-color: #F7002F !important;
+  box-shadow: 0 4px 12px rgba(247, 0, 47, 0.25);
+}
+
+.hymn-card-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: #FFFFFF;
+  border: 1.5px solid #EAEAEA;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.hymn-card-item:hover {
+  transform: translateY(-2px);
+  border-color: rgba(247, 0, 47, 0.4);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+}
+.hymn-card-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+}
+.hymn-num-pill {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: rgba(247, 0, 47, 0.08);
+  color: #F7002F;
+  font-weight: 800;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-family: var(--font-ui);
+}
+.hymn-card-info {
+  flex: 1;
+  min-width: 0;
+}
+.hymn-card-title {
+  margin: 0 0 3px 0;
+  font-size: 15px;
+  font-weight: 800;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hymn-card-subtitle {
+  margin: 0;
+  font-size: 12.5px;
+  color: #6B7280;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hymn-card-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 10px;
+}
+.hymn-badge-category {
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: #F3F4F6;
+  color: #4B5563;
+  font-size: 11px;
+  font-weight: 700;
+}
+.hymn-open-arrow {
+  color: #9CA3AF;
+  font-size: 16px;
+  font-weight: 800;
+}
+.hymn-chorus-box {
+  background: rgba(247, 0, 47, 0.05);
+  border-left: 4px solid #F7002F;
+  padding: 12px 16px;
+  border-radius: 0 12px 12px 0;
+  margin: 14px 0;
+  font-style: italic;
+  font-weight: 600;
+}
+.hymn-stanza-block {
+  margin-bottom: 16px;
+}
+.hymn-stanza-num {
+  font-weight: 800;
+  color: #F7002F;
+  margin-right: 6px;
+  display: inline-block;
+}
+
 
 
 
