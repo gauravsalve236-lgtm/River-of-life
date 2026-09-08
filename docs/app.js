@@ -13315,26 +13315,6 @@ window.toggleVodOptionsMenu = function() {
   }
 };
 
-window.openVodShareSheet = function() {
-  const sheet = document.getElementById("modal-vod-share-sheet");
-  if (sheet) {
-    sheet.style.display = "flex";
-    sheet.classList.add("active");
-    sheet.style.opacity = "1";
-    sheet.style.pointerEvents = "auto";
-  }
-};
-
-window.closeVodShareSheet = function() {
-  const sheet = document.getElementById("modal-vod-share-sheet");
-  if (sheet) {
-    sheet.style.display = "none";
-    sheet.classList.remove("active");
-    sheet.style.opacity = "0";
-    sheet.style.pointerEvents = "none";
-  }
-};
-
 window.cycleVodWallpaper = function() {
   const images = (window.dailyVersesImageList && window.dailyVersesImageList.length > 0) ? window.dailyVersesImageList : [
     'stars.png', 'forest.png', 'mist.png', 'mountains.png', 'mount_zion.png', 'ocean.png', 'path.png', 'sunrise.png'
