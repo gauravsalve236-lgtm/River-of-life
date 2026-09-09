@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v128-AUTHENTIC-MALE-AUDIO';
+const CACHE_NAME = 'river-of-life-cache-v132-MARVBSI-FULL-CHURCH-BIBLE';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
