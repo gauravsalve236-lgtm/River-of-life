@@ -3392,29 +3392,71 @@ window.googleTtsNarration = {
   isStopRequested: false,
 };
 
-async function synthesizeVerseAudio(verseText) {
-  const apiBase = (window.location.port === '8090') ? '/api/v1' : 'http://localhost:8090/api/v1';
-  const response = await fetch(`${apiBase}/tts/synthesize`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json; charset=utf-8" },
-    body: JSON.stringify({
-      text: verseText,
-      voice: "mr-IN-Chirp3-HD-Algieba",
-      languageCode: "mr-IN",
-      audioEncoding: "MP3"
-    })
-  });
-  const result = await response.json();
-  if (!response.ok || !result.success) {
-    throw new Error(result.error || "TTS synthesis failed");
-  }
-  const binaryString = window.atob(result.audioContent);
+function createBlobUrlFromBase64(base64Content) {
+  const binaryString = window.atob(base64Content);
   const bytes = new Uint8Array(binaryString.length);
   for (let i = 0; i < binaryString.length; i++) {
     bytes[i] = binaryString.charCodeAt(i);
   }
   const blob = new Blob([bytes], { type: "audio/mpeg" });
   return URL.createObjectURL(blob);
+}
+
+async function synthesizeVerseAudio(verseText) {
+  const apiKey = "AIzaSyClWC2VI25zclGPBRMaIaDpqOgH7ZebGeA";
+
+  // Tier 1: Try Local Backend Server if running on port 8090
+  if (window.location.port === '8090') {
+    try {
+      const response = await fetch('/api/v1/tts/synthesize', {
+        method: "POST",
+        headers: { "Content-Type": "application/json; charset=utf-8" },
+        body: JSON.stringify({
+          text: verseText,
+          voice: "mr-IN-Chirp3-HD-Algieba",
+          languageCode: "mr-IN",
+          audioEncoding: "MP3"
+        })
+      });
+      if (response.ok) {
+        const result = await response.json();
+        if (result && result.success && result.audioContent) {
+          return createBlobUrlFromBase64(result.audioContent);
+        }
+      }
+    } catch(e) {
+      console.warn("Backend TTS unreachable, trying direct Google Cloud API", e);
+    }
+  }
+
+  // Tier 2: Direct Google Cloud Text-to-Speech REST API Call (Works on GitHub Pages & Mobile Phones!)
+  try {
+    const googleRes = await fetch(`https://texttospeech.googleapis.com/v1/text:synthesize?key=${apiKey}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json; charset=utf-8" },
+      body: JSON.stringify({
+        input: { text: verseText },
+        voice: { languageCode: "mr-IN", name: "mr-IN-Chirp3-HD-Algieba" },
+        audioConfig: { audioEncoding: "MP3" }
+      })
+    });
+    if (googleRes.ok) {
+      const googleData = await googleRes.json();
+      if (googleData && googleData.audioContent) {
+        return createBlobUrlFromBase64(googleData.audioContent);
+      }
+    }
+  } catch(e) {
+    console.warn("Direct Google Cloud API failed, trying fallback", e);
+  }
+
+  // Tier 3: High-reliability Google Translate Marathi Audio Fallback
+  try {
+    const encodedText = encodeURIComponent(verseText.slice(0, 200));
+    return `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=mr&client=tw-ob`;
+  } catch(e) {
+    throw new Error("Unable to synthesize verse audio");
+  }
 }
 
 function getCleanVerseText(versesMr, index) {
