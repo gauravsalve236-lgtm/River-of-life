@@ -3421,15 +3421,15 @@ async function synthesizeVerseAudio(verseText) {
       if (response.ok) {
         const result = await response.json();
         if (result && result.success && result.audioContent) {
-          return createBlobUrlFromBase64(result.audioContent);
+          return "data:audio/mp3;base64," + result.audioContent;
         }
       }
     } catch(e) {
-      console.warn("Backend TTS unreachable, trying direct Google Cloud API", e);
+      console.warn("Backend TTS unreachable, using direct Google Cloud API", e);
     }
   }
 
-  // Tier 2: Direct Google Cloud Text-to-Speech REST API Call (Works on GitHub Pages & Mobile Phones!)
+  // Tier 2: Direct Google Cloud Text-to-Speech REST API Call (Works on GitHub Pages & iPhone Safari!)
   try {
     const googleRes = await fetch(`https://texttospeech.googleapis.com/v1/text:synthesize?key=${apiKey}`, {
       method: "POST",
@@ -3443,14 +3443,14 @@ async function synthesizeVerseAudio(verseText) {
     if (googleRes.ok) {
       const googleData = await googleRes.json();
       if (googleData && googleData.audioContent) {
-        return createBlobUrlFromBase64(googleData.audioContent);
+        return "data:audio/mp3;base64," + googleData.audioContent;
       }
     }
   } catch(e) {
     console.warn("Direct Google Cloud API failed, trying fallback", e);
   }
 
-  // Tier 3: High-reliability Google Translate Marathi Audio Fallback
+  // Tier 3: High-reliability Google Translate Marathi Audio Fallback for iOS
   try {
     const encodedText = encodeURIComponent(verseText.slice(0, 200));
     return `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=mr&client=tw-ob`;
@@ -3496,6 +3496,14 @@ async function startSpeechNarration(startVerseIndex = 0) {
 
   const n = window.googleTtsNarration;
   n.isStopRequested = false;
+  // Pre-unlock Audio player for iOS Safari (iPhone 12) user gesture requirement
+  if (!n.currentAudio) {
+    n.currentAudio = new Audio();
+  }
+  n.currentAudio.pause();
+  n.currentAudio.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
+  n.currentAudio.play().catch(function() {});
+  
   n.isActive = true;
 
   // Handle background worship music
@@ -3634,8 +3642,9 @@ async function startSpeechNarration(startVerseIndex = 0) {
       return;
     }
 
-    const audio = new Audio(audioUrl);
-    n.currentAudio = audio;
+    if (!n.currentAudio) n.currentAudio = new Audio();
+    const audio = n.currentAudio;
+    audio.src = audioUrl;
     window.currentGoogleTtsAudio = audio;
 
     // Prefetch next verse in background
