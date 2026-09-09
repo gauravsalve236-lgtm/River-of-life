@@ -2862,7 +2862,7 @@ async function checkTtsServerStatus() {
   }
 }
 
-function playDailyVerseAudio() {
+function playDailyVerseAudio() { console.log("playDailyVerseAudio disabled per user configuration - Bible reading audio only"); return;
   const { vod } = getCurrentVOD();
   const isEng = (state && state.translation === "eng");
   const text = isEng ? (vod.engText || vod.text) : (vod.text || vod.engText);
@@ -3735,7 +3735,7 @@ function startSpeechNarrationFromVerse(verseNum) {
   }
 }
 
-function playDailyVerseAudio() {
+function playDailyVerseAudio() { console.log("playDailyVerseAudio disabled per user configuration - Bible reading audio only"); return;
   const vodTextEl = document.getElementById("home-vod-text");
   const vodRefEl = document.getElementById("home-vod-ref");
   if (!vodTextEl) return;

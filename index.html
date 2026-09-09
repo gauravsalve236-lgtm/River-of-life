@@ -8,7 +8,7 @@
   <script>
     // Force immediate hard purge of all stale Service Workers and CacheStorage
     (function() {
-      const CURRENT_VER = "v128_AUTHENTIC_MALE_AUDIO_CLEAN_V27";
+      const CURRENT_VER = "v129_V25_5_RELEASE";
       if (localStorage.getItem("rol_app_ver") !== CURRENT_VER) {
         localStorage.setItem("rol_app_ver", CURRENT_VER);
         if ('serviceWorker' in navigator) {
@@ -272,9 +272,6 @@
                   <button class="home-vod-btn" id="home-vod-btn-read" onclick="openVODReader(); event.stopPropagation();" title="Read Verse / वाचा" aria-label="Read Verse">
                     <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
                   </button>
-                  <button class="home-vod-btn" id="home-vod-btn-listen" onclick="playDailyVerseAudio(); event.stopPropagation();" title="Listen / का" aria-label="Listen Audio">
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.3"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>
-                  </button>
                   <button class="home-vod-btn" id="home-vod-btn-save-img" onclick="saveExactDailyVerseImage(); event.stopPropagation();" title="Save Image to Gallery / फोटो सेव्ह करा" aria-label="Save to Gallery">
                     <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                   </button>
@@ -418,9 +415,6 @@
                     <button class="home-commandments-btn-sec" onclick="event.stopPropagation(); openReaderAndNavigate('exodus', 20, 1);" title="Read Exodus 20 in Bible / निर्गम २० वाचा">
                       📖 Read Exodus 20
                     </button>
-                    <button class="home-commandments-btn-sec" onclick="event.stopPropagation(); readTenCommandmentsAloud(this);" title="Listen Audio Narration / संपूर्ण ऑडिओ का">
-                      🔊 Listen Audio
-                    </button>
                   </div>
                 </div>
               </div>
@@ -449,13 +443,6 @@
                       <h4 id="micro-word-term" class="micro-word-title">Agape (ἀγάπη)</h4>
                     </div>
                     <!-- Pronunciation Audio Button -->
-                    <button class="microlearning-listen-btn" onclick="speakMicroLearningWord()" title="उच्चार व मनन का / Listen Pronunciation & Insight" aria-label="Listen Pronunciation">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-                        <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
-                      </svg>
-                    </button>
                   </div>
 
                   <!-- Meaning Box -->
@@ -1181,9 +1168,6 @@
                     "हे परमेशवरा, आजचया नवया दिवसासाठी मी ते आभार मानतो. ती दया दररोज सकाळी नवी असते. आजचया परतयेक पावलात, निरणयात आणि संभाषणात ते मारगदरशन मायासोबत असू दे. आमेन."
                   </blockquote>
                   <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-                    <button onclick="readPrayerAloud('morning')" class="btn-prayer-listen" style="background: var(--primary-light); color: var(--primary); border: 1px solid var(--primary); padding: 6px 14px; border-radius: 8px; font-size: 12.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px;">
-                      <span>▶ Listen Guided Prayer</span>
-                    </button>
                     <span style="font-size: 12px; color: var(--text-muted);">3-min quiet meditation</span>
                   </div>
                 </div>
@@ -1202,9 +1186,6 @@
                     "हे परभो, दिवसाचया धावपळीत माे मन तया शांतीमधये सथिर कर. जे परमेशवराची वाट पाहतात तयांना नवे सामरथय परापत होते. माा थकवा दूर कर आणि मला तया आतमयाने पनहा उतसाही कर."
                   </blockquote>
                   <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-                    <button onclick="readPrayerAloud('midday')" class="btn-prayer-listen" style="background: var(--primary-light); color: var(--primary); border: 1px solid var(--primary); padding: 6px 14px; border-radius: 8px; font-size: 12.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px;">
-                      <span>▶ Listen Guided Prayer</span>
-                    </button>
                     <span style="font-size: 12px; color: var(--text-muted);">Recharge in the Lord</span>
                   </div>
                 </div>
@@ -1223,9 +1204,6 @@
                     "हे देवा, मी शांतीने निजेन व ोपेन; कारण तूच मला निरभयपणे राहू देतोस. आजचया सर्व चिंता मी तया चरणी सोपवतो. माया घराचे व मनाचे रक्षण कर."
                   </blockquote>
                   <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-                    <button onclick="readPrayerAloud('evening')" class="btn-prayer-listen" style="background: var(--primary-light); color: var(--primary); border: 1px solid var(--primary); padding: 6px 14px; border-radius: 8px; font-size: 12.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px;">
-                      <span>▶ Listen Guided Prayer</span>
-                    </button>
                     <span style="font-size: 12px; color: var(--text-muted);">Peaceful sleep meditation</span>
                   </div>
                 </div>
@@ -1244,9 +1222,6 @@
                     "जो परातपर देवाचया गुप्तसथळी राहतो, तो सर्वसमरथाचया सावलीत विसावा पावेल. परमेशवर माा कोट व माा किलला आहे. तो मला सर्व संकटांपासून सोडवील आणि आपलया पंखांखाली मला आश्रय देईल."
                   </blockquote>
                   <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-                    <button onclick="readPrayerAloud('psalm91')" class="btn-prayer-listen" style="background: var(--primary-light); color: var(--primary); border: 1px solid var(--primary); padding: 6px 14px; border-radius: 8px; font-size: 12.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px;">
-                      <span>▶ Listen Guided Prayer</span>
-                    </button>
                     <button onclick="openReaderAndNavigate('psalms', 91, 1);" style="background: none; border: 1px solid var(--border); padding: 6px 12px; border-radius: 8px; font-size: 12px; color: var(--text); cursor: pointer;">
                       Read Psalm 91 📖
                     </button>
@@ -1267,9 +1242,6 @@
                     "हे येशू, तू महणालास: 'अहो कषटी व भाराकरांत जनहो, तमही सर्व मजकडे या, महणजे मी तमहाला विसावा देईन.' माया मनातील वेदना, भीती आणि ताण मी तला देतो. ती सवरगीय शांती माया हृदयात वाहू दे."
                   </blockquote>
                   <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-                    <button onclick="readPrayerAloud('healing')" class="btn-prayer-listen" style="background: var(--primary-light); color: var(--primary); border: 1px solid var(--primary); padding: 6px 14px; border-radius: 8px; font-size: 12.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px;">
-                      <span>▶ Listen Guided Prayer</span>
-                    </button>
                     <span style="font-size: 12px; color: var(--text-muted);">Find deep rest in Christ</span>
                   </div>
                 </div>
@@ -4826,9 +4798,6 @@
 
       <div style="padding: 14px 20px; border-top: 1px solid #eaeaea; background: #ffffff; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
         <div style="display: flex; gap: 8px; align-items: center;">
-          <button onclick="readTenCommandmentsAloud(this)" style="background: #ffffff; border: 1.5px solid #F7002F; padding: 8px 14px; border-radius: 10px; font-weight: 800; font-size: 12.5px; color: #F7002F; cursor: pointer; display: flex; align-items: center; gap: 5px;">
-            <span>▶ संपूर्ण दहा आजञा का</span>
-          </button>
           <button onclick="openReaderAndNavigate('exodus', 20, 1);" class="btn-primary-mini" style="background: #F7002F; color: #ffffff; padding: 8px 14px; border-radius: 10px; font-weight: 700; font-size: 12.5px; border: none; cursor: pointer;">
             📖 Open in Bible
           </button>
