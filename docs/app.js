@@ -2624,7 +2624,7 @@ async function testMarathiVoiceAloud(specificVerseNum = null) {
     btn.innerHTML = `<span class="tts-icon">⏳</span><span class="tts-label">Synthesizing...</span>`;
   }
 
-  showToast(`🔊 Synthesizing ${verseRef} with Google Cloud Algieba voice...`);
+  // toast hidden per user preference
 
   try {
     const apiBase = (window.location.port === '8090') ? '/api/v1' : 'http://localhost:8090/api/v1';
@@ -3516,7 +3516,7 @@ async function startSpeechNarration(startVerseIndex = 0) {
   updateReaderPlayState(true);
 
   const playbarEl = document.getElementById("floating-audio-playbar");
-  if (playbarEl) playbarEl.classList.add("active");
+  // playbar hidden per user preference
 
   const indicatorEl = document.getElementById("playbar-verse-indicator");
   const progressEl = document.getElementById("playbar-progress-line");
@@ -3633,7 +3633,7 @@ async function startSpeechNarration(startVerseIndex = 0) {
     try {
       await audio.play();
       if (index === startVerseIndex) {
-        showToast(`🎙️ ${bookName} ${chapterNum} — Google Cloud Marathi आवाज सुरू झाला`);
+        // toast hidden per user preference
       }
     } catch(err) {
       console.warn("[TTS] play() blocked:", err);
@@ -5530,7 +5530,7 @@ function setupEventListeners() {
   const btnTestNaturalVoice = document.getElementById("btn-test-natural-voice");
   if (btnTestNaturalVoice) {
     btnTestNaturalVoice.addEventListener("click", () => {
-      showToast("🔊 अस्सल मराठी पुरुष वाचक ऑडिओ सुरू होत आहे...");
+      // toast hidden per user preference
       if (typeof startSpeechNarration === "function") {
         startSpeechNarration(0);
       }
@@ -12725,7 +12725,7 @@ window.switchStoryAudioMode = function(modeVal) {
     if (typeof storyAtmosphere !== 'undefined') storyAtmosphere.playMood("cinematic");
     playStoryScene(0);
   } else if (modeVal === "human_native") {
-    showToast("🎙️ अस्सल मानवी मराठी आवाज (Fluent Native Human Voice) सुरू केला!");
+    // toast hidden per user preference
     if (typeof playHumanMarathiAudio === 'function') {
       playHumanMarathiAudio();
     } else {

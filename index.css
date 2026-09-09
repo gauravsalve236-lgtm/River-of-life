@@ -13937,3 +13937,12 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
 
 
 
+
+
+/* HIDE FLOATING PLAYBAR OVERLAY - USER REQUESTED CLEAN BACKGROUND PLAYBACK */
+#floating-audio-playbar, .floating-playbar-container {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
