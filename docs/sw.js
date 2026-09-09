@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v107-SAVE-GALLERY-WIDGET-NOTIFS';
+const CACHE_NAME = 'river-of-life-cache-v128-AUTHENTIC-MALE-AUDIO';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
