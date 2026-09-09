@@ -1622,7 +1622,7 @@ async function fetchBookDataEng(bookKey) {
 async function fetchBookDataMr(bookKey) {
   if (booksCacheMr[bookKey]) return booksCacheMr[bookKey];
   try {
-    const response = await fetch(`assets/bible/books_mr/${bookKey}.json`);
+    const response = await fetch(`assets/bible/books_mr/${bookKey}.json?v=132_MARVBSI`);
     const data = await response.json();
     booksCacheMr[bookKey] = data;
     return data;
