@@ -689,8 +689,8 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// ElevenLabs default key split to bypass GitHub secret scanning
-const ELEVENLABS_DEFAULT_KEY = "sk_a772ed" + "0a2146e4c1" + "1d41e15ffdae28d0" + "67b6a458a0e9cfda";
+// Production Key Management: Configured securely via Settings or environment
+const ELEVENLABS_DEFAULT_KEY = (typeof localStorage !== 'undefined' && localStorage.getItem('rol_elevenlabs_key')) || "";
 
 // Global Application State
 let state = {
@@ -957,6 +957,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     updateQuizCardStats();
     initBibleQuiz();
     initAuthAndPrayers();
+    checkAndTriggerFirstLaunchOnboarding();
   } catch (e) {
     console.error("Reader/Devotion init error:", e);
   }
@@ -1423,9 +1424,14 @@ function switchTab(rawRoute) {
     const activeBottomBtn = document.querySelector(`.tab-btn[data-tab="${route}"]`);
     if (activeBottomBtn) {
       activeBottomBtn.classList.add("active");
-    } else if (["plans", "prayers", "you", "admin"].includes(route)) {
-      const moreBtn = document.getElementById("btn-tab-more");
-      if (moreBtn) moreBtn.classList.add("active");
+    } else if (["grow", "hymns", "plans", "meetings", "discover"].includes(route)) {
+      const growBtn = document.querySelector('.tab-btn[data-tab="grow"]');
+      if (growBtn) growBtn.classList.add("active");
+      const growSidebar = document.querySelector('.nav-item[data-tab="grow"]');
+      if (growSidebar) growSidebar.classList.add("active");
+    } else if (["you", "admin"].includes(route)) {
+      const youBtn = document.querySelector('.tab-btn[data-tab="you"]');
+      if (youBtn) youBtn.classList.add("active");
     }
     
     adjustHeaderForRoute(route);
@@ -1434,6 +1440,8 @@ function switchTab(rawRoute) {
     if (route === "home") {
       renderDailyDevotion();
       if (typeof renderHomeAnnouncementBanner === "function") renderHomeAnnouncementBanner();
+    } else if (route === "grow") {
+      if (typeof renderGrowView === "function") renderGrowView();
     } else if (route === "hymns") {
       renderHymnsView();
     } else if (route === "you") {
@@ -2331,8 +2339,12 @@ function renderDailyDevotion() {
   }
   
   const userEl = document.getElementById("home-greeting-user");
+  const userSubEl = document.getElementById("home-greeting-subtext");
   if (userEl) {
-    userEl.textContent = `${greetingTimeEn}, ${userName}`;
+    userEl.textContent = `${greetingTimeEn}, ${userName} 👋`;
+  }
+  if (userSubEl) {
+    userSubEl.textContent = isEng ? "Take a moment with God today." : "आज देवाच्या सान्निध्यात थोडा वेळ घालवा.";
   }
   
   const { vod, dayOfYear, offset } = getCurrentVOD();
@@ -2346,7 +2358,7 @@ function renderDailyDevotion() {
   }
   const homeVodTextEl = document.getElementById("home-vod-text");
   if (homeVodTextEl) {
-    homeVodTextEl.textContent = `"${displayText}"`;
+    homeVodTextEl.textContent = `“${displayText}”`;
   }
   
   const fsVodRefEl = document.getElementById("fs-vod-ref");
@@ -2373,6 +2385,44 @@ function renderDailyDevotion() {
   const fsCapsule = document.querySelector(".fullscreen-vod-capsule");
   if (fsCapsule) fsCapsule.style.backgroundImage = `url('${imgUrl}')`;
   
+  // Continue Reading Card Data Sync
+  const contBookEl = document.getElementById("home-continue-book-chapter");
+  const contMrEl = document.getElementById("home-continue-marathi-name");
+  const contPercentEl = document.getElementById("home-continue-percent");
+  const contBarEl = document.getElementById("home-continue-progress-bar");
+  
+  const curBook = state.activeBook || "psalms";
+  const curCh = state.activeChapter || 23;
+  let bookMetaMr = (typeof booksMetadataMr !== "undefined") ? booksMetadataMr.find(b => b.filename.replace(".json", "") === curBook) : null;
+  let bookMetaEng = (typeof booksMetadataEng !== "undefined") ? booksMetadataEng.find(b => b.filename.replace(".json", "") === curBook) : null;
+  const engBookName = bookMetaEng?.name || (curBook.charAt(0).toUpperCase() + curBook.slice(1));
+  const mrBookName = bookMetaMr?.name || curBook;
+  const totalChs = bookMetaMr?.chaptersCount || bookMetaEng?.chaptersCount || 150;
+  const readPercent = Math.min(100, Math.max(8, Math.round((curCh / totalChs) * 100)));
+  
+  if (contBookEl) contBookEl.textContent = `${engBookName} ${curCh}`;
+  if (contMrEl) contMrEl.textContent = `${mrBookName} ${curCh}`;
+  if (contPercentEl) contPercentEl.textContent = isEng ? `Chapter ${curCh} of ${totalChs}` : `अध्याय ${curCh} / ${totalChs}`;
+  if (contBarEl) contBarEl.style.width = `${readPercent}%`;
+
+  // Today's Prayer Card Sync
+  const prayerTitleEl = document.getElementById("home-prayer-title");
+  const prayerExcerptEl = document.getElementById("home-prayer-excerpt");
+  if (prayerTitleEl) {
+    prayerTitleEl.textContent = isEng ? "Peace Over Anxiety" : "शांततेसाठी प्रार्थना • Peace Over Anxiety";
+  }
+  if (prayerExcerptEl) {
+    prayerExcerptEl.textContent = isEng ? '"The peace of God, which surpasses all understanding, will guard your hearts and minds in Christ Jesus."' : '"सर्व बुद्धीपलीकडची देवाची शांती तुमच्या हृदयाचे आणि मनाचे ख्रिस्त येशूमध्ये रक्षण करो."';
+  }
+
+  // Your Journey Stats Sync
+  const streakEl = document.getElementById("home-journey-streak");
+  const chaptersEl = document.getElementById("home-journey-chapters");
+  const savedEl = document.getElementById("home-journey-saved");
+  if (streakEl) streakEl.textContent = state.readingStreak || 7;
+  if (chaptersEl) chaptersEl.textContent = (state.readingHistory ? state.readingHistory.length : 0) || 14;
+  if (savedEl) savedEl.textContent = (state.bookmarks ? state.bookmarks.length : 0) || 5;
+
   // Heart count like sync
   const hasLiked = state.userLikes[vod.ref] || false;
   const heart = document.getElementById("fs-like-heart");
@@ -2430,6 +2480,583 @@ function renderDailyDevotion() {
     fsLabel.textContent = fsBadgeEn;
   }
 }
+
+// Phase 1 Action Handlers & Routing Helpers
+function openVODReader() {
+  const { vod } = getCurrentVOD();
+  let book = vod.bookKey || "psalms";
+  let ch = vod.chapter || 23;
+  let verse = vod.verse || 1;
+  
+  const refStr = vod.engRef || vod.ref || "";
+  const match = refStr.match(/^([1-3]?\s*[A-Za-z]+)\s*(\d+)(?::(\d+))?/);
+  if (match) {
+    const rawBook = match[1].toLowerCase().replace(/\s+/g, "");
+    if (rawBook.includes("psalm")) book = "psalms";
+    else if (rawBook.includes("john")) book = "john";
+    else if (rawBook.includes("rom")) book = "romans";
+    else if (rawBook.includes("prov")) book = "proverbs";
+    else if (rawBook.includes("matt")) book = "matthew";
+    else if (rawBook.includes("gen")) book = "genesis";
+    else if (rawBook.includes("phil")) book = "philippians";
+    else if (rawBook.includes("heb")) book = "hebrews";
+    else if (rawBook.includes("isa")) book = "isaiah";
+    else if (rawBook.includes("jer")) book = "jeremiah";
+    
+    ch = parseInt(match[2], 10) || 1;
+    verse = match[3] ? parseInt(match[3], 10) : 1;
+  }
+  
+  openReaderAndNavigate(book, ch, verse);
+}
+
+
+// =========================================================================
+// GOOGLE CLOUD MARATHI TEXT-TO-SPEECH (mr-IN-Chirp3-HD-Algieba)
+// =========================================================================
+window.currentGoogleTtsAudio = null;
+window.currentTtsVerseKey = null;
+
+function stopGoogleTtsAudio() {
+  if (window.currentGoogleTtsAudio) {
+    try {
+      window.currentGoogleTtsAudio.pause();
+      window.currentGoogleTtsAudio.currentTime = 0;
+    } catch (e) {}
+    window.currentGoogleTtsAudio = null;
+  }
+  document.querySelectorAll(".tts-playing-verse, .tts-synthesizing-verse").forEach(el => {
+    el.classList.remove("tts-playing-verse", "tts-synthesizing-verse");
+  });
+  const btn = document.getElementById("btn-test-marathi-voice");
+  if (btn) {
+    btn.classList.remove("playing", "synthesizing");
+    btn.innerHTML = `<span class="tts-icon">🔊</span><span class="tts-label">Test Marathi Voice</span>`;
+  }
+}
+
+async function testMarathiVoiceAloud(specificVerseNum = null) {
+  const btn = document.getElementById("btn-test-marathi-voice");
+  
+  // If already playing, toggle stop
+  if (window.currentGoogleTtsAudio && !window.currentGoogleTtsAudio.paused) {
+    stopGoogleTtsAudio();
+    showToast("⏹ Audio playback stopped");
+    return;
+  }
+
+  // Determine active book & chapter
+  const bookKey = state.activeBook || "john";
+  const chapterNum = state.activeChapter || 1;
+  let bookName = "बायबल";
+  if (typeof booksMetadataMr !== 'undefined' && Array.isArray(booksMetadataMr)) {
+    const meta = booksMetadataMr.find(b => b.filename.replace(".json", "") === bookKey);
+    if (meta && meta.name) bookName = meta.name;
+  }
+
+  let targetVerseNum = specificVerseNum;
+  let rawVerseText = "";
+
+  if (!targetVerseNum && selectedVerseMeta && selectedVerseMeta.chapter === chapterNum && selectedVerseMeta.book === bookKey) {
+    targetVerseNum = selectedVerseMeta.verse;
+  }
+
+  // Always fetch Marathi book data to ensure Marathi pronunciation
+  let bookDataMr = null;
+  try {
+    bookDataMr = await fetchBookDataMr(bookKey);
+  } catch (e) {
+    console.warn("[TTS] Error fetching Marathi book data:", e);
+  }
+
+  const versesMrList = (bookDataMr && bookDataMr.chapters) ? bookDataMr.chapters[chapterNum - 1] : [];
+
+  if (!targetVerseNum) {
+    // If no verse selected, try first visible verse row in reader
+    const firstRow = document.querySelector("#reader-verses .verse-row");
+    if (firstRow) {
+      targetVerseNum = parseInt(firstRow.dataset.verse || 1, 10);
+    } else {
+      targetVerseNum = 1;
+    }
+  }
+
+  targetVerseNum = parseInt(targetVerseNum, 10) || 1;
+
+  if (versesMrList && versesMrList[targetVerseNum - 1]) {
+    rawVerseText = versesMrList[targetVerseNum - 1];
+  } else {
+    // Fallback from DOM element
+    const vEl = document.querySelector(`.verse-row[data-verse="${targetVerseNum}"]`);
+    if (vEl) {
+      rawVerseText = vEl.dataset.text || vEl.textContent || "";
+    }
+  }
+
+  // Strip verse numbers, HTML tags, or brackets
+  const cleanVerseText = rawVerseText
+    .replace(/^[\d\s.:]+/, '')
+    .replace(/<[^>]*>?/gm, '')
+    .trim();
+
+  if (!cleanVerseText) {
+    showToast("⚠️ Could not find Marathi text for verse " + targetVerseNum);
+    return;
+  }
+
+  const verseRef = `${bookName} ${chapterNum}:${targetVerseNum}`;
+  const verseKey = `${bookKey}_${chapterNum}_${targetVerseNum}`;
+
+  // Clear any existing playback and highlights
+  stopGoogleTtsAudio();
+
+  // Find DOM element for verse
+  const verseEl = document.querySelector(`.verse-row[data-verse-id="${verseKey}"]`) ||
+                  document.querySelector(`.verse-row[data-verse="${targetVerseNum}"]`);
+
+  if (verseEl) {
+    verseEl.classList.add("tts-synthesizing-verse");
+    verseEl.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+  if (btn) {
+    btn.classList.add("synthesizing");
+    btn.innerHTML = `<span class="tts-icon">⏳</span><span class="tts-label">Synthesizing...</span>`;
+  }
+
+  showToast(`🔊 Synthesizing ${verseRef} with Google Cloud Algieba voice...`);
+
+  try {
+    const apiBase = (window.location.port === '8090') ? '/api/v1' : 'http://localhost:8090/api/v1';
+    const response = await fetch(`${apiBase}/tts/synthesize`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json; charset=utf-8"
+      },
+      body: JSON.stringify({
+        text: cleanVerseText,
+        voice: "mr-IN-Chirp3-HD-Algieba",
+        languageCode: "mr-IN",
+        audioEncoding: "MP3"
+      })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      if (verseEl) verseEl.classList.remove("tts-synthesizing-verse");
+      if (btn) {
+        btn.classList.remove("synthesizing");
+        btn.innerHTML = `<span class="tts-icon">🔊</span><span class="tts-label">Test Marathi Voice</span>`;
+      }
+
+      if (result.code === "MISSING_API_KEY" || result.code === "PERMISSION_DENIED" || (result.error && result.error.includes("Text-to-Speech API"))) {
+        showTtsSetupModal(result);
+      } else {
+        showToast(`❌ TTS Error: ${result.error || "Synthesis failed"}`);
+      }
+      return;
+    }
+
+    // Convert base64 audioContent to Blob
+    const binaryString = window.atob(result.audioContent);
+    const len = binaryString.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    const blob = new Blob([bytes], { type: "audio/mpeg" });
+    const audioUrl = URL.createObjectURL(blob);
+
+    const audio = new Audio(audioUrl);
+    window.currentGoogleTtsAudio = audio;
+
+    if (verseEl) {
+      verseEl.classList.remove("tts-synthesizing-verse");
+      verseEl.classList.add("tts-playing-verse");
+    }
+
+    if (btn) {
+      btn.classList.remove("synthesizing");
+      btn.classList.add("playing");
+      btn.innerHTML = `<span class="tts-icon">⏹</span><span class="tts-label">Stop Voice</span>`;
+    }
+
+    audio.onended = () => {
+      stopGoogleTtsAudio();
+      URL.revokeObjectURL(audioUrl);
+      showToast(`✓ Completed reading: ${verseRef} (mr-IN-Chirp3-HD-Algieba)`);
+    };
+
+    audio.onerror = (e) => {
+      console.error("[TTS AUDIO ERROR]", e);
+      stopGoogleTtsAudio();
+      URL.revokeObjectURL(audioUrl);
+      showToast("❌ Audio playback error");
+    };
+
+    await audio.play();
+
+  } catch (err) {
+    console.error("[TTS FETCH ERROR]", err);
+    if (verseEl) verseEl.classList.remove("tts-synthesizing-verse");
+    if (btn) {
+      btn.classList.remove("synthesizing");
+      btn.innerHTML = `<span class="tts-icon">🔊</span><span class="tts-label">Test Marathi Voice</span>`;
+    }
+    showToast(`❌ Network/Server Error: ${err.message}`);
+  }
+}
+
+function testMarathiVoiceForSelectedVerse() {
+  closeAllDrawers();
+  const verseNum = selectedVerseMeta ? selectedVerseMeta.verse : null;
+  testMarathiVoiceAloud(verseNum);
+}
+
+function showTtsSetupModal(errData = {}) {
+  const existing = document.getElementById("tts-setup-modal-overlay");
+  if (existing) existing.remove();
+
+  const detailsStr = JSON.stringify(errData.details || []);
+  const isKeyBlocked = detailsStr.includes("API_KEY_SERVICE_BLOCKED") || (errData.error && errData.error.includes("method google.cloud.texttospeech"));
+  const isApiDisabled = !isKeyBlocked && (errData.code === "PERMISSION_DENIED" || (errData.error && errData.error.includes("Text-to-Speech API")));
+  let activationUrl = "https://console.developers.google.com/apis/api/texttospeech.googleapis.com/overview";
+  const credentialsUrl = "https://console.cloud.google.com/apis/credentials?project=29916119818";
+
+  if (errData.details && Array.isArray(errData.details)) {
+    for (const d of errData.details) {
+      if (d.metadata && d.metadata.activationUrl) {
+        activationUrl = d.metadata.activationUrl;
+        break;
+      }
+      if (d.links && Array.isArray(d.links) && d.links[0]?.url) {
+        activationUrl = d.links[0].url;
+        break;
+      }
+    }
+  }
+
+  const modalOverlay = document.createElement("div");
+  modalOverlay.id = "tts-setup-modal-overlay";
+  modalOverlay.className = "tts-modal-overlay";
+
+  modalOverlay.innerHTML = `
+    <div class="tts-modal-box">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(212, 175, 55, 0.18); border: 1.5px solid #d4af37; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+            ${isKeyBlocked ? '🔒' : (isApiDisabled ? '⚡' : '🎙️')}
+          </div>
+          <div>
+            <h3 style="margin: 0; font-size: 17px; font-weight: 800; color: #f8fafc;">
+              ${isKeyBlocked ? 'API Key Restriction' : (isApiDisabled ? 'Enable Text-to-Speech API' : 'Marathi Voice Configuration')}
+            </h3>
+            <span style="font-size: 11.5px; color: #d4af37; font-weight: 700;">Google Cloud: mr-IN-Chirp3-HD-Algieba</span>
+          </div>
+        </div>
+        <button onclick="document.getElementById('tts-setup-modal-overlay').remove()" style="background: none; border: none; color: #94a3b8; font-size: 24px; cursor: pointer; padding: 0 4px; line-height: 1;">&times;</button>
+      </div>
+
+      ${isKeyBlocked ? `
+        <p style="font-size: 13.5px; color: #cbd5e1; line-height: 1.55; margin: 0 0 16px 0;">
+          Your API key is active, but it currently has <strong>API restrictions</strong> that block the Text-to-Speech service.
+        </p>
+        <div style="background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 14px; padding: 16px; margin-bottom: 18px;">
+          <div style="font-size: 12px; font-weight: 800; color: #fbbf24; margin-bottom: 8px;">Quick Fix in Google Cloud Console</div>
+          <a href="${credentialsUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 8px; background: #d97706; color: #ffffff; text-decoration: none; padding: 10px 18px; border-radius: 10px; font-weight: 800; font-size: 13px; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.35); margin-bottom: 8px;">
+            <span>🔑 Open API Credentials in Google Cloud</span>
+            <span>&rarr;</span>
+          </a>
+          <ol style="margin: 8px 0 0 16px; padding: 0; font-size: 12px; color: #fde68a; line-height: 1.6;">
+            <li>Click on your API Key.</li>
+            <li>Under <strong>API restrictions</strong>, check <strong>Cloud Text-to-Speech API</strong> (or select <em>Don't restrict key</em>).</li>
+            <li>Click <strong>Save</strong>.</li>
+          </ol>
+        </div>
+      ` : isApiDisabled ? `
+        <p style="font-size: 13.5px; color: #cbd5e1; line-height: 1.55; margin: 0 0 16px 0;">
+          Great! Your Google Cloud API key is recognized. Now, please <strong>enable</strong> the Cloud Text-to-Speech API in your Google Cloud project so it can synthesize speech.
+        </p>
+        <div style="background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 14px; padding: 16px; margin-bottom: 18px;">
+          <div style="font-size: 12px; font-weight: 800; color: #fbbf24; margin-bottom: 8px;">Action Required: One-click Activation</div>
+          <a href="${activationUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 8px; background: #d97706; color: #ffffff; text-decoration: none; padding: 10px 18px; border-radius: 10px; font-weight: 800; font-size: 13px; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.35); margin-bottom: 8px;">
+            <span>🚀 Enable Text-to-Speech API in Google Cloud</span>
+            <span>&rarr;</span>
+          </a>
+          <p style="margin: 8px 0 0 0; font-size: 11.5px; color: #fde68a; line-height: 1.4;">
+            Click the link above, press <strong>[ ENABLE ]</strong> on the Google Cloud page, then wait ~30 seconds and tap <strong>Test Marathi Voice</strong> again.
+          </p>
+        </div>
+      ` : `
+        <p style="font-size: 13.5px; color: #cbd5e1; line-height: 1.55; margin: 0 0 16px 0;">
+          To test the natural <strong>mr-IN-Chirp3-HD-Algieba</strong> Marathi voice, configure your Google Cloud Text-to-Speech API key on the backend server.
+        </p>
+
+        <div style="background: #1e293b; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 12px; padding: 14px; margin-bottom: 16px;">
+          <div style="font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">Setup Step 1: Add key to backend/.env</div>
+          <div style="background: #090d16; border-radius: 8px; padding: 10px 12px; font-family: monospace; font-size: 12.5px; color: #38bdf8; word-break: break-all; user-select: all; border: 1px solid rgba(56, 189, 248, 0.2);">
+            GOOGLE_TTS_API_KEY=AIzaSyYourApiKeyHere
+          </div>
+          <div style="font-size: 11.5px; color: #94a3b8; margin-top: 8px; line-height: 1.4;">
+            Paste your Google Cloud API key into <code style="color:#d4af37;">backend/.env</code> or set it in your system environment.
+          </div>
+        </div>
+      `}
+
+      <div id="tts-status-card" style="background: ${(isKeyBlocked || isApiDisabled) ? 'rgba(56, 189, 248, 0.1)' : 'rgba(239, 68, 68, 0.1)'}; border: 1px solid ${(isKeyBlocked || isApiDisabled) ? 'rgba(56, 189, 248, 0.3)' : 'rgba(239, 68, 68, 0.3)'}; border-radius: 12px; padding: 12px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 16px;">${(isKeyBlocked || isApiDisabled) ? '🔑' : '⚠️'}</span>
+          <span id="tts-status-text" style="font-size: 12.5px; font-weight: 700; color: ${(isKeyBlocked || isApiDisabled) ? '#7dd3fc' : '#fca5a5'};">
+            ${isKeyBlocked ? 'Key Loaded • TTS Service Restricted' : (isApiDisabled ? 'API Key Loaded • Awaiting API Enablement' : 'Server Status: API Key Unset')}
+          </span>
+        </div>
+        <button id="btn-check-tts-status" onclick="checkTtsServerStatus()" style="background: #1e293b; border: 1px solid #d4af37; color: #d4af37; font-size: 11.5px; font-weight: 800; border-radius: 8px; padding: 5px 10px; cursor: pointer;">Check Status</button>
+      </div>
+
+      <div style="display: flex; gap: 10px; justify-content: flex-end;">
+        <button onclick="document.getElementById('tts-setup-modal-overlay').remove()" style="background: #1e293b; border: 1px solid rgba(255, 255, 255, 0.15); color: #e2e8f0; font-size: 13px; font-weight: 700; padding: 9px 18px; border-radius: 10px; cursor: pointer;">Close</button>
+      </div>
+    </div>
+  `;
+
+
+  document.body.appendChild(modalOverlay);
+}
+
+
+async function checkTtsServerStatus() {
+  const statusText = document.getElementById("tts-status-text");
+  const checkBtn = document.getElementById("btn-check-tts-status");
+  if (checkBtn) checkBtn.textContent = "Checking...";
+
+  try {
+    const apiBase = (window.location.port === '8090') ? '/api/v1' : 'http://localhost:8090/api/v1';
+    const res = await fetch(`${apiBase}/tts/status`);
+    const data = await res.json();
+    if (data.configured) {
+      if (statusText) {
+        statusText.style.color = "#86efac";
+        statusText.textContent = "✓ Server Status: Configured & Ready";
+      }
+      const card = document.getElementById("tts-status-card");
+      if (card) {
+        card.style.background = "rgba(34, 197, 94, 0.15)";
+        card.style.borderColor = "rgba(34, 197, 94, 0.4)";
+      }
+      showToast("✓ Google Cloud TTS is configured and ready!");
+    } else {
+      if (statusText) {
+        statusText.style.color = "#fca5a5";
+        statusText.textContent = "⚠️ Server Status: API Key Missing";
+      }
+      showToast("API Key is not configured yet in backend/.env");
+    }
+  } catch (e) {
+    if (statusText) {
+      statusText.style.color = "#fca5a5";
+      statusText.textContent = "❌ Cannot connect to backend server";
+    }
+  } finally {
+    if (checkBtn) checkBtn.textContent = "Check Status";
+  }
+}
+
+function playDailyVerseAudio() {
+  const { vod } = getCurrentVOD();
+  const isEng = (state && state.translation === "eng");
+  const text = isEng ? (vod.engText || vod.text) : (vod.text || vod.engText);
+  if (!text) return;
+  
+  if (typeof speakMarathiText === 'function') {
+    speakMarathiText(text);
+    showToast("🔊 Playing Verse of the Day Audio...");
+  } else if (typeof playVerseAudio === 'function') {
+    playVerseAudio(text);
+  } else if (window.speechSynthesis) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = isEng ? 'en-US' : 'mr-IN';
+    utterance.rate = 0.92;
+    window.speechSynthesis.speak(utterance);
+    showToast("🔊 Playing Verse of the Day Audio...");
+  }
+}
+
+function continueLastReadChapter() {
+  const book = state.activeBook || "psalms";
+  const ch = state.activeChapter || 23;
+  openReaderAndNavigate(book, ch, 1);
+}
+
+function renderGrowView() {
+  console.log("[GrowView] Rendered Grow in Faith Hub");
+}
+
+function openDailyQuizModal() {
+  openModal('modal-bible-quiz');
+}
+
+function openBibleStoriesModal() {
+  openModal('modal-family-stories');
+}
+
+function openStudyToolsModal() {
+  switchTab('discover');
+}
+
+// First-Launch Onboarding Flow Management
+function checkAndTriggerFirstLaunchOnboarding() {
+  const onboarded = localStorage.getItem("rol_onboarded_v1");
+  if (!onboarded) {
+    const modal = document.getElementById("modal-onboarding-flow");
+    if (modal) {
+      modal.style.display = "flex";
+    }
+  }
+}
+
+function nextOnboardingStep(stepNum) {
+  document.querySelectorAll(".rol-onboarding-screen").forEach(s => s.classList.remove("active"));
+  const target = document.getElementById(`onboarding-screen-${stepNum}`);
+  if (target) target.classList.add("active");
+}
+
+function selectOnboardingLanguage(lang) {
+  document.querySelectorAll(".rol-onboarding-lang-pill, .rol-onboarding-lang-card").forEach(c => c.classList.remove("active"));
+  const card = document.getElementById(`onboarding-lang-${lang}`);
+  if (card) card.classList.add("active");
+  
+  if (lang === "mr") {
+    state.language = "mr";
+    state.translation = "marathi";
+  } else {
+    state.language = "en";
+    state.translation = "eng";
+  }
+  if (typeof applyAppLanguage === "function") {
+    applyAppLanguage(lang);
+  }
+}
+
+function toggleOnboardingFocus(chipEl, topicId) {
+  if (chipEl) {
+    chipEl.classList.toggle("active");
+  }
+}
+
+async function requestOnboardingMediaPermissions() {
+  const btn = document.getElementById("btn-onboarding-allow-media");
+  const btnLabel = document.getElementById("btn-onboarding-allow-label");
+  const statusAudio = document.getElementById("perm-status-audio");
+  const statusVideo = document.getElementById("perm-status-video");
+
+  if (btnLabel) btnLabel.textContent = "Checking Access...";
+  if (btn) btn.disabled = true;
+
+  const withTimeout = (p, ms = 1800) => {
+    return Promise.race([
+      p,
+      new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), ms))
+    ]);
+  };
+
+  try {
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      let granted = false;
+      try {
+        // Attempt joint audio + video prompt first
+        const stream = await withTimeout(navigator.mediaDevices.getUserMedia({ audio: true, video: true }), 1800);
+        if (stream) {
+          granted = true;
+          if (statusAudio) {
+            statusAudio.textContent = "✓ Enabled";
+            statusAudio.classList.add("granted");
+          }
+          if (statusVideo) {
+            statusVideo.textContent = "✓ Enabled";
+            statusVideo.classList.add("granted");
+          }
+          if (stream.getTracks) stream.getTracks().forEach(t => t.stop());
+          localStorage.setItem("rol_media_permissions", "granted");
+          showToast("🎙️ Live fellowship devices configured successfully!");
+        }
+      } catch (jointErr) {
+        // Fallback: try audio only
+        try {
+          const audioStream = await withTimeout(navigator.mediaDevices.getUserMedia({ audio: true }), 1200);
+          if (audioStream) {
+            granted = true;
+            if (statusAudio) {
+              statusAudio.textContent = "✓ Enabled";
+              statusAudio.classList.add("granted");
+            }
+            if (statusVideo) {
+              statusVideo.textContent = "Optional";
+            }
+            if (audioStream.getTracks) audioStream.getTracks().forEach(t => t.stop());
+            localStorage.setItem("rol_media_permissions", "granted");
+            showToast("🎙️ Microphone configured! (Camera optional)");
+          }
+        } catch (audioErr) {
+          console.warn("Audio fallback declined or unavailable:", audioErr);
+        }
+      }
+
+      if (!granted) {
+        localStorage.setItem("rol_media_permissions", "listen_only");
+        showToast("🎧 Setup complete! You can join live meetings in listen mode.");
+      }
+    } else {
+      localStorage.setItem("rol_media_permissions", "unsupported");
+    }
+  } catch (e) {
+    console.warn("Media permissions prompt error:", e);
+    localStorage.setItem("rol_media_permissions", "listen_only");
+  }
+
+  if (btnLabel) btnLabel.textContent = "✨ Entering Sanctuary...";
+  setTimeout(() => {
+    finishOnboardingFlow();
+  }, 400);
+}
+
+function skipOnboardingMediaPermissions() {
+  localStorage.setItem("rol_media_permissions", "skipped");
+  showToast("🎧 You can still join all live prayer meetings in listen mode anytime!");
+  finishOnboardingFlow();
+}
+
+function finishOnboardingFlow() {
+  localStorage.setItem("rol_onboarded_v1", "true");
+  localStorage.setItem("river_of_life_notifications_choice", "dismissed");
+  const modal = document.getElementById("modal-onboarding-flow");
+  if (modal) {
+    modal.style.display = "none";
+  }
+  const notiModal = document.getElementById("modal-notification-prompt");
+  if (notiModal) {
+    notiModal.classList.remove("active");
+  }
+  switchTab("home");
+  showToast("✨ Welcome to River of Life! Have a blessed time with God.");
+}
+
+window.requestOnboardingMediaPermissions = requestOnboardingMediaPermissions;
+window.skipOnboardingMediaPermissions = skipOnboardingMediaPermissions;
+
+// Expose Phase 1 Globals
+window.openVODReader = openVODReader;
+window.playDailyVerseAudio = playDailyVerseAudio;
+window.continueLastReadChapter = continueLastReadChapter;
+window.renderGrowView = renderGrowView;
+window.openDailyQuizModal = openDailyQuizModal;
+window.openBibleStoriesModal = openBibleStoriesModal;
+window.openStudyToolsModal = openStudyToolsModal;
+window.checkAndTriggerFirstLaunchOnboarding = checkAndTriggerFirstLaunchOnboarding;
+window.nextOnboardingStep = nextOnboardingStep;
+window.selectOnboardingLanguage = selectOnboardingLanguage;
+window.toggleOnboardingFocus = toggleOnboardingFocus;
+window.finishOnboardingFlow = finishOnboardingFlow;
 
 function toggleLikeVOD() {
   const { vod } = getCurrentVOD();
@@ -2748,10 +3375,69 @@ function updateReaderPlayState(isPlaying) {
   }
 }
 
-function startSpeechNarration(startVerseIndex = 0) {
+
+// ========== GOOGLE CLOUD TTS VERSE-BY-VERSE ENGINE ==========
+// State for continuous verse-by-verse narration
+window.googleTtsNarration = {
+  isActive: false,
+  currentVerseIndex: 0,
+  currentAudio: null,
+  prefetchedAudio: null,   // pre-loaded next verse
+  prefetchedIndex: -1,
+  bookKey: null,
+  chapterNum: null,
+  versesMr: [],
+  totalVerses: 0,
+  bookName: "",
+  isStopRequested: false,
+};
+
+async function synthesizeVerseAudio(verseText) {
+  const apiBase = (window.location.port === '8090') ? '/api/v1' : 'http://localhost:8090/api/v1';
+  const response = await fetch(`${apiBase}/tts/synthesize`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json; charset=utf-8" },
+    body: JSON.stringify({
+      text: verseText,
+      voice: "mr-IN-Chirp3-HD-Algieba",
+      languageCode: "mr-IN",
+      audioEncoding: "MP3"
+    })
+  });
+  const result = await response.json();
+  if (!response.ok || !result.success) {
+    throw new Error(result.error || "TTS synthesis failed");
+  }
+  const binaryString = window.atob(result.audioContent);
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  const blob = new Blob([bytes], { type: "audio/mpeg" });
+  return URL.createObjectURL(blob);
+}
+
+function getCleanVerseText(versesMr, index) {
+  const raw = versesMr[index] || "";
+  return raw.replace(/^[\d\s.:]+/, '').replace(/<[^>]*>?/gm, '').trim();
+}
+
+function highlightTtsVerse(verseIndex) {
+  document.querySelectorAll(".verse-row").forEach(el => {
+    el.classList.remove("tts-reading", "tts-playing-verse");
+  });
+  const verseNum = verseIndex + 1;
+  const el = document.querySelector(`.verse-row[data-verse="${verseNum}"]`);
+  if (el) {
+    el.classList.add("tts-reading", "tts-playing-verse");
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+}
+
+async function startSpeechNarration(startVerseIndex = 0) {
   closeModal("modal-audio-settings");
-  
-  // Stop and cleanup previous audio
+
+  // Stop old wordproject/other audio players if any
   if (bibleChapterAudioPlayer) {
     bibleChapterAudioPlayer.pause();
     bibleChapterAudioPlayer.src = "";
@@ -2761,9 +3447,14 @@ function startSpeechNarration(startVerseIndex = 0) {
     audioPlayerInstance.pause();
     audioPlayerInstance = null;
   }
-  if (typeof speechSynthesis !== 'undefined') {
-    speechSynthesis.cancel();
-  }
+  if (typeof speechSynthesis !== 'undefined') speechSynthesis.cancel();
+
+  // Stop existing TTS narration if any
+  stopSpeechNarration();
+
+  const n = window.googleTtsNarration;
+  n.isStopRequested = false;
+  n.isActive = true;
 
   // Handle background worship music
   const bgMusicSelect = document.getElementById("audio-bg-music-select");
@@ -2775,9 +3466,7 @@ function startSpeechNarration(startVerseIndex = 0) {
       ambientSynthInstance.start(bgMusicSelect.value);
     }
   } else {
-    if (typeof ambientSynthInstance !== 'undefined' && ambientSynthInstance) {
-      ambientSynthInstance.stop();
-    }
+    if (typeof ambientSynthInstance !== 'undefined' && ambientSynthInstance) ambientSynthInstance.stop();
   }
 
   // Handle sleep timer
@@ -2785,154 +3474,179 @@ function startSpeechNarration(startVerseIndex = 0) {
   if (sleepTimerSelect && sleepTimerSelect.value !== "off") {
     startSleepTimer(sleepTimerSelect.value);
   } else {
-    if (sleepTimerTimeout) {
-      clearTimeout(sleepTimerTimeout);
-      sleepTimerTimeout = null;
-    }
+    if (sleepTimerTimeout) { clearTimeout(sleepTimerTimeout); sleepTimerTimeout = null; }
   }
 
-  // Resolve current active book and chapter
-  const currentBook = state.activeBook || state.currentBook || "genesis";
-  const currentChapter = parseInt(state.activeChapter || state.currentChapter || 1, 10);
-  const bookNum = resolveBibleBookNumber(currentBook);
-  
-  const cleanKey = String(currentBook).toLowerCase().replace(".json", "").trim();
+  // Resolve book/chapter
+  const bookKey = state.activeBook || state.currentBook || "genesis";
+  const chapterNum = parseInt(state.activeChapter || state.currentChapter || 1, 10);
+
+  let bookName = bookKey;
   const foundMeta = (typeof booksMetadataMr !== 'undefined' && Array.isArray(booksMetadataMr))
-    ? booksMetadataMr.find(b => 
-        b.id === bookNum || 
-        b.filename.replace(".json", "").toLowerCase() === cleanKey ||
-        b.engName.toLowerCase() === cleanKey ||
-        b.name === currentBook
+    ? booksMetadataMr.find(b =>
+        b.filename.replace(".json", "").toLowerCase() === bookKey.toLowerCase() ||
+        b.engName.toLowerCase() === bookKey.toLowerCase()
       )
     : null;
+  if (foundMeta) bookName = foundMeta.name || foundMeta.engName || bookKey;
 
-  const isDevanagari = (state.translation !== "eng");
-  const activeBookTitle = (state.translation === "eng" && foundMeta) 
-    ? foundMeta.engName 
-    : (foundMeta ? foundMeta.name : (currentBook.charAt(0).toUpperCase() + currentBook.slice(1)));
+  // Load Marathi verse data
+  let bookDataMr = null;
+  try { bookDataMr = await fetchBookDataMr(bookKey); } catch(e) {}
+  const versesMr = (bookDataMr && bookDataMr.chapters) ? (bookDataMr.chapters[chapterNum - 1] || []) : [];
+  const totalVerses = versesMr.length;
 
-  // Resolve audio URL
-  const audioUrl = getBibleAudioUrl(bookNum, currentChapter, state.translation);
-  console.log(`[Bible Audio] Playing Authentic Male Audio: Book ${bookNum} (${activeBookTitle}) Chapter ${currentChapter} -> ${audioUrl}`);
+  if (totalVerses === 0) {
+    showToast("⚠️ मराठी श्लोक उपलब्ध नाहीत");
+    n.isActive = false;
+    updateReaderPlayState(false);
+    return;
+  }
 
-  const speedVal = parseFloat(document.getElementById("tts-speed-slider")?.value || audioState.speed || 1.0);
-  audioState.speed = speedVal;
+  // Store in narration state
+  n.bookKey = bookKey;
+  n.chapterNum = chapterNum;
+  n.versesMr = versesMr;
+  n.totalVerses = totalVerses;
+  n.bookName = bookName;
+
+  // Update playbar UI
   audioState.isPlaying = true;
   isBibleChapterPlaying = true;
-
-  // Update UI Elements
-  const speedPill = document.getElementById("playbar-btn-speed");
-  if (speedPill) speedPill.textContent = `${speedVal.toFixed(2).replace(/\.00$/, "")}x`;
-
-  const playbarEl = document.getElementById("floating-audio-playbar");
-  if (playbarEl) {
-    playbarEl.classList.add("active");
-  }
-
-  const indicatorEl = document.getElementById("playbar-verse-indicator");
-  if (indicatorEl) {
-    indicatorEl.textContent = `📖 ${activeBookTitle} ${isDevanagari ? 'अध्याय' : 'Chapter'} ${currentChapter}`;
-  }
-
-  const progressEl = document.getElementById("playbar-progress-line");
-  if (progressEl) progressEl.style.width = `0%`;
-
   updateReaderPlayState(true);
 
-  // Instantiate and play authentic audio
-  try {
-    bibleChapterAudioPlayer = new Audio(audioUrl);
-    bibleChapterAudioPlayer.playbackRate = speedVal;
-    
-    // Keep reference for global callers
-    window.bibleChapterAudioPlayer = bibleChapterAudioPlayer;
-    window.audioPlayerInstance = bibleChapterAudioPlayer;
-    audioPlayerInstance = bibleChapterAudioPlayer;
+  const playbarEl = document.getElementById("floating-audio-playbar");
+  if (playbarEl) playbarEl.classList.add("active");
 
-    // Time update for smooth progress & verse tracking
-    bibleChapterAudioPlayer.addEventListener("timeupdate", () => {
-      if (bibleChapterAudioPlayer && bibleChapterAudioPlayer.duration > 0) {
-        const pct = (bibleChapterAudioPlayer.currentTime / bibleChapterAudioPlayer.duration) * 100;
-        const prog = document.getElementById("playbar-progress-line");
-        if (prog) prog.style.width = `${Math.min(100, Math.max(0, pct))}%`;
+  const indicatorEl = document.getElementById("playbar-verse-indicator");
+  const progressEl = document.getElementById("playbar-progress-line");
+  if (progressEl) progressEl.style.width = "0%";
 
-        const verseRows = document.querySelectorAll(".verse-row");
-        if (verseRows.length > 0) {
-          const estimatedIdx = Math.min(
-            verseRows.length - 1,
-            Math.floor((bibleChapterAudioPlayer.currentTime / bibleChapterAudioPlayer.duration) * verseRows.length)
-          );
-          verseRows.forEach((v, idx) => {
-            if (idx === estimatedIdx) {
-              if (!v.classList.contains("tts-reading")) {
-                v.classList.add("tts-reading");
-                v.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                const vNum = v.dataset.verseNum || (idx + 1);
-                if (indicatorEl) {
-                  indicatorEl.textContent = `${activeBookTitle} ${currentChapter}:${vNum} (${vNum}/${verseRows.length})`;
-                }
-              }
-            } else {
-              v.classList.remove("tts-reading");
-            }
-          });
-        }
-      }
-    });
-
-    bibleChapterAudioPlayer.addEventListener("playing", () => {
-      audioState.isPlaying = true;
-      isBibleChapterPlaying = true;
-      updateReaderPlayState(true);
-    });
-
-    bibleChapterAudioPlayer.addEventListener("pause", () => {
-      if (!bibleChapterAudioPlayer || bibleChapterAudioPlayer.currentTime === 0) return;
+  // Recursive function to play verse at index
+  async function playVerseAt(index) {
+    if (n.isStopRequested || !n.isActive) return;
+    if (index >= totalVerses) {
+      // Chapter finished — auto-advance
+      n.isActive = false;
       audioState.isPlaying = false;
       isBibleChapterPlaying = false;
       updateReaderPlayState(false);
-    });
-
-    bibleChapterAudioPlayer.addEventListener("ended", () => {
-      audioState.isPlaying = false;
-      isBibleChapterPlaying = false;
-      updateReaderPlayState(false);
+      document.querySelectorAll(".verse-row").forEach(el => el.classList.remove("tts-reading", "tts-playing-verse"));
       showToast("✨ संपूर्ण अध्याय ऑडिओ पूर्ण झाला!");
-      
-      // Auto advance to next chapter
-      const currentBookMeta = (typeof booksMetadataMr !== 'undefined' && Array.isArray(booksMetadataMr))
-        ? booksMetadataMr.find(b => b.id === bookNum || b.filename.replace(".json", "") === state.activeBook)
-        : null;
-      if (currentBookMeta && state.activeChapter < currentBookMeta.chaptersCount) {
-        openReader(state.activeBook, state.activeChapter + 1);
-        setTimeout(() => startSpeechNarration(0), 700);
-      } else if (currentBookMeta && bookNum < 66) {
+      const bookNum = foundMeta ? foundMeta.id : null;
+      if (foundMeta && chapterNum < foundMeta.chaptersCount) {
+        openReader(bookKey, chapterNum + 1);
+        setTimeout(() => startSpeechNarration(0), 800);
+      } else if (foundMeta && bookNum < 66) {
         const nextBook = booksMetadataMr.find(b => b.id === bookNum + 1);
         if (nextBook) {
           openReader(nextBook.filename.replace(".json", ""), 1);
-          setTimeout(() => startSpeechNarration(0), 700);
+          setTimeout(() => startSpeechNarration(0), 800);
         }
       }
-    });
-
-    bibleChapterAudioPlayer.addEventListener("error", (e) => {
-      console.warn("[Bible Audio] Playback error notice:", e);
-      showToast("⚠️ ऑडिओ प्ले होत आहे...");
-    });
-
-    // Start playback immediately
-    const playPromise = bibleChapterAudioPlayer.play();
-    if (playPromise !== undefined) {
-      playPromise.then(() => {
-        showToast(`🎙️ ${activeBookTitle} अध्याय ${currentChapter} ऑडिओ सुरू झाला`);
-      }).catch(err => {
-        console.warn("[Bible Audio] Playback deferred:", err);
-      });
+      return;
     }
-  } catch (err) {
-    console.error("[Bible Audio] Error creating audio player:", err);
-    showToast("⚠️ ऑडिओ सुरू करण्यात अडचण आली");
+
+    n.currentVerseIndex = index;
+    const verseNum = index + 1;
+    const verseText = getCleanVerseText(versesMr, index);
+
+    if (!verseText) {
+      // Skip empty verse
+      playVerseAt(index + 1);
+      return;
+    }
+
+    highlightTtsVerse(index);
+    if (indicatorEl) indicatorEl.textContent = `${bookName} ${chapterNum}:${verseNum} (${verseNum}/${totalVerses})`;
+    if (progressEl) progressEl.style.width = `${Math.round((verseNum / totalVerses) * 100)}%`;
+
+    let audioUrl = null;
+
+    // Check if this was prefetched
+    if (n.prefetchedIndex === index && n.prefetchedAudio) {
+      audioUrl = n.prefetchedAudio;
+      n.prefetchedAudio = null;
+      n.prefetchedIndex = -1;
+    } else {
+      // Show synthesizing indicator
+      const verseEl = document.querySelector(`.verse-row[data-verse="${verseNum}"]`);
+      if (verseEl) verseEl.classList.add("tts-synthesizing-verse");
+      try {
+        audioUrl = await synthesizeVerseAudio(verseText);
+      } catch(err) {
+        if (n.isStopRequested) return;
+        console.error("[TTS] Synthesis error:", err);
+        showToast(`❌ TTS Error: ${err.message}`);
+        n.isActive = false;
+        audioState.isPlaying = false;
+        isBibleChapterPlaying = false;
+        updateReaderPlayState(false);
+        return;
+      }
+      if (verseEl) verseEl.classList.remove("tts-synthesizing-verse");
+    }
+
+    if (n.isStopRequested) {
+      URL.revokeObjectURL(audioUrl);
+      return;
+    }
+
+    const audio = new Audio(audioUrl);
+    n.currentAudio = audio;
+    window.currentGoogleTtsAudio = audio;
+
+    // Prefetch next verse in background
+    const nextIndex = index + 1;
+    if (nextIndex < totalVerses) {
+      const nextText = getCleanVerseText(versesMr, nextIndex);
+      if (nextText) {
+        synthesizeVerseAudio(nextText).then(url => {
+          if (!n.isStopRequested) {
+            n.prefetchedAudio = url;
+            n.prefetchedIndex = nextIndex;
+          } else {
+            URL.revokeObjectURL(url);
+          }
+        }).catch(() => {});
+      }
+    }
+
+    audio.onended = () => {
+      URL.revokeObjectURL(audioUrl);
+      n.currentAudio = null;
+      window.currentGoogleTtsAudio = null;
+      if (!n.isStopRequested && n.isActive) {
+        playVerseAt(index + 1);
+      }
+    };
+
+    audio.onerror = () => {
+      URL.revokeObjectURL(audioUrl);
+      n.currentAudio = null;
+      if (!n.isStopRequested && n.isActive) {
+        showToast("⚠️ ऑडिओ त्रुटी — पुढील श्लोक...");
+        playVerseAt(index + 1);
+      }
+    };
+
+    try {
+      await audio.play();
+      if (index === startVerseIndex) {
+        showToast(`🎙️ ${bookName} ${chapterNum} — Google Cloud Marathi आवाज सुरू झाला`);
+      }
+    } catch(err) {
+      console.warn("[TTS] play() blocked:", err);
+    }
   }
+
+  // Determine start verse (prefer selected verse)
+  let startIdx = parseInt(startVerseIndex, 10) || 0;
+  if (startIdx === 0 && selectedVerseMeta && selectedVerseMeta.book === bookKey && selectedVerseMeta.chapter === chapterNum) {
+    startIdx = Math.max(0, (selectedVerseMeta.verse || 1) - 1);
+  }
+
+  playVerseAt(startIdx);
 }
 
 function speakPlaybarVerse(index) {
@@ -2959,6 +3673,24 @@ function togglePlaybarSpeech() {
 }
 
 function stopSpeechNarration() {
+  // Stop new Google Cloud TTS verse-by-verse engine
+  if (window.googleTtsNarration) {
+    const n = window.googleTtsNarration;
+    n.isStopRequested = true;
+    n.isActive = false;
+    if (n.currentAudio) {
+      try { n.currentAudio.pause(); } catch(e) {}
+      n.currentAudio = null;
+    }
+    // Revoke prefetched audio if any
+    if (n.prefetchedAudio) {
+      try { URL.revokeObjectURL(n.prefetchedAudio); } catch(e) {}
+      n.prefetchedAudio = null;
+      n.prefetchedIndex = -1;
+    }
+    n.versesMr = [];
+  }
+
   audioState.isPlaying = false;
   isBibleChapterPlaying = false;
   if (bibleChapterAudioPlayer) {
@@ -2982,7 +3714,7 @@ function stopSpeechNarration() {
     sleepTimerTimeout = null;
   }
   
-  document.querySelectorAll(".verse-row").forEach(v => v.classList.remove("tts-reading"));
+  document.querySelectorAll(".verse-row").forEach(v => v.classList.remove("tts-reading", "tts-playing-verse", "tts-synthesizing-verse"));
   const playbar = document.getElementById("floating-audio-playbar");
   if (playbar) playbar.classList.remove("active");
   
@@ -6010,17 +6742,46 @@ I rest securely under the shadow of Your wings throughout this day.
 In Jesus' name, Amen.`,
     amenCount: 312
   },
-  "healing_restoration": {
-    id: "healing_restoration",
+  "healing_health": {
+    id: "healing_health",
     bookKey: "isaiah",
     chapter: 53,
     categoryMr: "आरोग्य आणि दैवी चंगाई",
-    categoryEn: "HEALING & RESTORATION",
+    categoryEn: "HEALING & HEALTH",
     titleMr: "आरोग्य आणि दैवी चंगाई",
-    titleEn: "Divine Healing & Physical Restoration",
+    titleEn: "Divine Healing & Restoration",
     bgImage: "assets/images/healing_light.png",
-    refMr: "यशया ५३:५",
-    refEn: "Isaiah 53:5",
+    refMr: "यिर्मया ३०:१७ • यशया ५३:५",
+    refEn: "Jeremiah 30:17 • Isaiah 53:5",
+    verseMr: "तो आमच्या अपराधांसाठी घायाळ झाला, आमच्या दुष्कर्मांसाठी चिरडला गेला; आमच्या शांतीसाठी त्याला शिक्षा झाली आणि त्याच्या फटक्यांनी आम्हाला आरोग्य प्राप्त झाले.",
+    verseEn: "He was pierced for our transgressions, he was crushed for our iniquities; the punishment that brought us peace was on him, and by his wounds we are healed.",
+    prayerMr: `हे महान वैद्या प्रभू येशू,
+
+तू वधस्तंभावर आमच्या सर्व वेदना, आजार आणि दुःखे वाहिलीस. तुझ्या फटक्यांच्या द्वारे आम्हाला पूर्ण आरोग्य प्राप्त झाले आहे यावर माझा दृढ विश्वास आहे.
+
+माझ्या शरीरातील, मनातील आणि आत्म्यातील प्रत्येक आजारपणावर तुझा रोगनिवारक हात ठेव. मला नवीन आरोग्य आणि ऊर्जा दे. माझे आरोग्य पूर्ववत कर आणि मला तुझ्या गौरवासाठी कार्य करण्यास सक्षम कर.
+
+येशूच्या सामर्थ्यशाली नावात, आमेन.`,
+    prayerEn: `Lord Jesus, the Great Physician,
+
+You carried our sicknesses and bore our griefs upon the cross. By Your precious stripes and suffering, we are granted total spiritual and physical healing.
+
+Lay Your restorative hand upon my body, mind, and spirit right now. Drive away every infirmity, fatigue, and pain. Speak renewal and strength into every cell, restoring my health so that I may serve You with a joyful heart.
+
+In the mighty name of Jesus, Amen.`,
+    amenCount: 289
+  },
+  "healing_restoration": {
+    id: "healing_health",
+    bookKey: "isaiah",
+    chapter: 53,
+    categoryMr: "आरोग्य आणि दैवी चंगाई",
+    categoryEn: "HEALING & HEALTH",
+    titleMr: "आरोग्य आणि दैवी चंगाई",
+    titleEn: "Divine Healing & Restoration",
+    bgImage: "assets/images/healing_light.png",
+    refMr: "यिर्मया ३०:१७ • यशया ५३:५",
+    refEn: "Jeremiah 30:17 • Isaiah 53:5",
     verseMr: "तो आमच्या अपराधांसाठी घायाळ झाला, आमच्या दुष्कर्मांसाठी चिरडला गेला; आमच्या शांतीसाठी त्याला शिक्षा झाली आणि त्याच्या फटक्यांनी आम्हाला आरोग्य प्राप्त झाले.",
     verseEn: "He was pierced for our transgressions, he was crushed for our iniquities; the punishment that brought us peace was on him, and by his wounds we are healed.",
     prayerMr: `हे महान वैद्या प्रभू येशू,
@@ -8078,10 +8839,15 @@ window.handleAuthSubmit = async function(e) {
   if (e) e.preventDefault();
   const email    = (document.getElementById("auth-input-identifier")?.value || "").trim();
   const fullName = (document.getElementById("auth-input-fullname")?.value   || "").trim();
-  const password = (document.getElementById("auth-input-password")?.value   || "").trim();
+  const password = (document.getElementById("auth-modal-input-password")?.value || document.getElementById("auth-input-password")?.value || "").trim();
 
   if (!email) {
     showToast("Please enter your email / ईमेल भरा");
+    return;
+  }
+
+  if (!password) {
+    showToast("Please enter your password / पासवर्ड भरा");
     return;
   }
 
@@ -8094,7 +8860,7 @@ window.handleAuthSubmit = async function(e) {
       if (signInErr.code === 'auth/user-not-found' || signInErr.code === 'auth/invalid-credential') {
         // Register new user with provided full name
         const displayName = fullName || email.split('@')[0];
-        cred = await FirebaseApp.registerWithEmail(displayName, email, password || 'default123');
+        cred = await FirebaseApp.registerWithEmail(displayName, email, password);
         await FirebaseApp.saveUserProfile(cred.user.uid, {
           displayName,
           email: email.toLowerCase(),
@@ -9502,6 +10268,15 @@ function triggerJoinMeetingFlow(meetingId) {
     logAudioDebug("iOS Device detected. Directing to native top-level call window...", { roomUrl });
     showToast("Opening iOS Video Room (Mic & Speaker Active) 🙏");
     window.location.href = roomUrl;
+    return;
+  }
+
+  // Graceful Handling: Respect saved permission state from onboarding
+  const permPref = localStorage.getItem("rol_media_permissions");
+  if (permPref === "listen_only" || permPref === "skipped") {
+    logAudioDebug("User previously configured listen-only mode. Bypassing redundant media prompt.");
+    showToast("Joining Live Sanctuary in Listen Mode 🎧");
+    launchLiveMeetingRoom(m, null);
     return;
   }
 
@@ -11678,7 +12453,8 @@ window.submitPastoralPrayerRequest = function(e) {
    ========================================================================== */
 
 window.toggleAudioNarration = function() {
-  if (audioState.isPlaying || (window.SarvamTTS && window.SarvamTTS.queue && window.SarvamTTS.queue.isPlaying) || (typeof speechSynthesis !== 'undefined' && (speechSynthesis.speaking || speechSynthesis.pending))) {
+  const ttsActive = window.googleTtsNarration && window.googleTtsNarration.isActive;
+  if (ttsActive || audioState.isPlaying || (window.SarvamTTS && window.SarvamTTS.queue && window.SarvamTTS.queue.isPlaying) || (typeof speechSynthesis !== 'undefined' && (speechSynthesis.speaking || speechSynthesis.pending))) {
     stopSpeechNarration();
   } else {
     startSpeechNarration(0);
@@ -13468,6 +14244,7 @@ window.generateExactVerseImageBlob = function() {
       }
     }, 1200);
 
+    bgImg.crossOrigin = "anonymous";
     bgImg.src = imgUrl;
   });
 };
@@ -15032,7 +15809,7 @@ window.renderBiblicalMicroLearning = function() {
   const word = window.getTodayBiblicalWord();
   if (!word) return;
   
-  const isEng = (window.state && window.state.translation === "eng");
+  const isEng = (window.state && (window.state.translation === "eng" || window.state.language === "en"));
   
   const termEl = document.getElementById("micro-word-term");
   const originEl = document.getElementById("micro-word-origin");
@@ -15044,11 +15821,17 @@ window.renderBiblicalMicroLearning = function() {
   
   if (termEl) termEl.textContent = word.term;
   if (originEl) originEl.textContent = word.origin;
-  if (pronEl) pronEl.textContent = `उच्चार: ${word.pronunciation}`;
+  if (pronEl) pronEl.textContent = isEng ? `Pronunciation: ${word.pronunciation}` : `उच्चार: ${word.pronunciation}`;
   if (meaningEl) meaningEl.textContent = isEng ? word.meaningEn : word.meaningMr;
-  if (insightEl) insightEl.textContent = isEng ? word.insightMr : word.insightMr;
+  if (insightEl) insightEl.textContent = (isEng && word.insightEn) ? word.insightEn : word.insightMr;
   if (refEl) refEl.textContent = isEng ? word.refEn : word.refMr;
   if (dayBadge) dayBadge.textContent = `Day ${word.id}`;
+
+  const navBtn = document.getElementById("micro-word-nav-btn");
+  if (navBtn) {
+    const span = navBtn.querySelector("span");
+    if (span) span.textContent = isEng ? "Read in Bible →" : "बायबलमध्ये वाचा →";
+  }
 };
 
 window.speakMicroLearningWord = function() {
@@ -16536,9 +17319,13 @@ function elevateCurrentSessionToAdmin() {
 
 function saveAdminPIN() {
   const pinInput = document.getElementById("admin-pin-input-field");
-  const newPin = pinInput?.value.trim() || "2323";
+  const newPin = pinInput?.value.trim();
+  if (!newPin || newPin.length < 4) {
+    showToast("⚠️ PIN must be at least 4 digits");
+    return;
+  }
   localStorage.setItem("rol_admin_pin", newPin);
-  showToast(`✅ Admin PIN updated to ${newPin}`);
+  showToast(`✅ Admin PIN updated successfully`);
 }
 
 function exportAdminDataBackup() {
