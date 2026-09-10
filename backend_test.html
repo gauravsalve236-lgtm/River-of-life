@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>River of Life — Backend & Database Interactive Test Console</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Noto+Serif+Devanagari:wght@500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card-bg: #131b2e;
+      --card-border: rgba(255, 255, 255, 0.08);
+      --primary: #F7002F;
+      --primary-hover: #d60029;
+      --accent: #00d26a;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --code-bg: #080c14;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 24px;
+      line-height: 1.5;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .brand-title {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand-title span {
+      color: var(--primary);
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(0, 210, 106, 0.12);
+      color: var(--accent);
+      border: 1px solid rgba(0, 210, 106, 0.3);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 1.8s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #fff;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    input, select, textarea {
+      background: var(--code-bg);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #fff;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+      transition: border 0.2s;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--primary);
+    }
+    .btn-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    button {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.18s, transform 0.1s;
+    }
+    button:hover { background: var(--primary-hover); }
+    button:active { transform: scale(0.98); }
+    button.btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    button.btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.14);
+    }
+    .response-box {
+      background: var(--code-bg);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 8px;
+      padding: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: #a5b4fc;
+      max-height: 180px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .nav-pill {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 14px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--card-border);
+      transition: all 0.2s;
+    }
+    .nav-pill:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+    audio {
+      width: 100%;
+      height: 38px;
+      border-radius: 8px;
+      margin-top: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div>
+        <div class="brand-title">
+          <span>River of Life</span> Backend & Database Console
+        </div>
+        <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">
+          PostgreSQL / SQLite Database Schema, JWT Authentication, Reading Progress, Bookmarks & Cloud Audio
+        </p>
+      </div>
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <div class="status-badge" id="api-status">
+          <span class="status-dot"></span> API Server: http://localhost:7880
+        </div>
+        <a href="index.html" class="nav-pill" style="color: #fff; background: var(--primary);">Open Main Bible App &rarr;</a>
+      </div>
+    </header>
+
+    <!-- SECTION 1: AUTH & JWT -->
+    <div class="grid">
+      <div class="card">
+        <div class="card-title">
+          <span>🔐</span> 1. User Authentication (Signup & Login)
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="auth-email" value="gaurav@riveroflife.org">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="auth-password" value="Password123!">
+        </div>
+        <div class="form-group">
+          <label>Full Name (for Signup)</label>
+          <input type="text" id="auth-name" value="Gaurav Salve">
+        </div>
+        <div class="btn-row">
+          <button onclick="testSignup()">Sign Up</button>
+          <button class="btn-secondary" onclick="testLogin()">Log In</button>
+          <button style="background: #4285F4;" onclick="testGoogleAuth()">Google Sign-Up</button>
+          <button class="btn-secondary" onclick="testMe()">Verify Session (/me)</button>
+        </div>
+        <label>Live API Response</label>
+        <div class="response-box" id="auth-response">// Click Sign Up, Log In, or Google Sign-Up to test JWT auth session...</div>
+      </div>
+
+      <!-- SECTION 2: READING PROGRESS -->
+      <div class="card">
+        <div class="card-title">
+          <span>📖</span> 2. Reading Progress Sync (Cross-Device)
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div class="form-group">
+            <label>Book Name</label>
+            <input type="text" id="prog-book" value="john">
+          </div>
+          <div class="form-group">
+            <label>Chapter Number</label>
+            <input type="number" id="prog-chapter" value="3" min="1">
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div class="form-group">
+            <label>Progress %</label>
+            <input type="number" id="prog-pct" value="100.0" min="0" max="100" step="5">
+          </div>
+          <div class="form-group">
+            <label>Last Verse Read</label>
+            <input type="number" id="prog-verse" value="16" min="1">
+          </div>
+        </div>
+        <div class="btn-row">
+          <button onclick="testSyncProgress()">Sync Chapter Progress</button>
+          <button class="btn-secondary" onclick="testGetProgress()">Fetch All Records</button>
+        </div>
+        <label>Live API Response</label>
+        <div class="response-box" id="prog-response">// Save chapter progress to database...</div>
+      </div>
+    </div>
+
+    <!-- SECTION 3: BOOKMARKS & AUDIO ASSETS -->
+    <div class="grid">
+      <div class="card">
+        <div class="card-title">
+          <span>🔖</span> 3. Bookmarks Management
+        </div>
+        <div class="form-group">
+          <label>Scripture Reference</label>
+          <input type="text" id="bm-ref" value="योहान ३:१६ (John 3:16)">
+        </div>
+        <div class="form-group">
+          <label>Thematic Category Tag</label>
+          <select id="bm-tag">
+            <option value="Salvation">Salvation (तारण)</option>
+            <option value="Grace">Grace (कृपा)</option>
+            <option value="Healing">Healing (आरोग्य)</option>
+            <option value="Faith">Faith (विश्वास)</option>
+            <option value="Peace">Peace (शांतता)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Verse Text</label>
+          <textarea id="bm-text" rows="2" style="resize: vertical; font-family: 'Noto Serif Devanagari', serif;">कारण देवाने जगावर एवढी प्रीती केली की त्याने आपला एकुलता एक पुत्र दिला...</textarea>
+        </div>
+        <div class="btn-row">
+          <button onclick="testCreateBookmark()">Save Bookmark</button>
+          <button class="btn-secondary" onclick="testFetchBookmarks()">List Bookmarks</button>
+        </div>
+        <label>Live API Response</label>
+        <div class="response-box" id="bm-response">// Save bookmark to database...</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <span>🎧</span> 4. Cloud High-Definition Audio Stream (R2 / S3)
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div class="form-group">
+            <label>Book (USFM / English)</label>
+            <select id="audio-book">
+              <option value="GEN">Genesis (उत्पत्ति)</option>
+              <option value="PSA">Psalms (स्तोत्रसंहिता)</option>
+              <option value="MAT">Matthew (मत्तय)</option>
+              <option value="JHN" selected>John (योहान)</option>
+              <option value="ROM">Romans (रोमकरांस)</option>
+              <option value="REV">Revelation (प्रकटीकरण)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Chapter Number</label>
+            <input type="number" id="audio-chapter" value="3" min="1">
+          </div>
+        </div>
+        <div class="btn-row">
+          <button onclick="testResolveAudio()">Resolve Cloud Audio URL</button>
+        </div>
+        <audio id="audio-player" controls style="display: none;"></audio>
+        <label>Resolved Cloud Asset URL</label>
+        <div class="response-box" id="audio-response">// Click above to resolve streaming URL from storage...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:7880';
+    let currentToken = localStorage.getItem('rol_access_token') || '';
+
+    // Check server health
+    async function checkHealth() {
+      try {
+        const res = await fetch(`${API_BASE}/api/health`);
+        const data = await res.json();
+        document.getElementById('api-status').innerHTML = `<span class="status-dot"></span> Server Connected (${data.status})`;
+      } catch (err) {
+        document.getElementById('api-status').innerHTML = `<span class="status-dot" style="background:#ff334b"></span> Server Offline / Check 7880`;
+        document.getElementById('api-status').style.borderColor = '#ff334b';
+        document.getElementById('api-status').style.color = '#ff334b';
+      }
+    }
+    checkHealth();
+
+    // 1. Signup
+    async function testSignup() {
+      const email = document.getElementById('auth-email').value;
+      const password = document.getElementById('auth-password').value;
+      const fullName = document.getElementById('auth-name').value;
+      const box = document.getElementById('auth-response');
+      box.textContent = 'Sending signup request...';
+
+      try {
+        const res = await fetch(`${API_BASE}/api/auth/signup`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password, fullName, preferredLanguage: 'mr' })
+        });
+        const data = await res.json();
+        box.textContent = JSON.stringify(data, null, 2);
+        if (data.accessToken) {
+          currentToken = data.accessToken;
+          localStorage.setItem('rol_access_token', currentToken);
+        }
+      } catch (e) {
+        box.textContent = 'Error: ' + e.message;
+      }
+    }
+
+    // 2. Login
+    async function testLogin() {
+      const email = document.getElementById('auth-email').value;
+      const password = document.getElementById('auth-password').value;
+      const box = document.getElementById('auth-response');
+      box.textContent = 'Authenticating...';
+
+      try {
+        const res = await fetch(`${API_BASE}/api/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        box.textContent = JSON.stringify(data, null, 2);
+        if (data.accessToken) {
+          currentToken = data.accessToken;
+          localStorage.setItem('rol_access_token', currentToken);
+        }
+      } catch (e) {
+        box.textContent = 'Error: ' + e.message;
+      }
+    }
+
+    // Google Sign-Up / Auth
+    async function testGoogleAuth() {
+      const email = document.getElementById('auth-email').value;
+      const fullName = document.getElementById('auth-name').value;
+      const box = document.getElementById('auth-response');
+      box.textContent = 'Signing up / authenticating with Google...';
+
+      try {
+        const res = await fetch(`${API_BASE}/api/auth/google`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email,
+            fullName,
+            preferredLanguage: 'mr',
+            role: 'Member'
+          })
+        });
+        const data = await res.json();
+        box.textContent = JSON.stringify(data, null, 2);
+        if (data.accessToken) {
+          currentToken = data.accessToken;
+          localStorage.setItem('rol_access_token', currentToken);
+        }
+      } catch (e) {
+        box.textContent = 'Error: ' + e.message;
+      }
+    }
+
+    // 3. Verify Session
+    async function testMe() {
+      const box = document.getElementById('auth-response');
+      if (!currentToken) {
+        box.textContent = 'No active token found. Please Sign Up or Log In first.';
+        return;
+      }
+      box.textContent = 'Fetching authenticated profile...';
+      try {
+        const res = await fetch(`${API_BASE}/api/auth/me`, {
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        const data = await res.json();
+        box.textContent = JSON.stringify(data, null, 2);
+      } catch (e) {
+        box.textContent = 'Error: ' + e.message;
+      }
+    }
+
+    // 4. Reading Progress
+    async function testSyncProgress() {
+      const book = document.getElementById('prog-book').value;
+      const ch = parseInt(document.getElementById('prog-chapter').value);
+      const pct = parseFloat(document.getElementById('prog-pct').value);
+      const verse = parseInt(document.getElementById('prog-verse').value);
+      const box = document.getElementById('prog-response');
+
+      if (!currentToken) {
+        box.textContent = 'Please Log In or Sign Up first to sync reading progress.';
+        return;
+      }
+      box.textContent = 'Syncing reading progress...';
+      try {
+        const res = await fetch(`${API_BASE}/api/reading-progress`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${currentToken}`
+          },
+          body: JSON.stringify({
+            book_name: book,
+            chapter_number: ch,
+            progress_percentage: pct,
+            last_verse: verse
+          })
+        });
+        const data = await res.json();
+        box.textContent = JSON.stringify(data, null, 2);
+      } catch (e) {
+        box.textContent = 'Error: ' + e.message;
+      }
+    }
+
+    async function testGetProgress() {
+      const box = document.getElementById('prog-response');
+      if (!currentToken) {
+        box.textContent = 'Please Log In or Sign Up first.';
+        return;
+      }
+      box.textContent = 'Fetching reading history...';
+      try {
+        const res = await fetch(`${API_BASE}/api/reading-progress`, {
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        const data = await res.json();
+        box.textContent = JSON.stringify(data, null, 2);
+      } catch (e) {
+        box.textContent = 'Error: ' + e.message;
+      }
+    }
+
+    // 5. Bookmarks
+    async function testCreateBookmark() {
+      const ref = document.getElementById('bm-ref').value;
+      const tag = document.getElementById('bm-tag').value;
+      const text = document.getElementById('bm-text').value;
+      const box = document.getElementById('bm-response');
+
+      if (!currentToken) {
+        box.textContent = 'Please Log In or Sign Up first to save bookmarks.';
+        return;
+      }
+      box.textContent = 'Saving bookmark...';
+      try {
+        const res = await fetch(`${API_BASE}/api/bookmarks`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${currentToken}`
+          },
+          body: JSON.stringify({
+            reference_text: ref,
+            verse_tag: tag,
+            verse_text: text,
+            book_name: 'john',
+            chapter_number: 3,
+            verse_number: 16
+          })
+        });
+        const data = await res.json();
+        box.textContent = JSON.stringify(data, null, 2);
+      } catch (e) {
+        box.textContent = 'Error: ' + e.message;
+      }
+    }
+
+    async function testFetchBookmarks() {
+      const box = document.getElementById('bm-response');
+      if (!currentToken) {
+        box.textContent = 'Please Log In or Sign Up first.';
+        return;
+      }
+      box.textContent = 'Fetching bookmarks...';
+      try {
+        const res = await fetch(`${API_BASE}/api/bookmarks`, {
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        const data = await res.json();
+        box.textContent = JSON.stringify(data, null, 2);
+      } catch (e) {
+        box.textContent = 'Error: ' + e.message;
+      }
+    }
+
+    // 6. Audio Asset Resolver
+    async function testResolveAudio() {
+      const book = document.getElementById('audio-book').value;
+      const ch = document.getElementById('audio-chapter').value;
+      const box = document.getElementById('audio-response');
+      const player = document.getElementById('audio-player');
+
+      box.textContent = 'Resolving cloud audio stream...';
+      try {
+        const res = await fetch(`${API_BASE}/api/audio-assets/${book}/${ch}?lang=mr`);
+        const data = await res.json();
+        box.textContent = JSON.stringify(data, null, 2);
+        if (data.asset && data.asset.audioUrl) {
+          player.src = data.asset.audioUrl;
+          player.style.display = 'block';
+        }
+      } catch (e) {
+        box.textContent = 'Error: ' + e.message;
+      }
+    }
+  </script>
+</body>
+</html>

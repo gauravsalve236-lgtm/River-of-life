@@ -10,7 +10,13 @@
  * ============================================================================
  */
 
-const { ElevenLabsClient } = require('@elevenlabs/elevenlabs-js');
+let ElevenLabsClient = null;
+try {
+  const elModule = require('elevenlabs');
+  ElevenLabsClient = elModule.ElevenLabsClient;
+} catch (e) {
+  // Graceful fallback if elevenlabs SDK is not installed
+}
 const { Readable, PassThrough } = require('node:stream');
 const fs = require('node:fs');
 const path = require('node:path');

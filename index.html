@@ -52,6 +52,8 @@
 
   <!-- Official LiveKit WebRTC Client SDK -->
   <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.0.8/dist/livekit-client.umd.min.js"></script>
+  <!-- Google Identity Services (Native Android & Chrome One-Tap Account Chooser) -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
   
@@ -212,11 +214,13 @@
             <h1 class="figma-app-title">River Of Life</h1>
           </div>
           <div class="figma-header-actions">
-            <button class="figma-icon-circle-btn" onclick="openNotificationModal()" title="Notifications" aria-label="Notifications">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+            <button id="header-bell-btn" class="figma-icon-circle-btn" onclick="openNotificationModal()" title="Notifications" aria-label="Notifications" style="position: relative; cursor: pointer; pointer-events: auto;">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" style="pointer-events: none;"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+              <span id="header-bell-badge" style="position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; border-radius: 50%; background: #ef4444; border: 1.5px solid var(--surface, #fff); display: block; pointer-events: none;"></span>
             </button>
-            <div class="figma-avatar-circle" onclick="openDrawer('drawer-account-settings')" title="Account Settings">
-              <img src="assets/icons/user_profile_avatar.svg" alt="User Profile" class="figma-avatar-img" id="figma-user-avatar">
+            <div class="figma-avatar-circle" onclick="openDrawer('drawer-account-settings')" title="Account Settings" style="cursor: pointer; overflow: hidden; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid var(--border);">
+              <img src="assets/icons/user_profile_avatar.svg" alt="User Profile" class="figma-avatar-img" id="figma-user-avatar" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+              <div id="figma-user-avatar-initial" style="display: none; width: 100%; height: 100%; align-items: center; justify-content: center; font-size: 15px; font-weight: 800; color: #fff; background: var(--primary);">U</div>
             </div>
           </div>
         </div>
@@ -1599,10 +1603,52 @@
                   <button id="auth-tab-signup" class="auth-tab-btn" style="flex: 1; border: none; background: transparent; color: var(--text-muted); padding: 8px; border-radius: 6px; font-weight: 700; font-size: 12px; cursor: pointer; transition: all 0.2s;">Register / नोंदणी</button>
                 </div>
                 
-                <form id="auth-form" onsubmit="return false;" style="display: flex; flex-direction: column; gap: 16px;">
+                <form id="auth-form" onsubmit="return false;" style="display: flex; flex-direction: column; gap: 14px;">
+                  <!-- Google Sign-in Action Button -->
+                  <button type="button" id="btn-google-signin" class="btn-google-auth" onclick="handleGoogleSignIn()" style="width: 100%; padding: 12px 16px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--surface); color: var(--text); font-size: 13.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+                    <svg width="18" height="18" viewBox="0 0 48 48">
+                      <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                      <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                      <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.79l7.97-6.2z"/>
+                      <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                      <path fill="none" d="M0 0h48v48H0z"/>
+                    </svg>
+                    <span id="btn-google-signin-text">Continue with Google / गुगलने पुढे जा</span>
+                  </button>
+
+                  <div style="display: flex; align-items: center; text-align: center; color: var(--text-muted); font-size: 11px; font-weight: 700; margin: 2px 0;">
+                    <span style="flex: 1; border-bottom: 1px solid var(--border);"></span>
+                    <span style="padding: 0 10px; text-transform: uppercase; letter-spacing: 0.5px;">Or with Email / किंवा</span>
+                    <span style="flex: 1; border-bottom: 1px solid var(--border);"></span>
+                  </div>
+
+                  <!-- Option in registration page to select Google account from device -->
+                  <div class="signup-only" style="display: none; flex-direction: column; gap: 6px; margin-bottom: 4px;">
+                    <button type="button" id="btn-device-google-select" onclick="openDeviceGoogleAccountChooser()" style="width: 100%; padding: 12px 14px; border-radius: 12px; border: 1.5px solid rgba(66, 133, 244, 0.45); background: linear-gradient(135deg, rgba(66, 133, 244, 0.12), rgba(52, 168, 83, 0.12)); color: var(--text); font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+                      <div style="display: flex; align-items: center; gap: 10px;">
+                        <svg width="22" height="22" viewBox="0 0 48 48">
+                          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.79l7.97-6.2z"/>
+                          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                        </svg>
+                        <div style="text-align: left; line-height: 1.25;">
+                          <div style="font-weight: 800; font-size: 13px; color: var(--text);">📱 Select Google Account on Device</div>
+                          <div style="font-size: 11px; color: var(--text-muted);">डिव्हाइसवरील गुगल खाते निवडून नोंदणी करा</div>
+                        </div>
+                      </div>
+                      <span style="font-size: 16px; font-weight: 800; color: var(--primary);">❯</span>
+                    </button>
+                    <div style="display: flex; align-items: center; text-align: center; color: var(--text-muted); font-size: 10.5px; font-weight: 700; margin: 4px 0 2px 0;">
+                      <span style="flex: 1; border-bottom: 1px solid var(--border);"></span>
+                      <span style="padding: 0 8px; text-transform: uppercase;">Or manual registration / किंवा माहिती भरा</span>
+                      <span style="flex: 1; border-bottom: 1px solid var(--border);"></span>
+                    </div>
+                  </div>
+
                   <div class="form-input-group" style="display: flex; flex-direction: column; gap: 6px;">
-                    <label for="auth-input-username" style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-align: left;">Username / यरनेम</label>
-                    <input type="text" id="auth-input-username" class="dropdown-selector" style="width: 100%; text-align: left; padding: 10px;" placeholder="Enter username" required autocomplete="username">
+                    <label for="auth-input-username" style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-align: left;">Username or Email / युझरनेम किंवा ईमेल</label>
+                    <input type="text" id="auth-input-username" class="dropdown-selector" style="width: 100%; text-align: left; padding: 10px;" placeholder="Enter username or email" required autocomplete="username">
                   </div>
                   
                   <div class="form-input-group signup-only" style="display: none; flex-direction: column; gap: 6px;">
@@ -3052,6 +3098,92 @@
       </div>
     </div>
 
+    <!-- 1. NOTIFICATIONS CENTER MODAL (Triggered by Header Bell Icon) -->
+    <div id="modal-notifications-center" class="app-modal-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.68); z-index: 99999; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); justify-content: center; align-items: flex-start; padding: 24px 16px;">
+      <div style="background: var(--surface, #ffffff); color: var(--text, #111827); border-radius: 24px; border: 1.5px solid var(--border, #E5E7EB); box-shadow: 0 25px 60px rgba(0,0,0,0.3); width: 100%; max-width: 460px; overflow: hidden; animation: popInModal 0.25s cubic-bezier(0.16,1,0.3,1); margin-top: 30px;">
+        
+        <!-- Header -->
+        <div style="padding: 16px 20px; border-bottom: 1px solid var(--border, #E5E7EB); display: flex; justify-content: space-between; align-items: center; background: var(--bg, #F9FAFB);">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 36px; height: 36px; border-radius: 50%; background: rgba(239, 68, 68, 0.12); color: #ef4444; display: flex; align-items: center; justify-content: center; font-size: 18px;">
+              🔔
+            </div>
+            <div>
+              <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: var(--text);">Notifications / सूचना केंद्र</h3>
+              <span style="font-size: 11.5px; color: var(--text-muted);">Daily verse, prayers & fellowship updates</span>
+            </div>
+          </div>
+          <button type="button" onclick="closeNotificationModal()" style="width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--border, #E5E7EB); background: var(--surface, #fff); color: var(--text); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center;">✕</button>
+        </div>
+
+        <!-- Notification List -->
+        <div style="padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; max-height: 65vh; overflow-y: auto;">
+          
+          <!-- Item 1: Daily Scripture Verse -->
+          <div class="notification-item" onclick="closeNotificationModal(); openReader('john', 3);" style="display: flex; gap: 12px; padding: 12px 14px; border-radius: 14px; background: rgba(34, 197, 94, 0.08); border: 1.5px solid rgba(34, 197, 94, 0.25); cursor: pointer; transition: all 0.2s;">
+            <div style="font-size: 22px; flex-shrink: 0; margin-top: 2px;">📖</div>
+            <div style="text-align: left; line-height: 1.35; flex: 1;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-weight: 800; font-size: 13.5px; color: var(--text);">आजचे वचन (Verse for Today)</span>
+                <span style="font-size: 10.5px; color: var(--text-muted);">Just now</span>
+              </div>
+              <p style="margin: 3px 0 0; font-size: 12.5px; color: var(--text);">"कारण देवाने जगावर एवढी प्रीती केली की त्याने आपला एकुलता एक पुत्र दिला..." — योहान ३:१६</p>
+              <span style="display: inline-block; margin-top: 5px; font-size: 11px; font-weight: 700; color: #16a34a;">वाचा (Read in Bible) ➔</span>
+            </div>
+          </div>
+
+          <!-- Item 2: Live Prayer Meeting -->
+          <div class="notification-item" onclick="closeNotificationModal(); switchTab('meetings');" style="display: flex; gap: 12px; padding: 12px 14px; border-radius: 14px; background: rgba(59, 130, 246, 0.08); border: 1.5px solid rgba(59, 130, 246, 0.25); cursor: pointer; transition: all 0.2s;">
+            <div style="font-size: 22px; flex-shrink: 0; margin-top: 2px;">🕊️</div>
+            <div style="text-align: left; line-height: 1.35; flex: 1;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-weight: 800; font-size: 13.5px; color: var(--text);">ऑनलाईन प्रार्थना सभा (Live Prayer)</span>
+                <span style="font-size: 10.5px; color: var(--text-muted);">Today 9:00 PM</span>
+              </div>
+              <p style="margin: 3px 0 0; font-size: 12.5px; color: var(--text);">आज रात्री ९:०० वाजता एकत्र प्रार्थना. व्हिडिओ आणि ऑडिओ फेलोशिपमध्ये सहभागी व्हा.</p>
+              <span style="display: inline-block; margin-top: 5px; font-size: 11px; font-weight: 700; color: #2563eb;">सहभागी व्हा (Join Room) ➔</span>
+            </div>
+          </div>
+
+          <!-- Item 3: New Marathi Hymn -->
+          <div class="notification-item" onclick="closeNotificationModal(); switchTab('hymns');" style="display: flex; gap: 12px; padding: 12px 14px; border-radius: 14px; background: rgba(245, 158, 11, 0.08); border: 1.5px solid rgba(245, 158, 11, 0.25); cursor: pointer; transition: all 0.2s;">
+            <div style="font-size: 22px; flex-shrink: 0; margin-top: 2px;">🎵</div>
+            <div style="text-align: left; line-height: 1.35; flex: 1;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-weight: 800; font-size: 13.5px; color: var(--text);">नवीन ख्रिस्ती गीत (New Hymn Added)</span>
+                <span style="font-size: 10.5px; color: var(--text-muted);">Yesterday</span>
+              </div>
+              <p style="margin: 3px 0 0; font-size: 12.5px; color: var(--text);">"येशूचे नाव किती गोड आहे" ऑडिओ आणि लिरिक्स उपलब्ध आहेत.</p>
+              <span style="display: inline-block; margin-top: 5px; font-size: 11px; font-weight: 700; color: #d97706;">ऐका (Listen Now) ➔</span>
+            </div>
+          </div>
+
+          <!-- Item 4: Audio Bible Available -->
+          <div class="notification-item" onclick="closeNotificationModal(); switchTab('bible');" style="display: flex; gap: 12px; padding: 12px 14px; border-radius: 14px; background: var(--bg, #F9FAFB); border: 1.5px solid var(--border, #E5E7EB); cursor: pointer; transition: all 0.2s;">
+            <div style="font-size: 22px; flex-shrink: 0; margin-top: 2px;">🔊</div>
+            <div style="text-align: left; line-height: 1.35; flex: 1;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-weight: 800; font-size: 13.5px; color: var(--text);">मराठी ऑडिओ बायबल (HD Audio)</span>
+                <span style="font-size: 10.5px; color: var(--text-muted);">Ready</span>
+              </div>
+              <p style="margin: 3px 0 0; font-size: 12.5px; color: var(--text-muted);">उत्पत्ती ते प्रकटीकरण संपूर्ण ६६ पुस्तके हाय-डेफिनिशन आवाजात उपलब्ध.</p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Footer Actions -->
+        <div style="padding: 12px 20px; border-top: 1px solid var(--border, #E5E7EB); display: flex; justify-content: space-between; align-items: center; background: var(--bg, #F9FAFB);">
+          <button type="button" onclick="closeNotificationModal(); openNotificationSettingsModal();" style="border: none; background: transparent; color: var(--primary, #dfa938); font-size: 12.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+            ⚙️ वेळेची सेटिंग्ज (Settings)
+          </button>
+          <button type="button" onclick="markAllNotificationsAsRead()" style="border: 1px solid var(--border, #E5E7EB); background: var(--surface, #fff); color: var(--text); padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;">
+            ✓ सर्व वाचले (Mark all read)
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- 2. DAILY BIBLE VERSE NOTIFICATIONS MODAL -->
     <div id="modal-notification-settings" class="drawer-overlay" onclick="if (event.target === this) closeNotificationSettingsModal();" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 99999; backdrop-filter: blur(6px); justify-content: center; align-items: flex-end;">
       <div class="ios-drawer-sheet" style="max-width: 500px; width: 100%; border-radius: 26px 26px 0 0; background: #FFFFFF; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 -10px 40px rgba(0,0,0,0.2);">
@@ -4413,6 +4545,24 @@
         <!-- Modal Body Form -->
         <form id="form-auth-login" onsubmit="handleAuthSubmit(event)" style="padding: 20px; display: flex; flex-direction: column; gap: 14px; text-align: left;">
           
+          <!-- Google Quick Auth Button -->
+          <button type="button" class="btn-google-auth" onclick="closeAuthModal(); handleGoogleSignIn();" style="width: 100%; padding: 12px 16px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--surface); color: var(--text); font-size: 13.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+            <svg width="18" height="18" viewBox="0 0 48 48">
+              <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+              <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+              <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.79l7.97-6.2z"/>
+              <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+              <path fill="none" d="M0 0h48v48H0z"/>
+            </svg>
+            <span>Continue with Google / गुगलने पुढे जा</span>
+          </button>
+
+          <div style="display: flex; align-items: center; text-align: center; color: var(--text-muted); font-size: 11px; font-weight: 700; margin: 2px 0;">
+            <span style="flex: 1; border-bottom: 1px solid var(--border);"></span>
+            <span style="padding: 0 10px; text-transform: uppercase; letter-spacing: 0.5px;">Or / किंवा</span>
+            <span style="flex: 1; border-bottom: 1px solid var(--border);"></span>
+          </div>
+
           <!-- Identifier Input (Phone or Email) -->
           <div>
             <label style="font-size: 12.5px; font-weight: 700; color: var(--text); display: block; margin-bottom: 4px;">Phone Number or Email Address *</label>
@@ -4447,6 +4597,231 @@
           </p>
 
         </form>
+
+      </div>
+    </div>
+
+    <!-- Device Google Account Chooser Modal (Matches Official Google Chooser Reference) -->
+    <div id="modal-google-account-chooser" class="app-modal-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 99999; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); justify-content: center; align-items: center; padding: 16px;">
+      <div style="background: #ffffff; color: #202124; border-radius: 28px; border: 1px solid #dadce0; box-shadow: 0 20px 60px rgba(0,0,0,0.3); width: 100%; max-width: 440px; overflow: hidden; animation: popInModal 0.25s cubic-bezier(0.16,1,0.3,1); font-family: 'Roboto', 'Google Sans', Inter, sans-serif;">
+        
+        <!-- Top Bar with Google Branding -->
+        <div style="padding: 16px 22px 10px; display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <svg width="22" height="22" viewBox="0 0 48 48">
+              <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+              <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+              <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.79l7.97-6.2z"/>
+              <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+            </svg>
+            <span style="font-size: 14.5px; font-weight: 500; color: #3c4043;">Sign in with Google</span>
+          </div>
+          <button type="button" onclick="closeDeviceGoogleAccountChooser()" style="width: 32px; height: 32px; border-radius: 50%; border: none; background: #f1f3f4; color: #5f6368; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center;">✕</button>
+        </div>
+
+        <!-- Google Title & Destination -->
+        <div style="padding: 10px 24px 14px; text-align: left;">
+          <h2 style="margin: 0; font-size: 26px; font-weight: 400; color: #202124; letter-spacing: -0.4px;">Choose an account</h2>
+          <p style="margin: 6px 0 0; font-size: 14px; color: #5f6368;">
+            to continue to <span style="color: #1a73e8; font-weight: 600;">River of Life</span>
+          </p>
+        </div>
+
+        <!-- Body Content -->
+        <div style="padding: 0 0 14px; display: flex; flex-direction: column; text-align: left;">
+          <!-- Status indicator -->
+          <div id="google-chooser-status" style="display: none; margin: 0 20px 10px; padding: 10px 14px; border-radius: 8px; background: #e8f0fe; color: #1a73e8; font-size: 13px; font-weight: 600; text-align: center;">
+          </div>
+
+          <!-- Account list (with clean border-bottom dividers) -->
+          <div id="google-account-chooser-list" style="display: flex; flex-direction: column;">
+          </div>
+
+          <!-- Use another account row -->
+          <div onclick="closeDeviceGoogleAccountChooser(); openGoogleSignupModal();" style="display: flex; align-items: center; gap: 16px; padding: 14px 24px; cursor: pointer; transition: background 0.15s; border-bottom: 1px solid #dadce0;" onmouseover="this.style.background='#f8f9fa';" onmouseout="this.style.background='transparent';">
+            <div style="width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid #dadce0; display: flex; align-items: center; justify-content: center; color: #5f6368; flex-shrink: 0;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            </div>
+            <div style="text-align: left;">
+              <div style="font-weight: 500; font-size: 14.5px; color: #3c4043;">Use another account</div>
+              <div style="font-size: 11.5px; color: #5f6368;">दुसरे गुगल खाते वापरा किंवा नोंदणी करा</div>
+            </div>
+          </div>
+          
+          <!-- Bottom helper / disclaimer -->
+          <div style="padding: 16px 24px 4px; font-size: 11.5px; color: #5f6368; line-height: 1.5;">
+            To continue, Google will share your name, email address, language preference, and profile picture with River of Life.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Google Sign-Up / Details Registration Modal -->
+    <div id="modal-google-signup" class="app-modal-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.72); z-index: 99999; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); justify-content: center; align-items: center; padding: 16px;">
+      <div style="background: var(--surface); color: var(--text); border-radius: 24px; border: 1.5px solid var(--border); box-shadow: 0 25px 60px rgba(0,0,0,0.3); width: 100%; max-width: 450px; overflow: hidden; animation: popInModal 0.28s cubic-bezier(0.16,1,0.3,1);">
+        <div style="padding: 18px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: var(--bg);">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <svg width="24" height="24" viewBox="0 0 48 48">
+              <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+              <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+              <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.79l7.97-6.2z"/>
+              <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+            </svg>
+            <div>
+              <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: var(--text);">Google Registration / गुगल नोंदणी</h3>
+              <span style="font-size: 11.5px; color: var(--text-muted);">Enter details to complete registration / आपली माहिती भरा</span>
+            </div>
+          </div>
+          <button type="button" onclick="closeGoogleSignupModal()" style="width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center;">✕</button>
+        </div>
+
+        <form id="form-google-signup" onsubmit="submitGoogleRegistration(event)" style="padding: 20px; display: flex; flex-direction: column; gap: 14px; text-align: left;">
+          <div>
+            <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Google Email Address / गुगल ईमेल *</label>
+            <input type="email" id="google-reg-email" required class="dropdown-selector" style="width: 100%; box-sizing: border-box; padding: 10px;" placeholder="e.g. name@gmail.com">
+          </div>
+
+          <div>
+            <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Full Name / आपले पूर्ण नाव *</label>
+            <input type="text" id="google-reg-name" required class="dropdown-selector" style="width: 100%; box-sizing: border-box; padding: 10px;" placeholder="e.g. Gaurav Salve">
+          </div>
+
+          <div>
+            <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Preferred Language / प्राधान्य भाषा</label>
+            <select id="google-reg-language" class="dropdown-selector" style="width: 100%; box-sizing: border-box; padding: 10px;">
+              <option value="mr" selected>मराठी (Marathi)</option>
+              <option value="eng">English</option>
+            </select>
+          </div>
+
+          <div>
+            <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Role / भूमिका</label>
+            <select id="google-reg-role" class="dropdown-selector" style="width: 100%; box-sizing: border-box; padding: 10px;">
+              <option value="Member" selected>Church Member / सभासद</option>
+              <option value="Pastor">Pastor / Church Leader / पास्टर</option>
+            </select>
+          </div>
+
+          <button type="submit" id="btn-google-submit" class="btn-primary-block" style="padding: 13px; font-size: 14px; font-weight: 800; border-radius: 12px; background: #F7002F; border: none; color: #fff; cursor: pointer; margin-top: 6px; box-shadow: 0 4px 14px rgba(247, 0, 47, 0.3);">
+            ✨ Complete Registration / नोंदणी पूर्ण करा
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Notifications Center Modal -->
+    <div id="modal-notifications-center" class="app-modal-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 99999; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); justify-content: center; align-items: center; padding: 16px;">
+      <div style="background: var(--surface); color: var(--text); border-radius: 24px; border: 1.5px solid var(--border); box-shadow: 0 24px 60px rgba(0,0,0,0.35); width: 100%; max-width: 460px; max-height: 88vh; display: flex; flex-direction: column; overflow: hidden; animation: popInModal 0.25s cubic-bezier(0.16,1,0.3,1);">
+        
+        <!-- Header -->
+        <div style="padding: 18px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, rgba(39, 58, 37, 0.95), rgba(22, 33, 20, 0.98)); color: #fff;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(223, 169, 56, 0.2); border: 1.5px solid #dfa938; display: flex; align-items: center; justify-content: center; color: #dfa938;">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+            </div>
+            <div>
+              <h3 style="margin: 0; font-size: 16.5px; font-weight: 800; color: #fff;">Notifications / सूचना केंद्र</h3>
+              <span style="font-size: 11.5px; color: rgba(255,255,255,0.75);">River of Life Fellowship Alerts</span>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <button onclick="markAllNotificationsAsRead()" title="Mark all read" style="background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); color: #fff; font-size: 11.5px; font-weight: 700; padding: 5px 10px; border-radius: 12px; cursor: pointer; transition: all 0.2s;">
+              Mark Read
+            </button>
+            <button onclick="closeNotificationModal()" style="background: rgba(255,255,255,0.15); border: none; color: #fff; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center;">✕</button>
+          </div>
+        </div>
+
+        <!-- Notification Items List -->
+        <div style="padding: 16px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; text-align: left;">
+          
+          <!-- Card 1: Today's Scripture Verse -->
+          <div style="background: var(--bg); border: 1.5px solid var(--border); border-radius: 16px; padding: 14px; display: flex; gap: 12px;">
+            <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(223, 169, 56, 0.15); border: 1px solid rgba(223, 169, 56, 0.4); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;">
+              📖
+            </div>
+            <div style="flex: 1; min-width: 0;">
+              <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2px;">
+                <h4 style="margin: 0; font-size: 14px; font-weight: 800; color: var(--text);">Daily Scripture / आजचे वचन</h4>
+                <span style="font-size: 11px; color: var(--text-muted);">Today 6:00 AM</span>
+              </div>
+              <p style="margin: 0 0 8px 0; font-size: 12.5px; color: var(--text); line-height: 1.45;">
+                "कारण देवाने जगावर एवढी प्रीती केली की, त्याने आपला एकुलता एक पुत्र दिला..." — योहान ३:१६
+              </p>
+              <button onclick="closeNotificationModal(); openChapter('JHN', 3);" style="padding: 6px 12px; border-radius: 8px; border: none; background: var(--primary); color: #fff; font-size: 11.5px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                Read Chapter / अध्याय वाचा ➔
+              </button>
+            </div>
+          </div>
+
+          <!-- Card 2: Live Prayer Fellowship -->
+          <div style="background: var(--bg); border: 1.5px solid var(--border); border-radius: 16px; padding: 14px; display: flex; gap: 12px;">
+            <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.4); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;">
+              🕊️
+            </div>
+            <div style="flex: 1; min-width: 0;">
+              <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2px;">
+                <h4 style="margin: 0; font-size: 14px; font-weight: 800; color: var(--text);">Online Prayer Fellowship / प्रार्थना सभा</h4>
+                <span style="font-size: 11px; color: #22c55e; font-weight: 700;">Tonight 9:00 PM</span>
+              </div>
+              <p style="margin: 0 0 8px 0; font-size: 12.5px; color: var(--text); line-height: 1.45;">
+                River of Life Online Google Meet Prayer Fellowship begins at 9:00 PM. All are invited to join.
+              </p>
+              <button onclick="closeNotificationModal(); switchTab('meetings');" style="padding: 6px 12px; border-radius: 8px; border: none; background: #22c55e; color: #fff; font-size: 11.5px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                Join Fellowship / सभेला जा ➔
+              </button>
+            </div>
+          </div>
+
+          <!-- Card 3: New Marathi Hymn -->
+          <div style="background: var(--bg); border: 1.5px solid var(--border); border-radius: 16px; padding: 14px; display: flex; gap: 12px;">
+            <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.4); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;">
+              🎵
+            </div>
+            <div style="flex: 1; min-width: 0;">
+              <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2px;">
+                <h4 style="margin: 0; font-size: 14px; font-weight: 800; color: var(--text);">New Marathi Hymn / नवीन भजन</h4>
+                <span style="font-size: 11px; color: var(--text-muted);">Yesterday</span>
+              </div>
+              <p style="margin: 0 0 8px 0; font-size: 12.5px; color: var(--text); line-height: 1.45;">
+                ख्रिस्ती भजने व गीते — नवीन भजने आणि ऑडिओ स्तुती गीते समाविष्ट केली आहेत.
+              </p>
+              <button onclick="closeNotificationModal(); switchTab('hymns');" style="padding: 6px 12px; border-radius: 8px; border: none; background: #9333ea; color: #fff; font-size: 11.5px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                Browse Hymns / भजने ऐका ➔
+              </button>
+            </div>
+          </div>
+
+          <!-- Card 4: Offline Marathi Audio Bible -->
+          <div style="background: var(--bg); border: 1.5px solid var(--border); border-radius: 16px; padding: 14px; display: flex; gap: 12px;">
+            <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.4); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;">
+              🔊
+            </div>
+            <div style="flex: 1; min-width: 0;">
+              <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2px;">
+                <h4 style="margin: 0; font-size: 14px; font-weight: 800; color: var(--text);">Offline Audio Bible / ऑडिओ बायबल</h4>
+                <span style="font-size: 11px; color: var(--text-muted);">Active</span>
+              </div>
+              <p style="margin: 0 0 8px 0; font-size: 12.5px; color: var(--text); line-height: 1.45;">
+                Marathi Dramatized Audio is ready for crystal-clear offline listening anytime anywhere.
+              </p>
+              <button onclick="closeNotificationModal(); switchTab('audio');" style="padding: 6px 12px; border-radius: 8px; border: none; background: #2563eb; color: #fff; font-size: 11.5px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                Open Audio Bible / ऑडिओ सुरू करा ➔
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Footer Action -->
+        <div style="padding: 12px 20px; border-top: 1px solid var(--border); background: var(--surface); display: flex; justify-content: space-between; align-items: center;">
+          <button onclick="closeNotificationModal(); openNotificationSettingsModal();" style="padding: 8px 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+            ⚙️ Notification Settings
+          </button>
+          <button onclick="closeNotificationModal()" style="padding: 8px 18px; border-radius: 10px; border: none; background: var(--border); color: var(--text); font-size: 12.5px; font-weight: 700; cursor: pointer;">
+            Close / बंद करा
+          </button>
+        </div>
 
       </div>
     </div>

@@ -689,8 +689,8 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// ElevenLabs default key split to bypass GitHub secret scanning
-const ELEVENLABS_DEFAULT_KEY = "sk_a772ed" + "0a2146e4c1" + "1d41e15ffdae28d0" + "67b6a458a0e9cfda";
+// Production Key Management: Configured securely via Settings or environment
+const ELEVENLABS_DEFAULT_KEY = (typeof localStorage !== 'undefined' && localStorage.getItem('rol_elevenlabs_key')) || "";
 
 // Global Application State
 let state = {
@@ -740,7 +740,7 @@ let state = {
   streak: 1,               // daily consecutive streak counter
   userLikes: {},           // map of verse_ref -> liked boolean
   audioSource: 'sarvam',     // 'sarvam' (Sarvam AI Bulbul V3 Indian Voice), 'human' (streaming MP3)
-  sarvamVoice: 'gee_elevenlabs',      // 'shubh' (Calm & Devotional Indian Male - Hindi/Marathi/English)
+  sarvamVoice: 'google_natural_mr',      // 'shubh' (Calm & Devotional Indian Male - Hindi/Marathi/English)
   sarvamPace: 0.92,          // 0.92x peaceful Bible reading speed
   sarvamApiKey: 'sk_odv5l3f4_XdZubK80ecSfBa6YYCLWDCNI', // Preconfigured Sarvam AI API Key
   quizHighscore: 0,        // High score in a single quiz session
@@ -957,6 +957,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     updateQuizCardStats();
     initBibleQuiz();
     initAuthAndPrayers();
+    updateAuthUI();
+    if (window.RolBackendSync && typeof window.RolBackendSync.restoreSession === 'function') {
+      window.RolBackendSync.restoreSession();
+    }
+    checkAndTriggerFirstLaunchOnboarding();
   } catch (e) {
     console.error("Reader/Devotion init error:", e);
   }
@@ -991,20 +996,354 @@ function loadStateFromLocalStorage() {
       console.error("Error loading state:", e);
     }
   }
+
+  // Restore authenticated session reliably across reloads and app restarts
+  try {
+    const savedUserJson = localStorage.getItem("rol_current_user");
+    const savedToken = localStorage.getItem("rol_access_token");
+    if (savedUserJson) {
+      const parsedUser = JSON.parse(savedUserJson);
+      if (parsedUser && (parsedUser.id || parsedUser.email || parsedUser.username)) {
+        state.currentUser = { ...parsedUser, token: savedToken || parsedUser.token };
+        if (state.currentUser.fullName || state.currentUser.username) {
+          localStorage.setItem("rol_user_name", state.currentUser.fullName || state.currentUser.username);
+        }
+      }
+    } else if (state.currentUser && state.currentUser.id) {
+      localStorage.setItem("rol_current_user", JSON.stringify(state.currentUser));
+    }
+  } catch (authErr) {
+    console.warn("Session restore notice:", authErr);
+  }
+
   // Force migration to Sarvam AI Bulbul V3 Indian Voice Narration
   state.audioSource = "sarvam";
   if (!state.sarvamVoice) {
-    state.sarvamVoice = state.sarvamVoice || "gee_elevenlabs";
+    if (!state.sarvamVoice || state.sarvamVoice === "google_natural_mr" || state.sarvamVoice === "shrey_elevenlabs") { state.sarvamVoice = "google_natural_mr"; }
   }
   state.sarvamPace = state.sarvamPace || 0.92;
 }
 
 function saveStateToLocalStorage() {
-  localStorage.setItem("river_of_life_state_v2", JSON.stringify(state));
-  // Non-blocking Firestore sync for cloud persistence
-  if (state.currentUser && state.currentUser.uid) {
-    syncUserDataToFirestore(); // fire-and-forget; errors are caught inside
+  try {
+    if (state.currentUser) {
+      localStorage.setItem("rol_current_user", JSON.stringify(state.currentUser));
+      if (state.currentUser.fullName || state.currentUser.username) {
+        localStorage.setItem("rol_user_name", state.currentUser.fullName || state.currentUser.username);
+      }
+    }
+    localStorage.setItem("river_of_life_state_v2", JSON.stringify(state));
+    // Non-blocking Firestore sync for cloud persistence
+    if (state.currentUser && state.currentUser.uid) {
+      syncUserDataToFirestore(); // fire-and-forget; errors are caught inside
+    }
+  } catch (e) {
+    console.warn("Failed saving state:", e);
   }
+}
+
+/* ==========================================================================
+   RIVER OF LIFE BACKEND & DATABASE SYNC CLIENT (POSTGRESQL / SQLITE API)
+   Handles JWT sessions, cross-device Reading Progress, and Bookmarks Sync
+   ========================================================================== */
+
+const ROL_API_BASE = (typeof window !== 'undefined' && window.location && window.location.origin && window.location.origin.startsWith('http')) 
+  ? (window.location.port === '8080' ? 'http://localhost:7880' : window.location.origin)
+  : 'http://localhost:7880';
+
+const RolBackendSync = {
+  getAccessToken() {
+    return (typeof localStorage !== 'undefined' ? localStorage.getItem('rol_access_token') : null) || 
+           (state.currentUser && state.currentUser.token) || null;
+  },
+
+  setAuthSession(token, refreshToken, user) {
+    if (typeof localStorage !== 'undefined') {
+      if (token) localStorage.setItem('rol_access_token', token);
+      if (refreshToken) localStorage.setItem('rol_refresh_token', refreshToken);
+      if (user) {
+        localStorage.setItem('rol_current_user', JSON.stringify(user));
+        if (user.fullName || user.username) {
+          localStorage.setItem('rol_user_name', user.fullName || user.username);
+        }
+        if (user.email) {
+          this.recordDeviceAccount(user.email, user.fullName || user.username, user.profilePhoto);
+        }
+      }
+    }
+    if (user) {
+      state.currentUser = user;
+      saveStateToLocalStorage();
+    }
+  },
+
+  clearAuthSession() {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.removeItem('rol_access_token');
+      localStorage.removeItem('rol_refresh_token');
+      localStorage.removeItem('rol_current_user');
+      localStorage.removeItem('rol_user_name');
+    }
+    state.currentUser = null;
+    saveStateToLocalStorage();
+  },
+
+  recordDeviceAccount(email, fullName, photo) {
+    if (!email || typeof localStorage === 'undefined') return;
+    try {
+      const raw = localStorage.getItem('rol_device_google_accounts');
+      let list = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(list)) list = [];
+      const cleanEmail = email.trim();
+      const existingIdx = list.findIndex(a => a.email && a.email.toLowerCase() === cleanEmail.toLowerCase());
+      const item = {
+        email: cleanEmail,
+        fullName: (fullName || cleanEmail.split('@')[0]).trim(),
+        photo: photo || null,
+        lastUsed: Date.now()
+      };
+      if (existingIdx >= 0) {
+        list[existingIdx] = { ...list[existingIdx], ...item };
+      } else {
+        list.unshift(item);
+      }
+      localStorage.setItem('rol_device_google_accounts', JSON.stringify(list.slice(0, 8)));
+    } catch (e) {
+      console.warn('Could not record device account:', e);
+    }
+  },
+
+  getDeviceAccounts() {
+    if (typeof localStorage === 'undefined') return [];
+    try {
+      const raw = localStorage.getItem('rol_device_google_accounts');
+      let list = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(list)) list = [];
+      
+      const curUser = state.currentUser || (localStorage.getItem('rol_current_user') ? JSON.parse(localStorage.getItem('rol_current_user')) : null);
+      if (curUser && curUser.email && !list.some(a => a.email.toLowerCase() === curUser.email.toLowerCase())) {
+        list.unshift({
+          email: curUser.email,
+          fullName: curUser.fullName || curUser.username || 'Saved Account',
+          photo: curUser.profilePhoto || null,
+          lastUsed: Date.now()
+        });
+      }
+      
+      if (list.length === 0) {
+        list = [
+          { email: 'gauravsalve236@gmail.com', fullName: 'Gaurav Salve', photo: null, color: '#1a73e8' },
+          { email: 'gauchi2323@gmail.com', fullName: 'Gauchi', photo: null, color: '#202124' },
+          { email: 'supermangee23@gmail.com', fullName: 'Gee', photo: null, color: '#e37400' },
+          { email: 'gauravsalve2012@gmail.com', fullName: 'Gaurav Salve', photo: null, color: '#1e8e3e' }
+        ];
+      }
+      return list;
+    } catch (e) {
+      return [
+        { email: 'gauravsalve236@gmail.com', fullName: 'Gaurav Salve', photo: null, color: '#1a73e8' },
+        { email: 'gauchi2323@gmail.com', fullName: 'Gauchi', photo: null, color: '#202124' },
+        { email: 'supermangee23@gmail.com', fullName: 'Gee', photo: null, color: '#e37400' },
+        { email: 'gauravsalve2012@gmail.com', fullName: 'Gaurav Salve', photo: null, color: '#1e8e3e' }
+      ];
+    }
+  },
+
+  async restoreSession() {
+    const token = this.getAccessToken();
+    if (!token) return null;
+    try {
+      const res = await fetch(`${ROL_API_BASE}/api/auth/me`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.user) {
+          state.currentUser = { ...data.user, token };
+          this.setAuthSession(token, localStorage.getItem('rol_refresh_token'), data.user);
+          updateAuthUI();
+          if (typeof renderYouProfile === 'function') renderYouProfile();
+          this.pullRemoteProgress();
+          this.pullRemoteBookmarks();
+          return data.user;
+        }
+      }
+    } catch (e) {
+      console.warn('[RolBackendSync] Session verification note:', e.message);
+    }
+    return state.currentUser;
+  },
+
+  async signup(email, password, fullName, preferredLanguage = 'mr') {
+    try {
+      const res = await fetch(`${ROL_API_BASE}/api/auth/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, fullName, preferredLanguage })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Signup failed');
+      this.setAuthSession(data.accessToken, data.refreshToken, data.user);
+      this.pullRemoteProgress();
+      this.pullRemoteBookmarks();
+      return data;
+    } catch (err) {
+      console.warn('[RolBackendSync] Signup error:', err.message);
+      throw err;
+    }
+  },
+
+  async login(email, password) {
+    try {
+      const res = await fetch(`${ROL_API_BASE}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Login failed');
+      this.setAuthSession(data.accessToken, data.refreshToken, data.user);
+      this.pullRemoteProgress();
+      this.pullRemoteBookmarks();
+      return data;
+    } catch (err) {
+      console.warn('[RolBackendSync] Login error:', err.message);
+      throw err;
+    }
+  },
+
+  async googleAuth(email, fullName, preferredLanguage = 'mr', role = 'Member') {
+    try {
+      const res = await fetch(`${ROL_API_BASE}/api/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, fullName, preferredLanguage, role })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Google authentication failed');
+      this.setAuthSession(data.accessToken, data.refreshToken, data.user);
+      this.pullRemoteProgress();
+      this.pullRemoteBookmarks();
+      return data;
+    } catch (err) {
+      console.warn('[RolBackendSync] Google auth error:', err.message);
+      throw err;
+    }
+  },
+
+  async syncReadingProgress(bookName, chapterNumber, progressPercentage = 100.0, lastVerse = 1) {
+    const token = this.getAccessToken();
+    if (!token) return;
+
+    try {
+      await fetch(`${ROL_API_BASE}/api/reading-progress`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          book_name: bookName,
+          chapter_number: chapterNumber,
+          progress_percentage: progressPercentage,
+          last_verse: lastVerse
+        })
+      });
+    } catch (err) {
+      console.warn('[RolBackendSync] Progress sync failed (saved locally):', err.message);
+    }
+  },
+
+  async syncBookmark(action, bookmarkData) {
+    const token = this.getAccessToken();
+    if (!token) return;
+
+    try {
+      if (action === 'create') {
+        const res = await fetch(`${ROL_API_BASE}/api/bookmarks`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            reference_text: bookmarkData.ref || bookmarkData.reference_text,
+            verse_tag: bookmarkData.tag || bookmarkData.verse_tag || 'General',
+            verse_text: bookmarkData.text || bookmarkData.verse_text || '',
+            book_name: bookmarkData.book || bookmarkData.book_name,
+            chapter_number: bookmarkData.chapter || bookmarkData.chapter_number,
+            verse_number: bookmarkData.verse || bookmarkData.verse_number
+          })
+        });
+        const data = await res.json();
+        if (data && data.bookmark && data.bookmark.id) {
+          bookmarkData.dbId = data.bookmark.id;
+        }
+      } else if (action === 'delete' && bookmarkData.dbId) {
+        await fetch(`${ROL_API_BASE}/api/bookmarks/${bookmarkData.dbId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+      }
+    } catch (err) {
+      console.warn('[RolBackendSync] Bookmark sync failed (kept locally):', err.message);
+    }
+  },
+
+  async pullRemoteProgress() {
+    const token = this.getAccessToken();
+    if (!token) return;
+    try {
+      const res = await fetch(`${ROL_API_BASE}/api/reading-progress`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.progress && Array.isArray(data.progress)) {
+          console.log('[RolBackendSync] Synced reading progress records:', data.progress.length);
+        }
+      }
+    } catch (e) {
+      console.warn('[RolBackendSync] Could not pull reading progress:', e.message);
+    }
+  },
+
+  async pullRemoteBookmarks() {
+    const token = this.getAccessToken();
+    if (!token) return;
+    try {
+      const res = await fetch(`${ROL_API_BASE}/api/bookmarks`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.bookmarks && Array.isArray(data.bookmarks)) {
+          data.bookmarks.forEach(rb => {
+            const exists = state.bookmarks.some(lb => lb.ref === rb.reference_text || lb.dbId === rb.id);
+            if (!exists) {
+              state.bookmarks.unshift({
+                dbId: rb.id,
+                ref: rb.reference_text,
+                text: rb.verse_text,
+                date: new Date(rb.created_at).toLocaleDateString(),
+                book: rb.book_name,
+                chapter: rb.chapter_number,
+                verse: rb.verse_number,
+                tag: rb.verse_tag
+              });
+            }
+          });
+          saveStateToLocalStorage();
+        }
+      }
+    } catch (e) {
+      console.warn('[RolBackendSync] Could not pull bookmarks:', e.message);
+    }
+  }
+};
+
+if (typeof window !== 'undefined') {
+  window.RolBackendSync = RolBackendSync;
 }
 
 // Update DOM elements layout, theme, and font sizing parameters from state
@@ -1018,7 +1357,7 @@ const I18N_DICTIONARY = {
     // Navigation & Header (English UI navigation & greetings as requested)
     "pull_refresh": "Pull to refresh",
     "tab_today": "Today",
-    "tab_community": "Community",
+    "tab_community": "Fellowship Hub",
     "greeting_morning": "Good morning",
     "greeting_afternoon": "Good afternoon",
     "greeting_evening": "Good evening",
@@ -1029,8 +1368,11 @@ const I18N_DICTIONARY = {
     // Bottom Navigation (English UI Tabs)
     "nav_home": "Home",
     "nav_bible": "Bible",
+    "nav_hymns": "Hymns",
+    "nav_settings": "Settings",
     "nav_meetings": "Meetings",
-    "nav_more": "More",
+    "nav_discover": "Search",
+    "nav_more": "Settings",
     
     // Verse of the Day (English Name / Header, Marathi Body inside)
     "vod_label": "VERSE OF THE DAY",
@@ -1059,7 +1401,7 @@ const I18N_DICTIONARY = {
     "commandments_title": "The 10 Commandments",
     "commandments_ref": "Exodus 20:1-17",
     "commandments_sub": "सीनाय पर्वतावर देवाने दिलेला शाश्वत नियम आणि येशूने सांगितलेला सारांश.",
-    "commandments_action": "Read & Listen to All 10 Commandments →",
+    "commandments_action": "सर्व १० आज्ञा वाचा →",
     
     // Ready-Made Prayers Grid Header & Live Fellowship
     "tag_prayer_sanctuary": "PRAYER SANCTUARY",
@@ -1131,7 +1473,7 @@ const I18N_DICTIONARY = {
     // Navigation & Header
     "pull_refresh": "Pull to refresh",
     "tab_today": "Today",
-    "tab_community": "Community",
+    "tab_community": "Fellowship Hub",
     "greeting_morning": "Good morning",
     "greeting_afternoon": "Good afternoon",
     "greeting_evening": "Good evening",
@@ -1142,8 +1484,11 @@ const I18N_DICTIONARY = {
     // Bottom Navigation
     "nav_home": "Home",
     "nav_bible": "Bible",
+    "nav_hymns": "Hymns",
+    "nav_settings": "Settings",
     "nav_meetings": "Meetings",
-    "nav_more": "More",
+    "nav_discover": "Search",
+    "nav_more": "Settings",
     
     // Verse of the Day
     "vod_label": "VERSE OF THE DAY",
@@ -1172,7 +1517,7 @@ const I18N_DICTIONARY = {
     "commandments_title": "The 10 Commandments",
     "commandments_ref": "Exodus 20:1-17",
     "commandments_sub": "God's timeless blueprint given at Mount Sinai and fulfilled in Christ.",
-    "commandments_action": "Read & Listen to All 10 Commandments →",
+    "commandments_action": "Read The 10 Commandments →",
     
     // Ready-Made Prayers Grid Header & Live Fellowship
     "tag_prayer_sanctuary": "PRAYER SANCTUARY",
@@ -1379,8 +1724,17 @@ function applyStylesFromState() {
    ========================================================================== */
 function switchTab(rawRoute) {
   if (!rawRoute) rawRoute = "home";
-  const route = rawRoute.replace("#/", "").split("?")[0].split("/")[0] || "home";
+  const route = String(rawRoute).replace(/^#\/?/, "").split("?")[0].split("/")[0] || "home";
+  console.log("[switchTab] Switching to route:", route, "from rawRoute:", rawRoute);
   
+  // Sync window.location.hash if not in sync
+  try {
+    const expectedHash = `#/${route}`;
+    if (window.location.hash !== expectedHash) {
+      history.replaceState(null, "", expectedHash);
+    }
+  } catch (e) {}
+
   // Hide all view panels
   document.querySelectorAll(".app-view").forEach(view => {
     view.classList.remove("active");
@@ -1405,21 +1759,46 @@ function switchTab(rawRoute) {
     
     // Highlight sidebar & bottom nav items
     document.querySelectorAll(`.nav-item[data-tab="${route}"]`).forEach(btn => btn.classList.add("active"));
-    document.querySelectorAll(`.tab-btn[data-tab="${route}"]`).forEach(btn => btn.classList.add("active"));
+    const activeBottomBtn = document.querySelector(`.tab-btn[data-tab="${route}"]`);
+    if (activeBottomBtn) {
+      activeBottomBtn.classList.add("active");
+    } else if (["grow", "hymns", "plans", "meetings", "discover"].includes(route)) {
+      const growBtn = document.querySelector('.tab-btn[data-tab="grow"]');
+      if (growBtn) growBtn.classList.add("active");
+      const growSidebar = document.querySelector('.nav-item[data-tab="grow"]');
+      if (growSidebar) growSidebar.classList.add("active");
+    } else if (["you", "admin"].includes(route)) {
+      const youBtn = document.querySelector('.tab-btn[data-tab="you"]');
+      if (youBtn) youBtn.classList.add("active");
+    }
     
     adjustHeaderForRoute(route);
     
     // Reload specific data lists on tab changes
-    if (route === "you") {
-      renderYouProfile();
-    } else if (route === "home") {
+    if (route === "home") {
       renderDailyDevotion();
+      if (typeof renderHomeAnnouncementBanner === "function") renderHomeAnnouncementBanner();
+    } else if (route === "grow") {
+      if (typeof renderGrowView === "function") renderGrowView();
+    } else if (route === "hymns") {
+      renderHymnsView();
+    } else if (route === "you") {
+      renderYouProfile();
     } else if (route === "plans") {
       renderReadingPlansTab();
     } else if (route === "prayers") {
       renderPrayersScreen();
     } else if (route === "meetings") {
       renderMeetingsDashboard();
+    } else if (route === "admin") {
+      if (typeof renderAdminPanel === "function") renderAdminPanel();
+    } else if (route === "reader") {
+      const versesCont = document.getElementById("reader-verses");
+      if (!versesCont || versesCont.children.length === 0 || versesCont.querySelector(".offline-error-card") || versesCont.querySelector(".loader-container")) {
+        const bk = state.activeBook || "genesis";
+        const ch = state.activeChapter || 1;
+        openReader(bk, ch);
+      }
     }
   } else {
     // Fallback to home view if route is unmapped
@@ -1431,6 +1810,8 @@ function switchTab(rawRoute) {
     }
   }
 }
+
+window.switchTab = switchTab;
 
 function initRouting() {
   const handleHashChange = () => {
@@ -1515,6 +1896,8 @@ function adjustHeaderForRoute(route) {
         staticTitle.textContent = state.translation === "eng" ? "Prayer Circle" : "प्रार्थना विनंत्या";
       } else if (route === "meetings") {
         staticTitle.textContent = state.translation === "eng" ? "Prayer Meetings" : "प्रार्थना सभा";
+      } else if (route === "admin") {
+        staticTitle.textContent = state.translation === "eng" ? "Admin Console" : "प्रशासकीय नियंत्रण";
       } else if (route === "you") {
         if (state.currentUser && state.currentUser.username) {
           staticTitle.textContent = state.currentUser.username;
@@ -1582,16 +1965,53 @@ async function fetchBookDataEng(bookKey) {
 }
 
 async function fetchBookDataMr(bookKey) {
-  if (booksCacheMr[bookKey]) return booksCacheMr[bookKey];
+  const cleanKey = String(bookKey || "genesis").toLowerCase().replace(".json", "").trim();
+  if (!cleanKey) return null;
+  if (booksCacheMr[cleanKey]) return booksCacheMr[cleanKey];
+
+  // Try 1: with cache-buster param
   try {
-    const response = await fetch(`assets/bible/books_mr/${bookKey}.json`);
-    const data = await response.json();
-    booksCacheMr[bookKey] = data;
-    return data;
+    const response = await fetch(`assets/bible/books_mr/${cleanKey}.json?v=132_MARVBSI`);
+    if (response.ok) {
+      const data = await response.json();
+      if (data && data.chapters) {
+        booksCacheMr[cleanKey] = data;
+        return data;
+      }
+    }
   } catch (e) {
-    console.error("Failed to load Marathi book:", e);
-    return null;
+    console.warn("[fetchBookDataMr] Param fetch failed, trying clean path:", cleanKey, e);
   }
+
+  // Try 2: clean path without query param
+  try {
+    const cleanResp = await fetch(`assets/bible/books_mr/${cleanKey}.json`);
+    if (cleanResp.ok) {
+      const data = await cleanResp.json();
+      if (data && data.chapters) {
+        booksCacheMr[cleanKey] = data;
+        return data;
+      }
+    }
+  } catch (e2) {
+    console.warn("[fetchBookDataMr] Clean path failed:", cleanKey, e2);
+  }
+
+  // Try 3: Service Worker cache match
+  try {
+    if (typeof caches !== "undefined") {
+      const cached = await caches.match(`assets/bible/books_mr/${cleanKey}.json`);
+      if (cached) {
+        const data = await cached.json();
+        if (data && data.chapters) {
+          booksCacheMr[cleanKey] = data;
+          return data;
+        }
+      }
+    }
+  } catch (e3) {}
+
+  return null;
 }
 
 // Streak Validation
@@ -1650,29 +2070,63 @@ function formatScriptureText(bookKey, chapterNum, verseNum, text, lang) {
    Bible Reader Engine (Verses & Navigation UI rendering)
    ========================================================================== */
 async function openReader(bookKey, chapterNum) {
-  let metadata = booksMetadataMr.find(b => b.filename.replace(".json", "") === bookKey);
+  if (!booksMetadataMr || booksMetadataMr.length === 0) {
+    try { await loadBooksIndexMr(); } catch(e) {}
+  }
+
+  const cleanBook = String(bookKey || state.activeBook || "genesis").toLowerCase().replace(".json", "").trim();
+  let metadata = (booksMetadataMr && booksMetadataMr.length)
+    ? booksMetadataMr.find(b => b.filename.replace(".json", "").toLowerCase() === cleanBook)
+    : null;
   if (!metadata) {
-    if (booksMetadataMr.length > 0) {
-      bookKey = booksMetadataMr[0].filename.replace(".json", "");
-      metadata = booksMetadataMr[0];
+    if (booksMetadataMr && booksMetadataMr.length > 0) {
+      metadata = booksMetadataMr.find(b => b.filename.replace(".json", "").toLowerCase() === "genesis") || booksMetadataMr[0];
+      bookKey = metadata.filename.replace(".json", "");
     } else {
-      return;
+      metadata = { name: "बायबल", engName: "Bible", chaptersCount: 50 };
+      bookKey = cleanBook;
     }
+  } else {
+    bookKey = cleanBook;
   }
   
-  let parsedChapter = parseInt(chapterNum);
+  let parsedChapter = parseInt(chapterNum, 10);
   if (isNaN(parsedChapter) || parsedChapter < 1) {
     parsedChapter = 1;
-  } else if (parsedChapter > metadata.chaptersCount) {
+  } else if (metadata.chaptersCount && parsedChapter > metadata.chaptersCount) {
     parsedChapter = metadata.chaptersCount;
   }
   
   state.activeBook = bookKey;
   state.activeChapter = parsedChapter;
   saveStateToLocalStorage();
-  
+  if (typeof RolBackendSync !== 'undefined' && RolBackendSync.syncReadingProgress) {
+    RolBackendSync.syncReadingProgress(bookKey, parsedChapter, 100.0, 1);
+  }
   chapterNum = parsedChapter;
+
+  // Immediately update UI titles so they never get stuck on default placeholders
+  const activeBookName = (state.translation === "eng") ? metadata.engName : metadata.name;
+  const navBookEl = document.getElementById("nav-book-title");
+  if (navBookEl) navBookEl.textContent = `${activeBookName} ${chapterNum}`;
+  const rChapTitleEl = document.getElementById("reader-chapter-title");
+  if (rChapTitleEl) rChapTitleEl.textContent = activeBookName;
+  const rChapNumEl = document.getElementById("reader-chapter-number");
+  if (rChapNumEl) rChapNumEl.textContent = `अध्याय ${chapterNum}`;
+  const inlineBookNameEl = document.getElementById("inline-reader-book-name");
+  if (inlineBookNameEl) inlineBookNameEl.textContent = `${activeBookName} ${chapterNum}`;
   
+  const inlineTransEl = document.getElementById("inline-reader-translation-name");
+  if (inlineTransEl) {
+    if (state.translation === "eng") inlineTransEl.textContent = "English (NLT)";
+    else if (state.translation === "parallel") inlineTransEl.textContent = "Parallel";
+    else inlineTransEl.textContent = "मराठी (BSI)";
+  }
+  const inlineVoiceSelect = document.getElementById("reader-inline-voice-select");
+  if (inlineVoiceSelect) {
+    inlineVoiceSelect.value = state.sarvamVoice || (state.translation === "eng" ? "ratan" : "shubh");
+  }
+
   const versesContainer = document.getElementById("reader-verses");
   versesContainer.innerHTML = `
     <div class="loader-container">
@@ -1689,6 +2143,12 @@ async function openReader(bookKey, chapterNum) {
   if (state.translation === "eng" || state.translation === "parallel") {
     bookDataEng = await fetchBookDataEng(bookKey);
   }
+
+  // Fallback retry if primary fetch was transiently empty
+  if (state.translation === "mar" && !bookDataMr) {
+    await new Promise(r => setTimeout(r, 200));
+    bookDataMr = await fetchBookDataMr(bookKey);
+  }
   
   // Verify that book data was successfully loaded to prevent runtime crash when offline
   if ((state.translation === "mar" && !bookDataMr) || 
@@ -1697,34 +2157,17 @@ async function openReader(bookKey, chapterNum) {
     versesContainer.innerHTML = `
       <div class="offline-error-card" style="text-align: center; padding: 40px 24px; background-color: var(--bg-content); border: 1px solid var(--border); border-radius: 16px; margin: 20px; font-family: var(--font-ui);">
         <span style="font-size: 32px; display: block; margin-bottom: 12px;">⚠️</span>
-        <h4 style="font-size: 16px; font-weight: 800; margin-bottom: 8px; color: var(--text);">Scripture Offline</h4>
+        <h4 style="font-size: 16px; font-weight: 800; margin-bottom: 8px; color: var(--text);">वचने लोड करण्यात अडचण (Scripture Offline)</h4>
         <p style="font-size: 13px; color: var(--text-muted); line-height: 1.6; margin-bottom: 20px;">
-          This book chapter is not cached on your device. Connect to the internet to load it, or go to Settings to download the complete Bible for offline use.
+          ${activeBookName} अध्याय ${chapterNum} चा मजकूर तात्पुरता लोड होऊ शकला नाही.
         </p>
-        <button onclick="window.location.hash='#/you'" class="btn-secondary-mini" style="padding: 8px 16px; font-weight: 700; font-size: 12px; border: 1px solid var(--border); border-radius: 8px; background-color: var(--bg-content); color: var(--text); cursor: pointer;">Go to Settings</button>
+        <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+          <button onclick="openReader('${bookKey}', ${chapterNum})" class="btn-primary-mini" style="padding: 10px 20px; font-weight: 700; font-size: 13px; border: none; border-radius: 8px; background: var(--primary, #e11d48); color: #fff; cursor: pointer;">पुन्हा प्रयत्न करा (Retry)</button>
+          <button onclick="window.location.hash='#/you'" class="btn-secondary-mini" style="padding: 10px 16px; font-weight: 700; font-size: 12px; border: 1px solid var(--border); border-radius: 8px; background-color: var(--bg-content); color: var(--text); cursor: pointer;">Go to Settings</button>
+        </div>
       </div>
     `;
     return;
-  }
-  
-  const activeBookName = (state.translation === "eng") ? metadata.engName : metadata.name;
-  document.getElementById("nav-book-title").textContent = `${activeBookName} ${chapterNum}`;
-  document.getElementById("reader-chapter-title").textContent = activeBookName;
-  
-  // Sync In-Page Bible Chapter Header
-  const inlineBookNameEl = document.getElementById("inline-reader-book-name");
-  if (inlineBookNameEl) {
-    inlineBookNameEl.textContent = `${activeBookName} ${chapterNum}`;
-  }
-  const inlineTransEl = document.getElementById("inline-reader-translation-name");
-  if (inlineTransEl) {
-    if (state.translation === "eng") inlineTransEl.textContent = "English (NLT)";
-    else if (state.translation === "parallel") inlineTransEl.textContent = "Parallel";
-    else inlineTransEl.textContent = "मराठी (BSI)";
-  }
-  const inlineVoiceSelect = document.getElementById("reader-inline-voice-select");
-  if (inlineVoiceSelect) {
-    inlineVoiceSelect.value = state.sarvamVoice || (state.translation === "eng" ? "ratan" : "shubh");
   }
   const inlineSpeedSelect = document.getElementById("reader-inline-speed-select");
   if (inlineSpeedSelect) {
@@ -2205,17 +2648,24 @@ function toggleBookmark() {
   const idx = state.bookmarks.findIndex(b => b.ref === selectedVerseMeta.ref);
   
   if (idx !== -1) {
-    state.bookmarks.splice(idx, 1);
+    const removed = state.bookmarks.splice(idx, 1)[0];
+    if (typeof RolBackendSync !== 'undefined' && RolBackendSync.syncBookmark) {
+      RolBackendSync.syncBookmark('delete', removed);
+    }
     showToast("Bookmark removed");
   } else {
-    state.bookmarks.unshift({
+    const newBm = {
       ref: selectedVerseMeta.ref,
       text: selectedVerseMeta.text,
       date: new Date().toLocaleDateString(),
       book: selectedVerseMeta.book,
       chapter: selectedVerseMeta.chapter,
       verse: selectedVerseMeta.verse
-    });
+    };
+    state.bookmarks.unshift(newBm);
+    if (typeof RolBackendSync !== 'undefined' && RolBackendSync.syncBookmark) {
+      RolBackendSync.syncBookmark('create', newBm);
+    }
     showToast("Bookmarked successfully");
   }
   saveStateToLocalStorage();
@@ -2246,6 +2696,21 @@ function getCurrentVOD() {
   const dayOfYear = Math.floor(diff / oneDay);
   
   const offset = state.vodDayOffset || 0;
+  if (offset === 0) {
+    try {
+      const customSaved = localStorage.getItem("rol_custom_vod");
+      if (customSaved) {
+        const customObj = JSON.parse(customSaved);
+        if (customObj && (customObj.text || customObj.engText)) {
+          return {
+            vod: customObj,
+            dayOfYear: dayOfYear,
+            offset: 0
+          };
+        }
+      }
+    } catch(e) {}
+  }
   const len = VOD_LIST.length;
   const vodIdx = ((dayOfYear + offset) % len + len) % len;
   return {
@@ -2255,7 +2720,71 @@ function getCurrentVOD() {
   };
 }
 
+window.toggleDailyVerseBookmark = function() {
+  const { vod } = (typeof getCurrentVOD === 'function') ? getCurrentVOD() : { vod: null };
+  if (!vod) return;
+  if (!state.bookmarks) state.bookmarks = [];
+  
+  const isBookmarked = state.bookmarks.some(b => b.ref === vod.ref || b.ref === vod.engRef);
+  
+  if (isBookmarked) {
+    state.bookmarks = state.bookmarks.filter(b => b.ref !== vod.ref && b.ref !== vod.engRef);
+    if (typeof showToast === 'function') showToast('वचन बुकमार्कवरून काढले • Bookmark removed');
+  } else {
+    state.bookmarks.unshift({
+      ref: vod.engRef || vod.ref,
+      mrRef: vod.ref,
+      text: vod.text,
+      engText: vod.engText,
+      date: new Date().toLocaleDateString(),
+      book: vod.book || 'john',
+      chapter: vod.chapter || 3,
+      verse: vod.verse || 16,
+      isVod: true
+    });
+    if (typeof showToast === 'function') showToast('वचन बुकमार्क केले • Saved to Bookmarks ⭐');
+  }
+  
+  if (typeof saveStateToLocalStorage === 'function') saveStateToLocalStorage();
+  if (typeof updateDailyVerseBookmarkUI === 'function') updateDailyVerseBookmarkUI();
+};
+
+window.updateDailyVerseBookmarkUI = function() {
+  const { vod } = (typeof getCurrentVOD === 'function') ? getCurrentVOD() : { vod: null };
+  if (!vod) return;
+  const isBookmarked = state.bookmarks && state.bookmarks.some(b => b.ref === vod.ref || b.ref === vod.engRef);
+  const btn = document.getElementById('home-vod-btn-bookmark');
+  const icon = document.getElementById('home-vod-bookmark-icon');
+  if (!btn) return;
+  
+  if (isBookmarked) {
+    btn.classList.add('active-bookmarked');
+    btn.setAttribute('title', 'Bookmarked / बुकमार्क केले आहे');
+    btn.setAttribute('aria-label', 'Remove Bookmark');
+    if (icon) {
+      icon.setAttribute('fill', '#f59e0b');
+      icon.setAttribute('stroke', '#f59e0b');
+    }
+  } else {
+    btn.classList.remove('active-bookmarked');
+    btn.setAttribute('title', 'Bookmark Verse / बुकमार्क करा');
+    btn.setAttribute('aria-label', 'Bookmark Verse');
+    if (icon) {
+      icon.setAttribute('fill', 'none');
+      icon.setAttribute('stroke', 'currentColor');
+    }
+  }
+  
+  const savedEl = document.getElementById('home-journey-saved');
+  if (savedEl) savedEl.textContent = state.bookmarks ? state.bookmarks.length : 0;
+};
+
 function renderDailyDevotion() {
+  if (typeof updateDaypartingAtmosphere === 'function') updateDaypartingAtmosphere();
+  if (typeof renderBiblicalMicroLearning === 'function') renderBiblicalMicroLearning();
+  if (typeof renderDailyFlowTrack === 'function') renderDailyFlowTrack();
+  if (typeof updateHomepageReadingPlanCard === 'function') updateHomepageReadingPlanCard();
+
   const now = new Date();
   const isEng = (state && state.translation === "eng");
   const options = { weekday: 'long', month: 'long', day: 'numeric' };
@@ -2281,8 +2810,12 @@ function renderDailyDevotion() {
   }
   
   const userEl = document.getElementById("home-greeting-user");
+  const userSubEl = document.getElementById("home-greeting-subtext");
   if (userEl) {
-    userEl.textContent = `${greetingTimeEn}, ${userName}`;
+    userEl.textContent = `${greetingTimeEn}, ${userName} 👋`;
+  }
+  if (userSubEl) {
+    userSubEl.textContent = isEng ? "Take a moment with God today." : "आज देवाच्या सान्निध्यात थोडा वेळ घालवा.";
   }
   
   const { vod, dayOfYear, offset } = getCurrentVOD();
@@ -2294,9 +2827,20 @@ function renderDailyDevotion() {
   if (homeVodRefEl) {
     homeVodRefEl.textContent = `${displayRef} ${isEng ? "NLT" : "MARVBSI"}`;
   }
+  const homeVodRefEnEl = document.getElementById("home-vod-ref-en");
+  const homeVodRefMrEl = document.getElementById("home-vod-ref-mr");
+  const homeVodVersionTag = document.getElementById("home-vod-version-tag");
+  if (homeVodRefEnEl) homeVodRefEnEl.textContent = vod.engRef || vod.ref || "John 3:16";
+  if (homeVodRefMrEl) homeVodRefMrEl.textContent = vod.ref || vod.engRef || "योहान ३:१६";
+  if (homeVodVersionTag) homeVodVersionTag.textContent = isEng ? "NLT" : "MARVBSI";
+
   const homeVodTextEl = document.getElementById("home-vod-text");
   if (homeVodTextEl) {
-    homeVodTextEl.textContent = `"${displayText}"`;
+    homeVodTextEl.textContent = `“${displayText}”`;
+  }
+
+  if (typeof updateDailyVerseBookmarkUI === "function") {
+    updateDailyVerseBookmarkUI();
   }
   
   const fsVodRefEl = document.getElementById("fs-vod-ref");
@@ -2305,9 +2849,9 @@ function renderDailyDevotion() {
   const fsVodTextEl = document.getElementById("fs-vod-text");
   if (fsVodTextEl) fsVodTextEl.textContent = `"${displayText}"`;
   
-  // Expanded Beautiful Rotating Background Wallpapers from assets/daily_verses/
+  // Expanded Luminous Rotating Scenic Wallpapers from assets/daily_verses/
   const images = (window.dailyVersesImageList && window.dailyVersesImageList.length > 0) ? window.dailyVersesImageList : [
-    'stars.png', 'forest.png', 'mist.png', 'mountains.png', 'mount_zion.png', 'ocean.png', 'path.png', 'sunrise.png'
+    'golden_dawn.png', 'sunrise.png', 'mountains.png', 'ocean.png', 'calm_waters.png', 'healing_light.png', 'river_of_life.png'
   ];
   const imgIdx = ((dayOfYear + offset) % images.length + images.length) % images.length;
   window.currentVodImageIndex = imgIdx;
@@ -2317,9 +2861,50 @@ function renderDailyDevotion() {
   const bgEl = document.getElementById("vod-dynamic-bg") || document.querySelector(".youversion-vod-bg") || document.querySelector(".daily-verse-card-bg");
   if (bgEl) bgEl.style.backgroundImage = `url('${imgUrl}')`;
 
+  const heroCard = document.getElementById("card-daily-verse-home");
+  if (heroCard) heroCard.style.backgroundImage = `url('${imgUrl}')`;
+
   const fsCapsule = document.querySelector(".fullscreen-vod-capsule");
   if (fsCapsule) fsCapsule.style.backgroundImage = `url('${imgUrl}')`;
   
+  // Continue Reading Card Data Sync
+  const contBookEl = document.getElementById("home-continue-book-chapter");
+  const contMrEl = document.getElementById("home-continue-marathi-name");
+  const contPercentEl = document.getElementById("home-continue-percent");
+  const contBarEl = document.getElementById("home-continue-progress-bar");
+  
+  const curBook = state.activeBook || "psalms";
+  const curCh = state.activeChapter || 23;
+  let bookMetaMr = (typeof booksMetadataMr !== "undefined") ? booksMetadataMr.find(b => b.filename.replace(".json", "") === curBook) : null;
+  let bookMetaEng = (typeof booksMetadataEng !== "undefined") ? booksMetadataEng.find(b => b.filename.replace(".json", "") === curBook) : null;
+  const engBookName = bookMetaEng?.name || (curBook.charAt(0).toUpperCase() + curBook.slice(1));
+  const mrBookName = bookMetaMr?.name || curBook;
+  const totalChs = bookMetaMr?.chaptersCount || bookMetaEng?.chaptersCount || 150;
+  const readPercent = Math.min(100, Math.max(8, Math.round((curCh / totalChs) * 100)));
+  
+  if (contBookEl) contBookEl.textContent = `${engBookName} ${curCh}`;
+  if (contMrEl) contMrEl.textContent = `${mrBookName} ${curCh}`;
+  if (contPercentEl) contPercentEl.textContent = isEng ? `Chapter ${curCh} of ${totalChs}` : `अध्याय ${curCh} / ${totalChs}`;
+  if (contBarEl) contBarEl.style.width = `${readPercent}%`;
+
+  // Today's Prayer Card Sync
+  const prayerTitleEl = document.getElementById("home-prayer-title");
+  const prayerExcerptEl = document.getElementById("home-prayer-excerpt");
+  if (prayerTitleEl) {
+    prayerTitleEl.textContent = isEng ? "Peace Over Anxiety" : "शांततेसाठी प्रार्थना • Peace Over Anxiety";
+  }
+  if (prayerExcerptEl) {
+    prayerExcerptEl.textContent = isEng ? '"The peace of God, which surpasses all understanding, will guard your hearts and minds in Christ Jesus."' : '"सर्व बुद्धीपलीकडची देवाची शांती तुमच्या हृदयाचे आणि मनाचे ख्रिस्त येशूमध्ये रक्षण करो."';
+  }
+
+  // Your Journey Stats Sync
+  const streakEl = document.getElementById("home-journey-streak");
+  const chaptersEl = document.getElementById("home-journey-chapters");
+  const savedEl = document.getElementById("home-journey-saved");
+  if (streakEl) streakEl.textContent = state.readingStreak || 7;
+  if (chaptersEl) chaptersEl.textContent = (state.readingHistory ? state.readingHistory.length : 0) || 14;
+  if (savedEl) savedEl.textContent = (state.bookmarks ? state.bookmarks.length : 0) || 5;
+
   // Heart count like sync
   const hasLiked = state.userLikes[vod.ref] || false;
   const heart = document.getElementById("fs-like-heart");
@@ -2378,6 +2963,583 @@ function renderDailyDevotion() {
   }
 }
 
+// Phase 1 Action Handlers & Routing Helpers
+function openVODReader() {
+  const { vod } = getCurrentVOD();
+  let book = vod.bookKey || "psalms";
+  let ch = vod.chapter || 23;
+  let verse = vod.verse || 1;
+  
+  const refStr = vod.engRef || vod.ref || "";
+  const match = refStr.match(/^([1-3]?\s*[A-Za-z]+)\s*(\d+)(?::(\d+))?/);
+  if (match) {
+    const rawBook = match[1].toLowerCase().replace(/\s+/g, "");
+    if (rawBook.includes("psalm")) book = "psalms";
+    else if (rawBook.includes("john")) book = "john";
+    else if (rawBook.includes("rom")) book = "romans";
+    else if (rawBook.includes("prov")) book = "proverbs";
+    else if (rawBook.includes("matt")) book = "matthew";
+    else if (rawBook.includes("gen")) book = "genesis";
+    else if (rawBook.includes("phil")) book = "philippians";
+    else if (rawBook.includes("heb")) book = "hebrews";
+    else if (rawBook.includes("isa")) book = "isaiah";
+    else if (rawBook.includes("jer")) book = "jeremiah";
+    
+    ch = parseInt(match[2], 10) || 1;
+    verse = match[3] ? parseInt(match[3], 10) : 1;
+  }
+  
+  openReaderAndNavigate(book, ch, verse);
+}
+
+
+// =========================================================================
+// GOOGLE CLOUD MARATHI TEXT-TO-SPEECH (mr-IN-Chirp3-HD-Algieba)
+// =========================================================================
+window.currentGoogleTtsAudio = null;
+window.currentTtsVerseKey = null;
+
+function stopGoogleTtsAudio() {
+  if (window.currentGoogleTtsAudio) {
+    try {
+      window.currentGoogleTtsAudio.pause();
+      window.currentGoogleTtsAudio.currentTime = 0;
+    } catch (e) {}
+    window.currentGoogleTtsAudio = null;
+  }
+  document.querySelectorAll(".tts-playing-verse, .tts-synthesizing-verse").forEach(el => {
+    el.classList.remove("tts-playing-verse", "tts-synthesizing-verse");
+  });
+  const btn = document.getElementById("btn-test-marathi-voice");
+  if (btn) {
+    btn.classList.remove("playing", "synthesizing");
+    btn.innerHTML = `<span class="tts-icon">🔊</span><span class="tts-label">Test Marathi Voice</span>`;
+  }
+}
+
+async function testMarathiVoiceAloud(specificVerseNum = null) {
+  const btn = document.getElementById("btn-test-marathi-voice");
+  
+  // If already playing, toggle stop
+  if (window.currentGoogleTtsAudio && !window.currentGoogleTtsAudio.paused) {
+    stopGoogleTtsAudio();
+    showToast("⏹ Audio playback stopped");
+    return;
+  }
+
+  // Determine active book & chapter
+  const bookKey = state.activeBook || "john";
+  const chapterNum = state.activeChapter || 1;
+  let bookName = "बायबल";
+  if (typeof booksMetadataMr !== 'undefined' && Array.isArray(booksMetadataMr)) {
+    const meta = booksMetadataMr.find(b => b.filename.replace(".json", "") === bookKey);
+    if (meta && meta.name) bookName = meta.name;
+  }
+
+  let targetVerseNum = specificVerseNum;
+  let rawVerseText = "";
+
+  if (!targetVerseNum && selectedVerseMeta && selectedVerseMeta.chapter === chapterNum && selectedVerseMeta.book === bookKey) {
+    targetVerseNum = selectedVerseMeta.verse;
+  }
+
+  // Always fetch Marathi book data to ensure Marathi pronunciation
+  let bookDataMr = null;
+  try {
+    bookDataMr = await fetchBookDataMr(bookKey);
+  } catch (e) {
+    console.warn("[TTS] Error fetching Marathi book data:", e);
+  }
+
+  const versesMrList = (bookDataMr && bookDataMr.chapters) ? bookDataMr.chapters[chapterNum - 1] : [];
+
+  if (!targetVerseNum) {
+    // If no verse selected, try first visible verse row in reader
+    const firstRow = document.querySelector("#reader-verses .verse-row");
+    if (firstRow) {
+      targetVerseNum = parseInt(firstRow.dataset.verse || 1, 10);
+    } else {
+      targetVerseNum = 1;
+    }
+  }
+
+  targetVerseNum = parseInt(targetVerseNum, 10) || 1;
+
+  if (versesMrList && versesMrList[targetVerseNum - 1]) {
+    rawVerseText = versesMrList[targetVerseNum - 1];
+  } else {
+    // Fallback from DOM element
+    const vEl = document.querySelector(`.verse-row[data-verse="${targetVerseNum}"]`);
+    if (vEl) {
+      rawVerseText = vEl.dataset.text || vEl.textContent || "";
+    }
+  }
+
+  // Strip verse numbers, HTML tags, or brackets
+  const cleanVerseText = rawVerseText
+    .replace(/^[\d\s.:]+/, '')
+    .replace(/<[^>]*>?/gm, '')
+    .trim();
+
+  if (!cleanVerseText) {
+    showToast("⚠️ Could not find Marathi text for verse " + targetVerseNum);
+    return;
+  }
+
+  const verseRef = `${bookName} ${chapterNum}:${targetVerseNum}`;
+  const verseKey = `${bookKey}_${chapterNum}_${targetVerseNum}`;
+
+  // Clear any existing playback and highlights
+  stopGoogleTtsAudio();
+
+  // Find DOM element for verse
+  const verseEl = document.querySelector(`.verse-row[data-verse-id="${verseKey}"]`) ||
+                  document.querySelector(`.verse-row[data-verse="${targetVerseNum}"]`);
+
+  if (verseEl) {
+    verseEl.classList.add("tts-synthesizing-verse");
+    verseEl.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+  if (btn) {
+    btn.classList.add("synthesizing");
+    btn.innerHTML = `<span class="tts-icon">⏳</span><span class="tts-label">Synthesizing...</span>`;
+  }
+
+  // toast hidden per user preference
+
+  try {
+    const apiBase = (window.location.port === '8090') ? '/api/v1' : 'http://localhost:8090/api/v1';
+    const response = await fetch(`${apiBase}/tts/synthesize`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json; charset=utf-8"
+      },
+      body: JSON.stringify({
+        text: cleanVerseText,
+        voice: "mr-IN-Chirp3-HD-Algieba",
+        languageCode: "mr-IN",
+        audioEncoding: "MP3"
+      })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      if (verseEl) verseEl.classList.remove("tts-synthesizing-verse");
+      if (btn) {
+        btn.classList.remove("synthesizing");
+        btn.innerHTML = `<span class="tts-icon">🔊</span><span class="tts-label">Test Marathi Voice</span>`;
+      }
+
+      if (result.code === "MISSING_API_KEY" || result.code === "PERMISSION_DENIED" || (result.error && result.error.includes("Text-to-Speech API"))) {
+        showTtsSetupModal(result);
+      } else {
+        showToast(`❌ TTS Error: ${result.error || "Synthesis failed"}`);
+      }
+      return;
+    }
+
+    // Convert base64 audioContent to Blob
+    const binaryString = window.atob(result.audioContent);
+    const len = binaryString.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    const blob = new Blob([bytes], { type: "audio/mpeg" });
+    const audioUrl = URL.createObjectURL(blob);
+
+    const audio = new Audio(audioUrl);
+    window.currentGoogleTtsAudio = audio;
+
+    if (verseEl) {
+      verseEl.classList.remove("tts-synthesizing-verse");
+      verseEl.classList.add("tts-playing-verse");
+    }
+
+    if (btn) {
+      btn.classList.remove("synthesizing");
+      btn.classList.add("playing");
+      btn.innerHTML = `<span class="tts-icon">⏹</span><span class="tts-label">Stop Voice</span>`;
+    }
+
+    audio.onended = () => {
+      stopGoogleTtsAudio();
+      URL.revokeObjectURL(audioUrl);
+      showToast(`✓ Completed reading: ${verseRef} (mr-IN-Chirp3-HD-Algieba)`);
+    };
+
+    audio.onerror = (e) => {
+      console.error("[TTS AUDIO ERROR]", e);
+      stopGoogleTtsAudio();
+      URL.revokeObjectURL(audioUrl);
+      showToast("❌ Audio playback error");
+    };
+
+    await audio.play();
+
+  } catch (err) {
+    console.error("[TTS FETCH ERROR]", err);
+    if (verseEl) verseEl.classList.remove("tts-synthesizing-verse");
+    if (btn) {
+      btn.classList.remove("synthesizing");
+      btn.innerHTML = `<span class="tts-icon">🔊</span><span class="tts-label">Test Marathi Voice</span>`;
+    }
+    showToast(`❌ Network/Server Error: ${err.message}`);
+  }
+}
+
+function testMarathiVoiceForSelectedVerse() {
+  closeAllDrawers();
+  const verseNum = selectedVerseMeta ? selectedVerseMeta.verse : null;
+  testMarathiVoiceAloud(verseNum);
+}
+
+function showTtsSetupModal(errData = {}) {
+  const existing = document.getElementById("tts-setup-modal-overlay");
+  if (existing) existing.remove();
+
+  const detailsStr = JSON.stringify(errData.details || []);
+  const isKeyBlocked = detailsStr.includes("API_KEY_SERVICE_BLOCKED") || (errData.error && errData.error.includes("method google.cloud.texttospeech"));
+  const isApiDisabled = !isKeyBlocked && (errData.code === "PERMISSION_DENIED" || (errData.error && errData.error.includes("Text-to-Speech API")));
+  let activationUrl = "https://console.developers.google.com/apis/api/texttospeech.googleapis.com/overview";
+  const credentialsUrl = "https://console.cloud.google.com/apis/credentials?project=29916119818";
+
+  if (errData.details && Array.isArray(errData.details)) {
+    for (const d of errData.details) {
+      if (d.metadata && d.metadata.activationUrl) {
+        activationUrl = d.metadata.activationUrl;
+        break;
+      }
+      if (d.links && Array.isArray(d.links) && d.links[0]?.url) {
+        activationUrl = d.links[0].url;
+        break;
+      }
+    }
+  }
+
+  const modalOverlay = document.createElement("div");
+  modalOverlay.id = "tts-setup-modal-overlay";
+  modalOverlay.className = "tts-modal-overlay";
+
+  modalOverlay.innerHTML = `
+    <div class="tts-modal-box">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(212, 175, 55, 0.18); border: 1.5px solid #d4af37; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+            ${isKeyBlocked ? '🔒' : (isApiDisabled ? '⚡' : '🎙️')}
+          </div>
+          <div>
+            <h3 style="margin: 0; font-size: 17px; font-weight: 800; color: #f8fafc;">
+              ${isKeyBlocked ? 'API Key Restriction' : (isApiDisabled ? 'Enable Text-to-Speech API' : 'Marathi Voice Configuration')}
+            </h3>
+            <span style="font-size: 11.5px; color: #d4af37; font-weight: 700;">Google Cloud: mr-IN-Chirp3-HD-Algieba</span>
+          </div>
+        </div>
+        <button onclick="document.getElementById('tts-setup-modal-overlay').remove()" style="background: none; border: none; color: #94a3b8; font-size: 24px; cursor: pointer; padding: 0 4px; line-height: 1;">&times;</button>
+      </div>
+
+      ${isKeyBlocked ? `
+        <p style="font-size: 13.5px; color: #cbd5e1; line-height: 1.55; margin: 0 0 16px 0;">
+          Your API key is active, but it currently has <strong>API restrictions</strong> that block the Text-to-Speech service.
+        </p>
+        <div style="background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 14px; padding: 16px; margin-bottom: 18px;">
+          <div style="font-size: 12px; font-weight: 800; color: #fbbf24; margin-bottom: 8px;">Quick Fix in Google Cloud Console</div>
+          <a href="${credentialsUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 8px; background: #d97706; color: #ffffff; text-decoration: none; padding: 10px 18px; border-radius: 10px; font-weight: 800; font-size: 13px; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.35); margin-bottom: 8px;">
+            <span>🔑 Open API Credentials in Google Cloud</span>
+            <span>&rarr;</span>
+          </a>
+          <ol style="margin: 8px 0 0 16px; padding: 0; font-size: 12px; color: #fde68a; line-height: 1.6;">
+            <li>Click on your API Key.</li>
+            <li>Under <strong>API restrictions</strong>, check <strong>Cloud Text-to-Speech API</strong> (or select <em>Don't restrict key</em>).</li>
+            <li>Click <strong>Save</strong>.</li>
+          </ol>
+        </div>
+      ` : isApiDisabled ? `
+        <p style="font-size: 13.5px; color: #cbd5e1; line-height: 1.55; margin: 0 0 16px 0;">
+          Great! Your Google Cloud API key is recognized. Now, please <strong>enable</strong> the Cloud Text-to-Speech API in your Google Cloud project so it can synthesize speech.
+        </p>
+        <div style="background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 14px; padding: 16px; margin-bottom: 18px;">
+          <div style="font-size: 12px; font-weight: 800; color: #fbbf24; margin-bottom: 8px;">Action Required: One-click Activation</div>
+          <a href="${activationUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 8px; background: #d97706; color: #ffffff; text-decoration: none; padding: 10px 18px; border-radius: 10px; font-weight: 800; font-size: 13px; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.35); margin-bottom: 8px;">
+            <span>🚀 Enable Text-to-Speech API in Google Cloud</span>
+            <span>&rarr;</span>
+          </a>
+          <p style="margin: 8px 0 0 0; font-size: 11.5px; color: #fde68a; line-height: 1.4;">
+            Click the link above, press <strong>[ ENABLE ]</strong> on the Google Cloud page, then wait ~30 seconds and tap <strong>Test Marathi Voice</strong> again.
+          </p>
+        </div>
+      ` : `
+        <p style="font-size: 13.5px; color: #cbd5e1; line-height: 1.55; margin: 0 0 16px 0;">
+          To test the natural <strong>mr-IN-Chirp3-HD-Algieba</strong> Marathi voice, configure your Google Cloud Text-to-Speech API key on the backend server.
+        </p>
+
+        <div style="background: #1e293b; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 12px; padding: 14px; margin-bottom: 16px;">
+          <div style="font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">Setup Step 1: Add key to backend/.env</div>
+          <div style="background: #090d16; border-radius: 8px; padding: 10px 12px; font-family: monospace; font-size: 12.5px; color: #38bdf8; word-break: break-all; user-select: all; border: 1px solid rgba(56, 189, 248, 0.2);">
+            GOOGLE_TTS_API_KEY=AIzaSyYourApiKeyHere
+          </div>
+          <div style="font-size: 11.5px; color: #94a3b8; margin-top: 8px; line-height: 1.4;">
+            Paste your Google Cloud API key into <code style="color:#d4af37;">backend/.env</code> or set it in your system environment.
+          </div>
+        </div>
+      `}
+
+      <div id="tts-status-card" style="background: ${(isKeyBlocked || isApiDisabled) ? 'rgba(56, 189, 248, 0.1)' : 'rgba(239, 68, 68, 0.1)'}; border: 1px solid ${(isKeyBlocked || isApiDisabled) ? 'rgba(56, 189, 248, 0.3)' : 'rgba(239, 68, 68, 0.3)'}; border-radius: 12px; padding: 12px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 16px;">${(isKeyBlocked || isApiDisabled) ? '🔑' : '⚠️'}</span>
+          <span id="tts-status-text" style="font-size: 12.5px; font-weight: 700; color: ${(isKeyBlocked || isApiDisabled) ? '#7dd3fc' : '#fca5a5'};">
+            ${isKeyBlocked ? 'Key Loaded • TTS Service Restricted' : (isApiDisabled ? 'API Key Loaded • Awaiting API Enablement' : 'Server Status: API Key Unset')}
+          </span>
+        </div>
+        <button id="btn-check-tts-status" onclick="checkTtsServerStatus()" style="background: #1e293b; border: 1px solid #d4af37; color: #d4af37; font-size: 11.5px; font-weight: 800; border-radius: 8px; padding: 5px 10px; cursor: pointer;">Check Status</button>
+      </div>
+
+      <div style="display: flex; gap: 10px; justify-content: flex-end;">
+        <button onclick="document.getElementById('tts-setup-modal-overlay').remove()" style="background: #1e293b; border: 1px solid rgba(255, 255, 255, 0.15); color: #e2e8f0; font-size: 13px; font-weight: 700; padding: 9px 18px; border-radius: 10px; cursor: pointer;">Close</button>
+      </div>
+    </div>
+  `;
+
+
+  document.body.appendChild(modalOverlay);
+}
+
+
+async function checkTtsServerStatus() {
+  const statusText = document.getElementById("tts-status-text");
+  const checkBtn = document.getElementById("btn-check-tts-status");
+  if (checkBtn) checkBtn.textContent = "Checking...";
+
+  try {
+    const apiBase = (window.location.port === '8090') ? '/api/v1' : 'http://localhost:8090/api/v1';
+    const res = await fetch(`${apiBase}/tts/status`);
+    const data = await res.json();
+    if (data.configured) {
+      if (statusText) {
+        statusText.style.color = "#86efac";
+        statusText.textContent = "✓ Server Status: Configured & Ready";
+      }
+      const card = document.getElementById("tts-status-card");
+      if (card) {
+        card.style.background = "rgba(34, 197, 94, 0.15)";
+        card.style.borderColor = "rgba(34, 197, 94, 0.4)";
+      }
+      showToast("✓ Google Cloud TTS is configured and ready!");
+    } else {
+      if (statusText) {
+        statusText.style.color = "#fca5a5";
+        statusText.textContent = "⚠️ Server Status: API Key Missing";
+      }
+      showToast("API Key is not configured yet in backend/.env");
+    }
+  } catch (e) {
+    if (statusText) {
+      statusText.style.color = "#fca5a5";
+      statusText.textContent = "❌ Cannot connect to backend server";
+    }
+  } finally {
+    if (checkBtn) checkBtn.textContent = "Check Status";
+  }
+}
+
+function playDailyVerseAudio() { console.log("playDailyVerseAudio disabled per user configuration - Bible reading audio only"); return;
+  const { vod } = getCurrentVOD();
+  const isEng = (state && state.translation === "eng");
+  const text = isEng ? (vod.engText || vod.text) : (vod.text || vod.engText);
+  if (!text) return;
+  
+  if (typeof speakMarathiText === 'function') {
+    speakMarathiText(text);
+    showToast("🔊 Playing Verse of the Day Audio...");
+  } else if (typeof playVerseAudio === 'function') {
+    playVerseAudio(text);
+  } else if (window.speechSynthesis) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = isEng ? 'en-US' : 'mr-IN';
+    utterance.rate = 0.92;
+    window.speechSynthesis.speak(utterance);
+    showToast("🔊 Playing Verse of the Day Audio...");
+  }
+}
+
+function continueLastReadChapter() {
+  const book = state.activeBook || "psalms";
+  const ch = state.activeChapter || 23;
+  openReaderAndNavigate(book, ch, 1);
+}
+
+function renderGrowView() {
+  console.log("[GrowView] Rendered Grow in Faith Hub");
+}
+
+function openDailyQuizModal() {
+  openModal('modal-bible-quiz');
+}
+
+function openBibleStoriesModal() {
+  openModal('modal-family-stories');
+}
+
+function openStudyToolsModal() {
+  switchTab('discover');
+}
+
+// First-Launch Onboarding Flow Management
+function checkAndTriggerFirstLaunchOnboarding() {
+  const onboarded = localStorage.getItem("rol_onboarded_v1");
+  if (!onboarded) {
+    const modal = document.getElementById("modal-onboarding-flow");
+    if (modal) {
+      modal.style.display = "flex";
+    }
+  }
+}
+
+function nextOnboardingStep(stepNum) {
+  document.querySelectorAll(".rol-onboarding-screen").forEach(s => s.classList.remove("active"));
+  const target = document.getElementById(`onboarding-screen-${stepNum}`);
+  if (target) target.classList.add("active");
+}
+
+function selectOnboardingLanguage(lang) {
+  document.querySelectorAll(".rol-onboarding-lang-pill, .rol-onboarding-lang-card").forEach(c => c.classList.remove("active"));
+  const card = document.getElementById(`onboarding-lang-${lang}`);
+  if (card) card.classList.add("active");
+  
+  if (lang === "mr") {
+    state.language = "mr";
+    state.translation = "marathi";
+  } else {
+    state.language = "en";
+    state.translation = "eng";
+  }
+  if (typeof applyAppLanguage === "function") {
+    applyAppLanguage(lang);
+  }
+}
+
+function toggleOnboardingFocus(chipEl, topicId) {
+  if (chipEl) {
+    chipEl.classList.toggle("active");
+  }
+}
+
+async function requestOnboardingMediaPermissions() {
+  const btn = document.getElementById("btn-onboarding-allow-media");
+  const btnLabel = document.getElementById("btn-onboarding-allow-label");
+  const statusAudio = document.getElementById("perm-status-audio");
+  const statusVideo = document.getElementById("perm-status-video");
+
+  if (btnLabel) btnLabel.textContent = "Checking Access...";
+  if (btn) btn.disabled = true;
+
+  const withTimeout = (p, ms = 1800) => {
+    return Promise.race([
+      p,
+      new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), ms))
+    ]);
+  };
+
+  try {
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      let granted = false;
+      try {
+        // Attempt joint audio + video prompt first
+        const stream = await withTimeout(navigator.mediaDevices.getUserMedia({ audio: true, video: true }), 1800);
+        if (stream) {
+          granted = true;
+          if (statusAudio) {
+            statusAudio.textContent = "✓ Enabled";
+            statusAudio.classList.add("granted");
+          }
+          if (statusVideo) {
+            statusVideo.textContent = "✓ Enabled";
+            statusVideo.classList.add("granted");
+          }
+          if (stream.getTracks) stream.getTracks().forEach(t => t.stop());
+          localStorage.setItem("rol_media_permissions", "granted");
+          showToast("🎙️ Live fellowship devices configured successfully!");
+        }
+      } catch (jointErr) {
+        // Fallback: try audio only
+        try {
+          const audioStream = await withTimeout(navigator.mediaDevices.getUserMedia({ audio: true }), 1200);
+          if (audioStream) {
+            granted = true;
+            if (statusAudio) {
+              statusAudio.textContent = "✓ Enabled";
+              statusAudio.classList.add("granted");
+            }
+            if (statusVideo) {
+              statusVideo.textContent = "Optional";
+            }
+            if (audioStream.getTracks) audioStream.getTracks().forEach(t => t.stop());
+            localStorage.setItem("rol_media_permissions", "granted");
+            showToast("🎙️ Microphone configured! (Camera optional)");
+          }
+        } catch (audioErr) {
+          console.warn("Audio fallback declined or unavailable:", audioErr);
+        }
+      }
+
+      if (!granted) {
+        localStorage.setItem("rol_media_permissions", "listen_only");
+        showToast("🎧 Setup complete! You can join live meetings in listen mode.");
+      }
+    } else {
+      localStorage.setItem("rol_media_permissions", "unsupported");
+    }
+  } catch (e) {
+    console.warn("Media permissions prompt error:", e);
+    localStorage.setItem("rol_media_permissions", "listen_only");
+  }
+
+  if (btnLabel) btnLabel.textContent = "✨ Entering Sanctuary...";
+  setTimeout(() => {
+    finishOnboardingFlow();
+  }, 400);
+}
+
+function skipOnboardingMediaPermissions() {
+  localStorage.setItem("rol_media_permissions", "skipped");
+  showToast("🎧 You can still join all live prayer meetings in listen mode anytime!");
+  finishOnboardingFlow();
+}
+
+function finishOnboardingFlow() {
+  localStorage.setItem("rol_onboarded_v1", "true");
+  localStorage.setItem("river_of_life_notifications_choice", "dismissed");
+  const modal = document.getElementById("modal-onboarding-flow");
+  if (modal) {
+    modal.style.display = "none";
+  }
+  const notiModal = document.getElementById("modal-notification-prompt");
+  if (notiModal) {
+    notiModal.classList.remove("active");
+  }
+  switchTab("home");
+  showToast("✨ Welcome to River of Life! Have a blessed time with God.");
+}
+
+window.requestOnboardingMediaPermissions = requestOnboardingMediaPermissions;
+window.skipOnboardingMediaPermissions = skipOnboardingMediaPermissions;
+
+// Expose Phase 1 Globals
+window.openVODReader = openVODReader;
+window.playDailyVerseAudio = playDailyVerseAudio;
+window.continueLastReadChapter = continueLastReadChapter;
+window.renderGrowView = renderGrowView;
+window.openDailyQuizModal = openDailyQuizModal;
+window.openBibleStoriesModal = openBibleStoriesModal;
+window.openStudyToolsModal = openStudyToolsModal;
+window.checkAndTriggerFirstLaunchOnboarding = checkAndTriggerFirstLaunchOnboarding;
+window.nextOnboardingStep = nextOnboardingStep;
+window.selectOnboardingLanguage = selectOnboardingLanguage;
+window.toggleOnboardingFocus = toggleOnboardingFocus;
+window.finishOnboardingFlow = finishOnboardingFlow;
+
 function toggleLikeVOD() {
   const { vod } = getCurrentVOD();
   const hasLiked = state.userLikes[vod.ref] || false;
@@ -2432,14 +3594,96 @@ window.switchHomeTab = function(tab) {
     if (btnToday) btnToday.classList.remove("active");
     if (btnComm) btnComm.classList.add("active");
     if (feedToday) feedToday.style.display = "none";
-    if (feedComm) feedComm.style.display = "block";
-    switchTab("meetings");
+    if (feedComm) feedComm.style.display = "flex";
+    
+    const scrollEl = document.getElementById("home-view-scroll-content") || document.querySelector("#view-home .screen-content");
+    if (scrollEl) scrollEl.scrollTop = 0;
   } else {
     if (btnComm) btnComm.classList.remove("active");
     if (btnToday) btnToday.classList.add("active");
     if (feedComm) feedComm.style.display = "none";
     if (feedToday) feedToday.style.display = "block";
+    
+    const scrollEl = document.getElementById("home-view-scroll-content") || document.querySelector("#view-home .screen-content");
+    if (scrollEl) scrollEl.scrollTop = 0;
   }
+};
+
+window.filterFellowshipHub = function(category, btn) {
+  const allChips = document.querySelectorAll(".fellowship-category-chip");
+  allChips.forEach(chip => chip.classList.remove("active"));
+  if (btn) btn.classList.add("active");
+
+  const items = document.querySelectorAll("#home-feed-community-container .fellowship-item");
+  items.forEach(item => {
+    if (category === "all" || item.getAttribute("data-category") === category) {
+      item.style.display = "block";
+    } else {
+      item.style.display = "none";
+    }
+  });
+};
+
+window.prayAmen = function(btn, countId) {
+  if (!btn) return;
+  const countSpan = document.getElementById(countId);
+  const currentCount = parseInt(countSpan ? countSpan.textContent : "0") || 0;
+  
+  if (!btn.classList.contains("prayed")) {
+    btn.classList.add("prayed");
+    if (countSpan) countSpan.textContent = currentCount + 1;
+    showToast("🙏 प्रार्थना आमेन! तुम्ही या प्रार्थनेत सहभागी झाला आहात. (Standing in faith!)");
+  } else {
+    btn.classList.remove("prayed");
+    if (countSpan && currentCount > 0) countSpan.textContent = currentCount - 1;
+  }
+};
+
+window.submitFellowshipDiscussion = function() {
+  const input = document.getElementById("fellowship-discussion-input");
+  if (!input || !input.value.trim()) {
+    showToast("कृपया तुमचे विचार किंवा साक्ष लिहा (Please enter reflection)");
+    return;
+  }
+  const text = input.value.trim();
+  const stream = document.getElementById("fellowship-comments-stream");
+  if (stream) {
+    const commentCard = document.createElement("div");
+    commentCard.style.cssText = "background: var(--pill-bg, #FAFAF8); border-radius: 12px; padding: 10px 12px; animation: fadeInFellowship 0.3s ease;";
+    commentCard.innerHTML = `
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+        <strong style="font-size: 12.5px; color: var(--text);">Gaurav S. (You)</strong>
+        <span style="font-size: 11px; color: var(--steel-muted, #A3A6AE);">Just now</span>
+      </div>
+      <p style="font-size: 12.5px; color: var(--text-muted); margin: 0; line-height: 1.45;">${text}</p>
+    `;
+    stream.prepend(commentCard);
+    input.value = "";
+    showToast("✨ तुमचे विचार मंडळीसोबत शेअर करण्यात आले आहेत! (Posted to Church Community)");
+  }
+};
+
+window.openSubmitPrayerModal = function() {
+  openDrawer("drawer-submit-prayer");
+};
+
+window.submitPrayerRequest = function() {
+  const nameInput = document.getElementById("prayer-req-name");
+  const catSelect = document.getElementById("prayer-req-category");
+  const detailInput = document.getElementById("prayer-req-details");
+
+  const name = nameInput?.value.trim() || "Gaurav S.";
+  const cat = catSelect?.value || "Spiritual Growth";
+  const details = detailInput?.value.trim();
+
+  if (!details) {
+    showToast("कृपया प्रार्थनेचा विषय लिहा (Please enter prayer details)");
+    return;
+  }
+
+  closeDrawer("drawer-submit-prayer");
+  if (detailInput) detailInput.value = "";
+  showToast("🙏 तुमची प्रार्थना विनंती प्रार्थना भिंतीवर जोडली गेली आहे! (Prayer submitted)");
 };
 
 window.readVODChapter = function() {
@@ -2478,301 +3722,903 @@ function fallbackToDirectPlay(mp3Url) {
 }
 
 /* ==========================================================================
-   Sarvam AI Bulbul V3 Indian Voice Narrator (TTS)
+   AUTHENTIC MALE MARATHI AUDIO BIBLE ENGINE (ALL 66 BOOKS - OT & NT)
    ========================================================================== */
-function startSpeechNarration() {
-  closeModal("modal-audio-settings");
+
+const BIBLE_BOOK_TO_NUM = {
+  // Old Testament (1 - 39)
+  "genesis": 1, "gen": 1, "उत्पत्ती": 1,
+  "exodus": 2, "exo": 2, "निर्गम": 2,
+  "leviticus": 3, "lev": 3, "लेवीय": 3,
+  "numbers": 4, "num": 4, "गणना": 4,
+  "deuteronomy": 5, "deu": 5, "अनुवाद": 5,
+  "joshua": 6, "jos": 6, "यहोशवा": 6,
+  "judges": 7, "jdg": 7, "शास्ते": 7,
+  "ruth": 8, "rut": 8, "रूथ": 8,
+  "1samuel": 9, "1sa": 9, "१ शमुवेल": 9, "1 samuel": 9, "1_samuel": 9,
+  "2samuel": 10, "2sa": 10, "२ शमुवेल": 10, "2 samuel": 10, "2_samuel": 10,
+  "1kings": 11, "1ki": 11, "१ राजे": 11, "1 kings": 11, "1_kings": 11,
+  "2kings": 12, "2ki": 12, "२ राजे": 12, "2 kings": 12, "2_kings": 12,
+  "1chronicles": 13, "1ch": 13, "१ इतिहास": 13, "1 chronicles": 13, "1_chronicles": 13,
+  "2chronicles": 14, "2ch": 14, "२ इतिहास": 14, "2 chronicles": 14, "2_chronicles": 14,
+  "ezra": 15, "ezr": 15, "एज्रा": 15,
+  "nehemiah": 16, "neh": 16, "नहेम्या": 16,
+  "esther": 17, "est": 17, "एस्तेर": 17,
+  "job": 18, "job": 18, "ईयोब": 18,
+  "psalms": 19, "psalm": 19, "psa": 19, "स्तोत्रसंहिता": 19, "स्तोत्र": 19,
+  "proverbs": 20, "proverb": 20, "pro": 20, "नीतिसूत्रे": 20,
+  "ecclesiastes": 21, "ecc": 21, "उपदेशक": 21,
+  "songofsolomon": 22, "sng": 22, "गीतरत्न": 22, "गीत": 22, "song of solomon": 22,
+  "isaiah": 23, "isa": 23, "यशया": 23,
+  "jeremiah": 24, "jer": 24, "यिर्मया": 24,
+  "lamentations": 25, "lam": 25, "विलापगीत": 25,
+  "ezekiel": 26, "ezk": 26, "यहेज्केल": 26,
+  "daniel": 27, "dan": 27, "दानिएल": 27,
+  "hosea": 28, "hos": 28, "होशेय": 28,
+  "joel": 29, "jol": 29, "योएल": 29,
+  "amos": 30, "amo": 30, "आमोस": 30,
+  "obadiah": 31, "oba": 31, "ओबद्या": 31,
+  "jonah": 32, "jon": 32, "योना": 32,
+  "micah": 33, "mic": 33, "मीखा": 33,
+  "nahum": 34, "nam": 34, "नहूम": 34,
+  "habakkuk": 35, "hab": 35, "हबक्कूक": 35,
+  "zephaniah": 36, "zep": 36, "सफन्या": 36,
+  "haggai": 37, "hag": 37, "हाग्गय": 37,
+  "zechariah": 38, "zec": 38, "जखऱ्या": 38, "जखऱ्या": 38,
+  "malachi": 39, "mal": 39, "मलाखी": 39,
+
+  // New Testament (40 - 66)
+  "matthew": 40, "mat": 40, "मत्तय": 40,
+  "mark": 41, "mrk": 41, "मार्क": 41,
+  "luke": 42, "luk": 42, "लूक": 42,
+  "john": 43, "jhn": 43, "योहान": 43,
+  "acts": 44, "act": 44, "प्रेषितांची कृत्ये": 44, "कृत्ये": 44,
+  "romans": 45, "rom": 45, "रोमकरांस": 45,
+  "1corinthians": 46, "1co": 46, "१ करिंथकरांस": 46, "1 corinthians": 46, "1_corinthians": 46,
+  "2corinthians": 47, "2co": 47, "२ करिंथकरांस": 47, "2 corinthians": 47, "2_corinthians": 47,
+  "galatians": 48, "gal": 48, "गलतीकरांस": 48,
+  "ephesians": 49, "eph": 49, "इफिसकरांस": 49,
+  "philippians": 50, "php": 50, "फिलिप्पीकरांस": 50,
+  "colossians": 51, "col": 51, "कलस्सैकरांस": 51, "कलस्सै": 51,
+  "1thessalonians": 52, "1th": 52, "१ थेस्सलनीकाकरांस": 52, "1 thessalonians": 52, "1_thessalonians": 52,
+  "2thessalonians": 53, "2th": 53, "२ थेस्सलनीकाकरांस": 53, "2 thessalonians": 53, "2_thessalonians": 53,
+  "1timothy": 54, "1ti": 54, "१ तीमथ्याला": 54, "1 timothy": 54, "1_timothy": 54,
+  "2timothy": 55, "2ti": 55, "२ तीमथ्याला": 55, "2 timothy": 55, "2_timothy": 55,
+  "titus": 56, "tit": 56, "तीताला": 56, "तीत": 56,
+  "philemon": 57, "phm": 57, "फिलेमोनाला": 57,
+  "hebrews": 58, "heb": 58, "इब्री लोकांस": 58, "इब्री": 58,
+  "james": 59, "jas": 59, "याकोब": 59,
+  "1peter": 60, "1pe": 60, "१ पेत्र": 60, "1 peter": 60, "1_peter": 60,
+  "2peter": 61, "2pe": 61, "२ पेत्र": 61, "2 peter": 61, "2_peter": 61,
+  "1john": 62, "1jn": 62, "१ योहान": 62, "1 john": 62, "1_john": 62,
+  "2john": 63, "2jn": 63, "२ योहान": 63, "2 john": 63, "2_john": 63,
+  "3john": 64, "3jn": 64, "३ योहान": 64, "3 john": 64, "3_john": 64,
+  "jude": 65, "jud": 65, "यहुदा": 65,
+  "revelation": 66, "rev": 66, "प्रकटीकरण": 66
+};
+
+function resolveBibleBookNumber(bookKeyOrName) {
+  if (!bookKeyOrName) return 1;
+  const clean = String(bookKeyOrName).toLowerCase().replace(".json", "").replace(/[\s_-]+/g, "").trim();
   
+  if (typeof booksMetadataMr !== 'undefined' && Array.isArray(booksMetadataMr) && booksMetadataMr.length > 0) {
+    const found = booksMetadataMr.find(b => 
+      String(b.id) === clean ||
+      b.filename.replace(".json", "").toLowerCase() === clean ||
+      b.engName.toLowerCase().replace(/[\s_-]+/g, "") === clean ||
+      b.name === bookKeyOrName ||
+      b.name.replace(/[\s_-]+/g, "") === clean
+    );
+    if (found && found.id) return parseInt(found.id, 10);
+  }
+  
+  if (BIBLE_BOOK_TO_NUM[clean]) {
+    return BIBLE_BOOK_TO_NUM[clean];
+  }
+  
+  return 1;
+}
+
+function getBibleAudioUrl(bookNumber, chapterNumber, translation) {
+  let langCode = "28"; // Marathi (मराठी पवित्र शास्त्र - Authentic Recorded Male Voice)
+  if (translation === "eng") langCode = "1";
+  else if (translation === "hi") langCode = "24";
+  return `https://audio.wordproject.org/bibles/app/audio/${langCode}/${bookNumber}/${chapterNumber}.mp3`;
+}
+
+const BSI_USFM_MAP = {
+  "genesis": "GEN", "exodus": "EXO", "leviticus": "LEV", "numbers": "NUM",
+  "deuteronomy": "DEU", "joshua": "JOS", "judges": "JDG", "ruth": "RUT",
+  "1samuel": "1SA", "2samuel": "2SA", "1kings": "1KI", "2kings": "2KI",
+  "1chronicles": "1CH", "2chronicles": "2CH", "ezra": "EZR", "nehemiah": "NEH",
+  "esther": "EST", "job": "JOB", "psalms": "PSA", "proverbs": "PRO",
+  "ecclesiastes": "ECC", "songofsolomon": "SNG", "isaiah": "ISA", "jeremiah": "JER",
+  "lamentations": "LAM", "ezekiel": "EZK", "daniel": "DAN", "hosea": "HOS",
+  "joel": "JOL", "amos": "AMO", "obadiah": "OBA", "jonah": "JON",
+  "micah": "MIC", "nahum": "NAM", "habakkuk": "HAB", "zephaniah": "ZEP",
+  "haggai": "HAG", "zechariah": "ZEC", "malachi": "MAL", "matthew": "MAT",
+  "mark": "MRK", "luke": "LUK", "john": "JHN", "acts": "ACT",
+  "romans": "ROM", "1corinthians": "1CO", "2corinthians": "2CO", "galatians": "GAL",
+  "ephesians": "EPH", "philippians": "PHP", "colossians": "COL", "1thessalonians": "1TH",
+  "2thessalonians": "2TH", "1timothy": "1TI", "2timothy": "2TI", "titus": "TIT",
+  "philemon": "PHM", "hebrews": "HEB", "james": "JAS", "1peter": "1PE",
+  "2peter": "2PE", "1john": "1JN", "2john": "2JN", "3john": "3JN",
+  "jude": "JUD", "revelation": "REV"
+};
+
+let bsiCloudFrontToken = 'Key-Pair-Id=KCC7HS8KPVISV&Signature=Q5w6n2eM6TbJCR74XQdNI~BVewvN8jj4oiquhNfzBL3GwQkg6mPhSeMvy5fSfK8CAopRXh-1ckeW1iKnGgVzrVku9RdN7eXb0DSfuRplZOcQNs3zkufJh6vsu2nfRn9yBAAmFz0O23jbT~7ISNFjkcX6BqzYkVF6tn6LfPMo-c7pLvKSAw-iZtdnmV75dCOm2WOqdkSK3QHGJQFgtHpsVSl5nfL~Q9-PC5tUtSxjUhRrloi-jhfG87UYmUJZG4oF2XNgBYafVNGqhbey~iiT827C4-s6lGxw~5yretHBambtI7xTtckHuacvzx8Z4aKwX2zUuLtfuni3UoD2-L1Ozw__&Expires=1789041260&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9kMWhrcHV6Mm81YTJ4dy5jbG91ZGZyb250Lm5ldC9zb3VyY2UvNTU1NDc2YzIzOTBjMTAyZC0wNC8qIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzg5MDQxMjYwfX19XX0_';
+
+async function getBsiCloudFrontToken() {
+  if (bsiCloudFrontToken) {
+    const m = bsiCloudFrontToken.match(/Expires=(\d+)/);
+    if (m) {
+      const exp = parseInt(m[1], 10);
+      const now = Math.floor(Date.now() / 1000);
+      if (now < (exp - 120)) {
+        return bsiCloudFrontToken;
+      }
+    }
+  }
+  try {
+    const res = await fetch(`assets/bsi_token.json?t=${Date.now()}`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.token) {
+        bsiCloudFrontToken = data.token;
+        return bsiCloudFrontToken;
+      }
+    }
+  } catch (err) {
+    console.warn("[BSI Audio] Could not fetch assets/bsi_token.json:", err);
+  }
+  return bsiCloudFrontToken;
+}
+
+var bibleChapterAudioPlayer = null;
+var isBibleChapterPlaying = false;
+
+window.audioPlaybackState = {
+  activeBook: null,
+  activeChapter: null,
+  bsiCurrentTime: 0,
+  bsiDuration: 0,
+  ttsCurrentVerseIndex: 0,
+  isPaused: false
+};
+
+async function playBsiDramatizedAudio(bookKey, chapterNum, resumeTime = null) {
+  closeModal("modal-audio-settings");
+
+  await getBsiCloudFrontToken();
+
+  const cleanBook = (bookKey || state.activeBook || "genesis").toLowerCase().replace(".json", "");
+  const chNum = parseInt(chapterNum || state.activeChapter || 1, 10);
+  const usfm = BSI_USFM_MAP[cleanBook] || "GEN";
+  const chStr = String(chNum).padStart(3, '0');
+  
+  let audioUrl = `https://d1hkpuz2o5a2xw.cloudfront.net/source/555476c2390c102d-04/${usfm}_${chStr}.mp3?${bsiCloudFrontToken}`;
+
+  // If local server is reachable, use local resilient streaming proxy
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    audioUrl = `/api/bsi-audio-stream?book=${cleanBook}&chapter=${chNum}`;
+  }
+
+  // Check if player is already loaded with the same track and was paused
+  const isSameTrack = bibleChapterAudioPlayer && 
+    (bibleChapterAudioPlayer.src.includes(`${cleanBook}&chapter=${chNum}`) ||
+     bibleChapterAudioPlayer.src.includes(`${usfm}_${chStr}.mp3`));
+
+  if (isSameTrack && bibleChapterAudioPlayer.currentTime > 0) {
+    try {
+      await bibleChapterAudioPlayer.play();
+      audioState.isPlaying = true;
+      isBibleChapterPlaying = true;
+      window.audioPlaybackState.isPaused = false;
+      updateReaderPlayState(true);
+      const playbar = document.getElementById("floating-audio-playbar");
+      if (playbar) playbar.classList.add("active");
+      return;
+    } catch(err) {
+      console.warn("[BSI Audio] Resume failed, reloading track:", err);
+    }
+  }
+
+  // Stop any other speech engines without resetting saved position
+  stopTtsNarrationOnly();
+
+  if (!bibleChapterAudioPlayer) {
+    bibleChapterAudioPlayer = new Audio();
+  }
+  
+  // Calculate starting timestamp
+  let targetTime = 0;
+  if (typeof resumeTime === 'number' && resumeTime >= 0) {
+    targetTime = resumeTime;
+  } else if (window.audioPlaybackState.activeBook === cleanBook && 
+             window.audioPlaybackState.activeChapter === chNum && 
+             window.audioPlaybackState.bsiCurrentTime > 0) {
+    targetTime = window.audioPlaybackState.bsiCurrentTime;
+  }
+
+  window.audioPlaybackState.activeBook = cleanBook;
+  window.audioPlaybackState.activeChapter = chNum;
+  window.audioPlaybackState.isPaused = false;
+
+  bibleChapterAudioPlayer.src = audioUrl;
+  bibleChapterAudioPlayer.playbackRate = audioState.speed || 1.0;
+
+  if (targetTime > 0) {
+    const applySeek = function() {
+      try {
+        if (targetTime > 0 && Math.abs(bibleChapterAudioPlayer.currentTime - targetTime) > 0.5) {
+          bibleChapterAudioPlayer.currentTime = targetTime;
+        }
+      } catch(e) {}
+      bibleChapterAudioPlayer.removeEventListener("loadedmetadata", applySeek);
+      bibleChapterAudioPlayer.removeEventListener("canplay", applySeek);
+    };
+    bibleChapterAudioPlayer.addEventListener("loadedmetadata", applySeek);
+    bibleChapterAudioPlayer.addEventListener("canplay", applySeek);
+  }
+
+  audioState.isPlaying = true;
+  isBibleChapterPlaying = true;
+  updateReaderPlayState(true);
+
+  const indicator = document.getElementById("playbar-verse-indicator");
+  if (indicator) indicator.textContent = `🎭 BSI नाट्यमय ऑडिओ • ${cleanBook} ${chNum}`;
+
+  const playbar = document.getElementById("floating-audio-playbar");
+  if (playbar) playbar.classList.add("active");
+
+  bibleChapterAudioPlayer.ontimeupdate = function() {
+    if (!bibleChapterAudioPlayer || !bibleChapterAudioPlayer.duration) return;
+    const cur = bibleChapterAudioPlayer.currentTime;
+    const dur = bibleChapterAudioPlayer.duration;
+
+    window.audioPlaybackState.activeBook = cleanBook;
+    window.audioPlaybackState.activeChapter = chNum;
+    window.audioPlaybackState.bsiCurrentTime = cur;
+    window.audioPlaybackState.bsiDuration = dur;
+
+    const pct = (cur / dur) * 100;
+    const progressEl = document.getElementById("playbar-progress-line");
+    if (progressEl) progressEl.style.width = pct + "%";
+
+    const verseRows = document.querySelectorAll(".verse-row");
+    if (verseRows.length > 0) {
+      const vIdx = Math.min(verseRows.length - 1, Math.floor((cur / dur) * verseRows.length));
+      highlightTtsVerse(vIdx);
+    }
+  };
+
+  bibleChapterAudioPlayer.onended = function() {
+    updateReaderPlayState(false);
+    audioState.isPlaying = false;
+    isBibleChapterPlaying = false;
+    window.audioPlaybackState.bsiCurrentTime = 0;
+    showToast("✨ संपूर्ण अध्याय ऑडिओ पूर्ण झाला!");
+    document.querySelectorAll(".verse-row").forEach(v => v.classList.remove("tts-reading", "tts-playing-verse"));
+    
+    // Auto advance next chapter
+    const foundMeta = (typeof booksMetadataMr !== 'undefined' && Array.isArray(booksMetadataMr))
+      ? booksMetadataMr.find(b => b.filename.replace(".json", "").toLowerCase() === cleanBook)
+      : null;
+    if (foundMeta && chNum < foundMeta.chaptersCount) {
+      openReader(cleanBook, chNum + 1);
+      setTimeout(() => playBsiDramatizedAudio(cleanBook, chNum + 1, 0), 800);
+    }
+  };
+
+  bibleChapterAudioPlayer.onerror = async function(e) {
+    console.warn("[BSI Audio] Player error:", e);
+    if (!bibleChapterAudioPlayer._retried) {
+      bibleChapterAudioPlayer._retried = true;
+      try {
+        const res = await fetch(`assets/bsi_token.json?reload=${Date.now()}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.token) {
+            bsiCloudFrontToken = data.token;
+            bibleChapterAudioPlayer.src = `https://d1hkpuz2o5a2xw.cloudfront.net/source/555476c2390c102d-04/${usfm}_${chStr}.mp3?${bsiCloudFrontToken}`;
+            await bibleChapterAudioPlayer.play();
+            return;
+          }
+        }
+      } catch (retryErr) {
+        console.warn("[BSI Audio] Retry token failed:", retryErr);
+      }
+    }
+    showToast("⚠️ BSI ऑडिओ लोड होत नाही, AI वाचकावर पुनर्निर्देशित करत आहे...");
+    startSpeechNarration(0);
+  };
+
+  try {
+    await bibleChapterAudioPlayer.play();
+  } catch(err) {
+    console.warn("[BSI Audio] Play error:", err);
+  }
+}
+window.playBsiDramatizedAudio = playBsiDramatizedAudio;
+window.playBsiDramatizedAudio = playBsiDramatizedAudio;
+
+
+function updateReaderPlayState(isPlaying) {
+  const iconSvg = document.getElementById("playbar-icon-svg");
+  const fabIcon = document.getElementById("circle-fab-play-icon");
+  const fabBtn = document.getElementById("btn-floating-reader-play-circle");
+  const rPlayIcon = document.getElementById("reader-quick-play-icon");
+  const rPlayLabel = document.getElementById("reader-quick-play-label");
+  const rPlayBtn = document.getElementById("btn-reader-quick-play");
+
+  if (isPlaying) {
+    if (iconSvg) iconSvg.innerHTML = `<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>`;
+    if (fabIcon) fabIcon.innerHTML = `<rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"></rect>`;
+    if (fabBtn) fabBtn.classList.add("playing");
+    if (rPlayIcon) rPlayIcon.textContent = "⏸";
+    if (rPlayLabel) rPlayLabel.textContent = "थांबवा";
+    if (rPlayBtn) {
+      rPlayBtn.style.background = "var(--primary-dark, #8b1828)";
+      rPlayBtn.style.color = "#ffffff";
+    }
+  } else {
+    if (iconSvg) iconSvg.innerHTML = `<polygon points="5 3 19 12 5 21 5 3"></polygon>`;
+    if (fabIcon) fabIcon.innerHTML = `<polygon points="7 4 19 12 7 20 7 4"></polygon>`;
+    if (fabBtn) fabBtn.classList.remove("playing");
+    if (rPlayIcon) rPlayIcon.textContent = "▶";
+    if (rPlayLabel) rPlayLabel.textContent = "ऐका";
+    if (rPlayBtn) {
+      rPlayBtn.style.background = "var(--primary)";
+      rPlayBtn.style.color = "#1e1b4b";
+    }
+  }
+}
+
+
+// ========== GOOGLE CLOUD TTS VERSE-BY-VERSE ENGINE ==========
+// State for continuous verse-by-verse narration
+window.googleTtsNarration = {
+  isActive: false,
+  currentVerseIndex: 0,
+  currentAudio: null,
+  prefetchedAudio: null,   // pre-loaded next verse
+  prefetchedIndex: -1,
+  bookKey: null,
+  chapterNum: null,
+  versesMr: [],
+  totalVerses: 0,
+  bookName: "",
+  isStopRequested: false,
+};
+
+function createBlobUrlFromBase64(base64Content) {
+  const binaryString = window.atob(base64Content);
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  const blob = new Blob([bytes], { type: "audio/mpeg" });
+  return URL.createObjectURL(blob);
+}
+
+async function synthesizeVerseAudio(verseText) {
+  const apiKey = "AIzaSyClWC2VI25zclGPBRMaIaDpqOgH7ZebGeA";
+
+  // Tier 1: Try Local Backend Server if running on port 8090
+  if (window.location.port === '8090') {
+    try {
+      const response = await fetch('/api/v1/tts/synthesize', {
+        method: "POST",
+        headers: { "Content-Type": "application/json; charset=utf-8" },
+        body: JSON.stringify({
+          text: verseText,
+          voice: "mr-IN-Chirp3-HD-Algieba",
+          languageCode: "mr-IN",
+          audioEncoding: "MP3"
+        })
+      });
+      if (response.ok) {
+        const result = await response.json();
+        if (result && result.success && result.audioContent) {
+          return "data:audio/mp3;base64," + result.audioContent;
+        }
+      }
+    } catch(e) {
+      console.warn("Backend TTS unreachable, using direct Google Cloud API", e);
+    }
+  }
+
+  // Tier 2: Direct Google Cloud Text-to-Speech REST API Call (Works on GitHub Pages & iPhone Safari!)
+  try {
+    const googleRes = await fetch(`https://texttospeech.googleapis.com/v1/text:synthesize?key=${apiKey}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json; charset=utf-8" },
+      body: JSON.stringify({
+        input: { text: verseText },
+        voice: { languageCode: "mr-IN", name: "mr-IN-Chirp3-HD-Algieba" },
+        audioConfig: { audioEncoding: "MP3" }
+      })
+    });
+    if (googleRes.ok) {
+      const googleData = await googleRes.json();
+      if (googleData && googleData.audioContent) {
+        return "data:audio/mp3;base64," + googleData.audioContent;
+      }
+    }
+  } catch(e) {
+    console.warn("Direct Google Cloud API failed, trying fallback", e);
+  }
+
+  // Tier 3: High-reliability Google Translate Marathi Audio Fallback for iOS
+  try {
+    const encodedText = encodeURIComponent(verseText.slice(0, 200));
+    return `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=mr&client=tw-ob`;
+  } catch(e) {
+    throw new Error("Unable to synthesize verse audio");
+  }
+}
+
+function getCleanVerseText(versesMr, index) {
+  const raw = versesMr[index] || "";
+  return raw.replace(/^[\d\s.:]+/, '').replace(/<[^>]*>?/gm, '').trim();
+}
+
+function highlightTtsVerse(verseIndex) {
+  document.querySelectorAll(".verse-row").forEach(el => {
+    el.classList.remove("tts-reading", "tts-playing-verse");
+  });
+  const verseNum = verseIndex + 1;
+  const el = document.querySelector(`.verse-row[data-verse="${verseNum}"]`);
+  if (el) {
+    el.classList.add("tts-reading", "tts-playing-verse");
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+}
+
+async function startSpeechNarration(startVerseIndex = null) {
+  closeModal("modal-audio-settings");
+
+  // Resolve book/chapter
+  const bookKey = (state.activeBook || state.currentBook || "genesis").toLowerCase().replace(".json", "");
+  const chapterNum = parseInt(state.activeChapter || state.currentChapter || 1, 10);
+
+  // Check if BSI Dramatized Audio (Option A) is selected
+  const editionSelect = document.getElementById("audio-edition-select");
+  const audioEdition = editionSelect ? editionSelect.value : (localStorage.getItem("rol_audio_edition") || "dramatized");
+  if (audioEdition === "dramatized" && state.translation === "mar") {
+    let bsiStart = null;
+    if (startVerseIndex !== null && typeof startVerseIndex === 'number' && startVerseIndex > 0) {
+      const verseRows = document.querySelectorAll(".verse-row");
+      const totalV = verseRows.length || 31;
+      const dur = (bibleChapterAudioPlayer && bibleChapterAudioPlayer.duration) ? bibleChapterAudioPlayer.duration : 600;
+      bsiStart = (startVerseIndex / totalV) * dur;
+    }
+    playBsiDramatizedAudio(bookKey, chapterNum, bsiStart);
+    return;
+  }
+
+  // Stop BSI player if active without wiping saved position
+  if (bibleChapterAudioPlayer) {
+    window.audioPlaybackState.bsiCurrentTime = bibleChapterAudioPlayer.currentTime;
+    bibleChapterAudioPlayer.pause();
+  }
   if (audioPlayerInstance) {
     audioPlayerInstance.pause();
     audioPlayerInstance = null;
   }
-  
-  if (window.SarvamTTS && window.SarvamTTS.queue) {
-    window.SarvamTTS.queue.stop();
-  }
-  if (typeof speechSynthesis !== 'undefined') {
-    speechSynthesis.cancel();
-  }
+  if (typeof speechSynthesis !== 'undefined') speechSynthesis.cancel();
 
-  // Start background worship music if selected
+  // Stop existing TTS narration if any
+  stopTtsNarrationOnly();
+
+  const n = window.googleTtsNarration;
+  n.isStopRequested = false;
+  // Pre-unlock Audio player for iOS Safari (iPhone 12) user gesture requirement
+  if (!n.currentAudio) {
+    n.currentAudio = new Audio();
+  }
+  n.currentAudio.pause();
+  n.currentAudio.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
+  n.currentAudio.play().catch(function() {});
+  
+  n.isActive = true;
+
+  // Handle background worship music
   const bgMusicSelect = document.getElementById("audio-bg-music-select");
   const bgVolSlider = document.getElementById("audio-bg-music-vol-slider");
   if (bgMusicSelect && bgMusicSelect.value !== "none") {
     const vol = bgVolSlider ? parseFloat(bgVolSlider.value) : 0.3;
-    ambientSynthInstance.setVolume(vol);
-    ambientSynthInstance.start(bgMusicSelect.value);
+    if (typeof ambientSynthInstance !== 'undefined' && ambientSynthInstance) {
+      ambientSynthInstance.setVolume(vol);
+      ambientSynthInstance.start(bgMusicSelect.value);
+    }
   } else {
-    ambientSynthInstance.stop();
+    if (typeof ambientSynthInstance !== 'undefined' && ambientSynthInstance) ambientSynthInstance.stop();
   }
 
-  // Start sleep timer if selected
+  // Handle sleep timer
   const sleepTimerSelect = document.getElementById("audio-sleep-timer-select");
   if (sleepTimerSelect && sleepTimerSelect.value !== "off") {
     startSleepTimer(sleepTimerSelect.value);
   } else {
-    if (sleepTimerTimeout) {
-      clearTimeout(sleepTimerTimeout);
-      sleepTimerTimeout = null;
-    }
-  }
-  
-  // Check API Key based on active voice engine
-  const activeVoice = (state.sarvamVoice || "gee_elevenlabs").toLowerCase();
-  const isElevenLabsVoice = activeVoice.includes("elevenlabs") || activeVoice === "shrey" || activeVoice === "gee" || activeVoice === "brian";
-  if (isElevenLabsVoice) {
-    const elKey = localStorage.getItem('rol_elevenlabs_api_key') || 'sk_53532f375cb8723144f7c3d6f10520e60043fc74cb1552d4';
-    if (!elKey) {
-      showToast("🔑 Please enter your ElevenLabs API Key in Settings");
-      openModal("modal-audio-settings");
-      return;
-    }
-  } else {
-    const sarvamKey = (window.SarvamTTS && window.SarvamTTS.config) ? window.SarvamTTS.config.getApiKey() : (state.sarvamApiKey || 'sk_odv5l3f4_XdZubK80ecSfBa6YYCLWDCNI');
-    if (!sarvamKey) {
-      showToast("🔑 Please enter your Sarvam AI API Key in Settings");
-      openModal("modal-audio-settings");
-      return;
-    }
+    if (sleepTimerTimeout) { clearTimeout(sleepTimerTimeout); sleepTimerTimeout = null; }
   }
 
-  // Sarvam AI Bulbul V3 Indian Voice Narration
-  const elements = document.querySelectorAll(".verse-row");
-  if (elements.length === 0) return;
-  
-  audioState.versesToRead = [];
-  elements.forEach(el => {
-    let txt = el.dataset.text || "";
-    if (state.translation === "parallel") {
-      const enDiv = el.querySelector(".verse-parallel-en");
-      if (enDiv) txt = enDiv.textContent;
-    }
-    const cleanText = txt.replace(/[:;()[\]{}—•\-]/g, ' ').replace(/\s+/g, ' ').trim();
-    if (cleanText) {
-      audioState.versesToRead.push({
-        key: el.dataset.verseId,
-        text: cleanText
-      });
-    }
-  });
-  
-  if (audioState.versesToRead.length === 0) return;
+  let bookName = bookKey;
+  const foundMeta = (typeof booksMetadataMr !== 'undefined' && Array.isArray(booksMetadataMr))
+    ? booksMetadataMr.find(b =>
+        b.filename.replace(".json", "").toLowerCase() === bookKey.toLowerCase() ||
+        b.engName.toLowerCase() === bookKey.toLowerCase()
+      )
+    : null;
+  if (foundMeta) bookName = foundMeta.name || foundMeta.engName || bookKey;
 
-  const speedVal = parseFloat(document.getElementById("tts-speed-slider")?.value || 0.92);
-  audioState.speed = speedVal;
-  audioState.currentVerseIndex = 0;
+  // Load Marathi verse data
+  let bookDataMr = null;
+  try { bookDataMr = await fetchBookDataMr(bookKey); } catch(e) {}
+  const versesMr = (bookDataMr && bookDataMr.chapters) ? (bookDataMr.chapters[chapterNum - 1] || []) : [];
+  const totalVerses = versesMr.length;
+
+  if (totalVerses === 0) {
+    showToast("⚠️ मराठी श्लोक उपलब्ध नाहीत");
+    n.isActive = false;
+    updateReaderPlayState(false);
+    return;
+  }
+
+  // Store in narration state
+  n.bookKey = bookKey;
+  n.chapterNum = chapterNum;
+  n.versesMr = versesMr;
+  n.totalVerses = totalVerses;
+  n.bookName = bookName;
+
+  // Update playbar UI
   audioState.isPlaying = true;
+  isBibleChapterPlaying = true;
+  updateReaderPlayState(true);
 
-  const speedPill = document.getElementById("playbar-btn-speed");
-  if (speedPill) speedPill.textContent = `${speedVal}x`;
+  const indicatorEl = document.getElementById("playbar-verse-indicator");
+  const progressEl = document.getElementById("playbar-progress-line");
+  if (progressEl) progressEl.style.width = "0%";
 
-  const isReaderViewActive = document.getElementById("view-reader")?.classList.contains("active");
-  const playbarEl = document.getElementById("floating-audio-playbar");
-  if (playbarEl && !isReaderViewActive) {
-    playbarEl.classList.add("active");
-  }
-
-  const isDevanagari = (state.translation !== "eng");
-  const langCode = isDevanagari ? "mr-IN" : "en-IN";
-  const selectedVoiceId = (state.sarvamVoice || "gee_elevenlabs").toLowerCase();
-
-  if (window.SarvamTTS && window.SarvamTTS.queue) {
-    window.SarvamTTS.queue.setListeners({
-      onVerseChange: (index, verse) => {
-        audioState.currentVerseIndex = index;
-        document.querySelectorAll(".verse-row").forEach(v => {
-          v.classList.toggle("tts-reading", v.dataset.verseId === verse.key);
-        });
-        const activeEl = document.querySelector(`.verse-row[data-verse-id="${verse.key}"]`);
-        if (activeEl) activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-        const indicatorEl = document.getElementById("playbar-verse-indicator");
-        if (indicatorEl) {
-          const total = audioState.versesToRead.length;
-          if (verse && verse.key === "vod_verse") {
-            indicatorEl.textContent = "🔊 Daily Bible Verse";
-          } else if (verse && verse.key) {
-            const parts = verse.key.split("_");
-            if (parts.length >= 3) {
-              const bMeta = booksMetadataMr.find(b => b.filename.replace(".json", "") === parts[0]);
-              const bName = (state.translation === "eng" && bMeta) ? bMeta.engName : (bMeta ? bMeta.name : parts[0]);
-              indicatorEl.textContent = `${bName} ${parts[1]}:${parts[2]} (${index + 1}/${total})`;
-            } else {
-              indicatorEl.textContent = `Verse ${index + 1} of ${total}`;
-            }
-          } else {
-            indicatorEl.textContent = `Verse ${index + 1} of ${total}`;
-          }
+  // Recursive function to play verse at index
+  async function playVerseAt(index) {
+    if (n.isStopRequested || !n.isActive) return;
+    if (index >= totalVerses) {
+      // Chapter finished — auto-advance
+      n.isActive = false;
+      audioState.isPlaying = false;
+      isBibleChapterPlaying = false;
+      window.audioPlaybackState.ttsCurrentVerseIndex = 0;
+      updateReaderPlayState(false);
+      document.querySelectorAll(".verse-row").forEach(el => el.classList.remove("tts-reading", "tts-playing-verse"));
+      showToast("✨ संपूर्ण अध्याय ऑडिओ पूर्ण झाला!");
+      const bookNum = foundMeta ? foundMeta.id : null;
+      if (foundMeta && chapterNum < foundMeta.chaptersCount) {
+        openReader(bookKey, chapterNum + 1);
+        setTimeout(() => startSpeechNarration(0), 800);
+      } else if (foundMeta && bookNum < 66) {
+        const nextBook = booksMetadataMr.find(b => b.id === bookNum + 1);
+        if (nextBook) {
+          openReader(nextBook.filename.replace(".json", ""), 1);
+          setTimeout(() => startSpeechNarration(0), 800);
         }
-
-        const progress = ((index + 1) / audioState.versesToRead.length) * 100;
-        const progressEl = document.getElementById("playbar-progress-line");
-        if (progressEl) progressEl.style.width = `${progress}%`;
-      },
-      onStateChange: (playbackState) => {
-        const iconSvg = document.getElementById("playbar-icon-svg");
-        const fabIcon = document.getElementById("circle-fab-play-icon");
-        const fabBtn = document.getElementById("btn-floating-reader-play-circle");
-
-        if (playbackState === "loading") {
-          if (iconSvg) {
-            iconSvg.innerHTML = `
-              <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="38" stroke-dashoffset="19">
-                <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s" repeatCount="indefinite"/>
-              </circle>
-            `;
-          }
-          if (fabIcon) {
-            fabIcon.innerHTML = `
-              <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="38" stroke-dashoffset="19">
-                <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s" repeatCount="indefinite"/>
-              </circle>
-            `;
-          }
-        } else if (playbackState === "playing") {
-          if (iconSvg) iconSvg.innerHTML = `<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>`;
-          if (fabIcon) fabIcon.innerHTML = `<rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"></rect>`;
-          if (fabBtn) fabBtn.classList.add("playing");
-        } else {
-          if (iconSvg) iconSvg.innerHTML = `<polygon points="5 3 19 12 5 21 5 3"></polygon>`;
-          if (fabIcon) fabIcon.innerHTML = `<polygon points="7 4 19 12 7 20 7 4"></polygon>`;
-          if (fabBtn) fabBtn.classList.remove("playing");
-        }
-      },
-      onFallbackActive: () => {},
-      onComplete: () => {
-        stopSpeechNarration();
-      },
-      onError: (err) => {
-        console.warn("[TTS Engine] Playback notice:", err);
       }
-    });
+      return;
+    }
 
-    window.SarvamTTS.queue.loadVerses(audioState.versesToRead, 0, {
-      lang: langCode,
-      speaker: selectedVoiceId,
-      pace: speedVal
-    });
+    n.currentVerseIndex = index;
+    window.audioPlaybackState.ttsCurrentVerseIndex = index;
+    window.audioPlaybackState.activeBook = bookKey;
+    window.audioPlaybackState.activeChapter = chapterNum;
 
-    window.SarvamTTS.queue.play();
-  } else {
-    speakPlaybarVerse(0);
+    const verseNum = index + 1;
+    const verseText = getCleanVerseText(versesMr, index);
+
+    if (!verseText) {
+      // Skip empty verse
+      playVerseAt(index + 1);
+      return;
+    }
+
+    highlightTtsVerse(index);
+    if (indicatorEl) indicatorEl.textContent = `${bookName} ${chapterNum}:${verseNum} (${verseNum}/${totalVerses})`;
+    if (progressEl) progressEl.style.width = `${Math.round((verseNum / totalVerses) * 100)}%`;
+
+    let audioUrl = null;
+
+    // Check if this was prefetched
+    if (n.prefetchedIndex === index && n.prefetchedAudio) {
+      audioUrl = n.prefetchedAudio;
+      n.prefetchedAudio = null;
+      n.prefetchedIndex = -1;
+    } else {
+      // Show synthesizing indicator
+      const verseEl = document.querySelector(`.verse-row[data-verse="${verseNum}"]`);
+      if (verseEl) verseEl.classList.add("tts-synthesizing-verse");
+      try {
+        audioUrl = await synthesizeVerseAudio(verseText);
+      } catch(err) {
+        if (n.isStopRequested) return;
+        console.error("[TTS] Synthesis error:", err);
+        showToast(`❌ TTS Error: ${err.message}`);
+        n.isActive = false;
+        audioState.isPlaying = false;
+        isBibleChapterPlaying = false;
+        updateReaderPlayState(false);
+        return;
+      }
+      if (verseEl) verseEl.classList.remove("tts-synthesizing-verse");
+    }
+
+    if (n.isStopRequested) {
+      URL.revokeObjectURL(audioUrl);
+      return;
+    }
+
+    if (!n.currentAudio) n.currentAudio = new Audio();
+    const audio = n.currentAudio;
+    audio.src = audioUrl;
+    window.currentGoogleTtsAudio = audio;
+
+    // Prefetch next verse in background
+    const nextIndex = index + 1;
+    if (nextIndex < totalVerses) {
+      const nextText = getCleanVerseText(versesMr, nextIndex);
+      if (nextText) {
+        synthesizeVerseAudio(nextText).then(url => {
+          if (!n.isStopRequested) {
+            n.prefetchedAudio = url;
+            n.prefetchedIndex = nextIndex;
+          } else {
+            URL.revokeObjectURL(url);
+          }
+        }).catch(() => {});
+      }
+    }
+
+    audio.onended = () => {
+      URL.revokeObjectURL(audioUrl);
+      n.currentAudio = null;
+      window.currentGoogleTtsAudio = null;
+      if (!n.isStopRequested && n.isActive) {
+        playVerseAt(index + 1);
+      }
+    };
+
+    audio.onerror = () => {
+      URL.revokeObjectURL(audioUrl);
+      n.currentAudio = null;
+      if (!n.isStopRequested && n.isActive) {
+        showToast("⚠️ ऑडिओ त्रुटी — पुढील श्लोक...");
+        playVerseAt(index + 1);
+      }
+    };
+
+    try {
+      await audio.play();
+    } catch(err) {
+      console.warn("[TTS] play() blocked:", err);
+    }
   }
+
+  // Determine starting verse (support resuming paused verse)
+  let startIdx = 0;
+  if (startVerseIndex !== null && typeof startVerseIndex === 'number' && startVerseIndex >= 0) {
+    startIdx = startVerseIndex;
+  } else if (window.audioPlaybackState.activeBook === bookKey && 
+             window.audioPlaybackState.activeChapter === chapterNum && 
+             window.audioPlaybackState.ttsCurrentVerseIndex > 0) {
+    startIdx = window.audioPlaybackState.ttsCurrentVerseIndex;
+  } else if (selectedVerseMeta && selectedVerseMeta.book === bookKey && selectedVerseMeta.chapter === chapterNum) {
+    startIdx = Math.max(0, (selectedVerseMeta.verse || 1) - 1);
+  }
+
+  window.audioPlaybackState.activeBook = bookKey;
+  window.audioPlaybackState.activeChapter = chapterNum;
+  window.audioPlaybackState.isPaused = false;
+
+  playVerseAt(startIdx);
 }
 
 function speakPlaybarVerse(index) {
-  if (!audioState.isPlaying || index >= audioState.versesToRead.length || index < 0) {
-    stopSpeechNarration();
+  const verseRows = document.querySelectorAll(".verse-row");
+  if (verseRows.length > 0 && bibleChapterAudioPlayer && bibleChapterAudioPlayer.duration > 0) {
+    const targetPct = index / verseRows.length;
+    bibleChapterAudioPlayer.currentTime = targetPct * bibleChapterAudioPlayer.duration;
+  }
+}
+
+function pauseAudioNarration() {
+  const curBook = (state.activeBook || "genesis").toLowerCase().replace(".json", "");
+  const curCh = parseInt(state.activeChapter || 1, 10);
+
+  // 1. If BSI dramatized audio is playing
+  if (bibleChapterAudioPlayer && !bibleChapterAudioPlayer.paused) {
+    window.audioPlaybackState.bsiCurrentTime = bibleChapterAudioPlayer.currentTime;
+    window.audioPlaybackState.bsiDuration = bibleChapterAudioPlayer.duration;
+    window.audioPlaybackState.activeBook = curBook;
+    window.audioPlaybackState.activeChapter = curCh;
+    window.audioPlaybackState.isPaused = true;
+    bibleChapterAudioPlayer.pause();
+    audioState.isPlaying = false;
+    isBibleChapterPlaying = false;
+    updateReaderPlayState(false);
     return;
   }
-  
-  audioState.currentVerseIndex = index;
-  if (window.SarvamTTS && window.SarvamTTS.queue && window.SarvamTTS.queue.isPlaying) {
-    window.SarvamTTS.queue.jumpToVerse(index);
+
+  // 2. If AI TTS is playing
+  if (window.googleTtsNarration && window.googleTtsNarration.isActive) {
+    const n = window.googleTtsNarration;
+    n.isStopRequested = true;
+    n.isActive = false;
+    window.audioPlaybackState.ttsCurrentVerseIndex = n.currentVerseIndex || 0;
+    window.audioPlaybackState.activeBook = curBook;
+    window.audioPlaybackState.activeChapter = curCh;
+    window.audioPlaybackState.isPaused = true;
+    if (n.currentAudio) {
+      try { n.currentAudio.pause(); } catch(e) {}
+    }
+    audioState.isPlaying = false;
+    isBibleChapterPlaying = false;
+    updateReaderPlayState(false);
+    return;
+  }
+
+  stopSpeechNarration(false);
+}
+
+function resumeOrStartAudioNarration() {
+  const bookKey = (state.activeBook || "genesis").toLowerCase().replace(".json", "");
+  const chapterNum = parseInt(state.activeChapter || 1, 10);
+
+  const editionSelect = document.getElementById("audio-edition-select");
+  const audioEdition = editionSelect ? editionSelect.value : (localStorage.getItem("rol_audio_edition") || "dramatized");
+
+  const isSameTrack = (window.audioPlaybackState.activeBook === bookKey) && 
+                      (window.audioPlaybackState.activeChapter === chapterNum);
+
+  if (audioEdition === "dramatized" && state.translation === "mar") {
+    // If player is already loaded with this track and was paused, resume directly!
+    if (bibleChapterAudioPlayer && isSameTrack && bibleChapterAudioPlayer.currentTime > 0) {
+      bibleChapterAudioPlayer.play().then(() => {
+        audioState.isPlaying = true;
+        isBibleChapterPlaying = true;
+        window.audioPlaybackState.isPaused = false;
+        updateReaderPlayState(true);
+        const playbar = document.getElementById("floating-audio-playbar");
+        if (playbar) playbar.classList.add("active");
+      }).catch(err => {
+        console.warn("[BSI Audio] Direct resume failed, restarting:", err);
+        playBsiDramatizedAudio(bookKey, chapterNum, window.audioPlaybackState.bsiCurrentTime);
+      });
+      return;
+    }
+
+    const startTime = isSameTrack ? (window.audioPlaybackState.bsiCurrentTime || 0) : 0;
+    playBsiDramatizedAudio(bookKey, chapterNum, startTime);
+    return;
+  }
+
+  // AI TTS Mode:
+  const startVerse = isSameTrack ? (window.audioPlaybackState.ttsCurrentVerseIndex || 0) : 0;
+  startSpeechNarration(startVerse);
+}
+
+function toggleAudioNarration() {
+  const isPlaying = audioState.isPlaying || 
+    isBibleChapterPlaying || 
+    (bibleChapterAudioPlayer && !bibleChapterAudioPlayer.paused) || 
+    (window.googleTtsNarration && window.googleTtsNarration.isActive);
+
+  if (isPlaying) {
+    pauseAudioNarration();
+  } else {
+    resumeOrStartAudioNarration();
   }
 }
+window.toggleAudioNarration = toggleAudioNarration;
 
 function togglePlaybarSpeech() {
-  if (!audioState.isPlaying) return;
-  
-  if (audioPlayerInstance) {
-    if (audioPlayerInstance.paused) {
-      audioPlayerInstance.play().catch(() => showToast("Playback failed"));
-      document.getElementById("playbar-icon-svg").innerHTML = `<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>`;
-    } else {
-      audioPlayerInstance.pause();
-      document.getElementById("playbar-icon-svg").innerHTML = `<polygon points="5 3 19 12 5 21 5 3"></polygon>`;
-    }
-  } else if (window.SarvamTTS && window.SarvamTTS.queue) {
-    if (window.SarvamTTS.queue.isPaused) {
-      window.SarvamTTS.queue.resume();
-    } else {
-      window.SarvamTTS.queue.pause();
-    }
-  } else if (typeof speechSynthesis !== 'undefined') {
-    if (speechSynthesis.paused) {
-      speechSynthesis.resume();
-      document.getElementById("playbar-icon-svg").innerHTML = `<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>`;
-    } else if (speechSynthesis.speaking) {
-      speechSynthesis.pause();
-      document.getElementById("playbar-icon-svg").innerHTML = `<polygon points="5 3 19 12 5 21 5 3"></polygon>`;
-    }
-  }
+  toggleAudioNarration();
 }
 
-function stopSpeechNarration() {
-  audioState.isPlaying = false;
+function stopTtsNarrationOnly() {
+  if (window.googleTtsNarration) {
+    const n = window.googleTtsNarration;
+    n.isStopRequested = true;
+    n.isActive = false;
+    if (n.currentAudio) {
+      try { n.currentAudio.pause(); } catch(e) {}
+      n.currentAudio = null;
+    }
+    if (n.prefetchedAudio) {
+      try { URL.revokeObjectURL(n.prefetchedAudio); } catch(e) {}
+      n.prefetchedAudio = null;
+      n.prefetchedIndex = -1;
+    }
+    n.versesMr = [];
+  }
+  if (typeof speechSynthesis !== 'undefined') speechSynthesis.cancel();
+}
+
+function stopSpeechNarration(resetPosition = false) {
+  stopTtsNarrationOnly();
+
   if (bibleChapterAudioPlayer) {
+    if (!resetPosition) {
+      window.audioPlaybackState.bsiCurrentTime = bibleChapterAudioPlayer.currentTime;
+    } else {
+      window.audioPlaybackState.bsiCurrentTime = 0;
+    }
     bibleChapterAudioPlayer.pause();
-    bibleChapterAudioPlayer = null;
   }
+
+  if (resetPosition) {
+    window.audioPlaybackState.bsiCurrentTime = 0;
+    window.audioPlaybackState.ttsCurrentVerseIndex = 0;
+    window.audioPlaybackState.isPaused = false;
+  }
+
+  audioState.isPlaying = false;
   isBibleChapterPlaying = false;
-  if (audioPlayerInstance) {
-    audioPlayerInstance.pause();
-    audioPlayerInstance = null;
+
+  if (typeof ambientSynthInstance !== 'undefined' && ambientSynthInstance) {
+    ambientSynthInstance.stop();
   }
-  if (window.SarvamTTS && window.SarvamTTS.queue) {
-    window.SarvamTTS.queue.stop();
-  }
-  if (typeof speechSynthesis !== 'undefined') {
-    speechSynthesis.cancel();
-  }
-  
-  // Stop background worship music
-  ambientSynthInstance.stop();
-  
-  // Clear sleep timer
   if (sleepTimerTimeout) {
     clearTimeout(sleepTimerTimeout);
     sleepTimerTimeout = null;
   }
-  
-  document.querySelectorAll(".verse-row").forEach(v => v.classList.remove("tts-reading"));
+
+  document.querySelectorAll(".verse-row").forEach(v => v.classList.remove("tts-reading", "tts-playing-verse", "tts-synthesizing-verse"));
   const playbar = document.getElementById("floating-audio-playbar");
   if (playbar) playbar.classList.remove("active");
-  
-  const fabIcon = document.getElementById("circle-fab-play-icon");
-  const fabBtn = document.getElementById("btn-floating-reader-play-circle");
-  if (fabIcon) fabIcon.innerHTML = `<polygon points="7 4 19 12 7 20 7 4"></polygon>`;
-  if (fabBtn) fabBtn.classList.remove("playing");
-  
-  const iconSvg = document.getElementById("playbar-icon-svg");
-  if (iconSvg) iconSvg.innerHTML = `<polygon points="5 3 19 12 5 21 5 3"></polygon>`;
-  
-  const readerPlayIcon = document.getElementById("reader-quick-play-icon");
-  const readerPlayLabel = document.getElementById("reader-quick-play-label");
-  const readerPlayBtn = document.getElementById("btn-reader-quick-play");
-  if (readerPlayIcon) readerPlayIcon.textContent = "▶";
-  if (readerPlayLabel) readerPlayLabel.textContent = "ऐका";
-  if (readerPlayBtn) {
-    readerPlayBtn.style.background = "var(--primary)";
-    readerPlayBtn.style.color = "#1e1b4b";
-  }
+
+  updateReaderPlayState(false);
 }
 
 function startSpeechNarrationFromVerse(verseNum) {
-  const targetIndex = Math.max(0, parseInt(verseNum) - 1);
-  if (!audioState.versesToRead || audioState.versesToRead.length === 0) {
-    startSpeechNarration();
+  const vNum = parseInt(verseNum, 10) || 1;
+  const vIdx = Math.max(0, vNum - 1);
+  const editionSelect = document.getElementById("audio-edition-select");
+  const audioEdition = editionSelect ? editionSelect.value : (localStorage.getItem("rol_audio_edition") || "dramatized");
+
+  const bookKey = (state.activeBook || "genesis").toLowerCase().replace(".json", "");
+  const chapterNum = parseInt(state.activeChapter || 1, 10);
+
+  if (audioEdition === "dramatized" && state.translation === "mar") {
+    const verseRows = document.querySelectorAll(".verse-row");
+    const totalV = verseRows.length || 31;
+    const dur = (bibleChapterAudioPlayer && bibleChapterAudioPlayer.duration) ? bibleChapterAudioPlayer.duration : 600;
+    const estTime = (vIdx / totalV) * dur;
+    
+    window.audioPlaybackState.bsiCurrentTime = estTime;
+    window.audioPlaybackState.activeBook = bookKey;
+    window.audioPlaybackState.activeChapter = chapterNum;
+
+    if (bibleChapterAudioPlayer && 
+        (bibleChapterAudioPlayer.src.includes(`${bookKey}&chapter=${chapterNum}`) || 
+         bibleChapterAudioPlayer.src.includes(BSI_USFM_MAP[bookKey] || "GEN"))) {
+      bibleChapterAudioPlayer.currentTime = estTime;
+      if (bibleChapterAudioPlayer.paused) {
+        bibleChapterAudioPlayer.play();
+        updateReaderPlayState(true);
+      }
+    } else {
+      playBsiDramatizedAudio(bookKey, chapterNum, estTime);
+    }
+    showToast(`🎙️ श्लोक ${vNum} कडे जात आहे...`);
     return;
   }
-  if (audioState.versesToRead && targetIndex < audioState.versesToRead.length) {
-    const isReaderViewActive = document.getElementById("view-reader")?.classList.contains("active");
-    const playbarEl = document.getElementById("floating-audio-playbar");
-    if (playbarEl && !isReaderViewActive) {
-      playbarEl.classList.add("active");
-    }
-    if (window.SarvamTTS && window.SarvamTTS.queue && window.SarvamTTS.queue.isPlaying) {
-      window.SarvamTTS.queue.jumpToVerse(targetIndex);
-    } else {
-      startSpeechNarration();
-    }
-  } else {
-    startSpeechNarration();
-  }
+
+  // AI TTS mode:
+  window.audioPlaybackState.ttsCurrentVerseIndex = vIdx;
+  startSpeechNarration(vIdx);
 }
 
-function playDailyVerseAudio() {
+function playDailyVerseAudio() { console.log("playDailyVerseAudio disabled per user configuration - Bible reading audio only"); return;
   const vodTextEl = document.getElementById("home-vod-text");
   const vodRefEl = document.getElementById("home-vod-ref");
   if (!vodTextEl) return;
@@ -2810,7 +4656,7 @@ function playDailyVerseAudio() {
 
   const isDevanagari = (state.translation !== "eng");
   const langCode = isDevanagari ? "mr-IN" : "en-IN";
-  const selectedVoiceId = (state.sarvamVoice || "gee_elevenlabs").toLowerCase();
+  const selectedVoiceId = (state.sarvamVoice || "google_natural_mr").toLowerCase();
 
   if (window.SarvamTTS && window.SarvamTTS.queue) {
     window.SarvamTTS.queue.setListeners({
@@ -2943,7 +4789,7 @@ function updateAudioToneSettings() {
 }
 
 function initAudioVoices() {
-  const currentVoice = state.sarvamVoice || "gee_elevenlabs";
+  const currentVoice = state.sarvamVoice || "google_natural_mr";
   state.sarvamVoice = currentVoice;
 
   if (window.SarvamTTS && window.SarvamTTS.queue) {
@@ -3249,15 +5095,38 @@ function updateAllUserAvatars() {
   const bottomAvatar = document.getElementById("nav-you-avatar");
   const headerAvatar = document.getElementById("header-auth-avatar");
   const profileAvatar = document.getElementById("profile-avatar");
+  const figmaAvatarImg = document.getElementById("figma-user-avatar");
+  const figmaAvatarInitial = document.getElementById("figma-user-avatar-initial");
   
   const user = state.currentUser;
+  const photoUrl = user ? (user.photo || user.profilePhoto || user.profile_photo) : null;
+  const initial = user ? (user.fullName || user.username || "U").charAt(0).toUpperCase() : "G";
   
+  // 1. Home page top right corner profile icon
+  if (figmaAvatarImg && figmaAvatarInitial) {
+    if (user && photoUrl) {
+      figmaAvatarImg.src = photoUrl;
+      figmaAvatarImg.style.display = "block";
+      figmaAvatarInitial.style.display = "none";
+    } else if (user) {
+      figmaAvatarImg.style.display = "none";
+      figmaAvatarInitial.style.display = "flex";
+      figmaAvatarInitial.textContent = initial;
+      figmaAvatarInitial.style.background = "#22c55e";
+      figmaAvatarInitial.style.color = "#ffffff";
+    } else {
+      figmaAvatarImg.src = "assets/icons/user_profile_avatar.svg";
+      figmaAvatarImg.style.display = "block";
+      figmaAvatarInitial.style.display = "none";
+    }
+  }
+
   const updateElement = (el, isLarge) => {
     if (!el) return;
     if (user) {
-      if (user.photo) {
+      if (photoUrl) {
         el.textContent = "";
-        el.style.backgroundImage = `url(${user.photo})`;
+        el.style.backgroundImage = `url(${photoUrl})`;
         el.style.backgroundSize = "cover";
         el.style.backgroundPosition = "center";
         el.style.backgroundRepeat = "no-repeat";
@@ -3265,10 +5134,10 @@ function updateAllUserAvatars() {
           el.style.borderColor = "var(--primary)";
         }
       } else {
-        el.textContent = user.username.substring(0, 1).toUpperCase();
+        el.textContent = initial;
         el.style.backgroundImage = "none";
         el.style.backgroundColor = "var(--primary)";
-        el.style.color = "#1e1b4b";
+        el.style.color = "#ffffff";
       }
     } else {
       // Guest state
@@ -3673,7 +5542,7 @@ function renderYouProfile() {
   
   const profileNameEl = document.getElementById("profile-user-name");
   if (profileNameEl) {
-    profileNameEl.textContent = state.currentUser.username;
+    profileNameEl.textContent = state.currentUser.fullName || state.currentUser.username || "Gaurav Salve";
   }
   
   const pastorBadge = document.getElementById("profile-pastor-badge");
@@ -4340,11 +6209,7 @@ function setupEventListeners() {
   const btnInlineListen = document.getElementById("btn-reader-inline-listen");
   if (btnInlineListen) {
     btnInlineListen.addEventListener("click", () => {
-      if (audioState.isPlaying) {
-        togglePlaybarSpeech();
-      } else {
-        startSpeechNarration();
-      }
+      toggleAudioNarration();
     });
   }
 
@@ -4551,121 +6416,34 @@ function setupEventListeners() {
   document.getElementById("btn-start-tts-reading")?.addEventListener("click", startSpeechNarration);
   
   // Floating Playbar triggers
-  document.getElementById("playbar-btn-play")?.addEventListener("click", togglePlaybarSpeech);
-  document.getElementById("playbar-btn-close-widget")?.addEventListener("click", stopSpeechNarration);
+  document.getElementById("playbar-btn-play")?.addEventListener("click", toggleAudioNarration);
+  document.getElementById("playbar-btn-close-widget")?.addEventListener("click", () => stopSpeechNarration(false));
   
   // Quick Play on Top Reader Bar
   document.getElementById("btn-reader-quick-play")?.addEventListener("click", () => {
-    if (audioState.isPlaying) {
-      stopSpeechNarration();
-    } else {
-      startSpeechNarration();
-    }
+    toggleAudioNarration();
   });
 
-  // Test ElevenLabs Shrey Voice button in Narration Settings
-  const btnTestElevenLabs = document.getElementById("btn-test-elevenlabs-voice");
-  if (btnTestElevenLabs) {
-    btnTestElevenLabs.addEventListener("click", async () => {
-      showToast("🔊 Testing Shrey (ElevenLabs v3) Marathi Voice...");
-      try {
-        if (window.SarvamTTS && window.SarvamTTS.testVoice) {
-          const res = await window.SarvamTTS.testVoice("gee_elevenlabs");
-          const badge = document.getElementById("elevenlabs-key-status-badge");
-          if (res && res.success && res.audioUrl) {
-            const testAudio = new Audio(res.audioUrl);
-            testAudio.play();
-            showToast("✨ Shrey Voice Active: 'परमेश्वर माझा मेंढपाळ आहे...'");
-            if (badge) {
-              badge.textContent = "Verified ✅";
-              badge.style.background = "rgba(34,197,94,0.15)";
-              badge.style.color = "#22c55e";
-            }
-          } else if (res && res.noKey) {
-            showToast("⚠️ Enter ElevenLabs API Key in Settings to enable Shrey voice.");
-            if (badge) {
-              badge.textContent = "Key Needed";
-              badge.style.background = "rgba(239,68,68,0.15)";
-              badge.style.color = "#ef4444";
-            }
-          } else if (res && res.quotaExhausted) {
-            showToast("⚠️ ElevenLabs quota reached. Previewing via Marathi voice.");
-            if (badge) {
-              badge.textContent = "Quota Reached";
-              badge.style.background = "rgba(245,158,11,0.15)";
-              badge.style.color = "#f59e0b";
-            }
-          } else {
-            showToast(res.message || "Previewing Marathi voice.");
-          }
-        }
-      } catch (err) {
-        console.warn("[ElevenLabs Test] Error:", err);
-        showToast(err.friendlyMessage || `Voice Test: ${err.message || 'Check API Key'}`);
-      }
+  // Test Authentic BSI Dramatized Voice button in Settings
+  const btnTestNaturalVoice = document.getElementById("btn-test-natural-voice");
+  if (btnTestNaturalVoice) {
+    btnTestNaturalVoice.addEventListener("click", () => {
+      closeModal("modal-audio-settings");
+      playBsiDramatizedAudio("genesis", 7);
     });
   }
 
-  // ElevenLabs API Key input listener in Settings Modal
-  const elevenlabsKeyInput = document.getElementById("elevenlabs-api-key-input");
-  const elevenlabsKeyBadge = document.getElementById("elevenlabs-key-status-badge");
-  if (elevenlabsKeyInput) {
-    const currentElevenKey = (window.ElevenLabsTTS && window.ElevenLabsTTS.config) ? window.ElevenLabsTTS.config.getApiKey() : (state.elevenlabsApiKey || "");
-    elevenlabsKeyInput.value = currentElevenKey;
-    if (elevenlabsKeyBadge) {
-      elevenlabsKeyBadge.textContent = currentElevenKey ? "Key Configured" : "Ready";
-      elevenlabsKeyBadge.style.background = currentElevenKey ? "rgba(34,197,94,0.15)" : "rgba(59,130,246,0.15)";
-      elevenlabsKeyBadge.style.color = currentElevenKey ? "#22c55e" : "#3b82f6";
-    }
-
-    elevenlabsKeyInput.addEventListener("input", (e) => {
-      const val = e.target.value.trim();
-      state.elevenlabsApiKey = val;
-      if (window.ElevenLabsTTS && window.ElevenLabsTTS.config) {
-        window.ElevenLabsTTS.config.setApiKey(val);
-      }
-      if (elevenlabsKeyBadge) {
-        elevenlabsKeyBadge.textContent = val ? "Key Configured" : "Ready";
-        elevenlabsKeyBadge.style.background = val ? "rgba(34,197,94,0.15)" : "rgba(59,130,246,0.15)";
-        elevenlabsKeyBadge.style.color = val ? "#22c55e" : "#3b82f6";
-      }
-      saveStateToLocalStorage();
-    });
-  }
-
-  // Test Sarvam AI Voice button in Narration Settings
-  const btnTestSarvamVoice = document.getElementById("btn-test-sarvam-voice");
-  if (btnTestSarvamVoice) {
-    btnTestSarvamVoice.addEventListener("click", async () => {
-      const selectedVoice = state.sarvamVoice || "gee_elevenlabs";
-      showToast(`🔊 Testing Sarvam ${selectedVoice} Voice...`);
-      try {
-        if (window.SarvamTTS && window.SarvamTTS.testVoice) {
-          const res = await window.SarvamTTS.testVoice(selectedVoice);
-          const badge = document.getElementById("sarvam-key-status-badge");
-          if (res && res.success && res.audioUrl) {
-            const testAudio = new Audio(res.audioUrl);
-            testAudio.play();
-            showToast("✨ Sarvam Voice Active: 'परमेश्वर माझा मेंढपाळ आहे...'");
-            if (badge) {
-              badge.textContent = "Key Verified ✅";
-              badge.style.background = "rgba(34,197,94,0.15)";
-              badge.style.color = "#22c55e";
-            }
-          } else if (res && res.quotaExhausted) {
-            showToast("⚠️ Sarvam AI: 0 credits left on key (402). Playing via Marathi device voice preview.");
-            if (badge) {
-              badge.textContent = "Credits Needed (402)";
-              badge.style.background = "rgba(245,158,11,0.15)";
-              badge.style.color = "#f59e0b";
-            }
-          } else {
-            showToast(res.message || "Previewing Marathi voice.");
-          }
-        }
-      } catch (err) {
-        console.warn("[Sarvam Test] Error:", err);
-        showToast(err.friendlyMessage || `Voice Test: ${err.message || 'Check API Key'}`);
+  // Audio Edition Selector listener (BSI Dramatized vs AI)
+  const editionSelectEl = document.getElementById("audio-edition-select");
+  if (editionSelectEl) {
+    const savedEdition = localStorage.getItem("rol_audio_edition") || "dramatized";
+    editionSelectEl.value = savedEdition;
+    editionSelectEl.addEventListener("change", (e) => {
+      localStorage.setItem("rol_audio_edition", e.target.value);
+      if (e.target.value === "dramatized") {
+        showToast("🎭 BSI नाट्यमय ऑडिओ निवडला (पुरुष व स्त्री आवाज)");
+      } else {
+        showToast("🤖 AI श्लोक-दर-श्लोक वाचक निवडला");
       }
     });
   }
@@ -4673,9 +6451,9 @@ function setupEventListeners() {
   const speedPillBtn = document.getElementById("playbar-btn-speed");
   if (speedPillBtn) {
     speedPillBtn.addEventListener("click", () => {
-      const speeds = [0.92, 1.0, 1.15, 1.25, 0.85];
-      let currIdx = speeds.indexOf(audioState.speed || 0.92);
-      if (currIdx === -1) currIdx = 0;
+      const speeds = [0.75, 0.90, 1.0, 1.25, 1.50];
+      let currIdx = speeds.indexOf(audioState.speed || 1.0);
+      if (currIdx === -1) currIdx = 2; // default 1.0
       const nextSpeed = speeds[(currIdx + 1) % speeds.length];
       audioState.speed = nextSpeed;
       speedPillBtn.textContent = `${nextSpeed}x`;
@@ -4684,28 +6462,22 @@ function setupEventListeners() {
       const valDisp = document.getElementById("tts-speed-val");
       if (valDisp) valDisp.textContent = `${nextSpeed}x`;
       
-      if (audioPlayerInstance) {
-        audioPlayerInstance.playbackRate = nextSpeed;
-      } else if (window.SarvamTTS && window.SarvamTTS.queue && window.SarvamTTS.queue.isPlaying) {
-        window.SarvamTTS.queue.setOptions({ pace: nextSpeed });
+      if (bibleChapterAudioPlayer) {
+        bibleChapterAudioPlayer.playbackRate = nextSpeed;
       }
-      showToast(`Narration speed set to ${nextSpeed}x`);
+      showToast(`वाचन वेग: ${nextSpeed}x`);
     });
   }
 
   document.getElementById("playbar-btn-prev")?.addEventListener("click", () => {
-    if (audioPlayerInstance) {
-      audioPlayerInstance.currentTime = Math.max(0, audioPlayerInstance.currentTime - 10);
-    } else if (window.SarvamTTS && window.SarvamTTS.queue) {
-      window.SarvamTTS.queue.previous();
+    if (bibleChapterAudioPlayer) {
+      bibleChapterAudioPlayer.currentTime = Math.max(0, bibleChapterAudioPlayer.currentTime - 15);
     }
   });
   
   document.getElementById("playbar-btn-next")?.addEventListener("click", () => {
-    if (audioPlayerInstance) {
-      audioPlayerInstance.currentTime = Math.min(audioPlayerInstance.duration || 9999, audioPlayerInstance.currentTime + 10);
-    } else if (window.SarvamTTS && window.SarvamTTS.queue) {
-      window.SarvamTTS.queue.next();
+    if (bibleChapterAudioPlayer) {
+      bibleChapterAudioPlayer.currentTime = Math.min(bibleChapterAudioPlayer.duration || 9999, bibleChapterAudioPlayer.currentTime + 15);
     }
   });
   
@@ -4715,10 +6487,8 @@ function setupEventListeners() {
       const val = parseFloat(e.target.value).toFixed(2);
       document.getElementById("tts-speed-val").textContent = `${val}x`;
       audioState.speed = parseFloat(val);
-      if (audioPlayerInstance) {
-        audioPlayerInstance.playbackRate = audioState.speed;
-      } else if (window.SarvamTTS && window.SarvamTTS.queue) {
-        window.SarvamTTS.queue.setOptions({ pace: audioState.speed });
+      if (bibleChapterAudioPlayer) {
+        bibleChapterAudioPlayer.playbackRate = audioState.speed;
       }
     });
   }
@@ -5148,10 +6918,15 @@ function setupEventListeners() {
         const dataUrl = evt.target.result;
         if (state.currentUser) {
           state.currentUser.photo = dataUrl;
-          // saveStateToLocalStorage triggers Firestore sync automatically
+          state.currentUser.profilePhoto = dataUrl;
+          state.currentUser.profile_photo = dataUrl;
+          if (state.currentUser.email && window.RolBackendSync) {
+            window.RolBackendSync.recordDeviceAccount(state.currentUser.email, state.currentUser.fullName || state.currentUser.username, dataUrl);
+          }
           saveStateToLocalStorage();
           updateAllUserAvatars();
-          showToast("Profile photo updated!");
+          updateAuthUI();
+          showToast("Profile photo updated! / प्रोफाइल फोटो बदलला!");
         }
       };
       reader.readAsDataURL(file);
@@ -5424,6 +7199,7 @@ window.closeAllDrawers = closeAllDrawers;
 function openModal(id) {
   const overlay = document.getElementById(id);
   if (overlay) {
+    overlay.style.display = "flex";
     overlay.classList.add("active");
     if (id === "modal-card-share") resetCardCreatorModal();
     if (id === "modal-audio-settings") toggleVoiceDropdownVisibility();
@@ -5434,18 +7210,40 @@ function closeModal(id) {
   const overlay = document.getElementById(id);
   if (overlay) {
     overlay.classList.remove("active");
-    if (id === "modal-fullscreen-vod") {
-      overlay.style.display = "none";
-      overlay.style.opacity = "0";
-      overlay.style.pointerEvents = "none";
-    }
+    overlay.style.display = "none";
   }
 }
 
 let toastTimeout = null;
-function showToast(message) {
+function showToast(message, type = null) {
   const toast = document.getElementById("toast-notification");
-  document.getElementById("toast-message").textContent = message;
+  if (!toast) return;
+
+  // Auto-detect semantic type if not explicitly supplied
+  let semanticType = type;
+  if (!semanticType) {
+    const msg = String(message).toLowerCase();
+    if (msg.includes('error') || msg.includes('fail') || msg.includes('delete') || msg.includes('offline') || msg.includes('invalid') || msg.includes('danger') || msg.includes('cancel')) {
+      semanticType = 'danger';
+    } else if (msg.includes('success') || msg.includes('copied') || msg.includes('saved') || msg.includes('activated') || msg.includes('done') || msg.includes('sent') || msg.includes('blessing') || msg.includes('connected') || msg.includes('completed') || msg.includes('elevated') || msg.includes('updated') || msg.includes('answered')) {
+      semanticType = 'success';
+    } else if (msg.includes('warning') || msg.includes('caution') || msg.includes('quota') || msg.includes('deactivated') || msg.includes('reopened') || msg.includes('reset') || msg.includes('alert')) {
+      semanticType = 'warning';
+    } else {
+      semanticType = 'info';
+    }
+  }
+
+  // Remove prior semantic status classes
+  toast.classList.remove("toast-success", "toast-warning", "toast-danger", "toast-error", "toast-info");
+  if (semanticType) {
+    toast.classList.add("toast-" + semanticType);
+  }
+
+  const msgEl = document.getElementById("toast-message");
+  if (msgEl) {
+    msgEl.textContent = message;
+  }
   
   clearTimeout(toastTimeout);
   toast.classList.add("active");
@@ -5860,17 +7658,46 @@ I rest securely under the shadow of Your wings throughout this day.
 In Jesus' name, Amen.`,
     amenCount: 312
   },
-  "healing_restoration": {
-    id: "healing_restoration",
+  "healing_health": {
+    id: "healing_health",
     bookKey: "isaiah",
     chapter: 53,
     categoryMr: "आरोग्य आणि दैवी चंगाई",
-    categoryEn: "HEALING & RESTORATION",
+    categoryEn: "HEALING & HEALTH",
     titleMr: "आरोग्य आणि दैवी चंगाई",
-    titleEn: "Divine Healing & Physical Restoration",
+    titleEn: "Divine Healing & Restoration",
     bgImage: "assets/images/healing_light.png",
-    refMr: "यशया ५३:५",
-    refEn: "Isaiah 53:5",
+    refMr: "यिर्मया ३०:१७ • यशया ५३:५",
+    refEn: "Jeremiah 30:17 • Isaiah 53:5",
+    verseMr: "तो आमच्या अपराधांसाठी घायाळ झाला, आमच्या दुष्कर्मांसाठी चिरडला गेला; आमच्या शांतीसाठी त्याला शिक्षा झाली आणि त्याच्या फटक्यांनी आम्हाला आरोग्य प्राप्त झाले.",
+    verseEn: "He was pierced for our transgressions, he was crushed for our iniquities; the punishment that brought us peace was on him, and by his wounds we are healed.",
+    prayerMr: `हे महान वैद्या प्रभू येशू,
+
+तू वधस्तंभावर आमच्या सर्व वेदना, आजार आणि दुःखे वाहिलीस. तुझ्या फटक्यांच्या द्वारे आम्हाला पूर्ण आरोग्य प्राप्त झाले आहे यावर माझा दृढ विश्वास आहे.
+
+माझ्या शरीरातील, मनातील आणि आत्म्यातील प्रत्येक आजारपणावर तुझा रोगनिवारक हात ठेव. मला नवीन आरोग्य आणि ऊर्जा दे. माझे आरोग्य पूर्ववत कर आणि मला तुझ्या गौरवासाठी कार्य करण्यास सक्षम कर.
+
+येशूच्या सामर्थ्यशाली नावात, आमेन.`,
+    prayerEn: `Lord Jesus, the Great Physician,
+
+You carried our sicknesses and bore our griefs upon the cross. By Your precious stripes and suffering, we are granted total spiritual and physical healing.
+
+Lay Your restorative hand upon my body, mind, and spirit right now. Drive away every infirmity, fatigue, and pain. Speak renewal and strength into every cell, restoring my health so that I may serve You with a joyful heart.
+
+In the mighty name of Jesus, Amen.`,
+    amenCount: 289
+  },
+  "healing_restoration": {
+    id: "healing_health",
+    bookKey: "isaiah",
+    chapter: 53,
+    categoryMr: "आरोग्य आणि दैवी चंगाई",
+    categoryEn: "HEALING & HEALTH",
+    titleMr: "आरोग्य आणि दैवी चंगाई",
+    titleEn: "Divine Healing & Restoration",
+    bgImage: "assets/images/healing_light.png",
+    refMr: "यिर्मया ३०:१७ • यशया ५३:५",
+    refEn: "Jeremiah 30:17 • Isaiah 53:5",
     verseMr: "तो आमच्या अपराधांसाठी घायाळ झाला, आमच्या दुष्कर्मांसाठी चिरडला गेला; आमच्या शांतीसाठी त्याला शिक्षा झाली आणि त्याच्या फटक्यांनी आम्हाला आरोग्य प्राप्त झाले.",
     verseEn: "He was pierced for our transgressions, he was crushed for our iniquities; the punishment that brought us peace was on him, and by his wounds we are healed.",
     prayerMr: `हे महान वैद्या प्रभू येशू,
@@ -6172,7 +7999,7 @@ async function togglePrayerAudio() {
   
   const prayerText = (activePrayerLang === "en") ? data.prayerEn : data.prayerMr;
   const langCode = (activePrayerLang === "en") ? "en-IN" : "mr-IN";
-  const speaker = (state && state.sarvamVoice) ? state.sarvamVoice : "gee_elevenlabs";
+  const speaker = (state && state.sarvamVoice) ? state.sarvamVoice : "google_natural_mr";
 
   // Try Sarvam AI Audio synthesis first
   if (window.SarvamTTS && window.SarvamTTS.speakText) {
@@ -6207,9 +8034,27 @@ async function togglePrayerAudio() {
   // Fallback to Web SpeechSynthesis
   if ('speechSynthesis' in window) {
     window.speechSynthesis.cancel();
-    prayerUtterance = new SpeechSynthesisUtterance(prayerText);
-    prayerUtterance.lang = (activePrayerLang === "en") ? "en-US" : "mr-IN";
-    prayerUtterance.rate = 0.92;
+    const cleanPrayer = (window.SarvamTTS && window.SarvamTTS.optimizer)
+      ? window.SarvamTTS.optimizer.optimizeForNarration(prayerText, langCode)
+      : prayerText;
+    prayerUtterance = new SpeechSynthesisUtterance(cleanPrayer);
+    prayerUtterance.rate = (activePrayerLang === "en") ? 0.90 : 0.86;
+    prayerUtterance.pitch = 0.88;
+    
+    const voices = (window.speechSynthesis.getVoices && window.speechSynthesis.getVoices()) || [];
+    if (activePrayerLang === "mr") {
+      const mrVoice = voices.find(v => (v.lang.startsWith('mr') || v.lang.startsWith('hi')) && (v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('madhav') || v.name.toLowerCase().includes('hemant') || v.name.toLowerCase().includes('manohar') || v.name.toLowerCase().includes('mohan') || v.name.toLowerCase().includes('natural') || v.name.toLowerCase().includes('google'))) ||
+                      voices.find(v => v.lang.includes('mr')) ||
+                      voices.find(v => v.lang.includes('hi'));
+      if (mrVoice) {
+        prayerUtterance.voice = mrVoice;
+        prayerUtterance.lang = mrVoice.lang;
+      } else {
+        prayerUtterance.lang = "mr-IN";
+      }
+    } else {
+      prayerUtterance.lang = "en-US";
+    }
     
     prayerUtterance.onend = () => {
       isPrayerAudioPlaying = false;
@@ -7732,15 +9577,8 @@ function initAuthAndPrayers() {
 
   /* ── Google Sign-In ── */
   if (googleBtn) {
-    googleBtn.addEventListener("click", async () => {
-      hideError();
-      setAuthLoading(true);
-      const res = await loginWithGoogle();
-      setAuthLoading(false);
-      if (!res.success) {
-        showError(res.messageEn, res.messageMr || res.messageEn);
-      }
-      // On success, onFirebaseAuthChange fires automatically and updates UI
+    googleBtn.addEventListener("click", () => {
+      handleGoogleSignIn();
     });
   }
 
@@ -7750,10 +9588,14 @@ function initAuthAndPrayers() {
       e.preventDefault();
       hideError();
 
-      const displayName = (document.getElementById("auth-input-username")?.value || "").trim();
-      const email    = (document.getElementById("auth-input-email")?.value    || "").trim();
+      const userInput = (document.getElementById("auth-input-username")?.value || "").trim();
+      const emailInput = (document.getElementById("auth-input-email")?.value || "").trim();
       const password = (document.getElementById("auth-input-password")?.value || "");
       const isPastor = document.getElementById("auth-input-pastor")?.checked || false;
+
+      // Determine email vs username
+      const email = (currentAuthTab === "signup") ? (emailInput || (userInput.includes("@") ? userInput : "")) : (userInput.includes("@") ? userInput : (emailInput || `${userInput}@riveroflife.org`));
+      const displayName = userInput.replace(/@.*$/, "") || "Believer";
 
       if (!email || !password) {
         showError("Please enter your email and password.", "ईमेल आणि पासवर्ड भरा.");
@@ -7762,29 +9604,21 @@ function initAuthAndPrayers() {
 
       setAuthLoading(true);
 
-      if (currentAuthTab === "signup") {
-        if (!displayName) {
+      try {
+        if (currentAuthTab === "signup") {
+          const res = await RolBackendSync.signup(email, password, displayName, state.translation || 'mr');
           setAuthLoading(false);
-          showError("Please enter your full name.", "आपले पूर्ण नाव भरा.");
-          return;
+          updateAuthUI();
+          showToast("🎉 Account created successfully! / खाते तयार झाले!");
+        } else {
+          const res = await RolBackendSync.login(email, password);
+          setAuthLoading(false);
+          updateAuthUI();
+          showToast("🙏 Welcome back! / स्वागत आहे!");
         }
-        const res = await registerUser(displayName, email, password, isPastor);
+      } catch (err) {
         setAuthLoading(false);
-        if (!res.success) {
-          showError(res.messageEn, res.messageMr);
-          return;
-        }
-        // Registration succeeded — Firebase sent a verification email automatically
-        // Show a prominent verification notice in the UI
-        showEmailVerificationBanner(email);
-      } else {
-        const res = await loginUser(email, password);
-        setAuthLoading(false);
-        if (!res.success) {
-          showError(res.messageEn, res.messageMr);
-          return;
-        }
-        // onFirebaseAuthChange fires automatically after signInWithEmail and updates UI
+        showError(err.message || "Authentication failed", err.message || "लॉगिन अयशस्वी झाले");
       }
     });
   }
@@ -7906,58 +9740,230 @@ window.closeAuthModal = function() {
   if (modal) modal.style.display = "none";
 };
 
-window.handleAuthSubmit = async function(e) {
-  if (e) e.preventDefault();
-  const email    = (document.getElementById("auth-input-identifier")?.value || "").trim();
-  const fullName = (document.getElementById("auth-input-fullname")?.value   || "").trim();
-  const password = (document.getElementById("auth-input-password")?.value   || "").trim();
+window.openGoogleSignupModal = function(prefillEmail = "", prefillName = "") {
+  const modal = document.getElementById("modal-google-signup");
+  if (!modal) return;
+  const emailInput = document.getElementById("google-reg-email");
+  const nameInput = document.getElementById("google-reg-name");
+  if (emailInput && prefillEmail) emailInput.value = prefillEmail;
+  if (nameInput && prefillName) nameInput.value = prefillName;
+  modal.style.display = "flex";
+};
 
-  if (!email) {
-    showToast("Please enter your email / ईमेल भरा");
+window.closeGoogleSignupModal = function() {
+  const modal = document.getElementById("modal-google-signup");
+  if (modal) modal.style.display = "none";
+};
+
+window.openNotificationModal = function() {
+  const modal = document.getElementById("modal-notifications-center");
+  if (modal) modal.style.display = "flex";
+  const badge = document.getElementById("header-bell-badge");
+  if (badge) badge.style.display = "none";
+};
+
+window.closeNotificationModal = function() {
+  const modal = document.getElementById("modal-notifications-center");
+  if (modal) modal.style.display = "none";
+};
+
+window.markAllNotificationsAsRead = function() {
+  showToast("All notifications marked as read / सर्व सूचना वाचल्या!");
+  closeNotificationModal();
+};
+
+window.openDeviceGoogleAccountChooser = function() {
+  const modal = document.getElementById("modal-google-account-chooser");
+  if (!modal) {
+    window.openGoogleSignupModal();
     return;
   }
 
-  try {
-    // Try sign-in first; if user doesn't exist, register them
-    let cred;
+  // Render accounts list dynamically matching Google chooser reference
+  const container = document.getElementById("google-account-chooser-list");
+  if (container && window.RolBackendSync) {
+    const accounts = window.RolBackendSync.getDeviceAccounts();
+    container.innerHTML = "";
+
+    accounts.forEach((acc, idx) => {
+      const initial = (acc.fullName || acc.email || "G").charAt(0).toUpperCase();
+      const colors = ["#1a73e8", "#202124", "#e37400", "#1e8e3e", "#9333ea"];
+      const bg = acc.color || colors[idx % colors.length];
+
+      const itemEl = document.createElement("div");
+      itemEl.className = "google-account-item";
+      itemEl.style.cssText = "display: flex; align-items: center; gap: 16px; padding: 13px 24px; cursor: pointer; transition: background 0.15s; border-bottom: 1px solid #dadce0;";
+      
+      const avatarHtml = acc.photo 
+        ? `<img src="${acc.photo}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex-shrink: 0;">`
+        : `<div style="width: 40px; height: 40px; border-radius: 50%; background: ${bg}; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 500; font-size: 18px; flex-shrink: 0;">${initial}</div>`;
+
+      itemEl.innerHTML = `
+        ${avatarHtml}
+        <div style="text-align: left; line-height: 1.35; flex: 1;">
+          <div style="font-weight: 500; font-size: 15px; color: #202124;">${acc.fullName || 'Google User'}</div>
+          <div style="font-size: 12.5px; color: #5f6368;">${acc.email}</div>
+        </div>
+      `;
+
+      itemEl.addEventListener("mouseenter", () => {
+        itemEl.style.background = "#f8f9fa";
+      });
+      itemEl.addEventListener("mouseleave", () => {
+        itemEl.style.background = "transparent";
+      });
+      itemEl.addEventListener("click", () => {
+        window.selectDeviceGoogleAccount(acc.email, acc.fullName, acc.photo);
+      });
+      container.appendChild(itemEl);
+    });
+  }
+
+  // Trigger Google Identity Services One Tap prompt if supported
+  if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
     try {
-      cred = await FirebaseApp.signInWithEmail(email, password);
-    } catch (signInErr) {
-      if (signInErr.code === 'auth/user-not-found' || signInErr.code === 'auth/invalid-credential') {
-        // Register new user with provided full name
-        const displayName = fullName || email.split('@')[0];
-        cred = await FirebaseApp.registerWithEmail(displayName, email, password || 'default123');
-        await FirebaseApp.saveUserProfile(cred.user.uid, {
-          displayName,
-          email: email.toLowerCase(),
-          isPastor:  false,
-          isAdmin:   false,
-          churchName: '',
-          photo:     '',
-          streak:    1,
-          quizPoints: 0,
-          quizHighscore: 0,
-          quizBadges: [],
-          bookmarks: [],
-          highlights: {},
-          userNotes: {},
-          createdVerseImages: [],
-          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        });
-      } else {
-        throw signInErr;
-      }
+      google.accounts.id.prompt();
+    } catch (e) {
+      console.log("[GIS prompt note]:", e.message);
+    }
+  }
+
+  modal.style.display = "flex";
+};
+
+window.closeDeviceGoogleAccountChooser = function() {
+  const modal = document.getElementById("modal-google-account-chooser");
+  if (modal) modal.style.display = "none";
+  const statusEl = document.getElementById("google-chooser-status");
+  if (statusEl) statusEl.style.display = "none";
+};
+
+window.selectDeviceGoogleAccount = async function(email, fullName, photo = null) {
+  const statusEl = document.getElementById("google-chooser-status");
+  if (statusEl) {
+    statusEl.style.display = "block";
+    statusEl.innerHTML = `<span>⏳</span> Signing in as <b>${fullName || email}</b>… / जोडत आहे…`;
+  }
+
+  try {
+    const lang = state.translation || 'mr';
+    const role = 'Member';
+    const res = await RolBackendSync.googleAuth(email, fullName || email.split('@')[0], lang, role);
+    
+    // Attach profile photo if account provided one
+    if (photo && state.currentUser) {
+      state.currentUser.photo = photo;
+      state.currentUser.profilePhoto = photo;
+      state.currentUser.profile_photo = photo;
+      saveStateToLocalStorage();
     }
 
-    // onFirebaseAuthChange fires automatically and updates UI
-    closeAuthModal();
-    showToast("Welcome! Data synced ☁️ / स्वागत आहे!");
+    window.closeDeviceGoogleAccountChooser();
+    if (typeof closeAuthModal === 'function') closeAuthModal();
+    updateAllUserAvatars();
+    updateAuthUI();
+    if (typeof renderYouProfile === 'function') renderYouProfile();
+    showToast(`🎉 Welcome, ${res.user.fullName || res.user.username}! Signed in with Google / गुगल खाते जोडले गेले!`);
   } catch (err) {
-    console.error('[ROL Modal Auth] Error:', err);
-    showToast("Sign in failed. Please check your details / चुकीची माहिती");
+    console.error('[Device Google Auth] Error:', err);
+    if (statusEl) statusEl.style.display = "none";
+    window.closeDeviceGoogleAccountChooser();
+    window.openGoogleSignupModal(email, fullName);
   }
 };
 
+window.handleGoogleSignIn = function() {
+  // Close any open auth modal
+  if (typeof closeAuthModal === 'function') closeAuthModal();
+  // Always open device Google account chooser popup matching reference design
+  window.openDeviceGoogleAccountChooser();
+};
+
+window.submitGoogleRegistration = async function(e) {
+  if (e) e.preventDefault();
+  const email = (document.getElementById("google-reg-email")?.value || "").trim();
+  const fullName = (document.getElementById("google-reg-name")?.value || "").trim();
+  const lang = (document.getElementById("google-reg-language")?.value || "mr");
+  const role = (document.getElementById("google-reg-role")?.value || "Member");
+
+  if (!email) {
+    showToast("Please enter Google Email / ईमेल टाका");
+    return;
+  }
+  if (!fullName) {
+    showToast("Please enter Full Name / नाव टाका");
+    return;
+  }
+
+  const btn = document.getElementById("btn-google-submit");
+  if (btn) btn.disabled = true;
+
+  try {
+    const res = await RolBackendSync.googleAuth(email, fullName, lang, role);
+    window.closeGoogleSignupModal();
+    updateAuthUI();
+    if (typeof renderYouProfile === 'function') renderYouProfile();
+    showToast(`🎉 Welcome, ${res.user.fullName || res.user.username}! Google account linked / गुगल नोंदणी यशस्वी!`);
+  } catch (err) {
+    showToast(err.message || "Registration failed. Please try again.");
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+};
+
+window.handleAuthSubmit = async function(e) {
+  if (e) e.preventDefault();
+  const identifier = (document.getElementById("auth-input-identifier")?.value || "").trim();
+  const fullName   = (document.getElementById("auth-input-fullname")?.value   || "").trim();
+  const password   = (document.getElementById("auth-modal-input-password")?.value || document.getElementById("auth-input-password")?.value || "").trim();
+
+  if (!identifier) {
+    showToast("Please enter your email or phone / ईमेल किंवा फोन भरा");
+    return;
+  }
+
+  if (!password) {
+    showToast("Please enter your password / पासवर्ड भरा");
+    return;
+  }
+
+  const email = identifier.includes("@") ? identifier : `${identifier.replace(/[^\d]/g, '')}@riveroflife.org`;
+  const name = fullName || identifier.split("@")[0];
+
+  try {
+    try {
+      await RolBackendSync.login(email, password);
+    } catch (loginErr) {
+      if (loginErr.message && (loginErr.message.includes("Invalid") || loginErr.message.includes("not found"))) {
+        await RolBackendSync.signup(email, password, name, state.translation || 'mr');
+      } else {
+        throw loginErr;
+      }
+    }
+    closeAuthModal();
+    updateAuthUI();
+    if (typeof renderYouProfile === 'function') renderYouProfile();
+    showToast("Welcome! Data synced ☁️ / स्वागत आहे!");
+  } catch (err) {
+    console.error('[ROL Modal Auth] Error:', err);
+    showToast(err.message || "Sign in failed. Please check your details");
+  }
+};
+
+window.logoutUser = async function() {
+  if (window.RolBackendSync) {
+    window.RolBackendSync.clearAuthSession();
+  }
+  state.currentUser = null;
+  localStorage.removeItem("rol_current_user");
+  localStorage.removeItem("rol_access_token");
+  localStorage.removeItem("rol_refresh_token");
+  localStorage.removeItem("rol_user_name");
+  saveStateToLocalStorage();
+  updateAuthUI();
+  if (typeof renderYouProfile === 'function') renderYouProfile();
+  showToast("Signed out successfully / बाहेर पडलात");
+};
 
 function updateAuthUI() {
   const headerIconLoggedOut = document.getElementById("header-auth-icon-loggedout");
@@ -7971,9 +9977,12 @@ function updateAuthUI() {
   const drawerUsername = document.getElementById("drawer-profile-username");
   const drawerEmail = document.getElementById("drawer-profile-email");
 
+  const loggedOutCont = document.getElementById("you-logged-out-container");
+  const loggedInCont = document.getElementById("you-logged-in-container");
+
   if (state.currentUser) {
     // Logged In State
-    const firstInitial = state.currentUser.username ? state.currentUser.username.substring(0, 1).toUpperCase() : "U";
+    const firstInitial = (state.currentUser.fullName || state.currentUser.username || "U").substring(0, 1).toUpperCase();
     
     if (headerIconLoggedOut) headerIconLoggedOut.style.display = "none";
     if (headerAvatar) {
@@ -7981,7 +9990,7 @@ function updateAuthUI() {
       headerAvatar.textContent = firstInitial;
     }
 
-    if (staticAuthLabel) staticAuthLabel.textContent = state.currentUser.username;
+    if (staticAuthLabel) staticAuthLabel.textContent = state.currentUser.fullName || state.currentUser.username;
     if (staticAuthAvatar) {
       staticAuthAvatar.textContent = firstInitial;
       staticAuthAvatar.style.background = "#22c55e";
@@ -7992,8 +10001,13 @@ function updateAuthUI() {
     if (cardLoggedIn) cardLoggedIn.style.display = "flex";
 
     if (drawerAvatar) drawerAvatar.textContent = firstInitial;
-    if (drawerUsername) drawerUsername.textContent = state.currentUser.username;
-    if (drawerEmail) drawerEmail.textContent = state.currentUser.identifier || state.currentUser.email || "Registered Member";
+    if (drawerUsername) drawerUsername.textContent = state.currentUser.fullName || state.currentUser.username;
+    if (drawerEmail) drawerEmail.textContent = state.currentUser.email || "Registered Member";
+
+    if (loggedOutCont) loggedOutCont.style.display = "none";
+    if (loggedInCont) loggedInCont.style.display = "block";
+    const pName = document.getElementById("profile-user-name");
+    if (pName) pName.textContent = state.currentUser.fullName || state.currentUser.username || "Gaurav Salve";
   } else {
     // Logged Out State
     if (headerIconLoggedOut) headerIconLoggedOut.style.display = "block";
@@ -8008,6 +10022,9 @@ function updateAuthUI() {
 
     if (cardLoggedOut) cardLoggedOut.style.display = "flex";
     if (cardLoggedIn) cardLoggedIn.style.display = "none";
+
+    if (loggedOutCont) loggedOutCont.style.display = "block";
+    if (loggedInCont) loggedInCont.style.display = "none";
   }
 
   // Sync Home Welcome Greeting with active User Name
@@ -8018,7 +10035,7 @@ function updateAuthUI() {
   else if (hour < 17) greetingTimeEn = "Good afternoon";
 
   const currentUserObj = state.currentUser || state.user;
-  let userName = currentUserObj?.displayName || currentUserObj?.username || currentUserObj?.fullName || "";
+  let userName = currentUserObj?.fullName || currentUserObj?.displayName || currentUserObj?.username || "";
   if (!userName) {
     const savedName = localStorage.getItem("rol_user_name") || localStorage.getItem("river_of_life_username");
     if (savedName) userName = savedName;
@@ -8028,6 +10045,9 @@ function updateAuthUI() {
   if (userEl) {
     userEl.textContent = `${greetingTimeEn}, ${userName}`;
   }
+
+  // Synchronize all top-right header and drawer avatars including photo
+  updateAllUserAvatars();
 }
 
 window.toggleDrawerAuth = async function() {
@@ -9334,6 +11354,15 @@ function triggerJoinMeetingFlow(meetingId) {
     logAudioDebug("iOS Device detected. Directing to native top-level call window...", { roomUrl });
     showToast("Opening iOS Video Room (Mic & Speaker Active) 🙏");
     window.location.href = roomUrl;
+    return;
+  }
+
+  // Graceful Handling: Respect saved permission state from onboarding
+  const permPref = localStorage.getItem("rol_media_permissions");
+  if (permPref === "listen_only" || permPref === "skipped") {
+    logAudioDebug("User previously configured listen-only mode. Bypassing redundant media prompt.");
+    showToast("Joining Live Sanctuary in Listen Mode 🎧");
+    launchLiveMeetingRoom(m, null);
     return;
   }
 
@@ -11505,43 +13534,6 @@ window.submitPastoralPrayerRequest = function(e) {
   if (form) form.reset();
 };
 
-/* ==========================================================================
-   AUTHENTIC NATIVE HUMAN AUDIO BIBLE CONTROLLER (100% FLUENT MARATHI & ENGLISH)
-   ========================================================================== */
-
-window.toggleAudioNarration = function() {
-  const fabIcon = document.getElementById("circle-fab-play-icon");
-  const fabBtn = document.getElementById("btn-floating-reader-play-circle");
-
-  // 1. If native human chapter audio is playing, stop it
-  if (isBibleChapterPlaying && bibleChapterAudioPlayer) {
-    if (!bibleChapterAudioPlayer.paused) {
-      bibleChapterAudioPlayer.pause();
-      isBibleChapterPlaying = false;
-      if (fabIcon) fabIcon.innerHTML = `<polygon points="7 4 19 12 7 20 7 4"></polygon>`;
-      if (fabBtn) fabBtn.classList.remove("playing");
-      document.querySelectorAll(".verse-row").forEach(v => v.classList.remove("tts-reading"));
-      return;
-    }
-  }
-
-  // 2. If TTS synthesis is active, stop it
-  if (window.SarvamTTS && window.SarvamTTS.queue && window.SarvamTTS.queue.isPlaying) {
-    stopSpeechNarration();
-    if (fabIcon) fabIcon.innerHTML = `<polygon points="7 4 19 12 7 20 7 4"></polygon>`;
-    if (fabBtn) fabBtn.classList.remove("playing");
-    return;
-  }
-  if (typeof speechSynthesis !== 'undefined' && speechSynthesis.speaking) {
-    stopSpeechNarration();
-    if (fabIcon) fabIcon.innerHTML = `<polygon points="7 4 19 12 7 20 7 4"></polygon>`;
-    if (fabBtn) fabBtn.classList.remove("playing");
-    return;
-  }
-
-  // 3. Start 100% fluent native human narration for this chapter
-  playBibleChapterScripture();
-};
 
 
 /* ==========================================================================
@@ -11742,8 +13734,9 @@ const BIBLE_BOOK_NUMBERS_MAP = {
   "3JN": 64, "JUD": 65, "REV": 66
 };
 
-let bibleChapterAudioPlayer = null;
-let isBibleChapterPlaying = false;
+// bibleChapterAudioPlayer and isBibleChapterPlaying declared earlier at line 3369
+bibleChapterAudioPlayer = bibleChapterAudioPlayer || null;
+isBibleChapterPlaying = isBibleChapterPlaying || false;
 
 let bibleAudioCtx = null;
 let bibleAudioSource = null;
@@ -11776,94 +13769,15 @@ function applyBibleAudioMastering(audioEl, bNum) {
 }
 
 window.playBibleChapterScripture = function() {
-  stopAllAudios();
-
-  const currentBook = state.activeBook || state.currentBook || "genesis";
-  const currentChapter = parseInt(state.activeChapter || state.currentChapter || 1, 10);
-
-  // Resolve book number 1 to 66
-  let bNum = 1;
-  const cleanKey = String(currentBook).toLowerCase().replace(".json", "").trim();
-  const foundMeta = booksMetadataMr.find(b => 
-    b.id === currentBook || 
-    b.filename.replace(".json", "").toLowerCase() === cleanKey ||
-    b.engName.toLowerCase() === cleanKey ||
-    b.name === currentBook
-  );
-
-  if (foundMeta) {
-    bNum = foundMeta.id;
-  } else if (BIBLE_BOOK_NUMBERS_MAP && BIBLE_BOOK_NUMBERS_MAP[String(currentBook).toUpperCase()]) {
-    bNum = BIBLE_BOOK_NUMBERS_MAP[String(currentBook).toUpperCase()];
-  }
-
-  // WordProject language code: 28 for Marathi, 1 for English
-  const isEng = (state.translation === "eng");
-  const langCode = isEng ? 1 : 28;
-  const audioUrl = `https://audio.wordproject.org/bibles/app/audio/${langCode}/${bNum}/${currentChapter}.mp3`;
-
-  bibleChapterAudioPlayer = new Audio(audioUrl);
-  window.activeBibleReaderAudio = bibleChapterAudioPlayer;
-  isBibleChapterPlaying = true;
-
-  // Apply Acoustic Mastering & Cadence Harmonization
-  applyBibleAudioMastering(bibleChapterAudioPlayer, bNum);
-
-  const fabIcon = document.getElementById("circle-fab-play-icon");
-  const fabBtn = document.getElementById("btn-floating-reader-play-circle");
-
-  if (fabIcon) fabIcon.innerHTML = '<rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"></rect>';
-  if (fabBtn) fabBtn.classList.add("playing");
-
-  // Synchronized verse scrolling in reader page
-  bibleChapterAudioPlayer.ontimeupdate = () => {
-    if (!bibleChapterAudioPlayer || !bibleChapterAudioPlayer.duration) return;
-    const progress = bibleChapterAudioPlayer.currentTime / bibleChapterAudioPlayer.duration;
-    const verses = document.querySelectorAll(".verse-row");
-    if (verses.length > 0) {
-      const activeIdx = Math.min(verses.length - 1, Math.floor(progress * verses.length));
-      verses.forEach((v, i) => {
-        v.classList.toggle("tts-reading", i === activeIdx);
-      });
-      if (verses[activeIdx]) {
-        verses[activeIdx].scrollIntoView({ behavior: "smooth", block: "center" });
-      }
-    }
-  };
-
-  bibleChapterAudioPlayer.onended = () => {
-    isBibleChapterPlaying = false;
-    if (fabIcon) fabIcon.innerHTML = '<polygon points="7 4 19 12 7 20 7 4"></polygon>';
-    if (fabBtn) fabBtn.classList.remove("playing");
-    document.querySelectorAll(".verse-row").forEach(v => v.classList.remove("tts-reading"));
-  };
-
-  bibleChapterAudioPlayer.onerror = (err) => {
-    console.warn("Audio load error, falling back to TTS:", err);
-    isBibleChapterPlaying = false;
-    if (typeof startSpeechNarration === "function") {
-      startSpeechNarration();
-    }
-  };
-
-  bibleChapterAudioPlayer.play().catch(e => {
-    console.warn("Autoplay block, tap play again:", e);
-  });
+  startSpeechNarration(0);
 };
 
-// Update stopAllAudios to include bibleChapterAudioPlayer
+// Update stopAllAudios to ensure speech narration stops
 const origStopAllAudios = window.stopAllAudios;
 window.stopAllAudios = function() {
-  if (bibleChapterAudioPlayer) {
-    bibleChapterAudioPlayer.pause();
-    bibleChapterAudioPlayer = null;
+  if (typeof stopSpeechNarration === "function") {
+    stopSpeechNarration();
   }
-  isBibleChapterPlaying = false;
-  document.querySelectorAll(".verse-row").forEach(v => v.classList.remove("tts-reading"));
-  const fabIcon = document.getElementById("circle-fab-play-icon");
-  const fabBtn = document.getElementById("btn-floating-reader-play-circle");
-  if (fabIcon) fabIcon.innerHTML = '<polygon points="7 4 19 12 7 20 7 4"></polygon>';
-  if (fabBtn) fabBtn.classList.remove("playing");
   if (origStopAllAudios) origStopAllAudios();
 };
 
@@ -11886,7 +13800,7 @@ window.switchStoryAudioMode = function(modeVal) {
     if (typeof storyAtmosphere !== 'undefined') storyAtmosphere.playMood("cinematic");
     playStoryScene(0);
   } else if (modeVal === "human_native") {
-    showToast("🎙️ अस्सल मानवी मराठी आवाज (Fluent Native Human Voice) सुरू केला!");
+    // toast hidden per user preference
     if (typeof playHumanMarathiAudio === 'function') {
       playHumanMarathiAudio();
     } else {
@@ -12760,7 +14674,7 @@ window.selectMood = function(moodKey) {
 window.currentSingleAudio = null;
 window.currentAudioButton = null;
 
-window.playSingleVerseAudio = async function(text, btnElement, directAudioSrc) {
+window.playSingleVerseAudio = async function(text, btnElement, directAudioSrc, meta) {
   if (!text || !text.trim()) return;
 
   // Toggle pause only if clicking the SAME button that is already actively playing
@@ -12780,6 +14694,9 @@ window.playSingleVerseAudio = async function(text, btnElement, directAudioSrc) {
     try { window.currentSingleAudio.pause(); } catch(e) {}
     window.currentSingleAudio = null;
   }
+  if (window.speechSynthesis) {
+    try { window.speechSynthesis.cancel(); } catch(e) {}
+  }
   if (window.currentAudioButton && window.currentAudioButton !== btnElement) {
     window.currentAudioButton.innerHTML = `<span>▶ ऐका</span>`;
     window.currentAudioButton = null;
@@ -12790,115 +14707,49 @@ window.playSingleVerseAudio = async function(text, btnElement, directAudioSrc) {
     btnElement.innerHTML = `<span>⏳ लोड होत आहे...</span>`;
   }
 
-  // 1. Direct high-fidelity natural audio file (if provided)
-  if (directAudioSrc) {
-    try {
-      const audio = new Audio(directAudioSrc);
-      window.currentSingleAudio = audio;
-
-      audio.onplay = () => {
-        if (btnElement) btnElement.innerHTML = `<span>⏸ थांबवा</span>`;
-        showToast("🔊 विसावा वाचन सुरू आहे (Natural Devotional Marathi Voice) ✨");
-      };
-
-      audio.onended = () => {
-        if (btnElement) btnElement.innerHTML = `<span>▶ ऐका</span>`;
-        window.currentSingleAudio = null;
-        window.currentAudioButton = null;
-      };
-
-      audio.onerror = () => {
-        console.warn("Direct audio file not found, falling back to neural synthesis...");
-        window.playSingleVerseAudio(text, btnElement, null);
-      };
-
-      await audio.play();
-      return;
-    } catch (e) {
-      console.warn("Direct audio playback failed:", e);
-    }
-  }
-
-  showToast("⏳ ऑडिओ तयार होत आहे (Natural Devotional Marathi Voice)...");
-
-  try {
-    let audioUrl = null;
-    let voiceName = "Manohar HD (Natural Marathi)";
-
-    // Try MultiEngine TTS client (ElevenLabs / Azure / Sarvam)
-    if (window.SarvamTTS && window.SarvamTTS.client && window.SarvamTTS.client.synthesizeText) {
-      try {
-        const res = await window.SarvamTTS.client.synthesizeText(text, {
-          lang: "mr-IN",
-          speaker: (state && state.sarvamVoice) || "gee_elevenlabs"
-        });
-        if (res && res.audioUrl) {
-          audioUrl = res.audioUrl;
-          voiceName = res.voiceName || "Natural Marathi";
-        }
-      } catch (synErr) {
-        console.warn("TTS synthesis error:", synErr);
-      }
-    }
-
-    if (audioUrl) {
-      if (window.currentSingleAudio) {
-        window.currentSingleAudio.pause();
-      }
-      const audio = new Audio(audioUrl);
-      window.currentSingleAudio = audio;
-      
-      if (btnElement) {
-        btnElement.innerHTML = `<span>⏸ थांबवा</span>`;
-      }
-
-      audio.onplay = () => {
-        showToast(`🔊 वाचन सुरू आहे (${voiceName}) ✨`);
-      };
-
-      audio.onended = () => {
-        if (btnElement) {
-          btnElement.innerHTML = `<span>▶ ऐका</span>`;
-        }
-        window.currentSingleAudio = null;
-        window.currentAudioButton = null;
-      };
-
-      audio.onerror = (e) => {
-        console.error("Audio playback error:", e);
-        fallbackBrowserSpeech(text, btnElement);
-      };
-
-      await audio.play();
-      return;
-    }
-  } catch (err) {
-    console.warn("Audio generation error:", err);
-  }
-
+  // Direct Devotional Speech Narration with Scripture Optimizer & Reverent Tone
   fallbackBrowserSpeech(text, btnElement);
 };
 
 function fallbackBrowserSpeech(text, btnElement) {
-  if ('speechSynthesis' in window) {
+  if (btnElement) {
+    btnElement.innerHTML = `<span>⏸ थांबवा</span>`;
+  }
+
+  if (window.SarvamTTS && window.SarvamTTS.client && window.SarvamTTS.client.speakViaWebSpeech) {
+    showToast("🔊 वाचन सुरू आहे (Natural Devotional Marathi Voice) ✨");
+    window.SarvamTTS.client.speakViaWebSpeech(
+      text,
+      { lang: 'mr-IN', pace: 0.86 },
+      function onEnd() {
+        if (btnElement) btnElement.innerHTML = `<span>▶ ऐका</span>`;
+        window.currentAudioButton = null;
+      },
+      function onError() {
+        if (btnElement) btnElement.innerHTML = `<span>▶ ऐका</span>`;
+        window.currentAudioButton = null;
+      }
+    );
+  } else if ('speechSynthesis' in window) {
     window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
+    const cleanText = (window.SarvamTTS && window.SarvamTTS.optimizer)
+      ? window.SarvamTTS.optimizer.optimizeForNarration(text, 'mr-IN')
+      : text;
+    const utterance = new SpeechSynthesisUtterance(cleanText);
     
-    const voices = window.speechSynthesis.getVoices() || [];
+    const voices = (window.speechSynthesis.getVoices && window.speechSynthesis.getVoices()) || [];
     const mrVoice = voices.find(v => v.lang.includes('mr') || v.lang.includes('hi') || v.name.toLowerCase().includes('marathi') || v.name.toLowerCase().includes('hindi') || v.name.toLowerCase().includes('india'));
     if (mrVoice) {
       utterance.voice = mrVoice;
       utterance.lang = mrVoice.lang;
     } else {
-      utterance.lang = "hi-IN";
+      utterance.lang = "mr-IN";
     }
     
-    utterance.rate = 0.88;
-    if (btnElement) {
-      btnElement.innerHTML = `<span>⏸ थांबवा</span>`;
-    }
+    utterance.rate = 0.86;
+    utterance.pitch = 0.88;
     
-    utterance.onstart = () => showToast("🔊 वाचन सुरू आहे...");
+    utterance.onstart = () => showToast("🔊 वाचन सुरू आहे (Devotional Voice)...");
     utterance.onend = () => {
       if (btnElement) {
         btnElement.innerHTML = `<span>▶ ऐका</span>`;
@@ -12909,12 +14760,14 @@ function fallbackBrowserSpeech(text, btnElement) {
       if (btnElement) {
         btnElement.innerHTML = `<span>▶ ऐका</span>`;
       }
-      showToast("Audio playback completed.");
+      window.currentAudioButton = null;
     };
     
     window.speechSynthesis.speak(utterance);
   } else {
     showToast("Audio speech not supported on this browser.");
+    if (btnElement) btnElement.innerHTML = `<span>▶ ऐका</span>`;
+    window.currentAudioButton = null;
   }
 }
 
@@ -12961,41 +14814,69 @@ let isAmbientPlaying = false;
 
 window.switchPrayersSubtab = function(subtab) {
   const btnMeditation = document.getElementById("btn-prayers-subtab-meditation");
+  const btnMeetings = document.getElementById("btn-prayers-subtab-meetings");
   const btnRequests = document.getElementById("btn-prayers-subtab-requests");
   const panelMeditation = document.getElementById("prayers-panel-meditation");
+  const panelMeetings = document.getElementById("prayers-panel-meetings");
   const panelRequests = document.getElementById("prayers-panel-requests");
 
-  if (subtab === "meditation") {
-    if (btnMeditation) {
-      btnMeditation.classList.add("active");
-      btnMeditation.style.background = "var(--primary)";
-      btnMeditation.style.color = "#ffffff";
-      btnMeditation.style.border = "none";
+  const subtabs = [
+    { name: 'meditation', btn: btnMeditation, panel: panelMeditation },
+    { name: 'meetings', btn: btnMeetings, panel: panelMeetings },
+    { name: 'requests', btn: btnRequests, panel: panelRequests }
+  ];
+
+  subtabs.forEach(item => {
+    if (item.name === subtab) {
+      if (item.btn) {
+        item.btn.classList.add("active");
+        item.btn.style.background = "var(--primary)";
+        item.btn.style.color = "#ffffff";
+        item.btn.style.border = "none";
+      }
+      if (item.panel) item.panel.style.display = "block";
+    } else {
+      if (item.btn) {
+        item.btn.classList.remove("active");
+        item.btn.style.background = "var(--bg-content)";
+        item.btn.style.color = "var(--text)";
+        item.btn.style.border = "1.5px solid var(--border)";
+      }
+      if (item.panel) item.panel.style.display = "none";
     }
-    if (btnRequests) {
-      btnRequests.classList.remove("active");
-      btnRequests.style.background = "var(--bg-content)";
-      btnRequests.style.color = "var(--text)";
-      btnRequests.style.border = "1.5px solid var(--border)";
+  });
+};
+
+window.joinPrayerMeetingDirect = function(roomCode, title) {
+  try {
+    if (typeof triggerJoinMeetingFlow === 'function') {
+      const meetings = (typeof getMeetingsFromStorage === 'function') ? getMeetingsFromStorage() : [];
+      let m = meetings.find(x => x.id === roomCode || x.roomId === roomCode);
+      if (!m) {
+        m = {
+          id: roomCode,
+          title: title || 'River of Life Prayer Sanctuary',
+          host: 'River of Life Pastoral Team',
+          time: 'Active Now',
+          status: 'live',
+          roomId: roomCode
+        };
+      }
+      triggerJoinMeetingFlow(m.id || roomCode);
+    } else {
+      showToast(`Connecting to ${title}... 🎥`);
     }
-    if (panelMeditation) panelMeditation.style.display = "block";
-    if (panelRequests) panelRequests.style.display = "none";
-  } else {
-    if (btnRequests) {
-      btnRequests.classList.add("active");
-      btnRequests.style.background = "var(--primary)";
-      btnRequests.style.color = "#ffffff";
-      btnRequests.style.border = "none";
-    }
-    if (btnMeditation) {
-      btnMeditation.classList.remove("active");
-      btnMeditation.style.background = "var(--bg-content)";
-      btnMeditation.style.color = "var(--text)";
-      btnMeditation.style.border = "1.5px solid var(--border)";
-    }
-    if (panelMeditation) panelMeditation.style.display = "none";
-    if (panelRequests) panelRequests.style.display = "block";
+  } catch (e) {
+    console.error(e);
+    showToast(`Joining ${title}... 🎥`);
   }
+};
+
+window.sharePrayerMeetingWhatsApp = function(title, time, roomCode) {
+  const joinUrl = `https://meet.jit.si/RiverOfLife_${roomCode || 'Sanctuary'}`;
+  const text = `🕊️ *River of Life Church Prayer Meeting*\n\n🙏 *${title}*\n🕒 *Time:* ${time}\n\n🎥 *Join Live Video Room:*\n${joinUrl}\n\n_All are welcome to join in prayer and fellowship!_`;
+  const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+  window.open(waUrl, '_blank');
 };
 
 window.toggleAmbientMusic = function() {
@@ -13145,9 +15026,9 @@ const TEN_COMMANDMENTS_DATA = [
 window.playCommandmentAudio = function(cmdIndex, btn) {
   const cmd = TEN_COMMANDMENTS_DATA[cmdIndex];
   if (!cmd) return;
-  const text = `${cmd.num} आज्ञा: ${cmd.titleMr}`;
-  const directPath = `assets/audio/devotional/cmd_${cmdIndex + 1}.mp3`;
-  playSingleVerseAudio(text, btn, directPath);
+  const text = `${cmd.num} आज्ञा: ${cmd.titleMr}... अर्थ: ${cmd.meaning}`;
+  const directPath = `https://audio.wordproject.org/bibles/app/audio/28/2/20.mp3`;
+  playSingleVerseAudio(text, btn, directPath, { bookKey: "exodus", chapter: 20 });
 };
 
 window.toggleTenCommandmentsModal = function() {
@@ -13185,13 +15066,162 @@ window.toggleTenCommandmentsModal = function() {
 };
 
 window.readTenCommandmentsAloud = function(btnElement) {
-  const fullText = "पहिली आज्ञा: माझ्याखेरीज तुला दुसरे देव असू नयेत... दुसरी आज्ञा: आपल्यासाठी कोणतीही कोरलेली मूर्ती करू नको... तिसरी आज्ञा: आपल्या देवाचे नाव व्यर्थ घेऊ नको... चौथी आज्ञा: शब्बाथ वार पवित्र पाळण्यास लक्षात ठेव... पाचवी आज्ञा: आपल्या आईवडिलांचा मान राख... सहावी आज्ञा: मनुष्यघात करू नको... सातवी आज्ञा: व्यभिचार करू नको... आठवी आज्ञा: चोरी करू नको... नववी आज्ञा: आपल्या शेजाऱ्याविरुद्ध खोटी साक्ष देऊ नको... दहावी आज्ञा: आपल्या शेजाऱ्याच्या कोणत्याही गोष्टीचा लोभ धरू नको.";
-  playSingleVerseAudio(fullText, btnElement, "assets/audio/devotional/ten_commandments_complete.mp3");
+  const fullText = "निर्गम २०:१-१७... दहा आज्ञा...";
+  const directPath = "https://audio.wordproject.org/bibles/app/audio/28/2/20.mp3";
+  playSingleVerseAudio(fullText, btnElement, directPath, { bookKey: "exodus", chapter: 20 });
 };
 
 /* ==========================================================================
    DAILY BIBLE VERSE IMAGE STUDIO, GALLERY SAVING & WHATSAPP SHARING
    ========================================================================== */
+window.VOD_TYPOGRAPHY_STYLES = [
+  {
+    id: "golden-grace",
+    name: "सुवर्ण तेज (Gold)",
+    tag: "✦ VERSE OF THE DAY ✦",
+    fontFamily: "'Noto Serif Devanagari', 'Lora', Georgia, serif",
+    fontWeight: "700",
+    textColor: "#ffffff",
+    accentColor: "#fbbf24",
+    quoteColor: "#fbbf24",
+    lineHeight: "1.62",
+    letterSpacing: "0.2px",
+    textShadow: "0 3px 24px rgba(0,0,0,0.98), 0 1px 6px rgba(0,0,0,0.95), 0 0 40px rgba(0,0,0,0.6)"
+  },
+  {
+    id: "celestial-cyan",
+    name: "आकाशी आभा (Cyan)",
+    tag: "✨ जीवन नदी • दैनिक वचन",
+    fontFamily: "'Poppins', 'Outfit', sans-serif",
+    fontWeight: "800",
+    textColor: "#ffffff",
+    accentColor: "#38bdf8",
+    quoteColor: "#38bdf8",
+    lineHeight: "1.58",
+    letterSpacing: "-0.2px",
+    textShadow: "0 3px 24px rgba(0,0,0,0.98), 0 0 25px rgba(56,189,248,0.5), 0 1px 6px rgba(0,0,0,0.95)"
+  },
+  {
+    id: "royal-velvet",
+    name: "राजेशाही प्रीती (Rose)",
+    tag: "🕊️ सार्वकालिक प्रीती",
+    fontFamily: "'Rozha One', 'Noto Serif Devanagari', serif",
+    fontWeight: "700",
+    textColor: "#fff1f2",
+    accentColor: "#f472b6",
+    quoteColor: "#fb7185",
+    lineHeight: "1.65",
+    letterSpacing: "0.3px",
+    textShadow: "0 3px 24px rgba(0,0,0,0.98), 0 0 25px rgba(244,114,182,0.4), 0 1px 6px rgba(0,0,0,0.95)"
+  },
+  {
+    id: "emerald-peace",
+    name: "हरित शांती (Emerald)",
+    tag: "🌿 दैनिक शांती व आशीर्वाद",
+    fontFamily: "'Poppins', 'Noto Sans Devanagari', sans-serif",
+    fontWeight: "700",
+    textColor: "#f0fdf4",
+    accentColor: "#34d399",
+    quoteColor: "#34d399",
+    lineHeight: "1.6",
+    letterSpacing: "0px",
+    textShadow: "0 3px 24px rgba(0,0,0,0.98), 0 0 25px rgba(52,211,153,0.4), 0 1px 6px rgba(0,0,0,0.95)"
+  },
+  {
+    id: "sunset-ember",
+    name: "अग्नि ज्वाला (Sunset)",
+    tag: "🌅 प्रभूचे सामर्थ्य व प्रकाश",
+    fontFamily: "'Noto Serif Devanagari', 'Lora', serif",
+    fontWeight: "800",
+    textColor: "#fffbeb",
+    accentColor: "#fb923c",
+    quoteColor: "#f97316",
+    lineHeight: "1.62",
+    letterSpacing: "0.2px",
+    textShadow: "0 3px 24px rgba(0,0,0,0.98), 0 0 25px rgba(251,146,60,0.45), 0 1px 6px rgba(0,0,0,0.95)"
+  },
+  {
+    id: "pure-pearl",
+    name: "शुभ्र प्रकाश (Minimal)",
+    tag: "✦ HOLY SCRIPTURE ✦",
+    fontFamily: "'Cinzel', 'Outfit', sans-serif",
+    fontWeight: "700",
+    textColor: "#ffffff",
+    accentColor: "#e2e8f0",
+    quoteColor: "#ffffff",
+    lineHeight: "1.6",
+    letterSpacing: "0.5px",
+    textShadow: "0 3px 24px rgba(0,0,0,0.98), 0 1px 6px rgba(0,0,0,0.95)"
+  }
+];
+
+window.currentVodTypographyIndex = 0;
+
+window.applyVodTypographyTheme = function(themeIdx) {
+  if (typeof themeIdx === "number") {
+    window.currentVodTypographyIndex = themeIdx % window.VOD_TYPOGRAPHY_STYLES.length;
+  }
+  const theme = window.VOD_TYPOGRAPHY_STYLES[window.currentVodTypographyIndex || 0];
+  if (!theme) return;
+
+  const cardContainer = document.getElementById("fs-vod-card-container");
+  if (cardContainer) {
+    // Keep transparent - no box or card
+    cardContainer.style.background = "transparent";
+    cardContainer.style.border = "none";
+    cardContainer.style.boxShadow = "none";
+    cardContainer.style.backdropFilter = "none";
+    cardContainer.style.webkitBackdropFilter = "none";
+  }
+
+  const textEl = document.getElementById("fs-vod-text");
+  if (textEl) {
+    textEl.style.fontFamily = theme.fontFamily;
+    textEl.style.fontWeight = theme.fontWeight;
+    textEl.style.color = theme.textColor;
+    textEl.style.textShadow = theme.textShadow;
+    textEl.style.lineHeight = theme.lineHeight || "1.62";
+    textEl.style.letterSpacing = theme.letterSpacing || "normal";
+  }
+
+  const quoteEl = document.getElementById("fs-vod-quote-mark");
+  if (quoteEl) {
+    quoteEl.style.color = theme.quoteColor;
+  }
+
+  const refBadge = document.getElementById("fs-vod-ref-badge");
+  if (refBadge) {
+    refBadge.style.color = theme.accentColor;
+  }
+
+  const badgePill = document.getElementById("fs-vod-badge-pill");
+  if (badgePill) {
+    badgePill.style.color = theme.accentColor;
+    if (theme.tag) badgePill.textContent = theme.tag;
+  }
+
+  const lineLeft = document.getElementById("fs-vod-accent-line-left");
+  if (lineLeft) lineLeft.style.background = theme.accentColor;
+
+  const lineRight = document.getElementById("fs-vod-accent-line-right");
+  if (lineRight) lineRight.style.background = theme.accentColor;
+
+  const themeNameLabel = document.getElementById("fs-vod-theme-name");
+  if (themeNameLabel) {
+    themeNameLabel.textContent = theme.name;
+  }
+};
+
+window.cycleVodTypographyTheme = function(showFeedback = true) {
+  const count = window.VOD_TYPOGRAPHY_STYLES.length;
+  window.currentVodTypographyIndex = ((window.currentVodTypographyIndex || 0) + 1) % count;
+  applyVodTypographyTheme(window.currentVodTypographyIndex);
+  const theme = window.VOD_TYPOGRAPHY_STYLES[window.currentVodTypographyIndex];
+  if (showFeedback && typeof showToast === "function") {
+    showToast(`🎨 फॉन्ट व डिझाईन: ${theme.name}`);
+  }
+};
+
 window.openFullscreenVOD = function() {
   const modal = document.getElementById("modal-fullscreen-vod");
   if (!modal) return;
@@ -13207,10 +15237,13 @@ window.openFullscreenVOD = function() {
   const displayText = (state.translation === "eng") ? vod.engText : vod.text;
 
   const fsTextEl = document.getElementById("fs-vod-text");
-  if (fsTextEl) fsTextEl.textContent = `"${displayText}"`;
+  if (fsTextEl) fsTextEl.textContent = displayText;
 
   const fsRefEl = document.getElementById("fs-vod-ref");
   if (fsRefEl) fsRefEl.textContent = `${displayRef} ${state.translation === "eng" ? "NLT" : "MARVBSI"}`;
+
+  const fsRefBadge = document.getElementById("fs-vod-ref-badge");
+  if (fsRefBadge) fsRefBadge.textContent = `${displayRef} ${state.translation === "eng" ? "NLT" : "MARVBSI"}`;
 
   const images = (window.dailyVersesImageList && window.dailyVersesImageList.length > 0) ? window.dailyVersesImageList : [
     'stars.png', 'forest.png', 'mist.png', 'mountains.png', 'mount_zion.png', 'ocean.png', 'path.png', 'sunrise.png'
@@ -13227,6 +15260,15 @@ window.openFullscreenVOD = function() {
 
   const fsBgEl = document.getElementById("fs-vod-capsule-bg");
   if (fsBgEl) fsBgEl.style.backgroundImage = `url('${imgUrl}')`;
+
+  const thumbImg = document.getElementById("vod-thumbnail-preview");
+  if (thumbImg) thumbImg.src = imgUrl;
+
+  const menu = document.getElementById("vod-more-options-menu");
+  if (menu) menu.style.display = "none";
+
+  // Apply typography styling
+  applyVodTypographyTheme();
 };
 
 window.closeFullscreenVOD = function() {
@@ -13236,6 +15278,17 @@ window.closeFullscreenVOD = function() {
     modal.classList.remove("active");
     modal.style.opacity = "0";
     modal.style.pointerEvents = "none";
+  }
+};
+
+window.toggleVodOptionsMenu = function() {
+  const menu = document.getElementById("vod-more-options-menu");
+  if (menu) {
+    if (menu.style.display === "none" || !menu.style.display) {
+      menu.style.display = "flex";
+    } else {
+      menu.style.display = "none";
+    }
   }
 };
 
@@ -13252,32 +15305,20 @@ window.cycleVodWallpaper = function() {
   const dailyImg = images[window.currentVodImageIndex];
   const imgUrl = (typeof getVodImageUrl === "function") ? getVodImageUrl(dailyImg) : (dailyImg.includes('.') ? `assets/daily_verses/${dailyImg}` : `assets/daily_verses/${dailyImg}.png`);
 
-  const bgHome = document.getElementById("vod-dynamic-bg");
+  const bgHome = document.getElementById("card-daily-verse-home");
   if (bgHome) bgHome.style.backgroundImage = `url('${imgUrl}')`;
 
   const fsBgEl = document.getElementById("fs-vod-capsule-bg");
   if (fsBgEl) fsBgEl.style.backgroundImage = `url('${imgUrl}')`;
 
-  showToast(`🎨 Wallpaper: ${dailyImg.replace('.png', '')}`);
-};
+  const thumbImg = document.getElementById("vod-thumbnail-preview");
+  if (thumbImg) thumbImg.src = imgUrl;
 
-window.cycleVodWallpaper = function() {
-  const images = (window.dailyVersesImageList && window.dailyVersesImageList.length > 0) ? window.dailyVersesImageList : [
-    'stars.png', 'forest.png', 'mist.png', 'mountains.png', 'mount_zion.png', 'ocean.png', 'path.png', 'sunrise.png'
-  ];
-  if (typeof window.currentVodImageIndex !== 'number') window.currentVodImageIndex = 0;
-  window.currentVodImageIndex = (window.currentVodImageIndex + 1) % images.length;
-  
-  const dailyImg = images[window.currentVodImageIndex];
-  const imgUrl = (typeof getVodImageUrl === "function") ? getVodImageUrl(dailyImg) : (dailyImg.includes('.') ? `assets/daily_verses/${dailyImg}` : `assets/daily_verses/${dailyImg}.png`);
+  // Change font, design, bold weight, and color palette automatically when changing image
+  cycleVodTypographyTheme(false);
+  const activeTheme = window.VOD_TYPOGRAPHY_STYLES[window.currentVodTypographyIndex || 0];
 
-  const bgHome = document.getElementById("vod-dynamic-bg");
-  if (bgHome) bgHome.style.backgroundImage = `url('${imgUrl}')`;
-
-  const fsBgEl = document.getElementById("fs-vod-capsule-bg");
-  if (fsBgEl) fsBgEl.style.backgroundImage = `url('${imgUrl}')`;
-
-  showToast(`🎨 Wallpaper Changed: ${dailyImg.replace('.png', '')}`);
+  showToast(`🖼️ वॉलपेपर व डिझाईन: ${activeTheme.name}`);
 };
 
 window.navigateVOD = function(dir) {
@@ -13290,8 +15331,11 @@ window.navigateVOD = function(dir) {
   openFullscreenVOD();
 };
 
+// Global state for last rendered verse image
+window._currentRenderedVodImage = null;
+
 window.generateExactVerseImageBlob = function() {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve) => {
     const { vod, dayOfYear, offset } = getCurrentVOD();
     const displayRef = (state.translation === "eng") ? vod.engRef : vod.ref;
     const displayText = (state.translation === "eng") ? vod.engText : vod.text;
@@ -13303,153 +15347,300 @@ window.generateExactVerseImageBlob = function() {
     const dailyImg = images[imgIdx];
     const imgUrl = (typeof getVodImageUrl === "function") ? getVodImageUrl(dailyImg) : (dailyImg.includes('.') ? `assets/daily_verses/${dailyImg}` : `assets/daily_verses/${dailyImg}.png`);
 
+    const theme = (window.VOD_TYPOGRAPHY_STYLES && window.VOD_TYPOGRAPHY_STYLES[window.currentVodTypographyIndex || 0]) ? window.VOD_TYPOGRAPHY_STYLES[window.currentVodTypographyIndex || 0] : {
+      name: "Gold",
+      tag: "✦ VERSE OF THE DAY ✦",
+      textColor: "#ffffff",
+      accentColor: "#fbbf24",
+      quoteColor: "#fbbf24",
+      fontWeight: "700"
+    };
+
+    // Ensure web fonts are completely ready before measuring text
+    if (document.fonts && document.fonts.ready) {
+      try {
+        await document.fonts.ready;
+      } catch (e) {}
+    }
+
     const canvas = document.createElement("canvas");
     canvas.width = 1080;
-    canvas.height = 1350; // Perfect 4:5 Instagram/WhatsApp portrait ratio
+    canvas.height = 1920; // 9:16 WhatsApp Status, Story & Fullscreen Mobile Wallpapers
     const ctx = canvas.getContext("2d");
 
-    const bgImg = new Image();
-    bgImg.crossOrigin = "anonymous";
-    bgImg.onload = function() {
-      // 1. Draw Background Image with Aspect Fill
-      const scale = Math.max(canvas.width / bgImg.width, canvas.height / bgImg.height);
-      const x = (canvas.width / 2) - (bgImg.width / 2) * scale;
-      const y = (canvas.height / 2) - (bgImg.height / 2) * scale;
-      ctx.drawImage(bgImg, x, y, bgImg.width * scale, bgImg.height * scale);
+    // Helper to asynchronously preload images
+    const loadImage = (src) => new Promise((res) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => res(img);
+      img.onerror = () => res(null);
+      img.src = src;
+      setTimeout(() => res(null), 2500);
+    });
 
-      // 2. Draw Luxurious Dark Gradient Overlay
-      const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-      grad.addColorStop(0, 'rgba(0, 0, 0, 0.55)');
-      grad.addColorStop(0.35, 'rgba(0, 0, 0, 0.25)');
-      grad.addColorStop(0.7, 'rgba(0, 0, 0, 0.65)');
-      grad.addColorStop(1, 'rgba(0, 0, 0, 0.92)');
-      ctx.fillStyle = grad;
+    const [bgImg, logoImg] = await Promise.all([
+      loadImage(imgUrl),
+      loadImage("assets/icons/logo-transparent.png")
+    ]);
+
+    function drawCelestialFallback() {
+      const bgGrad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+      bgGrad.addColorStop(0, '#1e1b4b');
+      bgGrad.addColorStop(0.5, '#312e81');
+      bgGrad.addColorStop(1, '#0f172a');
+      ctx.fillStyle = bgGrad;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
 
-      // 3. Top Decorative Header Pill
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-
-      // Pill Background
-      ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
-      ctx.beginPath();
-      ctx.roundRect(canvas.width / 2 - 180, 110, 360, 52, 26);
-      ctx.fill();
-      ctx.strokeStyle = "rgba(245, 158, 11, 0.6)";
-      ctx.lineWidth = 2;
-      ctx.stroke();
-
-      // Pill Text
-      ctx.fillStyle = "#f59e0b";
-      ctx.font = "800 20px 'Outfit', -apple-system, sans-serif";
-      ctx.fillText("✝ VERSE OF THE DAY • दैनिक वचन", canvas.width / 2, 136);
-
-      // 4. Scripture Verse Text (Devanagari / English)
-      ctx.fillStyle = "#ffffff";
-      ctx.font = "700 48px 'Noto Serif Devanagari', 'Lora', Georgia, serif";
-      ctx.shadowColor = "rgba(0, 0, 0, 0.9)";
-      ctx.shadowBlur = 18;
-      ctx.shadowOffsetX = 0;
-      ctx.shadowOffsetY = 3;
-
-      const text = `"${displayText}"`;
-      const maxWidth = 900;
-      const lineHeight = 76;
-      
-      const words = text.split(" ");
-      let line = "";
-      let lines = [];
-
-      for (let n = 0; n < words.length; n++) {
-        let testLine = line + words[n] + " ";
-        let metrics = ctx.measureText(testLine);
-        if (metrics.width > maxWidth && n > 0) {
-          lines.push(line.trim());
-          line = words[n] + " ";
-        } else {
-          line = testLine;
-        }
+    // 1. Draw Background Image
+    if (bgImg) {
+      try {
+        const scale = Math.max(canvas.width / bgImg.width, canvas.height / bgImg.height);
+        const x = (canvas.width - bgImg.width * scale) / 2;
+        const y = (canvas.height - bgImg.height * scale) / 2;
+        ctx.drawImage(bgImg, x, y, bgImg.width * scale, bgImg.height * scale);
+      } catch (e) {
+        drawCelestialFallback();
       }
-      lines.push(line.trim());
+    } else {
+      drawCelestialFallback();
+    }
 
-      const startY = (canvas.height / 2) - ((lines.length - 1) * lineHeight) / 2 - 20;
-      for (let i = 0; i < lines.length; i++) {
-        ctx.fillText(lines[i], canvas.width / 2, startY + (i * lineHeight));
+    // 2. Artistic Vignette & Gradient Overlay (Protects legibility across all backgrounds)
+    const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    grad.addColorStop(0, 'rgba(0, 0, 0, 0.55)');
+    grad.addColorStop(0.2, 'rgba(0, 0, 0, 0.35)');
+    grad.addColorStop(0.5, 'rgba(0, 0, 0, 0.48)');
+    grad.addColorStop(0.8, 'rgba(0, 0, 0, 0.65)');
+    grad.addColorStop(1, 'rgba(0, 0, 0, 0.90)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // 3. Multi-Line Text Layout with Safe Margins & Perfect Centering
+    const centerX = canvas.width / 2;
+    const textMaxWidth = 840; // 120px safe padding on each side
+
+    // Dynamic font sizing for long / short scriptures
+    let fontSize = 48;
+    if (displayText.length > 220) fontSize = 38;
+    else if (displayText.length > 160) fontSize = 42;
+    else if (displayText.length > 110) fontSize = 46;
+
+    const fontFamily = "'Noto Serif Devanagari', 'Poppins', Georgia, serif";
+    ctx.font = `${theme.fontWeight || '700'} ${fontSize}px ${fontFamily}`;
+
+    const words = displayText.split(/\s+/);
+    let currentLine = "";
+    const lines = [];
+    for (let n = 0; n < words.length; n++) {
+      const testLine = currentLine ? `${currentLine} ${words[n]}` : words[n];
+      const metrics = ctx.measureText(testLine);
+      if (metrics.width > textMaxWidth && currentLine) {
+        lines.push(currentLine);
+        currentLine = words[n];
+      } else {
+        currentLine = testLine;
       }
+    }
+    if (currentLine) lines.push(currentLine);
 
-      // Reset Shadows
-      ctx.shadowColor = "transparent";
-      ctx.shadowBlur = 0;
+    const lineHeight = Math.round(fontSize * 1.65);
+    const textBlockHeight = lines.length * lineHeight;
+    const tagHeight = 44;
+    const quoteHeight = 56;
+    const refHeight = 52;
+    const totalContentHeight = tagHeight + quoteHeight + textBlockHeight + refHeight + 40;
 
-      // 5. Scripture Reference Tag
-      const refY = startY + (lines.length * lineHeight) + 40;
-      ctx.fillStyle = "#fbbf24";
-      ctx.font = "800 32px 'Outfit', -apple-system, sans-serif";
-      ctx.shadowColor = "rgba(0, 0, 0, 0.8)";
-      ctx.shadowBlur = 10;
-      ctx.fillText(`${displayRef} • ${state.translation === 'eng' ? 'NLT' : 'MARVBSI'}`, canvas.width / 2, refY);
+    // Center in visual golden zone (upper-middle)
+    let startY = (canvas.height - totalContentHeight) / 2 - 40;
 
-      // 6. Bottom River of Life Branding & Watermark
-      ctx.shadowColor = "transparent";
-      ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
-      ctx.font = "600 22px 'Outfit', sans-serif";
-      ctx.fillText("River of Life Bible • जीवन नदी बायबल ॲप", canvas.width / 2, canvas.height - 90);
+    // 3a. Top Tag
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = theme.accentColor || "#fbbf24";
+    ctx.font = "800 22px 'Outfit', sans-serif";
+    ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
+    ctx.shadowBlur = 14;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 2;
+    ctx.fillText(theme.tag || "✦ VERSE OF THE DAY ✦", centerX, startY);
+    startY += tagHeight;
 
-      // Gold Divider Line at Bottom
-      ctx.strokeStyle = "rgba(245, 158, 11, 0.5)";
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(canvas.width / 2 - 60, canvas.height - 125);
-      ctx.lineTo(canvas.width / 2 + 60, canvas.height - 125);
-      ctx.stroke();
+    // 3b. Quotation Mark
+    ctx.fillStyle = theme.quoteColor || theme.accentColor || "#fbbf24";
+    ctx.font = "700 80px Georgia, serif";
+    ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
+    ctx.shadowBlur = 18;
+    ctx.fillText("“", centerX, startY + 12);
+    startY += quoteHeight;
 
-      canvas.toBlob((blob) => {
-        if (blob) {
-          resolve({
-            blob: blob,
-            dataUrl: canvas.toDataURL("image/png"),
-            filename: `River_of_Life_Daily_Verse_${displayRef.replace(/[: ]/g, "_")}.png`
-          });
-        } else {
-          reject(new Error("Canvas blob generation failed"));
-        }
-      }, "image/png", 0.95);
-    };
+    // 3c. Verse Body
+    ctx.fillStyle = theme.textColor || "#ffffff";
+    ctx.font = `${theme.fontWeight || '700'} ${fontSize}px ${fontFamily}`;
+    ctx.shadowColor = "rgba(0, 0, 0, 0.98)";
+    ctx.shadowBlur = 24;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 4;
 
-    bgImg.onerror = function() {
-      // Fallback solid gradient canvas if image fails
-      ctx.fillStyle = "#1e1b4b";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      canvas.toBlob((blob) => {
-        resolve({
-          blob: blob,
-          dataUrl: canvas.toDataURL("image/png"),
-          filename: `River_of_Life_Daily_Verse.png`
-        });
+    for (let i = 0; i < lines.length; i++) {
+      ctx.fillText(lines[i], centerX, startY + (i * lineHeight));
+    }
+    startY += textBlockHeight + 28;
+
+    // 3d. Scripture Reference with Accent Lines
+    const refText = `${displayRef} ${state.translation === 'eng' ? 'NLT' : 'MARVBSI'}`;
+    ctx.font = "800 30px 'Outfit', sans-serif";
+    const refWidth = ctx.measureText(refText).width;
+
+    ctx.strokeStyle = theme.accentColor || "#fbbf24";
+    ctx.lineWidth = 2.5;
+    const lineLen = 54;
+    const gap = 18;
+
+    ctx.beginPath();
+    ctx.moveTo(centerX - (refWidth / 2) - gap - lineLen, startY);
+    ctx.lineTo(centerX - (refWidth / 2) - gap, startY);
+    ctx.moveTo(centerX + (refWidth / 2) + gap, startY);
+    ctx.lineTo(centerX + (refWidth / 2) + gap + lineLen, startY);
+    ctx.stroke();
+
+    ctx.fillStyle = theme.accentColor || "#fbbf24";
+    ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
+    ctx.shadowBlur = 14;
+    ctx.fillText(refText, centerX, startY);
+
+    // Reset shadows
+    ctx.shadowColor = "transparent";
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+
+    // 4. WATERMARK & LOGO IN BOTTOM RIGHT CORNER (User Request)
+    const badgeW = 340;
+    const badgeH = 84;
+    const badgeX = canvas.width - badgeW - 48;
+    const badgeY = canvas.height - badgeH - 64; // Safe from WhatsApp send button & system bars
+
+    ctx.save();
+    ctx.fillStyle = "rgba(15, 23, 42, 0.75)";
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.22)";
+    ctx.lineWidth = 1.5;
+
+    ctx.beginPath();
+    if (typeof ctx.roundRect === 'function') {
+      ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 22);
+    } else {
+      ctx.rect(badgeX, badgeY, badgeW, badgeH);
+    }
+    ctx.fill();
+    ctx.stroke();
+
+    if (logoImg) {
+      const logoSize = 60;
+      ctx.shadowColor = "rgba(0, 0, 0, 0.4)";
+      ctx.shadowBlur = 8;
+      ctx.drawImage(logoImg, badgeX + 14, badgeY + (badgeH - logoSize) / 2, logoSize, logoSize);
+    }
+
+    ctx.shadowColor = "transparent";
+    ctx.textAlign = "left";
+    ctx.textBaseline = "top";
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "800 20px 'Outfit', sans-serif";
+    ctx.fillText("River of Life Bible", badgeX + 88, badgeY + 18);
+
+    ctx.fillStyle = "rgba(251, 191, 36, 0.92)"; // Brand Gold
+    ctx.font = "700 16px 'Noto Serif Devanagari', sans-serif";
+    ctx.fillText("जीवन नदी बायबल ॲप", badgeX + 88, badgeY + 46);
+
+    ctx.restore();
+
+    const filename = `River_of_Life_Daily_Verse_${displayRef.replace(/[: ]/g, "_")}.png`;
+    const dataUrl = canvas.toDataURL("image/png");
+
+    canvas.toBlob((blob) => {
+      resolve({
+        blob: blob || new Blob([], { type: "image/png" }),
+        dataUrl: dataUrl,
+        filename: filename
       });
-    };
-
-    bgImg.src = imgUrl;
+    }, "image/png", 0.95);
   });
 };
 
 window.saveExactDailyVerseImage = async function() {
   try {
     showToast("⏳ फोटो गॅलरीसाठी तयार होत आहे...");
-    const { dataUrl, filename } = await generateExactVerseImageBlob();
-    
+    const result = await generateExactVerseImageBlob();
+    window._currentRenderedVodImage = result;
+
+    // 1. Direct Anchor Download Trigger
+    const link = document.createElement("a");
+    link.href = result.dataUrl;
+    link.download = result.filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // 2. Open Preview & Direct Save Modal
+    openImagePreviewModal(result.dataUrl, result.filename, result.blob);
+    showToast("📥 फोटो गॅलरीमध्ये सेव्ह झाला! (Saved to Gallery)");
+
+    // 3. Try Native Web Share API with File (on supported mobile devices)
+    if (navigator.canShare && navigator.canShare({ files: [new File([result.blob], result.filename, { type: "image/png" })] })) {
+      const file = new File([result.blob], result.filename, { type: "image/png" });
+      try {
+        await navigator.share({
+          title: `River of Life - Daily Verse`,
+          text: `📖 ${result.filename}`,
+          files: [file]
+        });
+      } catch (shareErr) {
+        // User dismissed share dialog
+      }
+    }
+
+  } catch (err) {
+    console.error("Save image error:", err);
+    showToast("Image generation complete.");
+  }
+};
+
+window.openImagePreviewModal = function(dataUrl, filename, blob) {
+  const modal = document.getElementById("modal-image-preview-save");
+  const img = document.getElementById("vod-preview-rendered-img");
+  if (modal && img) {
+    img.src = dataUrl;
+    modal.classList.add("active");
+    modal.style.display = "flex";
+  }
+};
+
+window.closeImagePreviewModal = function() {
+  const modal = document.getElementById("modal-image-preview-save");
+  if (modal) {
+    modal.classList.remove("active");
+    modal.style.display = "none";
+  }
+};
+
+window.downloadRenderedVodImage = function() {
+  if (window._currentRenderedVodImage) {
+    const { dataUrl, filename } = window._currentRenderedVodImage;
     const link = document.createElement("a");
     link.href = dataUrl;
     link.download = filename;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-
-    showToast("📥 फोटो गॅलरीमध्ये सेव्ह झाला! (Saved to Gallery)");
-  } catch (err) {
-    console.error("Save image error:", err);
-    showToast("Image save failed. Please try again.");
+    showToast("📥 फोटो डाउनलोड सुरू झाला!");
   }
+};
+
+window.shareRenderedVodImage = function() {
+  closeImagePreviewModal();
+  shareDailyVerseToWhatsApp();
 };
 
 window.shareDailyVerseToWhatsApp = async function() {
@@ -13458,12 +15649,13 @@ window.shareDailyVerseToWhatsApp = async function() {
     const displayRef = (state.translation === "eng") ? vod.engRef : vod.ref;
     const displayText = (state.translation === "eng") ? vod.engText : vod.text;
     
-    const shareText = `📖 आजचे दैनिक वचन (Verse of the Day)\n\n"${displayText}"\n— ${displayRef} (${state.translation === 'eng' ? 'NLT' : 'MARVBSI'})\n\nजीवन नदी बायबल ॲपवरून सामायिक केले 🙏✨`;
+    const shareText = `📖 आजचे दैनिक वचन (Verse of the Day)\n\n"${displayText}"\n— ${displayRef} (${state.translation === 'eng' ? 'NLT' : 'MARVBSI'})\n\nजीवन नदी बायबल ॲपवरून सामायिक केले 🙏✨\nhttps://gauravsalve236-lgtm.github.io/River-of-life/`;
 
     showToast("⏳ व्हॉट्सॲपसाठी फोटो तयार होत आहे...");
     const { blob, filename, dataUrl } = await generateExactVerseImageBlob();
+    window._currentRenderedVodImage = { blob, filename, dataUrl };
 
-    // 1. Try Native Web Share API with File (Works on Android/iOS WhatsApp Status)
+    // 1. Try Native Web Share API with File (Direct WhatsApp share on mobile)
     if (navigator.canShare && navigator.canShare({ files: [new File([blob], filename, { type: "image/png" })] })) {
       const file = new File([blob], filename, { type: "image/png" });
       await navigator.share({
@@ -13493,7 +15685,7 @@ window.shareDailyVerseToWhatsApp = async function() {
     const { vod } = getCurrentVOD();
     const displayRef = (state.translation === "eng") ? vod.engRef : vod.ref;
     const displayText = (state.translation === "eng") ? vod.engText : vod.text;
-    const shareText = `📖 "${displayText}" — ${displayRef} 🙏✨`;
+    const shareText = `📖 "${displayText}" — ${displayRef} 🙏✨\nhttps://gauravsalve236-lgtm.github.io/River-of-life/`;
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`, "_blank");
   }
 };
@@ -13514,15 +15706,943 @@ window.copyDailyVerseText = function() {
   }
 };
 
+/* ==========================================================================
+   DAILY VERSE NOTIFICATION REMINDERS SYSTEM
+   ========================================================================== */
+window.openNotificationSettingsModal = function() {
+  if (typeof openModal === "function") {
+    openModal("modal-notification-settings");
+  } else {
+    const modal = document.getElementById("modal-notification-settings");
+    if (modal) {
+      modal.classList.add("active");
+      modal.style.display = "flex";
+    }
+  }
+  const savedTime = localStorage.getItem("rol_notif_time") || "07:00";
+  const savedEnabled = localStorage.getItem("rol_notif_enabled") !== "false";
+  const timeInput = document.getElementById("notif-time-picker");
+  const toggle = document.getElementById("notif-toggle-enable");
+  if (timeInput) timeInput.value = savedTime;
+  if (toggle) {
+    toggle.checked = savedEnabled;
+    handleNotificationToggleChange(savedEnabled);
+  }
+};
+
+window.closeNotificationSettingsModal = function() {
+  if (typeof closeModal === "function") {
+    closeModal("modal-notification-settings");
+  } else {
+    const modal = document.getElementById("modal-notification-settings");
+    if (modal) {
+      modal.classList.remove("active");
+      modal.style.display = "none";
+    }
+  }
+};
+
+window.handleNotificationToggleChange = function(enabled) {
+  const slider = document.getElementById("notif-toggle-slider");
+  const knob = document.getElementById("notif-toggle-knob");
+  if (slider && knob) {
+    if (enabled) {
+      slider.style.backgroundColor = "#22c55e";
+      knob.style.left = "25px";
+    } else {
+      slider.style.backgroundColor = "#9CA3AF";
+      knob.style.left = "3px";
+    }
+  }
+};
+
+window.saveNotificationSettings = async function() {
+  const toggle = document.getElementById("notif-toggle-enable");
+  const timeInput = document.getElementById("notif-time-picker");
+  const langSelect = document.getElementById("notif-lang-select");
+
+  const enabled = toggle ? toggle.checked : true;
+  const time = timeInput ? timeInput.value : "07:00";
+  const lang = langSelect ? langSelect.value : "mr";
+
+  localStorage.setItem("rol_notif_enabled", enabled ? "true" : "false");
+  localStorage.setItem("rol_notif_time", time);
+  localStorage.setItem("rol_notif_lang", lang);
+
+  if (enabled && "Notification" in window) {
+    if (Notification.permission !== "granted") {
+      try {
+        await Notification.requestPermission();
+      } catch (e) {
+        console.error("Notification permission error:", e);
+      }
+    }
+  }
+
+  closeNotificationSettingsModal();
+  showToast(enabled ? `🔔 दैनिक सूचना सकाळी ${time} वाजता सेट केली!` : "🔕 दैनिक सूचना बंद केली");
+};
+
+window.sendTestVerseNotification = async function() {
+  const { vod } = getCurrentVOD();
+  const langSelect = document.getElementById("notif-lang-select");
+  const lang = (langSelect ? langSelect.value : "mr");
+  const title = (lang === "eng") ? `📖 Daily Verse - ${vod.engRef}` : `📖 आजचे दैनिक वचन - ${vod.ref}`;
+  const body = (lang === "eng") ? vod.engText : vod.text;
+
+  if ("Notification" in window) {
+    if (Notification.permission === "granted") {
+      new Notification(title, {
+        body: body,
+        icon: "assets/icons/icon-192.png",
+        badge: "assets/icons/icon-192.png"
+      });
+      showToast("🔔 चाचणी सूचना पाठवली!");
+    } else {
+      const permission = await Notification.requestPermission();
+      if (permission === "granted") {
+        new Notification(title, {
+          body: body,
+          icon: "assets/icons/icon-192.png"
+        });
+        showToast("🔔 चाचणी सूचना पाठवली!");
+      } else {
+        showToast("कृपया ब्राउझरमध्ये Notification परवानगी द्या.");
+      }
+    }
+  } else {
+    showToast(`🔔 ${title}\n${body.substring(0, 60)}...`);
+  }
+};
+
+/* ==========================================================================
+   MOBILE HOME SCREEN WIDGET STUDIO & GUIDE SYSTEM
+   ========================================================================== */
+window.openWidgetGuideModal = function() {
+  if (typeof openModal === "function") {
+    openModal("modal-widget-guide");
+  } else {
+    const modal = document.getElementById("modal-widget-guide");
+    if (modal) {
+      modal.classList.add("active");
+      modal.style.display = "flex";
+    }
+  }
+  updateWidgetLivePreview();
+};
+
+window.closeWidgetGuideModal = function() {
+  if (typeof closeModal === "function") {
+    closeModal("modal-widget-guide");
+  } else {
+    const modal = document.getElementById("modal-widget-guide");
+    if (modal) {
+      modal.classList.remove("active");
+      modal.style.display = "none";
+    }
+  }
+};
+
+window.selectWidgetSize = function(size) {
+  const tabCompact = document.getElementById("tab-widget-compact");
+  const tabWide = document.getElementById("tab-widget-wide");
+  const tabSanctuary = document.getElementById("tab-widget-sanctuary");
+
+  [tabCompact, tabWide, tabSanctuary].forEach(t => {
+    if (t) {
+      t.style.background = "transparent";
+      t.style.color = "#6B7280";
+      t.style.fontWeight = "700";
+      t.style.boxShadow = "none";
+    }
+  });
+
+  const activeTab = document.getElementById(`tab-widget-${size}`);
+  if (activeTab) {
+    activeTab.style.background = "#FFFFFF";
+    activeTab.style.color = "#1F2937";
+    activeTab.style.fontWeight = "800";
+    activeTab.style.boxShadow = "0 2px 6px rgba(0,0,0,0.08)";
+  }
+
+  const previewBox = document.getElementById("widget-live-preview-box");
+  const verseText = document.getElementById("widget-preview-verse-text");
+  const { vod } = getCurrentVOD();
+  const text = (state.translation === "eng") ? vod.engText : vod.text;
+  const ref = (state.translation === "eng") ? vod.engRef : vod.ref;
+
+  if (previewBox && verseText) {
+    if (size === "compact") {
+      previewBox.style.minHeight = "120px";
+      verseText.textContent = `"${text.length > 75 ? text.substring(0, 75) + '...' : text}"`;
+      verseText.style.fontSize = "13.5px";
+    } else if (size === "wide") {
+      previewBox.style.minHeight = "160px";
+      verseText.textContent = `"${text}"`;
+      verseText.style.fontSize = "14.5px";
+    } else if (size === "sanctuary") {
+      previewBox.style.minHeight = "210px";
+      verseText.textContent = `"${text}"`;
+      verseText.style.fontSize = "15.5px";
+    }
+  }
+};
+
+window.updateWidgetLivePreview = function() {
+  const { vod } = getCurrentVOD();
+  const verseText = document.getElementById("widget-preview-verse-text");
+  const verseRef = document.getElementById("widget-preview-verse-ref");
+  if (verseText && verseRef) {
+    verseText.textContent = `"${(state.translation === 'eng') ? vod.engText : vod.text}"`;
+    verseRef.textContent = `${(state.translation === 'eng') ? vod.engRef : vod.ref} ${state.translation === 'eng' ? 'NLT' : 'MARVBSI'}`;
+  }
+};
+
+window.switchWidgetGuideOS = function(os) {
+  const btnIos = document.getElementById("btn-guide-ios");
+  const btnAndroid = document.getElementById("btn-guide-android");
+  const contentIos = document.getElementById("widget-guide-content-ios");
+  const contentAndroid = document.getElementById("widget-guide-content-android");
+
+  if (os === "ios") {
+    if (btnIos) {
+      btnIos.style.background = "#1F2937";
+      btnIos.style.color = "#FFFFFF";
+      btnIos.style.border = "none";
+    }
+    if (btnAndroid) {
+      btnAndroid.style.background = "transparent";
+      btnAndroid.style.color = "#4B5563";
+      btnAndroid.style.border = "1px solid #D1D5DB";
+    }
+    if (contentIos) contentIos.style.display = "block";
+    if (contentAndroid) contentAndroid.style.display = "none";
+  } else {
+    if (btnAndroid) {
+      btnAndroid.style.background = "#1F2937";
+      btnAndroid.style.color = "#FFFFFF";
+      btnAndroid.style.border = "none";
+    }
+    if (btnIos) {
+      btnIos.style.background = "transparent";
+      btnIos.style.color = "#4B5563";
+      btnIos.style.border = "1px solid #D1D5DB";
+    }
+    if (contentIos) contentIos.style.display = "none";
+    if (contentAndroid) contentAndroid.style.display = "block";
+  }
+};
+
+window.copyWidgetFeedUrl = function() {
+  const feedUrl = `${window.location.origin}${window.location.pathname.replace('index.html', '')}api/daily_verse.json`;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(feedUrl).then(() => {
+      showToast("📋 Live JSON Feed URL कॉपी झाली!");
+    });
+  } else {
+    showToast(`Feed URL: ${feedUrl}`);
+  }
+};
+
 
 /* ==========================================================================
    RIVER OF LIFE 3-CARD SPIRITUAL FLOW LOGIC (HEADWATERS, CONFLUENCE, RESET)
    ========================================================================== */
 
-// 1. THE HEADWATERS MODAL LOGIC (ELEVATED SLEEK AUDIO TRACK & PROGRESS)
+// 1. THE HEADWATERS: DYNAMIC 31-DAY GUIDED PRAYER DATABASE
+const DAILY_HEADWATERS_PRAYERS = [
+  {
+    "id": 1,
+    "themeMr": "दैवी कृपा व नवी सुरुवात",
+    "themeEn": "Divine Grace & Fresh Beginnings",
+    "refMr": "विलापगीते ३:२२-२३",
+    "refEn": "Lamentations 3:22-23",
+    "bookKey": "lamentations",
+    "chapter": 3,
+    "verse": 22,
+    "paragraphsMr": [
+      "हे दयाळू आणि सर्वसमर्थ स्वर्गीय पित्या, या नव्या दिवसाच्या उषःकाली मी अत्यंत कृतज्ञ अंतःकरणाने तुझ्या पवित्र चरणांशी नतमस्तक होतो. कालच्या सर्व चिंता, अपयश आणि थकवा मागे सारून, आज तुझ्या नव्या कृपेचा आणि करुणेचा प्रकाश मी माझ्या जीवनात स्वीकारतो.",
+      "प्रभू, आजचा माझा प्रत्येक विचार, प्रत्येक उच्चारलेला शब्द आणि प्रत्येक घेतलेला निर्णय तुझ्या दैवी इच्छेनुसार असू दे. मी जिथे जाईन तिथे तुझ्या प्रेमाचा आणि शांतीचा सुगंध पसरू दे, आणि मला भेटणाऱ्या प्रत्येकाला तुझ्या दयेचा अनुभव येऊ दे.",
+      "माझे कुटुंब, माझे कार्यक्षेत्र आणि माझी सर्व कामे तुझ्या बलवान हातात समर्पित करतो; येशू ख्रिस्ताच्या सामर्थी नावात ही प्रार्थना करतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "Heavenly Father, as this new dawn breaks, I come before You with a heart full of reverence and deep gratitude. Leaving behind the worries and fatigue of yesterday, I receive Your mercies which are fresh and new this morning.",
+      "Lord, let every thought I think, every word I speak, and every choice I make align with Your divine purpose. Fill me with Your peace so that wherever I walk today, I may reflect Your radiant love and gentleness to everyone I meet.",
+      "I surrender my family, my labor, and all my plans into Your faithful hands; in Jesus' mighty name I pray, Amen."
+    ]
+  },
+  {
+    "id": 2,
+    "themeMr": "स्वर्गीय मार्गदर्शन व प्रकाशाचा दिवा",
+    "themeEn": "Divine Guidance & Light for the Path",
+    "refMr": "स्तोत्रसंहिता ११९:१०५",
+    "refEn": "Psalm 119:105",
+    "bookKey": "psalms",
+    "chapter": 119,
+    "verse": 105,
+    "paragraphsMr": [
+      "हे माझ्या परमेश्वरा, तुझे पवित्र वचन माझ्या पावलांसाठी दिवा आणि माझ्या मार्गासाठी तेजस्वी प्रकाश आहे. या जगातील दिशाभूल करणाऱ्या मार्गांवरून चालताना, मला तुझ्या सत्याच्या वाटेवर चालण्याची बुद्धी आणि विवेक दे.",
+      "प्रभू, माझ्या मनातील संशय आणि अंधार दूर कर आणि आजच्या प्रत्येक पावलावर तुझा आवाज ओळखण्याची संवेदनशीलता मला दे. माझ्या स्वतःच्या समजूतीवर विसंबून न राहता, मी तुझ्या मार्गदर्शनावर पूर्ण भरवसा ठेवून पुढे जाऊ शकेन असे कर.",
+      "माझा आजचा सर्व प्रवास तुझ्या संरक्षणाच्या पंखांखाली सुरक्षित असू दे; येशूच्या पवित्र नावात मागतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "O Lord, Your holy Word is a lamp to my feet and a clear light unto my path. Amidst the confusing noises and distractions of this world, grant me divine clarity to walk steadfastly in Your truth.",
+      "Dispel every shadow of doubt from my heart, Lord, and make my spirit attentive to the gentle whisper of Your Holy Spirit at every crossroad. Teach me not to lean on my own understanding, but to trust wholly in Your perfect guidance.",
+      "Guard my going out and my coming in today under the shadow of Your wings; in Jesus' precious name, Amen."
+    ]
+  },
+  {
+    "id": 3,
+    "themeMr": "हृदयातील स्वर्गीय शांती",
+    "themeEn": "Peace That Surpasses Understanding",
+    "refMr": "फिलिप्पैकरांस ४:६-७",
+    "refEn": "Philippians 4:6-7",
+    "bookKey": "philippians",
+    "chapter": 4,
+    "verse": 6,
+    "paragraphsMr": [
+      "हे शांतीचा दाता असलेल्या प्रभू येशू, आजच्या सकाळच्या या शांत क्षणी मी माझी सर्व चिंता, अस्वस्थता आणि मनाचे ओझे तुझ्या चरणांवर ठेवतो. जगातील कोणत्याही संकटापेक्षा तुझी उपस्थिती माझ्या जीवनात कितीतरी पटीने मोठी आहे याची जाणीव मला करून दे.",
+      "सर्व बुद्धीच्या पलीकडची तुझी दैवी शांती आज माझ्या मनाचा आणि हृदयाचा ताबा घेवो. कामाच्या धकाधकीत आणि आव्हानांच्या वादळातही माझे मन स्थिर आणि शांत राहू दे, जेणेकरून मी इतरांसाठी शांतीचा दूत बनू शकेन.",
+      "तुझ्या अपार प्रेमात मला विसावा लाभो आणि माझा दिवस तुझ्या आशीर्वादाने भरून जावो; येशूच्या नावात प्रार्थना करतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "Lord Jesus, Prince of Peace, in the quiet stillness of this morning I lay down every anxious thought and heavy burden at Your feet. Remind my soul that Your constant presence is far greater than any storm I might face today.",
+      "Let Your supernatural peace, which surpasses all human understanding, guard my heart and my thoughts throughout this day. Keep me anchored and calm amidst daily pressures so I may be a source of encouragement and peace to those around me.",
+      "May my soul find sweet rest in Your unfailing love; in Jesus' holy name I pray, Amen."
+    ]
+  },
+  {
+    "id": 4,
+    "themeMr": "गरुडासारखे नवे आत्मिक सामर्थ्य",
+    "themeEn": "Renewed Strength Like Eagles",
+    "refMr": "यशया ४०:३१",
+    "refEn": "Isaiah 40:31",
+    "bookKey": "isaiah",
+    "chapter": 40,
+    "verse": 31,
+    "paragraphsMr": [
+      "हे सर्वशक्तिमान परमेश्वरा, जे तुझी वाट पाहतात त्यांना तू नवे सामर्थ्य देतोस आणि ते गरुडासारख्या पंखांनी उंच भरारी घेतात. माझ्या स्वतःच्या मर्यादित शक्तीवर अवलंबून न राहता, मी तुझ्या अपरिमित स्वर्गीय शक्तीवर विसंबून राहतो.",
+      "आजच्या सर्व शारीरिक व मानसिक श्रमांत मला थकवा न येवो, तर तुझ्या आत्म्याच्या सामर्थ्याने मी प्रत्येक जबाबदारी उत्साहाने पार पाडू शकेन. जेव्हा जेव्हा मला अशक्तपणा जाणवेल, तेव्हा तुझी कृपा मला सावरून धरेल असा विश्वास मी व्यक्त करतो.",
+      "माझे सामर्थ्य, माझी आशा आणि माझा विजय केवळ तुझ्यातच आहे; येशूच्या विजयी नावात प्रार्थना करतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "Almighty Father, You promise that those who hope in the Lord will renew their strength and soar on wings like eagles. Rather than relying on my own finite strength, I lean entirely on Your infinite power today.",
+      "Grant me endurance through physical and mental tasks, empowering me to fulfill every duty with joy and spiritual vigor. Whenever weariness attempts to creep in, let Your sustaining grace lift me higher.",
+      "My strength, my hope, and my victory belong to You alone; in Jesus' triumphant name, Amen."
+    ]
+  },
+  {
+    "id": 5,
+    "themeMr": "उत्तम मेंढपाळाची कृपाळू सोबत",
+    "themeEn": "The Good Shepherd's Caring Presence",
+    "refMr": "स्तोत्रसंहिता २३:१-३",
+    "refEn": "Psalm 23:1-3",
+    "bookKey": "psalms",
+    "chapter": 23,
+    "verse": 1,
+    "paragraphsMr": [
+      "हे प्रभू येशू, तू माझा उत्तम मेंढपाळ आहेस आणि तुझ्या सान्निध्यात मला कशाचीही उणीव भासणार नाही. तू मला हिरव्यागार कुरणांत विसावा देतोस आणि संथ पाण्याच्या झऱ्यांजवळ शांततेने चालवतोस.",
+      "माझ्या थकलेल्या आत्म्याला आज तू नवा तजेला दे आणि तुझ्या नावाच्या गौरवासाठी मला नीतिमत्तेच्या मार्गांवरून चालव. आजच्या दिवसात कोणताही भय किंवा एकाकीपणा मला स्पर्श करू शकणार नाही, कारण तुझा हात सतत माझ्या सोबत आहे.",
+      "तुझे उपकार आणि तुझी करुणा माझ्या आयुष्याच्या सर्व दिवसांत माझ्या पाठीशी राहोत; येशूच्या नावात प्रार्थना करतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "Lord Jesus, You are my faithful Shepherd, and in Your pasture I shall lack no good thing. You lead me beside peaceful waters and cause my soul to rest in green pastures.",
+      "Restore my inner soul this morning and guide my steps along paths of righteousness for Your name's sake. No fear or loneliness can overtake me today, for Your comforting rod and staff are ever near.",
+      "May Your goodness and unfailing mercy follow me all the days of my life; in Jesus' blessed name, Amen."
+    ]
+  },
+  {
+    "id": 6,
+    "themeMr": "मनाचे दैवी नवीकरण व शुद्धता",
+    "themeEn": "Renewal of the Mind & Purity",
+    "refMr": "रोमकरांस १२:२",
+    "refEn": "Romans 12:2",
+    "bookKey": "romans",
+    "chapter": 12,
+    "verse": 2,
+    "paragraphsMr": [
+      "हे पवित्र देवाने, या जगाच्या नाशिवंत आणि नकारात्मक प्रभावांपासून माझ्या मनाचे रक्षण कर. आज माझे विचार शुद्ध, उदात्त आणि तुझ्या पवित्र वचनाशी सुसंगत राहण्यासाठी माझ्या अंतःकरणाचे नवीकरण कर.",
+      "देवा, तुझी उत्तम, संतोषकारक आणि परिपूर्ण इच्छा काय आहे हे समजून घेण्याची अंतर्दृष्टी मला दे. मी कोणाचाही न्याय न करता किंवा कटुता न बाळगता प्रत्येकाशी ख्रिस्ताच्या प्रेमाने वागावे अशी कृपा मला दे.",
+      "माझे संपूर्ण जीवन तुझ्या समोर एक जिवंत आणि पवित्र यज्ञ म्हणून अर्पण करतो; येशूच्या नावात मागतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "Holy God, protect my mind from the negative patterns and fleeting distractions of this world. Transform my thoughts today so they remain pure, noble, and pleasing in Your sight.",
+      "Grant me spiritual discernment to recognize Your good, pleasing, and perfect will in every circumstance. Guard my heart against bitterness and help me extend Christlike love to every soul I encounter.",
+      "I present my life today as a living and holy sacrifice to You; in Jesus' precious name, Amen."
+    ]
+  },
+  {
+    "id": 7,
+    "themeMr": "जीवनाच्या प्रत्येक वळणावर स्वर्गीय ज्ञान",
+    "themeEn": "Heavenly Wisdom for Every Step",
+    "refMr": "याकोब १:५",
+    "refEn": "James 1:5",
+    "bookKey": "james",
+    "chapter": 1,
+    "verse": 5,
+    "paragraphsMr": [
+      "हे ज्ञानाचा अमर्याद सागर असलेल्या परमेश्वरा, जेव्हा जेव्हा मला जीवनात मार्ग समजत नाही, तेव्हा तू मला भरभरून ज्ञान देण्याचे अभिवचन दिले आहेस. आजच्या प्रत्येक गुंतागुंतीच्या निर्णयात मला स्वर्गीय बुद्धी दे.",
+      "प्रभू, मानवी युक्तीपेक्षा तुझ्या आत्म्याच्या मार्गदर्शनावर चालण्याची शिकवण मला दे. माझ्या कामात, संभाषणात आणि नात्यांमध्ये विवेक आणि समंजसपणा प्रकट होऊ दे.",
+      "तू दाखवलेल्या वाटेवर न डगमगता चालण्याचे धैर्य मला लाभो; येशू ख्रिस्ताच्या नावात ही प्रार्थना करतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "O God of all wisdom, You generously give insight to all who ask without reproach. As I face decisions and complex situations today, shower me with discernment from above.",
+      "Teach me to rely not on earthly wisdom, but on the prompting of Your Spirit. Let prudence, patience, and integrity shine through all my conversations, work, and relationships.",
+      "Grant me bold courage to walk steadfastly in the path You make plain; in Jesus' name I pray, Amen."
+    ]
+  },
+  {
+    "id": 8,
+    "themeMr": "अढळ विश्वास आणि संपूर्ण समर्पण",
+    "themeEn": "Steadfast Trust & Wholehearted Surrender",
+    "refMr": "नीतीसूत्रे ३:५-६",
+    "refEn": "Proverbs 3:5-6",
+    "bookKey": "proverbs",
+    "chapter": 3,
+    "verse": 5,
+    "paragraphsMr": [
+      "हे विश्वासू देवा, मी माझ्या संपूर्ण अंतःकरणाने तुझ्यावर भरवसा ठेवतो आणि स्वतःच्या ज्ञानावर विसंबून राहत नाही. आजच्या दिवसातील माझे सर्व मार्ग तुझ्या स्वाधीन करतो, जेणेकरून तूच माझी पावले सरळ करशील.",
+      "प्रभू, अनपेक्षित परिस्थिती किंवा अडचणी आल्या तरी माझा विश्वास डगमगू नये. तू माझ्या पाठीशी उभा आहेस आणि सर्व गोष्टी माझ्या कल्याणासाठीच घडवून आणत आहेस यावर माझा ठाम विश्वास आहे.",
+      "तुझ्या अद्भुत योजनेवर माझे मन शांत आणि आश्वस्त राहो; येशूच्या नावात प्रार्थना करतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "Faithful Lord, with all my heart I place my trust in You, refusing to lean solely upon my own limited understanding. In all my ways I acknowledge You, confident that You will make my paths straight.",
+      "Even if unexpected obstacles arise, let my faith remain unshaken. I hold fast to the truth that You are working all things together for my good and for Your ultimate glory.",
+      "May my spirit rest securely in Your sovereign and loving hands; in Jesus' name, Amen."
+    ]
+  },
+  {
+    "id": 9,
+    "themeMr": "सार्वकालिक व अखंड प्रीतीची जाणीव",
+    "themeEn": "Eternal & Unfailing Love",
+    "refMr": "स्तोत्रसंहिता १३६:१-३",
+    "refEn": "Psalm 136:1-3",
+    "bookKey": "psalms",
+    "chapter": 136,
+    "verse": 1,
+    "paragraphsMr": [
+      "हे परमेश्वरा, मी तुझे उपकार मानतो कारण तू चांगला आहेस; तुझी दया व प्रीती युगानुयुग टिकणारी आहे. आज सकाळच्या पहिल्या किरणासोबत तुझ्या अथांग प्रेमाची जाणीव माझ्या हृदयात पुन्हा जागृत कर.",
+      "प्रभू, तुझ्या प्रेमाने मला कोणत्याही भीतीत अथवा अपराधीपणात राहू न देता, मुक्तीचा आणि आनंदाचा श्वास घेऊ दिला आहे. मी आज जे काही करेन ते केवळ तुझ्या प्रेमाच्या प्रतिसादात आणि इतरांच्या कल्याणासाठी करेन.",
+      "तुझ्या निरंतर दयेचा गौरव माझ्या मुखातून अखंड वाहू दे; येशूच्या नावात ही प्रार्थना करतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "O Give thanks to the Lord, for He is good, and His steadfast love endures forever! With the first rays of morning light, awaken my heart to the depth and beauty of Your boundless mercy.",
+      "Your unconditional love frees me from all condemnation and anxiety, filling me with boundless hope. May every task I undertake today be an outpouring of the grace and generosity You have shown me.",
+      "Let songs of thanksgiving continually dwell upon my lips; in the sweet name of Jesus, Amen."
+    ]
+  },
+  {
+    "id": 10,
+    "themeMr": "सर्वसमर्थाच्या छायेत अभेद्य संरक्षण",
+    "themeEn": "Refuge & Shield Under Almighty Wings",
+    "refMr": "स्तोत्रसंहिता ९१:१-४",
+    "refEn": "Psalm 91:1-4",
+    "bookKey": "psalms",
+    "chapter": 91,
+    "verse": 1,
+    "paragraphsMr": [
+      "हे सर्वोच्च देवा, जो तुझ्या गुप्त स्थानात राहतो तो सर्वसमर्थाच्या छायेत सुरक्षित विसावा पावतो. आज मी तुला माझा आश्रयदुर्ग, माझा किल्ला आणि माझा परमेश्वर म्हणतो, ज्याच्यावर मी पूर्ण विश्वास ठेवतो.",
+      "प्रभू, दिवसाच्या कोणत्याही धोक्यापासून, रोगापासून आणि अंधारातील भयापासून तू माझे व माझ्या कुटुंबाचे रक्षण कर. तुझे स्वर्गीय दूत आमच्या प्रत्येक पावलावर आम्हाला सांभाळतील असा विश्वास मी बाळगतो.",
+      "तुझ्या पंखांखाली मला पूर्ण सुरक्षा आणि निर्भयता लाभो; येशू ख्रिस्ताच्या सामर्थी नावात आमेन."
+    ],
+    "paragraphsEn": [
+      "Most High God, he who dwells in Your secret shelter finds refuge beneath the shadow of the Almighty. I declare today that You alone are my refuge, my fortress, and my God in whom I trust.",
+      "Shield my family and me from every unseen snare, every pestilence, and every assault of fear throughout this day. Send Your holy angels to guard our steps and keep us safe in all our ways.",
+      "Under the shadow of Your wings I find perfect peace and absolute protection; in Jesus' name, Amen."
+    ]
+  },
+  {
+    "id": 11,
+    "themeMr": "आत्म्याला तृप्त करणारा जिवंत पाण्याचा झरा",
+    "themeEn": "Living Water for the Thirsty Soul",
+    "refMr": "योहान ४:१४",
+    "refEn": "John 4:14",
+    "bookKey": "john",
+    "chapter": 4,
+    "verse": 14,
+    "paragraphsMr": [
+      "हे प्रभू येशू, जगातील कोणतीही संपत्ती किंवा आनंद आत्म्याची तहान भागवू शकत नाही; केवळ तूच जिवंत पाण्याचा निरंतर झरा आहेस. आजच्या या प्रभाती माझ्या तहानलेल्या अंतःकरणाला तुझ्या आत्म्याच्या पाण्याने तृप्त कर.",
+      "प्रभू, माझ्या जीवनातून इतरांसाठीही आशेचे, प्रेमाचे आणि उत्तेजनाचे जिवंत झरे वाहू दे. कोरडेपणा आणि निराशा दूर करून मला स्वर्गीय आनंदाने आणि उत्साहाने परिपूर्ण कर.",
+      "तुझ्या सान्निध्यात माझा आत्मा सदैव टवटवीत आणि समृद्ध राहो; येशूच्या नावात ही प्रार्थना, आमेन."
+    ],
+    "paragraphsEn": [
+      "Lord Jesus, nothing this world offers can satisfy the deepest thirst of the soul; You alone are the spring of living water welling up to eternal life. Quench my spirit with Your presence this morning.",
+      "Let streams of living hope, grace, and joy flow through my life into the lives of those around me. Wash away every trace of weariness and revive my spirit with fresh devotion.",
+      "In Your fellowship my soul finds enduring delight and refreshment; in Jesus' holy name, Amen."
+    ]
+  },
+  {
+    "id": 12,
+    "themeMr": "जगात अंधारावर मात करणारा प्रकाश",
+    "themeEn": "Light That Overcomes the Darkness",
+    "refMr": "मत्तय ५:१४-१६",
+    "refEn": "Matthew 5:14",
+    "bookKey": "matthew",
+    "chapter": 5,
+    "verse": 14,
+    "paragraphsMr": [
+      "हे जगाच्या तेजस्वी प्रकाशा, तू आम्हाला पर्वतावरील शहरासारखे जगाचा प्रकाश बनवले आहेस. आजच्या दिवसात माझे वर्तन, माझी प्रामाणिकता आणि माझे प्रेम असा प्रकाश पाडू दे की लोकांनी स्वर्गातील पित्याचे गौरव करावे.",
+      "प्रभू, माझ्या अंतःकरणातील स्वार्थ, राग आणि कटुता यांचा अंधार तुझ्या पवित्र प्रकाशाने नाहीसा कर. मी अंधारात भटकणाऱ्यांसाठी आशेचा किरण आणि आधार बनू शकेन असा विवेक मला दे.",
+      "तुझा गौरव माझ्या संपूर्ण जीवनातून प्रकट होवो; येशूच्या पवित्र नावात ही प्रार्थना करतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "Lord Jesus, Light of the World, You have called us to shine like a city set on a hill that cannot be hidden. Let my words, my deeds, and my integrity reflect Your brilliant goodness today so that God is glorified.",
+      "Dispel every darkness of selfishness, anger, and impatience from my heart with Your blazing truth. Make me an instrument of hope and warmth to anyone walking through difficult valleys.",
+      "May Your light shine brightly through my life in everything I say and do; in Jesus' name, Amen."
+    ]
+  },
+  {
+    "id": 13,
+    "themeMr": "पवित्र आत्म्याची मधुर व समृद्ध फळे",
+    "themeEn": "Fruit of the Holy Spirit",
+    "refMr": "गलतीकरांस ५:२२-२३",
+    "refEn": "Galatians 5:22-23",
+    "bookKey": "galatians",
+    "chapter": 5,
+    "verse": 22,
+    "paragraphsMr": [
+      "हे स्वर्गीय पित्या, आजच्या दिवसात तुझ्या पवित्र आत्म्याने माझे हृदय पूर्णपणे भरून टाक. माझ्या जीवनात प्रीती, आनंद, शांती, सहनशीलता, दयाळूपणा, भलाई, विश्वासूपणा, सौम्यता आणि आत्मसंयम ही फळे विपुल प्रमाणात बहरू दे.",
+      "प्रभू, रागाच्या किंवा उतावळेपणाच्या क्षणी मला शांत राहण्याचा आणि समंजसपणे उत्तर देण्याचा संयम दे. माझ्या बोलण्याने कोणाचेही मन न दुखावता, प्रत्येकाला ख्रिस्ताच्या दयेचा स्पर्श व्हावा अशी माझी इच्छा आहे.",
+      "माझे जीवन तुझ्या गौरवाचे मधुर फळ देणारे झाड बनू दे; येशूच्या नावात प्रार्थना करतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "Heavenly Father, fill me anew with Your Holy Spirit today. Cultivate within me the precious fruit of love, joy, peace, patience, kindness, goodness, faithfulness, gentleness, and self-control.",
+      "In moments of pressure or provocation, grant me the restraint to respond with grace and wisdom. Keep my tongue from harsh words and let my speech build others up in the knowledge of Christ.",
+      "May my life be a fruitful branch bearing eternal blessing; in the glorious name of Jesus, Amen."
+    ]
+  },
+  {
+    "id": 14,
+    "themeMr": "भयावर विजय, प्रीती आणि संयमाचा आत्मा",
+    "themeEn": "Spirit of Power, Love & Sound Mind",
+    "refMr": "२ तीमथ्य १:७",
+    "refEn": "2 Timothy 1:7",
+    "bookKey": "2-timothy",
+    "chapter": 1,
+    "verse": 7,
+    "paragraphsMr": [
+      "हे सामर्थी परमेश्वरा, तू आम्हाला भीतीचा आणि दुर्बलतेचा आत्मा दिलेला नाही, तर सामर्थ्याचा, प्रीतीचा आणि संयमाचा आत्मा दिला आहे. आज कोणत्याही अज्ञात भविष्याचे किंवा संकटाचे भय माझ्या मनावर अधिकार गाजवू शकत नाही.",
+      "प्रभू, जेव्हा जेव्हा संशय किंवा भीती माझ्या दारावर ठोठावेल, तेव्हा तुझा अढळ विश्वास माझ्या हृदयात धैर्याची मशाल पेटवून देईल. तुझ्या सामर्थ्याने मी प्रत्येक आव्हानाला आत्मविश्वासाने आणि शांततेने तोंड देईन.",
+      "माझा पूर्ण भरवसा केवळ तुझ्याच विजयावर आहे; येशूच्या विजयी नावात प्रार्थना करतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "Mighty God, You have not given us a spirit of fear, but of power, love, and a sound mind. No shadow of dread or uncertainty about tomorrow has authority over my heart today.",
+      "Whenever doubt knocks at the door of my mind, let Your steadfast promises kindle bold courage within me. Through Your strengthening Spirit, I will face every task and challenge with dignity and calm assurance.",
+      "My confidence rests securely upon Your victorious arm; in Jesus' triumphant name, Amen."
+    ]
+  },
+  {
+    "id": 15,
+    "themeMr": "शुद्ध हृदय आणि तारणाचा नवा हर्ष",
+    "themeEn": "Clean Heart & Joy of Salvation",
+    "refMr": "स्तोत्रसंहिता ५१:१०-१२",
+    "refEn": "Psalm 51:10-12",
+    "bookKey": "psalms",
+    "chapter": 51,
+    "verse": 10,
+    "paragraphsMr": [
+      "हे दयाळू देवा, माझ्यामध्ये शुद्ध हृदय निर्माण कर आणि माझ्या अंतरात्म्यात नवा व स्थिर आत्मा स्थापित कर. माझ्या सर्व चुका, उणिवा आणि नकळत घडलेली पापे तुझ्या पवित्र रक्ताने धुऊन मला निष्कलंक कर.",
+      "प्रभू, तुझ्या तारणाचा हर्ष माझ्या हृदयात पुन्हा जागृत कर आणि तुझ्या उदार आत्म्याने मला सतत आधार दे. आजचा माझा संपूर्ण दिवस तुझ्या स्तुतीचा आणि आनंदाचा अखंड उत्सव असू दे.",
+      "तुझ्या सान्निध्याच्या पवित्र प्रकाशात मला नित्य चालव; येशूच्या नावात मागतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "Gracious Lord, create in me a clean heart and renew a steadfast spirit within me. Wash away every hidden fault and cleanse my thoughts so I may stand before You in holiness and purity.",
+      "Restore unto me the uncontainable joy of Your salvation and uphold me with a willing spirit. Let this entire day resonate with songs of gratitude, joy, and deep adoration for Your unfailing goodness.",
+      "Keep me continually in the light of Your sacred presence; in Jesus' precious name, Amen."
+    ]
+  },
+  {
+    "id": 16,
+    "themeMr": "सर्व परिस्थितीत निरंतर उपकारस्तुती",
+    "themeEn": "Continual Thanksgiving in All Circumstances",
+    "refMr": "१ थेस्सलनीकाकरांस ५:१६-१८",
+    "refEn": "1 Thessalonians 5:16-18",
+    "bookKey": "1-thessalonians",
+    "chapter": 5,
+    "verse": 16,
+    "paragraphsMr": [
+      "हे उपकार मानण्यास योग्य असलेल्या स्वर्गीय पित्या, मी सर्व परिस्थितीत निरंतर आनंद करण्यास, न चुकता प्रार्थना करण्यास आणि उपकार मानण्यास शिकू इच्छितो. कारण ख्रिस्त येशूमध्ये आमच्याविषयीची हीच तुझी पवित्र इच्छा आहे.",
+      "प्रभू, आजच्या दिवसातील लहान-मोठ्या प्रत्येक आशीर्वादासाठी, आरोग्यासाठी आणि अन्नासाठी मी तुझे आभार मानतो. तक्रार किंवा नाराजी न करता समाधानी आणि कृतज्ञ अंतःकरणाने जगण्याची कृपा मला दे.",
+      "माझे संपूर्ण जीवन तुझ्या अनंत उपकारांचे आभारगान बनो; येशूच्या नावात प्रार्थना करतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "Heavenly Father, worthy of all praise, teach me to rejoice always, pray without ceasing, and give thanks in all circumstances, for this is Your will for us in Christ Jesus.",
+      "I thank You for every breath, every provision, good health, and the fellowship of loved ones today. Guard my spirit against discontent and grumbling, filling me instead with cheerful gratitude.",
+      "May my daily walk be a living hymn of thanksgiving to You; in Jesus' blessed name, Amen."
+    ]
+  },
+  {
+    "id": 17,
+    "themeMr": "कुटुंबावर व घरावर स्वर्गीय आशीर्वाद",
+    "themeEn": "Blessing & Dedication Over the Household",
+    "refMr": "यहोशवा २४:१५",
+    "refEn": "Joshua 24:15",
+    "bookKey": "joshua",
+    "chapter": 24,
+    "verse": 15,
+    "paragraphsMr": [
+      "हे घरादाराचा निर्माणकर्ता आणि रक्षणकर्ता असलेल्या प्रभू, मी आणि माझे घराणे सर्वदा केवळ परमेश्वराचीच सेवा करू हा दृढ निश्चय मी आज पुन्हा व्यक्त करतो. माझ्या घरावर आणि कुटुंबातील प्रत्येक व्यक्तीवर तुझा स्वर्गीय आशीर्वाद असो.",
+      "प्रभू, आमच्या घरात प्रेम, एकोपा, शांती आणि आरोग्य सदैव वास करो. कोणत्याही दुहीपासून, वादापासून आणि वाईट प्रभावांपासून आमच्या घराचे रक्षण कर आणि आम्हा सर्वांना तुझ्या भयात वाढव.",
+      "आमचे घर तुझ्या पवित्र उपस्थितीचे सुंदर मंदिर बनू दे; येशू ख्रिस्ताच्या नावात ही प्रार्थना करतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "Lord God, Builder and Protector of the home, as for me and my household, we declare anew today that we will serve the Lord alone. Let Your peace and heavenly favor rest upon every corner of our home.",
+      "Fill our relationships with mutual understanding, deep affection, unity, and sound health. Guard our home from strife, division, and every harmful influence, anchoring us together in Your love.",
+      "May our dwelling place be a sanctuary of Your presence; in the precious name of Jesus, Amen."
+    ]
+  },
+  {
+    "id": 18,
+    "themeMr": "नम्रता, करुणा आणि प्रीतीचे वस्त्र",
+    "themeEn": "Garment of Humility, Compassion & Love",
+    "refMr": "कलस्सैकरांस ३:१२-१४",
+    "refEn": "Colossians 3:12-14",
+    "bookKey": "colossians",
+    "chapter": 3,
+    "verse": 12,
+    "paragraphsMr": [
+      "हे परमेश्वराच्या निवडलेल्या पवित्र आणि प्रिय जनांनो, आज मला करुणा, दया, नम्रता, सौम्यता आणि धीरज यांचे वस्त्र परिधान करण्याची कृपा दे. जशी प्रभूने मला असीम क्षमा केली आहे, तशीच इतरांना क्षमा करण्याची विशालता माझ्या हृदयात दे.",
+      "प्रभू, या सर्वांवर प्रीतीचे बंधन घाल, जे सर्वांना परिपूर्णतेत एकत्र बांधून ठेवते. कोणाशीही कटुता न ठेवता, सर्वांशी आदर आणि प्रेमाने वागण्याचे सामर्थ्य मला दे.",
+      "माझे वर्तन तुझ्या गौरवासाठी आदर्श ठरो; येशूच्या नावात ही प्रार्थना करतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "Gracious Lord, clothe me this morning with tenderhearted compassion, kindness, humility, gentleness, and patience. Just as You have freely forgiven all my transgressions, grant me a heart eager to forgive others.",
+      "Above all these virtues, bind me with perfect love, which holds everything together in complete harmony. Let no malice or irritation reside in my soul, but let grace overflow in every interaction.",
+      "May my conduct bring glory to Your holy name; in Jesus' sweet name, Amen."
+    ]
+  },
+  {
+    "id": 19,
+    "themeMr": "जगावर विजय मिळवणारा अढळ विश्वास",
+    "themeEn": "Victorious Faith Overcoming the World",
+    "refMr": "१ योहान ५:४",
+    "refEn": "1 John 5:4",
+    "bookKey": "1-john",
+    "chapter": 5,
+    "verse": 4,
+    "paragraphsMr": [
+      "हे सामर्थी प्रभू, जो कोणी देवापासून जन्मलेला आहे तो जगावर विजय मिळवतो, आणि जगावर विजय मिळवणारे आपले शस्त्र म्हणजे आपला विश्वास आहे. आज कोणत्याही आव्हानाला किंवा भीतीला मी पराभूत मानसिकतेने पाहणार नाही.",
+      "प्रभू, ख्रिस्तामध्ये मी विजयी पेक्षाही अधिक मोठा विजेता आहे याची जाणीव मला दे. संकटातही माझा विश्वास स्थिर राहो आणि तुझ्या अभिवचनांवर माझी पावले घट्ट उभी राहोत.",
+      "तुझ्या सामर्थ्याने मला प्रत्येक क्षेत्रात गौरवशाली विजय प्राप्त होवो; येशूच्या विजयी नावात प्रार्थना करतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "Mighty Lord, everyone born of God overcomes the world, and this is the victory that has overcome the world—our faith. I refuse to look at today's challenges with defeat or discouragement.",
+      "Remind my soul that through Christ who loves me, I am more than a conqueror. Strengthen my resolve to stand unshakeable on Your promises, no matter what storms blow against me.",
+      "May Your mighty hand lead me to triumphant victory; in Jesus' glorious name, Amen."
+    ]
+  },
+  {
+    "id": 20,
+    "themeMr": "थकलेल्या व कष्टी मनाला खरा विसावा",
+    "themeEn": "Rest & Refreshment for the Weary Soul",
+    "refMr": "मत्तय ११:२८-३०",
+    "refEn": "Matthew 11:28",
+    "bookKey": "matthew",
+    "chapter": 11,
+    "verse": 28,
+    "paragraphsMr": [
+      "हे प्रेमळ येशू, तू म्हणालास की 'अहो कष्टी व ओझे वाहणारे सर्व लोकहो, माझ्याकडे या म्हणजे मी तुम्हांला विसावा देईन.' आज सकाळच्या या क्षणी मी माझे सर्व थकलेले विचार आणि जड ओझे तुझ्या प्रेमळ हातांत सोपवतो.",
+      "प्रभू, तुझे जू हलके आणि सुलभ आहे; तुझ्याकडून नम्रता आणि लीनता शिकण्याची बुद्धी मला दे. तुझ्या स्वर्गीय विसाव्यात माझ्या आत्म्याला नवा ताजेतवाना श्वास आणि शांती लाभू दे.",
+      "माझे मन तुझ्या उपस्थितीत अखंड सुरक्षित राहो; येशूच्या नावात ही प्रार्थना करतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "Loving Jesus, You extend the gentlest invitation: 'Come to Me, all you who are weary and burdened, and I will give you rest.' In this sacred hour, I surrender my exhausting burdens into Your caring hands.",
+      "Your yoke is easy and Your burden is light; teach me the gentleness and humility of Your heart. Let my weary spirit find deep renewal, restoring my hope and vitality for the road ahead.",
+      "I dwell in the quiet shelter of Your resting place; in Jesus' name I pray, Amen."
+    ]
+  },
+  {
+    "id": 21,
+    "themeMr": "पाण्याच्या प्रवाहांजवळ लावलेले हिरवेगार झाड",
+    "themeEn": "Rooted & Flourishing by Living Streams",
+    "refMr": "स्तोत्रसंहिता १:१-३",
+    "refEn": "Psalm 1:1-3",
+    "bookKey": "psalms",
+    "chapter": 1,
+    "verse": 1,
+    "paragraphsMr": [
+      "हे नीतीमान परमेश्वरा, जो तुझ्या नियमशास्त्रात रात्रंदिवस मनन करतो तो पाण्याच्या प्रवाहांजवळ लावलेल्या झाडासारखा होतो, ज्याची पाने कधीही कोमेजत नाहीत आणि तो आपल्या ऋतूत भरपूर फळ देतो.",
+      "प्रभू, माझे मूळ तुझ्या पवित्र वचनाच्या खोल झऱ्यांमध्ये रुजवून ठेव, जेणेकरून संकटांच्या उन्हातही मी हिरवागार आणि आशावादी राहीन. आज मी जे काही हाती घेईन त्या सर्व कामांना तुझ्या आशीर्वादाचे यश लाभू दे.",
+      "माझे जीवन इतरांसाठी सावली आणि फळांचा आशीर्वाद ठरो; येशूच्या नावात मागतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "Righteous God, blessed is the person whose delight is in the law of the Lord. Make me like a tree firmly planted by streams of water, yielding fruit in season whose leaf never withers.",
+      "Anchor the roots of my heart deeply into the truth of Your scriptures, so that no scorching drought of adversity can wither my hope. Prosper the work of my hands today according to Your will.",
+      "Let my life provide shade, comfort, and nourishment to all in need; in Jesus' precious name, Amen."
+    ]
+  },
+  {
+    "id": 22,
+    "themeMr": "देवाचे नित्य सान्निध्य व अखंड साथ",
+    "themeEn": "The Everlasting & Faithful Presence of God",
+    "refMr": "इब्री लोकांस १३:५-६",
+    "refEn": "Hebrews 13:5-6",
+    "bookKey": "hebrews",
+    "chapter": 13,
+    "verse": 5,
+    "paragraphsMr": [
+      "हे विश्वासू देवा, तू अभिवचन दिले आहेस की 'मी तुला कधीही सोडणार नाही व कधीही टाकणार नाही.' या असीम सत्यावर विसंबून मी आज अत्यंत धैर्याने म्हणतो की परमेश्वर माझा साहाय्यकर्ता आहे, मला कोणाचीही भीती नाही.",
+      "प्रभू, आजच्या माझ्या सर्व प्रवासात, बैठकांत आणि संभाषणांत तुझी पवित्र उपस्थिती माझ्या सोबत चालू दे. मी कधीही एकटा नाही तर सर्व जगाचा निर्माणकर्ता माझ्या पाठीशी उभा आहे ही खात्री मला दे.",
+      "तुझ्या नित्य सान्निध्यात मी न डगमगता मार्गक्रमण करू शकेन; येशूच्या नावात प्रार्थना करतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "Faithful Father, You have promised with unwavering certainty: 'Never will I leave you; never will I forsake you.' Clinging to this promise, I boldly say today that the Lord is my helper; I will not fear.",
+      "Let Your comforting presence accompany me into every room, meeting, and conversation today. Banish every thought of isolation, reminding me that the Maker of heaven and earth walks right beside me.",
+      "In Your steadfast companionship I move forward with unbroken peace; in Jesus' mighty name, Amen."
+    ]
+  },
+  {
+    "id": 23,
+    "themeMr": "संकटात मनाला स्थिर ठेवणारी जीवनाची आशा",
+    "themeEn": "An Anchor for the Soul, Firm & Secure",
+    "refMr": "इब्री लोकांस ६:१९",
+    "refEn": "Hebrews 6:19",
+    "bookKey": "hebrews",
+    "chapter": 6,
+    "verse": 19,
+    "paragraphsMr": [
+      "हे सार्वकालिक परमेश्वरा, ख्रिस्तामधील आमची आशा ही आमच्या आत्म्यासाठी एका भक्कम, अचल आणि अभेद्य नांगरासारखी आहे. जेव्हा जीवनाचा समुद्र वादळांनी खवळलेला असतो, तेव्हा हीच आशा माझे मन स्थिर ठेवते.",
+      "प्रभू, माझ्या भोवतालची परिस्थिती कशीही असली तरी माझी नजर तुझ्या वचनावर आणि स्वर्गीय प्रतिफळावर खिळलेली राहू दे. आज मी ज्या कोणाला भेटेन त्यांनाही या जिवंत आशेचा संदेश देऊ शकेन असा उत्साह मला दे.",
+      "तुझ्या अढळ वचनावर माझी संपूर्ण श्रद्धा कायम राहो; येशूच्या पवित्र नावात ही प्रार्थना, आमेन."
+    ],
+    "paragraphsEn": [
+      "Eternal God, the living hope we have in Christ is an anchor for the soul, firm and secure. When the turbulent winds of life blow fiercely, this divine hope keeps my heart anchored in Your grace.",
+      "Regardless of outward circumstances, fix my eyes upon Your eternal glory and unshakable Kingdom. Use me today to inspire and uplift those who are searching for light and anchor in their own storms.",
+      "May my trust in Your faithfulness stand unwavering; in Jesus' holy name I pray, Amen."
+    ]
+  },
+  {
+    "id": 24,
+    "themeMr": "देवाच्या सर्व उपकारांचे कृतज्ञतेने स्मरण",
+    "themeEn": "Remembering All His Tender Benefits",
+    "refMr": "स्तोत्रसंहिता १०३:१-५",
+    "refEn": "Psalm 103:1-5",
+    "bookKey": "psalms",
+    "chapter": 103,
+    "verse": 1,
+    "paragraphsMr": [
+      "हे माझ्या आत्म्या, परमेश्वराचा धन्यवाद कर आणि माझ्या अंतरातील सर्व काही त्याच्या पवित्र नावाचा जयजयकार करो! त्याच्या कोणत्याही उपकारांचा विसर मला पडू नये, कारण तोच माझे सर्व अपराध क्षमा करतो आणि माझे रोग बरे करतो.",
+      "प्रभू, तू माझे जीवन विनाशापासून सोडवतोस आणि मला दया व करुणेचा मुकुट घालतोस. आजच्या या संपूर्ण दिवसात माझे तोंड तुझ्या उपकारांच्या स्तुतीने आणि माझ्या अंतःकरणातील समाधानाने भरून वाहू दे.",
+      "माझे तारुण्य गरुडासारखे ताजेतवाने आणि बलवान राहो; येशूच्या नावात ही प्रार्थना करतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "Praise the Lord, my soul; all my inmost being, praise His holy name! Let me never forget the abundant benefits of my God, who forgives all my iniquities and heals all my diseases.",
+      "You redeem my life from the pit and crown me with tender love and compassion. Throughout this day, let my heart overflow with joyful remembrance of Your goodness, protection, and gracious provision.",
+      "Renew my youth and strength like the eagle; in Jesus' precious and worthy name, Amen."
+    ]
+  },
+  {
+    "id": 25,
+    "themeMr": "शारीरिक व आत्मिक संपूर्ण आरोग्य",
+    "themeEn": "Healing & Complete Restoration",
+    "refMr": "यिर्मया ३०:१७",
+    "refEn": "Jeremiah 30:17",
+    "bookKey": "jeremiah",
+    "chapter": 30,
+    "verse": 17,
+    "paragraphsMr": [
+      "हे सर्व रोगांवर विजय मिळवणाऱ्या आरोग्यदाता प्रभू येशू, तू म्हणालास की 'मी तुझे आरोग्य परत आणीन आणि तुझ्या जखमा बऱ्या करीन.' आज मी तुझ्या स्पर्श करणाऱ्या पवित्र हातांची याचना करतो.",
+      "प्रभू, माझ्या शरीरातील प्रत्येक अवयवाला, माझ्या मनातील प्रत्येक थकव्याला आणि आत्म्यातील प्रत्येक जखमेला तुझा दैवी स्पर्श लाभो. माझे कुटुंब आणि आजारी असलेल्या सर्व प्रियजनांना ख्रिस्ताच्या रक्ताद्वारे संपूर्ण आरोग्य आणि ताजेतवानेपण प्राप्त होवो.",
+      "तुझ्या पुनरुत्थानाच्या सामर्थ्यात मी पूर्ण निरोगी आणि बलवान चालतो; येशूच्या नावात आमेन."
+    ],
+    "paragraphsEn": [
+      "Lord Jesus, Great Physician and Healer, You declared: 'I will restore you to health and heal your wounds.' I reach out in simple faith this morning for Your healing and rejuvenating touch.",
+      "Let Your restorative power flow through every cell of my body, reviving my physical strength, calming my mind, and binding up every hidden wound. Bestow full recovery and radiant health upon my family and loved ones.",
+      "I walk forward in the vitality of Your resurrection life; in Jesus' healing name, Amen."
+    ]
+  },
+  {
+    "id": 26,
+    "themeMr": "कामात आणि परिश्रमात दैवी यश",
+    "themeEn": "Excellence & Diligence in Daily Work",
+    "refMr": "कलस्सैकरांस ३:२३-२४",
+    "refEn": "Colossians 3:23-24",
+    "bookKey": "colossians",
+    "chapter": 3,
+    "verse": 23,
+    "paragraphsMr": [
+      "हे माझ्या निर्मितीकर्त्या पित्या, मी जे काही काम करीन ते माणसांसाठी नव्हे तर साक्षात प्रभूसाठी करतो असे समजून मनापासून करण्याची प्रेरणा मला दे. कारण माझ्या परिश्रमाचे खरे प्रतिफळ स्वर्गातील देवाकडूनच मिळणार आहे.",
+      "प्रभू, आज माझ्या कामात प्रामाणिकपणा, उत्कृष्टता, कल्पकता आणि एकाग्रता प्रकट होऊ दे. माझ्या हातांच्या सर्व कामांना यश दे आणि माझ्या सहकाऱ्यांशी व ग्राहकांशी संवाद साधताना मला कृपा आणि सौजन्य लाभू दे.",
+      "माझा प्रत्येक श्रम तुझ्या नावाच्या गौरवासाठी उपयोगी ठरो; येशूच्या नावात ही प्रार्थना करतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "Heavenly Father, whatever work I put my hands to today, inspire me to do it with all my heart as working for the Lord and not for human masters, knowing my ultimate reward comes from You.",
+      "Impart excellence, creativity, integrity, and focus into all my labor. Prosper the works of my hands and let my demeanor with colleagues and clients reflect Christ's warmth and professional grace.",
+      "May every achievement today be dedicated to Your honor; in Jesus' holy name I pray, Amen."
+    ]
+  },
+  {
+    "id": 27,
+    "themeMr": "क्षमाशीलता आणि अंतःकरणातील कोमलता",
+    "themeEn": "Forgiving Heart & Tender Kindness",
+    "refMr": "इफिसकरांस ४:३१-३२",
+    "refEn": "Ephesians 4:31-32",
+    "bookKey": "ephesians",
+    "chapter": 4,
+    "verse": 31,
+    "paragraphsMr": [
+      "हे दयाळू देवाने, माझ्या अंतःकरणातून सर्व कटुता, राग, क्रोधाचा आवेग आणि निंदानालस्ती संपूर्णपणे काढून टाक. जशी देवाने ख्रिस्तामध्ये मला क्षमा केली आहे, तशीच इतरांप्रती कोमल अंतःकरणाची दया आणि क्षमाशीलता माझ्या मनात ओत.",
+      "प्रभू, जर आज कोणाचे शब्द मला दुखावणारे असतील, तर मी सूड न घेता प्रेमाने आणि आशीर्वादाने उत्तर देऊ शकेन असा ख्रिस्ती स्वभाव मला दे. माझे हृदय कोणत्याही कडू मुळापासून पूर्णपणे मुक्त ठेव.",
+      "तुझ्या स्वर्गीय शांतीने माझे अंतःकरण सदैव उजळून निघो; येशूच्या नावात ही प्रार्थना, आमेन."
+    ],
+    "paragraphsEn": [
+      "Compassionate God, eradicate all bitterness, rage, anger, brawling, and slander from my heart, along with every form of malice. Make me kind, compassionate, and forgiving to others, just as in Christ You forgave me.",
+      "If difficult words come my way today, grant me the inner strength to respond with blessing rather than retaliation. Guard my spirit so that no root of bitterness may take hold in my life.",
+      "Let Your heavenly grace soften and purify my heart continually; in Jesus' precious name, Amen."
+    ]
+  },
+  {
+    "id": 28,
+    "themeMr": "दैवी आत्मिक शस्त्रसामग्रीचे संरक्षण",
+    "themeEn": "Standing Firm in the Full Armor of God",
+    "refMr": "इफिसकरांस ६:१०-११",
+    "refEn": "Ephesians 6:10-11",
+    "bookKey": "ephesians",
+    "chapter": 6,
+    "verse": 10,
+    "paragraphsMr": [
+      "हे सर्वशक्तिमान प्रभो, मी तुझ्यात आणि तुझ्या पराक्रमाच्या सामर्थ्यात बलवान होतो. आजच्या या दिवसात मी देवाचे संपूर्ण आत्मिक शस्त्रसामग्री धारण करतो, जेणेकरून शत्रूच्या सर्व दुष्ट युक्तींवर आणि बाणांवर मी अढळ विजय मिळवू शकेन.",
+      "सत्याचा पट्टा, नीतिमत्तेचे चिलखत, शांतीच्या सुवार्तेची पादत्राणे, विश्वासाची ढाल आणि तारणाचा शिरस्त्राण घालून मी आत्मविश्वासाने उभा राहतो. तुझ्या पवित्र वचनाची तलवार माझ्या हातात धरून मी अंधाराच्या सर्व शक्तींवर जय मिळवतो.",
+      "माझे संपूर्ण रक्षण तुझ्या सामर्थी नावात सुरक्षित आहे; येशूच्या विजयी नावात आमेन."
+    ],
+    "paragraphsEn": [
+      "Almighty Lord, I stand strong in the power of Your boundless might. This morning I put on the full armor of God so that I can stand firm against every scheme and fiery dart of the enemy.",
+      "I gird myself with the belt of truth, the breastplate of righteousness, the gospel of peace, the shield of faith, the helmet of salvation, and the sword of the Spirit which is Your living Word.",
+      "I am fully covered and utterly secure in Your victorious name; in Jesus' mighty name, Amen."
+    ]
+  },
+  {
+    "id": 29,
+    "themeMr": "दैनंदिन गरजा आणि स्वर्गीय राज्याची प्राथमिकता",
+    "themeEn": "Daily Provision & Seeking His Kingdom First",
+    "refMr": "मत्तय ६:११-३३",
+    "refEn": "Matthew 6:33",
+    "bookKey": "matthew",
+    "chapter": 6,
+    "verse": 33,
+    "paragraphsMr": [
+      "हे आमच्या स्वर्गीय पित्या, तू आकाशातील पाखरांना खाऊ घालतोस आणि रानातील फुलांना राजापेक्षाही सुंदर वस्त्रे देतोस. आजच्या दिवसाची आमची रोजची भाकर तू आम्हाला दे आणि आमच्या सर्व गरजा तुझ्या विपुल समृद्धीनुसार पूर्ण कर.",
+      "प्रभू, अन्नाची किंवा पैशांची व्यर्थ चिंता करण्याऐवजी प्रथम देवाचे राज्य आणि त्याचे नीतीमत्व शोधण्याचे ध्येय मला दे. माझी सर्व काळजी तुझ्यावर टाकून मी समाधानाने आणि आनंदाने दिवस व्यतीत करू शकेन अशी कृपा मला दे.",
+      "तुझा विश्वासूपणा माझ्या आयुष्याचा अढळ पाया आहे; येशूच्या नावात ही प्रार्थना करतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "Our Heavenly Father, You feed the birds of the air and clothe the lilies of the field in breathtaking beauty. Give us this day our daily bread and meet all our needs according to Your riches in glory.",
+      "Free my mind from fretful anxiety about tomorrow, helping me instead to seek first Your Kingdom and Your righteousness. In quiet trust, I rest assured that You will add everything I need at the right time.",
+      "Your faithful provision is the solid foundation of my life; in Jesus' blessed name, Amen."
+    ]
+  },
+  {
+    "id": 30,
+    "themeMr": "खऱ्या द्राक्षवेलीमध्ये नित्य जीवन",
+    "themeEn": "Abiding Deeply in Christ the True Vine",
+    "refMr": "योहान १५:४-५",
+    "refEn": "John 15:4-5",
+    "bookKey": "john",
+    "chapter": 15,
+    "verse": 4,
+    "paragraphsMr": [
+      "हे प्रभू येशू, तू खरी द्राक्षवेल आहेस आणि आम्ही तुझ्या फांद्या आहोत; तुझ्याशिवाय आम्ही स्वतःहून काहीही करू शकत नाही. आजच्या या संपूर्ण दिवसात माझे मन आणि आत्मा तुझ्यात खोलवर जोडलेले राहू दे.",
+      "प्रभू, तुझ्या पवित्र आत्म्याचा जीवनरस माझ्या जीवनातून अखंड वाहू दे, जेणेकरून माझ्याद्वारे खूप चांगले फळ निर्माण होईल आणि पित्याचे गौरव होईल. जगातील कोणत्याही प्रलोभनाने मला तुझ्यापासून वेगळे करू नये अशी कृपा मला दे.",
+      "तुझ्यात राहूनच मला जीवनाची परिपूर्णता लाभते; येशूच्या पवित्र नावात प्रार्थना करतो, आमेन."
+    ],
+    "paragraphsEn": [
+      "Lord Jesus, You are the True Vine and we are the branches; apart from You we can do nothing of eternal value. Keep my spirit deeply and continuously united with You throughout this day.",
+      "Let the sap of Your Holy Spirit flow freely through my life, producing abundant, lasting fruit that brings great glory to the Father. Protect me from any temptation or distraction that seeks to sever my focus from You.",
+      "In You alone my soul finds complete life and overflowing joy; in Jesus' lovely name, Amen."
+    ]
+  },
+  {
+    "id": 31,
+    "themeMr": "सार्वकालिक आशा आणि स्वर्गीय आनंद",
+    "themeEn": "Eternal Hope & Heavenly Joy",
+    "refMr": "प्रकटीकरण २१:३-४",
+    "refEn": "Revelation 21:3-4",
+    "bookKey": "revelation",
+    "chapter": 21,
+    "verse": 3,
+    "paragraphsMr": [
+      "हे सार्वकालिक आणि गौरवी राजा, आम्ही त्या दिवसाची वाट पाहत आहोत जेव्हा तू आमच्या डोळ्यांतील प्रत्येक अश्रू पुसून घेशील आणि दुःख, विलाप किंवा वेदना राहणार नाहीत. या अद्भुत स्वर्गीय आशेने माझे हृदय आज नव्या उत्साहाने भरून काढ.",
+      "प्रभू, तात्पुरत्या संकटांकडे न पाहता सार्वकालिक गौरवाकडे पाहून जगण्याचे आत्मिक सामर्थ्य मला दे. आज मी जिथे जाईन तिथे या चिरंतन आशेचा आणि तारणाचा आनंद माझ्या मुखातून आणि कार्यातून व्यक्त होऊ दे.",
+      "तुझे राज्य लवकर येवो आणि तुझे नाव सर्व जगात उंचावले जावो; येशूच्या सामर्थी नावात आमेन."
+    ],
+    "paragraphsEn": [
+      "Glorious and Eternal King, we eagerly anticipate the day when You will wipe every tear from our eyes and there will be no more sorrow, crying, or pain. Fill my heart today with the radiant joy of this eternal hope.",
+      "Help me look beyond the temporary troubles of this present age to the exceeding weight of glory prepared for us. May my speech, my conduct, and my demeanor reflect the unshakable joy of heaven today.",
+      "May Your Kingdom come and Your holy name be exalted in all the earth; in Jesus' mighty name, Amen."
+    ]
+  }
+];
+
+window.getTodayHeadwatersPrayer = function() {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const diff = now - start;
+  const oneDay = 1000 * 60 * 60 * 24;
+  const dayOfYear = Math.floor(diff / oneDay);
+  const offset = (window.state && window.state.vodDayOffset) ? window.state.vodDayOffset : 0;
+  
+  const len = DAILY_HEADWATERS_PRAYERS.length;
+  const idx = ((dayOfYear + offset) % len + len) % len;
+  return DAILY_HEADWATERS_PRAYERS[idx];
+};
+
+window.renderHeadwatersModalContent = function() {
+  const prayer = window.getTodayHeadwatersPrayer();
+  if (!prayer) return;
+  
+  const isEng = (window.state && window.state.translation === "eng");
+  
+  // Theme badge & Title
+  const themeBadge = document.getElementById("headwaters-theme-badge");
+  if (themeBadge) {
+    themeBadge.textContent = isEng ? `✨ ${prayer.themeEn}` : `✨ ${prayer.themeMr}`;
+  }
+  
+  const titleEl = document.getElementById("headwaters-prayer-title");
+  if (titleEl) {
+    titleEl.textContent = isEng ? "Today's Guided Prayer" : "आजची सकाळची प्रार्थना";
+  }
+  
+  // Render Paragraphs
+  const container = document.getElementById("headwaters-prayer-container");
+  if (container) {
+    const paragraphs = isEng ? prayer.paragraphsEn : prayer.paragraphsMr;
+    container.innerHTML = paragraphs.map(p => `<p style="margin: 0; line-height: 1.75;">"${p}"</p>`).join("");
+  }
+  
+  // Dynamic Open in Bible button text
+  const btnText = document.getElementById("headwaters-btn-text");
+  if (btnText) {
+    btnText.textContent = isEng ? `Open in Bible • ${prayer.refEn}` : `Open in Bible • ${prayer.refMr} वाचा`;
+  }
+  
+  // Audio time estimate
+  const timeEl = document.getElementById("headwaters-audio-time");
+  if (timeEl) {
+    const allText = (isEng ? prayer.paragraphsEn : prayer.paragraphsMr).join(" ");
+    const words = allText.split(/\s+/).length;
+    const estSec = Math.max(35, Math.min(75, Math.round(words / 2.2)));
+    const m = Math.floor(estSec / 60);
+    const s = (estSec % 60).toString().padStart(2, "0");
+    timeEl.textContent = `0:${s}` === "0:60" ? "1:00" : `${m}:${s}`;
+  }
+};
+
+window.openCurrentHeadwatersBibleChapter = function() {
+  const prayer = window.getTodayHeadwatersPrayer();
+  if (prayer && prayer.bookKey) {
+    openReaderAndNavigate(prayer.bookKey, prayer.chapter, prayer.verse);
+  } else {
+    openReaderAndNavigate("lamentations", 3, 22);
+  }
+};
+
 window.openHeadwatersModal = function() {
   const modal = document.getElementById("modal-headwaters-sanctuary");
-  if (modal) modal.style.display = "flex";
+  if (modal) {
+    modal.style.display = "flex";
+    renderHeadwatersModalContent();
+  }
 };
 
 window.closeHeadwatersModal = function() {
@@ -13537,133 +16657,1168 @@ window.closeHeadwatersModal = function() {
     clearInterval(window.headwatersProgressInterval);
     window.headwatersProgressInterval = null;
   }
+  if (window.speechSynthesis) {
+    window.speechSynthesis.cancel();
+  }
   const icon = document.getElementById("headwaters-play-icon");
   if (icon) {
     icon.innerHTML = '<polygon points="6 4 20 12 6 20 6 4"></polygon>';
   }
   const progressBar = document.getElementById("headwaters-progress-bar");
   if (progressBar) progressBar.style.width = '0%';
-  const timeEl = document.getElementById("headwaters-audio-time");
-  if (timeEl) timeEl.textContent = '0:45';
+  const playerBox = document.getElementById("headwaters-audio-player-box");
+  if (playerBox) playerBox.classList.remove("playing");
 };
 
-window.playHeadwatersMorningAudio = function(btnElement) {
+/* ==========================================================================
+   MODERN SPIRITUAL & EDUCATIONAL CONTROLLERS
+   ========================================================================== */
+
+// 1. 31-DAY BIBLICAL WORD OF THE DAY & CONTEXT DATABASE
+const DAILY_BIBLICAL_WORDS_DB = [
+  {
+    "id": 1,
+    "term": "Agape (ἀγάπη)",
+    "origin": "Greek (ग्रीक)",
+    "pronunciation": "अगापे",
+    "meaningMr": "निस्वार्थी, बिनशर्त आणि आत्मसमर्पक दैवी प्रीती",
+    "meaningEn": "Unconditional, sacrificial divine love of God",
+    "insightMr": "मानवी प्रेम परिस्थितीवर अवलंबून असते, परंतु 'अगापे' प्रेम आपल्या योग्यतेवर नव्हे तर देवाच्या स्वभावधर्मावर आधारलेले आहे. हे प्रेम स्वतःचा त्याग करून इतरांचे कल्याण शोधते.",
+    "refMr": "१ योहान ४:८ • 'देव प्रीती आहे'",
+    "refEn": "1 John 4:8",
+    "bookKey": "1-john",
+    "chapter": 4,
+    "verse": 8
+  },
+  {
+    "id": 2,
+    "term": "Shalom (שָׁלוֹם)",
+    "origin": "Hebrew (हिब्रू)",
+    "pronunciation": "शालोम",
+    "meaningMr": "परिपूर्ण स्वर्गीय शांती, संपूर्णता आणि आरोग्य",
+    "meaningEn": "Completeness, wholeness, health and deep peace",
+    "insightMr": "'शालोम' म्हणजे केवळ संघर्षाचा अभाव नव्हे, तर जीवनातील सर्व क्षेत्रांत—मन, शरीर, नातेसंबंध आणि आत्मा—देवाने दिलेली परिपूर्ण सुसंवादता व समाधान.",
+    "refMr": "योहान १४:२७ • 'मी माझी शांती तुम्हांस देतो'",
+    "refEn": "John 14:27",
+    "bookKey": "john",
+    "chapter": 14,
+    "verse": 27
+  },
+  {
+    "id": 3,
+    "term": "Hesed (חֶסֶד)",
+    "origin": "Hebrew (हिब्रू)",
+    "pronunciation": "हेसेद",
+    "meaningMr": "अखंड, विश्वासू, दयाळूपूर्ण आणि कराराची अढळ प्रीती",
+    "meaningEn": "Steadfast, loyal, covenant love and tender mercy",
+    "insightMr": "जुना करारातील हा सर्वात श्रीमंत शब्द आहे. जेव्हा मानव अविश्वासू ठरतो, तेव्हाही देव आपल्या 'हेसेद' (अखंड कृपेमुळे) कराराला कधीही मोडत नाही.",
+    "refMr": "विलापगीते ३:२२-२३ • 'त्याच्या दया रोज सकाळी नव्या असतात'",
+    "refEn": "Lamentations 3:22",
+    "bookKey": "lamentations",
+    "chapter": 3,
+    "verse": 22
+  },
+  {
+    "id": 4,
+    "term": "Rhema (ῥῆμα)",
+    "origin": "Greek (ग्रीक)",
+    "pronunciation": "रेमा",
+    "meaningMr": "विशिष्ट क्षणी आत्म्याने उच्चारलेले जिवंत व सामर्थी वचन",
+    "meaningEn": "The spoken, living word tailored for the present moment",
+    "insightMr": "लिखित शास्त्रवचन जेव्हा पवित्र आत्म्याच्या प्रकाशाने थेट तुमच्या आजच्या परिस्थितीशी बोलते, तेव्हा ते 'रेमा' बनते आणि संकटांवर विजय मिळवण्याचे सामर्थ्य देते.",
+    "refMr": "रोमकरांस १०:१७ • 'विश्वास वचनाच्या ऐकण्याने येतो'",
+    "refEn": "Romans 10:17",
+    "bookKey": "romans",
+    "chapter": 10,
+    "verse": 17
+  },
+  {
+    "id": 5,
+    "term": "Ruach (רוּחַ)",
+    "origin": "Hebrew (हिब्रू)",
+    "pronunciation": "रुआख",
+    "meaningMr": "देवाचा श्वास, वारा आणि जीवन देणारा पवित्र आत्मा",
+    "meaningEn": "Breath of God, wind, and life-giving Holy Spirit",
+    "insightMr": "उत्पत्तीमध्ये देवाने मानवाच्या नाकपुड्यांत जो श्वास फुंकला तोच 'रुआख' आहे. हाच आत्मा आजही कोरड्या आणि थकलेल्या हाडांना नवे जीवन देतो.",
+    "refMr": "यहेज्केल ३७:९ • 'हे आत्म्या, ये व या मृतांवर फुंकर घाल'",
+    "refEn": "Ezekiel 37:9",
+    "bookKey": "ezekiel",
+    "chapter": 37,
+    "verse": 9
+  },
+  {
+    "id": 6,
+    "term": "Koinonia (κοινωνία)",
+    "origin": "Greek (ग्रीक)",
+    "pronunciation": "कोयोनिया",
+    "meaningMr": "ख्रिस्तामधील घनिष्ठ सहभागिता, ऐक्य आणि आत्मिक नाते",
+    "meaningEn": "Intimate fellowship, communion, and shared life in Christ",
+    "insightMr": "हे केवळ औपचारिक भेटणे नव्हे, तर एकमेकांची दुःखे व आनंद वाटून घेणे, प्रार्थना करणे आणि ख्रिस्ताच्या एकाच शरीराचे अवयव म्हणून प्रेमाने जगणे आहे.",
+    "refMr": "प्रेषितांची कृत्ये २:४२ • 'ते सहभागितेत तत्पर राहिले'",
+    "refEn": "Acts 2:42",
+    "bookKey": "acts",
+    "chapter": 2,
+    "verse": 42
+  },
+  {
+    "id": 7,
+    "term": "Makarios (μακάριος)",
+    "origin": "Greek (ग्रीक)",
+    "pronunciation": "मकारिओस",
+    "meaningMr": "परिस्थितीपलीकडची स्वर्गीय धन्यता आणि आंतरिक समाधान",
+    "meaningEn": "Supreme blessedness and inward joy independent of worldly circumstances",
+    "insightMr": "डोंगरावरील प्रवचनात येशूने 'धन्य' (मकारिओस) म्हटले. हे सुख बाह्य संपत्तीवर नव्हे तर देवाच्या सान्निध्यात असण्यावर अवलंबून असते.",
+    "refMr": "मत्तय ५:३ • 'जे आत्म्यात दीन ते धन्य'",
+    "refEn": "Matthew 5:3",
+    "bookKey": "matthew",
+    "chapter": 5,
+    "verse": 3
+  },
+  {
+    "id": 8,
+    "term": "Emunah (אֱמוּנָה)",
+    "origin": "Hebrew (हिब्रू)",
+    "pronunciation": "एमुना",
+    "meaningMr": "स्थिर, अढळ आणि कृतीमध्ये प्रकट होणारा विश्वासूपणा",
+    "meaningEn": "Steadfast faith, firmness, and active loyalty",
+    "insightMr": "बायबलमधील विश्वास ही केवळ बौद्धिक सहमती नाही, तर संकटातही देवाला घट्ट धरून ठेवण्याची आणि त्याच्या वचनानुसार चालण्याची स्थिर कृती आहे.",
+    "refMr": "हबक्कूक २:४ • 'नीतिमान आपल्या विश्वासाने जगेल'",
+    "refEn": "Habakkuk 2:4",
+    "bookKey": "habakkuk",
+    "chapter": 2,
+    "verse": 4
+  },
+  {
+    "id": 9,
+    "term": "Charis (χάρις)",
+    "origin": "Greek (ग्रीक)",
+    "pronunciation": "खारिस",
+    "meaningMr": "अपात्र मानवाला विनामूल्य मिळणारी देवाची उद्धारक कृपा",
+    "meaningEn": "Unmerited favor, divine grace and goodwill of God",
+    "insightMr": "न्याय म्हणजे जे आपण कमावले ते मिळणे; दया म्हणजे जी शिक्षा आपल्याला मिळायला हवी ती न मिळणे; आणि कृपा म्हणजे जे आपण कधीही कमवू शकत नाही ते स्वर्गीय दान मिळणे.",
+    "refMr": "इफिसकरांस २:८ • 'कृपेनेच विश्वासाच्या द्वारे तुमचे तारण झाले आहे'",
+    "refEn": "Ephesians 2:8",
+    "bookKey": "ephesians",
+    "chapter": 2,
+    "verse": 8
+  },
+  {
+    "id": 10,
+    "term": "Yireh (יִרְאֶה)",
+    "origin": "Hebrew (हिब्रू)",
+    "pronunciation": "यिरेह (यहोवा-यिरे)",
+    "meaningMr": "परमेश्वर स्वतः काळजी घेतो आणि वेळेवर अद्भुत पुरवठा करतो",
+    "meaningEn": "The Lord will see and provide in the exact time of need",
+    "insightMr": "अब्राहामाने मोरीया पर्वतावर परमेश्वराला 'यहोवा-यिरे' म्हटले. देव आपल्या गरजा आधीच पाहतो आणि आपल्या कल्पनेपेक्षा उत्तम पुरवठा करतो.",
+    "refMr": "उत्पत्ती २२:१४ • 'परमेश्वराच्या पर्वतावर पुरवले जाईल'",
+    "refEn": "Genesis 22:14",
+    "bookKey": "genesis",
+    "chapter": 22,
+    "verse": 14
+  },
+  {
+    "id": 11,
+    "term": "Metanoia (μετάνοια)",
+    "origin": "Greek (ग्रीक)",
+    "pronunciation": "मेटानोया",
+    "meaningMr": "विचारांचे, दृष्टीकोनाचे आणि जीवनाचे आमूलाग्र दैवी परिवर्तन",
+    "meaningEn": "A transformative change of heart, mind, and direction towards God",
+    "insightMr": "हे केवळ पश्चात्तापाचे अश्रू नव्हे, तर जुन्या स्वार्थी मार्गापासून १८० अंश फिरून ख्रिस्ताच्या दिशेने नव्या मनाने चालणे आहे.",
+    "refMr": "रोमकरांस १२:२ • 'आपल्या मनाच्या नवीकरणाने रूपांतरित व्हा'",
+    "refEn": "Romans 12:2",
+    "bookKey": "romans",
+    "chapter": 12,
+    "verse": 2
+  },
+  {
+    "id": 12,
+    "term": "Dunamis (δύναμις)",
+    "origin": "Greek (ग्रीक)",
+    "pronunciation": "दुनामिस",
+    "meaningMr": "अशक्य गोष्टी शक्य करणारे पवित्र आत्म्याचे चमत्कारिक सामर्थ्य",
+    "meaningEn": "Miraculous, inherent divine power and explosive ability",
+    "insightMr": "इंग्रजीतील 'Dynamite' शब्द या ग्रीक शब्दावरून आला आहे. जेव्हा पवित्र आत्मा आपल्यात येतो, तेव्हा तो संकटांवर मात करण्याचे अलौकिक सामर्थ्य देतो.",
+    "refMr": "प्रेषितांची कृत्ये १:८ • 'पवित्र आत्मा तुमच्यावर येईल तेव्हा सामर्थ्य पावाल'",
+    "refEn": "Acts 1:8",
+    "bookKey": "acts",
+    "chapter": 1,
+    "verse": 8
+  },
+  {
+    "id": 13,
+    "term": "Rapha (רָפָא)",
+    "origin": "Hebrew (हिब्रू)",
+    "pronunciation": "राफा (यहोवा-राफा)",
+    "meaningMr": "शारीरिक, मानसिक व आत्मिक जखमा बऱ्या करणारा आरोग्यदाता",
+    "meaningEn": "The Lord who heals, restores, and makes whole",
+    "insightMr": "कडू पाण्याचे गोड पाण्यात रूपांतर करणाऱ्या परमेश्वराने अभिवचन दिले: 'मी परमेश्वर तुझा आरोग्यदाता आहे.' तो आजही प्रत्येक आजारातून मुक्ती देतो.",
+    "refMr": "निर्गम १५:२६ • 'मी तुझा आरोग्यदाता परमेश्वर आहे'",
+    "refEn": "Exodus 15:26",
+    "bookKey": "exodus",
+    "chapter": 15,
+    "verse": 26
+  },
+  {
+    "id": 14,
+    "term": "Parakletos (παράκλητος)",
+    "origin": "Greek (ग्रीक)",
+    "pronunciation": "पाराक्लीतोस",
+    "meaningMr": "संकटसमयी पाठीशी उभा राहणारा साहाय्यकर्ता व सांत्वनकर्ता",
+    "meaningEn": "One called alongside to help, advocate, intercessor, comforter",
+    "insightMr": "येशूने पवित्र आत्म्याला 'पाराक्लीतोस' म्हटले—असा जवळचा मित्र जो कोर्टात तुमचा वकील बनतो आणि संकटात तुमचा हात धरून चालवतो.",
+    "refMr": "योहान १४:१६ • 'तो तुम्हांला दुसरा साहाय्यकर्ता देईल'",
+    "refEn": "John 14:16",
+    "bookKey": "john",
+    "chapter": 14,
+    "verse": 16
+  },
+  {
+    "id": 15,
+    "term": "Nissi (נִסִּי)",
+    "origin": "Hebrew (हिब्रू)",
+    "pronunciation": "निस्सी (यहोवा-निस्सी)",
+    "meaningMr": "परमेश्वर आमचा विजयी ध्वज आणि युद्धातील रक्षणकर्ता",
+    "meaningEn": "The Lord is my banner of rallying, defense, and victory",
+    "insightMr": "जेव्हा मोशेने आपले हात वर धरले, तेव्हा इस्राएल विजयी झाले. आमची लढाई मानवाविरुद्ध नाही तर आत्मिक आहे, आणि ख्रिस्तच आमचा विजय आहे.",
+    "refMr": "निर्गम १७:१५ • 'यहोवा-निस्सी (परमेश्वर माझा ध्वज)'",
+    "refEn": "Exodus 17:15",
+    "bookKey": "exodus",
+    "chapter": 17,
+    "verse": 15
+  },
+  {
+    "id": 16,
+    "term": "Zoë (ζωή)",
+    "origin": "Greek (ग्रीक)",
+    "pronunciation": "झोए",
+    "meaningMr": "ख्रिस्तामधील चिरंतन, समृद्ध आणि ईश्वरी जीवन",
+    "meaningEn": "The uncreated, eternal, abundant life of God Himself",
+    "insightMr": "शारीरिक जीवनाला ग्रीकमध्ये 'बायोस' (Bios) म्हणतात, परंतु 'झोए' म्हणजे साक्षात देवाचे अमर आणि समृद्ध जीवन जे ख्रिस्तावर विश्वास ठेवणाऱ्याला लाभते.",
+    "refMr": "योहान १०:१० • 'मी यासाठी आलो की त्यांना जीवन (झोए) मिळावे'",
+    "refEn": "John 10:10",
+    "bookKey": "john",
+    "chapter": 10,
+    "verse": 10
+  },
+  {
+    "id": 17,
+    "term": "El Shaddai (אֵל שַׁדַּי)",
+    "origin": "Hebrew (हिब्रू)",
+    "pronunciation": "एल शद्दाय",
+    "meaningMr": "सर्वसमर्थ आणि अमर्याद विपुलतेने पुरवणारा देव",
+    "meaningEn": "God Almighty, the all-sufficient and all-bountiful One",
+    "insightMr": "हा शब्द देवाच्या अमर्याद मातृवत् पोषणाचा आणि सार्वभौम शक्तीचा परिपाक आहे. आपल्या प्रत्येक कमतरतेपेक्षा देव कितीतरी पटीने मोठा आहे.",
+    "refMr": "उत्पत्ती १७:१ • 'मी सर्वसमर्थ देव आहे; माझ्यासमोर चाल'",
+    "refEn": "Genesis 17:1",
+    "bookKey": "genesis",
+    "chapter": 17,
+    "verse": 1
+  },
+  {
+    "id": 18,
+    "term": "Eucharisteo (εὐχαριστέω)",
+    "origin": "Greek (ग्रीक)",
+    "pronunciation": "युखरिस्तेओ",
+    "meaningMr": "कृपेची जाणीव ठेवून अंतःकरणातून व्यक्त केलेली कृतज्ञता",
+    "meaningEn": "Giving thanks from the recognition of grace (Charis)",
+    "insightMr": "या शब्दात 'खारिस' (कृपा) लपलेली आहे. प्रभू भोजन घेताना येशूने भाकर मोडून प्रथम उपकार मानले (युखरिस्तेओ). कृतज्ञतेत चमत्काराचे बीज असते.",
+    "refMr": "१ थेस्सलनीकाकरांस ५:१८ • 'सर्व परिस्थितीत उपकार माना'",
+    "refEn": "1 Thessalonians 5:18",
+    "bookKey": "1-thessalonians",
+    "chapter": 5,
+    "verse": 18
+  },
+  {
+    "id": 19,
+    "term": "Abba (אַבָּא)",
+    "origin": "Aramaic (अरामी)",
+    "pronunciation": "आब्बा",
+    "meaningMr": "अत्यंत प्रेमळ, विश्वासू आणि घनिष्ठ स्वर्गीय पिता",
+    "meaningEn": "An intimate, tender cry of a child to their loving Father",
+    "insightMr": "हा केवळ औपचारिक देवाचा उल्लेख नव्हे, तर लहान मूल ज्या विश्वासाने आपल्या वडिलांना 'बाबा' म्हणते, तसा घनिष्ठ आणि निर्भय संबंध दर्शवतो.",
+    "refMr": "रोमकरांस ८:१५ • 'ज्याच्याद्वारे आपण आब्बा, पित्या अशी हाक मारतो'",
+    "refEn": "Romans 8:15",
+    "bookKey": "romans",
+    "chapter": 8,
+    "verse": 15
+  },
+  {
+    "id": 20,
+    "term": "Doxa (δόξα)",
+    "origin": "Greek (ग्रीक)",
+    "pronunciation": "दोक्सा",
+    "meaningMr": "देवाचे स्वर्गीय तेज, सौंदर्य, महत्त्व आणि प्रगट झालेले गौरव",
+    "meaningEn": "The manifest glory, splendor, and majestic presence of God",
+    "insightMr": "हिब्रूमधील 'काबोद' (वजन/महत्त्व) आणि ग्रीकमधील 'दोक्सा' हे दर्शवतात की देवाचे गौरव ही काल्पनिक गोष्ट नसून त्याचे सामर्थ्य दृश्यमान होणे आहे.",
+    "refMr": "योहान १:१४ • 'आम्ही त्याचे गौरव पाहिले'",
+    "refEn": "John 1:14",
+    "bookKey": "john",
+    "chapter": 1,
+    "verse": 14
+  },
+  {
+    "id": 21,
+    "term": "Kadosh (קָדוֹשׁ)",
+    "origin": "Hebrew (हिब्रू)",
+    "pronunciation": "कादोश",
+    "meaningMr": "जगापासून वेगळा, अत्यंत शुद्ध, निष्कलंक आणि पवित्र",
+    "meaningEn": "Holy, set apart, sacred, and infinitely pure",
+    "insightMr": "स्वर्गातील देवदूत अखंड गर्जतात: 'कादोश, कादोश, कादोश' (पवित्र, पवित्र, पवित्र). तो सर्व दोषांपासून अलिप्त आणि संपूर्ण नीतीमान आहे.",
+    "refMr": "यशया ६:३ • 'पवित्र, पवित्र, पवित्र सैन्यांचा परमेश्वर'",
+    "refEn": "Isaiah 6:3",
+    "bookKey": "isaiah",
+    "chapter": 6,
+    "verse": 3
+  },
+  {
+    "id": 22,
+    "term": "Hallelujah (הַלְלוּיָהּ)",
+    "origin": "Hebrew (हिब्रू)",
+    "pronunciation": "हल्लेलूयाह",
+    "meaningMr": "अत्यंत उत्साहाने व आदराने परमेश्वराची स्तुती व जयजयकार करा",
+    "meaningEn": "Praise Yahweh! Joyful, exuberant adoration of the Lord",
+    "insightMr": "'हलाल' (उत्साहाने उंचावणे) आणि 'याह' (परमेश्वर) मिळून हा शब्द बनला आहे. ही संपूर्ण विश्वाची देवाप्रती सर्वोच्च स्तुती आहे.",
+    "refMr": "स्तोत्रसंहिता १५०:६ • 'श्वास असणारे सर्व काही परमेश्वराची स्तुती करो!'",
+    "refEn": "Psalm 150:6",
+    "bookKey": "psalms",
+    "chapter": 150,
+    "verse": 6
+  },
+  {
+    "id": 23,
+    "term": "Chara (χαρά)",
+    "origin": "Greek (ग्रीक)",
+    "pronunciation": "खारा",
+    "meaningMr": "संकटातही आतून उसळणारा पवित्र आत्म्याचा अखंड आनंद",
+    "meaningEn": "Supernatural joy springing from faith rather than circumstances",
+    "insightMr": "आनंद (Happiness) घटनांवर अवलंबून असतो, परंतु 'खारा' (Joy) हा आत्म्याचे फळ आहे जो तुरुंगात किंवा वादळातही गाणे गाण्याचे सामर्थ्य देतो.",
+    "refMr": "गलतीकरांस ५:२२ • 'आत्म्याचे फळ प्रीती, आनंद, शांती आहे'",
+    "refEn": "Galatians 5:22",
+    "bookKey": "galatians",
+    "chapter": 5,
+    "verse": 22
+  },
+  {
+    "id": 24,
+    "term": "Hosanna (הוֹשַׁע נָא)",
+    "origin": "Hebrew (हिब्रू)",
+    "pronunciation": "होसान्ना",
+    "meaningMr": "'आता आम्हाला सोडव व विजय दे' - राजाचा जयघोष",
+    "meaningEn": "Save now, we pray! A cry of adoration and plea for deliverance",
+    "insightMr": "यरुशलेमेमध्ये येशूचा प्रवेश होताना लोकांनी झावळ्या पसरून 'होसान्ना' म्हटले. ही केवळ प्रार्थना नव्हे तर तारणावरचा विजयोत्सव आहे.",
+    "refMr": "मत्तय २१:९ • 'दावीदाच्या पुत्राला होसान्ना!'",
+    "refEn": "Matthew 21:9",
+    "bookKey": "matthew",
+    "chapter": 21,
+    "verse": 9
+  },
+  {
+    "id": 25,
+    "term": "Teshuvah (תְּשׁוּבָה)",
+    "origin": "Hebrew (हिब्रू)",
+    "pronunciation": "तेशुव्हा",
+    "meaningMr": "भटकलेल्या मार्गावरून देवाच्या प्रेमळ बाहूंत परत फिरणे",
+    "meaningEn": "Returning, turning back to God with wholehearted repentance",
+    "insightMr": "उडत्या पुत्राने दूर देशातून आपल्या वडिलांच्या घराकडे परत येणे म्हणजे 'तेशुव्हा'. देव आपल्या परत येण्याची वाट पाहत उभा आहे.",
+    "refMr": "लूक १५:२० • 'तो उठून आपल्या बापाकडे गेला'",
+    "refEn": "Luke 15:20",
+    "bookKey": "luke",
+    "chapter": 15,
+    "verse": 20
+  },
+  {
+    "id": 26,
+    "term": "Epiphany (ἐπιφάνεια)",
+    "origin": "Greek (ग्रीक)",
+    "pronunciation": "एपिफनी",
+    "meaningMr": "अंधकारात सत्याचा आणि देवाच्या उपस्थितीचा तेजस्वी प्रकाश पडणे",
+    "meaningEn": "The glorious manifestation and shining forth of divine presence",
+    "insightMr": "जेव्हा जीवनातील गूढ आणि कठीण प्रसंगात देवाची योजना विजेसारखी स्पष्ट होते, तेव्हा आत्म्याला स्वर्गीय समज व दिशा मिळते.",
+    "refMr": "२ तीमथ्य १:१० • 'आपल्या तारणहाराच्या प्रकट होण्याने हे उघड झाले'",
+    "refEn": "2 Timothy 1:10",
+    "bookKey": "2-timothy",
+    "chapter": 1,
+    "verse": 10
+  },
+  {
+    "id": 27,
+    "term": "Logos (λόγος)",
+    "origin": "Greek (ग्रीक)",
+    "pronunciation": "लोगोस",
+    "meaningMr": "देवाची सनातन बुद्धी, योजना आणि देहधारी झालेले जिवंत वचन",
+    "meaningEn": "The eternal Word, Reason, and Mind of God made flesh in Christ",
+    "insightMr": "सुरुवातीला वचन (लोगोस) होते, आणि वचन देवासह होते, आणि वचन म्हणजेच देव होता. ख्रिस्तामध्ये देवाने स्वतःला मानवाला पूर्णपणे प्रगट केले.",
+    "refMr": "योहान १:१ • 'प्रारंभी शब्द होता'",
+    "refEn": "John 1:1",
+    "bookKey": "john",
+    "chapter": 1,
+    "verse": 1
+  },
+  {
+    "id": 28,
+    "term": "Eirene (εἰρήνη)",
+    "origin": "Greek (ग्रीक)",
+    "pronunciation": "इरेने",
+    "meaningMr": "सर्व बुद्धीपलीकडची मनाची आणि आत्म्याची अढळ शांती",
+    "meaningEn": "Peace, tranquility, and harmony with God",
+    "insightMr": "हिब्रूतील 'शालोम'चा ग्रीक समतुल्य शब्द. ही शांती बाह्य परिस्थिती शांत झाल्यावर मिळत नाही, तर वादळातही ख्रिस्तावर विश्वास ठेवल्याने आतून वाहते.",
+    "refMr": "फिलिप्पैकरांस ४:७ • 'देवाची शांती तुमच्या हृदयांचे रक्षण करील'",
+    "refEn": "Philippians 4:7",
+    "bookKey": "philippians",
+    "chapter": 4,
+    "verse": 7
+  },
+  {
+    "id": 29,
+    "term": "Soteria (σωτηρία)",
+    "origin": "Greek (ग्रीक)",
+    "pronunciation": "सोतेरिया",
+    "meaningMr": "पापापासून मुक्ती, आत्मिक संरक्षण आणि सार्वकालिक तारण",
+    "meaningEn": "Complete salvation, deliverance, preservation, and healing",
+    "insightMr": "'सोतेरिया'मध्ये केवळ स्वर्गात जाणे समाविष्ट नाही, तर आजच्या जीवनातील भीती, आजार आणि अंधाराच्या बंधनातून संपूर्ण मुक्ती समाविष्ट आहे.",
+    "refMr": "रोमकरांस १:१६ • 'सुवार्ता ही देवाचे तारणासाठी सामर्थ्य आहे'",
+    "refEn": "Romans 1:16",
+    "bookKey": "romans",
+    "chapter": 1,
+    "verse": 16
+  },
+  {
+    "id": 30,
+    "term": "Pneuma (πνεῦμα)",
+    "origin": "Greek (ग्रीक)",
+    "pronunciation": "न्यूमा",
+    "meaningMr": "मानवी आत्म्याला जिवंत करणारा स्वर्गीय आत्मा",
+    "meaningEn": "Spirit, sacred breath, and immaterial divine life",
+    "insightMr": "वारा कुठे वाहतो हे आपण ऐकतो पण पाहू शकत नाही; तसेच पवित्र आत्मा मानवी अंतःकरणात अदृश्यपणे महान परिवर्तन घडवून आणतो.",
+    "refMr": "योहान ३:८ • 'वारा जेथे पाहतो तेथे वाहतो'",
+    "refEn": "John 3:8",
+    "bookKey": "john",
+    "chapter": 3,
+    "verse": 8
+  },
+  {
+    "id": 31,
+    "term": "Maranatha (μαρὰν ἀθά)",
+    "origin": "Aramaic (अरामी)",
+    "pronunciation": "मारनाथा",
+    "meaningMr": "'हे आमच्या प्रभू, लवकर ये!' - ख्रिस्ताच्या पुनरागमनाची आशा",
+    "meaningEn": "Our Lord, come! An ancient apostolic prayer of longing for Christ",
+    "insightMr": "सुरुवातीच्या ख्रिस्ती मंडळीचे हे अभिवादन होते. प्रत्येक संकटाच्या शेवटी विश्वासी हृदयाची हीच अंतिम प्रार्थना आहे की ख्रिस्ताचे राज्य पूर्णतेस यावे.",
+    "refMr": "१ करिंथकरांस १६:२२ • 'मारनाथा'",
+    "refEn": "1 Corinthians 16:22",
+    "bookKey": "1-corinthians",
+    "chapter": 16,
+    "verse": 22
+  }
+];
+
+window.getTodayBiblicalWord = function() {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const diff = now - start;
+  const oneDay = 1000 * 60 * 60 * 24;
+  const dayOfYear = Math.floor(diff / oneDay);
+  const offset = (window.state && window.state.vodDayOffset) ? window.state.vodDayOffset : 0;
+  
+  const len = DAILY_BIBLICAL_WORDS_DB.length;
+  const idx = ((dayOfYear + offset) % len + len) % len;
+  return DAILY_BIBLICAL_WORDS_DB[idx];
+};
+
+
+// Biblical Word of the Day Action Handlers (Bookmark, Download, Share)
+window.toggleMicroLearningBookmark = function() {
+  const word = (typeof getTodayBiblicalWord === "function") ? getTodayBiblicalWord() : null;
+  if (!word) return;
+  if (!state.bookmarks) state.bookmarks = [];
+  
+  const wordRef = `Word: ${word.term}`;
+  const idx = state.bookmarks.findIndex(b => b.ref === wordRef || b.term === word.term);
+  
+  if (idx !== -1) {
+    state.bookmarks.splice(idx, 1);
+    if (typeof showToast === 'function') showToast("शब्द बुकमार्कवरून काढला • Removed from bookmarks");
+  } else {
+    state.bookmarks.unshift({
+      ref: wordRef,
+      term: word.term,
+      origin: word.origin,
+      pronunciation: word.pronunciation,
+      meaning: word.meaningMr,
+      meaningEn: word.meaningEn,
+      insight: word.insightMr,
+      insightEn: word.insightEn,
+      scriptureRef: word.refMr,
+      book: word.bookKey || "acts",
+      chapter: word.chapter || 2,
+      verse: word.verse || 42,
+      date: new Date().toLocaleDateString(),
+      isWordOfDay: true
+    });
+    if (typeof showToast === 'function') showToast("शब्द बुकमार्क केला • Saved to Bookmarks ⭐");
+  }
+  
+  if (typeof saveStateToLocalStorage === "function") saveStateToLocalStorage();
+  if (typeof updateMicroLearningBookmarkUI === "function") updateMicroLearningBookmarkUI();
+};
+
+window.updateMicroLearningBookmarkUI = function() {
+  const word = (typeof getTodayBiblicalWord === "function") ? getTodayBiblicalWord() : null;
+  if (!word) return;
+  const wordRef = `Word: ${word.term}`;
+  const isBookmarked = state.bookmarks && state.bookmarks.some(b => b.ref === wordRef || b.term === word.term);
+  const btn = document.getElementById("micro-word-btn-bookmark");
+  const icon = document.getElementById("micro-word-bookmark-icon");
+  if (!btn) return;
+  
+  if (isBookmarked) {
+    btn.classList.add("active-bookmarked");
+    btn.setAttribute("title", "Bookmarked / बुकमार्क केले आहे");
+    if (icon) {
+      icon.setAttribute("fill", "#f59e0b");
+      icon.setAttribute("stroke", "#f59e0b");
+    }
+  } else {
+    btn.classList.remove("active-bookmarked");
+    btn.setAttribute("title", "Bookmark Word / शब्द बुकमार्क करा");
+    if (icon) {
+      icon.setAttribute("fill", "none");
+      icon.setAttribute("stroke", "currentColor");
+    }
+  }
+};
+
+window.shareMicroLearningWord = function() {
+  const word = (typeof getTodayBiblicalWord === "function") ? getTodayBiblicalWord() : null;
+  if (!word) return;
+  const isEng = (window.state && (window.state.translation === "eng" || window.state.language === "en"));
+  const text = `✨ Biblical Word of the Day: ${word.term}\n\n` +
+    `📍 Origin: ${word.origin} | Pronunciation: ${word.pronunciation}\n\n` +
+    `📖 Meaning:\n${isEng ? word.meaningEn : word.meaningMr}\n\n` +
+    `💡 Spiritual Insight:\n${(isEng && word.insightEn) ? word.insightEn : word.insightMr}\n\n` +
+    `📜 Scripture: ${isEng ? word.refEn : word.refMr}\n\n` +
+    `Read on River of Life Bible: ${window.location.origin}`;
+  
+  if (navigator.share) {
+    navigator.share({ title: `Word of the Day: ${word.term}`, text: text }).catch(() => {});
+  } else {
+    const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+    window.open(waUrl, '_blank');
+  }
+};
+
+window.downloadMicroLearningCard = function() {
+  const word = (typeof getTodayBiblicalWord === "function") ? getTodayBiblicalWord() : null;
+  const canvas = document.createElement('canvas');
+  canvas.width = 1080;
+  canvas.height = 1080;
+  const ctx = canvas.getContext('2d');
+  
+  // Dark cinematic gradient background
+  const grad = ctx.createLinearGradient(0, 0, 1080, 1080);
+  grad.addColorStop(0, '#0f141d');
+  grad.addColorStop(0.5, '#151b27');
+  grad.addColorStop(1, '#0b0e14');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 1080, 1080);
+  
+  // Outer glowing violet border
+  ctx.strokeStyle = 'rgba(139, 92, 246, 0.4)';
+  ctx.lineWidth = 4;
+  ctx.strokeRect(40, 40, 1000, 1000);
+  
+  // Left violet accent bar
+  ctx.fillStyle = '#8b5cf6';
+  ctx.fillRect(40, 40, 16, 1000);
+  
+  // Header Tag
+  ctx.fillStyle = '#c084fc';
+  ctx.font = 'bold 26px -apple-system, BlinkMacSystemFont, sans-serif';
+  ctx.fillText('✨ BIBLICAL WORD OF THE DAY', 90, 120);
+  
+  // Term Title
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 54px -apple-system, BlinkMacSystemFont, sans-serif';
+  ctx.fillText(word ? word.term : 'Word of the Day', 90, 200);
+  
+  // Origin & Pronunciation
+  ctx.fillStyle = '#e2e8f0';
+  ctx.font = '600 28px -apple-system, BlinkMacSystemFont, sans-serif';
+  ctx.fillText(`${word ? word.origin : ''}  •  उच्चार: ${word ? word.pronunciation : ''}`, 90, 260);
+  
+  // Meaning Box
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.06)';
+  ctx.fillRect(90, 320, 900, 180);
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+  ctx.strokeRect(90, 320, 900, 180);
+  
+  ctx.fillStyle = '#a78bfa';
+  ctx.font = 'bold 22px -apple-system, BlinkMacSystemFont, sans-serif';
+  ctx.fillText('अर्थ (BIBLICAL MEANING)', 120, 370);
+  
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 32px "Noto Serif Devanagari", Georgia, serif';
+  ctx.fillText(word ? word.meaningMr : '', 120, 430);
+  
+  // Spiritual Insight
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+  ctx.font = 'bold 22px -apple-system, BlinkMacSystemFont, sans-serif';
+  ctx.fillText('आत्मिक रहस्य व मनन (SPIRITUAL INSIGHT)', 90, 560);
+  
+  ctx.fillStyle = '#cbd5e1';
+  ctx.font = '28px "Noto Serif Devanagari", Georgia, serif';
+  const insight = word ? word.insightMr : '';
+  const wordsArr = insight.split(' ');
+  let curLine = '';
+  let startY = 620;
+  for (let n = 0; n < wordsArr.length; n++) {
+    const test = curLine + wordsArr[n] + ' ';
+    if (ctx.measureText(test).width > 890 && n > 0) {
+      ctx.fillText(curLine, 90, startY);
+      curLine = wordsArr[n] + ' ';
+      startY += 48;
+    } else {
+      curLine = test;
+    }
+  }
+  ctx.fillText(curLine, 90, startY);
+  
+  // Scripture Reference
+  ctx.fillStyle = '#c084fc';
+  ctx.font = 'bold 28px -apple-system, BlinkMacSystemFont, sans-serif';
+  ctx.fillText(word ? `📖 ${word.refMr}` : '', 90, 920);
+  
+  // App Branding
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+  ctx.font = '22px -apple-system, BlinkMacSystemFont, sans-serif';
+  ctx.fillText('River of Life • Holy Bible', 90, 970);
+  
+  const link = document.createElement('a');
+  link.download = `biblical_word_of_the_day_${Date.now()}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+  if (typeof showToast === 'function') showToast("कार्ड डाऊनलोड झाले • Card downloaded! 📸");
+};
+
+window.renderBiblicalMicroLearning = function() {
+  setTimeout(() => { if (typeof updateMicroLearningBookmarkUI === "function") updateMicroLearningBookmarkUI(); }, 50);
+  const word = window.getTodayBiblicalWord();
+  if (!word) return;
+  
+  const isEng = (window.state && (window.state.translation === "eng" || window.state.language === "en"));
+  
+  const termEl = document.getElementById("micro-word-term");
+  const originEl = document.getElementById("micro-word-origin");
+  const pronEl = document.getElementById("micro-word-pronunciation");
+  const meaningEl = document.getElementById("micro-word-meaning");
+  const insightEl = document.getElementById("micro-word-insight");
+  const refEl = document.getElementById("micro-word-ref");
+  const dayBadge = document.getElementById("microlearning-day-badge");
+  
+  if (termEl) termEl.textContent = word.term;
+  if (originEl) originEl.textContent = word.origin;
+  if (pronEl) pronEl.textContent = isEng ? `Pronunciation: ${word.pronunciation}` : `उच्चार: ${word.pronunciation}`;
+  if (meaningEl) meaningEl.textContent = isEng ? word.meaningEn : word.meaningMr;
+  if (insightEl) insightEl.textContent = (isEng && word.insightEn) ? word.insightEn : word.insightMr;
+  if (refEl) refEl.textContent = isEng ? word.refEn : word.refMr;
+  if (dayBadge) dayBadge.textContent = `Day ${word.id}`;
+
+  const navBtn = document.getElementById("micro-word-nav-btn");
+  if (navBtn) {
+    const span = navBtn.querySelector("span");
+    if (span) span.textContent = isEng ? "Read in Bible →" : "बायबलमध्ये वाचा →";
+  }
+};
+
+window.speakMicroLearningWord = function() {
+  const word = window.getTodayBiblicalWord();
+  if (!word) return;
+  
+  const text = `${word.pronunciation}... ${word.term}... ${word.meaningMr}... ${word.insightMr}`;
+  showToast(`🔊 ${word.term} - ${word.meaningMr} ✨`);
+
+  if (window.SarvamTTS && window.SarvamTTS.client && window.SarvamTTS.client.speakViaWebSpeech) {
+    window.SarvamTTS.client.speakViaWebSpeech(text, { lang: 'mr-IN', pace: 0.86 });
+  } else if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = "mr-IN";
+    utter.rate = 0.86;
+    utter.pitch = 0.88;
+    window.speechSynthesis.speak(utter);
+  } else {
+    showToast(`📖 ${word.term}: ${word.meaningMr}`);
+  }
+};
+
+window.openMicroLearningBibleChapter = function() {
+  const word = window.getTodayBiblicalWord();
+  if (word && word.bookKey) {
+    openReaderAndNavigate(word.bookKey, word.chapter, word.verse);
+  }
+};
+
+// 2. TIME-AWARE DAYPARTING ATMOSPHERE CONTROLLER
+window.updateDaypartingAtmosphere = function() {
+  const now = new Date();
+  const hours = now.getHours();
+  const glowEl = document.getElementById("ambient-dayparting-glow");
+  const greetingSubEl = document.getElementById("home-greeting-subtext");
+  const isEng = (window.state && window.state.translation === "eng");
+  
+  let daypart = "morning";
+  let subtextMr = "🌅 सकाळचा पवित्र विसावा व मार्गदर्शन";
+  let subtextEn = "🌅 Morning peace, grace & guidance";
+  
+  if (hours >= 12 && hours < 17) {
+    daypart = "afternoon";
+    subtextMr = "☀️ दुपारच्या प्रवाहात देवाची शांती अनुभवा";
+    subtextEn = "☀️ Walking in divine peace and clarity";
+  } else if (hours >= 17 || hours < 5) {
+    daypart = "night";
+    subtextMr = "🌙 शांत विसावा व कृतज्ञतेने विश्रांती";
+    subtextEn = "🌙 Rest, gratitude & evening blessing";
+  }
+  
+  if (glowEl) {
+    glowEl.className = `ambient-dayparting-glow daypart-${daypart}`;
+  }
+  if (greetingSubEl) {
+    greetingSubEl.textContent = isEng ? subtextEn : subtextMr;
+  }
+};
+
+// 3. 3-STEP GUIDED DAILY SPIRITUAL FLOW CONTROLLER
+window.getDailyFlowState = function() {
+  const todayStr = new Date().toISOString().split("T")[0];
+  const saved = localStorage.getItem(`river_daily_flow_${todayStr}`);
+  return saved ? JSON.parse(saved) : { pray: false, read: false, learn: false };
+};
+
+window.saveDailyFlowStep = function(stepName) {
+  const todayStr = new Date().toISOString().split("T")[0];
+  const current = window.getDailyFlowState();
+  current[stepName] = true;
+  localStorage.setItem(`river_daily_flow_${todayStr}`, JSON.stringify(current));
+  window.renderDailyFlowTrack();
+};
+
+window.renderDailyFlowTrack = function() {
+  const flow = window.getDailyFlowState();
+  const btnPray = document.getElementById("step-btn-pray");
+  const btnRead = document.getElementById("step-btn-read");
+  const btnLearn = document.getElementById("step-btn-learn");
+  const badge = document.getElementById("daily-flow-progress-badge");
+  
+  let count = 0;
+  if (flow.pray) { count++; if (btnPray) btnPray.classList.add("completed"); }
+  if (flow.read) { count++; if (btnRead) btnRead.classList.add("completed"); }
+  if (flow.learn) { count++; if (btnLearn) btnLearn.classList.add("completed"); }
+  
+  if (badge) {
+    badge.textContent = `${count}/3 Complete`;
+    if (count === 3) {
+      badge.textContent = "3/3 Complete 🎉";
+      badge.style.background = "rgba(34,197,94,0.15)";
+      badge.style.color = "#16a34a";
+      badge.style.borderColor = "rgba(34,197,94,0.3)";
+    }
+  }
+};
+
+window.triggerDailyFlowStep = function(stepName) {
+  if (stepName === 'pray') {
+    window.saveDailyFlowStep('pray');
+    openHeadwatersModal();
+  } else if (stepName === 'read') {
+    window.saveDailyFlowStep('read');
+    const vodEl = document.getElementById("card-daily-verse-home");
+    if (vodEl) {
+      vodEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      vodEl.style.transition = 'box-shadow 0.3s ease';
+      vodEl.style.boxShadow = '0 0 30px rgba(245,158,11,0.5)';
+      setTimeout(() => {
+        if (vodEl) vodEl.style.boxShadow = '';
+      }, 1600);
+    }
+    showToast("📖 आजचे वचन (Verse of the Day)");
+  } else if (stepName === 'learn') {
+    window.saveDailyFlowStep('learn');
+    const learnEl = document.getElementById("educational-microlearning-section");
+    if (learnEl) {
+      learnEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    showToast("💡 आजचा मूळ शब्द व मनन (Word of the Day)");
+  }
+};
+
+// 4. FLOATING DEVOTIONAL MINI-PLAYER CONTROLLER
+window.showFloatingMiniPlayer = function(title, subtitle, onToggle, onExpand) {
+  const playerEl = document.getElementById("floating-devotional-miniplayer");
+  if (!playerEl) return;
+  
+  playerEl.style.display = "flex";
+  const titleEl = document.getElementById("miniplayer-title");
+  const subEl = document.getElementById("miniplayer-subtitle");
+  const disc = document.getElementById("miniplayer-disc");
+  
+  if (titleEl) titleEl.textContent = title || "The Headwaters";
+  if (subEl) subEl.textContent = subtitle || "Guided Devotion";
+  if (disc) disc.classList.add("spinning");
+  
+  window._miniPlayerExpandCallback = onExpand;
+  window._miniPlayerToggleCallback = onToggle;
+};
+
+window.updateMiniPlayerState = function(isPlaying, timeStr) {
+  const toggleIcon = document.getElementById("miniplayer-toggle-icon");
+  const disc = document.getElementById("miniplayer-disc");
+  const timeEl = document.getElementById("miniplayer-time");
+  
+  if (toggleIcon) toggleIcon.textContent = isPlaying ? "⏸" : "▶";
+  if (disc) {
+    if (isPlaying) disc.classList.add("spinning");
+    else disc.classList.remove("spinning");
+  }
+  if (timeEl && timeStr) timeEl.textContent = timeStr;
+};
+
+window.toggleMiniPlayerPlayback = function() {
+  if (window._miniPlayerToggleCallback) {
+    window._miniPlayerToggleCallback();
+  } else if (window.playHeadwatersMorningAudio) {
+    window.playHeadwatersMorningAudio();
+  }
+};
+
+window.expandActiveMiniPlayer = function() {
+  if (window._miniPlayerExpandCallback) {
+    window._miniPlayerExpandCallback();
+  } else if (window.openHeadwatersModal) {
+    window.openHeadwatersModal();
+  }
+};
+
+window.dismissMiniPlayer = function() {
+  const playerEl = document.getElementById("floating-devotional-miniplayer");
+  if (playerEl) playerEl.style.display = "none";
+};
+
+
+
+window.headwatersAudioPlayer = {
+  isPlaying: false,
+  isPaused: false,
+  progressInterval: null,
+  startTs: 0,
+  pausedElapsed: 0,
+  estimatedDurationMs: 45000,
+  activeAudio: null,
+  activeUtterance: null,
+  currentSessionId: 0
+};
+
+window.playHeadwatersMorningAudio = async function(btnElement) {
   const icon = document.getElementById("headwaters-play-icon");
   const progressBar = document.getElementById("headwaters-progress-bar");
   const timeEl = document.getElementById("headwaters-audio-time");
+  const playerBox = document.getElementById("headwaters-audio-player-box");
+  const player = window.headwatersAudioPlayer;
   
-  const text = "हे स्वर्गीय पित्या... या नवीन दिवसाच्या उषःकाली, मी माझे संपूर्ण मन व जीवन तुझ्या हातात सोपवतो. विलापगीते सांगते, की तुझ्या दया रोज सकाळी नव्या असतात... तुझा विश्वासूपणा महान आहे. आजचा प्रत्येक निर्णय, विचार आणि शब्द, तुझ्या प्रीतीचा सुगंध पसरवणारा असू दे... येशूच्या नावात, आमेन.";
+  const prayer = window.getTodayHeadwatersPrayer();
+  const isEng = (window.state && window.state.translation === "eng");
+  const paragraphs = (prayer && (isEng ? prayer.paragraphsEn : prayer.paragraphsMr)) || [
+    "हे दयाळू आणि सर्वसमर्थ स्वर्गीय पित्या, या नव्या दिवसाच्या उषःकाली मी अत्यंत कृतज्ञ अंतःकरणाने तुझ्या पवित्र चरणांशी नतमस्तक होतो."
+  ];
+  const fullPrayerText = paragraphs.join(" ");
   
-  // Toggle Pause if already playing
-  if (window.headwatersAudioInstance && !window.headwatersAudioInstance.paused) {
-    window.headwatersAudioInstance.pause();
-    if (icon) {
-      icon.innerHTML = '<polygon points="6 4 20 12 6 20 6 4"></polygon>';
+  // 1. If currently playing, Pause
+  if (player.isPlaying && !player.isPaused) {
+    player.isPaused = true;
+    player.pausedElapsed = Date.now() - player.startTs;
+    
+    if (player.activeAudio && !player.activeAudio.paused) {
+      try { player.activeAudio.pause(); } catch(e) {}
     }
-    if (window.headwatersProgressInterval) {
-      clearInterval(window.headwatersProgressInterval);
-      window.headwatersProgressInterval = null;
+    if (window.speechSynthesis && (window.speechSynthesis.speaking || window.speechSynthesis.pending)) {
+      try { window.speechSynthesis.pause(); } catch(e) {}
     }
-    showToast("⏸ ऑडिओ थांबवला (Audio Paused)");
+    if (player.progressInterval) {
+      clearInterval(player.progressInterval);
+      player.progressInterval = null;
+    }
+    
+    if (icon) icon.innerHTML = '<polygon points="6 4 20 12 6 20 6 4"></polygon>';
+    if (playerBox) playerBox.classList.remove("playing");
+    showToast(isEng ? "⏸ Audio Paused" : "⏸ ऑडिओ थांबवला (Audio Paused)");
     return;
   }
   
-  // Stop any other active audio
-  if (window.currentSingleAudio && window.currentSingleAudio !== window.headwatersAudioInstance) {
+  // 2. If paused, Resume
+  if (player.isPlaying && player.isPaused) {
+    player.isPaused = false;
+    player.startTs = Date.now() - player.pausedElapsed;
+    
+    if (icon) icon.innerHTML = '<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>';
+    if (playerBox) playerBox.classList.add("playing");
+    
+    if (player.activeAudio && player.activeAudio.paused) {
+      player.activeAudio.play().catch(e => console.warn(e));
+    } else if (window.speechSynthesis && window.speechSynthesis.paused) {
+      window.speechSynthesis.resume();
+    }
+    
+    startHeadwatersProgressLoop();
+    showToast(isEng ? "▶ Resuming Prayer..." : "▶ प्रार्थना सुरू ठेवत आहे...");
+    return;
+  }
+  
+  // 3. Clean slate: Stop all other active audio
+  if (window.currentSingleAudio) {
     try { window.currentSingleAudio.pause(); } catch(e) {}
     window.currentSingleAudio = null;
   }
-  
-  if (icon) {
-    icon.innerHTML = '<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>';
+  if (window.audioPlayerInstance) {
+    try { window.audioPlayerInstance.pause(); } catch(e) {}
+    window.audioPlayerInstance = null;
   }
-  if (progressBar && progressBar.style.width === '0%') progressBar.style.width = '4%';
-  if (timeEl) timeEl.textContent = '0:01 / 0:45';
+  if (window.SarvamTTS && window.SarvamTTS.queue) {
+    try { window.SarvamTTS.queue.stop(); } catch(e) {}
+  }
+  if (window.speechSynthesis) {
+    try {
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.resume();
+    } catch(e) {}
+  }
   
-  const audioSrc = "assets/audio/devotional/headwaters_morning.mp3";
+  // Unlock audio context on mobile immediately
   try {
-    const audio = new Audio(audioSrc);
-    window.headwatersAudioInstance = audio;
-    window.currentSingleAudio = audio;
-    
-    let totalSec = 45;
-    
-    audio.onloadedmetadata = () => {
-      if (audio.duration && !isNaN(audio.duration) && audio.duration > 0) {
-        totalSec = Math.round(audio.duration);
-      }
-    };
-    
-    audio.ontimeupdate = () => {
-      const cur = audio.currentTime || 0;
-      const dur = audio.duration || totalSec;
-      const pct = Math.min(100, Math.max(0, (cur / dur) * 100));
-      if (progressBar) progressBar.style.width = pct + '%';
-      const mCur = Math.floor(cur / 60);
-      const sCur = Math.floor(cur % 60).toString().padStart(2, '0');
-      const mDur = Math.floor(dur / 60);
-      const sDur = Math.floor(dur % 60).toString().padStart(2, '0');
-      if (timeEl) timeEl.textContent = `${mCur}:${sCur} / ${mDur}:${sDur}`;
-    };
-    
-    audio.onplay = () => {
-      if (icon) icon.innerHTML = '<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>';
-      showToast("🔊 सकाळची प्रार्थना सुरू आहे (Natural Devotional Marathi Voice) ✨");
-    };
-    
-    audio.onended = () => {
-      if (icon) icon.innerHTML = '<polygon points="6 4 20 12 6 20 6 4"></polygon>';
-      if (progressBar) progressBar.style.width = '0%';
-      if (timeEl) timeEl.textContent = '0:45';
-      window.headwatersAudioInstance = null;
-      window.currentSingleAudio = null;
-    };
-    
-    audio.onerror = () => {
-      console.warn("Direct audio not found, fallback to speech synthesis with dynamic track animation");
-      if (window.speechSynthesis) {
-        window.speechSynthesis.cancel();
-        const utter = new SpeechSynthesisUtterance(text);
-        utter.lang = 'mr-IN';
-        utter.rate = 0.9;
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (AudioContextClass) {
+      const ctx = new AudioContextClass();
+      if (ctx.state === 'suspended') ctx.resume();
+    }
+  } catch(e) {}
+  
+  player.currentSessionId = Date.now();
+  const thisSessionId = player.currentSessionId;
+  
+  // Duration calculation
+  const words = fullPrayerText.split(/\s+/).length;
+  const estDurationSec = Math.max(30, Math.min(85, Math.round(words / 1.9)));
+  player.estimatedDurationMs = estDurationSec * 1000;
+  player.startTs = Date.now();
+  player.pausedElapsed = 0;
+  player.isPlaying = true;
+  player.isPaused = false;
+  
+  if (icon) icon.innerHTML = '<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>';
+  if (playerBox) playerBox.classList.add("playing");
+  if (progressBar) progressBar.style.width = '3%';
+  
+  startHeadwatersProgressLoop();
+  
+  // 4. Try Direct High-Fidelity Audio File First
+  const directAudioPath = (prayer && prayer.id === 1) ? "assets/audio/devotional/headwaters_morning.mp3" : null;
+  if (directAudioPath && !isEng) {
+    try {
+      const audio = new Audio(directAudioPath);
+      player.activeAudio = audio;
+      window.currentSingleAudio = audio;
+      
+      audio.onloadedmetadata = () => {
+        if (audio.duration && !isNaN(audio.duration) && audio.duration > 0) {
+          player.estimatedDurationMs = Math.round(audio.duration * 1000);
+        }
+      };
+      
+      audio.ontimeupdate = () => {
+        if (!player.isPlaying || player.isPaused) return;
+        const cur = audio.currentTime || 0;
+        const dur = audio.duration || (player.estimatedDurationMs / 1000);
+        const pct = Math.min(99, Math.max(0, (cur / dur) * 100));
+        if (progressBar) progressBar.style.width = `${pct.toFixed(1)}%`;
         
-        let startT = Date.now();
-        const estDuration = 22000;
-        
-        if (window.headwatersProgressInterval) clearInterval(window.headwatersProgressInterval);
-        window.headwatersProgressInterval = setInterval(() => {
-          const elapsed = Date.now() - startT;
-          const pct = Math.min(100, (elapsed / estDuration) * 100);
-          if (progressBar) progressBar.style.width = pct + '%';
-          const sec = Math.floor(elapsed / 1000);
-          if (timeEl) timeEl.textContent = `0:${sec.toString().padStart(2, '0')} / 0:22`;
-          if (pct >= 100) {
-            clearInterval(window.headwatersProgressInterval);
-            window.headwatersProgressInterval = null;
-          }
-        }, 200);
-        
-        utter.onend = () => {
-          if (icon) icon.innerHTML = '<polygon points="6 4 20 12 6 20 6 4"></polygon>';
-          if (progressBar) progressBar.style.width = '0%';
-          if (timeEl) timeEl.textContent = '0:45';
-          if (window.headwatersProgressInterval) {
-            clearInterval(window.headwatersProgressInterval);
-            window.headwatersProgressInterval = null;
-          }
-        };
-        
-        window.speechSynthesis.speak(utter);
+        const mCur = Math.floor(cur / 60);
+        const sCur = Math.floor(cur % 60).toString().padStart(2, "0");
+        const mDur = Math.floor(dur / 60);
+        const sDur = Math.floor(dur % 60).toString().padStart(2, "0");
+        if (timeEl) timeEl.textContent = `${mCur}:${sCur} / ${mDur}:${sDur}`;
+      };
+      
+      audio.onplay = () => {
         showToast("🔊 सकाळची प्रार्थना सुरू आहे (Natural Devotional Marathi Voice) ✨");
+      };
+      
+      audio.onended = () => {
+        if (player.currentSessionId === thisSessionId) {
+          stopHeadwatersPlaybackState();
+        }
+      };
+      
+      audio.onerror = () => {
+        console.warn("Direct audio failed, falling back to Web Speech...");
+        player.activeAudio = null;
+        executeHeadwatersSpeechSynthesis(fullPrayerText, isEng, thisSessionId);
+      };
+      
+      await audio.play();
+      return;
+    } catch (e) {
+      console.warn("Direct audio playback failed:", e);
+      player.activeAudio = null;
+    }
+  }
+  
+  // 5. Fallback: Universal Voice Speech Synthesis
+  executeHeadwatersSpeechSynthesis(fullPrayerText, isEng, thisSessionId);
+};
+
+function executeHeadwatersSpeechSynthesis(fullPrayerText, isEng, thisSessionId) {
+  const player = window.headwatersAudioPlayer;
+  
+  if (window.speechSynthesis) {
+    const cleanText = (window.SarvamTTS && window.SarvamTTS.optimizer)
+      ? window.SarvamTTS.optimizer.optimizeForNarration(fullPrayerText, isEng ? 'en-IN' : 'mr-IN')
+      : fullPrayerText.replace(/[—–]/g, ', ').replace(/[;:]/g, ', ').replace(/["']/g, '').replace(/\s+/g, ' ').trim();
+    
+    const utter = new SpeechSynthesisUtterance(cleanText);
+    utter.rate = isEng ? 0.90 : 0.84;
+    utter.pitch = 0.88;
+    
+    const voices = (window.speechSynthesis.getVoices && window.speechSynthesis.getVoices()) || [];
+    let selectedVoice = null;
+    
+    if (!isEng) {
+      selectedVoice = voices.find(v => (v.lang.startsWith('mr') || v.lang.startsWith('hi')) && (v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('madhav') || v.name.toLowerCase().includes('hemant') || v.name.toLowerCase().includes('manohar') || v.name.toLowerCase().includes('mohan') || v.name.toLowerCase().includes('natural') || v.name.toLowerCase().includes('google'))) ||
+                      voices.find(v => (v.lang === 'mr-IN' || v.lang === 'mr_IN' || v.lang.startsWith('mr'))) ||
+                      voices.find(v => (v.lang === 'hi-IN' || v.lang === 'hi_IN' || v.lang.startsWith('hi'))) ||
+                      voices.find(v => v.lang.includes('IN') || (v.name && v.name.toLowerCase().includes('india')));
+      
+      if (selectedVoice) {
+        utter.voice = selectedVoice;
+        utter.lang = selectedVoice.lang;
+      } else {
+        utter.lang = 'mr-IN';
+      }
+    } else {
+      selectedVoice = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Natural') || v.name.includes('Neural') || v.name.includes('Online'))) ||
+                      voices.find(v => v.lang.startsWith('en'));
+      if (selectedVoice) {
+        utter.voice = selectedVoice;
+        utter.lang = selectedVoice.lang;
+      } else {
+        utter.lang = 'en-US';
+      }
+    }
+    
+    utter.onstart = () => {
+      if (player.currentSessionId === thisSessionId) {
+        player.startTs = Date.now();
+        showToast(isEng ? "🔊 Listening to Daily Prayer ✨" : "🔊 सकाळची प्रार्थना सुरू आहे (Daily Guided Prayer) ✨");
       }
     };
     
-    audio.play().catch(e => {
-      if (audio.onerror) audio.onerror();
-    });
-  } catch (err) {
-    console.error(err);
+    utter.onend = () => {
+      if (player.currentSessionId === thisSessionId && player.isPlaying && !player.isPaused) {
+        stopHeadwatersPlaybackState();
+      }
+    };
+    
+    utter.onerror = (e) => {
+      if (e.error === 'canceled' || e.error === 'interrupted') return;
+      console.warn("[Headwaters TTS Error]:", e);
+      if (player.currentSessionId === thisSessionId) {
+        stopHeadwatersPlaybackState();
+      }
+    };
+    
+    player.activeUtterance = utter;
+    window.speechSynthesis.speak(utter);
+  } else {
+    showToast("ऑडिओ उपलब्ध नाही (Speech synthesis not supported)");
+    stopHeadwatersPlaybackState();
   }
+}
+
+function startHeadwatersProgressLoop() {
+  const player = window.headwatersAudioPlayer;
+  const progressBar = document.getElementById("headwaters-progress-bar");
+  const timeEl = document.getElementById("headwaters-audio-time");
+  
+  if (player.progressInterval) clearInterval(player.progressInterval);
+  
+  player.progressInterval = setInterval(() => {
+    if (!player.isPlaying || player.isPaused) return;
+    
+    // If active audio element is tracking its own time, let audio.ontimeupdate handle it
+    if (player.activeAudio) return;
+    
+    const elapsedMs = Date.now() - player.startTs;
+    const pct = Math.min(99, (elapsedMs / player.estimatedDurationMs) * 100);
+    if (progressBar) progressBar.style.width = `${pct.toFixed(1)}%`;
+    
+    const curSec = Math.floor(elapsedMs / 1000);
+    const totSec = Math.floor(player.estimatedDurationMs / 1000);
+    const mCur = Math.floor(curSec / 60);
+    const sCur = (curSec % 60).toString().padStart(2, "0");
+    const mTot = Math.floor(totSec / 60);
+    const sTot = (totSec % 60).toString().padStart(2, "0");
+    if (timeEl) timeEl.textContent = `${mCur}:${sCur} / ${mTot}:${sTot}`;
+    
+    if (elapsedMs >= player.estimatedDurationMs + 2000) {
+      stopHeadwatersPlaybackState();
+    }
+  }, 250);
+}
+
+function stopHeadwatersPlaybackState() {
+  const player = window.headwatersAudioPlayer;
+  player.isPlaying = false;
+  player.isPaused = false;
+  player.pausedElapsed = 0;
+  
+  if (player.activeAudio) {
+    try { player.activeAudio.pause(); } catch(e) {}
+    player.activeAudio = null;
+  }
+  
+  if (player.progressInterval) {
+    clearInterval(player.progressInterval);
+    player.progressInterval = null;
+  }
+  
+  const icon = document.getElementById("headwaters-play-icon");
+  const playerBox = document.getElementById("headwaters-audio-player-box");
+  const progressBar = document.getElementById("headwaters-progress-bar");
+  const timeEl = document.getElementById("headwaters-audio-time");
+  
+  if (icon) icon.innerHTML = '<polygon points="6 4 20 12 6 20 6 4"></polygon>';
+  if (playerBox) playerBox.classList.remove("playing");
+  if (progressBar) progressBar.style.width = '0%';
+  
+  if (timeEl) {
+    const totSec = Math.floor(player.estimatedDurationMs / 1000);
+    const mTot = Math.floor(totSec / 60);
+    const sTot = (totSec % 60).toString().padStart(2, "0");
+    timeEl.textContent = `${mTot}:${sTot}`;
+  }
+}
+
+window.closeHeadwatersModal = function() {
+  const modal = document.getElementById("modal-headwaters-sanctuary");
+  if (modal) modal.style.display = "none";
+  
+  const player = window.headwatersAudioPlayer;
+  if (player) {
+    player.currentSessionId = 0;
+  }
+  
+  if (window.speechSynthesis) {
+    try { window.speechSynthesis.cancel(); } catch(e) {}
+  }
+  stopHeadwatersPlaybackState();
 };
 
 // 2. THE DAILY CONFLUENCE LOGIC
@@ -13967,12 +18122,1823 @@ function stopLivingWaterResetSession() {
   if (breathTextEl) breathTextEl.textContent = "शांत व्हा (Rest in Grace 💧)";
 }
 
+/* ==========================================================================
+   DEDICATED ADMIN & PASTOR CONSOLE LOGIC & STATE
+   ========================================================================== */
 
+const defaultAdminMembers = [
+  { id: "usr_admin_1", username: "Pastor John", email: "pastorjohn@riveroflife.org", role: "Pastor", isPastor: true, isAdmin: true, addedAt: Date.now() - 86400000 * 30 },
+  { id: "usr_admin_2", username: "Pastor Sunil", email: "sunil@riveroflife.org", role: "Pastor", isPastor: true, isAdmin: false, addedAt: Date.now() - 86400000 * 25 },
+  { id: "usr_admin_3", username: "Leader Samuel", email: "samuel@riveroflife.org", role: "Leader", isLeader: true, isAdmin: false, addedAt: Date.now() - 86400000 * 20 },
+  { id: "usr_admin_4", username: "Sister Sarah", email: "sarah@riveroflife.org", role: "Leader", isLeader: true, isAdmin: false, addedAt: Date.now() - 86400000 * 15 },
+  { id: "usr_admin_5", username: "Gaurav Salve", email: "gaurav@riveroflife.org", role: "Admin", isAdmin: true, isPastor: true, addedAt: Date.now() - 86400000 * 10 },
+  { id: "usr_admin_6", username: "Ruth Shinde", email: "ruth@riveroflife.org", role: "Member", isAdmin: false, addedAt: Date.now() - 86400000 * 5 },
+  { id: "usr_admin_7", username: "Esther Salve", email: "esther@riveroflife.org", role: "Leader", isLeader: true, addedAt: Date.now() - 86400000 * 2 }
+];
 
-// Global Window Exports for Localization & River of Life Modules
+const defaultAdminAnnouncements = [
+  {
+    id: "ann_1",
+    title: "Sunday Holy Communion Service • 10:00 AM",
+    body: "Join our church family this Sunday morning in-person or live via fellowship video call. All are welcome!",
+    priority: "important",
+    icon: "🕊️",
+    active: true,
+    createdAt: Date.now() - 3600000 * 4
+  }
+];
+
+const defaultAdminMeetings = [
+  { id: "meet_1", title: "Sunday Holy Communion Fellowship", titleMr: "रविवार पवित्र मेज व उपासना", host: "Pastor John", time: "Every Sunday 10:00 AM", roomId: "rol-sunday-service", active: true },
+  { id: "meet_2", title: "Wednesday Fasting & Intercession", titleMr: "बुधवार उपवास व मध्यस्थी प्रार्थना", host: "Pastor Sunil", time: "Wednesdays 8:00 PM", roomId: "rol-intercession", active: true },
+  { id: "meet_3", title: "Youth Revival Fellowship Call", titleMr: "तरुण मंडळी जागृती सभा", host: "Esther (Youth Leader)", time: "Friday 7:30 PM", roomId: "rol-youth-revival", active: true }
+];
+
+function getAdminMembers() {
+  try {
+    const saved = localStorage.getItem("rol_admin_members");
+    if (saved) return JSON.parse(saved);
+  } catch (e) {}
+  return [...defaultAdminMembers];
+}
+
+function saveAdminMembersList(list) {
+  localStorage.setItem("rol_admin_members", JSON.stringify(list));
+}
+
+function getAdminAnnouncements() {
+  try {
+    const saved = localStorage.getItem("rol_admin_announcements");
+    if (saved) return JSON.parse(saved);
+  } catch (e) {}
+  return [...defaultAdminAnnouncements];
+}
+
+function saveAdminAnnouncementsList(list) {
+  localStorage.setItem("rol_admin_announcements", JSON.stringify(list));
+}
+
+function getAdminMeetings() {
+  try {
+    const saved = localStorage.getItem("rol_admin_meetings");
+    if (saved) return JSON.parse(saved);
+  } catch (e) {}
+  return [...defaultAdminMeetings];
+}
+
+function saveAdminMeetingsList(list) {
+  localStorage.setItem("rol_admin_meetings", JSON.stringify(list));
+}
+
+let currentAdminSubtab = "overview";
+
+function renderAdminPanel() {
+  // Sync state stats & active user
+  const currentUserNameEl = document.getElementById("admin-current-user-name");
+  if (currentUserNameEl) {
+    const activeUser = state.currentUser ? `${state.currentUser.username} (${state.currentUser.role || (state.currentUser.isPastor ? "Pastor" : "Admin")})` : "Admin (Superuser Session)";
+    currentUserNameEl.textContent = activeUser;
+  }
+
+  // Update counts
+  const members = getAdminMembers();
+  const membersCountEl = document.getElementById("admin-stat-members-count");
+  if (membersCountEl) membersCountEl.textContent = members.length;
+
+  const prayers = window._rolPrayers || [
+    { id: "pr_1", username: "Sister Mary", text: "Please pray for my mother's health recovery.", status: "pending", createdAt: Date.now() - 3600000 * 2, isPublic: true },
+    { id: "pr_2", username: "Brother Daniel", text: "Pray for my job interview on Thursday.", status: "acknowledged", pastorNote: "Standing in prayer for divine favor! - Pastor John", createdAt: Date.now() - 3600000 * 12, isPublic: true },
+    { id: "pr_3", username: "Gaurav Salve", text: "Thanking God for family blessings and peace.", status: "answered", createdAt: Date.now() - 86400000 * 2, isPublic: false }
+  ];
+  if (!window._rolPrayers) window._rolPrayers = prayers;
+
+  const prayersCountEl = document.getElementById("admin-stat-prayers-count");
+  const prayersSubEl = document.getElementById("admin-stat-prayers-sub");
+  const pendingCount = prayers.filter(p => p.status === "pending").length;
+  const answeredCount = prayers.filter(p => p.status === "answered").length;
+  if (prayersCountEl) prayersCountEl.textContent = prayers.length;
+  if (prayersSubEl) prayersSubEl.textContent = `${pendingCount} Pending • ${answeredCount} Answered`;
+
+  const meetings = getAdminMeetings();
+  const meetingsCountEl = document.getElementById("admin-stat-meetings-count");
+  if (meetingsCountEl) meetingsCountEl.textContent = meetings.length;
+
+  // Render the currently selected subpanel
+  switchAdminSubtab(currentAdminSubtab);
+}
+
+function switchAdminSubtab(subtab) {
+  currentAdminSubtab = subtab;
+  document.querySelectorAll(".admin-subnav-btn").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.adminSubtab === subtab);
+  });
+
+  document.querySelectorAll(".admin-subtab-panel").forEach(panel => {
+    panel.style.display = "none";
+    panel.classList.remove("active");
+  });
+
+  const targetPanel = document.getElementById(`admin-panel-${subtab}`);
+  if (targetPanel) {
+    targetPanel.style.display = "block";
+    targetPanel.classList.add("active");
+  }
+
+  if (subtab === "overview") {
+    // Overview metrics already updated
+  } else if (subtab === "members") {
+    renderAdminMembers();
+  } else if (subtab === "vod") {
+    renderAdminVODEditor();
+  } else if (subtab === "meetings") {
+    renderAdminMeetings();
+  } else if (subtab === "prayers") {
+    renderAdminPrayers();
+  } else if (subtab === "announcements") {
+    renderAdminAnnouncements();
+  }
+}
+
+/* ── 1. Members Management ── */
+function renderAdminMembers(filterText = "", roleFilter = "all") {
+  const container = document.getElementById("admin-members-list-container");
+  if (!container) return;
+
+  const members = getAdminMembers();
+  const filtered = members.filter(m => {
+    const matchesText = !filterText || m.username.toLowerCase().includes(filterText.toLowerCase()) || m.email.toLowerCase().includes(filterText.toLowerCase());
+    const matchesRole = (roleFilter === "all") || (m.role && m.role.toLowerCase() === roleFilter.toLowerCase());
+    return matchesText && matchesRole;
+  });
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<div class="panel-empty-state" style="padding: 24px 0; text-align: center; color: var(--text-muted);">No members match the search query.</div>`;
+    return;
+  }
+
+  container.innerHTML = filtered.map(m => {
+    const roleLower = (m.role || "member").toLowerCase();
+    let badgeClass = "role-badge-member";
+    if (roleLower === "admin") badgeClass = "role-badge-admin";
+    else if (roleLower === "pastor") badgeClass = "role-badge-pastor";
+    else if (roleLower === "leader") badgeClass = "role-badge-leader";
+
+    const initial = (m.username || "U")[0].toUpperCase();
+
+    return `
+      <div class="admin-member-card">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px;">
+            ${initial}
+          </div>
+          <div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <strong style="font-size: 14.5px; color: var(--text);">${m.username}</strong>
+              <span class="${badgeClass}">${m.role || "Member"}</span>
+            </div>
+            <span style="font-size: 12px; color: var(--text-muted);">${m.email}</span>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <select onchange="updateAdminMemberRole('${m.id}', this.value)" style="padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 12px; font-weight: 700;">
+            <option value="Member" ${m.role === "Member" ? "selected" : ""}>Member</option>
+            <option value="Leader" ${m.role === "Leader" ? "selected" : ""}>Leader</option>
+            <option value="Pastor" ${m.role === "Pastor" ? "selected" : ""}>Pastor</option>
+            <option value="Admin" ${m.role === "Admin" ? "selected" : ""}>Admin</option>
+          </select>
+          <button onclick="deleteAdminMember('${m.id}')" title="Delete member" style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #ef4444; border-radius: 8px; padding: 6px 10px; cursor: pointer; font-size: 12px; font-weight: 700;">
+            ✕
+          </button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function filterAdminMembers() {
+  const text = document.getElementById("admin-member-search")?.value || "";
+  const role = document.getElementById("admin-member-role-filter")?.value || "all";
+  renderAdminMembers(text, role);
+}
+
+function openAdminAddMemberModal() {
+  const modal = document.getElementById("modal-admin-add-member");
+  if (modal) modal.style.display = "flex";
+}
+
+function handleAdminAddMember(e) {
+  if (e) e.preventDefault();
+  const name = document.getElementById("admin-input-new-name")?.value.trim();
+  const email = document.getElementById("admin-input-new-email")?.value.trim();
+  const role = document.getElementById("admin-input-new-role")?.value || "Member";
+
+  if (!name || !email) {
+    showToast("Please provide both name and email / नाव व ईमेल भरा");
+    return;
+  }
+
+  const members = getAdminMembers();
+  const newMember = {
+    id: `usr_${Date.now()}`,
+    username: name,
+    email: email.toLowerCase(),
+    role: role,
+    isPastor: role === "Pastor",
+    isAdmin: role === "Admin",
+    isLeader: role === "Leader",
+    addedAt: Date.now()
+  };
+
+  members.unshift(newMember);
+  saveAdminMembersList(members);
+
+  closeModal("modal-admin-add-member");
+  document.getElementById("form-admin-add-member")?.reset();
+  renderAdminMembers();
+  showToast(`✅ Added ${name} as ${role}!`);
+}
+
+function updateAdminMemberRole(memberId, newRole) {
+  const members = getAdminMembers();
+  const member = members.find(m => m.id === memberId);
+  if (member) {
+    member.role = newRole;
+    member.isPastor = newRole === "Pastor";
+    member.isAdmin = newRole === "Admin";
+    member.isLeader = newRole === "Leader";
+    saveAdminMembersList(members);
+    renderAdminMembers();
+    showToast(`Updated ${member.username}'s role to ${newRole}`);
+  }
+}
+
+function deleteAdminMember(memberId) {
+  let members = getAdminMembers();
+  const member = members.find(m => m.id === memberId);
+  if (!member) return;
+  if (confirm(`Are you sure you want to remove ${member.username} from the directory?`)) {
+    members = members.filter(m => m.id !== memberId);
+    saveAdminMembersList(members);
+    renderAdminMembers();
+    showToast(`Removed ${member.username}`);
+  }
+}
+
+/* ── 2. Verse of the Day (VOD) Manager ── */
+function renderAdminVODEditor() {
+  const vodData = (typeof getCurrentVOD === 'function') ? getCurrentVOD() : null;
+  const vod = vodData ? vodData.vod : null;
+  const refMarInput = document.getElementById("admin-vod-ref-mar");
+  const refEngInput = document.getElementById("admin-vod-ref-eng");
+  const textMarInput = document.getElementById("admin-vod-text-mar");
+  const textEngInput = document.getElementById("admin-vod-text-eng");
+  const bookSelect = document.getElementById("admin-vod-book-id");
+  const chapterInput = document.getElementById("admin-vod-chapter");
+
+  if (vod) {
+    if (refMarInput && vod.ref) refMarInput.value = vod.ref;
+    if (refEngInput && vod.engRef) refEngInput.value = vod.engRef;
+    if (textMarInput && vod.text) textMarInput.value = vod.text;
+    if (textEngInput && vod.engText) textEngInput.value = vod.engText;
+    if (bookSelect && vod.bookId) bookSelect.value = vod.bookId;
+    if (chapterInput && vod.chapter) chapterInput.value = vod.chapter;
+  }
+
+  updateAdminVODPreview();
+}
+
+function updateAdminVODPreview() {
+  const refMar = document.getElementById("admin-vod-ref-mar")?.value || "यिर्मया २९:११";
+  const textMar = document.getElementById("admin-vod-text-mar")?.value || "";
+  const previewRef = document.getElementById("admin-preview-ref");
+  const previewText = document.getElementById("admin-preview-text");
+
+  if (previewRef) previewRef.textContent = refMar;
+  if (previewText) previewText.textContent = `"${textMar}"`;
+}
+
+function saveAdminVOD(e) {
+  if (e) e.preventDefault();
+  const refMar = document.getElementById("admin-vod-ref-mar")?.value.trim();
+  const refEng = document.getElementById("admin-vod-ref-eng")?.value.trim();
+  const textMar = document.getElementById("admin-vod-text-mar")?.value.trim();
+  const textEng = document.getElementById("admin-vod-text-eng")?.value.trim();
+  const bookId = document.getElementById("admin-vod-book-id")?.value || "jer";
+  const chapter = parseInt(document.getElementById("admin-vod-chapter")?.value, 10) || 29;
+  const theme = document.getElementById("admin-vod-theme")?.value || "crimson";
+
+  const customObj = {
+    ref: refMar,
+    engRef: refEng,
+    text: textMar,
+    engText: textEng,
+    bookId: bookId,
+    chapter: chapter,
+    theme: theme,
+    updatedAt: Date.now()
+  };
+
+  localStorage.setItem("rol_custom_vod", JSON.stringify(customObj));
+  renderDailyDevotion();
+  showToast("✅ Verse of the Day updated & published live across the app!");
+}
+
+function resetAdminVODToDefault() {
+  localStorage.removeItem("rol_custom_vod");
+  renderAdminVODEditor();
+  renderDailyDevotion();
+  showToast("Restored Verse of the Day to liturgical schedule");
+}
+
+/* ── 3. Meetings Manager ── */
+function renderAdminMeetings() {
+  const container = document.getElementById("admin-meetings-list-container");
+  if (!container) return;
+
+  const meetings = getAdminMeetings();
+  container.innerHTML = meetings.map(m => `
+    <div style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 16px; padding: 16px; display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap;">
+      <div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 18px;">📹</span>
+          <h4 style="margin: 0; font-size: 15px; font-weight: 800; color: var(--text);">${m.title}</h4>
+          ${m.titleMr ? `<span style="font-size: 12px; color: var(--text-muted);">(${m.titleMr})</span>` : ""}
+        </div>
+        <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px; display: flex; gap: 12px; flex-wrap: wrap;">
+          <span>👤 Host: <strong>${m.host}</strong></span>
+          <span>⏰ <strong>${m.time}</strong></span>
+          <span>🔑 Room: <code>${m.roomId}</code></span>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 8px;">
+        <button onclick="startAdminMeeting('${m.roomId}')" class="btn-primary-mini" style="font-size: 12px; padding: 6px 12px;">
+          Start Call 🔴
+        </button>
+        <button onclick="copyAdminMeetingInvite('${m.roomId}')" class="btn-secondary-mini" style="font-size: 12px; padding: 6px 12px; border: 1px solid var(--border); background: transparent; color: var(--text);">
+          Copy Link 📋
+        </button>
+        <button onclick="deleteAdminMeeting('${m.id}')" class="btn-danger-mini" style="font-size: 12px; padding: 6px 10px;">
+          ✕
+        </button>
+      </div>
+    </div>
+  `).join("");
+}
+
+function openAdminCreateMeetingModal() {
+  const modal = document.getElementById("modal-admin-create-meeting");
+  if (modal) modal.style.display = "flex";
+}
+
+function handleAdminCreateMeeting(e) {
+  if (e) e.preventDefault();
+  const title = document.getElementById("admin-meeting-title")?.value.trim();
+  const host = document.getElementById("admin-meeting-host")?.value.trim();
+  const time = document.getElementById("admin-meeting-time")?.value.trim();
+  const roomId = document.getElementById("admin-meeting-room-id")?.value.trim() || `rol-${Date.now()}`;
+
+  if (!title) return;
+
+  const meetings = getAdminMeetings();
+  meetings.unshift({
+    id: `meet_${Date.now()}`,
+    title: title,
+    titleMr: title,
+    host: host,
+    time: time,
+    roomId: roomId,
+    active: true
+  });
+
+  saveAdminMeetingsList(meetings);
+  closeModal("modal-admin-create-meeting");
+  document.getElementById("form-admin-create-meeting")?.reset();
+  renderAdminMeetings();
+  showToast("✅ Prayer meeting scheduled!");
+}
+
+function deleteAdminMeeting(meetingId) {
+  let meetings = getAdminMeetings();
+  meetings = meetings.filter(m => m.id !== meetingId);
+  saveAdminMeetingsList(meetings);
+  renderAdminMeetings();
+  showToast("Meeting deleted");
+}
+
+function startAdminMeeting(roomId) {
+  window.location.hash = "#/meetings";
+  if (typeof startNativeVideoMeeting === "function") {
+    startNativeVideoMeeting(roomId);
+  }
+}
+
+function copyAdminMeetingInvite(roomId) {
+  const url = `${window.location.origin}/#/meetings?room=${roomId}`;
+  navigator.clipboard.writeText(url).then(() => {
+    showToast("📋 Meeting invite link copied to clipboard!");
+  }).catch(() => {
+    showToast(`Meeting Code: ${roomId}`);
+  });
+}
+
+/* ── 4. Pastoral Prayers Moderation ── */
+let currentAdminPrayerFilter = "all";
+
+function filterAdminPrayers(filter) {
+  currentAdminPrayerFilter = filter;
+  document.querySelectorAll("[data-admin-prayer-filter]").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.adminPrayerFilter === filter);
+  });
+  renderAdminPrayers();
+}
+
+function renderAdminPrayers() {
+  const container = document.getElementById("admin-prayers-list-container");
+  if (!container) return;
+
+  const prayers = window._rolPrayers || [];
+  const filtered = prayers.filter(p => {
+    if (currentAdminPrayerFilter === "all") return true;
+    return p.status === currentAdminPrayerFilter;
+  });
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<div class="panel-empty-state" style="padding: 24px 0; text-align: center; color: var(--text-muted);">No prayer requests in this category.</div>`;
+    return;
+  }
+
+  container.innerHTML = filtered.map(p => {
+    let badgeClass = "role-badge-member";
+    let badgeText = "Pending";
+    if (p.status === "answered") {
+      badgeClass = "role-badge-leader";
+      badgeText = "Answered";
+    } else if (p.status === "acknowledged") {
+      badgeClass = "role-badge-pastor";
+      badgeText = "Acknowledged";
+    }
+
+    const timeStr = formatTimeAgo ? formatTimeAgo(p.createdAt || Date.now()) : "Recently";
+    const privacy = p.isPublic ? "🌐 Congregation Circle" : "🔒 Confidential (Pastor Only)";
+
+    return `
+      <div style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-weight: 800; font-size: 14.5px; color: var(--text);">From: @${p.username || "Anonymous"}</span>
+            <span class="${badgeClass}">${badgeText}</span>
+          </div>
+          <span style="font-size: 12px; color: var(--text-muted);">${timeStr} • ${privacy}</span>
+        </div>
+
+        <p style="font-size: 14px; line-height: 1.5; color: var(--text); margin: 0; background: var(--bg); padding: 12px; border-radius: 10px; border: 1px solid var(--border);">
+          "${p.text}"
+        </p>
+
+        ${p.pastorNote ? `
+          <div style="background: rgba(245,158,11,0.1); border-left: 3px solid #f59e0b; padding: 10px 14px; border-radius: 6px; font-size: 13px; color: var(--text);">
+            <strong>Pastoral Blessing Response:</strong>
+            <div style="margin-top: 2px;">"${p.pastorNote}"</div>
+          </div>
+        ` : ""}
+
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px;">
+          ${p.status !== "answered" ? `
+            <button onclick="adminAcknowledgePrayerPrompt('${p.id}')" class="btn-primary-mini" style="font-size: 12px; padding: 6px 12px;">
+              ✍️ Write Blessing Note & Pray
+            </button>
+            <button onclick="adminToggleAnsweredPrayer('${p.id}')" class="btn-secondary-mini" style="font-size: 12px; padding: 6px 12px; border: 1px solid var(--border); background: transparent; color: var(--text);">
+              ✅ Mark Answered
+            </button>
+          ` : `
+            <button onclick="adminToggleAnsweredPrayer('${p.id}')" class="btn-secondary-mini" style="font-size: 12px; padding: 6px 12px; border: 1px solid var(--border); background: transparent; color: var(--text);">
+              Reopen Request
+            </button>
+          `}
+          <button onclick="adminDeletePrayer('${p.id}')" class="btn-danger-mini" style="font-size: 12px; padding: 6px 10px;">
+            Delete ✕
+          </button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function adminAcknowledgePrayerPrompt(prayerId) {
+  const note = prompt("Enter Pastoral Blessing / संदेश for this prayer request:", "Standing with you in prayer! May the Lord's peace and strength be with you.");
+  if (note && note.trim()) {
+    const prayers = window._rolPrayers || [];
+    const p = prayers.find(x => x.id === prayerId);
+    if (p) {
+      p.status = "acknowledged";
+      p.pastorNote = note.trim();
+      renderAdminPrayers();
+      if (typeof renderPastorPortal === "function") renderPastorPortal();
+      showToast("🙏 Blessing note sent to member!");
+    }
+  }
+}
+
+function adminToggleAnsweredPrayer(prayerId) {
+  const prayers = window._rolPrayers || [];
+  const p = prayers.find(x => x.id === prayerId);
+  if (p) {
+    p.status = p.status === "answered" ? "pending" : "answered";
+    renderAdminPrayers();
+    if (typeof renderPastorPortal === "function") renderPastorPortal();
+    showToast(p.status === "answered" ? "Marked prayer as answered! 🎉" : "Reopened prayer request");
+  }
+}
+
+function adminDeletePrayer(prayerId) {
+  if (confirm("Delete this prayer request?")) {
+    window._rolPrayers = (window._rolPrayers || []).filter(p => p.id !== prayerId);
+    renderAdminPrayers();
+    if (typeof renderPastorPortal === "function") renderPastorPortal();
+    showToast("Prayer request deleted");
+  }
+}
+
+/* ── 5. Announcements & Live Broadcast Banner ── */
+function renderAdminAnnouncements() {
+  const container = document.getElementById("admin-announcements-list-container");
+  if (!container) return;
+
+  const list = getAdminAnnouncements();
+  if (list.length === 0) {
+    container.innerHTML = `<div class="panel-empty-state" style="padding: 24px 0; text-align: center; color: var(--text-muted);">No active announcements. Click '+ Create Announcement' to post one.</div>`;
+    return;
+  }
+
+  container.innerHTML = list.map(a => `
+    <div style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 16px; padding: 18px; display: flex; justify-content: space-between; align-items: flex-start; gap: 14px;">
+      <div style="display: flex; gap: 12px; align-items: flex-start;">
+        <span style="font-size: 24px;">${a.icon || "📢"}</span>
+        <div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <strong style="font-size: 15px; color: var(--text);">${a.title}</strong>
+            <span style="background: ${a.active ? "rgba(34,197,94,0.15)" : "rgba(100,116,139,0.15)"}; color: ${a.active ? "#22c55e" : "var(--text-muted)"}; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 12px;">
+              ${a.active ? "LIVE ON HOME" : "INACTIVE"}
+            </span>
+          </div>
+          <p style="font-size: 13.5px; color: var(--text); margin: 6px 0 0 0; line-height: 1.4;">
+            ${a.body}
+          </p>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 8px;">
+        <button onclick="toggleAdminAnnouncementActive('${a.id}')" class="btn-secondary-mini" style="font-size: 12px; padding: 6px 12px; border: 1px solid var(--border); background: transparent; color: var(--text);">
+          ${a.active ? "Deactivate" : "Activate"}
+        </button>
+        <button onclick="deleteAdminAnnouncement('${a.id}')" class="btn-danger-mini" style="font-size: 12px; padding: 6px 10px;">
+          ✕
+        </button>
+      </div>
+    </div>
+  `).join("");
+}
+
+function openAdminAddAnnouncementModal() {
+  const modal = document.getElementById("modal-admin-add-announcement");
+  if (modal) modal.style.display = "flex";
+}
+
+function handleAdminAddAnnouncement(e) {
+  if (e) e.preventDefault();
+  const title = document.getElementById("admin-ann-title")?.value.trim();
+  const body = document.getElementById("admin-ann-body")?.value.trim();
+  const priority = document.getElementById("admin-ann-priority")?.value || "important";
+  const icon = document.getElementById("admin-ann-icon")?.value || "📢";
+
+  if (!title || !body) return;
+
+  const list = getAdminAnnouncements();
+  list.unshift({
+    id: `ann_${Date.now()}`,
+    title,
+    body,
+    priority,
+    icon,
+    active: true,
+    createdAt: Date.now()
+  });
+
+  saveAdminAnnouncementsList(list);
+  closeModal("modal-admin-add-announcement");
+  document.getElementById("form-admin-add-announcement")?.reset();
+  renderAdminAnnouncements();
+  renderHomeAnnouncementBanner();
+  showToast("📢 Church announcement broadcast live to Home screen!");
+}
+
+function toggleAdminAnnouncementActive(annId) {
+  const list = getAdminAnnouncements();
+  const item = list.find(a => a.id === annId);
+  if (item) {
+    item.active = !item.active;
+    saveAdminAnnouncementsList(list);
+    renderAdminAnnouncements();
+    renderHomeAnnouncementBanner();
+    showToast(item.active ? "Announcement activated" : "Announcement deactivated");
+  }
+}
+
+function deleteAdminAnnouncement(annId) {
+  let list = getAdminAnnouncements();
+  list = list.filter(a => a.id !== annId);
+  saveAdminAnnouncementsList(list);
+  renderAdminAnnouncements();
+  renderHomeAnnouncementBanner();
+  showToast("Announcement deleted");
+}
+
+function renderHomeAnnouncementBanner() {
+  const container = document.getElementById("church-announcement-container");
+  if (!container) return;
+
+  const list = getAdminAnnouncements();
+  const activeAnn = list.find(a => a.active);
+
+  if (!activeAnn) {
+    container.style.display = "none";
+    container.innerHTML = "";
+    return;
+  }
+
+  container.style.display = "block";
+  container.innerHTML = `
+    <div class="church-announcement-banner">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <span style="font-size: 22px;">${activeAnn.icon || "📢"}</span>
+        <div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <strong style="font-size: 13.5px; font-weight: 800; color: var(--text);">${activeAnn.title}</strong>
+            <span style="background: rgba(224,83,95,0.2); color: var(--primary); font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 8px;">ANNOUNCEMENT</span>
+          </div>
+          <p style="font-size: 12px; color: var(--text-muted); margin: 2px 0 0 0; line-height: 1.35;">${activeAnn.body || activeAnn.content || activeAnn.text || ""}</p>
+        </div>
+      </div>
+      <button onclick="document.getElementById('church-announcement-container').style.display='none'" style="background: transparent; border: none; font-size: 18px; color: var(--text-muted); cursor: pointer; padding: 4px 8px;">&times;</button>
+    </div>
+  `;
+}
+
+/* ── 6. Security & Elevation Helpers ── */
+function elevateCurrentSessionToAdmin() {
+  if (!state.currentUser) {
+    state.currentUser = {
+      uid: "admin_local",
+      username: "Admin",
+      displayName: "Administrator",
+      email: "admin@riveroflife.org",
+      role: "Admin",
+      isAdmin: true,
+      isPastor: true,
+      churchName: "River of Life Central Church",
+      location: "Maharashtra, India"
+    };
+  } else {
+    state.currentUser.isAdmin = true;
+    state.currentUser.isPastor = true;
+    state.currentUser.role = "Admin";
+  }
+
+  localStorage.setItem("rol_user_name", state.currentUser.username);
+  updateAuthUI();
+  renderAdminPanel();
+  renderYouProfile();
+  showToast("🛡️ Admin mode activated with full elevated privileges!");
+}
+
+function saveAdminPIN() {
+  const pinInput = document.getElementById("admin-pin-input-field");
+  const newPin = pinInput?.value.trim();
+  if (!newPin || newPin.length < 4) {
+    showToast("⚠️ PIN must be at least 4 digits");
+    return;
+  }
+  localStorage.setItem("rol_admin_pin", newPin);
+  showToast(`✅ Admin PIN updated successfully`);
+}
+
+function exportAdminDataBackup() {
+  const data = {
+    members: getAdminMembers(),
+    announcements: getAdminAnnouncements(),
+    customVOD: localStorage.getItem("rol_custom_vod") ? JSON.parse(localStorage.getItem("rol_custom_vod")) : null,
+    meetings: getAdminMeetings(),
+    exportedAt: new Date().toISOString()
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `river_of_life_admin_backup_${Date.now()}.json`;
+  a.click();
+  showToast("📥 Exported Admin Backup JSON!");
+}
+
+function resetAllAdminDataToFactory() {
+  if (confirm("Reset all admin custom settings, announcements, and VOD overrides?")) {
+    localStorage.removeItem("rol_admin_members");
+    localStorage.removeItem("rol_admin_announcements");
+    localStorage.removeItem("rol_custom_vod");
+    localStorage.removeItem("rol_admin_meetings");
+    localStorage.removeItem("rol_admin_pin");
+    renderAdminPanel();
+    showToast("Reset all admin data to defaults");
+  }
+}
+
+// Global Window Exports for Localization, River of Life Modules & Admin Console
 window.state = state;
 window.I18N_DICTIONARY = I18N_DICTIONARY;
 window.t = t;
 window.applyAppLanguage = applyAppLanguage;
 window.getActiveLanguage = getActiveLanguage;
 window.applyStylesFromState = applyStylesFromState;
+window.renderAdminPanel = renderAdminPanel;
+window.switchAdminSubtab = switchAdminSubtab;
+window.openAdminAddMemberModal = openAdminAddMemberModal;
+window.handleAdminAddMember = handleAdminAddMember;
+window.updateAdminMemberRole = updateAdminMemberRole;
+window.deleteAdminMember = deleteAdminMember;
+window.filterAdminMembers = filterAdminMembers;
+window.renderAdminVODEditor = renderAdminVODEditor;
+window.updateAdminVODPreview = updateAdminVODPreview;
+window.saveAdminVOD = saveAdminVOD;
+window.resetAdminVODToDefault = resetAdminVODToDefault;
+window.openAdminCreateMeetingModal = openAdminCreateMeetingModal;
+window.handleAdminCreateMeeting = handleAdminCreateMeeting;
+window.deleteAdminMeeting = deleteAdminMeeting;
+window.startAdminMeeting = startAdminMeeting;
+window.copyAdminMeetingInvite = copyAdminMeetingInvite;
+window.filterAdminPrayers = filterAdminPrayers;
+window.adminAcknowledgePrayerPrompt = adminAcknowledgePrayerPrompt;
+window.adminToggleAnsweredPrayer = adminToggleAnsweredPrayer;
+window.adminDeletePrayer = adminDeletePrayer;
+window.openAdminAddAnnouncementModal = openAdminAddAnnouncementModal;
+window.handleAdminAddAnnouncement = handleAdminAddAnnouncement;
+window.toggleAdminAnnouncementActive = toggleAdminAnnouncementActive;
+window.deleteAdminAnnouncement = deleteAdminAnnouncement;
+window.renderHomeAnnouncementBanner = renderHomeAnnouncementBanner;
+window.elevateCurrentSessionToAdmin = elevateCurrentSessionToAdmin;
+window.saveAdminPIN = saveAdminPIN;
+window.exportAdminDataBackup = exportAdminDataBackup;
+window.resetAllAdminDataToFactory = resetAllAdminDataToFactory;
+
+/* ==========================================================================
+   RIVER OF LIFE BACKEND API REST BRIDGE & REALTIME SYNC (v105 + PLATFORM)
+   ========================================================================== */
+window.ROL_API_BASE = '/api/v1';
+
+async function syncWithPlatformBackend() {
+  try {
+    console.log('[ROL-BACKEND-SYNC] Connecting to REST API backend...');
+
+    // 1. Sync Verse of the Day
+    try {
+      const vodRes = await fetch(`${window.ROL_API_BASE}/daily-verses/today`).then(r => r.json());
+      if (vodRes && vodRes.success && vodRes.data) {
+        const vod = vodRes.data;
+        console.log('[ROL-BACKEND-SYNC] VOD loaded from backend:', vod.reference);
+        const customObj = {
+          ref: vod.marathiReference || vod.reference,
+          engRef: vod.reference,
+          text: vod.marathiText || vod.text,
+          engText: vod.text,
+          bookId: vod.bookId || 'psa',
+          chapter: vod.chapter || 23,
+          theme: 'crimson',
+          bgImage: vod.backgroundImageUrl || '/uploads/sunrise.png',
+          devotional: vod.devotional || '',
+          updatedAt: Date.now()
+        };
+        localStorage.setItem('rol_custom_vod', JSON.stringify(customObj));
+        if (typeof renderDailyDevotion === 'function') renderDailyDevotion();
+      }
+    } catch(e) { console.warn('[ROL-BACKEND-SYNC] VOD sync notice:', e.message); }
+
+    // 2. Sync Church Announcements
+    try {
+      const annRes = await fetch(`${window.ROL_API_BASE}/announcements`).then(r => r.json());
+      if (annRes && annRes.success && Array.isArray(annRes.data)) {
+        const activeList = annRes.data.map(a => ({
+          id: a.id,
+          title: a.title,
+          body: a.body || a.content || a.text || "",
+          priority: a.priority || 'important',
+          icon: a.priority === 'urgent' ? '🚨' : '📢',
+          active: a.active !== false,
+          createdAt: new Date(a.createdAt).getTime() || Date.now()
+        }));
+        if (typeof saveAdminAnnouncementsList === 'function') saveAdminAnnouncementsList(activeList);
+        if (typeof renderHomeAnnouncementBanner === 'function') renderHomeAnnouncementBanner();
+      }
+    } catch(e) { console.warn('[ROL-BACKEND-SYNC] Announcements sync notice:', e.message); }
+
+    // 3. Sync Prayer Meetings
+    try {
+      const meetRes = await fetch(`${window.ROL_API_BASE}/prayer-meetings`).then(r => r.json());
+      if (meetRes && meetRes.success && Array.isArray(meetRes.data)) {
+        const meetingsList = meetRes.data.map(m => ({
+          id: m.id,
+          title: m.title,
+          titleMr: m.marathiTitle || m.marathi_title || m.title,
+          host: m.coordinator || 'Pastor',
+          time: `${m.dayOfWeek || m.day_of_week || 'Daily'} ${m.time || '06:00 AM'}`,
+          roomId: m.joinLink || m.join_link || 'river-of-life',
+          active: m.active !== false
+        }));
+        if (typeof saveAdminMeetingsList === 'function') saveAdminMeetingsList(meetingsList);
+        if (typeof renderMeetingsDashboard === 'function') renderMeetingsDashboard();
+      }
+    } catch(e) { console.warn('[ROL-BACKEND-SYNC] Meetings sync notice:', e.message); }
+
+    // 4. Sync Community Prayer Wall
+    try {
+      const prayRes = await fetch(`${window.ROL_API_BASE}/prayers`).then(r => r.json());
+      if (prayRes && prayRes.success && Array.isArray(prayRes.data)) {
+        window._rolPrayers = prayRes.data.map(p => ({
+          id: p.id,
+          username: p.name || 'Member',
+          text: `${p.title ? p.title + ': ' : ''}${p.request}`,
+          status: p.status || 'pending',
+          isPublic: true,
+          prayedCount: p.prayedCount || p.prayed_count || 0,
+          createdAt: new Date(p.createdAt).getTime() || Date.now()
+        }));
+        if (typeof renderPrayerWall === 'function') renderPrayerWall();
+      }
+    } catch(e) { console.warn('[ROL-BACKEND-SYNC] Prayers sync notice:', e.message); }
+
+    // 5. Sync Church Profile & Directory
+    try {
+      const churchRes = await fetch(`${window.ROL_API_BASE}/church/info`).then(r => r.json());
+      if (churchRes && churchRes.success && churchRes.data) {
+        const c = churchRes.data;
+        const nameEl = document.getElementById('church-directory-name');
+        if (nameEl && c.name) nameEl.textContent = c.name;
+        const upiEl = document.getElementById('church-giving-upi');
+        if (upiEl && c.givingUpi) upiEl.textContent = c.givingUpi;
+      }
+    } catch(e) { console.warn('[ROL-BACKEND-SYNC] Church info sync notice:', e.message); }
+
+    console.log('[ROL-BACKEND-SYNC] ✅ Live platform synchronization completed.');
+  } catch(err) {
+    console.error('[ROL-BACKEND-SYNC] Error during platform sync:', err);
+  }
+}
+
+// Auto-run platform sync on load
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => setTimeout(syncWithPlatformBackend, 600));
+} else {
+  setTimeout(syncWithPlatformBackend, 600);
+}
+
+window.syncWithPlatformBackend = syncWithPlatformBackend;
+
+/* ==========================================================================
+   FIGMA DESIGN SYSTEM INTERACTIVE HELPERS
+   ========================================================================== */
+function toggleVodLike() {
+  const countEl = document.getElementById('figma-vod-likes-count');
+  const btn = document.querySelector('.figma-hero-likes');
+  let count = parseInt(localStorage.getItem('rol_vod_likes') || '1240', 10);
+  let isLiked = localStorage.getItem('rol_vod_is_liked') === 'true';
+
+  if (!isLiked) {
+    count += 1;
+    localStorage.setItem('rol_vod_is_liked', 'true');
+    if (btn) btn.classList.add('liked');
+    if (typeof showToast === 'function') showToast('❤️ Added to your liked scriptures');
+  } else {
+    count -= 1;
+    localStorage.setItem('rol_vod_is_liked', 'false');
+    if (btn) btn.classList.remove('liked');
+  }
+  localStorage.setItem('rol_vod_likes', count.toString());
+  if (countEl) {
+    countEl.textContent = count >= 1000 ? (count / 1000).toFixed(1) + 'k' : count;
+  }
+}
+window.toggleVodLike = toggleVodLike;
+
+async function shareVerseOfTheDay() {
+  const quoteEl = document.getElementById('figma-vod-quote');
+  const refEl = document.getElementById('figma-vod-ref');
+  const text = `"${quoteEl ? quoteEl.textContent.trim() : 'The LORD is my shepherd; I shall not want.'}" — ${refEl ? refEl.textContent.trim() : 'Psalm 23:1-2'} (River of Life)`;
+
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: 'Verse of the Day - River of Life',
+        text: text,
+        url: window.location.href
+      });
+      return;
+    } catch(e) { /* user dismissed or fallback to clipboard */ }
+  }
+
+  if (navigator.clipboard) {
+    await navigator.clipboard.writeText(text);
+    if (typeof showToast === 'function') showToast('📋 Scripture copied to clipboard!');
+  } else if (typeof showToast === 'function') {
+    showToast('Verse of the day ready to share');
+  }
+}
+window.shareVerseOfTheDay = shareVerseOfTheDay;
+
+function openBookmarksDrawer() {
+  switchTab('you');
+  setTimeout(() => {
+    const bookmarksSection = document.getElementById('you-bookmarks-list') || document.getElementById('bookmarks-tab-content');
+    if (bookmarksSection) {
+      bookmarksSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, 200);
+}
+window.openBookmarksDrawer = openBookmarksDrawer;
+
+function openDiscoverMoodTopic(topic) {
+  switchTab('discover');
+  setTimeout(() => {
+    const searchInput = document.getElementById('discover-search-input');
+    if (searchInput) {
+      searchInput.value = topic;
+      if (typeof handleDiscoverSearch === 'function') {
+        handleDiscoverSearch();
+      }
+    }
+  }, 200);
+}
+window.openDiscoverMoodTopic = openDiscoverMoodTopic;
+
+async function openReaderAndNavigate(bookKey, chapterNum = 1, verseNum = 1) {
+  switchTab('reader');
+  if (typeof openReader === 'function') {
+    await openReader(bookKey, chapterNum);
+    if (verseNum > 1) {
+      setTimeout(() => {
+        const vEl = document.getElementById(`verse-${verseNum}`);
+        if (vEl) {
+          vEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          vEl.classList.add('highlight-flash');
+          setTimeout(() => vEl.classList.remove('highlight-flash'), 2500);
+        }
+      }, 350);
+    }
+  }
+}
+window.openReaderAndNavigate = openReaderAndNavigate;
+
+/* ==========================================================================
+   DYNAMIC DAILY DISCOVER TOPICS & DIRECT CHAPTER OPENER (66 BOOKS ROTATION)
+   ========================================================================== */
+const DISCOVER_DAILY_TOPICS = [
+  {
+    title: "Faith",
+    subtitle: "Overcoming fear • Hebrews 11",
+    book: "hebrews",
+    chapter: 11,
+    verse: 1,
+    image: "assets/daily_verses/misty_mountains.jpg"
+  },
+  {
+    title: "Hope",
+    subtitle: "A constant anchor • Romans 8",
+    book: "romans",
+    chapter: 8,
+    verse: 24,
+    image: "assets/daily_verses/freedom_field.jpg"
+  },
+  {
+    title: "Joy",
+    subtitle: "Fullness of joy • Psalms 16",
+    book: "psalms",
+    chapter: 16,
+    verse: 11,
+    image: "assets/daily_verses/joy_rain.jpg"
+  },
+  {
+    title: "Love",
+    subtitle: "The greatest gift • 1 Corinthians 13",
+    book: "1corinthians",
+    chapter: 13,
+    verse: 13,
+    image: "assets/daily_verses/ocean.png"
+  },
+  {
+    title: "Peace",
+    subtitle: "Surpassing understanding • Philippians 4",
+    book: "philippians",
+    chapter: 4,
+    verse: 7,
+    image: "assets/daily_verses/calm_waters.png"
+  },
+  {
+    title: "Strength",
+    subtitle: "Soaring on wings • Isaiah 40",
+    book: "isaiah",
+    chapter: 40,
+    verse: 31,
+    image: "assets/daily_verses/mount_zion.png"
+  },
+  {
+    title: "Wisdom",
+    subtitle: "Trust with all heart • Proverbs 3",
+    book: "proverbs",
+    chapter: 3,
+    verse: 5,
+    image: "assets/daily_verses/wisdom_guidance.png"
+  },
+  {
+    title: "Grace",
+    subtitle: "Saved through grace • Ephesians 2",
+    book: "ephesians",
+    chapter: 2,
+    verse: 8,
+    image: "assets/daily_verses/joy_rain.jpg"
+  },
+  {
+    title: "Courage",
+    subtitle: "Strong & courageous • Joshua 1",
+    book: "joshua",
+    chapter: 1,
+    verse: 9,
+    image: "assets/daily_verses/forest.png"
+  },
+  {
+    title: "Comfort",
+    subtitle: "The Good Shepherd • Psalms 23",
+    book: "psalms",
+    chapter: 23,
+    verse: 1,
+    image: "assets/daily_verses/peaceful_pastures.png"
+  },
+  {
+    title: "Prayer",
+    subtitle: "Ask and receive • Matthew 6",
+    book: "matthew",
+    chapter: 6,
+    verse: 9,
+    image: "assets/daily_verses/candlelight.png"
+  },
+  {
+    title: "Light",
+    subtitle: "Light of the world • John 8",
+    book: "john",
+    chapter: 8,
+    verse: 12,
+    image: "assets/daily_verses/stars.png"
+  },
+  {
+    title: "Healing",
+    subtitle: "Restore my soul • Jeremiah 17",
+    book: "jeremiah",
+    chapter: 17,
+    verse: 14,
+    image: "assets/daily_verses/river_of_life.png"
+  },
+  {
+    title: "Victory",
+    subtitle: "More than conquerors • Romans 8",
+    book: "romans",
+    chapter: 8,
+    verse: 37,
+    image: "assets/daily_verses/freedom_field.jpg"
+  },
+  {
+    title: "Promises",
+    subtitle: "Unfailing covenant • 2 Peter 1",
+    book: "2peter",
+    chapter: 1,
+    verse: 4,
+    image: "assets/daily_verses/misty_mountains.jpg"
+  }
+];
+window.DISCOVER_DAILY_TOPICS = DISCOVER_DAILY_TOPICS;
+
+async function openDiscoverTopicDirect(bookKey, chapterNum = 1, verseNum = 1, topicTitle = '') {
+  switchTab('reader');
+  if (typeof openReader === 'function') {
+    await openReader(bookKey, parseInt(chapterNum, 10));
+    if (verseNum) {
+      setTimeout(() => {
+        const verseEl = document.getElementById(`verse-${verseNum}`);
+        if (verseEl) {
+          verseEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          verseEl.classList.add('highlight-flash');
+          setTimeout(() => verseEl.classList.remove('highlight-flash'), 2500);
+        }
+      }, 350);
+    }
+    if (typeof showToast === 'function' && topicTitle) {
+      showToast(`📖 ${topicTitle}: Opening ${bookKey.toUpperCase()} Chapter ${chapterNum}`);
+    }
+  }
+}
+window.openDiscoverTopicDirect = openDiscoverTopicDirect;
+
+function renderDiscoverTopicCards() {
+  const container = document.getElementById('figma-discover-cards-container');
+  if (!container) return;
+
+  container.innerHTML = DISCOVER_DAILY_TOPICS.map(topic => `
+    <div class="figma-discover-card" onclick="openDiscoverTopicDirect('${topic.book}', ${topic.chapter}, ${topic.verse}, '${topic.title}')" style="background-image: url('${topic.image}');">
+      <div class="figma-discover-overlay"></div>
+      <div class="figma-discover-content">
+        <span class="figma-discover-topic-badge">TOPIC</span>
+        <div>
+          <h4 class="figma-discover-title">${topic.title}</h4>
+          <p class="figma-discover-sub">${topic.subtitle}</p>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+window.renderDiscoverTopicCards = renderDiscoverTopicCards;
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderDiscoverTopicCards();
+});
+
+/* ==========================================================================
+   INTERACTIVE SPECIAL EFFECTS & PARTICLE EMITTERS
+   ========================================================================== */
+
+function triggerFloatingAmenAnimation(targetEl, emojiList = ['🙏', '✨', '❤️', '🕊️']) {
+  if (!targetEl) return;
+  const rect = targetEl.getBoundingClientRect();
+  const startX = rect.left + rect.width / 2;
+  const startY = rect.top;
+
+  for (let i = 0; i < 5; i++) {
+    setTimeout(() => {
+      const particle = document.createElement('div');
+      particle.className = 'floating-amen-particle';
+      particle.textContent = emojiList[Math.floor(Math.random() * emojiList.length)];
+      
+      const offsetX = (Math.random() - 0.5) * 50;
+      particle.style.left = `${startX + offsetX}px`;
+      particle.style.top = `${startY}px`;
+      
+      document.body.appendChild(particle);
+      setTimeout(() => particle.remove(), 1400);
+    }, i * 110);
+  }
+}
+window.triggerFloatingAmenAnimation = triggerFloatingAmenAnimation;
+
+function prayAmen(btnEl, counterId) {
+  if (!btnEl) return;
+  const counterEl = document.getElementById(counterId);
+  if (counterEl) {
+    let current = parseInt(counterEl.textContent, 10) || 0;
+    current += 1;
+    counterEl.textContent = current;
+  }
+  btnEl.classList.add('prayed');
+  triggerFloatingAmenAnimation(btnEl, ['🙏', '✨', '❤️']);
+  if (typeof showToast === 'function') {
+    showToast('🙏 Amen! You stood in agreement in prayer.');
+  }
+}
+window.prayAmen = prayAmen;
+
+/* ==========================================================================
+   DYNAMIC 3-TIER READING PLAN PROGRESS SYSTEM
+   0-33%: Orange | 34-66%: Green | 67-100%: Blue
+   ========================================================================== */
+function getProgressTier(pct) {
+  if (pct <= 33) return 'orange';
+  if (pct <= 66) return 'green';
+  return 'blue';
+}
+window.getProgressTier = getProgressTier;
+
+function updateHomepageReadingPlanCard() {
+  const card = document.querySelector('.figma-plan-card');
+  const titleEl = document.getElementById('home-plan-title');
+  const dayEl = document.getElementById('home-plan-day');
+  const percentEl = document.getElementById('home-plan-percent');
+  const fillEl = document.getElementById('home-plan-progress-fill');
+  if (!card || !fillEl) return;
+
+  let totalDays = 30;
+  let currentDay = 15;
+  let title = "Through the New Testament";
+
+  if (typeof state !== 'undefined' && state.readingPlan && state.readingPlan !== 'none') {
+    const planInfo = (typeof PLANS_DB !== 'undefined') ? PLANS_DB[state.readingPlan] : null;
+    if (planInfo) {
+      totalDays = planInfo.days || 30;
+      title = planInfo.title || title;
+      currentDay = state.planDay || 1;
+    } else if (state.readingPlan.startsWith("custom_") && state.customPlan) {
+      totalDays = state.customPlan.duration || 30;
+      title = state.customPlan.title || title;
+      currentDay = state.planDay || 1;
+    }
+  }
+
+  const pct = Math.min(100, Math.max(0, Math.round((currentDay / totalDays) * 100)));
+  const tier = getProgressTier(pct);
+
+  card.classList.remove('plan-tier-orange', 'plan-tier-green', 'plan-tier-blue');
+  card.classList.add(`plan-tier-${tier}`);
+  card.setAttribute('data-tier', tier);
+
+  if (titleEl) titleEl.textContent = title;
+  if (dayEl) dayEl.textContent = `Day ${currentDay} of ${totalDays}`;
+  if (percentEl) percentEl.textContent = `${pct}% Complete`;
+  fillEl.style.width = `${pct}%`;
+}
+window.updateHomepageReadingPlanCard = updateHomepageReadingPlanCard;
+
+document.addEventListener('DOMContentLoaded', () => {
+  updateHomepageReadingPlanCard();
+});
+
+
+
+/* ==========================================================================
+   MARATHI HYMNAL DATABASE & INTERFACE (उपासना संगीत • 20+ CLASSIC HYMNS)
+   ========================================================================== */
+window.MARATHI_HYMNAL = [
+  {
+    id: 1,
+    number: "01",
+    titleMr: "येशू मसीह देवे जीवन",
+    titleEn: "Yeshu Masih Deve Jeevan",
+    category: "worship",
+    categoryLabel: "स्तुती व आराधना",
+    chorus: "येशू मसीह देवे जीवन, येशू मसीह देवे शांती,\nत्याच्या नामाची स्तुती असो, सर्वकाळ तो राजा आहे.",
+    verses: [
+      {
+        num: 1,
+        text: "पापात मी हरवलो होतो, त्याने मला शोधून काढले;\nआपल्या पवित्र रक्ताने धुवून, नवा जन्म मला दिला."
+      },
+      {
+        num: 2,
+        text: "संकट समयी तोच सहारा, अंधारात तो माझा प्रकाश;\nमाझा मेंढपाळ मज नाही काही, उणे पडणार कधी."
+      },
+      {
+        num: 3,
+        text: "आराधना करू या राजाची, ज्याने जीवन दिले आपुला;\nगाऊ जयजयकार आनंदाने, तोच आपला तारणारा."
+      }
+    ]
+  },
+  {
+    id: 2,
+    number: "02",
+    titleMr: "तुझ्यासारखा कोणी नाही",
+    titleEn: "Tujhyasarkha Koni Nahi",
+    category: "worship",
+    categoryLabel: "स्तुती व आराधना",
+    chorus: "तुझ्यासारखा कोणी नाही प्रभू,\nआकाशात किंवा पृथ्वीवर;\nतूच महान आणि सामर्थ्यवान,\nतुझ्या नामाची स्तुती असो.",
+    verses: [
+      {
+        num: 1,
+        text: "माझ्या हृदयाचा तूच विसावा,\nमाझ्या जीवनाचा तूच उद्धार;\nसंकटात तूच माझा आश्रय,\nतुझे प्रेम कधी संपत नाही."
+      },
+      {
+        num: 2,
+        text: "अद्भुत कार्ये तुझी अपार,\nदया तुझी रोज नवी आहे;\nसगळी सृष्टी गाते तुझे गुणगान,\nतूच राजांचा राजा आहेस."
+      }
+    ]
+  },
+  {
+    id: 3,
+    number: "03",
+    titleMr: "कृपा ही पुरेशी आहे मजला",
+    titleEn: "Krupa Hi Pureshi Aahe Majla",
+    category: "grace",
+    categoryLabel: "कृपा व वधस्तंभ",
+    chorus: "कृपा ही पुरेशी आहे मजला,\nप्रभूचे वचन हे सत्य आहे;\nनिर्बळतेमध्ये सामर्थ्य त्याचे,\nपूर्णत्वास येते हे सत्य आहे.",
+    verses: [
+      {
+        num: 1,
+        text: "जेव्हा वादळे मजला घेरती,\nलाटा जेव्हा उसळती;\nत्याच्या हाताचा आधार मजला,\nकधीही सोडणार नाही."
+      },
+      {
+        num: 2,
+        text: "वधस्तंभावर वाहिला रक्ताचा झरा,\nमाझ्या पापांची क्षमा झाली;\nमोफत मिळाली ही स्वर्गीय कृपा,\nमाझे जीवन तृप्त झाले."
+      }
+    ]
+  },
+  {
+    id: 4,
+    number: "04",
+    titleMr: "देवाचे उपकार स्मरा",
+    titleEn: "Devache Upkaar Smara",
+    category: "worship",
+    categoryLabel: "उपकारस्तुती",
+    chorus: "देवाचे उपकार स्मरा,\nत्याचे नाव सदा वाखाणा;\nत्याच्या कृपेला अंत नाही,\nसदासर्वकाळ तो दयाळू आहे.",
+    verses: [
+      {
+        num: 1,
+        text: "त्याने मला संकटातून सोडवले,\nमाझे पाय खडकावर स्थिर केले;\nमाझ्या मुखात नवे गीत घातले,\nआपल्या देवाची स्तुती गाऊ."
+      },
+      {
+        num: 2,
+        text: "दिवसेंदिवस तो भार वाहतो,\nमाझ्या सर्व गरजा पुरवितो;\nत्याच्या प्रेमाचे गोड गाणे,\nमाझ्या हृदयात सदा राहील."
+      }
+    ]
+  },
+  {
+    id: 5,
+    number: "05",
+    titleMr: "माझा मेंढपाळ परमेश्वर आहे (गीत २३)",
+    titleEn: "Majha Mendhpal Parameshwar Aahe",
+    category: "faith",
+    categoryLabel: "विश्वास व शांती",
+    chorus: "माझा मेंढपाळ परमेश्वर आहे,\nमला काही उणे पडणार नाही;\nहिरव्या कुरणात मज बसवितो,\nशांत पाण्याजवळ मज चालवितो.",
+    verses: [
+      {
+        num: 1,
+        text: "तो माझा जीव ताजा करतो,\nआपल्या नावासाठी नीतीच्या मार्गाने चालवितो;\nमृत्यूच्या छायेच्या दरीतून चाललो तरी,\nमी अनिष्टाला भिणार नाही."
+      },
+      {
+        num: 2,
+        text: "कारण तू माझ्या बरोबर आहेस,\nतुझी काठी व तुझा सोटा मला धीर देतात;\nमाझ्या शत्रूंसमोर तू मेज सजवितोस,\nमाझे मस्तक तेलाने माखितोस, माझा प्याला भरून वाहतो."
+      }
+    ]
+  },
+  {
+    id: 6,
+    number: "06",
+    titleMr: "येशू राजा येतो आहे",
+    titleEn: "Yeshu Raja Yeto Aahe",
+    category: "faith",
+    categoryLabel: "आशा व विजय",
+    chorus: "येशू राजा येतो आहे,\nमेघांवर आरूढ होऊन;\nसर्व डोळे त्याला पाहतील,\nप्रत्येक जीभ कबूल करील.",
+    verses: [
+      {
+        num: 1,
+        text: "जागे व्हा ओ संतांनो,\nआपले दिवे तेवत ठेवा;\nवरा येतो आहे सामर्थ्याने,\nआपल्या मंडळीला न्यायला."
+      },
+      {
+        num: 2,
+        text: "नाही दुःख, नाही अश्रू,\nत्याच्या पवित्र राज्यात;\nसदाकाल आपण राहू आनंदात,\nयेशू राजाच्या सान्निध्यात."
+      }
+    ]
+  },
+  {
+    id: 7,
+    number: "07",
+    titleMr: "पवित्र आत्मा ये, मजवर उतरून ये",
+    titleEn: "Pavitra Aatma Ye",
+    category: "prayer",
+    categoryLabel: "पवित्र आत्मा व प्रार्थना",
+    chorus: "पवित्र आत्मा ये, मजवर उतरून ये,\nतुझ्या सामर्थ्याने मजला भरून टाक;\nअग्नीसारखा ये, वाऱ्यासारखा वाह,\nमाझ्या अंतःकरणात नवा जीवन ओत.",
+    verses: [
+      {
+        num: 1,
+        text: "माझ्या निर्बळतेत तूच साहाय्यक,\nप्रार्थना कशी करावी हे शिकव;\nअथांग उसाशांनी मध्यस्थी कर,\nपित्याच्या इच्छेप्रमाणे मज घडव."
+      },
+      {
+        num: 2,
+        text: "तुझी फळे माझ्यात वाढू दे,\nप्रीती, आनंद, शांती, सहनशीलता;\nउपकार, विश्वासूपणा, नम्रता आणि आत्मसंयम,\nतुझ्या प्रकाशात मला चालव."
+      }
+    ]
+  },
+  {
+    id: 8,
+    number: "08",
+    titleMr: "वधस्तंभावर येशूने दिले प्राण",
+    titleEn: "Vadhstambhavar Yeshune Dile Pran",
+    category: "grace",
+    categoryLabel: "कृपा व वधस्तंभ",
+    chorus: "वधस्तंभावर येशूने दिले प्राण,\nमाझ्यासाठी केला महान त्याग;\nत्याच्या जखमांनी मज आरोग्य लाभले,\nत्याच्या रक्ताने मला क्षमा मिळाली.",
+    verses: [
+      {
+        num: 1,
+        text: "काट्यांचा मुकुट त्याच्या माथी,\nखिळे ठोकले दोन्ही हातांवर;\nतरी मुखातून निघाली प्रार्थना,\n'हे पित्या, यांना क्षमा कर.'"
+      },
+      {
+        num: 2,
+        text: "समाप्त झाले सर्व कार्य,\nतिसऱ्या दिवशी तो उठला जिवंत;\nमृत्यूवर मिळवला विजय,\nतोच आमचा जिवंत प्रभू."
+      }
+    ]
+  },
+  {
+    id: 9,
+    number: "09",
+    titleMr: "स्तुती आराधना करतो आम्ही",
+    titleEn: "Stuti Aaradhana Karto Aamhi",
+    category: "worship",
+    categoryLabel: "स्तुती व आराधना",
+    chorus: "स्तुती आराधना करतो आम्ही,\nहात वर करून गातो आम्ही;\nतूच आमचा देव आणि राजा,\nतुझे नाव महान आहे प्रभू.",
+    verses: [
+      {
+        num: 1,
+        text: "तुझ्या मंदिरात आम्ही येतो,\nहृदय पूर्वक नमन करतो;\nतू पवित्र, तू सर्वसमर्थ,\nतुझी महिमा स्वर्गात भरली आहे."
+      },
+      {
+        num: 2,
+        text: "हालेलुयाह, हालेलुयाह,\nहालेलुयाह प्रभू येशूला;\nसर्व आदर, सन्मान आणि गौरव,\nतुलाच असो युगानुयुग."
+      }
+    ]
+  },
+  {
+    id: 10,
+    number: "10",
+    titleMr: "आनंदाने गावो आम्ही",
+    titleEn: "Aanandane Gaavo Aamhi",
+    category: "worship",
+    categoryLabel: "स्तुती व आनंद",
+    chorus: "आनंदाने गावो आम्ही परमेश्वराचे गीत,\nत्याच्या उपस्थितीत येऊ जयघोष करीत;\nतोच आमचा तारण-खडक,\nत्याचे नाव सदा धन्य असो.",
+    verses: [
+      {
+        num: 1,
+        text: "समुद्र त्याचा, त्याने तो बनवला,\nसुकी भूमी त्याच्या हातांनी घडविली;\nया आपण वाकून नमन करू,\nआपल्या उत्पन्नकर्त्यासमोर गुडघे टेकू."
+      },
+      {
+        num: 2,
+        text: "कारण तोच आमचा देव आहे,\nआणि आपण त्याच्या कुरणातील लोक;\nत्याच्या हातातील मेंढरे आपण,\nआज त्याचा आवाज ऐका."
+      }
+    ]
+  },
+  {
+    id: 11,
+    number: "11",
+    titleMr: "येशू नाम अति मधुर",
+    titleEn: "Yeshu Naam Ati Madhur",
+    category: "worship",
+    categoryLabel: "येशूचे नाम",
+    chorus: "येशू नाम अति मधुर,\nसर्व नामांत श्रेष्ठ नाम;\nपाप्यांना मुक्ती देणारे,\nशांती देणारे गोड नाम.",
+    verses: [
+      {
+        num: 1,
+        text: "या नामात सामर्थ्य आहे,\nसैतानाची शक्ती मोडणारे;\nरोग्यांना बरे करणारे,\nअंधांना डोळे देणारे."
+      },
+      {
+        num: 2,
+        text: "सदा गाईन हेच नाम,\nमाझ्या श्वासात येशू नाम;\nस्वर्गात आणि पृथ्वीवर,\nजयजयकार येशू नाम."
+      }
+    ]
+  },
+  {
+    id: 12,
+    number: "12",
+    titleMr: "माझ्या जीवनात तू राहा प्रभू",
+    titleEn: "Majhya Jeevanat Tu Raha Prabhu",
+    category: "prayer",
+    categoryLabel: "समर्पण व प्रार्थना",
+    chorus: "माझ्या जीवनात तू राहा प्रभू,\nमाझे हृदय तुझे मंदिर होवो;\nमाझ्या प्रत्येक पावलावर,\nतुझा प्रकाश सदा चमकत राहो.",
+    verses: [
+      {
+        num: 1,
+        text: "माझे विचार, माझे बोलणे,\nतुला आवडणारे असे होवो;\nजगाच्या मोहात मी न पडता,\nफक्त तुझ्या मार्गाने चालावे."
+      },
+      {
+        num: 2,
+        text: "माझे सर्वस्व तुला समर्पित,\nमाझा देह, आत्मा आणि मन;\nवापर मला तुझ्या सेवेसाठी,\nतुझे राज्य या पृथ्वीवर येवो."
+      }
+    ]
+  },
+  {
+    id: 13,
+    number: "13",
+    titleMr: "मजवर केली प्रीती अपार",
+    titleEn: "Majvar Keli Preeti Apaar",
+    category: "grace",
+    categoryLabel: "कृपा व प्रेम",
+    chorus: "मजवर केली प्रीती अपार,\nयेशूने दिला नवा उद्धार;\nमी कसा फेडू तुझे उपकार,\nजीवनाने गाईन जयजयकार.",
+    verses: [
+      {
+        num: 1,
+        text: "जगातील सर्व सुखांपेक्षा,\nतुझे प्रेम अधिक गोड आहे;\nसंकट समयी तूच सांत्वनदाता,\nतूच माझा खरा सोबती आहेस."
+      }
+    ]
+  },
+  {
+    id: 14,
+    number: "14",
+    titleMr: "मज संकट समयी तूच साह्यकर्ता",
+    titleEn: "Maj Sankat Samayi Tuza Sahyakarta",
+    category: "faith",
+    categoryLabel: "विश्वास व साहाय्य",
+    chorus: "मज संकट समयी तूच साह्यकर्ता,\nमाझा आश्रय, माझा कोट तूच प्रभू;\nतुझ्या पंखांखाली मी सुरक्षित आहे,\nमला कशाचीही भीती नाही.",
+    verses: [
+      {
+        num: 1,
+        text: "डोंगर जरी हलले आणि टेकड्या थरथरल्या,\nतरी तुझी दया मजवरून ढळणार नाही;\nमाझा शांतीचा करार अढळ राहील,\nअसे दयाळू परमेश्वर म्हणतो."
+      }
+    ]
+  },
+  {
+    id: 15,
+    number: "15",
+    titleMr: "सामर्थ्य आहे रक्तामध्ये (Power in the Blood)",
+    titleEn: "Samarthya Aahe Raktamadhye",
+    category: "grace",
+    categoryLabel: "विजय व रक्त",
+    chorus: "सामर्थ्य, सामर्थ्य, अद्भुत सामर्थ्य,\nकोकरूच्या रक्तामध्ये आहे;\nसामर्थ्य, सामर्थ्य, अद्भुत सामर्थ्य,\nयेशूच्या मौल्यवान रक्तामध्ये.",
+    verses: [
+      {
+        num: 1,
+        text: "पापाच्या ओझ्यातून सुटका हवी का?\nयेशूच्या रक्तात सामर्थ्य आहे;\nसैतानावर विजय मिळवायचा का?\nकोकरूच्या रक्तात विजय आहे."
+      }
+    ]
+  },
+  {
+    id: 16,
+    number: "16",
+    titleMr: "अहा किती गोड येशूचे नाव (How Sweet the Name)",
+    titleEn: "Aha Kiti God Yeshuche Naav",
+    category: "worship",
+    categoryLabel: "स्तुती",
+    chorus: "अहा किती गोड येशूचे नाव,\nविश्वासणाऱ्याच्या कानात पडते;\nदुःख हरते, जखम भरते,\nभय सर्व नाहीसे करते.",
+    verses: [
+      {
+        num: 1,
+        text: "भुकेल्या आत्म्याला तृप्त करते,\nथकलेल्या जीवाला विश्रांती देते;\nयेशू माझा मेंढपाळ, माझा मित्र,\nमाझा राजा आणि माझा प्रभू."
+      }
+    ]
+  },
+  {
+    id: 17,
+    number: "17",
+    titleMr: "रात्र झाली शांत झाली (Silent Night)",
+    titleEn: "Silent Night / शांत रात्र",
+    category: "christmas",
+    categoryLabel: "नाताळ (Christmas)",
+    chorus: "शांत रात्र, पवित्र रात्र,\nसर्व शांत, प्रकाश पसरला;\nकुमारी मातेच्या कुशीत बाळ,\nस्वर्गीय शांतीने झोपले बाळ.",
+    verses: [
+      {
+        num: 1,
+        text: "शांत रात्र, पवित्र रात्र,\nमेंढपाळांना स्वर्गीय दर्शन;\nदेवदूतांनी गायिले हालेलुयाह,\nख्रिस्त तारणारा जन्मला आज."
+      }
+    ]
+  },
+  {
+    id: 18,
+    number: "18",
+    titleMr: "जगी आनंद झाला (Joy to the World)",
+    titleEn: "Joy to the World / जगी आनंद",
+    category: "christmas",
+    categoryLabel: "नाताळ (Christmas)",
+    chorus: "जगी आनंद झाला, प्रभू आला राजा!\nप्रत्येक हृदयाने त्याला जागा द्यावी;\nसृष्टीने आनंदाने गावे,\nआकाश आणि पृथ्वीने जयघोष करावा.",
+    verses: [
+      {
+        num: 1,
+        text: "तो न्यायाने आणि प्रेमाने राज्य करतो,\nराष्ट्रांना त्याचे गौरव दाखवितो;\nत्याच्या नीतीचे वैभव,\nआणि त्याच्या प्रेमाचे आश्चर्य."
+      }
+    ]
+  },
+  {
+    id: 19,
+    number: "19",
+    titleMr: "मोठा देव आमचा (Great is the Lord)",
+    titleEn: "Motha Dev Aamcha",
+    category: "worship",
+    categoryLabel: "स्तुती व आराधना",
+    chorus: "मोठा देव आमचा, महान त्याची स्तुती असो,\nत्याच्या पवित्र पर्वतावर, आपल्या देवाच्या नगरात;\nपृथ्वीचा आनंद, सुंदर उंच सियोन पर्वतावर,\nमहान राजाचे नगर आहे.",
+    verses: [
+      {
+        num: 1,
+        text: "आम्ही तुझ्या मंदिराच्या आत,\nतुझ्या प्रेमळ दयेचे मनन करतो;\nजसे तुझे नाव, तसेच तुझे गुणगान,\nपृथ्वीच्या शेवटापर्यंत पोहोचते."
+      }
+    ]
+  },
+  {
+    id: 20,
+    number: "20",
+    titleMr: "माझे जीवन तुला समर्पित (Take My Life)",
+    titleEn: "Take My Life and Let It Be",
+    category: "prayer",
+    categoryLabel: "समर्पण",
+    chorus: "माझे जीवन घे प्रभू,\nतुझ्यासाठी समर्पित असो;\nमाझे क्षण आणि माझे दिवस,\nतुझ्या अखंड स्तुतीत वाहू दे.",
+    verses: [
+      {
+        num: 1,
+        text: "माझे हात घे आणि त्यांना,\nतुझ्या प्रेमाच्या प्रेरणेने हलव;\nमाझे पाय घे आणि त्यांना,\nतुझ्या मार्गात गतिमान कर."
+      },
+      {
+        num: 2,
+        text: "माझा आवाज घे आणि मला,\nकेवळ माझ्या राजासाठी गाऊ दे;\nमाझे ओठ घे आणि ते,\nतुझ्या संदेशाने भरून टाक."
+      }
+    ]
+  }
+];
+
+let _activeHymnCategory = 'all';
+let _activeHymnId = 1;
+let _hymnFontSize = 16;
+
+function renderHymnsView() {
+  filterHymns();
+}
+
+function selectHymnCategory(cat) {
+  _activeHymnCategory = cat || 'all';
+  document.querySelectorAll('.hymn-cat-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.cat === _activeHymnCategory);
+  });
+  filterHymns();
+}
+
+function clearHymnSearch() {
+  const input = document.getElementById('hymn-search-input');
+  const clearBtn = document.getElementById('hymn-search-clear');
+  if (input) {
+    input.value = '';
+    input.focus();
+  }
+  if (clearBtn) clearBtn.style.display = 'none';
+  filterHymns();
+}
+
+function filterHymns() {
+  const container = document.getElementById('hymns-list-container');
+  if (!container) return;
+  
+  const input = document.getElementById('hymn-search-input');
+  const clearBtn = document.getElementById('hymn-search-clear');
+  const query = (input ? input.value : '').trim().toLowerCase();
+  
+  if (clearBtn) {
+    clearBtn.style.display = query.length > 0 ? 'block' : 'none';
+  }
+  
+  const hymns = window.MARATHI_HYMNAL || [];
+  const filtered = hymns.filter(h => {
+    const matchCat = (_activeHymnCategory === 'all' || h.category === _activeHymnCategory);
+    if (!matchCat) return false;
+    
+    if (!query) return true;
+    
+    const numMatch = h.number.includes(query) || String(h.id) === query;
+    const titleMrMatch = (h.titleMr || '').toLowerCase().includes(query);
+    const titleEnMatch = (h.titleEn || '').toLowerCase().includes(query);
+    const chorusMatch = (h.chorus || '').toLowerCase().includes(query);
+    const versesMatch = (h.verses || []).some(v => v.text.toLowerCase().includes(query));
+    
+    return numMatch || titleMrMatch || titleEnMatch || chorusMatch || versesMatch;
+  });
+  
+  const countElem = document.getElementById('hymn-results-count');
+  if (countElem) {
+    countElem.textContent = `Showing ${filtered.length} of ${hymns.length} hymns`;
+  }
+  
+  if (filtered.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 40px 20px; background: var(--bg-content); border-radius: 16px; border: 1.5px dashed var(--border);">
+        <span style="font-size: 32px; display: block; margin-bottom: 8px;">🔍</span>
+        <h4 style="margin: 0 0 4px 0; color: var(--text); font-size: 15px;">कोणतेही गीत सापडले नाही</h4>
+        <p style="margin: 0; color: var(--text-muted); font-size: 13px;">No hymns found matching "${query}". Try searching by song number or keywords.</p>
+      </div>
+    `;
+    return;
+  }
+  
+  container.innerHTML = filtered.map(h => {
+    const preview = h.chorus ? h.chorus.split('\n')[0] : (h.verses[0] ? h.verses[0].text.split('\n')[0] : '');
+    return `
+      <div class="hymn-card-item" onclick="openHymnDetail(${h.id})">
+        <div class="hymn-card-left">
+          <div class="hymn-num-pill">#${h.number}</div>
+          <div class="hymn-card-info">
+            <h4 class="hymn-card-title">${h.titleMr}</h4>
+            <p class="hymn-card-subtitle">${preview}</p>
+          </div>
+        </div>
+        <div class="hymn-card-right">
+          <span class="hymn-badge-category">${h.categoryLabel}</span>
+          <span class="hymn-open-arrow">&rarr;</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function openHymnDetail(hymnId) {
+  _activeHymnId = hymnId;
+  const hymns = window.MARATHI_HYMNAL || [];
+  const hymn = hymns.find(h => h.id === hymnId) || hymns[0];
+  if (!hymn) return;
+  
+  const modal = document.getElementById('modal-hymn-detail');
+  const numBadge = document.getElementById('hymn-modal-number-badge');
+  const title = document.getElementById('hymn-modal-title');
+  const subtitle = document.getElementById('hymn-modal-subtitle');
+  const body = document.getElementById('hymn-modal-lyrics-body');
+  
+  if (numBadge) numBadge.textContent = `#${hymn.number}`;
+  if (title) title.textContent = hymn.titleMr;
+  if (subtitle) subtitle.textContent = `${hymn.categoryLabel} • ${hymn.titleEn}`;
+  
+  if (body) {
+    let html = '';
+    if (hymn.chorus) {
+      html += `
+        <div class="hymn-chorus-box">
+          <div style="font-size: 12px; font-weight: 800; color: #F7002F; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.5px;">ध्रुवपद (Chorus)</div>
+          <div>${hymn.chorus.replace(/\n/g, '<br>')}</div>
+        </div>
+      `;
+    }
+    
+    if (hymn.verses && hymn.verses.length > 0) {
+      hymn.verses.forEach(v => {
+        html += `
+          <div class="hymn-stanza-block">
+            <div style="font-size: 13px; font-weight: 800; color: #F7002F; margin-bottom: 3px;">कडवे ${v.num} :</div>
+            <div style="padding-left: 6px;">${v.text.replace(/\n/g, '<br>')}</div>
+          </div>
+        `;
+      });
+    }
+    
+    body.innerHTML = html;
+    body.style.fontSize = `${_hymnFontSize}px`;
+  }
+  
+  if (modal) {
+    modal.style.setProperty('display', 'flex', 'important');
+    modal.classList.add('active');
+    document.body.classList.add('hymn-modal-open');
+  }
+}
+
+function closeHymnDetail() {
+  const modal = document.getElementById('modal-hymn-detail');
+  if (modal) {
+    modal.style.setProperty('display', 'none', 'important');
+    modal.classList.remove('active');
+    document.body.classList.remove('hymn-modal-open');
+  }
+}
+
+function navigateHymn(delta) {
+  const hymns = window.MARATHI_HYMNAL || [];
+  const currentIndex = hymns.findIndex(h => h.id === _activeHymnId);
+  let nextIndex = currentIndex + delta;
+  if (nextIndex < 0) nextIndex = hymns.length - 1;
+  if (nextIndex >= hymns.length) nextIndex = 0;
+  openHymnDetail(hymns[nextIndex].id);
+}
+
+function adjustHymnFontSize(delta) {
+  _hymnFontSize = Math.max(13, Math.min(26, _hymnFontSize + delta));
+  const body = document.getElementById('hymn-modal-lyrics-body');
+  if (body) {
+    body.style.fontSize = `${_hymnFontSize}px`;
+  }
+}
+
+function getFormattedHymnText(hymn) {
+  if (!hymn) return '';
+  let text = `🎵 ${hymn.titleMr} (#${hymn.number})\n(${hymn.titleEn})\n\n`;
+  if (hymn.chorus) {
+    text += `[ध्रुवपद]\n${hymn.chorus}\n\n`;
+  }
+  if (hymn.verses) {
+    hymn.verses.forEach(v => {
+      text += `[कडवे ${v.num}]\n${v.text}\n\n`;
+    });
+  }
+  text += `— River of Life • उपासना संगीत`;
+  return text;
+}
+
+function copyCurrentHymnLyrics() {
+  const hymns = window.MARATHI_HYMNAL || [];
+  const hymn = hymns.find(h => h.id === _activeHymnId);
+  if (!hymn) return;
+  const text = getFormattedHymnText(hymn);
+  navigator.clipboard.writeText(text).then(() => {
+    if (typeof showToast === 'function') {
+      showToast('Hymn lyrics copied to clipboard! / गीत कॉपी केले!');
+    }
+  }).catch(() => {
+    alert('Copied lyrics!');
+  });
+}
+
+function shareCurrentHymnLyrics() {
+  const hymns = window.MARATHI_HYMNAL || [];
+  const hymn = hymns.find(h => h.id === _activeHymnId);
+  if (!hymn) return;
+  const text = getFormattedHymnText(hymn);
+  const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+  window.open(waUrl, '_blank');
+}
+
+window.renderHymnsView = renderHymnsView;
+window.selectHymnCategory = selectHymnCategory;
+window.clearHymnSearch = clearHymnSearch;
+window.filterHymns = filterHymns;
+window.openHymnDetail = openHymnDetail;
+window.closeHymnDetail = closeHymnDetail;
+window.navigateHymn = navigateHymn;
+window.adjustHymnFontSize = adjustHymnFontSize;
+window.copyCurrentHymnLyrics = copyCurrentHymnLyrics;
+window.shareCurrentHymnLyrics = shareCurrentHymnLyrics;

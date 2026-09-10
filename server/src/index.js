@@ -7,6 +7,9 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const authRoutes = require('./routes/auth.routes');
+const readingProgressRoutes = require('./routes/readingProgress.routes');
+const bookmarksRoutes = require('./routes/bookmarks.routes');
+const audioAssetsRoutes = require('./routes/audioAssets.routes');
 const meetingRoutes = require('./routes/meeting.routes');
 const prayerRoutes = require('./routes/prayer.routes');
 const notificationRoutes = require('./routes/notification.routes');
@@ -35,6 +38,9 @@ app.use(express.static(path.join(__dirname, '../../')));
 
 // API Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/reading-progress', readingProgressRoutes);
+app.use('/api/bookmarks', bookmarksRoutes);
+app.use('/api/audio-assets', audioAssetsRoutes);
 app.use('/api/meetings', meetingRoutes);
 app.use('/api/prayers', prayerRoutes);
 app.use('/api/notifications', notificationRoutes);
@@ -89,10 +95,12 @@ app.post('/api/get-meeting-token', async (req, res) => {
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`================================================================`);
-  console.log(`   RIVER OF LIFE PRODUCTION API SERVER IS RUNNING ON PORT ${PORT}  `);
-  console.log(`================================================================`);
-});
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`================================================================`);
+    console.log(`   RIVER OF LIFE PRODUCTION API SERVER IS RUNNING ON PORT ${PORT}  `);
+    console.log(`================================================================`);
+  });
+}
 
 module.exports = app;

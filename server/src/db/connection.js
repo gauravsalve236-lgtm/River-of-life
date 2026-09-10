@@ -2,8 +2,13 @@ const { Pool } = require('pg');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const dotenv = require('dotenv');
+const crypto = require('crypto');
 
 dotenv.config();
+
+function generateUuid() {
+  return crypto.randomUUID ? crypto.randomUUID() : crypto.randomBytes(16).toString('hex');
+}
 
 const USE_POSTGRES = process.env.USE_POSTGRES === 'true' || !!process.env.DATABASE_URL;
 let pgPool = null;
@@ -17,6 +22,65 @@ if (USE_POSTGRES) {
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 5000,
   });
+
+  // Ensure PostgreSQL schema for core tables is initialized
+  pgPool.query(`
+    CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+    CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+    CREATE TABLE IF NOT EXISTS users (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      email VARCHAR(255) UNIQUE NOT NULL,
+      password_hash VARCHAR(255),
+      full_name VARCHAR(255),
+      username VARCHAR(100) UNIQUE,
+      phone VARCHAR(20) UNIQUE,
+      profile_photo TEXT,
+      preferred_language VARCHAR(10) DEFAULT 'mr',
+      role VARCHAR(50) DEFAULT 'Member',
+      status VARCHAR(50) DEFAULT 'Active',
+      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+      last_login_at TIMESTAMP WITH TIME ZONE
+    );
+
+    CREATE TABLE IF NOT EXISTS reading_progress (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      book_name VARCHAR(100) NOT NULL,
+      chapter_number INTEGER NOT NULL,
+      progress_percentage NUMERIC(5,2) DEFAULT 0.00,
+      last_verse INTEGER DEFAULT 1,
+      updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+      CONSTRAINT uq_user_book_chapter UNIQUE(user_id, book_name, chapter_number)
+    );
+
+    CREATE TABLE IF NOT EXISTS bookmarks (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      reference_text VARCHAR(255) NOT NULL,
+      verse_tag VARCHAR(100) DEFAULT 'General',
+      verse_text TEXT,
+      book_name VARCHAR(100),
+      chapter_number INTEGER,
+      verse_number INTEGER,
+      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS audio_assets (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      book_name VARCHAR(100) NOT NULL,
+      chapter_number INTEGER NOT NULL,
+      language VARCHAR(10) DEFAULT 'mr',
+      audio_url TEXT NOT NULL,
+      storage_provider VARCHAR(50) DEFAULT 'cloudflare_r2',
+      duration_seconds INTEGER,
+      file_size_bytes BIGINT,
+      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+      CONSTRAINT uq_audio_book_chapter_lang UNIQUE(book_name, chapter_number, language)
+    );
+  `).catch(err => console.warn('[DB] PostgreSQL init notice:', err.message));
+
 } else {
   console.log('[DB] Using SQLite database engine for local development & testing.');
   const dbPath = path.join(__dirname, '../../river_of_life.db');
@@ -27,16 +91,71 @@ if (USE_POSTGRES) {
     sqliteDb.run(`
       CREATE TABLE IF NOT EXISTS users (
         id TEXT PRIMARY KEY,
-        full_name TEXT NOT NULL,
-        username TEXT UNIQUE NOT NULL,
-        phone TEXT UNIQUE NOT NULL,
+        full_name TEXT,
+        username TEXT UNIQUE,
+        phone TEXT UNIQUE,
         email TEXT UNIQUE,
+        password_hash TEXT,
         profile_photo TEXT,
+        preferred_language TEXT DEFAULT 'mr',
         role TEXT NOT NULL DEFAULT 'Member',
         status TEXT NOT NULL DEFAULT 'Active',
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        last_login DATETIME
+        last_login DATETIME,
+        last_login_at DATETIME
+      )
+    `);
+
+    // Column migrations for users table
+    sqliteDb.run(`ALTER TABLE users ADD COLUMN password_hash TEXT`, () => {});
+    sqliteDb.run(`ALTER TABLE users ADD COLUMN preferred_language TEXT DEFAULT 'mr'`, () => {});
+    sqliteDb.run(`ALTER TABLE users ADD COLUMN last_login_at DATETIME`, () => {});
+
+    // Reading Progress Table
+    sqliteDb.run(`
+      CREATE TABLE IF NOT EXISTS reading_progress (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        book_name TEXT NOT NULL,
+        chapter_number INTEGER NOT NULL,
+        progress_percentage REAL DEFAULT 0.00,
+        last_verse INTEGER DEFAULT 1,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(user_id, book_name, chapter_number),
+        FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+      )
+    `);
+
+    // Bookmarks Table
+    sqliteDb.run(`
+      CREATE TABLE IF NOT EXISTS bookmarks (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        reference_text TEXT NOT NULL,
+        verse_tag TEXT DEFAULT 'General',
+        verse_text TEXT,
+        book_name TEXT,
+        chapter_number INTEGER,
+        verse_number INTEGER,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+      )
+    `);
+
+    // Audio Assets Table
+    sqliteDb.run(`
+      CREATE TABLE IF NOT EXISTS audio_assets (
+        id TEXT PRIMARY KEY,
+        book_name TEXT NOT NULL,
+        chapter_number INTEGER NOT NULL,
+        language TEXT DEFAULT 'mr',
+        audio_url TEXT NOT NULL,
+        storage_provider TEXT DEFAULT 'cloudflare_r2',
+        duration_seconds INTEGER,
+        file_size_bytes INTEGER,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(book_name, chapter_number, language)
       )
     `);
 
@@ -588,5 +707,6 @@ const dbQuery = {
 
 module.exports = {
   dbQuery,
+  generateUuid,
   ...dbQuery
 };

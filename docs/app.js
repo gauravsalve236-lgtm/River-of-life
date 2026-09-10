@@ -957,6 +957,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     updateQuizCardStats();
     initBibleQuiz();
     initAuthAndPrayers();
+    updateAuthUI();
+    if (window.RolBackendSync && typeof window.RolBackendSync.restoreSession === 'function') {
+      window.RolBackendSync.restoreSession();
+    }
     checkAndTriggerFirstLaunchOnboarding();
   } catch (e) {
     console.error("Reader/Devotion init error:", e);
@@ -992,6 +996,26 @@ function loadStateFromLocalStorage() {
       console.error("Error loading state:", e);
     }
   }
+
+  // Restore authenticated session reliably across reloads and app restarts
+  try {
+    const savedUserJson = localStorage.getItem("rol_current_user");
+    const savedToken = localStorage.getItem("rol_access_token");
+    if (savedUserJson) {
+      const parsedUser = JSON.parse(savedUserJson);
+      if (parsedUser && (parsedUser.id || parsedUser.email || parsedUser.username)) {
+        state.currentUser = { ...parsedUser, token: savedToken || parsedUser.token };
+        if (state.currentUser.fullName || state.currentUser.username) {
+          localStorage.setItem("rol_user_name", state.currentUser.fullName || state.currentUser.username);
+        }
+      }
+    } else if (state.currentUser && state.currentUser.id) {
+      localStorage.setItem("rol_current_user", JSON.stringify(state.currentUser));
+    }
+  } catch (authErr) {
+    console.warn("Session restore notice:", authErr);
+  }
+
   // Force migration to Sarvam AI Bulbul V3 Indian Voice Narration
   state.audioSource = "sarvam";
   if (!state.sarvamVoice) {
@@ -1001,11 +1025,325 @@ function loadStateFromLocalStorage() {
 }
 
 function saveStateToLocalStorage() {
-  localStorage.setItem("river_of_life_state_v2", JSON.stringify(state));
-  // Non-blocking Firestore sync for cloud persistence
-  if (state.currentUser && state.currentUser.uid) {
-    syncUserDataToFirestore(); // fire-and-forget; errors are caught inside
+  try {
+    if (state.currentUser) {
+      localStorage.setItem("rol_current_user", JSON.stringify(state.currentUser));
+      if (state.currentUser.fullName || state.currentUser.username) {
+        localStorage.setItem("rol_user_name", state.currentUser.fullName || state.currentUser.username);
+      }
+    }
+    localStorage.setItem("river_of_life_state_v2", JSON.stringify(state));
+    // Non-blocking Firestore sync for cloud persistence
+    if (state.currentUser && state.currentUser.uid) {
+      syncUserDataToFirestore(); // fire-and-forget; errors are caught inside
+    }
+  } catch (e) {
+    console.warn("Failed saving state:", e);
   }
+}
+
+/* ==========================================================================
+   RIVER OF LIFE BACKEND & DATABASE SYNC CLIENT (POSTGRESQL / SQLITE API)
+   Handles JWT sessions, cross-device Reading Progress, and Bookmarks Sync
+   ========================================================================== */
+
+const ROL_API_BASE = (typeof window !== 'undefined' && window.location && window.location.origin && window.location.origin.startsWith('http')) 
+  ? (window.location.port === '8080' ? 'http://localhost:7880' : window.location.origin)
+  : 'http://localhost:7880';
+
+const RolBackendSync = {
+  getAccessToken() {
+    return (typeof localStorage !== 'undefined' ? localStorage.getItem('rol_access_token') : null) || 
+           (state.currentUser && state.currentUser.token) || null;
+  },
+
+  setAuthSession(token, refreshToken, user) {
+    if (typeof localStorage !== 'undefined') {
+      if (token) localStorage.setItem('rol_access_token', token);
+      if (refreshToken) localStorage.setItem('rol_refresh_token', refreshToken);
+      if (user) {
+        localStorage.setItem('rol_current_user', JSON.stringify(user));
+        if (user.fullName || user.username) {
+          localStorage.setItem('rol_user_name', user.fullName || user.username);
+        }
+        if (user.email) {
+          this.recordDeviceAccount(user.email, user.fullName || user.username, user.profilePhoto);
+        }
+      }
+    }
+    if (user) {
+      state.currentUser = user;
+      saveStateToLocalStorage();
+    }
+  },
+
+  clearAuthSession() {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.removeItem('rol_access_token');
+      localStorage.removeItem('rol_refresh_token');
+      localStorage.removeItem('rol_current_user');
+      localStorage.removeItem('rol_user_name');
+    }
+    state.currentUser = null;
+    saveStateToLocalStorage();
+  },
+
+  recordDeviceAccount(email, fullName, photo) {
+    if (!email || typeof localStorage === 'undefined') return;
+    try {
+      const raw = localStorage.getItem('rol_device_google_accounts');
+      let list = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(list)) list = [];
+      const cleanEmail = email.trim();
+      const existingIdx = list.findIndex(a => a.email && a.email.toLowerCase() === cleanEmail.toLowerCase());
+      const item = {
+        email: cleanEmail,
+        fullName: (fullName || cleanEmail.split('@')[0]).trim(),
+        photo: photo || null,
+        lastUsed: Date.now()
+      };
+      if (existingIdx >= 0) {
+        list[existingIdx] = { ...list[existingIdx], ...item };
+      } else {
+        list.unshift(item);
+      }
+      localStorage.setItem('rol_device_google_accounts', JSON.stringify(list.slice(0, 8)));
+    } catch (e) {
+      console.warn('Could not record device account:', e);
+    }
+  },
+
+  getDeviceAccounts() {
+    if (typeof localStorage === 'undefined') return [];
+    try {
+      const raw = localStorage.getItem('rol_device_google_accounts');
+      let list = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(list)) list = [];
+      
+      const curUser = state.currentUser || (localStorage.getItem('rol_current_user') ? JSON.parse(localStorage.getItem('rol_current_user')) : null);
+      if (curUser && curUser.email && !list.some(a => a.email.toLowerCase() === curUser.email.toLowerCase())) {
+        list.unshift({
+          email: curUser.email,
+          fullName: curUser.fullName || curUser.username || 'Saved Account',
+          photo: curUser.profilePhoto || null,
+          lastUsed: Date.now()
+        });
+      }
+      
+      if (list.length === 0) {
+        list = [
+          { email: 'gauravsalve236@gmail.com', fullName: 'Gaurav Salve', photo: null, color: '#1a73e8' },
+          { email: 'gauchi2323@gmail.com', fullName: 'Gauchi', photo: null, color: '#202124' },
+          { email: 'supermangee23@gmail.com', fullName: 'Gee', photo: null, color: '#e37400' },
+          { email: 'gauravsalve2012@gmail.com', fullName: 'Gaurav Salve', photo: null, color: '#1e8e3e' }
+        ];
+      }
+      return list;
+    } catch (e) {
+      return [
+        { email: 'gauravsalve236@gmail.com', fullName: 'Gaurav Salve', photo: null, color: '#1a73e8' },
+        { email: 'gauchi2323@gmail.com', fullName: 'Gauchi', photo: null, color: '#202124' },
+        { email: 'supermangee23@gmail.com', fullName: 'Gee', photo: null, color: '#e37400' },
+        { email: 'gauravsalve2012@gmail.com', fullName: 'Gaurav Salve', photo: null, color: '#1e8e3e' }
+      ];
+    }
+  },
+
+  async restoreSession() {
+    const token = this.getAccessToken();
+    if (!token) return null;
+    try {
+      const res = await fetch(`${ROL_API_BASE}/api/auth/me`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.user) {
+          state.currentUser = { ...data.user, token };
+          this.setAuthSession(token, localStorage.getItem('rol_refresh_token'), data.user);
+          updateAuthUI();
+          if (typeof renderYouProfile === 'function') renderYouProfile();
+          this.pullRemoteProgress();
+          this.pullRemoteBookmarks();
+          return data.user;
+        }
+      }
+    } catch (e) {
+      console.warn('[RolBackendSync] Session verification note:', e.message);
+    }
+    return state.currentUser;
+  },
+
+  async signup(email, password, fullName, preferredLanguage = 'mr') {
+    try {
+      const res = await fetch(`${ROL_API_BASE}/api/auth/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, fullName, preferredLanguage })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Signup failed');
+      this.setAuthSession(data.accessToken, data.refreshToken, data.user);
+      this.pullRemoteProgress();
+      this.pullRemoteBookmarks();
+      return data;
+    } catch (err) {
+      console.warn('[RolBackendSync] Signup error:', err.message);
+      throw err;
+    }
+  },
+
+  async login(email, password) {
+    try {
+      const res = await fetch(`${ROL_API_BASE}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Login failed');
+      this.setAuthSession(data.accessToken, data.refreshToken, data.user);
+      this.pullRemoteProgress();
+      this.pullRemoteBookmarks();
+      return data;
+    } catch (err) {
+      console.warn('[RolBackendSync] Login error:', err.message);
+      throw err;
+    }
+  },
+
+  async googleAuth(email, fullName, preferredLanguage = 'mr', role = 'Member') {
+    try {
+      const res = await fetch(`${ROL_API_BASE}/api/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, fullName, preferredLanguage, role })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Google authentication failed');
+      this.setAuthSession(data.accessToken, data.refreshToken, data.user);
+      this.pullRemoteProgress();
+      this.pullRemoteBookmarks();
+      return data;
+    } catch (err) {
+      console.warn('[RolBackendSync] Google auth error:', err.message);
+      throw err;
+    }
+  },
+
+  async syncReadingProgress(bookName, chapterNumber, progressPercentage = 100.0, lastVerse = 1) {
+    const token = this.getAccessToken();
+    if (!token) return;
+
+    try {
+      await fetch(`${ROL_API_BASE}/api/reading-progress`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          book_name: bookName,
+          chapter_number: chapterNumber,
+          progress_percentage: progressPercentage,
+          last_verse: lastVerse
+        })
+      });
+    } catch (err) {
+      console.warn('[RolBackendSync] Progress sync failed (saved locally):', err.message);
+    }
+  },
+
+  async syncBookmark(action, bookmarkData) {
+    const token = this.getAccessToken();
+    if (!token) return;
+
+    try {
+      if (action === 'create') {
+        const res = await fetch(`${ROL_API_BASE}/api/bookmarks`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            reference_text: bookmarkData.ref || bookmarkData.reference_text,
+            verse_tag: bookmarkData.tag || bookmarkData.verse_tag || 'General',
+            verse_text: bookmarkData.text || bookmarkData.verse_text || '',
+            book_name: bookmarkData.book || bookmarkData.book_name,
+            chapter_number: bookmarkData.chapter || bookmarkData.chapter_number,
+            verse_number: bookmarkData.verse || bookmarkData.verse_number
+          })
+        });
+        const data = await res.json();
+        if (data && data.bookmark && data.bookmark.id) {
+          bookmarkData.dbId = data.bookmark.id;
+        }
+      } else if (action === 'delete' && bookmarkData.dbId) {
+        await fetch(`${ROL_API_BASE}/api/bookmarks/${bookmarkData.dbId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+      }
+    } catch (err) {
+      console.warn('[RolBackendSync] Bookmark sync failed (kept locally):', err.message);
+    }
+  },
+
+  async pullRemoteProgress() {
+    const token = this.getAccessToken();
+    if (!token) return;
+    try {
+      const res = await fetch(`${ROL_API_BASE}/api/reading-progress`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.progress && Array.isArray(data.progress)) {
+          console.log('[RolBackendSync] Synced reading progress records:', data.progress.length);
+        }
+      }
+    } catch (e) {
+      console.warn('[RolBackendSync] Could not pull reading progress:', e.message);
+    }
+  },
+
+  async pullRemoteBookmarks() {
+    const token = this.getAccessToken();
+    if (!token) return;
+    try {
+      const res = await fetch(`${ROL_API_BASE}/api/bookmarks`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.bookmarks && Array.isArray(data.bookmarks)) {
+          data.bookmarks.forEach(rb => {
+            const exists = state.bookmarks.some(lb => lb.ref === rb.reference_text || lb.dbId === rb.id);
+            if (!exists) {
+              state.bookmarks.unshift({
+                dbId: rb.id,
+                ref: rb.reference_text,
+                text: rb.verse_text,
+                date: new Date(rb.created_at).toLocaleDateString(),
+                book: rb.book_name,
+                chapter: rb.chapter_number,
+                verse: rb.verse_number,
+                tag: rb.verse_tag
+              });
+            }
+          });
+          saveStateToLocalStorage();
+        }
+      }
+    } catch (e) {
+      console.warn('[RolBackendSync] Could not pull bookmarks:', e.message);
+    }
+  }
+};
+
+if (typeof window !== 'undefined') {
+  window.RolBackendSync = RolBackendSync;
 }
 
 // Update DOM elements layout, theme, and font sizing parameters from state
@@ -1762,6 +2100,9 @@ async function openReader(bookKey, chapterNum) {
   state.activeBook = bookKey;
   state.activeChapter = parsedChapter;
   saveStateToLocalStorage();
+  if (typeof RolBackendSync !== 'undefined' && RolBackendSync.syncReadingProgress) {
+    RolBackendSync.syncReadingProgress(bookKey, parsedChapter, 100.0, 1);
+  }
   chapterNum = parsedChapter;
 
   // Immediately update UI titles so they never get stuck on default placeholders
@@ -2307,17 +2648,24 @@ function toggleBookmark() {
   const idx = state.bookmarks.findIndex(b => b.ref === selectedVerseMeta.ref);
   
   if (idx !== -1) {
-    state.bookmarks.splice(idx, 1);
+    const removed = state.bookmarks.splice(idx, 1)[0];
+    if (typeof RolBackendSync !== 'undefined' && RolBackendSync.syncBookmark) {
+      RolBackendSync.syncBookmark('delete', removed);
+    }
     showToast("Bookmark removed");
   } else {
-    state.bookmarks.unshift({
+    const newBm = {
       ref: selectedVerseMeta.ref,
       text: selectedVerseMeta.text,
       date: new Date().toLocaleDateString(),
       book: selectedVerseMeta.book,
       chapter: selectedVerseMeta.chapter,
       verse: selectedVerseMeta.verse
-    });
+    };
+    state.bookmarks.unshift(newBm);
+    if (typeof RolBackendSync !== 'undefined' && RolBackendSync.syncBookmark) {
+      RolBackendSync.syncBookmark('create', newBm);
+    }
     showToast("Bookmarked successfully");
   }
   saveStateToLocalStorage();
@@ -4747,15 +5095,38 @@ function updateAllUserAvatars() {
   const bottomAvatar = document.getElementById("nav-you-avatar");
   const headerAvatar = document.getElementById("header-auth-avatar");
   const profileAvatar = document.getElementById("profile-avatar");
+  const figmaAvatarImg = document.getElementById("figma-user-avatar");
+  const figmaAvatarInitial = document.getElementById("figma-user-avatar-initial");
   
   const user = state.currentUser;
+  const photoUrl = user ? (user.photo || user.profilePhoto || user.profile_photo) : null;
+  const initial = user ? (user.fullName || user.username || "U").charAt(0).toUpperCase() : "G";
   
+  // 1. Home page top right corner profile icon
+  if (figmaAvatarImg && figmaAvatarInitial) {
+    if (user && photoUrl) {
+      figmaAvatarImg.src = photoUrl;
+      figmaAvatarImg.style.display = "block";
+      figmaAvatarInitial.style.display = "none";
+    } else if (user) {
+      figmaAvatarImg.style.display = "none";
+      figmaAvatarInitial.style.display = "flex";
+      figmaAvatarInitial.textContent = initial;
+      figmaAvatarInitial.style.background = "#22c55e";
+      figmaAvatarInitial.style.color = "#ffffff";
+    } else {
+      figmaAvatarImg.src = "assets/icons/user_profile_avatar.svg";
+      figmaAvatarImg.style.display = "block";
+      figmaAvatarInitial.style.display = "none";
+    }
+  }
+
   const updateElement = (el, isLarge) => {
     if (!el) return;
     if (user) {
-      if (user.photo) {
+      if (photoUrl) {
         el.textContent = "";
-        el.style.backgroundImage = `url(${user.photo})`;
+        el.style.backgroundImage = `url(${photoUrl})`;
         el.style.backgroundSize = "cover";
         el.style.backgroundPosition = "center";
         el.style.backgroundRepeat = "no-repeat";
@@ -4763,10 +5134,10 @@ function updateAllUserAvatars() {
           el.style.borderColor = "var(--primary)";
         }
       } else {
-        el.textContent = user.username.substring(0, 1).toUpperCase();
+        el.textContent = initial;
         el.style.backgroundImage = "none";
         el.style.backgroundColor = "var(--primary)";
-        el.style.color = "#1e1b4b";
+        el.style.color = "#ffffff";
       }
     } else {
       // Guest state
@@ -5171,7 +5542,7 @@ function renderYouProfile() {
   
   const profileNameEl = document.getElementById("profile-user-name");
   if (profileNameEl) {
-    profileNameEl.textContent = state.currentUser.username;
+    profileNameEl.textContent = state.currentUser.fullName || state.currentUser.username || "Gaurav Salve";
   }
   
   const pastorBadge = document.getElementById("profile-pastor-badge");
@@ -6547,10 +6918,15 @@ function setupEventListeners() {
         const dataUrl = evt.target.result;
         if (state.currentUser) {
           state.currentUser.photo = dataUrl;
-          // saveStateToLocalStorage triggers Firestore sync automatically
+          state.currentUser.profilePhoto = dataUrl;
+          state.currentUser.profile_photo = dataUrl;
+          if (state.currentUser.email && window.RolBackendSync) {
+            window.RolBackendSync.recordDeviceAccount(state.currentUser.email, state.currentUser.fullName || state.currentUser.username, dataUrl);
+          }
           saveStateToLocalStorage();
           updateAllUserAvatars();
-          showToast("Profile photo updated!");
+          updateAuthUI();
+          showToast("Profile photo updated! / प्रोफाइल फोटो बदलला!");
         }
       };
       reader.readAsDataURL(file);
@@ -9201,15 +9577,8 @@ function initAuthAndPrayers() {
 
   /* ── Google Sign-In ── */
   if (googleBtn) {
-    googleBtn.addEventListener("click", async () => {
-      hideError();
-      setAuthLoading(true);
-      const res = await loginWithGoogle();
-      setAuthLoading(false);
-      if (!res.success) {
-        showError(res.messageEn, res.messageMr || res.messageEn);
-      }
-      // On success, onFirebaseAuthChange fires automatically and updates UI
+    googleBtn.addEventListener("click", () => {
+      handleGoogleSignIn();
     });
   }
 
@@ -9219,10 +9588,14 @@ function initAuthAndPrayers() {
       e.preventDefault();
       hideError();
 
-      const displayName = (document.getElementById("auth-input-username")?.value || "").trim();
-      const email    = (document.getElementById("auth-input-email")?.value    || "").trim();
+      const userInput = (document.getElementById("auth-input-username")?.value || "").trim();
+      const emailInput = (document.getElementById("auth-input-email")?.value || "").trim();
       const password = (document.getElementById("auth-input-password")?.value || "");
       const isPastor = document.getElementById("auth-input-pastor")?.checked || false;
+
+      // Determine email vs username
+      const email = (currentAuthTab === "signup") ? (emailInput || (userInput.includes("@") ? userInput : "")) : (userInput.includes("@") ? userInput : (emailInput || `${userInput}@riveroflife.org`));
+      const displayName = userInput.replace(/@.*$/, "") || "Believer";
 
       if (!email || !password) {
         showError("Please enter your email and password.", "ईमेल आणि पासवर्ड भरा.");
@@ -9231,29 +9604,21 @@ function initAuthAndPrayers() {
 
       setAuthLoading(true);
 
-      if (currentAuthTab === "signup") {
-        if (!displayName) {
+      try {
+        if (currentAuthTab === "signup") {
+          const res = await RolBackendSync.signup(email, password, displayName, state.translation || 'mr');
           setAuthLoading(false);
-          showError("Please enter your full name.", "आपले पूर्ण नाव भरा.");
-          return;
+          updateAuthUI();
+          showToast("🎉 Account created successfully! / खाते तयार झाले!");
+        } else {
+          const res = await RolBackendSync.login(email, password);
+          setAuthLoading(false);
+          updateAuthUI();
+          showToast("🙏 Welcome back! / स्वागत आहे!");
         }
-        const res = await registerUser(displayName, email, password, isPastor);
+      } catch (err) {
         setAuthLoading(false);
-        if (!res.success) {
-          showError(res.messageEn, res.messageMr);
-          return;
-        }
-        // Registration succeeded — Firebase sent a verification email automatically
-        // Show a prominent verification notice in the UI
-        showEmailVerificationBanner(email);
-      } else {
-        const res = await loginUser(email, password);
-        setAuthLoading(false);
-        if (!res.success) {
-          showError(res.messageEn, res.messageMr);
-          return;
-        }
-        // onFirebaseAuthChange fires automatically after signInWithEmail and updates UI
+        showError(err.message || "Authentication failed", err.message || "लॉगिन अयशस्वी झाले");
       }
     });
   }
@@ -9375,14 +9740,185 @@ window.closeAuthModal = function() {
   if (modal) modal.style.display = "none";
 };
 
-window.handleAuthSubmit = async function(e) {
+window.openGoogleSignupModal = function(prefillEmail = "", prefillName = "") {
+  const modal = document.getElementById("modal-google-signup");
+  if (!modal) return;
+  const emailInput = document.getElementById("google-reg-email");
+  const nameInput = document.getElementById("google-reg-name");
+  if (emailInput && prefillEmail) emailInput.value = prefillEmail;
+  if (nameInput && prefillName) nameInput.value = prefillName;
+  modal.style.display = "flex";
+};
+
+window.closeGoogleSignupModal = function() {
+  const modal = document.getElementById("modal-google-signup");
+  if (modal) modal.style.display = "none";
+};
+
+window.openNotificationModal = function() {
+  const modal = document.getElementById("modal-notifications-center");
+  if (modal) modal.style.display = "flex";
+  const badge = document.getElementById("header-bell-badge");
+  if (badge) badge.style.display = "none";
+};
+
+window.closeNotificationModal = function() {
+  const modal = document.getElementById("modal-notifications-center");
+  if (modal) modal.style.display = "none";
+};
+
+window.markAllNotificationsAsRead = function() {
+  showToast("All notifications marked as read / सर्व सूचना वाचल्या!");
+  closeNotificationModal();
+};
+
+window.openDeviceGoogleAccountChooser = function() {
+  const modal = document.getElementById("modal-google-account-chooser");
+  if (!modal) {
+    window.openGoogleSignupModal();
+    return;
+  }
+
+  // Render accounts list dynamically matching Google chooser reference
+  const container = document.getElementById("google-account-chooser-list");
+  if (container && window.RolBackendSync) {
+    const accounts = window.RolBackendSync.getDeviceAccounts();
+    container.innerHTML = "";
+
+    accounts.forEach((acc, idx) => {
+      const initial = (acc.fullName || acc.email || "G").charAt(0).toUpperCase();
+      const colors = ["#1a73e8", "#202124", "#e37400", "#1e8e3e", "#9333ea"];
+      const bg = acc.color || colors[idx % colors.length];
+
+      const itemEl = document.createElement("div");
+      itemEl.className = "google-account-item";
+      itemEl.style.cssText = "display: flex; align-items: center; gap: 16px; padding: 13px 24px; cursor: pointer; transition: background 0.15s; border-bottom: 1px solid #dadce0;";
+      
+      const avatarHtml = acc.photo 
+        ? `<img src="${acc.photo}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex-shrink: 0;">`
+        : `<div style="width: 40px; height: 40px; border-radius: 50%; background: ${bg}; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 500; font-size: 18px; flex-shrink: 0;">${initial}</div>`;
+
+      itemEl.innerHTML = `
+        ${avatarHtml}
+        <div style="text-align: left; line-height: 1.35; flex: 1;">
+          <div style="font-weight: 500; font-size: 15px; color: #202124;">${acc.fullName || 'Google User'}</div>
+          <div style="font-size: 12.5px; color: #5f6368;">${acc.email}</div>
+        </div>
+      `;
+
+      itemEl.addEventListener("mouseenter", () => {
+        itemEl.style.background = "#f8f9fa";
+      });
+      itemEl.addEventListener("mouseleave", () => {
+        itemEl.style.background = "transparent";
+      });
+      itemEl.addEventListener("click", () => {
+        window.selectDeviceGoogleAccount(acc.email, acc.fullName, acc.photo);
+      });
+      container.appendChild(itemEl);
+    });
+  }
+
+  // Trigger Google Identity Services One Tap prompt if supported
+  if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
+    try {
+      google.accounts.id.prompt();
+    } catch (e) {
+      console.log("[GIS prompt note]:", e.message);
+    }
+  }
+
+  modal.style.display = "flex";
+};
+
+window.closeDeviceGoogleAccountChooser = function() {
+  const modal = document.getElementById("modal-google-account-chooser");
+  if (modal) modal.style.display = "none";
+  const statusEl = document.getElementById("google-chooser-status");
+  if (statusEl) statusEl.style.display = "none";
+};
+
+window.selectDeviceGoogleAccount = async function(email, fullName, photo = null) {
+  const statusEl = document.getElementById("google-chooser-status");
+  if (statusEl) {
+    statusEl.style.display = "block";
+    statusEl.innerHTML = `<span>⏳</span> Signing in as <b>${fullName || email}</b>… / जोडत आहे…`;
+  }
+
+  try {
+    const lang = state.translation || 'mr';
+    const role = 'Member';
+    const res = await RolBackendSync.googleAuth(email, fullName || email.split('@')[0], lang, role);
+    
+    // Attach profile photo if account provided one
+    if (photo && state.currentUser) {
+      state.currentUser.photo = photo;
+      state.currentUser.profilePhoto = photo;
+      state.currentUser.profile_photo = photo;
+      saveStateToLocalStorage();
+    }
+
+    window.closeDeviceGoogleAccountChooser();
+    if (typeof closeAuthModal === 'function') closeAuthModal();
+    updateAllUserAvatars();
+    updateAuthUI();
+    if (typeof renderYouProfile === 'function') renderYouProfile();
+    showToast(`🎉 Welcome, ${res.user.fullName || res.user.username}! Signed in with Google / गुगल खाते जोडले गेले!`);
+  } catch (err) {
+    console.error('[Device Google Auth] Error:', err);
+    if (statusEl) statusEl.style.display = "none";
+    window.closeDeviceGoogleAccountChooser();
+    window.openGoogleSignupModal(email, fullName);
+  }
+};
+
+window.handleGoogleSignIn = function() {
+  // Close any open auth modal
+  if (typeof closeAuthModal === 'function') closeAuthModal();
+  // Always open device Google account chooser popup matching reference design
+  window.openDeviceGoogleAccountChooser();
+};
+
+window.submitGoogleRegistration = async function(e) {
   if (e) e.preventDefault();
-  const email    = (document.getElementById("auth-input-identifier")?.value || "").trim();
-  const fullName = (document.getElementById("auth-input-fullname")?.value   || "").trim();
-  const password = (document.getElementById("auth-modal-input-password")?.value || document.getElementById("auth-input-password")?.value || "").trim();
+  const email = (document.getElementById("google-reg-email")?.value || "").trim();
+  const fullName = (document.getElementById("google-reg-name")?.value || "").trim();
+  const lang = (document.getElementById("google-reg-language")?.value || "mr");
+  const role = (document.getElementById("google-reg-role")?.value || "Member");
 
   if (!email) {
-    showToast("Please enter your email / ईमेल भरा");
+    showToast("Please enter Google Email / ईमेल टाका");
+    return;
+  }
+  if (!fullName) {
+    showToast("Please enter Full Name / नाव टाका");
+    return;
+  }
+
+  const btn = document.getElementById("btn-google-submit");
+  if (btn) btn.disabled = true;
+
+  try {
+    const res = await RolBackendSync.googleAuth(email, fullName, lang, role);
+    window.closeGoogleSignupModal();
+    updateAuthUI();
+    if (typeof renderYouProfile === 'function') renderYouProfile();
+    showToast(`🎉 Welcome, ${res.user.fullName || res.user.username}! Google account linked / गुगल नोंदणी यशस्वी!`);
+  } catch (err) {
+    showToast(err.message || "Registration failed. Please try again.");
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+};
+
+window.handleAuthSubmit = async function(e) {
+  if (e) e.preventDefault();
+  const identifier = (document.getElementById("auth-input-identifier")?.value || "").trim();
+  const fullName   = (document.getElementById("auth-input-fullname")?.value   || "").trim();
+  const password   = (document.getElementById("auth-modal-input-password")?.value || document.getElementById("auth-input-password")?.value || "").trim();
+
+  if (!identifier) {
+    showToast("Please enter your email or phone / ईमेल किंवा फोन भरा");
     return;
   }
 
@@ -9391,47 +9927,43 @@ window.handleAuthSubmit = async function(e) {
     return;
   }
 
+  const email = identifier.includes("@") ? identifier : `${identifier.replace(/[^\d]/g, '')}@riveroflife.org`;
+  const name = fullName || identifier.split("@")[0];
+
   try {
-    // Try sign-in first; if user doesn't exist, register them
-    let cred;
     try {
-      cred = await FirebaseApp.signInWithEmail(email, password);
-    } catch (signInErr) {
-      if (signInErr.code === 'auth/user-not-found' || signInErr.code === 'auth/invalid-credential') {
-        // Register new user with provided full name
-        const displayName = fullName || email.split('@')[0];
-        cred = await FirebaseApp.registerWithEmail(displayName, email, password);
-        await FirebaseApp.saveUserProfile(cred.user.uid, {
-          displayName,
-          email: email.toLowerCase(),
-          isPastor:  false,
-          isAdmin:   false,
-          churchName: '',
-          photo:     '',
-          streak:    1,
-          quizPoints: 0,
-          quizHighscore: 0,
-          quizBadges: [],
-          bookmarks: [],
-          highlights: {},
-          userNotes: {},
-          createdVerseImages: [],
-          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        });
+      await RolBackendSync.login(email, password);
+    } catch (loginErr) {
+      if (loginErr.message && (loginErr.message.includes("Invalid") || loginErr.message.includes("not found"))) {
+        await RolBackendSync.signup(email, password, name, state.translation || 'mr');
       } else {
-        throw signInErr;
+        throw loginErr;
       }
     }
-
-    // onFirebaseAuthChange fires automatically and updates UI
     closeAuthModal();
+    updateAuthUI();
+    if (typeof renderYouProfile === 'function') renderYouProfile();
     showToast("Welcome! Data synced ☁️ / स्वागत आहे!");
   } catch (err) {
     console.error('[ROL Modal Auth] Error:', err);
-    showToast("Sign in failed. Please check your details / चुकीची माहिती");
+    showToast(err.message || "Sign in failed. Please check your details");
   }
 };
 
+window.logoutUser = async function() {
+  if (window.RolBackendSync) {
+    window.RolBackendSync.clearAuthSession();
+  }
+  state.currentUser = null;
+  localStorage.removeItem("rol_current_user");
+  localStorage.removeItem("rol_access_token");
+  localStorage.removeItem("rol_refresh_token");
+  localStorage.removeItem("rol_user_name");
+  saveStateToLocalStorage();
+  updateAuthUI();
+  if (typeof renderYouProfile === 'function') renderYouProfile();
+  showToast("Signed out successfully / बाहेर पडलात");
+};
 
 function updateAuthUI() {
   const headerIconLoggedOut = document.getElementById("header-auth-icon-loggedout");
@@ -9445,9 +9977,12 @@ function updateAuthUI() {
   const drawerUsername = document.getElementById("drawer-profile-username");
   const drawerEmail = document.getElementById("drawer-profile-email");
 
+  const loggedOutCont = document.getElementById("you-logged-out-container");
+  const loggedInCont = document.getElementById("you-logged-in-container");
+
   if (state.currentUser) {
     // Logged In State
-    const firstInitial = state.currentUser.username ? state.currentUser.username.substring(0, 1).toUpperCase() : "U";
+    const firstInitial = (state.currentUser.fullName || state.currentUser.username || "U").substring(0, 1).toUpperCase();
     
     if (headerIconLoggedOut) headerIconLoggedOut.style.display = "none";
     if (headerAvatar) {
@@ -9455,7 +9990,7 @@ function updateAuthUI() {
       headerAvatar.textContent = firstInitial;
     }
 
-    if (staticAuthLabel) staticAuthLabel.textContent = state.currentUser.username;
+    if (staticAuthLabel) staticAuthLabel.textContent = state.currentUser.fullName || state.currentUser.username;
     if (staticAuthAvatar) {
       staticAuthAvatar.textContent = firstInitial;
       staticAuthAvatar.style.background = "#22c55e";
@@ -9466,8 +10001,13 @@ function updateAuthUI() {
     if (cardLoggedIn) cardLoggedIn.style.display = "flex";
 
     if (drawerAvatar) drawerAvatar.textContent = firstInitial;
-    if (drawerUsername) drawerUsername.textContent = state.currentUser.username;
-    if (drawerEmail) drawerEmail.textContent = state.currentUser.identifier || state.currentUser.email || "Registered Member";
+    if (drawerUsername) drawerUsername.textContent = state.currentUser.fullName || state.currentUser.username;
+    if (drawerEmail) drawerEmail.textContent = state.currentUser.email || "Registered Member";
+
+    if (loggedOutCont) loggedOutCont.style.display = "none";
+    if (loggedInCont) loggedInCont.style.display = "block";
+    const pName = document.getElementById("profile-user-name");
+    if (pName) pName.textContent = state.currentUser.fullName || state.currentUser.username || "Gaurav Salve";
   } else {
     // Logged Out State
     if (headerIconLoggedOut) headerIconLoggedOut.style.display = "block";
@@ -9482,6 +10022,9 @@ function updateAuthUI() {
 
     if (cardLoggedOut) cardLoggedOut.style.display = "flex";
     if (cardLoggedIn) cardLoggedIn.style.display = "none";
+
+    if (loggedOutCont) loggedOutCont.style.display = "block";
+    if (loggedInCont) loggedInCont.style.display = "none";
   }
 
   // Sync Home Welcome Greeting with active User Name
@@ -9492,7 +10035,7 @@ function updateAuthUI() {
   else if (hour < 17) greetingTimeEn = "Good afternoon";
 
   const currentUserObj = state.currentUser || state.user;
-  let userName = currentUserObj?.displayName || currentUserObj?.username || currentUserObj?.fullName || "";
+  let userName = currentUserObj?.fullName || currentUserObj?.displayName || currentUserObj?.username || "";
   if (!userName) {
     const savedName = localStorage.getItem("rol_user_name") || localStorage.getItem("river_of_life_username");
     if (savedName) userName = savedName;
@@ -9502,6 +10045,9 @@ function updateAuthUI() {
   if (userEl) {
     userEl.textContent = `${greetingTimeEn}, ${userName}`;
   }
+
+  // Synchronize all top-right header and drawer avatars including photo
+  updateAllUserAvatars();
 }
 
 window.toggleDrawerAuth = async function() {
