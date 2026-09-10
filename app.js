@@ -14789,7 +14789,7 @@ window.navigateVOD = function(dir) {
 window._currentRenderedVodImage = null;
 
 window.generateExactVerseImageBlob = function() {
-  return new Promise((resolve) => {
+  return new Promise(async (resolve) => {
     const { vod, dayOfYear, offset } = getCurrentVOD();
     const displayRef = (state.translation === "eng") ? vod.engRef : vod.ref;
     const displayText = (state.translation === "eng") ? vod.engText : vod.text;
@@ -14810,148 +14810,32 @@ window.generateExactVerseImageBlob = function() {
       fontWeight: "700"
     };
 
+    // Ensure web fonts are completely ready before measuring text
+    if (document.fonts && document.fonts.ready) {
+      try {
+        await document.fonts.ready;
+      } catch (e) {}
+    }
+
     const canvas = document.createElement("canvas");
     canvas.width = 1080;
-    canvas.height = 1440; // High-res portrait ratio for WhatsApp Status & Gallery
+    canvas.height = 1920; // 9:16 WhatsApp Status, Story & Fullscreen Mobile Wallpapers
     const ctx = canvas.getContext("2d");
 
-    let isCompleted = false;
+    // Helper to asynchronously preload images
+    const loadImage = (src) => new Promise((res) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => res(img);
+      img.onerror = () => res(null);
+      img.src = src;
+      setTimeout(() => res(null), 2500);
+    });
 
-    function renderCanvasWithBackground(bgImageOrNull) {
-      if (isCompleted) return;
-      isCompleted = true;
-
-      // 1. Draw Background Image
-      if (bgImageOrNull) {
-        try {
-          const scale = Math.max(canvas.width / bgImageOrNull.width, canvas.height / bgImageOrNull.height);
-          const x = (canvas.width / 2) - (bgImageOrNull.width / 2) * scale;
-          const y = (canvas.height / 2) - (bgImageOrNull.height / 2) * scale;
-          ctx.drawImage(bgImageOrNull, x, y, bgImageOrNull.width * scale, bgImageOrNull.height * scale);
-        } catch (e) {
-          drawCelestialFallback();
-        }
-      } else {
-        drawCelestialFallback();
-      }
-
-      // 2. Artistic Vignette & Gradient Overlay (Soft darkening so text shines without any box)
-      const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-      grad.addColorStop(0, 'rgba(0, 0, 0, 0.5)');
-      grad.addColorStop(0.25, 'rgba(0, 0, 0, 0.25)');
-      grad.addColorStop(0.5, 'rgba(0, 0, 0, 0.4)');
-      grad.addColorStop(0.8, 'rgba(0, 0, 0, 0.6)');
-      grad.addColorStop(1, 'rgba(0, 0, 0, 0.9)');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // 3. Multi-Line Text Directly On Image (NO BOX)
-      const textMaxWidth = 880;
-      const centerX = canvas.width / 2;
-
-      // Word wrapping
-      const fontSize = 48;
-      ctx.font = `${theme.fontWeight} ${fontSize}px 'Noto Serif Devanagari', 'Poppins', -apple-system, sans-serif`;
-      const words = displayText.split(/\s+/);
-      let currentLine = "";
-      const lines = [];
-      for (let n = 0; n < words.length; n++) {
-        const testLine = currentLine ? `${currentLine} ${words[n]}` : words[n];
-        const metrics = ctx.measureText(testLine);
-        if (metrics.width > textMaxWidth && currentLine) {
-          lines.push(currentLine);
-          currentLine = words[n];
-        } else {
-          currentLine = testLine;
-        }
-      }
-      if (currentLine) lines.push(currentLine);
-
-      const lineHeight = 80;
-      const textBlockHeight = lines.length * lineHeight;
-      const totalBlockHeight = 40 + 60 + textBlockHeight + 50; // tag + quote + text + ref
-      let startY = (canvas.height - totalBlockHeight) / 2;
-
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-
-      // 3a. Top Tag
-      ctx.fillStyle = theme.accentColor;
-      ctx.font = "800 20px 'Outfit', sans-serif";
-      ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
-      ctx.shadowBlur = 14;
-      ctx.fillText(theme.tag || "✦ VERSE OF THE DAY ✦", centerX, startY);
-      startY += 48;
-
-      // 3b. Quotation Mark
-      ctx.fillStyle = theme.quoteColor || theme.accentColor;
-      ctx.font = "700 76px Georgia, serif";
-      ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
-      ctx.shadowBlur = 16;
-      ctx.fillText("“", centerX, startY + 10);
-      startY += 58;
-
-      // 3c. Scripture Verse Body (Multi-line, High Legibility, Deep Glow)
-      ctx.fillStyle = theme.textColor || "#ffffff";
-      ctx.font = `${theme.fontWeight} ${fontSize}px 'Noto Serif Devanagari', 'Poppins', serif`;
-      ctx.shadowColor = "rgba(0, 0, 0, 0.98)";
-      ctx.shadowBlur = 24;
-      ctx.shadowOffsetX = 0;
-      ctx.shadowOffsetY = 3;
-
-      for (let i = 0; i < lines.length; i++) {
-        ctx.fillText(lines[i], centerX, startY + (i * lineHeight));
-      }
-
-      ctx.shadowColor = "transparent";
-      ctx.shadowBlur = 0;
-      startY += textBlockHeight + 24;
-
-      // 3d. Scripture Reference with Accent Lines
-      const refText = `${displayRef} ${state.translation === 'eng' ? 'NLT' : 'MARVBSI'}`;
-      ctx.font = "800 28px 'Outfit', sans-serif";
-      const refWidth = ctx.measureText(refText).width;
-
-      // Accent lines on sides of reference
-      ctx.strokeStyle = theme.accentColor;
-      ctx.lineWidth = 2;
-      const lineLen = 50;
-      const gap = 16;
-
-      ctx.beginPath();
-      ctx.moveTo(centerX - (refWidth / 2) - gap - lineLen, startY);
-      ctx.lineTo(centerX - (refWidth / 2) - gap, startY);
-      ctx.moveTo(centerX + (refWidth / 2) + gap, startY);
-      ctx.lineTo(centerX + (refWidth / 2) + gap + lineLen, startY);
-      ctx.stroke();
-
-      // Reference text
-      ctx.fillStyle = theme.accentColor;
-      ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
-      ctx.shadowBlur = 14;
-      ctx.fillText(refText, centerX, startY);
-
-      // Reset shadows
-      ctx.shadowColor = "transparent";
-      ctx.shadowBlur = 0;
-
-      // 4. Subtle Bottom Branding Watermark
-      ctx.textAlign = "center";
-      ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
-      ctx.font = "600 22px 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif";
-      ctx.fillText("River of Life Bible • जीवन नदी बायबल ॲप", canvas.width / 2, canvas.height - 45);
-
-      const filename = `River_of_Life_Daily_Verse_${displayRef.replace(/[: ]/g, "_")}.png`;
-      const dataUrl = canvas.toDataURL("image/png");
-      
-      canvas.toBlob((blob) => {
-        resolve({
-          blob: blob || new Blob([], { type: "image/png" }),
-          dataUrl: dataUrl,
-          filename: filename
-        });
-      }, "image/png", 0.95);
-    }
+    const [bgImg, logoImg] = await Promise.all([
+      loadImage(imgUrl),
+      loadImage("assets/icons/logo-transparent.png")
+    ]);
 
     function drawCelestialFallback() {
       const bgGrad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
@@ -14962,23 +14846,180 @@ window.generateExactVerseImageBlob = function() {
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
-    const bgImg = new Image();
-    bgImg.onload = function() {
-      renderCanvasWithBackground(bgImg);
-    };
-    bgImg.onerror = function() {
-      renderCanvasWithBackground(null);
-    };
-
-    // Safety timeout: if image takes > 1200ms, render immediately with celestial background
-    setTimeout(() => {
-      if (!isCompleted) {
-        renderCanvasWithBackground(null);
+    // 1. Draw Background Image
+    if (bgImg) {
+      try {
+        const scale = Math.max(canvas.width / bgImg.width, canvas.height / bgImg.height);
+        const x = (canvas.width - bgImg.width * scale) / 2;
+        const y = (canvas.height - bgImg.height * scale) / 2;
+        ctx.drawImage(bgImg, x, y, bgImg.width * scale, bgImg.height * scale);
+      } catch (e) {
+        drawCelestialFallback();
       }
-    }, 1200);
+    } else {
+      drawCelestialFallback();
+    }
 
-    bgImg.crossOrigin = "anonymous";
-    bgImg.src = imgUrl;
+    // 2. Artistic Vignette & Gradient Overlay (Protects legibility across all backgrounds)
+    const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    grad.addColorStop(0, 'rgba(0, 0, 0, 0.55)');
+    grad.addColorStop(0.2, 'rgba(0, 0, 0, 0.35)');
+    grad.addColorStop(0.5, 'rgba(0, 0, 0, 0.48)');
+    grad.addColorStop(0.8, 'rgba(0, 0, 0, 0.65)');
+    grad.addColorStop(1, 'rgba(0, 0, 0, 0.90)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // 3. Multi-Line Text Layout with Safe Margins & Perfect Centering
+    const centerX = canvas.width / 2;
+    const textMaxWidth = 840; // 120px safe padding on each side
+
+    // Dynamic font sizing for long / short scriptures
+    let fontSize = 48;
+    if (displayText.length > 220) fontSize = 38;
+    else if (displayText.length > 160) fontSize = 42;
+    else if (displayText.length > 110) fontSize = 46;
+
+    const fontFamily = "'Noto Serif Devanagari', 'Poppins', Georgia, serif";
+    ctx.font = `${theme.fontWeight || '700'} ${fontSize}px ${fontFamily}`;
+
+    const words = displayText.split(/\s+/);
+    let currentLine = "";
+    const lines = [];
+    for (let n = 0; n < words.length; n++) {
+      const testLine = currentLine ? `${currentLine} ${words[n]}` : words[n];
+      const metrics = ctx.measureText(testLine);
+      if (metrics.width > textMaxWidth && currentLine) {
+        lines.push(currentLine);
+        currentLine = words[n];
+      } else {
+        currentLine = testLine;
+      }
+    }
+    if (currentLine) lines.push(currentLine);
+
+    const lineHeight = Math.round(fontSize * 1.65);
+    const textBlockHeight = lines.length * lineHeight;
+    const tagHeight = 44;
+    const quoteHeight = 56;
+    const refHeight = 52;
+    const totalContentHeight = tagHeight + quoteHeight + textBlockHeight + refHeight + 40;
+
+    // Center in visual golden zone (upper-middle)
+    let startY = (canvas.height - totalContentHeight) / 2 - 40;
+
+    // 3a. Top Tag
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = theme.accentColor || "#fbbf24";
+    ctx.font = "800 22px 'Outfit', sans-serif";
+    ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
+    ctx.shadowBlur = 14;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 2;
+    ctx.fillText(theme.tag || "✦ VERSE OF THE DAY ✦", centerX, startY);
+    startY += tagHeight;
+
+    // 3b. Quotation Mark
+    ctx.fillStyle = theme.quoteColor || theme.accentColor || "#fbbf24";
+    ctx.font = "700 80px Georgia, serif";
+    ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
+    ctx.shadowBlur = 18;
+    ctx.fillText("“", centerX, startY + 12);
+    startY += quoteHeight;
+
+    // 3c. Verse Body
+    ctx.fillStyle = theme.textColor || "#ffffff";
+    ctx.font = `${theme.fontWeight || '700'} ${fontSize}px ${fontFamily}`;
+    ctx.shadowColor = "rgba(0, 0, 0, 0.98)";
+    ctx.shadowBlur = 24;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 4;
+
+    for (let i = 0; i < lines.length; i++) {
+      ctx.fillText(lines[i], centerX, startY + (i * lineHeight));
+    }
+    startY += textBlockHeight + 28;
+
+    // 3d. Scripture Reference with Accent Lines
+    const refText = `${displayRef} ${state.translation === 'eng' ? 'NLT' : 'MARVBSI'}`;
+    ctx.font = "800 30px 'Outfit', sans-serif";
+    const refWidth = ctx.measureText(refText).width;
+
+    ctx.strokeStyle = theme.accentColor || "#fbbf24";
+    ctx.lineWidth = 2.5;
+    const lineLen = 54;
+    const gap = 18;
+
+    ctx.beginPath();
+    ctx.moveTo(centerX - (refWidth / 2) - gap - lineLen, startY);
+    ctx.lineTo(centerX - (refWidth / 2) - gap, startY);
+    ctx.moveTo(centerX + (refWidth / 2) + gap, startY);
+    ctx.lineTo(centerX + (refWidth / 2) + gap + lineLen, startY);
+    ctx.stroke();
+
+    ctx.fillStyle = theme.accentColor || "#fbbf24";
+    ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
+    ctx.shadowBlur = 14;
+    ctx.fillText(refText, centerX, startY);
+
+    // Reset shadows
+    ctx.shadowColor = "transparent";
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+
+    // 4. WATERMARK & LOGO IN BOTTOM RIGHT CORNER (User Request)
+    const badgeW = 340;
+    const badgeH = 84;
+    const badgeX = canvas.width - badgeW - 48;
+    const badgeY = canvas.height - badgeH - 64; // Safe from WhatsApp send button & system bars
+
+    ctx.save();
+    ctx.fillStyle = "rgba(15, 23, 42, 0.75)";
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.22)";
+    ctx.lineWidth = 1.5;
+
+    ctx.beginPath();
+    if (typeof ctx.roundRect === 'function') {
+      ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 22);
+    } else {
+      ctx.rect(badgeX, badgeY, badgeW, badgeH);
+    }
+    ctx.fill();
+    ctx.stroke();
+
+    if (logoImg) {
+      const logoSize = 60;
+      ctx.shadowColor = "rgba(0, 0, 0, 0.4)";
+      ctx.shadowBlur = 8;
+      ctx.drawImage(logoImg, badgeX + 14, badgeY + (badgeH - logoSize) / 2, logoSize, logoSize);
+    }
+
+    ctx.shadowColor = "transparent";
+    ctx.textAlign = "left";
+    ctx.textBaseline = "top";
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "800 20px 'Outfit', sans-serif";
+    ctx.fillText("River of Life Bible", badgeX + 88, badgeY + 18);
+
+    ctx.fillStyle = "rgba(251, 191, 36, 0.92)"; // Brand Gold
+    ctx.font = "700 16px 'Noto Serif Devanagari', sans-serif";
+    ctx.fillText("जीवन नदी बायबल ॲप", badgeX + 88, badgeY + 46);
+
+    ctx.restore();
+
+    const filename = `River_of_Life_Daily_Verse_${displayRef.replace(/[: ]/g, "_")}.png`;
+    const dataUrl = canvas.toDataURL("image/png");
+
+    canvas.toBlob((blob) => {
+      resolve({
+        blob: blob || new Blob([], { type: "image/png" }),
+        dataUrl: dataUrl,
+        filename: filename
+      });
+    }, "image/png", 0.95);
   });
 };
 
