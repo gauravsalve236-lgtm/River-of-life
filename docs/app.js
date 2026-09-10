@@ -1454,6 +1454,13 @@ function switchTab(rawRoute) {
       renderMeetingsDashboard();
     } else if (route === "admin") {
       if (typeof renderAdminPanel === "function") renderAdminPanel();
+    } else if (route === "reader") {
+      const versesCont = document.getElementById("reader-verses");
+      if (!versesCont || versesCont.children.length === 0 || versesCont.querySelector(".offline-error-card") || versesCont.querySelector(".loader-container")) {
+        const bk = state.activeBook || "genesis";
+        const ch = state.activeChapter || 1;
+        openReader(bk, ch);
+      }
     }
   } else {
     // Fallback to home view if route is unmapped
@@ -1620,16 +1627,53 @@ async function fetchBookDataEng(bookKey) {
 }
 
 async function fetchBookDataMr(bookKey) {
-  if (booksCacheMr[bookKey]) return booksCacheMr[bookKey];
+  const cleanKey = String(bookKey || "genesis").toLowerCase().replace(".json", "").trim();
+  if (!cleanKey) return null;
+  if (booksCacheMr[cleanKey]) return booksCacheMr[cleanKey];
+
+  // Try 1: with cache-buster param
   try {
-    const response = await fetch(`assets/bible/books_mr/${bookKey}.json?v=132_MARVBSI`);
-    const data = await response.json();
-    booksCacheMr[bookKey] = data;
-    return data;
+    const response = await fetch(`assets/bible/books_mr/${cleanKey}.json?v=132_MARVBSI`);
+    if (response.ok) {
+      const data = await response.json();
+      if (data && data.chapters) {
+        booksCacheMr[cleanKey] = data;
+        return data;
+      }
+    }
   } catch (e) {
-    console.error("Failed to load Marathi book:", e);
-    return null;
+    console.warn("[fetchBookDataMr] Param fetch failed, trying clean path:", cleanKey, e);
   }
+
+  // Try 2: clean path without query param
+  try {
+    const cleanResp = await fetch(`assets/bible/books_mr/${cleanKey}.json`);
+    if (cleanResp.ok) {
+      const data = await cleanResp.json();
+      if (data && data.chapters) {
+        booksCacheMr[cleanKey] = data;
+        return data;
+      }
+    }
+  } catch (e2) {
+    console.warn("[fetchBookDataMr] Clean path failed:", cleanKey, e2);
+  }
+
+  // Try 3: Service Worker cache match
+  try {
+    if (typeof caches !== "undefined") {
+      const cached = await caches.match(`assets/bible/books_mr/${cleanKey}.json`);
+      if (cached) {
+        const data = await cached.json();
+        if (data && data.chapters) {
+          booksCacheMr[cleanKey] = data;
+          return data;
+        }
+      }
+    }
+  } catch (e3) {}
+
+  return null;
 }
 
 // Streak Validation
@@ -1688,29 +1732,60 @@ function formatScriptureText(bookKey, chapterNum, verseNum, text, lang) {
    Bible Reader Engine (Verses & Navigation UI rendering)
    ========================================================================== */
 async function openReader(bookKey, chapterNum) {
-  let metadata = booksMetadataMr.find(b => b.filename.replace(".json", "") === bookKey);
+  if (!booksMetadataMr || booksMetadataMr.length === 0) {
+    try { await loadBooksIndexMr(); } catch(e) {}
+  }
+
+  const cleanBook = String(bookKey || state.activeBook || "genesis").toLowerCase().replace(".json", "").trim();
+  let metadata = (booksMetadataMr && booksMetadataMr.length)
+    ? booksMetadataMr.find(b => b.filename.replace(".json", "").toLowerCase() === cleanBook)
+    : null;
   if (!metadata) {
-    if (booksMetadataMr.length > 0) {
-      bookKey = booksMetadataMr[0].filename.replace(".json", "");
-      metadata = booksMetadataMr[0];
+    if (booksMetadataMr && booksMetadataMr.length > 0) {
+      metadata = booksMetadataMr.find(b => b.filename.replace(".json", "").toLowerCase() === "genesis") || booksMetadataMr[0];
+      bookKey = metadata.filename.replace(".json", "");
     } else {
-      return;
+      metadata = { name: "बायबल", engName: "Bible", chaptersCount: 50 };
+      bookKey = cleanBook;
     }
+  } else {
+    bookKey = cleanBook;
   }
   
-  let parsedChapter = parseInt(chapterNum);
+  let parsedChapter = parseInt(chapterNum, 10);
   if (isNaN(parsedChapter) || parsedChapter < 1) {
     parsedChapter = 1;
-  } else if (parsedChapter > metadata.chaptersCount) {
+  } else if (metadata.chaptersCount && parsedChapter > metadata.chaptersCount) {
     parsedChapter = metadata.chaptersCount;
   }
   
   state.activeBook = bookKey;
   state.activeChapter = parsedChapter;
   saveStateToLocalStorage();
-  
   chapterNum = parsedChapter;
+
+  // Immediately update UI titles so they never get stuck on default placeholders
+  const activeBookName = (state.translation === "eng") ? metadata.engName : metadata.name;
+  const navBookEl = document.getElementById("nav-book-title");
+  if (navBookEl) navBookEl.textContent = `${activeBookName} ${chapterNum}`;
+  const rChapTitleEl = document.getElementById("reader-chapter-title");
+  if (rChapTitleEl) rChapTitleEl.textContent = activeBookName;
+  const rChapNumEl = document.getElementById("reader-chapter-number");
+  if (rChapNumEl) rChapNumEl.textContent = `अध्याय ${chapterNum}`;
+  const inlineBookNameEl = document.getElementById("inline-reader-book-name");
+  if (inlineBookNameEl) inlineBookNameEl.textContent = `${activeBookName} ${chapterNum}`;
   
+  const inlineTransEl = document.getElementById("inline-reader-translation-name");
+  if (inlineTransEl) {
+    if (state.translation === "eng") inlineTransEl.textContent = "English (NLT)";
+    else if (state.translation === "parallel") inlineTransEl.textContent = "Parallel";
+    else inlineTransEl.textContent = "मराठी (BSI)";
+  }
+  const inlineVoiceSelect = document.getElementById("reader-inline-voice-select");
+  if (inlineVoiceSelect) {
+    inlineVoiceSelect.value = state.sarvamVoice || (state.translation === "eng" ? "ratan" : "shubh");
+  }
+
   const versesContainer = document.getElementById("reader-verses");
   versesContainer.innerHTML = `
     <div class="loader-container">
@@ -1727,6 +1802,12 @@ async function openReader(bookKey, chapterNum) {
   if (state.translation === "eng" || state.translation === "parallel") {
     bookDataEng = await fetchBookDataEng(bookKey);
   }
+
+  // Fallback retry if primary fetch was transiently empty
+  if (state.translation === "mar" && !bookDataMr) {
+    await new Promise(r => setTimeout(r, 200));
+    bookDataMr = await fetchBookDataMr(bookKey);
+  }
   
   // Verify that book data was successfully loaded to prevent runtime crash when offline
   if ((state.translation === "mar" && !bookDataMr) || 
@@ -1735,34 +1816,17 @@ async function openReader(bookKey, chapterNum) {
     versesContainer.innerHTML = `
       <div class="offline-error-card" style="text-align: center; padding: 40px 24px; background-color: var(--bg-content); border: 1px solid var(--border); border-radius: 16px; margin: 20px; font-family: var(--font-ui);">
         <span style="font-size: 32px; display: block; margin-bottom: 12px;">⚠️</span>
-        <h4 style="font-size: 16px; font-weight: 800; margin-bottom: 8px; color: var(--text);">Scripture Offline</h4>
+        <h4 style="font-size: 16px; font-weight: 800; margin-bottom: 8px; color: var(--text);">वचने लोड करण्यात अडचण (Scripture Offline)</h4>
         <p style="font-size: 13px; color: var(--text-muted); line-height: 1.6; margin-bottom: 20px;">
-          This book chapter is not cached on your device. Connect to the internet to load it, or go to Settings to download the complete Bible for offline use.
+          ${activeBookName} अध्याय ${chapterNum} चा मजकूर तात्पुरता लोड होऊ शकला नाही.
         </p>
-        <button onclick="window.location.hash='#/you'" class="btn-secondary-mini" style="padding: 8px 16px; font-weight: 700; font-size: 12px; border: 1px solid var(--border); border-radius: 8px; background-color: var(--bg-content); color: var(--text); cursor: pointer;">Go to Settings</button>
+        <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+          <button onclick="openReader('${bookKey}', ${chapterNum})" class="btn-primary-mini" style="padding: 10px 20px; font-weight: 700; font-size: 13px; border: none; border-radius: 8px; background: var(--primary, #e11d48); color: #fff; cursor: pointer;">पुन्हा प्रयत्न करा (Retry)</button>
+          <button onclick="window.location.hash='#/you'" class="btn-secondary-mini" style="padding: 10px 16px; font-weight: 700; font-size: 12px; border: 1px solid var(--border); border-radius: 8px; background-color: var(--bg-content); color: var(--text); cursor: pointer;">Go to Settings</button>
+        </div>
       </div>
     `;
     return;
-  }
-  
-  const activeBookName = (state.translation === "eng") ? metadata.engName : metadata.name;
-  document.getElementById("nav-book-title").textContent = `${activeBookName} ${chapterNum}`;
-  document.getElementById("reader-chapter-title").textContent = activeBookName;
-  
-  // Sync In-Page Bible Chapter Header
-  const inlineBookNameEl = document.getElementById("inline-reader-book-name");
-  if (inlineBookNameEl) {
-    inlineBookNameEl.textContent = `${activeBookName} ${chapterNum}`;
-  }
-  const inlineTransEl = document.getElementById("inline-reader-translation-name");
-  if (inlineTransEl) {
-    if (state.translation === "eng") inlineTransEl.textContent = "English (NLT)";
-    else if (state.translation === "parallel") inlineTransEl.textContent = "Parallel";
-    else inlineTransEl.textContent = "मराठी (BSI)";
-  }
-  const inlineVoiceSelect = document.getElementById("reader-inline-voice-select");
-  if (inlineVoiceSelect) {
-    inlineVoiceSelect.value = state.sarvamVoice || (state.translation === "eng" ? "ratan" : "shubh");
   }
   const inlineSpeedSelect = document.getElementById("reader-inline-speed-select");
   if (inlineSpeedSelect) {
@@ -2308,6 +2372,65 @@ function getCurrentVOD() {
   };
 }
 
+window.toggleDailyVerseBookmark = function() {
+  const { vod } = (typeof getCurrentVOD === 'function') ? getCurrentVOD() : { vod: null };
+  if (!vod) return;
+  if (!state.bookmarks) state.bookmarks = [];
+  
+  const isBookmarked = state.bookmarks.some(b => b.ref === vod.ref || b.ref === vod.engRef);
+  
+  if (isBookmarked) {
+    state.bookmarks = state.bookmarks.filter(b => b.ref !== vod.ref && b.ref !== vod.engRef);
+    if (typeof showToast === 'function') showToast('वचन बुकमार्कवरून काढले • Bookmark removed');
+  } else {
+    state.bookmarks.unshift({
+      ref: vod.engRef || vod.ref,
+      mrRef: vod.ref,
+      text: vod.text,
+      engText: vod.engText,
+      date: new Date().toLocaleDateString(),
+      book: vod.book || 'john',
+      chapter: vod.chapter || 3,
+      verse: vod.verse || 16,
+      isVod: true
+    });
+    if (typeof showToast === 'function') showToast('वचन बुकमार्क केले • Saved to Bookmarks ⭐');
+  }
+  
+  if (typeof saveStateToLocalStorage === 'function') saveStateToLocalStorage();
+  if (typeof updateDailyVerseBookmarkUI === 'function') updateDailyVerseBookmarkUI();
+};
+
+window.updateDailyVerseBookmarkUI = function() {
+  const { vod } = (typeof getCurrentVOD === 'function') ? getCurrentVOD() : { vod: null };
+  if (!vod) return;
+  const isBookmarked = state.bookmarks && state.bookmarks.some(b => b.ref === vod.ref || b.ref === vod.engRef);
+  const btn = document.getElementById('home-vod-btn-bookmark');
+  const icon = document.getElementById('home-vod-bookmark-icon');
+  if (!btn) return;
+  
+  if (isBookmarked) {
+    btn.classList.add('active-bookmarked');
+    btn.setAttribute('title', 'Bookmarked / बुकमार्क केले आहे');
+    btn.setAttribute('aria-label', 'Remove Bookmark');
+    if (icon) {
+      icon.setAttribute('fill', '#f59e0b');
+      icon.setAttribute('stroke', '#f59e0b');
+    }
+  } else {
+    btn.classList.remove('active-bookmarked');
+    btn.setAttribute('title', 'Bookmark Verse / बुकमार्क करा');
+    btn.setAttribute('aria-label', 'Bookmark Verse');
+    if (icon) {
+      icon.setAttribute('fill', 'none');
+      icon.setAttribute('stroke', 'currentColor');
+    }
+  }
+  
+  const savedEl = document.getElementById('home-journey-saved');
+  if (savedEl) savedEl.textContent = state.bookmarks ? state.bookmarks.length : 0;
+};
+
 function renderDailyDevotion() {
   if (typeof updateDaypartingAtmosphere === 'function') updateDaypartingAtmosphere();
   if (typeof renderBiblicalMicroLearning === 'function') renderBiblicalMicroLearning();
@@ -2356,9 +2479,20 @@ function renderDailyDevotion() {
   if (homeVodRefEl) {
     homeVodRefEl.textContent = `${displayRef} ${isEng ? "NLT" : "MARVBSI"}`;
   }
+  const homeVodRefEnEl = document.getElementById("home-vod-ref-en");
+  const homeVodRefMrEl = document.getElementById("home-vod-ref-mr");
+  const homeVodVersionTag = document.getElementById("home-vod-version-tag");
+  if (homeVodRefEnEl) homeVodRefEnEl.textContent = vod.engRef || vod.ref || "John 3:16";
+  if (homeVodRefMrEl) homeVodRefMrEl.textContent = vod.ref || vod.engRef || "योहान ३:१६";
+  if (homeVodVersionTag) homeVodVersionTag.textContent = isEng ? "NLT" : "MARVBSI";
+
   const homeVodTextEl = document.getElementById("home-vod-text");
   if (homeVodTextEl) {
     homeVodTextEl.textContent = `“${displayText}”`;
+  }
+
+  if (typeof updateDailyVerseBookmarkUI === "function") {
+    updateDailyVerseBookmarkUI();
   }
   
   const fsVodRefEl = document.getElementById("fs-vod-ref");
@@ -3344,6 +3478,178 @@ function getBibleAudioUrl(bookNumber, chapterNumber, translation) {
   return `https://audio.wordproject.org/bibles/app/audio/${langCode}/${bookNumber}/${chapterNumber}.mp3`;
 }
 
+const BSI_USFM_MAP = {
+  "genesis": "GEN", "exodus": "EXO", "leviticus": "LEV", "numbers": "NUM",
+  "deuteronomy": "DEU", "joshua": "JOS", "judges": "JDG", "ruth": "RUT",
+  "1samuel": "1SA", "2samuel": "2SA", "1kings": "1KI", "2kings": "2KI",
+  "1chronicles": "1CH", "2chronicles": "2CH", "ezra": "EZR", "nehemiah": "NEH",
+  "esther": "EST", "job": "JOB", "psalms": "PSA", "proverbs": "PRO",
+  "ecclesiastes": "ECC", "songofsolomon": "SNG", "isaiah": "ISA", "jeremiah": "JER",
+  "lamentations": "LAM", "ezekiel": "EZK", "daniel": "DAN", "hosea": "HOS",
+  "joel": "JOL", "amos": "AMO", "obadiah": "OBA", "jonah": "JON",
+  "micah": "MIC", "nahum": "NAM", "habakkuk": "HAB", "zephaniah": "ZEP",
+  "haggai": "HAG", "zechariah": "ZEC", "malachi": "MAL", "matthew": "MAT",
+  "mark": "MRK", "luke": "LUK", "john": "JHN", "acts": "ACT",
+  "romans": "ROM", "1corinthians": "1CO", "2corinthians": "2CO", "galatians": "GAL",
+  "ephesians": "EPH", "philippians": "PHP", "colossians": "COL", "1thessalonians": "1TH",
+  "2thessalonians": "2TH", "1timothy": "1TI", "2timothy": "2TI", "titus": "TIT",
+  "philemon": "PHM", "hebrews": "HEB", "james": "JAS", "1peter": "1PE",
+  "2peter": "2PE", "1john": "1JN", "2john": "2JN", "3john": "3JN",
+  "jude": "JUD", "revelation": "REV"
+};
+
+let bsiCloudFrontToken = 'Key-Pair-Id=KCC7HS8KPVISV&Signature=HsevzkG62MRVWgMjPtjmLvmx2Qzq6moXVwo7RE3M250qkTjDq6rAZAEB1obYccUuU9jGfmYzl0oZaLG08XIhVOnQePe9ck0eg0aT8Ih8jKL0C34ClnM03~bm4XCqK6uaw-QpmldRRV3DGgQ8wFcCSAWCUEZTBXa32xUondcI-h4yuIz53GOZgv-yRqZ88gyuUpWMw80KcMMN2D7iPNEIWvLOHtLv8p6fCxfhOnTg0XNx-8UnoVTrmygwrj58D7vEpMldYqd~4oEn43o7pp1hMqYwfdY3Qx9I2OMpI3VqLSQhDOJMiwdWPZpS4Mg7OAj2dRaWxqgllRu4ZsEfGyJl2Q__&Expires=1789032121&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9kMWhrcHV6Mm81YTJ4dy5jbG91ZGZyb250Lm5ldC9zb3VyY2UvNTU1NDc2YzIzOTBjMTAyZC0wNC8qIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzg5MDMyMTIxfX19XX0_';
+
+var bibleChapterAudioPlayer = null;
+var isBibleChapterPlaying = false;
+
+window.audioPlaybackState = {
+  activeBook: null,
+  activeChapter: null,
+  bsiCurrentTime: 0,
+  bsiDuration: 0,
+  ttsCurrentVerseIndex: 0,
+  isPaused: false
+};
+
+async function playBsiDramatizedAudio(bookKey, chapterNum, resumeTime = null) {
+  closeModal("modal-audio-settings");
+
+  const cleanBook = (bookKey || state.activeBook || "genesis").toLowerCase().replace(".json", "");
+  const chNum = parseInt(chapterNum || state.activeChapter || 1, 10);
+  const usfm = BSI_USFM_MAP[cleanBook] || "GEN";
+  const chStr = String(chNum).padStart(3, '0');
+  
+  let audioUrl = `https://d1hkpuz2o5a2xw.cloudfront.net/source/555476c2390c102d-04/${usfm}_${chStr}.mp3?${bsiCloudFrontToken}`;
+
+  // If local server is reachable, use local resilient streaming proxy
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    audioUrl = `/api/bsi-audio-stream?book=${cleanBook}&chapter=${chNum}`;
+  }
+
+  // Check if player is already loaded with the same track and was paused
+  const isSameTrack = bibleChapterAudioPlayer && 
+    (bibleChapterAudioPlayer.src.includes(`${cleanBook}&chapter=${chNum}`) ||
+     bibleChapterAudioPlayer.src.includes(`${usfm}_${chStr}.mp3`));
+
+  if (isSameTrack && bibleChapterAudioPlayer.currentTime > 0) {
+    try {
+      await bibleChapterAudioPlayer.play();
+      audioState.isPlaying = true;
+      isBibleChapterPlaying = true;
+      window.audioPlaybackState.isPaused = false;
+      updateReaderPlayState(true);
+      const playbar = document.getElementById("floating-audio-playbar");
+      if (playbar) playbar.classList.add("active");
+      return;
+    } catch(err) {
+      console.warn("[BSI Audio] Resume failed, reloading track:", err);
+    }
+  }
+
+  // Stop any other speech engines without resetting saved position
+  stopTtsNarrationOnly();
+
+  if (!bibleChapterAudioPlayer) {
+    bibleChapterAudioPlayer = new Audio();
+  }
+  
+  // Calculate starting timestamp
+  let targetTime = 0;
+  if (typeof resumeTime === 'number' && resumeTime >= 0) {
+    targetTime = resumeTime;
+  } else if (window.audioPlaybackState.activeBook === cleanBook && 
+             window.audioPlaybackState.activeChapter === chNum && 
+             window.audioPlaybackState.bsiCurrentTime > 0) {
+    targetTime = window.audioPlaybackState.bsiCurrentTime;
+  }
+
+  window.audioPlaybackState.activeBook = cleanBook;
+  window.audioPlaybackState.activeChapter = chNum;
+  window.audioPlaybackState.isPaused = false;
+
+  bibleChapterAudioPlayer.src = audioUrl;
+  bibleChapterAudioPlayer.playbackRate = audioState.speed || 1.0;
+
+  if (targetTime > 0) {
+    const applySeek = function() {
+      try {
+        if (targetTime > 0 && Math.abs(bibleChapterAudioPlayer.currentTime - targetTime) > 0.5) {
+          bibleChapterAudioPlayer.currentTime = targetTime;
+        }
+      } catch(e) {}
+      bibleChapterAudioPlayer.removeEventListener("loadedmetadata", applySeek);
+      bibleChapterAudioPlayer.removeEventListener("canplay", applySeek);
+    };
+    bibleChapterAudioPlayer.addEventListener("loadedmetadata", applySeek);
+    bibleChapterAudioPlayer.addEventListener("canplay", applySeek);
+  }
+
+  audioState.isPlaying = true;
+  isBibleChapterPlaying = true;
+  updateReaderPlayState(true);
+
+  const indicator = document.getElementById("playbar-verse-indicator");
+  if (indicator) indicator.textContent = `🎭 BSI नाट्यमय ऑडिओ • ${cleanBook} ${chNum}`;
+
+  const playbar = document.getElementById("floating-audio-playbar");
+  if (playbar) playbar.classList.add("active");
+
+  bibleChapterAudioPlayer.ontimeupdate = function() {
+    if (!bibleChapterAudioPlayer || !bibleChapterAudioPlayer.duration) return;
+    const cur = bibleChapterAudioPlayer.currentTime;
+    const dur = bibleChapterAudioPlayer.duration;
+
+    window.audioPlaybackState.activeBook = cleanBook;
+    window.audioPlaybackState.activeChapter = chNum;
+    window.audioPlaybackState.bsiCurrentTime = cur;
+    window.audioPlaybackState.bsiDuration = dur;
+
+    const pct = (cur / dur) * 100;
+    const progressEl = document.getElementById("playbar-progress-line");
+    if (progressEl) progressEl.style.width = pct + "%";
+
+    const verseRows = document.querySelectorAll(".verse-row");
+    if (verseRows.length > 0) {
+      const vIdx = Math.min(verseRows.length - 1, Math.floor((cur / dur) * verseRows.length));
+      highlightTtsVerse(vIdx);
+    }
+  };
+
+  bibleChapterAudioPlayer.onended = function() {
+    updateReaderPlayState(false);
+    audioState.isPlaying = false;
+    isBibleChapterPlaying = false;
+    window.audioPlaybackState.bsiCurrentTime = 0;
+    showToast("✨ संपूर्ण अध्याय ऑडिओ पूर्ण झाला!");
+    document.querySelectorAll(".verse-row").forEach(v => v.classList.remove("tts-reading", "tts-playing-verse"));
+    
+    // Auto advance next chapter
+    const foundMeta = (typeof booksMetadataMr !== 'undefined' && Array.isArray(booksMetadataMr))
+      ? booksMetadataMr.find(b => b.filename.replace(".json", "").toLowerCase() === cleanBook)
+      : null;
+    if (foundMeta && chNum < foundMeta.chaptersCount) {
+      openReader(cleanBook, chNum + 1);
+      setTimeout(() => playBsiDramatizedAudio(cleanBook, chNum + 1, 0), 800);
+    }
+  };
+
+  bibleChapterAudioPlayer.onerror = function(e) {
+    console.warn("[BSI Audio] Player error, falling back to AI voice:", e);
+    showToast("⚠️ BSI ऑडिओ लोड होत नाही, AI वाचकावर पुनर्निर्देशित करत आहे...");
+    startSpeechNarration(0);
+  };
+
+  try {
+    await bibleChapterAudioPlayer.play();
+  } catch(err) {
+    console.warn("[BSI Audio] Play error:", err);
+  }
+}
+window.playBsiDramatizedAudio = playBsiDramatizedAudio;
+window.playBsiDramatizedAudio = playBsiDramatizedAudio;
+
+
 function updateReaderPlayState(isPlaying) {
   const iconSvg = document.getElementById("playbar-icon-svg");
   const fabIcon = document.getElementById("circle-fab-play-icon");
@@ -3476,14 +3782,32 @@ function highlightTtsVerse(verseIndex) {
   }
 }
 
-async function startSpeechNarration(startVerseIndex = 0) {
+async function startSpeechNarration(startVerseIndex = null) {
   closeModal("modal-audio-settings");
 
-  // Stop old wordproject/other audio players if any
+  // Resolve book/chapter
+  const bookKey = (state.activeBook || state.currentBook || "genesis").toLowerCase().replace(".json", "");
+  const chapterNum = parseInt(state.activeChapter || state.currentChapter || 1, 10);
+
+  // Check if BSI Dramatized Audio (Option A) is selected
+  const editionSelect = document.getElementById("audio-edition-select");
+  const audioEdition = editionSelect ? editionSelect.value : (localStorage.getItem("rol_audio_edition") || "dramatized");
+  if (audioEdition === "dramatized" && state.translation === "mar") {
+    let bsiStart = null;
+    if (startVerseIndex !== null && typeof startVerseIndex === 'number' && startVerseIndex > 0) {
+      const verseRows = document.querySelectorAll(".verse-row");
+      const totalV = verseRows.length || 31;
+      const dur = (bibleChapterAudioPlayer && bibleChapterAudioPlayer.duration) ? bibleChapterAudioPlayer.duration : 600;
+      bsiStart = (startVerseIndex / totalV) * dur;
+    }
+    playBsiDramatizedAudio(bookKey, chapterNum, bsiStart);
+    return;
+  }
+
+  // Stop BSI player if active without wiping saved position
   if (bibleChapterAudioPlayer) {
+    window.audioPlaybackState.bsiCurrentTime = bibleChapterAudioPlayer.currentTime;
     bibleChapterAudioPlayer.pause();
-    bibleChapterAudioPlayer.src = "";
-    bibleChapterAudioPlayer = null;
   }
   if (audioPlayerInstance) {
     audioPlayerInstance.pause();
@@ -3492,7 +3816,7 @@ async function startSpeechNarration(startVerseIndex = 0) {
   if (typeof speechSynthesis !== 'undefined') speechSynthesis.cancel();
 
   // Stop existing TTS narration if any
-  stopSpeechNarration();
+  stopTtsNarrationOnly();
 
   const n = window.googleTtsNarration;
   n.isStopRequested = false;
@@ -3526,10 +3850,6 @@ async function startSpeechNarration(startVerseIndex = 0) {
   } else {
     if (sleepTimerTimeout) { clearTimeout(sleepTimerTimeout); sleepTimerTimeout = null; }
   }
-
-  // Resolve book/chapter
-  const bookKey = state.activeBook || state.currentBook || "genesis";
-  const chapterNum = parseInt(state.activeChapter || state.currentChapter || 1, 10);
 
   let bookName = bookKey;
   const foundMeta = (typeof booksMetadataMr !== 'undefined' && Array.isArray(booksMetadataMr))
@@ -3565,9 +3885,6 @@ async function startSpeechNarration(startVerseIndex = 0) {
   isBibleChapterPlaying = true;
   updateReaderPlayState(true);
 
-  const playbarEl = document.getElementById("floating-audio-playbar");
-  // playbar hidden per user preference
-
   const indicatorEl = document.getElementById("playbar-verse-indicator");
   const progressEl = document.getElementById("playbar-progress-line");
   if (progressEl) progressEl.style.width = "0%";
@@ -3580,6 +3897,7 @@ async function startSpeechNarration(startVerseIndex = 0) {
       n.isActive = false;
       audioState.isPlaying = false;
       isBibleChapterPlaying = false;
+      window.audioPlaybackState.ttsCurrentVerseIndex = 0;
       updateReaderPlayState(false);
       document.querySelectorAll(".verse-row").forEach(el => el.classList.remove("tts-reading", "tts-playing-verse"));
       showToast("✨ संपूर्ण अध्याय ऑडिओ पूर्ण झाला!");
@@ -3598,6 +3916,10 @@ async function startSpeechNarration(startVerseIndex = 0) {
     }
 
     n.currentVerseIndex = index;
+    window.audioPlaybackState.ttsCurrentVerseIndex = index;
+    window.audioPlaybackState.activeBook = bookKey;
+    window.audioPlaybackState.activeChapter = chapterNum;
+
     const verseNum = index + 1;
     const verseText = getCleanVerseText(versesMr, index);
 
@@ -3683,19 +4005,26 @@ async function startSpeechNarration(startVerseIndex = 0) {
 
     try {
       await audio.play();
-      if (index === startVerseIndex) {
-        // toast hidden per user preference
-      }
     } catch(err) {
       console.warn("[TTS] play() blocked:", err);
     }
   }
 
-  // Determine start verse (prefer selected verse)
-  let startIdx = parseInt(startVerseIndex, 10) || 0;
-  if (startIdx === 0 && selectedVerseMeta && selectedVerseMeta.book === bookKey && selectedVerseMeta.chapter === chapterNum) {
+  // Determine starting verse (support resuming paused verse)
+  let startIdx = 0;
+  if (startVerseIndex !== null && typeof startVerseIndex === 'number' && startVerseIndex >= 0) {
+    startIdx = startVerseIndex;
+  } else if (window.audioPlaybackState.activeBook === bookKey && 
+             window.audioPlaybackState.activeChapter === chapterNum && 
+             window.audioPlaybackState.ttsCurrentVerseIndex > 0) {
+    startIdx = window.audioPlaybackState.ttsCurrentVerseIndex;
+  } else if (selectedVerseMeta && selectedVerseMeta.book === bookKey && selectedVerseMeta.chapter === chapterNum) {
     startIdx = Math.max(0, (selectedVerseMeta.verse || 1) - 1);
   }
+
+  window.audioPlaybackState.activeBook = bookKey;
+  window.audioPlaybackState.activeChapter = chapterNum;
+  window.audioPlaybackState.isPaused = false;
 
   playVerseAt(startIdx);
 }
@@ -3708,23 +4037,101 @@ function speakPlaybarVerse(index) {
   }
 }
 
-function togglePlaybarSpeech() {
-  if (bibleChapterAudioPlayer) {
-    if (bibleChapterAudioPlayer.paused) {
-      bibleChapterAudioPlayer.play().then(() => {
-        updateReaderPlayState(true);
-      }).catch(() => showToast("ऑडिओ सुरू करता आला नाही"));
-    } else {
-      bibleChapterAudioPlayer.pause();
-      updateReaderPlayState(false);
-    }
-  } else {
-    startSpeechNarration(0);
+function pauseAudioNarration() {
+  const curBook = (state.activeBook || "genesis").toLowerCase().replace(".json", "");
+  const curCh = parseInt(state.activeChapter || 1, 10);
+
+  // 1. If BSI dramatized audio is playing
+  if (bibleChapterAudioPlayer && !bibleChapterAudioPlayer.paused) {
+    window.audioPlaybackState.bsiCurrentTime = bibleChapterAudioPlayer.currentTime;
+    window.audioPlaybackState.bsiDuration = bibleChapterAudioPlayer.duration;
+    window.audioPlaybackState.activeBook = curBook;
+    window.audioPlaybackState.activeChapter = curCh;
+    window.audioPlaybackState.isPaused = true;
+    bibleChapterAudioPlayer.pause();
+    audioState.isPlaying = false;
+    isBibleChapterPlaying = false;
+    updateReaderPlayState(false);
+    return;
   }
+
+  // 2. If AI TTS is playing
+  if (window.googleTtsNarration && window.googleTtsNarration.isActive) {
+    const n = window.googleTtsNarration;
+    n.isStopRequested = true;
+    n.isActive = false;
+    window.audioPlaybackState.ttsCurrentVerseIndex = n.currentVerseIndex || 0;
+    window.audioPlaybackState.activeBook = curBook;
+    window.audioPlaybackState.activeChapter = curCh;
+    window.audioPlaybackState.isPaused = true;
+    if (n.currentAudio) {
+      try { n.currentAudio.pause(); } catch(e) {}
+    }
+    audioState.isPlaying = false;
+    isBibleChapterPlaying = false;
+    updateReaderPlayState(false);
+    return;
+  }
+
+  stopSpeechNarration(false);
 }
 
-function stopSpeechNarration() {
-  // Stop new Google Cloud TTS verse-by-verse engine
+function resumeOrStartAudioNarration() {
+  const bookKey = (state.activeBook || "genesis").toLowerCase().replace(".json", "");
+  const chapterNum = parseInt(state.activeChapter || 1, 10);
+
+  const editionSelect = document.getElementById("audio-edition-select");
+  const audioEdition = editionSelect ? editionSelect.value : (localStorage.getItem("rol_audio_edition") || "dramatized");
+
+  const isSameTrack = (window.audioPlaybackState.activeBook === bookKey) && 
+                      (window.audioPlaybackState.activeChapter === chapterNum);
+
+  if (audioEdition === "dramatized" && state.translation === "mar") {
+    // If player is already loaded with this track and was paused, resume directly!
+    if (bibleChapterAudioPlayer && isSameTrack && bibleChapterAudioPlayer.currentTime > 0) {
+      bibleChapterAudioPlayer.play().then(() => {
+        audioState.isPlaying = true;
+        isBibleChapterPlaying = true;
+        window.audioPlaybackState.isPaused = false;
+        updateReaderPlayState(true);
+        const playbar = document.getElementById("floating-audio-playbar");
+        if (playbar) playbar.classList.add("active");
+      }).catch(err => {
+        console.warn("[BSI Audio] Direct resume failed, restarting:", err);
+        playBsiDramatizedAudio(bookKey, chapterNum, window.audioPlaybackState.bsiCurrentTime);
+      });
+      return;
+    }
+
+    const startTime = isSameTrack ? (window.audioPlaybackState.bsiCurrentTime || 0) : 0;
+    playBsiDramatizedAudio(bookKey, chapterNum, startTime);
+    return;
+  }
+
+  // AI TTS Mode:
+  const startVerse = isSameTrack ? (window.audioPlaybackState.ttsCurrentVerseIndex || 0) : 0;
+  startSpeechNarration(startVerse);
+}
+
+function toggleAudioNarration() {
+  const isPlaying = audioState.isPlaying || 
+    isBibleChapterPlaying || 
+    (bibleChapterAudioPlayer && !bibleChapterAudioPlayer.paused) || 
+    (window.googleTtsNarration && window.googleTtsNarration.isActive);
+
+  if (isPlaying) {
+    pauseAudioNarration();
+  } else {
+    resumeOrStartAudioNarration();
+  }
+}
+window.toggleAudioNarration = toggleAudioNarration;
+
+function togglePlaybarSpeech() {
+  toggleAudioNarration();
+}
+
+function stopTtsNarrationOnly() {
   if (window.googleTtsNarration) {
     const n = window.googleTtsNarration;
     n.isStopRequested = true;
@@ -3733,7 +4140,6 @@ function stopSpeechNarration() {
       try { n.currentAudio.pause(); } catch(e) {}
       n.currentAudio = null;
     }
-    // Revoke prefetched audio if any
     if (n.prefetchedAudio) {
       try { URL.revokeObjectURL(n.prefetchedAudio); } catch(e) {}
       n.prefetchedAudio = null;
@@ -3741,22 +4147,30 @@ function stopSpeechNarration() {
     }
     n.versesMr = [];
   }
+  if (typeof speechSynthesis !== 'undefined') speechSynthesis.cancel();
+}
+
+function stopSpeechNarration(resetPosition = false) {
+  stopTtsNarrationOnly();
+
+  if (bibleChapterAudioPlayer) {
+    if (!resetPosition) {
+      window.audioPlaybackState.bsiCurrentTime = bibleChapterAudioPlayer.currentTime;
+    } else {
+      window.audioPlaybackState.bsiCurrentTime = 0;
+    }
+    bibleChapterAudioPlayer.pause();
+  }
+
+  if (resetPosition) {
+    window.audioPlaybackState.bsiCurrentTime = 0;
+    window.audioPlaybackState.ttsCurrentVerseIndex = 0;
+    window.audioPlaybackState.isPaused = false;
+  }
 
   audioState.isPlaying = false;
   isBibleChapterPlaying = false;
-  if (bibleChapterAudioPlayer) {
-    bibleChapterAudioPlayer.pause();
-    bibleChapterAudioPlayer.src = "";
-    bibleChapterAudioPlayer = null;
-  }
-  if (audioPlayerInstance) {
-    audioPlayerInstance.pause();
-    audioPlayerInstance = null;
-  }
-  if (typeof speechSynthesis !== 'undefined') {
-    speechSynthesis.cancel();
-  }
-  
+
   if (typeof ambientSynthInstance !== 'undefined' && ambientSynthInstance) {
     ambientSynthInstance.stop();
   }
@@ -3764,26 +4178,51 @@ function stopSpeechNarration() {
     clearTimeout(sleepTimerTimeout);
     sleepTimerTimeout = null;
   }
-  
+
   document.querySelectorAll(".verse-row").forEach(v => v.classList.remove("tts-reading", "tts-playing-verse", "tts-synthesizing-verse"));
   const playbar = document.getElementById("floating-audio-playbar");
   if (playbar) playbar.classList.remove("active");
-  
+
   updateReaderPlayState(false);
 }
 
 function startSpeechNarrationFromVerse(verseNum) {
   const vNum = parseInt(verseNum, 10) || 1;
-  if (!bibleChapterAudioPlayer || !audioState.isPlaying) {
-    startSpeechNarration(vNum);
+  const vIdx = Math.max(0, vNum - 1);
+  const editionSelect = document.getElementById("audio-edition-select");
+  const audioEdition = editionSelect ? editionSelect.value : (localStorage.getItem("rol_audio_edition") || "dramatized");
+
+  const bookKey = (state.activeBook || "genesis").toLowerCase().replace(".json", "");
+  const chapterNum = parseInt(state.activeChapter || 1, 10);
+
+  if (audioEdition === "dramatized" && state.translation === "mar") {
+    const verseRows = document.querySelectorAll(".verse-row");
+    const totalV = verseRows.length || 31;
+    const dur = (bibleChapterAudioPlayer && bibleChapterAudioPlayer.duration) ? bibleChapterAudioPlayer.duration : 600;
+    const estTime = (vIdx / totalV) * dur;
+    
+    window.audioPlaybackState.bsiCurrentTime = estTime;
+    window.audioPlaybackState.activeBook = bookKey;
+    window.audioPlaybackState.activeChapter = chapterNum;
+
+    if (bibleChapterAudioPlayer && 
+        (bibleChapterAudioPlayer.src.includes(`${bookKey}&chapter=${chapterNum}`) || 
+         bibleChapterAudioPlayer.src.includes(BSI_USFM_MAP[bookKey] || "GEN"))) {
+      bibleChapterAudioPlayer.currentTime = estTime;
+      if (bibleChapterAudioPlayer.paused) {
+        bibleChapterAudioPlayer.play();
+        updateReaderPlayState(true);
+      }
+    } else {
+      playBsiDramatizedAudio(bookKey, chapterNum, estTime);
+    }
+    showToast(`🎙️ श्लोक ${vNum} कडे जात आहे...`);
+    return;
   }
-  
-  // Jump to relative position in audio
-  const verseRows = document.querySelectorAll(".verse-row");
-  if (verseRows.length > 0 && bibleChapterAudioPlayer && bibleChapterAudioPlayer.duration > 0) {
-    const targetPct = (vNum - 1) / verseRows.length;
-    bibleChapterAudioPlayer.currentTime = targetPct * bibleChapterAudioPlayer.duration;
-  }
+
+  // AI TTS mode:
+  window.audioPlaybackState.ttsCurrentVerseIndex = vIdx;
+  startSpeechNarration(vIdx);
 }
 
 function playDailyVerseAudio() { console.log("playDailyVerseAudio disabled per user configuration - Bible reading audio only"); return;
@@ -5354,11 +5793,7 @@ function setupEventListeners() {
   const btnInlineListen = document.getElementById("btn-reader-inline-listen");
   if (btnInlineListen) {
     btnInlineListen.addEventListener("click", () => {
-      if (audioState.isPlaying) {
-        togglePlaybarSpeech();
-      } else {
-        startSpeechNarration();
-      }
+      toggleAudioNarration();
     });
   }
 
@@ -5565,25 +6000,34 @@ function setupEventListeners() {
   document.getElementById("btn-start-tts-reading")?.addEventListener("click", startSpeechNarration);
   
   // Floating Playbar triggers
-  document.getElementById("playbar-btn-play")?.addEventListener("click", togglePlaybarSpeech);
-  document.getElementById("playbar-btn-close-widget")?.addEventListener("click", stopSpeechNarration);
+  document.getElementById("playbar-btn-play")?.addEventListener("click", toggleAudioNarration);
+  document.getElementById("playbar-btn-close-widget")?.addEventListener("click", () => stopSpeechNarration(false));
   
   // Quick Play on Top Reader Bar
   document.getElementById("btn-reader-quick-play")?.addEventListener("click", () => {
-    if (audioState.isPlaying) {
-      stopSpeechNarration();
-    } else {
-      startSpeechNarration();
-    }
+    toggleAudioNarration();
   });
 
-  // Test Authentic Male Voice button in Narration Settings
+  // Test Authentic BSI Dramatized Voice button in Settings
   const btnTestNaturalVoice = document.getElementById("btn-test-natural-voice");
   if (btnTestNaturalVoice) {
     btnTestNaturalVoice.addEventListener("click", () => {
-      // toast hidden per user preference
-      if (typeof startSpeechNarration === "function") {
-        startSpeechNarration(0);
+      closeModal("modal-audio-settings");
+      playBsiDramatizedAudio("genesis", 7);
+    });
+  }
+
+  // Audio Edition Selector listener (BSI Dramatized vs AI)
+  const editionSelectEl = document.getElementById("audio-edition-select");
+  if (editionSelectEl) {
+    const savedEdition = localStorage.getItem("rol_audio_edition") || "dramatized";
+    editionSelectEl.value = savedEdition;
+    editionSelectEl.addEventListener("change", (e) => {
+      localStorage.setItem("rol_audio_edition", e.target.value);
+      if (e.target.value === "dramatized") {
+        showToast("🎭 BSI नाट्यमय ऑडिओ निवडला (पुरुष व स्त्री आवाज)");
+      } else {
+        showToast("🤖 AI श्लोक-दर-श्लोक वाचक निवडला");
       }
     });
   }
@@ -12499,18 +12943,6 @@ window.submitPastoralPrayerRequest = function(e) {
   if (form) form.reset();
 };
 
-/* ==========================================================================
-   AUTHENTIC NATIVE HUMAN AUDIO BIBLE CONTROLLER (100% FLUENT MARATHI & ENGLISH)
-   ========================================================================== */
-
-window.toggleAudioNarration = function() {
-  const ttsActive = window.googleTtsNarration && window.googleTtsNarration.isActive;
-  if (ttsActive || audioState.isPlaying || (window.SarvamTTS && window.SarvamTTS.queue && window.SarvamTTS.queue.isPlaying) || (typeof speechSynthesis !== 'undefined' && (speechSynthesis.speaking || speechSynthesis.pending))) {
-    stopSpeechNarration();
-  } else {
-    startSpeechNarration(0);
-  }
-};
 
 
 /* ==========================================================================
@@ -12711,8 +13143,9 @@ const BIBLE_BOOK_NUMBERS_MAP = {
   "3JN": 64, "JUD": 65, "REV": 66
 };
 
-let bibleChapterAudioPlayer = null;
-let isBibleChapterPlaying = false;
+// bibleChapterAudioPlayer and isBibleChapterPlaying declared earlier at line 3369
+bibleChapterAudioPlayer = bibleChapterAudioPlayer || null;
+isBibleChapterPlaying = isBibleChapterPlaying || false;
 
 let bibleAudioCtx = null;
 let bibleAudioSource = null;
@@ -14050,6 +14483,154 @@ window.readTenCommandmentsAloud = function(btnElement) {
 /* ==========================================================================
    DAILY BIBLE VERSE IMAGE STUDIO, GALLERY SAVING & WHATSAPP SHARING
    ========================================================================== */
+window.VOD_TYPOGRAPHY_STYLES = [
+  {
+    id: "golden-grace",
+    name: "सुवर्ण तेज (Gold)",
+    tag: "✦ VERSE OF THE DAY ✦",
+    fontFamily: "'Noto Serif Devanagari', 'Lora', Georgia, serif",
+    fontWeight: "700",
+    textColor: "#ffffff",
+    accentColor: "#fbbf24",
+    quoteColor: "#fbbf24",
+    lineHeight: "1.62",
+    letterSpacing: "0.2px",
+    textShadow: "0 3px 24px rgba(0,0,0,0.98), 0 1px 6px rgba(0,0,0,0.95), 0 0 40px rgba(0,0,0,0.6)"
+  },
+  {
+    id: "celestial-cyan",
+    name: "आकाशी आभा (Cyan)",
+    tag: "✨ जीवन नदी • दैनिक वचन",
+    fontFamily: "'Poppins', 'Outfit', sans-serif",
+    fontWeight: "800",
+    textColor: "#ffffff",
+    accentColor: "#38bdf8",
+    quoteColor: "#38bdf8",
+    lineHeight: "1.58",
+    letterSpacing: "-0.2px",
+    textShadow: "0 3px 24px rgba(0,0,0,0.98), 0 0 25px rgba(56,189,248,0.5), 0 1px 6px rgba(0,0,0,0.95)"
+  },
+  {
+    id: "royal-velvet",
+    name: "राजेशाही प्रीती (Rose)",
+    tag: "🕊️ सार्वकालिक प्रीती",
+    fontFamily: "'Rozha One', 'Noto Serif Devanagari', serif",
+    fontWeight: "700",
+    textColor: "#fff1f2",
+    accentColor: "#f472b6",
+    quoteColor: "#fb7185",
+    lineHeight: "1.65",
+    letterSpacing: "0.3px",
+    textShadow: "0 3px 24px rgba(0,0,0,0.98), 0 0 25px rgba(244,114,182,0.4), 0 1px 6px rgba(0,0,0,0.95)"
+  },
+  {
+    id: "emerald-peace",
+    name: "हरित शांती (Emerald)",
+    tag: "🌿 दैनिक शांती व आशीर्वाद",
+    fontFamily: "'Poppins', 'Noto Sans Devanagari', sans-serif",
+    fontWeight: "700",
+    textColor: "#f0fdf4",
+    accentColor: "#34d399",
+    quoteColor: "#34d399",
+    lineHeight: "1.6",
+    letterSpacing: "0px",
+    textShadow: "0 3px 24px rgba(0,0,0,0.98), 0 0 25px rgba(52,211,153,0.4), 0 1px 6px rgba(0,0,0,0.95)"
+  },
+  {
+    id: "sunset-ember",
+    name: "अग्नि ज्वाला (Sunset)",
+    tag: "🌅 प्रभूचे सामर्थ्य व प्रकाश",
+    fontFamily: "'Noto Serif Devanagari', 'Lora', serif",
+    fontWeight: "800",
+    textColor: "#fffbeb",
+    accentColor: "#fb923c",
+    quoteColor: "#f97316",
+    lineHeight: "1.62",
+    letterSpacing: "0.2px",
+    textShadow: "0 3px 24px rgba(0,0,0,0.98), 0 0 25px rgba(251,146,60,0.45), 0 1px 6px rgba(0,0,0,0.95)"
+  },
+  {
+    id: "pure-pearl",
+    name: "शुभ्र प्रकाश (Minimal)",
+    tag: "✦ HOLY SCRIPTURE ✦",
+    fontFamily: "'Cinzel', 'Outfit', sans-serif",
+    fontWeight: "700",
+    textColor: "#ffffff",
+    accentColor: "#e2e8f0",
+    quoteColor: "#ffffff",
+    lineHeight: "1.6",
+    letterSpacing: "0.5px",
+    textShadow: "0 3px 24px rgba(0,0,0,0.98), 0 1px 6px rgba(0,0,0,0.95)"
+  }
+];
+
+window.currentVodTypographyIndex = 0;
+
+window.applyVodTypographyTheme = function(themeIdx) {
+  if (typeof themeIdx === "number") {
+    window.currentVodTypographyIndex = themeIdx % window.VOD_TYPOGRAPHY_STYLES.length;
+  }
+  const theme = window.VOD_TYPOGRAPHY_STYLES[window.currentVodTypographyIndex || 0];
+  if (!theme) return;
+
+  const cardContainer = document.getElementById("fs-vod-card-container");
+  if (cardContainer) {
+    // Keep transparent - no box or card
+    cardContainer.style.background = "transparent";
+    cardContainer.style.border = "none";
+    cardContainer.style.boxShadow = "none";
+    cardContainer.style.backdropFilter = "none";
+    cardContainer.style.webkitBackdropFilter = "none";
+  }
+
+  const textEl = document.getElementById("fs-vod-text");
+  if (textEl) {
+    textEl.style.fontFamily = theme.fontFamily;
+    textEl.style.fontWeight = theme.fontWeight;
+    textEl.style.color = theme.textColor;
+    textEl.style.textShadow = theme.textShadow;
+    textEl.style.lineHeight = theme.lineHeight || "1.62";
+    textEl.style.letterSpacing = theme.letterSpacing || "normal";
+  }
+
+  const quoteEl = document.getElementById("fs-vod-quote-mark");
+  if (quoteEl) {
+    quoteEl.style.color = theme.quoteColor;
+  }
+
+  const refBadge = document.getElementById("fs-vod-ref-badge");
+  if (refBadge) {
+    refBadge.style.color = theme.accentColor;
+  }
+
+  const badgePill = document.getElementById("fs-vod-badge-pill");
+  if (badgePill) {
+    badgePill.style.color = theme.accentColor;
+    if (theme.tag) badgePill.textContent = theme.tag;
+  }
+
+  const lineLeft = document.getElementById("fs-vod-accent-line-left");
+  if (lineLeft) lineLeft.style.background = theme.accentColor;
+
+  const lineRight = document.getElementById("fs-vod-accent-line-right");
+  if (lineRight) lineRight.style.background = theme.accentColor;
+
+  const themeNameLabel = document.getElementById("fs-vod-theme-name");
+  if (themeNameLabel) {
+    themeNameLabel.textContent = theme.name;
+  }
+};
+
+window.cycleVodTypographyTheme = function(showFeedback = true) {
+  const count = window.VOD_TYPOGRAPHY_STYLES.length;
+  window.currentVodTypographyIndex = ((window.currentVodTypographyIndex || 0) + 1) % count;
+  applyVodTypographyTheme(window.currentVodTypographyIndex);
+  const theme = window.VOD_TYPOGRAPHY_STYLES[window.currentVodTypographyIndex];
+  if (showFeedback && typeof showToast === "function") {
+    showToast(`🎨 फॉन्ट व डिझाईन: ${theme.name}`);
+  }
+};
+
 window.openFullscreenVOD = function() {
   const modal = document.getElementById("modal-fullscreen-vod");
   if (!modal) return;
@@ -14065,10 +14646,13 @@ window.openFullscreenVOD = function() {
   const displayText = (state.translation === "eng") ? vod.engText : vod.text;
 
   const fsTextEl = document.getElementById("fs-vod-text");
-  if (fsTextEl) fsTextEl.textContent = `"${displayText}"`;
+  if (fsTextEl) fsTextEl.textContent = displayText;
 
   const fsRefEl = document.getElementById("fs-vod-ref");
   if (fsRefEl) fsRefEl.textContent = `${displayRef} ${state.translation === "eng" ? "NLT" : "MARVBSI"}`;
+
+  const fsRefBadge = document.getElementById("fs-vod-ref-badge");
+  if (fsRefBadge) fsRefBadge.textContent = `${displayRef} ${state.translation === "eng" ? "NLT" : "MARVBSI"}`;
 
   const images = (window.dailyVersesImageList && window.dailyVersesImageList.length > 0) ? window.dailyVersesImageList : [
     'stars.png', 'forest.png', 'mist.png', 'mountains.png', 'mount_zion.png', 'ocean.png', 'path.png', 'sunrise.png'
@@ -14091,6 +14675,9 @@ window.openFullscreenVOD = function() {
 
   const menu = document.getElementById("vod-more-options-menu");
   if (menu) menu.style.display = "none";
+
+  // Apply typography styling
+  applyVodTypographyTheme();
 };
 
 window.closeFullscreenVOD = function() {
@@ -14136,7 +14723,11 @@ window.cycleVodWallpaper = function() {
   const thumbImg = document.getElementById("vod-thumbnail-preview");
   if (thumbImg) thumbImg.src = imgUrl;
 
-  showToast(`🎨 Wallpaper Changed: ${dailyImg.replace('.png', '')}`);
+  // Change font, design, bold weight, and color palette automatically when changing image
+  cycleVodTypographyTheme(false);
+  const activeTheme = window.VOD_TYPOGRAPHY_STYLES[window.currentVodTypographyIndex || 0];
+
+  showToast(`🖼️ वॉलपेपर व डिझाईन: ${activeTheme.name}`);
 };
 
 window.navigateVOD = function(dir) {
@@ -14165,6 +14756,15 @@ window.generateExactVerseImageBlob = function() {
     const dailyImg = images[imgIdx];
     const imgUrl = (typeof getVodImageUrl === "function") ? getVodImageUrl(dailyImg) : (dailyImg.includes('.') ? `assets/daily_verses/${dailyImg}` : `assets/daily_verses/${dailyImg}.png`);
 
+    const theme = (window.VOD_TYPOGRAPHY_STYLES && window.VOD_TYPOGRAPHY_STYLES[window.currentVodTypographyIndex || 0]) ? window.VOD_TYPOGRAPHY_STYLES[window.currentVodTypographyIndex || 0] : {
+      name: "Gold",
+      tag: "✦ VERSE OF THE DAY ✦",
+      textColor: "#ffffff",
+      accentColor: "#fbbf24",
+      quoteColor: "#fbbf24",
+      fontWeight: "700"
+    };
+
     const canvas = document.createElement("canvas");
     canvas.width = 1080;
     canvas.height = 1440; // High-res portrait ratio for WhatsApp Status & Gallery
@@ -14190,74 +14790,111 @@ window.generateExactVerseImageBlob = function() {
         drawCelestialFallback();
       }
 
-      // 2. Vertical Scenic Gradient Overlay (matching YouVersion Screenshot 3)
+      // 2. Artistic Vignette & Gradient Overlay (Soft darkening so text shines without any box)
       const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-      grad.addColorStop(0, 'rgba(0, 0, 0, 0.45)');
-      grad.addColorStop(0.3, 'rgba(0, 0, 0, 0.2)');
-      grad.addColorStop(0.65, 'rgba(0, 0, 0, 0.45)');
-      grad.addColorStop(1, 'rgba(0, 0, 0, 0.85)');
+      grad.addColorStop(0, 'rgba(0, 0, 0, 0.5)');
+      grad.addColorStop(0.25, 'rgba(0, 0, 0, 0.25)');
+      grad.addColorStop(0.5, 'rgba(0, 0, 0, 0.4)');
+      grad.addColorStop(0.8, 'rgba(0, 0, 0, 0.6)');
+      grad.addColorStop(1, 'rgba(0, 0, 0, 0.9)');
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // 3. Left-Aligned Typography Layout (Clean YouVersion Style matching Screenshot 3)
-      const marginX = 80;
-      const maxWidth = canvas.width - (marginX * 2); // 920px
-      ctx.textAlign = "left";
-      ctx.textBaseline = "top";
+      // 3. Multi-Line Text Directly On Image (NO BOX)
+      const textMaxWidth = 880;
+      const centerX = canvas.width / 2;
 
-      let curY = 160;
-
-      // Top Small Label: "Verse of the day"
-      ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
-      ctx.font = "700 24px 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-      ctx.fillText("Verse of the day", marginX, curY);
-      curY += 46;
-
-      // Scripture Reference: e.g. "1 पेत्र 5:6 MARVBSI"
-      ctx.fillStyle = "#ffffff";
-      ctx.font = "800 32px 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-      ctx.fillText(`${displayRef} ${state.translation === 'eng' ? 'NLT' : 'MARVBSI'}`, marginX, curY);
-      curY += 68;
-
-      // Scripture Verse Text: Clean Large Devanagari / English Serif
-      ctx.fillStyle = "#ffffff";
-      ctx.font = "600 46px 'Noto Serif Devanagari', 'Lora', Georgia, serif";
-      ctx.shadowColor = "rgba(0, 0, 0, 0.85)";
-      ctx.shadowBlur = 16;
-      ctx.shadowOffsetX = 0;
-      ctx.shadowOffsetY = 3;
-
-      const lineHeight = 78;
+      // Word wrapping
+      const fontSize = 48;
+      ctx.font = `${theme.fontWeight} ${fontSize}px 'Noto Serif Devanagari', 'Poppins', -apple-system, sans-serif`;
       const words = displayText.split(/\s+/);
       let currentLine = "";
       const lines = [];
-
       for (let n = 0; n < words.length; n++) {
         const testLine = currentLine ? `${currentLine} ${words[n]}` : words[n];
         const metrics = ctx.measureText(testLine);
-        if (metrics.width > maxWidth && currentLine) {
+        if (metrics.width > textMaxWidth && currentLine) {
           lines.push(currentLine);
           currentLine = words[n];
         } else {
           currentLine = testLine;
         }
       }
-      if (currentLine) {
-        lines.push(currentLine);
-      }
+      if (currentLine) lines.push(currentLine);
+
+      const lineHeight = 80;
+      const textBlockHeight = lines.length * lineHeight;
+      const totalBlockHeight = 40 + 60 + textBlockHeight + 50; // tag + quote + text + ref
+      let startY = (canvas.height - totalBlockHeight) / 2;
+
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+
+      // 3a. Top Tag
+      ctx.fillStyle = theme.accentColor;
+      ctx.font = "800 20px 'Outfit', sans-serif";
+      ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
+      ctx.shadowBlur = 14;
+      ctx.fillText(theme.tag || "✦ VERSE OF THE DAY ✦", centerX, startY);
+      startY += 48;
+
+      // 3b. Quotation Mark
+      ctx.fillStyle = theme.quoteColor || theme.accentColor;
+      ctx.font = "700 76px Georgia, serif";
+      ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
+      ctx.shadowBlur = 16;
+      ctx.fillText("“", centerX, startY + 10);
+      startY += 58;
+
+      // 3c. Scripture Verse Body (Multi-line, High Legibility, Deep Glow)
+      ctx.fillStyle = theme.textColor || "#ffffff";
+      ctx.font = `${theme.fontWeight} ${fontSize}px 'Noto Serif Devanagari', 'Poppins', serif`;
+      ctx.shadowColor = "rgba(0, 0, 0, 0.98)";
+      ctx.shadowBlur = 24;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 3;
 
       for (let i = 0; i < lines.length; i++) {
-        ctx.fillText(lines[i], marginX, curY + (i * lineHeight));
+        ctx.fillText(lines[i], centerX, startY + (i * lineHeight));
       }
 
-      // Reset Shadows
+      ctx.shadowColor = "transparent";
+      ctx.shadowBlur = 0;
+      startY += textBlockHeight + 24;
+
+      // 3d. Scripture Reference with Accent Lines
+      const refText = `${displayRef} ${state.translation === 'eng' ? 'NLT' : 'MARVBSI'}`;
+      ctx.font = "800 28px 'Outfit', sans-serif";
+      const refWidth = ctx.measureText(refText).width;
+
+      // Accent lines on sides of reference
+      ctx.strokeStyle = theme.accentColor;
+      ctx.lineWidth = 2;
+      const lineLen = 50;
+      const gap = 16;
+
+      ctx.beginPath();
+      ctx.moveTo(centerX - (refWidth / 2) - gap - lineLen, startY);
+      ctx.lineTo(centerX - (refWidth / 2) - gap, startY);
+      ctx.moveTo(centerX + (refWidth / 2) + gap, startY);
+      ctx.lineTo(centerX + (refWidth / 2) + gap + lineLen, startY);
+      ctx.stroke();
+
+      // Reference text
+      ctx.fillStyle = theme.accentColor;
+      ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
+      ctx.shadowBlur = 14;
+      ctx.fillText(refText, centerX, startY);
+
+      // Reset shadows
       ctx.shadowColor = "transparent";
       ctx.shadowBlur = 0;
 
       // 4. Subtle Bottom Branding Watermark
-      ctx.fillStyle = "rgba(255, 255, 255, 0.65)";
+      ctx.textAlign = "center";
+      ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
       ctx.font = "600 22px 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif";
-      ctx.fillText("River of Life Bible • जीवन नदी बायबल ॲप", marginX, canvas.height - 80);
+      ctx.fillText("River of Life Bible • जीवन नदी बायबल ॲप", canvas.width / 2, canvas.height - 45);
 
       const filename = `River_of_Life_Daily_Verse_${displayRef.replace(/[: ]/g, "_")}.png`;
       const dataUrl = canvas.toDataURL("image/png");
@@ -15856,7 +16493,183 @@ window.getTodayBiblicalWord = function() {
   return DAILY_BIBLICAL_WORDS_DB[idx];
 };
 
+
+// Biblical Word of the Day Action Handlers (Bookmark, Download, Share)
+window.toggleMicroLearningBookmark = function() {
+  const word = (typeof getTodayBiblicalWord === "function") ? getTodayBiblicalWord() : null;
+  if (!word) return;
+  if (!state.bookmarks) state.bookmarks = [];
+  
+  const wordRef = `Word: ${word.term}`;
+  const idx = state.bookmarks.findIndex(b => b.ref === wordRef || b.term === word.term);
+  
+  if (idx !== -1) {
+    state.bookmarks.splice(idx, 1);
+    if (typeof showToast === 'function') showToast("शब्द बुकमार्कवरून काढला • Removed from bookmarks");
+  } else {
+    state.bookmarks.unshift({
+      ref: wordRef,
+      term: word.term,
+      origin: word.origin,
+      pronunciation: word.pronunciation,
+      meaning: word.meaningMr,
+      meaningEn: word.meaningEn,
+      insight: word.insightMr,
+      insightEn: word.insightEn,
+      scriptureRef: word.refMr,
+      book: word.bookKey || "acts",
+      chapter: word.chapter || 2,
+      verse: word.verse || 42,
+      date: new Date().toLocaleDateString(),
+      isWordOfDay: true
+    });
+    if (typeof showToast === 'function') showToast("शब्द बुकमार्क केला • Saved to Bookmarks ⭐");
+  }
+  
+  if (typeof saveStateToLocalStorage === "function") saveStateToLocalStorage();
+  if (typeof updateMicroLearningBookmarkUI === "function") updateMicroLearningBookmarkUI();
+};
+
+window.updateMicroLearningBookmarkUI = function() {
+  const word = (typeof getTodayBiblicalWord === "function") ? getTodayBiblicalWord() : null;
+  if (!word) return;
+  const wordRef = `Word: ${word.term}`;
+  const isBookmarked = state.bookmarks && state.bookmarks.some(b => b.ref === wordRef || b.term === word.term);
+  const btn = document.getElementById("micro-word-btn-bookmark");
+  const icon = document.getElementById("micro-word-bookmark-icon");
+  if (!btn) return;
+  
+  if (isBookmarked) {
+    btn.classList.add("active-bookmarked");
+    btn.setAttribute("title", "Bookmarked / बुकमार्क केले आहे");
+    if (icon) {
+      icon.setAttribute("fill", "#f59e0b");
+      icon.setAttribute("stroke", "#f59e0b");
+    }
+  } else {
+    btn.classList.remove("active-bookmarked");
+    btn.setAttribute("title", "Bookmark Word / शब्द बुकमार्क करा");
+    if (icon) {
+      icon.setAttribute("fill", "none");
+      icon.setAttribute("stroke", "currentColor");
+    }
+  }
+};
+
+window.shareMicroLearningWord = function() {
+  const word = (typeof getTodayBiblicalWord === "function") ? getTodayBiblicalWord() : null;
+  if (!word) return;
+  const isEng = (window.state && (window.state.translation === "eng" || window.state.language === "en"));
+  const text = `✨ Biblical Word of the Day: ${word.term}\n\n` +
+    `📍 Origin: ${word.origin} | Pronunciation: ${word.pronunciation}\n\n` +
+    `📖 Meaning:\n${isEng ? word.meaningEn : word.meaningMr}\n\n` +
+    `💡 Spiritual Insight:\n${(isEng && word.insightEn) ? word.insightEn : word.insightMr}\n\n` +
+    `📜 Scripture: ${isEng ? word.refEn : word.refMr}\n\n` +
+    `Read on River of Life Bible: ${window.location.origin}`;
+  
+  if (navigator.share) {
+    navigator.share({ title: `Word of the Day: ${word.term}`, text: text }).catch(() => {});
+  } else {
+    const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+    window.open(waUrl, '_blank');
+  }
+};
+
+window.downloadMicroLearningCard = function() {
+  const word = (typeof getTodayBiblicalWord === "function") ? getTodayBiblicalWord() : null;
+  const canvas = document.createElement('canvas');
+  canvas.width = 1080;
+  canvas.height = 1080;
+  const ctx = canvas.getContext('2d');
+  
+  // Dark cinematic gradient background
+  const grad = ctx.createLinearGradient(0, 0, 1080, 1080);
+  grad.addColorStop(0, '#0f141d');
+  grad.addColorStop(0.5, '#151b27');
+  grad.addColorStop(1, '#0b0e14');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 1080, 1080);
+  
+  // Outer glowing violet border
+  ctx.strokeStyle = 'rgba(139, 92, 246, 0.4)';
+  ctx.lineWidth = 4;
+  ctx.strokeRect(40, 40, 1000, 1000);
+  
+  // Left violet accent bar
+  ctx.fillStyle = '#8b5cf6';
+  ctx.fillRect(40, 40, 16, 1000);
+  
+  // Header Tag
+  ctx.fillStyle = '#c084fc';
+  ctx.font = 'bold 26px -apple-system, BlinkMacSystemFont, sans-serif';
+  ctx.fillText('✨ BIBLICAL WORD OF THE DAY', 90, 120);
+  
+  // Term Title
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 54px -apple-system, BlinkMacSystemFont, sans-serif';
+  ctx.fillText(word ? word.term : 'Word of the Day', 90, 200);
+  
+  // Origin & Pronunciation
+  ctx.fillStyle = '#e2e8f0';
+  ctx.font = '600 28px -apple-system, BlinkMacSystemFont, sans-serif';
+  ctx.fillText(`${word ? word.origin : ''}  •  उच्चार: ${word ? word.pronunciation : ''}`, 90, 260);
+  
+  // Meaning Box
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.06)';
+  ctx.fillRect(90, 320, 900, 180);
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+  ctx.strokeRect(90, 320, 900, 180);
+  
+  ctx.fillStyle = '#a78bfa';
+  ctx.font = 'bold 22px -apple-system, BlinkMacSystemFont, sans-serif';
+  ctx.fillText('अर्थ (BIBLICAL MEANING)', 120, 370);
+  
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 32px "Noto Serif Devanagari", Georgia, serif';
+  ctx.fillText(word ? word.meaningMr : '', 120, 430);
+  
+  // Spiritual Insight
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+  ctx.font = 'bold 22px -apple-system, BlinkMacSystemFont, sans-serif';
+  ctx.fillText('आत्मिक रहस्य व मनन (SPIRITUAL INSIGHT)', 90, 560);
+  
+  ctx.fillStyle = '#cbd5e1';
+  ctx.font = '28px "Noto Serif Devanagari", Georgia, serif';
+  const insight = word ? word.insightMr : '';
+  const wordsArr = insight.split(' ');
+  let curLine = '';
+  let startY = 620;
+  for (let n = 0; n < wordsArr.length; n++) {
+    const test = curLine + wordsArr[n] + ' ';
+    if (ctx.measureText(test).width > 890 && n > 0) {
+      ctx.fillText(curLine, 90, startY);
+      curLine = wordsArr[n] + ' ';
+      startY += 48;
+    } else {
+      curLine = test;
+    }
+  }
+  ctx.fillText(curLine, 90, startY);
+  
+  // Scripture Reference
+  ctx.fillStyle = '#c084fc';
+  ctx.font = 'bold 28px -apple-system, BlinkMacSystemFont, sans-serif';
+  ctx.fillText(word ? `📖 ${word.refMr}` : '', 90, 920);
+  
+  // App Branding
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+  ctx.font = '22px -apple-system, BlinkMacSystemFont, sans-serif';
+  ctx.fillText('River of Life • Holy Bible', 90, 970);
+  
+  const link = document.createElement('a');
+  link.download = `biblical_word_of_the_day_${Date.now()}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+  if (typeof showToast === 'function') showToast("कार्ड डाऊनलोड झाले • Card downloaded! 📸");
+};
+
 window.renderBiblicalMicroLearning = function() {
+  setTimeout(() => { if (typeof updateMicroLearningBookmarkUI === "function") updateMicroLearningBookmarkUI(); }, 50);
   const word = window.getTodayBiblicalWord();
   if (!word) return;
   

@@ -389,30 +389,29 @@
                 </div>
               </div>
 
-              <!-- The 10 Commandments Hub Card (पवित्र शास्त्रातील १० आजञा) -->
-              <div class="home-commandments-card" id="home-commandments-card" onclick="toggleTenCommandmentsModal()" title="Explore The 10 Commandments / दहा आजञा वाचा व का">
-                <div class="home-commandments-header">
-                  <div class="home-commandments-badge-row">
-                    <span class="home-commandments-badge" data-i18n="tag_commandments">EXODUS 20 • निर्गम २०</span>
-                    <span class="home-commandments-sub-badge">THE MORAL LAW</span>
-                  </div>
-                  <div class="home-commandments-illustration">
-                    <img src="assets/images/moses_ten_commandments.png" alt="Moses and 10 Commandments" class="home-moses-thumb">
-                  </div>
+              <!-- The 10 Commandments Hub Card (Unified Soft-Bordered Tile Style) -->
+              <div class="figma-home-tile tile-commandments-card" id="home-commandments-card" onclick="toggleTenCommandmentsModal()" title="Explore The 10 Commandments / दहा आज्ञा वाचा व शिका">
+                <div class="figma-tile-cover-wrapper">
+                  <img src="assets/images/moses_mount_sinai_art.jpg" alt="Moses atop Mount Sinai holding Ten Commandments" class="figma-tile-cover-img">
+                  <span class="figma-tile-floating-badge">
+                    <span>📜</span> <span>Exodus 20 • निर्गम २०</span>
+                  </span>
                 </div>
-                <div class="home-commandments-body">
-                  <h3 class="home-commandments-title">The 10 Commandments • दहा आजञा</h3>
-                  <p class="home-commandments-desc">
-                    देवाने सीनाय परवतावर दिलेला शाश्वत नियम आणि येशू ख्रिस्ताने शिकवलेला प्रीतीचा नियम.
+                <div class="figma-tile-meta">
+                  <div class="figma-tile-tag-row">
+                    <span class="figma-tile-category-tag" data-i18n="tag_commandments">THE MORAL LAW • पवित्र नियम</span>
+                  </div>
+                  <h3 class="figma-tile-title-en">The 10 Commandments</h3>
+                  <p class="figma-tile-sub-mr">पवित्र शास्त्रातील १० आज्ञा</p>
+                  <p class="figma-tile-excerpt">
+                    देवाने सीनाय पर्वतावर दिलेला शाश्वत नियम आणि येशू ख्रिस्ताने शिकवलेला प्रीतीचा नियम.
                   </p>
-                </div>
-                <div class="home-commandments-actions">
-                  <button class="home-commandments-btn-primary" onclick="event.stopPropagation(); toggleTenCommandmentsModal();" title="Explore 10 Commandments / सर्व १० आजञा वाचा व का">
-                    <span>Explore All 10 Commandments (सर्व १० आजञा)</span>
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                  </button>
-                  <div class="home-commandments-sub-actions">
-                    <button class="home-commandments-btn-sec" onclick="event.stopPropagation(); openReaderAndNavigate('exodus', 20, 1);" title="Read Exodus 20 in Bible / निर्गम २० वाचा">
+                  <div class="figma-tile-actions-row" style="flex-wrap: wrap; gap: 8px;">
+                    <button class="figma-tile-action-btn" onclick="event.stopPropagation(); toggleTenCommandmentsModal();" title="Explore 10 Commandments">
+                      <span>Explore All 10 Commandments (सर्व १० आज्ञा)</span>
+                      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </button>
+                    <button onclick="event.stopPropagation(); openReaderAndNavigate('exodus', 20, 1);" style="background: rgba(0,0,0,0.06); color: var(--text); font-family: var(--font-ui); font-size: 12.5px; font-weight: 700; border: 1px solid var(--border); padding: 7px 12px; border-radius: 10px; cursor: pointer;">
                       📖 Read Exodus 20
                     </button>
                   </div>
@@ -489,23 +488,21 @@
                   <span class="home-section-sub" data-i18n="sanctuary_sub">Spiritual Alignment</span>
                 </div>
 
-                <div class="home-prayer-sanctuary-grid">
+                <div class="home-prayer-sanctuary-scroller" id="home-prayer-sanctuary-scroller">
                   <!-- Card 1: Miracle & Provision -->
-                  <div class="home-sanctuary-card" onclick="openImmersivePrayerModal('wedding_cana')" title="Miracle & Provision / दैवी चमतकार व परवठा">
+                  <div class="home-sanctuary-card" onclick="openImmersivePrayerModal('wedding_cana')" title="Miracle & Provision / दैवी चमत्कार व पुरवठा">
                     <div class="home-sanctuary-card-bg" style="background-image: url('assets/images/wedding_cana_miracle.jpg');">
                       <div class="home-sanctuary-card-scrim"></div>
+                      <span class="home-sanctuary-category-badge">MIRACLE & PROVISION</span>
+                      <span class="home-sanctuary-floating-ref">John 2:1-11</span>
                     </div>
                     <div class="home-sanctuary-card-content">
-                      <div class="home-sanctuary-badge-row">
-                        <span class="home-sanctuary-category-badge">MIRACLE & PROVISION</span>
-                        <span class="home-sanctuary-ref-pill">John 2:1-11</span>
-                      </div>
                       <h4 class="home-sanctuary-card-title">Water Turned into Wine</h4>
                       <p class="home-sanctuary-card-subtitle">Abundance in scarcity & divine breakthrough • पाण्याचे द्राक्षारसात रूपांतर</p>
                       <div class="home-sanctuary-footer-row">
                         <span class="home-sanctuary-mr-ref">योहान २:१-११</span>
                         <button class="home-sanctuary-pray-btn" onclick="event.stopPropagation(); openImmersivePrayerModal('wedding_cana');" title="Pray Now">
-                          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                           <span data-i18n="btn_pray_now">Pray Now</span>
                         </button>
                       </div>
@@ -513,21 +510,19 @@
                   </div>
 
                   <!-- Card 2: Peace Over Anxiety -->
-                  <div class="home-sanctuary-card" onclick="openImmersivePrayerModal('peace_anxiety')" title="Peace Over Anxiety / चिंतेतून मकती आणि शांती">
-                    <div class="home-sanctuary-card-bg" style="background-image: url('assets/images/peace_anxiety.png');">
+                  <div class="home-sanctuary-card" onclick="openImmersivePrayerModal('peace_anxiety')" title="Peace Over Anxiety / चिंतेतून मुक्ती आणि शांती">
+                    <div class="home-sanctuary-card-bg" style="background-image: url('assets/images/peace_anxiety_art.jpg');">
                       <div class="home-sanctuary-card-scrim"></div>
+                      <span class="home-sanctuary-category-badge">PEACE OVER ANXIETY</span>
+                      <span class="home-sanctuary-floating-ref">Philippians 4:6-7</span>
                     </div>
                     <div class="home-sanctuary-card-content">
-                      <div class="home-sanctuary-badge-row">
-                        <span class="home-sanctuary-category-badge">PEACE OVER ANXIETY</span>
-                        <span class="home-sanctuary-ref-pill">Philippians 4:6-7</span>
-                      </div>
                       <h4 class="home-sanctuary-card-title">Transcendent Calm & Peace</h4>
                       <p class="home-sanctuary-card-subtitle">Guard your heart against fear & anxiety • सर्व बुद्धीपलीकडची देवाची शांती</p>
                       <div class="home-sanctuary-footer-row">
-                        <span class="home-sanctuary-mr-ref">फिलिपपैकरांस ४:६-७</span>
+                        <span class="home-sanctuary-mr-ref">फिलिप्पैकरांस ४:६-७</span>
                         <button class="home-sanctuary-pray-btn" onclick="event.stopPropagation(); openImmersivePrayerModal('peace_anxiety');" title="Pray Now">
-                          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                           <span data-i18n="btn_pray_now">Pray Now</span>
                         </button>
                       </div>
@@ -536,20 +531,18 @@
 
                   <!-- Card 3: Morning Grace & Protection -->
                   <div class="home-sanctuary-card" onclick="openImmersivePrayerModal('morning_grace')" title="Morning Grace & Protection / सकाळची कृपा व संरक्षण">
-                    <div class="home-sanctuary-card-bg" style="background-image: url('assets/images/golden_dawn.png');">
+                    <div class="home-sanctuary-card-bg" style="background-image: url('assets/images/morning_grace_art.jpg');">
                       <div class="home-sanctuary-card-scrim"></div>
+                      <span class="home-sanctuary-category-badge">MORNING GRACE</span>
+                      <span class="home-sanctuary-floating-ref">Psalm 91:1-4</span>
                     </div>
                     <div class="home-sanctuary-card-content">
-                      <div class="home-sanctuary-badge-row">
-                        <span class="home-sanctuary-category-badge">MORNING GRACE & PROTECTION</span>
-                        <span class="home-sanctuary-ref-pill">Psalm 91:1-4</span>
-                      </div>
                       <h4 class="home-sanctuary-card-title">Shadow of the Almighty</h4>
-                      <p class="home-sanctuary-card-subtitle">Safe beneath His wings throughout the day • परातपराचया गुप्त स्थानी आश्रय</p>
+                      <p class="home-sanctuary-card-subtitle">Safe beneath His wings throughout the day • परात्पराच्या गुप्त स्थानी आश्रय</p>
                       <div class="home-sanctuary-footer-row">
                         <span class="home-sanctuary-mr-ref">स्तोत्रसंहिता ९१:१-४</span>
                         <button class="home-sanctuary-pray-btn" onclick="event.stopPropagation(); openImmersivePrayerModal('morning_grace');" title="Pray Now">
-                          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                           <span data-i18n="btn_pray_now">Pray Now</span>
                         </button>
                       </div>
@@ -558,20 +551,18 @@
 
                   <!-- Card 4: Healing & Health -->
                   <div class="home-sanctuary-card" onclick="openImmersivePrayerModal('healing_health')" title="Healing & Health / आरोग्य आणि दैवी चंगाई">
-                    <div class="home-sanctuary-card-bg" style="background-image: url('assets/images/healing_light.png');">
+                    <div class="home-sanctuary-card-bg" style="background-image: url('assets/images/divine_healing_art.jpg');">
                       <div class="home-sanctuary-card-scrim"></div>
+                      <span class="home-sanctuary-category-badge">HEALING & HEALTH</span>
+                      <span class="home-sanctuary-floating-ref">Jeremiah 30:17</span>
                     </div>
                     <div class="home-sanctuary-card-content">
-                      <div class="home-sanctuary-badge-row">
-                        <span class="home-sanctuary-category-badge">HEALING & HEALTH</span>
-                        <span class="home-sanctuary-ref-pill">Jeremiah 30:17</span>
-                      </div>
                       <h4 class="home-sanctuary-card-title">Divine Healing & Wholeness</h4>
                       <p class="home-sanctuary-card-subtitle">Physical, emotional & spiritual restoration • आरोग्य आणि दैवी चंगाई</p>
                       <div class="home-sanctuary-footer-row">
                         <span class="home-sanctuary-mr-ref">यिर्मया ३०:१७ • यशया ५३:५</span>
                         <button class="home-sanctuary-pray-btn" onclick="event.stopPropagation(); openImmersivePrayerModal('healing_health');" title="Pray Now">
-                          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                           <span data-i18n="btn_pray_now">Pray Now</span>
                         </button>
                       </div>

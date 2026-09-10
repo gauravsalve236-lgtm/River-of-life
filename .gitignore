@@ -8,3 +8,4 @@ node_modules/
 __pycache__/
 verified_*.png
 test_*.py
+.bsi_token.json
