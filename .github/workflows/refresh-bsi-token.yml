@@ -1,0 +1,56 @@
+name: Refresh BSI Audio Token
+
+on:
+  schedule:
+    - cron: '0 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Fetch Live BSI Token from indian.bible
+        run: |
+          python -c "
+          import urllib.request, re, json, time
+
+          url = 'https://www.indian.bible/bible/MARVBSI/GEN.1'
+          headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'}
+          req = urllib.request.Request(url, headers=headers)
+          try:
+              with urllib.request.urlopen(req, timeout=30) as resp:
+                  html = resp.read().decode('utf-8', errors='ignore')
+                  m = re.search(r'https://d1hkpuz2o5a2xw\\.cloudfront\\.net/source/555476c2390c102d-04/[^\\s\\"\'<>]+(\\?[^\\s\\"\'<>]+)', html)
+                  if m:
+                      raw_token = m.group(1).lstrip('?').replace('&amp;', '&')
+                      print('Found fresh token!')
+                      data = {'token': raw_token, 'updatedAt': int(time.time())}
+                      for p in ['assets/bsi_token.json', 'docs/assets/bsi_token.json']:
+                          with open(p, 'w', encoding='utf-8') as f:
+                              json.dump(data, f, indent=2)
+                          print(f'Wrote {p}')
+                  else:
+                      print('Could not find CloudFront token in HTML')
+                      exit(1)
+          except Exception as e:
+              print('Error fetching token:', e)
+              exit(1)
+          "
+
+      - name: Commit and Push Updated Token
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add assets/bsi_token.json docs/assets/bsi_token.json
+          git diff --staged --quiet || (git commit -m "chore(audio): auto-refresh BSI CloudFront token [skip ci]" && git push)

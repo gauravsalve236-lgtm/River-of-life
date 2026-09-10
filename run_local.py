@@ -77,6 +77,13 @@ def refresh_token():
                     try:
                         with open(TOKEN_FILE, 'w', encoding='utf-8') as f:
                             json.dump({"token": CURRENT_TOKEN, "savedAt": time.time()}, f)
+                        token_payload = {"token": CURRENT_TOKEN, "updatedAt": int(time.time())}
+                        for bsi_path in [os.path.join(DIRECTORY, 'assets', 'bsi_token.json'), os.path.join(DIRECTORY, 'docs', 'assets', 'bsi_token.json')]:
+                            try:
+                                with open(bsi_path, 'w', encoding='utf-8') as f_out:
+                                    json.dump(token_payload, f_out, indent=2)
+                            except Exception:
+                                pass
                     except Exception:
                         pass
                     print("[BSI Audio] Successfully refreshed live CloudFront token!")

@@ -3498,7 +3498,33 @@ const BSI_USFM_MAP = {
   "jude": "JUD", "revelation": "REV"
 };
 
-let bsiCloudFrontToken = 'Key-Pair-Id=KCC7HS8KPVISV&Signature=HsevzkG62MRVWgMjPtjmLvmx2Qzq6moXVwo7RE3M250qkTjDq6rAZAEB1obYccUuU9jGfmYzl0oZaLG08XIhVOnQePe9ck0eg0aT8Ih8jKL0C34ClnM03~bm4XCqK6uaw-QpmldRRV3DGgQ8wFcCSAWCUEZTBXa32xUondcI-h4yuIz53GOZgv-yRqZ88gyuUpWMw80KcMMN2D7iPNEIWvLOHtLv8p6fCxfhOnTg0XNx-8UnoVTrmygwrj58D7vEpMldYqd~4oEn43o7pp1hMqYwfdY3Qx9I2OMpI3VqLSQhDOJMiwdWPZpS4Mg7OAj2dRaWxqgllRu4ZsEfGyJl2Q__&Expires=1789032121&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9kMWhrcHV6Mm81YTJ4dy5jbG91ZGZyb250Lm5ldC9zb3VyY2UvNTU1NDc2YzIzOTBjMTAyZC0wNC8qIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzg5MDMyMTIxfX19XX0_';
+let bsiCloudFrontToken = 'Key-Pair-Id=KCC7HS8KPVISV&Signature=Q5w6n2eM6TbJCR74XQdNI~BVewvN8jj4oiquhNfzBL3GwQkg6mPhSeMvy5fSfK8CAopRXh-1ckeW1iKnGgVzrVku9RdN7eXb0DSfuRplZOcQNs3zkufJh6vsu2nfRn9yBAAmFz0O23jbT~7ISNFjkcX6BqzYkVF6tn6LfPMo-c7pLvKSAw-iZtdnmV75dCOm2WOqdkSK3QHGJQFgtHpsVSl5nfL~Q9-PC5tUtSxjUhRrloi-jhfG87UYmUJZG4oF2XNgBYafVNGqhbey~iiT827C4-s6lGxw~5yretHBambtI7xTtckHuacvzx8Z4aKwX2zUuLtfuni3UoD2-L1Ozw__&Expires=1789041260&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9kMWhrcHV6Mm81YTJ4dy5jbG91ZGZyb250Lm5ldC9zb3VyY2UvNTU1NDc2YzIzOTBjMTAyZC0wNC8qIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzg5MDQxMjYwfX19XX0_';
+
+async function getBsiCloudFrontToken() {
+  if (bsiCloudFrontToken) {
+    const m = bsiCloudFrontToken.match(/Expires=(\d+)/);
+    if (m) {
+      const exp = parseInt(m[1], 10);
+      const now = Math.floor(Date.now() / 1000);
+      if (now < (exp - 120)) {
+        return bsiCloudFrontToken;
+      }
+    }
+  }
+  try {
+    const res = await fetch(`assets/bsi_token.json?t=${Date.now()}`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.token) {
+        bsiCloudFrontToken = data.token;
+        return bsiCloudFrontToken;
+      }
+    }
+  } catch (err) {
+    console.warn("[BSI Audio] Could not fetch assets/bsi_token.json:", err);
+  }
+  return bsiCloudFrontToken;
+}
 
 var bibleChapterAudioPlayer = null;
 var isBibleChapterPlaying = false;
@@ -3514,6 +3540,8 @@ window.audioPlaybackState = {
 
 async function playBsiDramatizedAudio(bookKey, chapterNum, resumeTime = null) {
   closeModal("modal-audio-settings");
+
+  await getBsiCloudFrontToken();
 
   const cleanBook = (bookKey || state.activeBook || "genesis").toLowerCase().replace(".json", "");
   const chNum = parseInt(chapterNum || state.activeChapter || 1, 10);
@@ -3634,8 +3662,25 @@ async function playBsiDramatizedAudio(bookKey, chapterNum, resumeTime = null) {
     }
   };
 
-  bibleChapterAudioPlayer.onerror = function(e) {
-    console.warn("[BSI Audio] Player error, falling back to AI voice:", e);
+  bibleChapterAudioPlayer.onerror = async function(e) {
+    console.warn("[BSI Audio] Player error:", e);
+    if (!bibleChapterAudioPlayer._retried) {
+      bibleChapterAudioPlayer._retried = true;
+      try {
+        const res = await fetch(`assets/bsi_token.json?reload=${Date.now()}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.token) {
+            bsiCloudFrontToken = data.token;
+            bibleChapterAudioPlayer.src = `https://d1hkpuz2o5a2xw.cloudfront.net/source/555476c2390c102d-04/${usfm}_${chStr}.mp3?${bsiCloudFrontToken}`;
+            await bibleChapterAudioPlayer.play();
+            return;
+          }
+        }
+      } catch (retryErr) {
+        console.warn("[BSI Audio] Retry token failed:", retryErr);
+      }
+    }
     showToast("⚠️ BSI ऑडिओ लोड होत नाही, AI वाचकावर पुनर्निर्देशित करत आहे...");
     startSpeechNarration(0);
   };
