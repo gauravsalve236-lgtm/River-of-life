@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v132-MARVBSI-FULL-CHURCH-BIBLE';
+const CACHE_NAME = 'river-of-life-cache-v134_MOBILE_PHONE_SYNC_ALL_TILES';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
