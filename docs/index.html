@@ -154,6 +154,10 @@
           <svg viewBox="0 0 24 24" class="nav-icon" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
           <span class="nav-label" data-i18n="nav_grow">Grow</span>
         </button>
+        <button class="nav-item" data-tab="study" onclick="switchTab('study')">
+          <svg viewBox="0 0 24 24" class="nav-icon" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+          <span class="nav-label" data-i18n="nav_study">Study</span>
+        </button>
         <button class="nav-item" data-tab="you" onclick="switchTab('you')">
           <svg viewBox="0 0 24 24" class="nav-icon" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
           <span class="nav-label" data-i18n="nav_you">You</span>
@@ -2416,6 +2420,13 @@
             </div>
           </section>
 
+          <!-- VIEW: BIBLE STUDY SECTION (INTERACTIVE MUSEUM & JOURNAL) -->
+          <section id="view-study" class="app-view" style="display: none;">
+            <div class="view-scroll-content study-view-scroll-content" id="study-view-scroll-content">
+              <div id="bible-study-dynamic-container"></div>
+            </div>
+          </section>
+
           <!-- VIEW 10: GROW IN FAITH HUB (Spiritual Formation, Hymns, Plans, Quiz, Stories, Study) -->
           <section id="view-grow" class="app-view" style="display: none;">
             <div class="view-scroll-content grow-scroll-view" style="max-width: 900px; margin: 0 auto; padding-bottom: 95px;">
@@ -2480,20 +2491,20 @@
                   </div>
                  <!-- Floating playbar capsule above the mobile tab bar / bottom desktop page -->
       
-                <!-- 5. Study Tools & Lexicon -->
-                <div class="grow-feature-card" onclick="openStudyToolsModal()" style="background: #FFFFFF; border: 1.5px solid var(--border); border-radius: 18px; padding: 18px; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); transition: transform 0.15s ease, box-shadow 0.15s ease;">
+                <!-- 5. Bible Study & Museum -->
+                <div class="grow-feature-card" onclick="switchTab('study')" style="background: #FFFFFF; border: 1.5px solid var(--border); border-radius: 18px; padding: 18px; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); transition: transform 0.15s ease, box-shadow 0.15s ease;">
                   <div style="display: flex; align-items: flex-start; gap: 14px;">
-                    <div style="width: 46px; height: 46px; border-radius: 12px; background: rgba(16,185,129,0.08); color: #10b981; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <div style="width: 46px; height: 46px; border-radius: 12px; background: rgba(197,155,39,0.12); color: #c59b27; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
                     </div>
                     <div>
-                      <span style="font-size: 10.5px; font-weight: 800; color: #10b981; letter-spacing: 0.5px; text-transform: uppercase;">BIBLICAL FOUNDATIONS</span>
-                      <h3 style="margin: 2px 0 4px 0; font-size: 16px; font-weight: 800; color: var(--text);">Study Tools (अभ्यास साधने व पाया)</h3>
-                      <p style="margin: 0; font-size: 12.5px; color: var(--text-muted); line-height: 1.4;">Origins, 40+ Authors, OIA Reading Method, 66 Books Timeline & Manuscripts.</p>
+                      <span style="font-size: 10.5px; font-weight: 800; color: #c59b27; letter-spacing: 0.5px; text-transform: uppercase;">BIBLICAL SCHOLARSHIP</span>
+                      <h3 style="margin: 2px 0 4px 0; font-size: 16px; font-weight: 800; color: var(--text);">Bible Study & Museum (बायबल अभ्यास व संग्रहालय)</h3>
+                      <p style="margin: 0; font-size: 12.5px; color: var(--text-muted); line-height: 1.4;">Discover the story: 66 Books, Timeline, People & Places, Languages & OIA Method.</p>
                     </div>
                   </div>
                   <div style="display: flex; justify-content: flex-end; align-items: center;">
-                    <span style="font-size: 12px; font-weight: 800; color: #10b981;">Explore Study Suite &rarr;</span>
+                    <span style="font-size: 12px; font-weight: 800; color: #c59b27;">Enter Bible Study &rarr;</span>
                   </div>
                 </div>
 
@@ -5809,7 +5820,8 @@
 
   <!-- App Main Logic (Cache-Busted for 100% MARVBSI Church Bible) -->
   <script src="sarvam-tts.js?v=132_MARVBSI_FULL_CHURCH_BIBLE"></script>
-<script src="app.js?v=136_DAILY_VERSE_STATUS_ALIGNMENT_AND_WATERMARK"></script>
+  <script src="bible-study.js?v=138_MUSEUM_STUDY_HUB"></script>
+  <script src="app.js?v=136_DAILY_VERSE_STATUS_ALIGNMENT_AND_WATERMARK"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 4.5s no matter what

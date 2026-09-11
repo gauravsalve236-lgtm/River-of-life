@@ -1781,7 +1781,7 @@ function switchTab(rawRoute) {
     const activeBottomBtn = document.querySelector(`.tab-btn[data-tab="${route}"]`);
     if (activeBottomBtn) {
       activeBottomBtn.classList.add("active");
-    } else if (["grow", "hymns", "plans", "meetings", "discover"].includes(route)) {
+    } else if (["grow", "hymns", "plans", "meetings", "discover", "study"].includes(route)) {
       const growBtn = document.querySelector('.tab-btn[data-tab="grow"]');
       if (growBtn) growBtn.classList.add("active");
       const growSidebar = document.querySelector('.nav-item[data-tab="grow"]');
@@ -1800,6 +1800,10 @@ function switchTab(rawRoute) {
       if (typeof renderHomeThematicPrayers === "function") renderHomeThematicPrayers();
       if (typeof renderDidYouKnowWidget === "function") renderDidYouKnowWidget();
       if (typeof renderEducationalMicroLearning === "function") renderEducationalMicroLearning();
+    } else if (route === "study") {
+      if (window.BibleStudy && typeof window.BibleStudy.init === "function") {
+        window.BibleStudy.init();
+      }
     } else if (route === "grow") {
       if (typeof renderGrowView === "function") renderGrowView();
     } else if (route === "hymns") {
@@ -21057,21 +21061,10 @@ function switchStudyToolTab(tabName, btn) {
 
 function openStudyToolsModal() {
   if (typeof switchTab === 'function') {
-    switchTab('grow');
+    switchTab('study');
   } else {
-    window.location.hash = '#/grow';
+    window.location.hash = '#/study';
   }
-  setTimeout(() => {
-    const hub = document.getElementById('grow-study-tools-hub');
-    if (hub) {
-      hub.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      hub.style.transition = 'box-shadow 0.3s ease';
-      hub.style.boxShadow = '0 0 0 3px rgba(16,185,129,0.5)';
-      setTimeout(() => {
-        if (hub) hub.style.boxShadow = '';
-      }, 1500);
-    }
-  }, 150);
 }
 
 window.toggleStudyAccordion = toggleStudyAccordion;
