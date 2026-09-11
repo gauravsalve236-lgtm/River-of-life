@@ -2863,6 +2863,13 @@ function renderDailyDevotion() {
     homeVodTextEl.textContent = `“${displayText}”`;
   }
 
+  // Native Widget sync for Android & iOS
+  try {
+    if (window.NativeWidgetBridge && typeof window.NativeWidgetBridge.updateDailyVerse === "function") {
+      window.NativeWidgetBridge.updateDailyVerse(displayText, displayRef);
+    }
+  } catch(e) {}
+
   if (typeof updateDailyVerseBookmarkUI === "function") {
     updateDailyVerseBookmarkUI();
   }
@@ -7906,6 +7913,161 @@ Let Your angels stand guard over my household throughout the night.
 
 In Jesus' name, Amen.`,
     amenCount: 264
+  },
+  "morning_awakening": {
+    id: "morning_awakening",
+    bookKey: "psalms",
+    chapter: 5,
+    categoryMr: "सकाळची ध्यानधारणा",
+    categoryEn: "MORNING MEDITATION",
+    titleMr: "पहाटेची प्रार्थना व जागृती (Morning Awakening)",
+    titleEn: "Morning Awakening & Divine Presence",
+    subtitleMr: "दिवसाची सुरुवात देवाच्या जिवंत सान्निध्यात",
+    subtitleEn: "Begin your day anchored in God's presence",
+    bgImage: "assets/images/morning_grace_art.jpg",
+    refMr: "स्तोत्रसंहिता ५:३",
+    refEn: "Psalm 5:3",
+    verseMr: "हे परमेश्वरा, सकाळी तू माझी प्रार्थना ऐकशील; सकाळी मी तुला आपली विनंती सादर करून वाट पाहीन.",
+    verseEn: "In the morning, Lord, you hear my voice; in the morning I lay my requests before you and wait expectantly.",
+    prayerMr: `हे सर्वसमर्थ आणि दयाळू स्वर्गीय पित्या, आजच्या नव्या दिवसाच्या पहाटे मी तुझ्या चरणी नम्रतेने येतो. रात्रभर मला सुरक्षित ठेवून या सुंदर सकाळचा सूर्य पाहण्याची कृपा तू मला दिलीस, याबद्दल माझे हृदय उपकारस्तुतीने भरून गेले आहे. तुझी दया दररोज सकाळी नवी असते आणि तुझा विश्वासूपणा अथांग आहे.
+
+प्रभू, आजच्या संपूर्ण दिवसात माझे विचार, माझे शब्द आणि माझी सर्व कृत्ये तुझ्या इच्छेनुसार चालू दे. कामाच्या ठिकाणी, कुटुंबात आणि प्रवासात माझ्या पावलांना मार्गदर्शन कर. माझ्यासमोर येणाऱ्या प्रत्येक आव्हानात मला स्वर्गीय ज्ञान आणि धीर दे. मला सर्व प्रकारच्या प्रलोभनांपासून आणि वाईटापासून दूर ठेव.
+
+मी आज ज्या ज्या लोकांना भेटेन, त्यांच्यासाठी मी तुझ्या प्रेमाचा आणि आशीर्वादाचा झरा बनावे अशी कृपा कर. माझ्या कुटुंबावर, मित्रांवर आणि संपूर्ण मंडळीवर तुझा संरक्षणाचा हात असू दे. आजचा संपूर्ण दिवस मी तुझ्या पवित्र हातात समर्पित करतो.
+
+येशू ख्रिस्ताच्या पवित्र व सामर्थ्यशाली नावात, आमेन.`,
+    prayerEn: `Heavenly Father, Almighty Creator, I come into Your presence at the threshold of this brand-new morning with a heart brimming with gratitude. Thank You for sustaining my breath through the stillness of the night and granting me the gift of this new dawn. Your mercies are truly new every single morning, and Your faithfulness is boundless.
+
+Lord, as I step into the responsibilities, conversations, and appointments of this day, guide my footsteps along the paths of righteousness. Guard my tongue so that I speak words of grace, encouragement, and truth. Grant me divine wisdom in every decision, patience amid disruptions, and courage to stand firm in faith when trials arise.
+
+Let Your Holy Spirit empower me to be a beacon of light, hope, and compassion to everyone I cross paths with today. Shield my family and home under the shadow of Your almighty wings. I dedicate every minute of this day to Your glory and honor.
+
+In the precious and victorious name of Jesus Christ, Amen.`,
+    amenCount: 342
+  },
+  "midday_strength": {
+    id: "midday_strength",
+    bookKey: "isaiah",
+    chapter: 40,
+    categoryMr: "दुपारची विश्रांती व बळ",
+    categoryEn: "MIDDAY REFRESHING",
+    titleMr: "दुपारची प्रार्थना व सामर्थ्य (Midday Strength)",
+    titleEn: "Midday Renewal & Strength",
+    subtitleMr: "कामाच्या धावपळीत आत्मिक ताजेतवानेपणा",
+    subtitleEn: "Renew your strength in the midst of daily toil",
+    bgImage: "assets/images/moses_mount_sinai_art.jpg",
+    refMr: "यशया ४०:२९-३१",
+    refEn: "Isaiah 40:29-31",
+    verseMr: "तो थकलेल्याला सामर्थ्य देतो आणि अशक्त असलेल्याचे बळ वाढवतो. जे परमेश्वराची वाट पाहतात ते नवीन सामर्थ्य प्राप्त करतील.",
+    verseEn: "He gives strength to the weary and increases the power of the weak. Those who hope in the Lord will renew their strength.",
+    prayerMr: `हे माझ्या जीवनाच्या सामर्थ्यवान खडका, दिवसाच्या या मध्यंतरी, कामाच्या गडबडीत आणि थकव्यात मी माझे मन क्षणभर तुझ्याकडे वळवतो. प्रभू, सकाळपासून केलेल्या परिश्रमामुळे माझे शरीर आणि मन थकले असेल, परंतु तुझा आत्मा कधीही थकत नाही. तू अशक्ताला बळ देणारा आणि थकलेल्याला नवी शक्ती देणारा जिवंत देव आहेस.
+
+या घडीला मी माझ्या मनातील सर्व ताण, गोंधळ आणि काळजी तुझ्या स्वाधीन करतो. माझे विचार पुन्हा तुझ्या शांततेत स्थिर कर. जे परमेश्वराची वाट पाहतात ते गरुडासारखे पंख पसरून उंच उडतील आणि चालताना थकणार नाहीत, या तुझ्या वचनावर मी भरवसा ठेवतो. माझ्या उर्वरित दिवसाच्या कामावर तुझा आशीर्वाद असू दे.
+
+माझ्या सहकाऱ्यांशी व कुटुंबाशी संवाद साधताना मला सौम्यता, समजूतदारपणा आणि प्रेम दे. माझ्या कष्टाचे फळ तुझ्या गौरवासाठी उपयोगी पडू दे. तूच माझा खरा विसावा आणि माझ्या आत्म्याचे समाधान आहेस.
+
+येशूच्या नावात, आमेन.`,
+    prayerEn: `O Lord, my Fortress and Strength, in the middle of this busy day amidst deadlines and weariness, I pause to fix my eyes upon You. The pressures of work and the demands of this world can easily drain my physical energy and cloud my focus, but Your strength is unfailing and Your well of grace never runs dry.
+
+I surrender every frustration, anxiety, and deadline into Your capable hands. Breathe Your supernatural peace into my spirit and revitalize my mind. As Your Word promises, those who wait upon You shall renew their strength, mounting up with wings like eagles, running and not growing weary, walking and not fainting.
+
+Fill me afresh with patience, diligence, and integrity as I complete the tasks set before me today. Let my attitude and conduct honor You in every interaction. Thank You for being my constant companion and eternal source of joy.
+
+In Jesus' name, Amen.`,
+    amenCount: 285
+  },
+  "evening_surrender": {
+    id: "evening_surrender",
+    bookKey: "psalms",
+    chapter: 4,
+    categoryMr: "रात्रीची विश्रांती व समर्पण",
+    categoryEn: "EVENING SURRENDER",
+    titleMr: "संध्याकाळची प्रार्थना व समर्पण (Evening Surrender)",
+    titleEn: "Evening Surrender & Night Peace",
+    subtitleMr: "दिवसभराचा भार प्रभूच्या चरणी अर्पण करा",
+    subtitleEn: "Cast every burden into His hands for peaceful sleep",
+    bgImage: "assets/images/peace_anxiety_art.jpg",
+    refMr: "स्तोत्रसंहिता ४:८",
+    refEn: "Psalm 4:8",
+    verseMr: "मी शांततेने निजेन आणि मला लगेच झोप लागेल; कारण हे परमेश्वरा, केवळ तूच मला सुरक्षिततेमध्ये ठेवतोस.",
+    verseEn: "In peace I will lie down and sleep, for you alone, Lord, make me dwell in safety.",
+    prayerMr: `हे प्रेमळ पित्या, दिवस मावळला आहे आणि रात्रीची शांतता पसरली आहे. आजच्या संपूर्ण दिवसात तू माझ्यासोबत राहिलास, प्रत्येक संकटापासून माझे रक्षण केलेस आणि माझ्या गरजा पुरवल्यास, याबद्दल मी तुझे कोटी कोटी आभार मानतो. आज दिवसभरात माझ्या हातून घडलेल्या प्रत्येक चुकीची आणि उणिवांची क्षमा कर.
+
+आजच्या दिवसातील सर्व अपूर्ण कामे, उद्याची चिंता आणि माझ्या मनावर असलेला भार मी आता पूर्णपणे तुझ्या पायाशी ठेवतो. मला कशाचीही भीती नाही, कारण तू माझ्यावर अहोरात्र लक्ष ठेवणारा देव आहेस. इस्राएलाचा रक्षक कधीही डुलकी घेत नाही आणि झोपतही नाही.
+
+माझ्या घरावर आणि प्रियजनांवर तुझ्या पवित्र देवदूतांचा पहारा असू दे. माझ्या मनाला सर्व भीती आणि अस्वस्थतेतून सोडवून गोड आणि विश्रांतीपूर्ण झोप दे, जेणेकरून उद्या सकाळी मी तुझ्या सेवेसाठी नव्या उत्साहाने जागा होऊ शकेन.
+
+येशू ख्रिस्ताच्या नावात, आमेन.`,
+    prayerEn: `Loving Father, as dusk settles and the quiet shadows of night draw near, I bow my head to thank You for Your unwavering protection and provision throughout this day. You have preserved my going out and my coming in. Where I fell short in thought, word, or deed today, I ask for Your loving forgiveness and cleansing grace.
+
+Right now, I choose to release every unfinished task, unresolved conflict, and worry about tomorrow into Your mighty hands. I refuse to carry burdens into my rest that only You are big enough to bear. You who watch over Your children neither slumber nor sleep; therefore, I can rest without fear or agitation.
+
+Post Your guardian angels around my home and my family tonight. Blanket my heart and mind with Your profound peace, and grant me deep, healing, and restorative sleep so that I may awaken tomorrow refreshed and ready to serve You.
+
+In the name of Jesus, Amen.`,
+    amenCount: 318
+  },
+  "psalm91_protection": {
+    id: "psalm91_protection",
+    bookKey: "psalms",
+    chapter: 91,
+    categoryMr: "सर्व संकटांतून दैवी संरक्षण",
+    categoryEn: "DIVINE PROTECTION",
+    titleMr: "स्तोत्र ९१: दैवी संरक्षण प्रार्थना (Psalm 91 Shield)",
+    titleEn: "Psalm 91: The Fortress of Protection",
+    subtitleMr: "सर्वसमर्थाच्या पंखांखाली सुरक्षित निवारा",
+    subtitleEn: "Dwelling secure in the secret place of the Most High",
+    bgImage: "assets/images/serene_sky_prayer.jpg",
+    refMr: "स्तोत्रसंहिता ९१:१-४",
+    refEn: "Psalm 91:1-4",
+    verseMr: "जो परात्पर देवाच्या गुप्तस्थळी राहतो, तो सर्वसमर्थाच्या सावलीत विसावा पावेल. परमेश्वर माझा कोट व माझा किल्ला आहे. तो आपल्या पंखांनी तुला आच्छादील.",
+    verseEn: "Whoever dwells in the shelter of the Most High will rest in the shadow of the Almighty. I will say of the Lord, 'He is my refuge and my fortress, my God, in whom I trust.'",
+    prayerMr: `हे परात्पर देवा, सर्वसमर्थ परमेश्वरा, मी आज स्वतःला, माझ्या कुटुंबाला आणि माझ्या घरादाराला तुझ्या गुप्तस्थळाच्या सावलीत सुरक्षित ठेवतो. तूच माझा अभेद्य कोट, माझा भक्कम किल्ला आणि माझा एकमेव आश्रय आहेस. कोणत्याही महामारीची, दुष्ट शक्तींची किंवा अंधकारातील संकटांची भीती मला बाळगण्याचे कारण नाही, कारण तू माझा महान रक्षक आहेस.
+
+प्रभू, तू आपल्या पंखांनी मला आच्छादतोस आणि तुझा सत्य करार ही माझी ढाल आणि संरक्षण आहे. माझ्या उजव्या बाजूला हजारो पडले तरी संकट माझ्या जवळ येणार नाही. तू आपल्या देवदूतांना माझ्याविषयी आज्ञा दिली आहेस की त्यांनी मला माझ्या सर्व मार्गांत सांभाळावे, जेणेकरून माझ्या पायाला दगडाची ठेच लागणार नाही.
+
+शत्रूच्या प्रत्येक युक्तीचा आणि षडयंत्राचा नाश कर. माझ्या कुटुंबाभोवती तुझ्या अग्नीची भिंत उभी कर. आम्हाला दीर्घायुष्य, उत्तम आरोग्य आणि तुझे तारण अनुभवण्याचे भाग्य दे.
+
+येशू ख्रिस्ताच्या सामर्थ्यशाली आणि विजयी नावात, आमेन.`,
+    prayerEn: `Most High God and Almighty Father, I deliberately take shelter under the shadow of Your wings today. You alone are my refuge, my impenetrable fortress, and my God in whom I place my absolute trust. I declare that no evil shall conquer me, nor shall any plague come near my dwelling, because You are my ultimate protector.
+
+Your faithfulness is my shield and buckler. I will not fear the terror by night, nor the arrow that flies by day, nor the pestilence that walks in darkness. Though a thousand fall at my side and ten thousand at my right hand, danger will not touch me because You have commanded Your holy angels to guard me in all my ways.
+
+Deliver me and my family from every hidden snare and spiritual attack. Satisfy us with long life, robust health, and show us Your salvation. Let Your presence encompass our going out and coming in from this time forth and forevermore.
+
+In the mighty and unrivaled name of Jesus, Amen.`,
+    amenCount: 450
+  },
+  "inner_healing": {
+    id: "inner_healing",
+    bookKey: "matthew",
+    chapter: 11,
+    categoryMr: "भावनिक आरोग्य व आंतरिक शांती",
+    categoryEn: "INNER HEALING",
+    titleMr: "अंतर्मनाची शांती व चंगाई (Inner Healing & Peace)",
+    titleEn: "Inner Healing, Peace & Wholeness",
+    subtitleMr: "मनातील जखमा, भीती व ताणतणावातून मुक्ती",
+    subtitleEn: "Restoration for wounded hearts and weary souls",
+    bgImage: "assets/images/divine_healing_art.jpg",
+    refMr: "मत्तय ११:२८-३०",
+    refEn: "Matthew 11:28-30",
+    verseMr: "अहो कष्टी व भाराक्रांत जनहो, तुम्ही सर्व मजकडे या, म्हणजे मी तुम्हाला विसावा देईन. माझे जू आपल्यावर घ्या व माझ्यापासून शिका; म्हणजे तुमच्या जिवाला विसावा मिळेल.",
+    verseEn: "Come to me, all you who are weary and burdened, and I will give you rest. Take my yoke upon you and learn from me, for I am gentle and humble in heart, and you will find rest for your souls.",
+    prayerMr: `हे दयाळू आणि प्रेमळ प्रभू येशू, तू म्हणालास की 'अहो कष्टी व भाराक्रांत जनहो, तुम्ही सर्व मजकडे या, म्हणजे मी तुम्हाला विसावा देईन.' आज मी माझे अंतःकरण, माझ्या मनातील खोलवर लपलेल्या वेदना, निराशा आणि भूतकाळातील कटू आठवणी तुझ्या चरणी आणतो. तू तुटलेल्या हृदयांना जोडणारा आणि जखमांवर मलम लावणारा महान वैद्य आहेस.
+
+ज्या ज्या लोकांनी मला दुखावले, अपमानित केले किंवा फसवले, त्या सर्वांना क्षमा करण्याचे मोठे मन मला दे. माझ्या मनातील सर्व कडूपणा, राग आणि असंतोष काढून टाक आणि त्या जागी तुझी स्वर्गीय क्षमा आणि प्रीती भरून दे. माझ्या अंतर्मनातील भीतीचे आणि संशयाचे मूळ नष्ट कर.
+
+तुझ्या पवित्र आत्म्याचा शांतीचा प्रवाह माझ्या आत्म्यात, मनात आणि विचारांत वाहू दे. माझे मन सर्व समजुतीच्या पलीकडच्या दैवी शांतीने भरून जावे. मला पुन्हा नवे समाधान, आनंद आणि आत्मिक उल्हास प्राप्त होऊ दे.
+
+येशूच्या गोड आणि तारणहार नावात, आमेन.`,
+    prayerEn: `Compassionate Lord Jesus, You extended the most tender invitation to humanity: "Come to me, all you who are weary and burdened, and I will give you rest." Today, I bring my bruised heart, suppressed tears, and hidden emotional wounds directly to Your feet. You heal the brokenhearted and bind up every painful wound.
+
+I actively choose to forgive anyone who has betrayed, hurt, judged, or abandoned me. Cleanse my soul of every trace of resentment, bitterness, and anger. Where rejection left deep scars, pour in Your affirming unconditional love. Silence the voice of shame, anxiety, and worthlessness with the truth of Your redemption.
+
+Let the soothing balm of Your Holy Spirit wash over my thoughts, memories, and emotions. Fill every dry and weary place in my being with rivers of living water. Grant me rest, renewed joy, and complete wholeness so that I may walk forward in victory.
+
+In Your healing and holy name, Jesus, Amen.`,
+    amenCount: 395
   }
 };
 
@@ -9275,30 +9437,11 @@ function hideEmailVerificationBanner() {
 
 // Render Prayers Screen
 function renderPrayersScreen() {
-  const loggedOutView = document.getElementById("prayers-logged-out-container");
-  const loggedInView = document.getElementById("prayers-logged-in-container");
-  
-  if (!state.currentUser) {
-    if (loggedOutView) loggedOutView.style.display = "block";
-    if (loggedInView) loggedInView.style.display = "none";
-    return;
+  if (typeof renderPublicPrayerRequests === 'function') {
+    renderPublicPrayerRequests();
   }
-  
-  if (loggedOutView) loggedOutView.style.display = "none";
-  if (loggedInView) loggedInView.style.display = "block";
-  
-  const userPortal = document.getElementById("prayers-user-portal");
-  const pastorPortal = document.getElementById("prayers-pastor-portal");
-  
-  const hasAccess = state.currentUser.isPastor || state.currentUser.isAdmin || state.currentUser.username.toLowerCase() === "admin";
-  if (hasAccess) {
-    if (userPortal) userPortal.style.display = "none";
-    if (pastorPortal) pastorPortal.style.display = "block";
-    renderPastorPortal();
-  } else {
-    if (userPortal) userPortal.style.display = "block";
-    if (pastorPortal) pastorPortal.style.display = "none";
-    renderUserPortal();
+  if (typeof renderScheduledPrayersTab === 'function') {
+    renderScheduledPrayersTab();
   }
 }
 
@@ -10623,29 +10766,12 @@ const DEVOTIONAL_DB = {
 
 function getMeetingsFromStorage() {
   try {
-    let meetings = JSON.parse(localStorage.getItem("river_of_life_meetings"));
-    
-    if (!meetings) {
-      const today = new Date();
-      const formatDate = (d) => d.toISOString().split('T')[0];
-      
-      meetings = [
-        {
-          id: "meeting_1",
-          title: "Friday Family Prayer / शुक्रवारची कौटुंबिक प्रार्थना",
-          description: "Live family prayer, praise, worship and Marathi scripture study.",
-          host: "Pastor John",
-          date: formatDate(today),
-          time: "20:00",
-          duration: "60",
-          repeat: "weekly",
-          visibility: "public",
-          status: "live",
-          createdAt: Date.now()
-        }
-      ];
-      localStorage.setItem("river_of_life_meetings", JSON.stringify(meetings));
-    }
+    const raw = localStorage.getItem("river_of_life_meetings");
+    if (!raw) return [];
+    let meetings = JSON.parse(raw);
+    if (!Array.isArray(meetings)) return [];
+    // Purge mock meeting_1 or fasting-friday if left over from previous mock data
+    meetings = meetings.filter(m => m && m.id !== "meeting_1" && m.id !== "fasting-friday" && m.id !== "sanctuary-dawn" && m.id !== "fellowship-evening" && m.id !== "sunday-worship");
     return meetings;
   } catch (e) {
     console.error("Error loading meetings DB:", e);
@@ -14950,6 +15076,271 @@ window.switchPrayersSubtab = function(subtab) {
       if (item.panel) item.panel.style.display = "none";
     }
   });
+
+  if (subtab === 'meetings') {
+    renderScheduledPrayersTab();
+  } else if (subtab === 'requests') {
+    renderPublicPrayerRequests();
+  }
+};
+
+window.renderScheduledPrayersTab = function() {
+  const container = document.getElementById("prayers-scheduled-meetings-list");
+  if (!container) return;
+
+  const meetings = (typeof getMeetingsFromStorage === 'function') ? getMeetingsFromStorage() : [];
+  const scheduled = meetings.filter(m => m && m.id && m.status !== 'ended');
+
+  if (scheduled.length === 0) {
+    container.innerHTML = `
+      <div class="panel-empty-state" style="padding: 42px 20px; text-align: center; background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 18px; box-shadow: var(--shadow-xs);">
+        <span style="font-size: 42px; display: block; margin-bottom: 12px;">⛪</span>
+        <h4 style="font-size: 17px; font-weight: 800; color: var(--text); margin: 0 0 6px 0;">कोणतीही सभा नियोजित नाही / No Scheduled Meetings</h4>
+        <p style="color: var(--text-muted); font-size: 13.5px; max-width: 380px; margin: 0 auto 16px auto; line-height: 1.5;">
+          सध्या कोणतीही सभा नियोजित नाही. पास्टर किंवा ॲडमिन जेव्हा सभा आयोजित करतील, तेव्हा ती येथे दिसेल आणि तुम्ही थेट व्हिडिओ कॉलमध्ये सामील होऊ शकाल.
+        </p>
+        <button onclick="openDrawer('drawer-schedule-meeting'); if (typeof populateScheduleHostsDropdown==='function') populateScheduleHostsDropdown();" class="btn-primary-mini" style="margin: 0 auto; display: inline-flex; padding: 10px 20px; font-size: 13px; font-weight: 700; border-radius: 10px; background: #22c55e; color: #fff; border: none; cursor: pointer;">
+          <span>+ सभा आयोजित करा (Schedule Meeting)</span>
+        </button>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = scheduled.map(m => {
+    const isLive = m.status === 'live';
+    const badgeText = isLive ? '🔴 LIVE NOW' : '📅 UPCOMING';
+    const badgeBg = isLive ? 'rgba(34,197,94,0.15)' : 'rgba(59,130,246,0.15)';
+    const badgeColor = isLive ? '#16a34a' : '#2563eb';
+    const timeStr = `${m.date || ''} • ${m.time || ''}`;
+    const desc = m.description || 'Live Church Fellowship & Prayer';
+    return `
+      <div class="meeting-schedule-card" style="background: var(--bg-content); border: 1.5px solid ${isLive ? '#22c55e' : 'var(--border)'}; border-radius: 18px; padding: 18px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+              <span style="background: ${badgeBg}; color: ${badgeColor}; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px;">${badgeText}</span>
+              <span style="font-size: 11px; color: var(--text-muted); font-weight: 700;">⏱️ ${m.duration || 60} mins</span>
+            </div>
+            <h4 style="margin: 0 0 4px 0; font-size: 16.5px; font-weight: 800; color: var(--text);">${m.title || 'Church Prayer Meeting'}</h4>
+            <p style="margin: 0; font-size: 12px; color: var(--text-muted); font-weight: 600;">Host: ${m.host || 'Pastoral Team'} • Time: ${timeStr}</p>
+          </div>
+          <div style="font-size: 26px;">${isLive ? '🎥' : '⛪'}</div>
+        </div>
+        <p style="margin: 0; font-size: 13px; color: var(--text); line-height: 1.45; background: var(--bg); padding: 10px 12px; border-radius: 10px; border-left: 3px solid ${isLive ? '#22c55e' : 'var(--primary)'};">
+          ${desc}
+        </p>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <button onclick="triggerJoinMeetingFlow('${m.id}')" class="btn-primary-mini" style="flex: 1.4; padding: 11px 16px; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; background: ${isLive ? '#22c55e' : 'var(--primary)'}; color: #fff; border: none;">
+            <span>🎥 Join Video Call (कॉलमध्ये जोडा)</span>
+          </button>
+          <button onclick="sharePrayerMeetingWhatsApp('${m.title || 'Prayer Meeting'}', '${timeStr}', '${m.id}')" class="btn-secondary-mini" style="flex: 1; padding: 11px 14px; border-radius: 12px; font-size: 12.5px; font-weight: 700; border: 1.5px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>💬 Invite (निमंत्रण)</span>
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+};
+
+let currentPrayerRequestsFilter = 'all';
+
+function getPublicPrayerRequests() {
+  try {
+    const raw = localStorage.getItem("rol_public_prayer_requests");
+    if (!raw) {
+      const defaultRequests = [
+        {
+          id: "pr_1",
+          category: "आरोग्य व चंगाई (Healing)",
+          target: "church",
+          name: "राकेश कांबळे",
+          isAnonymous: false,
+          text: "माझ्या आईच्या आरोग्यासाठी प्रार्थना करा. त्या सध्या आजारी आहेत आणि त्यांना देवाच्या चंगाईच्या स्पर्शाची गरज आहे.",
+          createdAt: Date.now() - 7200000,
+          amenCount: 14,
+          isAnswered: false,
+          userVoted: false
+        },
+        {
+          id: "pr_2",
+          category: "आर्थिक आशीर्वाद व नोकरी (Financial)",
+          target: "pastor",
+          name: "गुप्त (Anonymous)",
+          isAnonymous: true,
+          text: "नवीन नोकरीच्या मुलाखतीसाठी देवाचे मार्गदर्शन आणि यश मिळावे म्हणून प्रार्थना करा.",
+          createdAt: Date.now() - 86400000,
+          amenCount: 9,
+          isAnswered: false,
+          userVoted: false
+        }
+      ];
+      localStorage.setItem("rol_public_prayer_requests", JSON.stringify(defaultRequests));
+      return defaultRequests;
+    }
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch(e) {
+    return [];
+  }
+}
+
+function savePublicPrayerRequests(reqs) {
+  try {
+    localStorage.setItem("rol_public_prayer_requests", JSON.stringify(reqs));
+  } catch(e) {}
+}
+
+window.submitPrayerRequestPublic = function() {
+  const catEl = document.getElementById("prayer-input-category");
+  const targetEl = document.getElementById("prayer-input-target");
+  const isAnonEl = document.getElementById("prayer-input-anonymous");
+  const nameEl = document.getElementById("prayer-input-name");
+  const textEl = document.getElementById("prayer-input-details");
+
+  const category = catEl ? catEl.value : "आरोग्य व चंगाई (Healing)";
+  const target = targetEl ? targetEl.value : "church";
+  const isAnonymous = isAnonEl ? isAnonEl.checked : false;
+  let name = (nameEl ? nameEl.value.trim() : "");
+  if (isAnonymous) {
+    name = "गुप्त (Anonymous)";
+  } else if (!name) {
+    name = (state && state.currentUser) ? (state.currentUser.displayName || state.currentUser.username) : "विश्वासू भाविक (Believer)";
+  }
+  const text = textEl ? textEl.value.trim() : "";
+
+  if (!text) {
+    showToast("कृपया विनंती तपशील भरा / Please write request details.");
+    return;
+  }
+
+  const newRequest = {
+    id: "pr_" + Date.now(),
+    category: category,
+    target: target,
+    name: name,
+    isAnonymous: isAnonymous,
+    text: text,
+    createdAt: Date.now(),
+    amenCount: 1,
+    isAnswered: false,
+    userVoted: true,
+    isMy: true
+  };
+
+  const allReqs = getPublicPrayerRequests();
+  allReqs.unshift(newRequest);
+  savePublicPrayerRequests(allReqs);
+
+  if (textEl) textEl.value = "";
+  if (nameEl && !isAnonymous) nameEl.value = "";
+
+  renderPublicPrayerRequests(currentPrayerRequestsFilter);
+  showToast("🙏 प्रार्थना विनंती पाठवली! आम्ही तुमच्यासाठी प्रार्थना करतो.");
+};
+
+window.filterPublicPrayerRequests = function(filter, btn) {
+  currentPrayerRequestsFilter = filter;
+  document.querySelectorAll(".prayer-filter-pill").forEach(p => p.classList.remove("active"));
+  if (btn) {
+    btn.classList.add("active");
+    btn.style.background = "var(--primary)";
+    btn.style.color = "#fff";
+  }
+  renderPublicPrayerRequests(filter);
+};
+
+window.renderPublicPrayerRequests = function(filter = currentPrayerRequestsFilter) {
+  const container = document.getElementById("user-submitted-requests-list");
+  if (!container) return;
+
+  const allReqs = getPublicPrayerRequests();
+  let filtered = allReqs;
+  if (filter === "my") {
+    filtered = allReqs.filter(r => r.isMy || (!r.isAnonymous && state.currentUser && r.name === (state.currentUser.displayName || state.currentUser.username)));
+  } else if (filter === "answered") {
+    filtered = allReqs.filter(r => r.isAnswered);
+  }
+
+  if (filtered.length === 0) {
+    container.innerHTML = `
+      <div class="panel-empty-state" style="padding: 30px 20px; text-align: center; color: var(--text-muted); font-size: 13.5px;">
+        <span>कोणतीही प्रार्थना विनंती आढळली नाही / No prayer requests found.</span>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = filtered.map(r => {
+    let targetLabel = "👥 Church Congregation / सर्व मंडळी";
+    let targetBadgeColor = "#2563eb";
+    if (r.target === "pastor") {
+      targetLabel = "🔒 Pastor Only / फक्त पास्टर";
+      targetBadgeColor = "#dc2626";
+    } else if (r.target === "leaders") {
+      targetLabel = "🛡️ Admin & Leaders / ॲडमिन व सेवक";
+      targetBadgeColor = "#d97706";
+    }
+
+    const timeAgoStr = typeof formatTimeAgo === 'function' ? formatTimeAgo(r.createdAt) : 'Recently';
+
+    return `
+      <div class="public-prayer-card" style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 10px; box-shadow: var(--shadow-xs);">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="background: rgba(247,0,47,0.1); color: var(--primary); font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px;">${r.category || 'प्रार्थना'}</span>
+            <span style="font-size: 11px; font-weight: 700; color: ${targetBadgeColor}; background: rgba(0,0,0,0.04); padding: 2px 7px; border-radius: 5px;">${targetLabel}</span>
+          </div>
+          <span style="font-size: 11.5px; color: var(--text-muted); font-weight: 600;">${timeAgoStr}</span>
+        </div>
+
+        <p style="margin: 0; font-size: 14px; line-height: 1.55; color: var(--text); font-family: var(--font-body); white-space: pre-line;">${r.text}</p>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; padding-top: 8px; border-top: 1px solid var(--border);">
+          <span style="font-size: 12px; color: var(--text-muted); font-weight: 700;">👤 ${r.name || 'Believer'}</span>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <button onclick="standInPrayer('${r.id}')" style="background: ${r.userVoted ? 'var(--primary)' : 'var(--bg)'}; color: ${r.userVoted ? '#fff' : 'var(--text)'}; border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+              <span>🙏 आमेन / Prayed (${r.amenCount || 1})</span>
+            </button>
+            ${r.isAnswered ? `
+              <span style="font-size: 11px; font-weight: 800; color: #16a34a; background: rgba(34,197,94,0.15); padding: 4px 8px; border-radius: 6px;">✓ Answered / उत्तर मिळाले</span>
+            ` : `
+              <button onclick="togglePublicRequestAnswered('${r.id}')" style="background: none; border: 1px solid var(--border); color: var(--text-muted); border-radius: 8px; padding: 5px 10px; font-size: 11.5px; font-weight: 600; cursor: pointer;">
+                Mark Answered
+              </button>
+            `}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+};
+
+window.standInPrayer = function(id) {
+  const reqs = getPublicPrayerRequests();
+  const item = reqs.find(r => r.id === id);
+  if (item) {
+    if (!item.userVoted) {
+      item.amenCount = (item.amenCount || 0) + 1;
+      item.userVoted = true;
+      savePublicPrayerRequests(reqs);
+      showToast("🙏 तुम्ही या प्रार्थनेत सहभागी झालात! (You stood in prayer!)");
+    } else {
+      showToast("🙏 तुम्ही आधीच या प्रार्थनेत सहभागी आहात!");
+    }
+    renderPublicPrayerRequests(currentPrayerRequestsFilter);
+  }
+};
+
+window.togglePublicRequestAnswered = function(id) {
+  const reqs = getPublicPrayerRequests();
+  const item = reqs.find(r => r.id === id);
+  if (item) {
+    item.isAnswered = !item.isAnswered;
+    savePublicPrayerRequests(reqs);
+    showToast(item.isAnswered ? "🎉 देव महान आहे! प्रार्थना उत्तरित झाली!" : "Status updated.");
+    renderPublicPrayerRequests(currentPrayerRequestsFilter);
+  }
 };
 
 window.joinPrayerMeetingDirect = function(roomCode, title) {

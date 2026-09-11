@@ -45,6 +45,16 @@ public class MainActivity extends AppCompatActivity {
         // Enable Hardware Acceleration
         webView.setLayerType(WebView.LAYER_TYPE_HARDWARE, null);
 
+        // Native Widget Bridge for Verse of the Day
+        webView.addJavascriptInterface(new Object() {
+            @android.webkit.JavascriptInterface
+            public void updateDailyVerse(String verseText, String verseRef) {
+                runOnUiThread(() -> {
+                    VerseWidgetProvider.updateWidgetData(MainActivity.this, verseText, verseRef);
+                });
+            }
+        }, "NativeWidgetBridge");
+
         // Handle WebRTC Camera & Microphone Hardware Granting
         webView.setWebChromeClient(new WebChromeClient() {
             @Override
