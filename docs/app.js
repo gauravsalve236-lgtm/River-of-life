@@ -21021,6 +21021,63 @@ window.openGalleryLightbox = openGalleryLightbox;
 window.closeGalleryLightbox = closeGalleryLightbox;
 window.toggleEventRsvp = toggleEventRsvp;
 
+/* ==========================================================================
+   Study Tools Suite (Grow Tab Hub)
+   ========================================================================== */
+function toggleStudyAccordion(id) {
+  const el = document.getElementById(id);
+  const chev = document.getElementById(id.replace('accordion-', 'chevron-'));
+  if (!el) return;
+  const isHidden = el.style.display === 'none';
+  el.style.display = isHidden ? 'block' : 'none';
+  if (chev) {
+    chev.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(-90deg)';
+  }
+}
+
+function switchStudyToolTab(tabName, btn) {
+  const panels = ['modules', 'timeline', 'oia', 'manuscripts'];
+  panels.forEach(p => {
+    const el = document.getElementById(`study-panel-${p}`);
+    if (el) el.style.display = (p === tabName) ? 'flex' : 'none';
+  });
+  document.querySelectorAll('.study-hub-nav-btn').forEach(b => {
+    b.classList.remove('active');
+    b.style.background = 'rgba(255,255,255,0.1)';
+    b.style.color = '#e2e8f0';
+    b.style.border = '1px solid rgba(255,255,255,0.2)';
+  });
+  if (btn) {
+    btn.classList.add('active');
+    btn.style.background = 'var(--primary)';
+    btn.style.color = '#ffffff';
+    btn.style.border = 'none';
+  }
+}
+
+function openStudyToolsModal() {
+  if (typeof switchTab === 'function') {
+    switchTab('grow');
+  } else {
+    window.location.hash = '#/grow';
+  }
+  setTimeout(() => {
+    const hub = document.getElementById('grow-study-tools-hub');
+    if (hub) {
+      hub.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      hub.style.transition = 'box-shadow 0.3s ease';
+      hub.style.boxShadow = '0 0 0 3px rgba(16,185,129,0.5)';
+      setTimeout(() => {
+        if (hub) hub.style.boxShadow = '';
+      }, 1500);
+    }
+  }, 150);
+}
+
+window.toggleStudyAccordion = toggleStudyAccordion;
+window.switchStudyToolTab = switchStudyToolTab;
+window.openStudyToolsModal = openStudyToolsModal;
+
 // Auto-initialize homepage engagement widgets
 setTimeout(() => {
   try {
@@ -21038,5 +21095,6 @@ setTimeout(() => {
     scheduleDailyMorningNotification();
   } catch (e) {}
 }, 2000);
+
 
 
