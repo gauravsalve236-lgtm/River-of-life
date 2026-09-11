@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v91-PERFECT-MARATHI-RATAN-SARVAM-CHUNKING';
+const CACHE_NAME = 'river-of-life-cache-v137_BSI_AUDIO_LIVE_TOKEN_ENGINE_FIX';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
@@ -19,9 +19,34 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if (client.url && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      if (clients.openWindow) {
+        return clients.openWindow('./index.html#today');
+      }
+    })
+  );
+});
+
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   
+  // NEVER cache BSI tokens, CloudFront audio, or backend APIs
+  if (
+    event.request.url.includes('bsi_token') ||
+    event.request.url.includes('cloudfront.net') ||
+    event.request.url.includes('/api/')
+  ) {
+    return;
+  }
+
   event.respondWith(
     fetch(event.request)
       .then((networkResponse) => {

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v136_DAILY_VERSE_STATUS_ALIGNMENT_AND_WATERMARK';
+const CACHE_NAME = 'river-of-life-cache-v137_BSI_AUDIO_LIVE_TOKEN_ENGINE_FIX';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
@@ -38,6 +38,15 @@ self.addEventListener('notificationclick', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   
+  // NEVER cache BSI tokens, CloudFront audio, or backend APIs
+  if (
+    event.request.url.includes('bsi_token') ||
+    event.request.url.includes('cloudfront.net') ||
+    event.request.url.includes('/api/')
+  ) {
+    return;
+  }
+
   event.respondWith(
     fetch(event.request)
       .then((networkResponse) => {

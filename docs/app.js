@@ -3846,24 +3846,28 @@ const BSI_USFM_MAP = {
   "jude": "JUD", "revelation": "REV"
 };
 
-let bsiCloudFrontToken = 'Key-Pair-Id=KCC7HS8KPVISV&Signature=Q5w6n2eM6TbJCR74XQdNI~BVewvN8jj4oiquhNfzBL3GwQkg6mPhSeMvy5fSfK8CAopRXh-1ckeW1iKnGgVzrVku9RdN7eXb0DSfuRplZOcQNs3zkufJh6vsu2nfRn9yBAAmFz0O23jbT~7ISNFjkcX6BqzYkVF6tn6LfPMo-c7pLvKSAw-iZtdnmV75dCOm2WOqdkSK3QHGJQFgtHpsVSl5nfL~Q9-PC5tUtSxjUhRrloi-jhfG87UYmUJZG4oF2XNgBYafVNGqhbey~iiT827C4-s6lGxw~5yretHBambtI7xTtckHuacvzx8Z4aKwX2zUuLtfuni3UoD2-L1Ozw__&Expires=1789041260&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9kMWhrcHV6Mm81YTJ4dy5jbG91ZGZyb250Lm5ldC9zb3VyY2UvNTU1NDc2YzIzOTBjMTAyZC0wNC8qIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzg5MDQxMjYwfX19XX0_';
+let bsiCloudFrontToken = 'Key-Pair-Id=KCC7HS8KPVISV&Signature=V0p9WSTU7Q~Sg-IBpKdlvmzVmAsz7SIldFE~kY~lBq~9ndFWebawfjTmzLZcSO6nf8wN45eIMkQ65uO2cKwMNxpL3ZFpoN4YWeFBLHIH6NbeaRteHtdDscS0A8TnkYPDRgbaGuGNukT9E4ShwZ5VDZM7oTwBDrcKDOuABRkrk0HzIoPSrLVpxV8cOPihirPitlFtmDCZAcXl86KTKVMEUepskwNTaOm3b3udV3ETbO8kuprPgDtZpWPHzJ0hmZsWR9XGucUIkugzcEFbJZiLOw-g~A9FoDkTFnC-NF7UbjlBkZnAcp5r5jMVXFWLpN3c13H0Z~bWpWTo425SJNMKQA__&Expires=1789112157&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9kMWhrcHV6Mm81YTJ4dy5jbG91ZGZyb250Lm5ldC9zb3VyY2UvNTU1NDc2YzIzOTBjMTAyZC0wNC8qIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzg5MTEyMTU3fX19XX0_';
+
+function isBsiTokenValid(token) {
+  if (!token || typeof token !== 'string') return false;
+  const m = token.match(/Expires=(\d+)/);
+  if (!m) return false;
+  const exp = parseInt(m[1], 10);
+  const now = Math.floor(Date.now() / 1000);
+  return now < (exp - 60);
+}
 
 async function getBsiCloudFrontToken() {
-  if (bsiCloudFrontToken) {
-    const m = bsiCloudFrontToken.match(/Expires=(\d+)/);
-    if (m) {
-      const exp = parseInt(m[1], 10);
-      const now = Math.floor(Date.now() / 1000);
-      if (now < (exp - 120)) {
-        return bsiCloudFrontToken;
-      }
-    }
+  if (isBsiTokenValid(bsiCloudFrontToken)) {
+    return bsiCloudFrontToken;
   }
+
+  // 1. Try local assets/bsi_token.json with no-store cache control
   try {
-    const res = await fetch(`assets/bsi_token.json?t=${Date.now()}`);
+    const res = await fetch(`assets/bsi_token.json?t=${Date.now()}`, { cache: 'no-store' });
     if (res.ok) {
       const data = await res.json();
-      if (data && data.token) {
+      if (data && isBsiTokenValid(data.token)) {
         bsiCloudFrontToken = data.token;
         return bsiCloudFrontToken;
       }
@@ -3871,6 +3875,35 @@ async function getBsiCloudFrontToken() {
   } catch (err) {
     console.warn("[BSI Audio] Could not fetch assets/bsi_token.json:", err);
   }
+
+  // 2. Try raw.githubusercontent.com live branch fallback (instant bypass of GitHub Pages deployment lag)
+  try {
+    const rawRes = await fetch(`https://raw.githubusercontent.com/gauravsalve236-lgtm/River-of-life/main/assets/bsi_token.json?t=${Date.now()}`, { cache: 'no-store' });
+    if (rawRes.ok) {
+      const data = await rawRes.json();
+      if (data && isBsiTokenValid(data.token)) {
+        bsiCloudFrontToken = data.token;
+        return bsiCloudFrontToken;
+      }
+    }
+  } catch (err) {
+    console.warn("[BSI Audio] Raw GitHub token fallback failed:", err);
+  }
+
+  // 3. If local development server is reachable, ask backend
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    try {
+      const localRes = await fetch('/api/refresh-bsi-token');
+      if (localRes.ok) {
+        const data = await localRes.json();
+        if (data && isBsiTokenValid(data.token)) {
+          bsiCloudFrontToken = data.token;
+          return bsiCloudFrontToken;
+        }
+      }
+    } catch(e) {}
+  }
+
   return bsiCloudFrontToken;
 }
 
@@ -3944,6 +3977,7 @@ async function playBsiDramatizedAudio(bookKey, chapterNum, resumeTime = null) {
   window.audioPlaybackState.activeChapter = chNum;
   window.audioPlaybackState.isPaused = false;
 
+  bibleChapterAudioPlayer._retried = false;
   bibleChapterAudioPlayer.src = audioUrl;
   bibleChapterAudioPlayer.playbackRate = audioState.speed || 1.0;
 
@@ -4015,15 +4049,16 @@ async function playBsiDramatizedAudio(bookKey, chapterNum, resumeTime = null) {
     if (!bibleChapterAudioPlayer._retried) {
       bibleChapterAudioPlayer._retried = true;
       try {
-        const res = await fetch(`assets/bsi_token.json?reload=${Date.now()}`);
-        if (res.ok) {
-          const data = await res.json();
-          if (data && data.token) {
-            bsiCloudFrontToken = data.token;
-            bibleChapterAudioPlayer.src = `https://d1hkpuz2o5a2xw.cloudfront.net/source/555476c2390c102d-04/${usfm}_${chStr}.mp3?${bsiCloudFrontToken}`;
-            await bibleChapterAudioPlayer.play();
-            return;
+        bsiCloudFrontToken = null;
+        const freshToken = await getBsiCloudFrontToken();
+        if (freshToken) {
+          console.log("[BSI Audio] Retrying playback with fresh token...");
+          bibleChapterAudioPlayer.src = `https://d1hkpuz2o5a2xw.cloudfront.net/source/555476c2390c102d-04/${usfm}_${chStr}.mp3?${freshToken}`;
+          if (targetTime > 0) {
+            bibleChapterAudioPlayer.currentTime = targetTime;
           }
+          await bibleChapterAudioPlayer.play();
+          return;
         }
       } catch (retryErr) {
         console.warn("[BSI Audio] Retry token failed:", retryErr);
