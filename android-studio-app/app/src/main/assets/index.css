@@ -12329,11 +12329,42 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
 }
 
 .micro-word-title {
-  margin: 2px 0 0 0;
+  margin: 4px 0 0 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  line-height: 1.25;
+}
+
+.micro-word-highlighted {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #FFE4E6 0%, #FECDD3 50%, #FDA4AF 100%);
+  color: #9F1239;
+  border: 1.5px solid #F43F5E;
+  padding: 4px 14px;
+  border-radius: 12px;
   font-size: 22px;
-  font-weight: 800;
-  color: #0F172A;
+  font-weight: 900;
   letter-spacing: -0.3px;
+  box-shadow: 0 4px 14px rgba(244, 63, 94, 0.22);
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.micro-word-highlighted:hover {
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 6px 18px rgba(244, 63, 94, 0.32);
+}
+
+.micro-word-original-script {
+  font-size: 20px;
+  font-weight: 700;
+  color: #BE123C;
+  font-family: var(--font-serif, "Georgia", serif);
+  letter-spacing: 0.5px;
 }
 
 .microlearning-listen-btn {
@@ -12453,9 +12484,18 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
   border-color: var(--primary, #F7002F) !important;
   box-shadow: 0 8px 28px rgba(247, 0, 47, 0.22) !important;
 }
-.ios-theme-dark .microlearning-heading,
-.ios-theme-dark .micro-word-title {
+.ios-theme-dark .microlearning-heading {
   color: #f8fafc;
+}
+.ios-theme-dark .micro-word-highlighted {
+  background: linear-gradient(135deg, rgba(225, 29, 72, 0.25) 0%, rgba(190, 18, 60, 0.4) 100%);
+  color: #FFE4E6;
+  border-color: #FB7185;
+  box-shadow: 0 4px 16px rgba(244, 63, 94, 0.35);
+  text-shadow: none;
+}
+.ios-theme-dark .micro-word-original-script {
+  color: #FDA4AF;
 }
 .ios-theme-dark .microlearning-meaning-box {
   background: rgba(247, 0, 47, 0.08);
@@ -13709,6 +13749,9 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
 .ios-theme-dark .home-sanctuary-card {
   background: #1e293b;
   border-color: #334155;
+}
+.ios-theme-dark .home-sanctuary-card-content {
+  background: #1e293b;
 }
 .ios-theme-dark .home-sanctuary-card-title {
   color: #f8fafc;

@@ -1634,6 +1634,9 @@ function applyAppLanguage(langCode) {
   }
   saveStateToLocalStorage();
   applyStylesFromState();
+  if (typeof renderHomeThematicPrayers === 'function') renderHomeThematicPrayers();
+  if (typeof renderDidYouKnowWidget === 'function') renderDidYouKnowWidget();
+  if (typeof renderEducationalMicroLearning === 'function') renderEducationalMicroLearning();
 }
 
 window.t = t;
@@ -1794,6 +1797,9 @@ function switchTab(rawRoute) {
     if (route === "home") {
       renderDailyDevotion();
       if (typeof renderHomeAnnouncementBanner === "function") renderHomeAnnouncementBanner();
+      if (typeof renderHomeThematicPrayers === "function") renderHomeThematicPrayers();
+      if (typeof renderDidYouKnowWidget === "function") renderDidYouKnowWidget();
+      if (typeof renderEducationalMicroLearning === "function") renderEducationalMicroLearning();
     } else if (route === "grow") {
       if (typeof renderGrowView === "function") renderGrowView();
     } else if (route === "hymns") {
@@ -7638,9 +7644,11 @@ const PRAYER_TOPICS_DATA = {
     bookKey: "john",
     chapter: 2,
     categoryMr: "दैवी चमत्कार व पुरवठा",
-    categoryEn: "MIRACLE & DIVINE PROVISION",
+    categoryEn: "MIRACLE & PROVISION",
     titleMr: "पाण्याचे द्राक्षारसात रूपांतर",
-    titleEn: "Water Turned into Wine • Abundance in Scarcity",
+    titleEn: "Water Turned into Wine",
+    subtitleMr: "अभावात विपुलता व दैवी चमत्कार",
+    subtitleEn: "Abundance in scarcity & divine breakthrough",
     bgImage: "assets/images/wedding_cana_miracle.jpg",
     refMr: "योहान २:१-११",
     refEn: "John 2:1-11",
@@ -7668,48 +7676,17 @@ In the mighty and precious name of Jesus Christ, I pray,
 Amen.`,
     amenCount: 154
   },
-  "peace_anxiety": {
-    id: "peace_anxiety",
-    bookKey: "philippians",
-    chapter: 4,
-    categoryMr: "चिंतेतून मुक्ती आणि शांती",
-    categoryEn: "PEACE OVER ANXIETY & FEAR",
-    titleMr: "चिंतेतून मुक्ती आणि दैवी शांती",
-    titleEn: "Peace Over Anxiety & Worry",
-    bgImage: "assets/images/peace_anxiety.png",
-    refMr: "फिलिप्पैकरांस ४:६-७",
-    refEn: "Philippians 4:6-7",
-    verseMr: "कशाविषयीही चिंता करू नका, तर सर्व गोष्टींत प्रार्थना व याचना करून उपकारस्तुतीसह आपली मागणी देवाला कळवा. म्हणजे सर्व बुद्धीच्या पलीकडची देवाची शांती तुमच्या हृदयांचे आणि मनांचे रक्षण करील.",
-    verseEn: "Do not be anxious about anything, but in every situation, by prayer and petition, with thanksgiving, present your requests to God. And the peace of God, which transcends all understanding, will guard your hearts and your minds.",
-    prayerMr: `हे शांतीच्या अधिपती प्रभू,
-
-आज माझे मन अनेक चिंतांनी, भविष्याच्या काळजीने आणि भीतींनी व्याकुळ झाले आहे. परंतु तुझे वचन मला सांगते की कशाविषयीही चिंता करू नको.
-
-मी माझी प्रत्येक काळजी, समस्या आणि भीती तुझ्या चरणी सोपवतो. सर्व बुद्धीच्या पलीकडची तुझी स्वर्गीय शांती माझ्या मनावर आणि हृदयावर पहारा करो.
-
-माझ्या मनात चाललेले वादळ शांत कर आणि मला आठवण करून दे की तू सर्व गोष्टींवर नियंत्रण ठेवणारा जिवंत देव आहेस.
-
-येशूच्या नावात, आमेन.`,
-    prayerEn: `Lord Jesus, Prince of Peace,
-
-Today my heart feels heavy with anxious thoughts, deadlines, and uncertainties about the future. Yet Your Word gently reminds me to cast all my anxieties upon You because You care for me.
-
-I surrender every fear, doubt, and worry into Your capable hands right now. Let Your transcendent peace—which surpasses all human understanding—guard my mind, emotions, and thoughts.
-
-Quiet the storm within my soul and anchor my spirit in Your unwavering love and sovereign control.
-
-In Jesus' name, Amen.`,
-    amenCount: 238
-  },
   "morning_grace": {
     id: "morning_grace",
     bookKey: "psalms",
     chapter: 91,
     categoryMr: "सकाळची कृपा व संरक्षण",
-    categoryEn: "MORNING GRACE & PROTECTION",
+    categoryEn: "MORNING GRACE",
     titleMr: "सकाळची कृपा व दैवी संरक्षण",
-    titleEn: "Morning Grace & Divine Protection",
-    bgImage: "assets/images/golden_dawn.png",
+    titleEn: "Shadow of the Almighty",
+    subtitleMr: "परात्पराच्या गुप्त स्थानी आश्रय व कृपा",
+    subtitleEn: "Safe beneath His wings throughout the day",
+    bgImage: "assets/images/dawn_valley_genesis.jpg",
     refMr: "स्तोत्रसंहिता ९१:१-४",
     refEn: "Psalm 91:1-4",
     verseMr: "जो परात्पराच्या गुप्त स्थानी राहतो, तो सर्वसमर्थाच्या सावलीत विसावा पावेल. तो आपल्या पंखांनी तुला झाकून घेईल, आणि त्याच्या पंखांखाली तुला आश्रय मिळेल.",
@@ -7734,6 +7711,72 @@ I rest securely under the shadow of Your wings throughout this day.
 In Jesus' name, Amen.`,
     amenCount: 312
   },
+  "wisdom_guidance": {
+    id: "wisdom_guidance",
+    bookKey: "proverbs",
+    chapter: 3,
+    categoryMr: "ज्ञानासाठी व मार्गदर्शन",
+    categoryEn: "WISDOM & GUIDANCE",
+    titleMr: "स्वर्गीय ज्ञान व योग्य मार्गदर्शन",
+    titleEn: "Trust in the Lord",
+    subtitleMr: "योग्य मार्गावर चालण्यासाठी स्वर्गीय बुद्धी",
+    subtitleEn: "He will direct your paths straight ahead",
+    bgImage: "assets/images/winding_path_journey.jpg",
+    refMr: "नीतिसूत्रे ३:५-६",
+    refEn: "Proverbs 3:5-6",
+    verseMr: "तू आपल्या पूर्ण अंतःकरणाने परमेश्वरावर भाव ठेव, आणि आपल्या स्वतःच्या बुद्धीवर अवलंबून राहू नको; आपल्या सर्व मार्गांत त्याची दखल घे, म्हणजे तो तुझे मार्ग नीट करील.",
+    verseEn: "Trust in the Lord with all your heart and lean not on your own understanding; in all your ways submit to him, and he will make your paths straight.",
+    prayerMr: `हे सर्वज्ञानी देवा,
+
+माझ्या जीवनातील प्रत्येक निर्णयासाठी, माझ्या नोकरी, व्यवसाय आणि शिक्षणासाठी मला स्वर्गीय बुद्धी आणि विवेक दे.
+
+माझ्या पुढील मार्गावर प्रकाश टाक आणि चुकीच्या निर्णयांपासून मला वाचव. माझ्या हातांच्या कष्टाला यश आणि आशीर्वाद दे. मला प्रामाणिकपणाने आणि उत्कृष्टतेने कार्य करण्याचे मन दे.
+
+येशूच्या नावात, आमेन.`,
+    prayerEn: `Omniscient God and Wise Counselor,
+
+I acknowledge that human wisdom is limited, but Your understanding is infinite. Grant me divine discernment, creativity, and wisdom for my career, education, and pivotal life decisions.
+
+Open doors of opportunity that no one can shut, and close every door that would lead me away from Your purpose. Bless the work of my hands and let me find favor with leaders and colleagues.
+
+In Jesus' name, Amen.`,
+    amenCount: 178
+  },
+  "peace_anxiety": {
+    id: "peace_anxiety",
+    bookKey: "philippians",
+    chapter: 4,
+    categoryMr: "चिंतेतून मुक्ती आणि शांती",
+    categoryEn: "PEACE OVER ANXIETY",
+    titleMr: "चिंतेतून मुक्ती आणि दैवी शांती",
+    titleEn: "Transcendent Calm & Peace",
+    subtitleMr: "सर्व बुद्धीपलीकडची देवाची स्वर्गीय शांती",
+    subtitleEn: "Guard your heart against fear & anxiety",
+    bgImage: "assets/images/serene_sky_prayer.jpg",
+    refMr: "फिलिप्पैकरांस ४:६-७",
+    refEn: "Philippians 4:6-7",
+    verseMr: "कशाविषयीही चिंता करू नका, तर सर्व गोष्टींत प्रार्थना व याचना करून उपकारस्तुतीसह आपली मागणी देवाला कळवा. म्हणजे सर्व बुद्धीच्या पलीकडची देवाची शांती तुमच्या हृदयांचे आणि मनांचे रक्षण करील.",
+    verseEn: "Do not be anxious about anything, but in every situation, by prayer and petition, with thanksgiving, present your requests to God. And the peace of God, which transcends all understanding, will guard your hearts and your minds.",
+    prayerMr: `हे शांतीच्या अधिपती प्रभू,
+
+आज माझे मन अनेक चिंतांनी, भविष्याच्या काळजीने आणि भीतींनी व्याकुळ झाले आहे. परंतु तुझे वचन मला सांगते की कशाविषयीही चिंता करू नको.
+
+मी माझी प्रत्येक काळजी, समस्या आणि भीती तुझ्या चरणी सोपवतो. सर्व बुद्धीच्या पलीकडची तुझी स्वर्गीय शांती माझ्या मनावर आणि हृदयावर पहारा करो.
+
+माझ्या मनात चाललेले वादळ शांत कर आणि मला आठवण करून दे की तू सर्व गोष्टींवर नियंत्रण ठेवणारा जिवंत देव आहेस.
+
+येशूच्या नावात, आमेन.`,
+    prayerEn: `Lord Jesus, Prince of Peace,
+
+Today my heart feels heavy with anxious thoughts, deadlines, and uncertainties about the future. Yet Your Word gently reminds me to cast all my anxieties upon You because You care for me.
+
+I surrender every fear, doubt, and worry into Your capable hands right now. Let Your transcendent peace—which surpasses all human understanding—guard my mind, emotions, and thoughts.
+
+Quiet the storm within my soul and anchor my spirit in Your unwavering love and sovereign control.
+
+In Jesus' name, Amen.`,
+    amenCount: 238
+  },
   "healing_health": {
     id: "healing_health",
     bookKey: "isaiah",
@@ -7741,37 +7784,10 @@ In Jesus' name, Amen.`,
     categoryMr: "आरोग्य आणि दैवी चंगाई",
     categoryEn: "HEALING & HEALTH",
     titleMr: "आरोग्य आणि दैवी चंगाई",
-    titleEn: "Divine Healing & Restoration",
-    bgImage: "assets/images/healing_light.png",
-    refMr: "यिर्मया ३०:१७ • यशया ५३:५",
-    refEn: "Jeremiah 30:17 • Isaiah 53:5",
-    verseMr: "तो आमच्या अपराधांसाठी घायाळ झाला, आमच्या दुष्कर्मांसाठी चिरडला गेला; आमच्या शांतीसाठी त्याला शिक्षा झाली आणि त्याच्या फटक्यांनी आम्हाला आरोग्य प्राप्त झाले.",
-    verseEn: "He was pierced for our transgressions, he was crushed for our iniquities; the punishment that brought us peace was on him, and by his wounds we are healed.",
-    prayerMr: `हे महान वैद्या प्रभू येशू,
-
-तू वधस्तंभावर आमच्या सर्व वेदना, आजार आणि दुःखे वाहिलीस. तुझ्या फटक्यांच्या द्वारे आम्हाला पूर्ण आरोग्य प्राप्त झाले आहे यावर माझा दृढ विश्वास आहे.
-
-माझ्या शरीरातील, मनातील आणि आत्म्यातील प्रत्येक आजारपणावर तुझा रोगनिवारक हात ठेव. मला नवीन आरोग्य आणि ऊर्जा दे. माझे आरोग्य पूर्ववत कर आणि मला तुझ्या गौरवासाठी कार्य करण्यास सक्षम कर.
-
-येशूच्या सामर्थ्यशाली नावात, आमेन.`,
-    prayerEn: `Lord Jesus, the Great Physician,
-
-You carried our sicknesses and bore our griefs upon the cross. By Your precious stripes and suffering, we are granted total spiritual and physical healing.
-
-Lay Your restorative hand upon my body, mind, and spirit right now. Drive away every infirmity, fatigue, and pain. Speak renewal and strength into every cell, restoring my health so that I may serve You with a joyful heart.
-
-In the mighty name of Jesus, Amen.`,
-    amenCount: 289
-  },
-  "healing_restoration": {
-    id: "healing_health",
-    bookKey: "isaiah",
-    chapter: 53,
-    categoryMr: "आरोग्य आणि दैवी चंगाई",
-    categoryEn: "HEALING & HEALTH",
-    titleMr: "आरोग्य आणि दैवी चंगाई",
-    titleEn: "Divine Healing & Restoration",
-    bgImage: "assets/images/healing_light.png",
+    titleEn: "Divine Healing & Wholeness",
+    subtitleMr: "शारीरिक, भावनिक व आत्मिक आरोग्य आणि चंगाई",
+    subtitleEn: "Physical, emotional & spiritual restoration",
+    bgImage: "assets/images/divine_healing_art.jpg",
     refMr: "यिर्मया ३०:१७ • यशया ५३:५",
     refEn: "Jeremiah 30:17 • Isaiah 53:5",
     verseMr: "तो आमच्या अपराधांसाठी घायाळ झाला, आमच्या दुष्कर्मांसाठी चिरडला गेला; आमच्या शांतीसाठी त्याला शिक्षा झाली आणि त्याच्या फटक्यांनी आम्हाला आरोग्य प्राप्त झाले.",
@@ -7797,10 +7813,12 @@ In the mighty name of Jesus, Amen.`,
     bookKey: "joshua",
     chapter: 24,
     categoryMr: "कुटुंबासाठी आशीर्वाद व एकता",
-    categoryEn: "FAMILY BLESSING & HARMONY",
+    categoryEn: "FAMILY BLESSING",
     titleMr: "कुटुंबासाठी आशीर्वाद व एकता",
     titleEn: "Family Blessing & Harmony",
-    bgImage: "assets/images/family_blessing.png",
+    subtitleMr: "घरावर देवाची कृपा, सुख-शांती व कौटुंबिक एकता",
+    subtitleEn: "Unity, love, and protection over your household",
+    bgImage: "assets/images/morning_grace_art.jpg",
     refMr: "यहोशू २४:१५",
     refEn: "Joshua 24:15",
     verseMr: "परंतु मी व माझे घराणे आम्ही तर परमेश्वराचीच सेवा करू.",
@@ -7827,11 +7845,13 @@ In Jesus' name, Amen.`,
     id: "strength_trials",
     bookKey: "isaiah",
     chapter: 40,
-    categoryMr: "कठीण प्रसंगी सामर्थ्य व धीर",
+    categoryMr: "कठीण प्रसंगी सामर्थ्य",
     categoryEn: "STRENGTH IN HARD TIMES",
     titleMr: "कठीण प्रसंगी सामर्थ्य व धीर",
     titleEn: "Strength in Trials & Difficulties",
-    bgImage: "assets/images/mount_zion.png",
+    subtitleMr: "कठीण प्रसंगी अढळ विश्वास व नवीन सामर्थ्य",
+    subtitleEn: "Renewed courage and endurance through Christ",
+    bgImage: "assets/images/moses_mount_sinai_art.jpg",
     refMr: "यशया ४०:२९-३१",
     refEn: "Isaiah 40:29-31",
     verseMr: "तो थकलेल्याला सामर्थ्य देतो आणि अशक्त असलेल्याचे बळ वाढवतो. जे परमेश्वराची वाट पाहतात ते नवीन सामर्थ्य प्राप्त करतील; ते गरुडासारखे पंख पसरून उंच उडतील.",
@@ -7854,44 +7874,17 @@ By Your mighty Spirit, I will rise above this trial like an eagle soaring on the
 In Jesus' name, Amen.`,
     amenCount: 220
   },
-  "wisdom_guidance": {
-    id: "wisdom_guidance",
-    bookKey: "proverbs",
-    chapter: 3,
-    categoryMr: "ज्ञानासाठी व नोकरी-व्यवसाय मार्गदर्शन",
-    categoryEn: "WISDOM & CAREER GUIDANCE",
-    titleMr: "ज्ञानासाठी व नोकरी-व्यवसाय मार्गदर्शन",
-    titleEn: "Wisdom & Career Guidance",
-    bgImage: "assets/images/wisdom_guidance.png",
-    refMr: "नीतिसूत्रे ३:५-६",
-    refEn: "Proverbs 3:5-6",
-    verseMr: "तू आपल्या पूर्ण अंतःकरणाने परमेश्वरावर भाव ठेव, आणि आपल्या स्वतःच्या बुद्धीवर अवलंबून राहू नको; आपल्या सर्व मार्गांत त्याची दखल घे, म्हणजे तो तुझे मार्ग नीट करील.",
-    verseEn: "Trust in the Lord with all your heart and lean not on your own understanding; in all your ways submit to him, and he will make your paths straight.",
-    prayerMr: `हे सर्वज्ञानी देवा,
-
-माझ्या जीवनातील प्रत्येक निर्णयासाठी, माझ्या नोकरी, व्यवसाय आणि शिक्षणासाठी मला स्वर्गीय बुद्धी आणि विवेक दे.
-
-माझ्या पुढील मार्गावर प्रकाश टाक आणि चुकीच्या निर्णयांपासून मला वाचव. माझ्या हातांच्या कष्टाला यश आणि आशीर्वाद दे. मला प्रामाणिकपणाने आणि उत्कृष्टतेने कार्य करण्याचे मन दे.
-
-येशूच्या नावात, आमेन.`,
-    prayerEn: `Omniscient God and Wise Counselor,
-
-I acknowledge that human wisdom is limited, but Your understanding is infinite. Grant me divine discernment, creativity, and wisdom for my career, education, and pivotal life decisions.
-
-Open doors of opportunity that no one can shut, and close every door that would lead me away from Your purpose. Bless the work of my hands and let me find favor with leaders and colleagues.
-
-In Jesus' name, Amen.`,
-    amenCount: 178
-  },
   "evening_rest": {
     id: "evening_rest",
     bookKey: "psalms",
     chapter: 4,
-    categoryMr: "रात्रीची उपकारस्तुती व शांत झोप",
-    categoryEn: "EVENING THANKSGIVING & REST",
+    categoryMr: "रात्रीची विश्रांती व शांती",
+    categoryEn: "EVENING REST",
     titleMr: "रात्रीची उपकारस्तुती व शांत झोप",
     titleEn: "Evening Thanksgiving & Restful Sleep",
-    bgImage: "assets/images/candlelight.png",
+    subtitleMr: "रात्रीची विश्रांती आणि देवदूतांचा सुरक्षित पहारा",
+    subtitleEn: "Peaceful rest under angelic protection",
+    bgImage: "assets/images/peace_anxiety_art.jpg",
     refMr: "स्तोत्रसंहिता ४:८",
     refEn: "Psalm 4:8",
     verseMr: "मी शांततेने निजेन आणि मला लगेच झोप लागेल; कारण हे परमेश्वरा, केवळ तूच मला सुरक्षिततेमध्ये ठेवतोस.",
@@ -17427,7 +17420,17 @@ window.renderBiblicalMicroLearning = function() {
   const refEl = document.getElementById("micro-word-ref");
   const dayBadge = document.getElementById("microlearning-day-badge");
   
-  if (termEl) termEl.textContent = word.term;
+  if (termEl) {
+    const rawTerm = word.term || '';
+    const match = rawTerm.match(/^([^(]+)(?:\s*\(([^)]+)\))?/);
+    if (match) {
+      const primaryWord = match[1].trim();
+      const scriptWord = match[2] ? `(${match[2].trim()})` : '';
+      termEl.innerHTML = `<span class="micro-word-highlighted">${primaryWord}</span> ${scriptWord ? `<span class="micro-word-original-script">${scriptWord}</span>` : ''}`;
+    } else {
+      termEl.innerHTML = `<span class="micro-word-highlighted">${rawTerm}</span>`;
+    }
+  }
   if (originEl) originEl.textContent = word.origin;
   if (pronEl) pronEl.textContent = isEng ? `Pronunciation: ${word.pronunciation}` : `उच्चार: ${word.pronunciation}`;
   if (meaningEl) meaningEl.textContent = isEng ? word.meaningEn : word.meaningMr;
@@ -17441,6 +17444,7 @@ window.renderBiblicalMicroLearning = function() {
     if (span) span.textContent = isEng ? "Read in Bible →" : "बायबलमध्ये वाचा →";
   }
 };
+window.renderEducationalMicroLearning = window.renderBiblicalMicroLearning;
 
 window.speakMicroLearningWord = function() {
   const word = window.getTodayBiblicalWord();
@@ -20066,7 +20070,7 @@ const DID_YOU_KNOW_INSIGHTS = [
     titleMr: "मेंढपाळाची काठी व सोटा",
     tagEn: "Cultural Context",
     tagMr: "ऐतिहासिक संदर्भ",
-    textEn: "In biblical antiquity, a shepherd carried two distinct wooden implements: the 'rod' (shebet) for defending the flock against predators, and the curved 'staff' (mish'enet) for gently guiding straying sheep back to safety. In Psalm 23, David celebrates both as sources of divine comfort.",
+    textEn: "In biblical antiquity, a shepherd carried two distinct wooden implements: the 'rod' (shebet) for defending the flock against wild beasts, and the curved 'staff' (mish'enet) for gently guiding straying sheep back to safety. In Psalm 23, David celebrates both as sources of divine comfort.",
     textMr: "बायबल काळात मेंढपाळाकडे दोन साधने असत: 'सोटा' हिंस्र श्वापदांपासून मेंढरांचे रक्षण करण्यासाठी, आणि 'काठी' चुकलेल्या मेंढरांना हळुवारपणे परत आणण्यासाठी. स्तोत्र २३ मध्ये दावीद याच साधनांचा उल्लेख देवाचे सांत्वन म्हणून करतो.",
     refEn: "Psalm 23 • स्तोत्रसंहिता २३"
   },
@@ -20077,18 +20081,18 @@ const DID_YOU_KNOW_INSIGHTS = [
     titleMr: "काना येथील पाण्याचे द्राक्षारसात रूपांतर",
     tagEn: "Miracle Insight",
     tagMr: "चमत्काराचे रहस्य",
-    textEn: "The six stone jars at Cana were specifically kept for Jewish ceremonial washing, holding about 20 to 30 gallons each. Jesus transformed over 120 gallons of water into the finest wine, demonstrating abundant divine grace replacing old ceremonial shadows.",
+    textEn: "The six stone jars at Cana were kept specifically for Jewish ceremonial purification, holding about 20 to 30 gallons each. Jesus transformed over 120 gallons of water into the finest wine, demonstrating abundant divine grace replacing old ceremonial shadows.",
     textMr: "काना येथील सहा दगडी रांजण ज्यूंच्या शुद्धीकरण विधीसाठी ठेवले होते. प्रत्येकात सुमारे १०० लिटर पाणी मावत असे. येशूने तब्बल ६०० लिटर पाण्याचे उत्कृष्ट द्राक्षारसात रूपांतर करून जुन्या विधींच्या जागी देवाची विपुल कृपा प्रकट केली.",
     refEn: "John 2 • योहान २"
   },
   {
     book: "philippians",
     chapter: 4,
-    titleEn: "The Peace of God which Surpasses Understanding",
+    titleEn: "The Peace that Guards Your Heart",
     titleMr: "सर्व बुद्धिसामर्थ्याच्या पलीकडची शांती",
     tagEn: "Spiritual Peace",
     tagMr: "आत्मिक शांती",
-    textEn: "When Paul wrote about the peace of God guarding believers' hearts, he used the Roman military term 'phroureo'—describing a Roman garrison standing on 24-hour guard duty around an empire citadel, keeping anxiety completely outside.",
+    textEn: "When Paul wrote about the peace of God guarding believers' hearts, he used the Roman military term 'phroureo'—describing an armed garrison standing on 24-hour guard duty around an empire fortress, keeping anxiety completely outside.",
     textMr: "पौलाने जेव्हा 'देवाच्या शांतीने तुमचे रक्षण करावे' असे लिहिले, तेव्हा त्याने रोमन सैन्याचा 'फ्रुरिओ' (phroureo) हा शब्द वापरला—ज्याचा अर्थ एखाद्या किल्ल्याचे २४ तास अहोरात्र रक्षण करणारा पहारेकरी. देवाची शांती तुमच्या हृदयाचे असेच रक्षण करते.",
     refEn: "Philippians 4 • फिलिप्पैकरांस ४"
   },
@@ -20124,9 +20128,175 @@ const DID_YOU_KNOW_INSIGHTS = [
     textEn: "Hebrews 11 describes faith not as blind optimism, but as 'hypostasis'—a title deed or solid foundation of things hoped for. Ancient papyri used this exact term for real estate legal ownership documents.",
     textMr: "इब्री ११ मध्ये विश्वासाची व्याख्या करताना 'हायपोस्टॅसिस' (hypostasis) हा शब्द आला आहे, ज्याचा अर्थ 'मालकी हक्काचा कायदेशीर दस्तऐवज'. देवाच्या वचनांवरचा विश्वास ही केवळ आशा नसून स्वर्गीय आशीर्वादांची पक्की खात्री आहे.",
     refEn: "Hebrews 11 • इब्री ११"
+  },
+  {
+    book: "genesis",
+    chapter: 1,
+    titleEn: "Creation Out of Nothing ('Bara')",
+    titleMr: "शून्यातून विश्वाची दैवी निर्मिती ('बारा')",
+    tagEn: "Creation Truth",
+    tagMr: "सृष्टीचे रहस्य",
+    textEn: "In Genesis 1:1, the Hebrew verb used for God creating the heavens and earth is 'bara' (בָּרָא)—a word reserved exclusively in Scripture for God's sovereign creation out of absolute nothingness (creatio ex nihilo).",
+    textMr: "उत्पत्ती १:१ मध्ये देवाने आकाश व पृथ्वी निर्माण केली यासाठी 'बारा' (bara) हा हिब्रू शब्द वापरला आहे. संपूर्ण पवित्र शास्त्रात हा शब्द केवळ देवाने शून्यातून केलेल्या अलौकिक निर्मितीसाठीच वापरला जातो.",
+    refEn: "Genesis 1 • उत्पत्ती १"
+  },
+  {
+    book: "matthew",
+    chapter: 5,
+    titleEn: "The Salt of the Earth",
+    titleMr: "पृथ्वीचे मीठ आणि जगाचा प्रकाश",
+    tagEn: "Kingdom Culture",
+    tagMr: "देवाचे राज्य",
+    textEn: "In the ancient Mediterranean world, salt was not just for flavor—it was the primary preservative preventing food from decaying and was even used as a form of currency. Jesus calls His followers the moral preservative of the world.",
+    textMr: "प्राचीन काळात मीठ केवळ चवीसाठी नव्हे तर अन्नाला सडण्यापासून वाचवणारे मुख्य संरक्षक साधन होते. येशूने आपल्या अनुयायांना 'पृथ्वीचे मीठ' म्हणून या जगात सत्य व नैतिकतेचे रक्षण करण्याची जबाबदारी दिली.",
+    refEn: "Matthew 5 • मत्तय ५"
+  },
+  {
+    book: "isaiah",
+    chapter: 40,
+    titleEn: "Soaring on Eagle's Wings",
+    titleMr: "गरुडासारखे उंच उड्डाण",
+    tagEn: "Divine Strength",
+    tagMr: "दैवी सामर्थ्य",
+    textEn: "Unlike other birds that flee from storms, eagles lock their wings into storm updrafts to soar effortlessly above turbulence. Isaiah 40:31 teaches that those who wait on the Lord rise above trials on the wind of His Spirit.",
+    textMr: "इतर पक्षी वादळाला घाबरून पळतात, परंतु गरुड वादळातील हवेच्या वेगाचा वापर करून अधिक उंचावर भरारी घेतो. यशया ४०:३१ सांगते की जे परमेश्वराची वाट पाहतात, ते संकटांवर मात करून उंच झेपावतात.",
+    refEn: "Isaiah 40 • यशया ४०"
+  },
+  {
+    book: "john",
+    chapter: 1,
+    titleEn: "The Word Made Flesh (Logos)",
+    titleMr: "शब्द देहधारी झाला (Logos)",
+    tagEn: "The Incarnation",
+    tagMr: "देहधारण",
+    textEn: "The apostle John adopted the term 'Logos'—which in Greek philosophy meant the ultimate cosmic order and reason of the universe—and revealed that this Logos is a living, loving Person: Jesus Christ.",
+    textMr: "ग्रीक तत्त्वज्ञानात 'लोगोस' (Logos) म्हणजे विश्वाला चालवणारी वैश्विक बुद्धी. योहान १ मध्ये जाहीर करतो की हा 'शब्द' कोणती अमूर्त कल्पना नसून साक्षात प्रभू येशू ख्रिस्त आहे जो आपल्यामध्ये राहिला.",
+    refEn: "John 1 • योहान १"
+  },
+  {
+    book: "proverbs",
+    chapter: 3,
+    titleEn: "Straight Paths in Divine Wisdom",
+    titleMr: "सरळ मार्ग आणि स्वर्गीय बुद्धी",
+    tagEn: "Wisdom Nuance",
+    tagMr: "दैवी ज्ञान",
+    textEn: "In Proverbs 3:6, 'He will direct your paths' uses the Hebrew verb 'yashar' (יָשַׁר), which means to level out rugged mountains and remove impassable obstacles from a traveller's road.",
+    textMr: "नीतिसूत्रे ३:६ मध्ये 'तो तुझे मार्ग नीट करील' यासाठी 'याशार' (yashar) हा मूळ शब्द आहे, ज्याचा अर्थ वाटसरूच्या मार्गातील उंच-सखल डोंगर सपाट करणे आणि सर्व अडथळे दूर करणे.",
+    refEn: "Proverbs 3 • नीतिसूत्रे ३"
+  },
+  {
+    book: "1corinthians",
+    chapter: 13,
+    titleEn: "The Greatest Gift: Agape",
+    titleMr: "प्रीतीचा अमर स्तोत्र (अगापे)",
+    tagEn: "Unconditional Love",
+    tagMr: "निःस्वार्थी प्रीती",
+    textEn: "Ancient Greek had four distinct words for love: Eros (romantic), Storge (familial), Philia (brotherly friendship), and Agape (sacrificial divine love). In 1 Corinthians 13, Paul exclusively uses Agape.",
+    textMr: "ग्रीक भाषेत प्रेमासाठी चार शब्द आहेत: एरोस (शारीरिक), स्टोर्गे (कौटुंबिक), फिलिया (मित्रप्रेम) आणि अगापे (दैवी निःस्वार्थी प्रेम). १ करिंथ १३ मध्ये पौलाने केवळ 'अगापे' प्रीतीचे वर्णन केले आहे.",
+    refEn: "1 Corinthians 13 • १ करिंथकरांस १३"
+  },
+  {
+    book: "ephesians",
+    chapter: 6,
+    titleEn: "The Roman Scutum (Shield of Faith)",
+    titleMr: "विश्वासाची महाढाल (रोमन स्कूटम)",
+    tagEn: "Spiritual Warfare",
+    tagMr: "आत्मिक शस्त्रे",
+    textEn: "The 'shield of faith' in Ephesians 6:16 refers to the Roman 'scutum'—a massive four-foot tall door-like shield covered in leather and soaked in water to instantly extinguish flaming pitch arrows.",
+    textMr: "इफिसकरांस ६:१६ मधील 'विश्वासाची ढाल' म्हणजे रोमन सैनिकांची चार फूट उंच 'स्कूटम' ढाल, ज्यावर चामड्याचे आवरण असून ती पाण्यात भिजवली जात असे जेणेकरून शत्रूचे जळते बाण तात्काळ विझत असत.",
+    refEn: "Ephesians 6 • इफिसकरांस ६"
+  },
+  {
+    book: "joshua",
+    chapter: 1,
+    titleEn: "Be Strong & Courageous ('Chazaq')",
+    titleMr: "बळ धर आणि धीर धर ('हझाक')",
+    tagEn: "Courage in Crisis",
+    tagMr: "संकटात धैर्य",
+    textEn: "God repeats 'Chazaq ve-emats' (חֲזַק וֶאֱמָץ) to Joshua three times. 'Chazaq' means to hold tightly with a firm grip, while 'Emats' means internal mental fortitude rooted in God's presence.",
+    textMr: "देवाने यहोशूला तीन वेळा 'बळ धर व धैर्याने राहा' सांगितले. हिब्रू भाषेत 'हझाक' म्हणजे देवाची वचने घट्ट धरून ठेवणे आणि 'एमात्स' म्हणजे संकटात मनाचा समतोल ढळू न देणे.",
+    refEn: "Joshua 1 • यहोशू १"
+  },
+  {
+    book: "revelation",
+    chapter: 22,
+    titleEn: "The River of Life & Healing Leaves",
+    titleMr: "जीवनाच्या पाण्याचा शुद्ध प्रवाह",
+    tagEn: "Eternal Hope",
+    tagMr: "सार्वकालिक आशा",
+    textEn: "In Revelation 22:2, the leaves of the Tree of Life beside the crystal river are for the 'therapeia' (healing) of nations—the Greek root of our modern word 'therapy'. God's ultimate plan is complete restoration.",
+    textMr: "प्रकटीकरण २२:२ मध्ये जीवनाच्या वृक्षाची पाने राष्ट्रांच्या आरोग्यासाठी आहेत. येथे 'थेरेपिया' (therapeia) हा ग्रीक शब्द आला आहे, ज्यातून इंग्रजीतील 'थेरपी' शब्द आला आहे. देव सर्वांना पूर्ण आरोग्य देतो.",
+    refEn: "Revelation 22 • प्रकटीकरण २२"
+  },
+  {
+    book: "psalms",
+    chapter: 91,
+    titleEn: "Under His Feathers & Wings",
+    titleMr: "परात्पराच्या गुप्त स्थानी आश्रय",
+    tagEn: "Divine Protection",
+    tagMr: "दैवी संरक्षण",
+    textEn: "Psalm 91:4 uses tender maternal bird imagery: mother birds shield their fledglings beneath their wings even through forest fires, sacrificing themselves to ensure the safety of their young.",
+    textMr: "स्तोत्रसंहिता ९१:४ मधील पक्ष्याच्या पंखांखालील आश्रयाचे रूपक मातृप्रेमाचे प्रतीक आहे. पक्षी वणव्यातही स्वतःच्या अंगावर जाळ सोसून पंखांखालील पिल्लांचे प्राण वाचवतो; देव आपल्यावर असाच पहारा ठेवतो.",
+    refEn: "Psalm 91 • स्तोत्रसंहिता ९१"
+  },
+  {
+    book: "luke",
+    chapter: 15,
+    titleEn: "The Running Father",
+    titleMr: "उधळ्या पुत्रासाठी धावणारा पिता",
+    tagEn: "Grace Unmeasured",
+    tagMr: "अथांग कृपा",
+    textEn: "In Middle Eastern culture, an honorable patriarch never ran in public as it was considered humiliating. Yet in Luke 15:20, the father threw off his robes and ran to embrace his repentant son before anyone could shame him.",
+    textMr: "प्राचीन मध्यपूर्वेत प्रतिष्ठित घरातील वयोवृद्ध पिता कधीही सार्वजनिक ठिकाणी धावत नसे. परंतु लूक १५:२० मध्ये बापाने सर्व सामाजिक मर्यादा बाजूला ठेवून आपल्या पश्चात्तापी मुलाला मिठी मारण्यासाठी धाव घेतली.",
+    refEn: "Luke 15 • लूक १५"
+  },
+  {
+    book: "jeremiah",
+    chapter: 29,
+    titleEn: "Plans for Peace in Captivity",
+    titleMr: "भविष्याची व आशेची दैवी योजना",
+    tagEn: "Prophetic Promise",
+    tagMr: "भविष्यसूचक वचन",
+    textEn: "Jeremiah 29:11 ('plans to give you hope and a future') was not given in peacetime, but to displaced Hebrew captives weeping in Babylon, assuring them that God works redemptively even through exile.",
+    textMr: "यिर्मया २९:११ मधील 'कल्याणाची योजना' हे वचन सुखाच्या काळात नव्हे, तर बाबेलच्या पारतंत्र्यात रडणाऱ्या इस्राएली लोकांना दिले गेले होते, की देव कठीण परिस्थितीतूनही उज्ज्वल भविष्य घडवतो.",
+    refEn: "Jeremiah 29 • यिर्मया २९"
+  },
+  {
+    book: "mark",
+    chapter: 4,
+    titleEn: "Peace, Be Still ('Siopa, Pephimoso')",
+    titleMr: "शांत हो, स्तब्ध राहा ('सियोपा')",
+    tagEn: "Sovereign Authority",
+    tagMr: "सार्वभौम अधिकार",
+    textEn: "When Jesus calmed the storm on the Sea of Galilee, He commanded the raging waves: 'Siopa! Pephimoso!'—literally, 'Silence! Put a muzzle on it!' The sea immediately responded like a disciplined child.",
+    textMr: "गालीलाच्या समुद्रावर जेव्हा वादळ उसळले, तेव्हा येशूने लाटांना 'सियोपा, पेफिमोसो' अशी आज्ञा दिली—ज्याचा अर्थ 'शांत हो, तोंडावर लगाम घाल!' आणि एका क्षणात संपूर्ण वादळ शमून नितांत शांतता झाली.",
+    refEn: "Mark 4 • मार्क ४"
+  },
+  {
+    book: "acts",
+    chapter: 2,
+    titleEn: "The Reversal of Babel at Pentecost",
+    titleMr: "पेन्टेकॉस्ट: बाबेलच्या फाळणीचा अंत",
+    tagEn: "Holy Spirit Power",
+    tagMr: "पवित्र आत्म्याचे कार्य",
+    textEn: "At the Tower of Babel in Genesis 11, human pride divided nations by scattering languages. At Pentecost in Acts 2, the Holy Spirit unified diverse nations by allowing everyone to hear God's praises in their own tongue.",
+    textMr: "उत्पत्ती ११ मधील बाबेलच्या मनोऱ्यापाशी मानवी अहंकारामुळे भाषांमध्ये फूट पडली. परंतु प्रेषितांची कृत्ये २ मध्ये पेन्टेकॉस्टच्या दिवशी पवित्र आत्म्याने सर्व भाषांतील लोकांना ख्रिस्ताच्या प्रेमात एकत्र आणले.",
+    refEn: "Acts 2 • प्रेषितांची कृत्ये २"
+  },
+  {
+    book: "colossians",
+    chapter: 3,
+    titleEn: "The Peace of Christ as Umpire ('Brabeuo')",
+    titleMr: "ख्रिस्ताची शांती तुमच्या मनाचा मुख्य पंच",
+    tagEn: "Decision Discernment",
+    tagMr: "योग्य निर्णय विवेक",
+    textEn: "In Colossians 3:15, Paul writes 'let the peace of God rule in your hearts.' The Greek word 'brabeuo' (βραβεύω) means to act as the head referee or umpire in athletic games, making the decisive ruling in every conflict.",
+    textMr: "कलसैकर ३:१५ मध्ये 'ख्रिस्ताच्या शांतीने तुमच्या अंतःकरणात राज्य करावे' असे म्हटले आहे. येथे 'ब्राबेउओ' (brabeuo) हा मूळ ग्रीक शब्द आहे, ज्याचा अर्थ ऑलिम्पिक खेळातील मुख्य पंच. जीवनातील प्रत्येक निर्णयात देवाची शांतीच अंतिम कौल देते.",
+    refEn: "Colossians 3 • कलसैकर ३"
   }
 ];
 
+let didYouKnowOffset = 0;
 let activeDidYouKnowInsight = DID_YOU_KNOW_INSIGHTS[0];
 
 function renderDidYouKnowWidget() {
@@ -20138,10 +20308,10 @@ function renderDidYouKnowWidget() {
   const diff = now - start;
   const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
   
-  const idx = dayOfYear % DID_YOU_KNOW_INSIGHTS.length;
-  activeDidYouKnowInsight = DID_YOU_KNOW_INSIGHTS[idx];
+  const idx = Math.abs(dayOfYear + didYouKnowOffset) % DID_YOU_KNOW_INSIGHTS.length;
+  activeDidYouKnowInsight = DID_YOU_KNOW_INSIGHTS[idx] || DID_YOU_KNOW_INSIGHTS[0];
   
-  const isEng = (state && state.translation === 'eng');
+  const isEng = (window.state && (window.state.translation === 'eng' || window.state.language === 'en'));
   
   const tagEl = document.getElementById("did-you-know-tag");
   const titleEl = document.getElementById("did-you-know-title");
@@ -20152,6 +20322,15 @@ function renderDidYouKnowWidget() {
   if (titleEl) titleEl.textContent = isEng ? activeDidYouKnowInsight.titleEn : `${activeDidYouKnowInsight.titleMr} (${activeDidYouKnowInsight.titleEn})`;
   if (textEl) textEl.textContent = isEng ? activeDidYouKnowInsight.textEn : activeDidYouKnowInsight.textMr;
   if (refEl) refEl.textContent = activeDidYouKnowInsight.refEn;
+}
+
+function nextDidYouKnowInsight() {
+  didYouKnowOffset++;
+  renderDidYouKnowWidget();
+  if (typeof showToast === 'function') {
+    const isEng = (window.state && (window.state.translation === 'eng' || window.state.language === 'en'));
+    showToast(isEng ? "✨ Next insight loaded!" : "✨ पुढील आध्यात्मिक रहस्य लोड झाले!");
+  }
 }
 
 function openDidYouKnowChapter() {
@@ -20177,35 +20356,41 @@ function renderHomeThematicPrayers() {
   const offset = dayOfYear % keys.length;
   const rotatedKeys = [...keys.slice(offset), ...keys.slice(0, offset)];
   
-  const isEng = (state && state.translation === 'eng');
+  const isEng = (window.state && (window.state.translation === 'eng' || window.state.language === 'en'));
   
   scroller.innerHTML = rotatedKeys.map(key => {
     const item = PRAYER_TOPICS_DATA[key];
+    if (!item) return '';
     const cat = isEng ? item.categoryEn : item.categoryMr;
     const title = isEng ? item.titleEn : item.titleMr;
+    const subtitle = isEng ? (item.subtitleEn || item.titleEn) : (item.subtitleMr || item.titleMr);
     const ref = isEng ? item.refEn : item.refMr;
     const bg = item.bgImage || "assets/images/morning_grace_art.jpg";
+    const prayBtnText = isEng ? "Pray Now" : "प्रार्थना करा";
     
     return `
       <div class="home-sanctuary-card" onclick="openImmersivePrayerModal('${item.id}')" title="${title}">
         <div class="home-sanctuary-card-bg" style="background-image: url('${bg}');">
-          <div class="home-sanctuary-overlay"></div>
-          <div class="home-sanctuary-content">
-            <span class="home-sanctuary-badge">${cat}</span>
-            <h4 class="home-sanctuary-title">${title}</h4>
-            <div class="home-sanctuary-meta-row">
-              <span class="home-sanctuary-ref">${ref}</span>
-              <button class="home-sanctuary-pray-btn" onclick="event.stopPropagation(); openImmersivePrayerModal('${item.id}')">
-                <span>प्रार्थना करा</span>
-                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
-              </button>
-            </div>
+          <div class="home-sanctuary-card-scrim"></div>
+          <span class="home-sanctuary-category-badge">${cat}</span>
+          <span class="home-sanctuary-floating-ref">${ref}</span>
+        </div>
+        <div class="home-sanctuary-card-content">
+          <h4 class="home-sanctuary-card-title">${title}</h4>
+          <p class="home-sanctuary-card-subtitle">${subtitle}</p>
+          <div class="home-sanctuary-footer-row">
+            <span class="home-sanctuary-mr-ref">${ref}</span>
+            <button class="home-sanctuary-pray-btn" onclick="event.stopPropagation(); openImmersivePrayerModal('${item.id}');" title="${prayBtnText}">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+              <span>${prayBtnText}</span>
+            </button>
           </div>
         </div>
       </div>
     `;
   }).join('');
 }
+
 
 /* ==========================================================================
    3. Daily 7:00 AM Morning Push Notifications (Item 6)
@@ -20432,6 +20617,7 @@ function toggleEventRsvp(btn, eventName) {
 
 // Window Global Bindings
 window.renderDidYouKnowWidget = renderDidYouKnowWidget;
+window.nextDidYouKnowInsight = nextDidYouKnowInsight;
 window.openDidYouKnowChapter = openDidYouKnowChapter;
 window.renderHomeThematicPrayers = renderHomeThematicPrayers;
 window.scheduleDailyMorningNotification = scheduleDailyMorningNotification;
@@ -20444,10 +20630,22 @@ window.openGalleryLightbox = openGalleryLightbox;
 window.closeGalleryLightbox = closeGalleryLightbox;
 window.toggleEventRsvp = toggleEventRsvp;
 
+// Auto-initialize homepage engagement widgets
+setTimeout(() => {
+  try {
+    if (typeof renderHomeThematicPrayers === 'function') renderHomeThematicPrayers();
+    if (typeof renderDidYouKnowWidget === 'function') renderDidYouKnowWidget();
+    if (typeof renderEducationalMicroLearning === 'function') renderEducationalMicroLearning();
+  } catch (e) {
+    console.warn("Home widgets auto-init warning:", e);
+  }
+}, 350);
+
 // Auto-initialize morning notification scheduler
 setTimeout(() => {
   try {
     scheduleDailyMorningNotification();
   } catch (e) {}
 }, 2000);
+
 

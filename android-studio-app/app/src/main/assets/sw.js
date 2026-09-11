@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v138_ALL_19_SYSTEMIC_FIXES_AND_ENHANCEMENTS';
+const CACHE_NAME = 'river-of-life-cache-v139_PRAYER_IMAGES_DIDYOUKNOW_WORD_HIGHLIGHT';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

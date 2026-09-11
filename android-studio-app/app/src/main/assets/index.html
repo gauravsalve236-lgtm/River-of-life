@@ -330,7 +330,7 @@
                         <span id="micro-word-origin" class="micro-tag-origin">Greek (ग्रीक)</span>
                         <span id="micro-word-pronunciation" class="micro-tag-pronunciation">उच्चार: अगापे</span>
                       </div>
-                      <h4 id="micro-word-term" class="micro-word-title">Agape (ἀγάπη)</h4>
+                      <h4 id="micro-word-term" class="micro-word-title"><span class="micro-word-highlighted">Agape</span> <span class="micro-word-original-script">(ἀγάπη)</span></h4>
                     </div>
                   </div>
 
@@ -368,7 +368,12 @@
                     <span style="font-size: 18px;">💡</span>
                     <span style="font-size: 11px; font-weight: 800; color: #d97706; letter-spacing: 0.5px; text-transform: uppercase;">DID YOU KNOW? • माहिती आहे का?</span>
                   </div>
-                  <span id="did-you-know-tag" style="font-size: 10.5px; font-weight: 700; color: #d97706; background: rgba(245, 158, 11, 0.15); padding: 2px 8px; border-radius: 6px;">Chapter Insight</span>
+                  <div style="display: flex; align-items: center; gap: 6px;">
+                    <button onclick="event.stopPropagation(); nextDidYouKnowInsight();" title="Next Insight / पुढील रहस्य" style="background: rgba(245, 158, 11, 0.15); border: none; border-radius: 6px; padding: 2px 7px; color: #d97706; font-size: 11px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 3px;">
+                      <span>🔄</span><span>Next</span>
+                    </button>
+                    <span id="did-you-know-tag" style="font-size: 10.5px; font-weight: 700; color: #d97706; background: rgba(245, 158, 11, 0.15); padding: 2px 8px; border-radius: 6px;">Chapter Insight</span>
+                  </div>
                 </div>
                 <h4 id="did-you-know-title" style="margin: 0 0 6px 0; font-size: 16.5px; font-weight: 800; color: var(--text);">The Shepherd's Rod & Staff (मेंढपाळाची काठी व सोटा)</h4>
                 <p id="did-you-know-text" style="margin: 0 0 12px 0; font-size: 13px; color: var(--text); line-height: 1.5;">बायबल काळात मेंढपाळाचा सोटा हिंस्र पशूंपासून रक्षण करण्यासाठी आणि वळलेली काठी चुकलेल्या मेंढरांना प्रेमाने परत आणण्यासाठी वापरली जात असे. स्तोत्र २३ मध्ये दावीद याच साधनांचा उल्लेख देवाचे सांत्वन म्हणून करतो.</p>
@@ -538,36 +543,16 @@
                     </div>
                   </div>
 
-                  <!-- Card 2: Peace Over Anxiety -->
-                  <div class="home-sanctuary-card" onclick="openImmersivePrayerModal('peace_anxiety')" title="Peace Over Anxiety / चिंतेतून मुक्ती आणि शांती">
-                    <div class="home-sanctuary-card-bg" style="background-image: url('assets/images/peace_anxiety_art.jpg');">
-                      <div class="home-sanctuary-card-scrim"></div>
-                      <span class="home-sanctuary-category-badge">PEACE OVER ANXIETY</span>
-                      <span class="home-sanctuary-floating-ref">Philippians 4:6-7</span>
-                    </div>
-                    <div class="home-sanctuary-card-content">
-                      <h4 class="home-sanctuary-card-title">Transcendent Calm & Peace</h4>
-                      <p class="home-sanctuary-card-subtitle">Guard your heart against fear & anxiety • सर्व बुद्धीपलीकडची देवाची शांती</p>
-                      <div class="home-sanctuary-footer-row">
-                        <span class="home-sanctuary-mr-ref">फिलिप्पैकरांस ४:६-७</span>
-                        <button class="home-sanctuary-pray-btn" onclick="event.stopPropagation(); openImmersivePrayerModal('peace_anxiety');" title="Pray Now">
-                          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                          <span data-i18n="btn_pray_now">Pray Now</span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Card 3: Morning Grace & Protection -->
+                  <!-- Card 2: Morning Grace & Divine Protection (Screenshot 2: Baptism Service) -->
                   <div class="home-sanctuary-card" onclick="openImmersivePrayerModal('morning_grace')" title="Morning Grace & Protection / सकाळची कृपा व संरक्षण">
-                    <div class="home-sanctuary-card-bg" style="background-image: url('assets/images/morning_grace_art.jpg');">
+                    <div class="home-sanctuary-card-bg" style="background-image: url('assets/images/dawn_valley_genesis.jpg');">
                       <div class="home-sanctuary-card-scrim"></div>
                       <span class="home-sanctuary-category-badge">MORNING GRACE</span>
                       <span class="home-sanctuary-floating-ref">Psalm 91:1-4</span>
                     </div>
                     <div class="home-sanctuary-card-content">
                       <h4 class="home-sanctuary-card-title">Shadow of the Almighty</h4>
-                      <p class="home-sanctuary-card-subtitle">Safe beneath His wings throughout the day • परात्पराच्या गुप्त स्थानी आश्रय</p>
+                      <p class="home-sanctuary-card-subtitle">Safe beneath His wings throughout the day • परात्पराच्या गुप्त स्थानी आश्रय व कृपा</p>
                       <div class="home-sanctuary-footer-row">
                         <span class="home-sanctuary-mr-ref">स्तोत्रसंहिता ९१:१-४</span>
                         <button class="home-sanctuary-pray-btn" onclick="event.stopPropagation(); openImmersivePrayerModal('morning_grace');" title="Pray Now">
@@ -578,19 +563,39 @@
                     </div>
                   </div>
 
-                  <!-- Card 4: Healing & Health -->
-                  <div class="home-sanctuary-card" onclick="openImmersivePrayerModal('healing_health')" title="Healing & Health / आरोग्य आणि दैवी चंगाई">
-                    <div class="home-sanctuary-card-bg" style="background-image: url('assets/images/divine_healing_art.jpg');">
+                  <!-- Card 3: Wisdom & Divine Guidance (Screenshot 2: Youth Retreat) -->
+                  <div class="home-sanctuary-card" onclick="openImmersivePrayerModal('wisdom_guidance')" title="Wisdom & Guidance / स्वर्गीय ज्ञान व योग्य मार्गदर्शन">
+                    <div class="home-sanctuary-card-bg" style="background-image: url('assets/images/winding_path_journey.jpg');">
                       <div class="home-sanctuary-card-scrim"></div>
-                      <span class="home-sanctuary-category-badge">HEALING & HEALTH</span>
-                      <span class="home-sanctuary-floating-ref">Jeremiah 30:17</span>
+                      <span class="home-sanctuary-category-badge">WISDOM & GUIDANCE</span>
+                      <span class="home-sanctuary-floating-ref">Proverbs 3:5-6</span>
                     </div>
                     <div class="home-sanctuary-card-content">
-                      <h4 class="home-sanctuary-card-title">Divine Healing & Wholeness</h4>
-                      <p class="home-sanctuary-card-subtitle">Physical, emotional & spiritual restoration • आरोग्य आणि दैवी चंगाई</p>
+                      <h4 class="home-sanctuary-card-title">Trust in the Lord</h4>
+                      <p class="home-sanctuary-card-subtitle">He will direct your paths straight ahead • योग्य मार्गावर चालण्यासाठी स्वर्गीय बुद्धी</p>
                       <div class="home-sanctuary-footer-row">
-                        <span class="home-sanctuary-mr-ref">यिर्मया ३०:१७ • यशया ५३:५</span>
-                        <button class="home-sanctuary-pray-btn" onclick="event.stopPropagation(); openImmersivePrayerModal('healing_health');" title="Pray Now">
+                        <span class="home-sanctuary-mr-ref">नीतिसूत्रे ३:५-६</span>
+                        <button class="home-sanctuary-pray-btn" onclick="event.stopPropagation(); openImmersivePrayerModal('wisdom_guidance');" title="Pray Now">
+                          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                          <span data-i18n="btn_pray_now">Pray Now</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Card 4: Peace Over Anxiety (Screenshot 2: Outreach Mission) -->
+                  <div class="home-sanctuary-card" onclick="openImmersivePrayerModal('peace_anxiety')" title="Peace Over Anxiety / चिंतेतून मुक्ती आणि शांती">
+                    <div class="home-sanctuary-card-bg" style="background-image: url('assets/images/serene_sky_prayer.jpg');">
+                      <div class="home-sanctuary-card-scrim"></div>
+                      <span class="home-sanctuary-category-badge">PEACE OVER ANXIETY</span>
+                      <span class="home-sanctuary-floating-ref">Philippians 4:6-7</span>
+                    </div>
+                    <div class="home-sanctuary-card-content">
+                      <h4 class="home-sanctuary-card-title">Transcendent Calm & Peace</h4>
+                      <p class="home-sanctuary-card-subtitle">Guard your heart against fear & anxiety • सर्व बुद्धीपलीकडची देवाची स्वर्गीय शांती</p>
+                      <div class="home-sanctuary-footer-row">
+                        <span class="home-sanctuary-mr-ref">फिलिप्पैकरांस ४:६-७</span>
+                        <button class="home-sanctuary-pray-btn" onclick="event.stopPropagation(); openImmersivePrayerModal('peace_anxiety');" title="Pray Now">
                           <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                           <span data-i18n="btn_pray_now">Pray Now</span>
                         </button>
