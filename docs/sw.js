@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v137_BSI_AUDIO_LIVE_TOKEN_ENGINE_FIX';
+const CACHE_NAME = 'river-of-life-cache-v138_ALL_19_SYSTEMIC_FIXES_AND_ENHANCEMENTS';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

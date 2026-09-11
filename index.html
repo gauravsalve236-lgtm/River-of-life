@@ -12,7 +12,7 @@
   <script>
     // Force immediate hard purge of all stale Service Workers and CacheStorage
     (function() {
-      const CURRENT_VER = "v137_BSI_AUDIO_LIVE_TOKEN_ENGINE_FIX";
+      const CURRENT_VER = "v138_ALL_19_SYSTEMIC_FIXES_AND_ENHANCEMENTS";
       if (localStorage.getItem("rol_app_ver") !== CURRENT_VER) {
         localStorage.setItem("rol_app_ver", CURRENT_VER);
         if ('serviceWorker' in navigator) {
@@ -257,8 +257,6 @@
               </div>
 
               <!-- LIVE CHURCH ANNOUNCEMENTS BROADCAST (If Active) -->
-              <div id="church-announcement-container" style="display: none; margin-bottom: 12px;"></div>
-
               <!-- 2. Daily Verse Card: Prominent card with inline action buttons (Read, Listen, Save, Share) -->
               <div class="home-vod-card" id="card-daily-verse-home" onclick="openFullscreenVOD()" title="Open Daily Verse Studio & Gallery / दैनिक वचन स्टुडिओ उघडा" style="background-image: url('assets/daily_verses/golden_dawn.png');">
                 <div class="home-vod-overlay"></div>
@@ -288,55 +286,121 @@
                 </div>
               </div>
 
-              <!-- 3. Continue Reading Card (Unified Soft-Bordered Tile Style) -->
-              <div class="figma-home-tile tile-continue-reading" id="home-continue-reading-card" onclick="continueLastReadChapter()" title="Continue Reading / वाचन सुरू ठेवा">
-                <div class="figma-tile-cover-wrapper">
-                  <img src="assets/images/dawn_valley_genesis.jpg" alt="Dawn Valley Genesis" class="figma-tile-cover-img" id="home-continue-cover-img">
-                  <span class="figma-tile-floating-badge" id="home-continue-floating-badge">
-                    <span>📖</span> <span id="home-continue-percent">Chapter 23 of 150</span>
-                  </span>
+              <!-- 3. Continue Reading Card (Clean Text-First Minimalist Module) -->
+              <div class="minimal-reading-card" id="home-continue-reading-card" onclick="continueLastReadChapter()" title="Continue Reading / वाचन सुरू ठेवा" style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 16px; padding: 16px 18px; cursor: pointer; box-shadow: var(--shadow-sm); transition: transform 0.15s ease, box-shadow 0.15s ease;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 18px;">📖</span>
+                    <span style="font-size: 11px; font-weight: 800; color: var(--primary); letter-spacing: 0.5px; text-transform: uppercase;" data-i18n="tag_continue_reading">CONTINUE READING • वाचन सुरू ठेवा</span>
+                  </div>
+                  <span id="home-continue-percent" style="font-size: 11.5px; font-weight: 700; color: var(--text-muted); background: var(--bg); padding: 3px 8px; border-radius: 8px; border: 1px solid var(--border);">Chapter 23 of 150</span>
                 </div>
-                <div class="figma-tile-meta">
-                  <div class="figma-tile-tag-row">
-                    <span class="figma-tile-category-tag" data-i18n="tag_continue_reading">CONTINUE READING • वाचन सुरू ठेवा</span>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <div>
+                    <h3 id="home-continue-book-chapter" style="margin: 0; font-size: 18px; font-weight: 800; color: var(--text);">Psalms 23</h3>
+                    <p id="home-continue-marathi-name" style="margin: 2px 0 0 0; font-size: 13px; color: var(--text-muted); font-weight: 600;">स्तोत्रसंहिता २३</p>
                   </div>
-                  <h3 class="figma-tile-title-en" id="home-continue-book-chapter">Psalms 23</h3>
-                  <p class="figma-tile-sub-mr" id="home-continue-marathi-name">स्तोत्रसंहिता २३</p>
-                  <div class="figma-tile-progress-track">
-                    <div class="figma-tile-progress-fill" id="home-continue-progress-bar" style="width: 35%;"></div>
+                  <button class="btn-primary-mini" style="margin: 0; padding: 8px 14px; border-radius: 10px; font-size: 12.5px; font-weight: 800; display: flex; align-items: center; gap: 6px;" onclick="event.stopPropagation(); continueLastReadChapter();">
+                    <span data-i18n="btn_continue_reading">Read</span>
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                  </button>
+                </div>
+                <div style="height: 5px; width: 100%; background: var(--bg); border-radius: 6px; overflow: hidden; margin-top: 12px; border: 1px solid rgba(0,0,0,0.04);">
+                  <div id="home-continue-progress-bar" style="height: 100%; width: 35%; background: var(--primary); border-radius: 6px; transition: width 0.3s ease;"></div>
+                </div>
+              </div>
+
+              <!-- 4. Word for the Day (Repositioned directly below Continue Reading) -->
+              <div class="educational-microlearning-section" id="educational-microlearning-section" style="margin: 4px 0 2px 0;">
+                <div class="microlearning-header-row">
+                  <div class="microlearning-title-group">
+                    <div class="microlearning-badge-pill">
+                      <span class="microlearning-sparkle">✨</span>
+                      <span data-i18n="tag_microlearning">BIBLICAL WORD OF THE DAY</span>
+                    </div>
+                    <h3 class="microlearning-heading" data-i18n="title_word_of_the_day">आजचा मूळ शब्द • Word of the Day</h3>
                   </div>
-                  <div class="figma-tile-actions-row">
-                    <button class="figma-tile-action-btn" onclick="event.stopPropagation(); continueLastReadChapter();">
-                      <span data-i18n="btn_continue_reading">Continue Reading</span>
-                      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                  <span id="microlearning-day-badge" class="microlearning-day-badge">Day 6</span>
+                </div>
+
+                <div class="microlearning-card" id="card-microlearning-word">
+                  <div class="microlearning-top-row">
+                    <div class="microlearning-term-group">
+                      <div class="microlearning-meta-tags">
+                        <span id="micro-word-origin" class="micro-tag-origin">Greek (ग्रीक)</span>
+                        <span id="micro-word-pronunciation" class="micro-tag-pronunciation">उच्चार: अगापे</span>
+                      </div>
+                      <h4 id="micro-word-term" class="micro-word-title">Agape (ἀγάπη)</h4>
+                    </div>
+                  </div>
+
+                  <div class="microlearning-meaning-box">
+                    <span class="microlearning-label" data-i18n="lbl_biblical_meaning">अर्थ (Biblical Meaning)</span>
+                    <p id="micro-word-meaning" class="micro-word-meaning-text">निःस्वार्थी, बिनशर्त आणि आत्मसमर्पक दैवी प्रीती</p>
+                  </div>
+
+                  <div class="microlearning-insight-box">
+                    <span class="microlearning-label" data-i18n="lbl_spiritual_insight">आत्मिक रहस्य व मनन (Spiritual Insight)</span>
+                    <p id="micro-word-insight" class="micro-word-insight-text">
+                      मानवी प्रेम परिस्थितीवर अवलंबून असते, परंतु 'अगापे' प्रेम आपल्या योग्यतेवर नव्हे तर देवाच्या स्वभावधर्मावर आधारलेले आहे. हे प्रेम स्वतःचा त्याग करून इतरांचे कल्याण शोधते.
+                    </p>
+                  </div>
+
+                  <div class="microlearning-footer-row">
+                    <div class="microlearning-ref-group">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                      </svg>
+                      <span id="micro-word-ref" class="micro-word-ref-text">१ योहान ४:८ • 'देव प्रीती आहे'</span>
+                    </div>
+                    <button id="micro-word-nav-btn" class="microlearning-read-btn" onclick="openMicroLearningBibleChapter()" title="हा संदर्भ बायबलमध्ये उघडा / Read in Bible">
+                      <span>बायबलमध्ये वाचा &rarr;</span>
                     </button>
                   </div>
                 </div>
               </div>
 
-              <!-- 4. Reading Plan Progress Card (Unified Soft-Bordered Tile Style) -->
-              <div class="figma-home-tile tile-reading-plan" id="home-plan-card" onclick="switchTab('grow')" style="cursor: pointer;" title="Open Reading Plans / वाचन योजना उघडा">
-                <div class="figma-tile-cover-wrapper">
-                  <img src="assets/images/winding_path_journey.jpg" alt="Winding Path Spiritual Journey" class="figma-tile-cover-img">
-                  <span class="figma-tile-floating-badge" id="home-plan-floating-badge">
-                    <span>📅</span> <span id="home-plan-day">Day 15 of 30</span> • <span id="home-plan-percent">50% Complete</span>
-                  </span>
+              <!-- 5. Interactive "Did You Know? / Chapter Insight" Engagement Card -->
+              <div class="home-insight-card" id="card-did-you-know" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(234, 88, 12, 0.06)); border: 1.5px solid rgba(245, 158, 11, 0.3); border-radius: 16px; padding: 16px 18px; box-shadow: var(--shadow-sm); cursor: pointer;" onclick="openDidYouKnowChapter()">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 18px;">💡</span>
+                    <span style="font-size: 11px; font-weight: 800; color: #d97706; letter-spacing: 0.5px; text-transform: uppercase;">DID YOU KNOW? • माहिती आहे का?</span>
+                  </div>
+                  <span id="did-you-know-tag" style="font-size: 10.5px; font-weight: 700; color: #d97706; background: rgba(245, 158, 11, 0.15); padding: 2px 8px; border-radius: 6px;">Chapter Insight</span>
                 </div>
-                <div class="figma-tile-meta">
-                  <div class="figma-tile-tag-row">
-                    <span class="figma-tile-category-tag" data-i18n="plan_card_heading">DAILY READING PLAN • दैनिक वाचन योजना</span>
+                <h4 id="did-you-know-title" style="margin: 0 0 6px 0; font-size: 16.5px; font-weight: 800; color: var(--text);">The Shepherd's Rod & Staff (मेंढपाळाची काठी व सोटा)</h4>
+                <p id="did-you-know-text" style="margin: 0 0 12px 0; font-size: 13px; color: var(--text); line-height: 1.5;">बायबल काळात मेंढपाळाचा सोटा हिंस्र पशूंपासून रक्षण करण्यासाठी आणि वळलेली काठी चुकलेल्या मेंढरांना प्रेमाने परत आणण्यासाठी वापरली जात असे. स्तोत्र २३ मध्ये दावीद याच साधनांचा उल्लेख देवाचे सांत्वन म्हणून करतो.</p>
+                <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(245, 158, 11, 0.2); padding-top: 10px;">
+                  <span id="did-you-know-ref" style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Psalm 23 • स्तोत्रसंहिता २३</span>
+                  <button id="did-you-know-btn" class="btn-primary-mini" style="margin: 0; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 800; background: #d97706; color: #fff; border: none; cursor: pointer;" onclick="event.stopPropagation(); openDidYouKnowChapter();">
+                    Read Chapter / अध्याय वाचा &rarr;
+                  </button>
+                </div>
+              </div>
+
+              <!-- 6. Reading Plan Progress Card (Clean Text-First Minimalist Module) -->
+              <div class="minimal-reading-card" id="home-plan-card" onclick="switchTab('plans')" style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 16px; padding: 16px 18px; cursor: pointer; box-shadow: var(--shadow-sm); transition: transform 0.15s ease, box-shadow 0.15s ease;" title="Open Reading Plans / वाचन योजना उघडा">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 18px;">📅</span>
+                    <span style="font-size: 11px; font-weight: 800; color: #3b82f6; letter-spacing: 0.5px; text-transform: uppercase;" data-i18n="plan_card_heading">DAILY READING PLAN • दैनिक वाचन योजना</span>
                   </div>
-                  <h3 class="figma-tile-title-en" id="home-plan-title">Through the New Testament</h3>
-                  <p class="figma-tile-sub-mr">नवा करार वाचन योजना • ३० दिवस</p>
-                  <div class="figma-tile-progress-track">
-                    <div class="figma-tile-progress-fill" id="home-plan-progress-fill" style="width: 50%;"></div>
+                  <span id="home-plan-day" style="font-size: 11.5px; font-weight: 700; color: var(--text-muted); background: var(--bg); padding: 3px 8px; border-radius: 8px; border: 1px solid var(--border);">Day 15 of 30 • 50%</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <div>
+                    <h3 id="home-plan-title" style="margin: 0; font-size: 17px; font-weight: 800; color: var(--text);">Through the New Testament</h3>
+                    <p style="margin: 2px 0 0 0; font-size: 12.5px; color: var(--text-muted); font-weight: 600;">नवा करार वाचन योजना • ३० दिवस</p>
                   </div>
-                  <div class="figma-tile-actions-row">
-                    <button class="figma-tile-action-btn" onclick="event.stopPropagation(); switchTab('grow');">
-                      <span data-i18n="btn_continue">Continue Plan</span>
-                      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                    </button>
-                  </div>
+                  <button class="btn-primary-mini" style="margin: 0; padding: 8px 14px; border-radius: 10px; font-size: 12.5px; font-weight: 800; background: #3b82f6; color: #fff; border: none; display: flex; align-items: center; gap: 6px;" onclick="event.stopPropagation(); switchTab('plans');">
+                    <span data-i18n="btn_continue">Plan</span>
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                  </button>
+                </div>
+                <div style="height: 5px; width: 100%; background: var(--bg); border-radius: 6px; overflow: hidden; margin-top: 12px; border: 1px solid rgba(0,0,0,0.04);">
+                  <div id="home-plan-progress-fill" style="height: 100%; width: 50%; background: #3b82f6; border-radius: 6px; transition: width 0.3s ease;"></div>
                 </div>
               </div>
 
@@ -437,63 +501,6 @@
                       📖 Read Exodus 20
                     </button>
                   </div>
-                </div>
-              </div>
-
-              <!-- 7. Discover Topics: Educational Biblical Micro-Learning (Word of the Day & Context) -->
-              <div class="educational-microlearning-section" id="educational-microlearning-section">
-                <div class="microlearning-header-row">
-                  <div class="microlearning-title-group">
-                    <div class="microlearning-badge-pill">
-                      <span class="microlearning-sparkle">✨</span>
-                      <span data-i18n="tag_microlearning">BIBLICAL WORD OF THE DAY</span>
-                    </div>
-                    <h3 class="microlearning-heading" data-i18n="title_word_of_the_day">आजचा मूळ शब्द • Word of the Day</h3>
-                  </div>
-                  <span id="microlearning-day-badge" class="microlearning-day-badge">Day 6</span>
-                </div>
-
-                <!-- Interactive Greek/Hebrew Insight Card in Pristine White Theme -->
-                <div class="microlearning-card" id="card-microlearning-word">
-                  <div class="microlearning-top-row">
-                    <div class="microlearning-term-group">
-                      <div class="microlearning-meta-tags">
-                        <span id="micro-word-origin" class="micro-tag-origin">Greek (ग्रीक)</span>
-                        <span id="micro-word-pronunciation" class="micro-tag-pronunciation">उच्चार: अगापे</span>
-                      </div>
-                      <h4 id="micro-word-term" class="micro-word-title">Agape (ἀγάπη)</h4>
-                    </div>
-                    <!-- Pronunciation Audio Button -->
-                  </div>
-
-                  <!-- Meaning Box -->
-                  <div class="microlearning-meaning-box">
-                    <span class="microlearning-label" data-i18n="lbl_biblical_meaning">अर्थ (Biblical Meaning)</span>
-                    <p id="micro-word-meaning" class="micro-word-meaning-text">निःस्वार्थी, बिनशर्त आणि आत्मसमर्पक दैवी प्रीती</p>
-                  </div>
-
-                  <!-- Spiritual Insight Box -->
-                  <div class="microlearning-insight-box">
-                    <span class="microlearning-label" data-i18n="lbl_spiritual_insight">आत्मिक रहस्य व मनन (Spiritual Insight)</span>
-                    <p id="micro-word-insight" class="micro-word-insight-text">
-                      मानवी प्रेम परिस्थितीवर अवलंबून असते, परंतु 'अगापे' प्रेम आपल्या योग्यतेवर नव्हे तर देवाच्या स्वभावधर्मावर आधारलेले आहे. हे प्रेम स्वतःचा त्याग करून इतरांचे कल्याण शोधते.
-                    </p>
-                  </div>
-
-                  <!-- Bottom Reference & Bible Jump Row -->
-                  <div class="microlearning-footer-row">
-                    <div class="microlearning-ref-group">
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                      </svg>
-                      <span id="micro-word-ref" class="micro-word-ref-text">१ योहान ४:८ • 'देव प्रीती आहे'</span>
-                    </div>
-                    <button id="micro-word-nav-btn" class="microlearning-read-btn" onclick="openMicroLearningBibleChapter()" title="हा संदर्भ बायबलमध्ये उघडा / Read in Bible">
-                      <span>बायबलमध्ये वाचा &rarr;</span>
-                    </button>
-                  </div>
-
                 </div>
               </div>
 
@@ -603,15 +610,15 @@
                 <div class="home-chips-scroller">
                   <button class="home-chip" onclick="openDiscoverTopicDirect('hebrews', 11, 1, 'Faith')">
                     <span class="home-chip-icon">✨</span>
-                    <span data-i18n="chip_faith">Faith (विशवास)</span>
+                    <span data-i18n="chip_faith">Faith (विश्वास)</span>
                   </button>
                   <button class="home-chip" onclick="openDiscoverTopicDirect('philippians', 4, 6, 'Peace')">
                     <span class="home-chip-icon">🕊</span>
                     <span data-i18n="chip_peace">Peace (शांती)</span>
                   </button>
                   <button class="home-chip" onclick="openDiscoverTopicDirect('ephesians', 5, 21, 'Family')">
-                    <span class="home-chip-icon">👨👩👧</span>
-                    <span data-i18n="chip_family">Family (कटंब)</span>
+                    <span class="home-chip-icon">👨‍👩‍👧</span>
+                    <span data-i18n="chip_family">Family (कुटुंब)</span>
                   </button>
                   <button class="home-chip" onclick="openDiscoverTopicDirect('jeremiah', 30, 17, 'Healing')">
                     <span class="home-chip-icon">🌿</span>
@@ -623,7 +630,7 @@
                   </button>
                   <button class="home-chip" onclick="openDiscoverTopicDirect('isaiah', 40, 31, 'Strength')">
                     <span class="home-chip-icon">💪</span>
-                    <span data-i18n="chip_strength">Strength (सामरथय)</span>
+                    <span data-i18n="chip_strength">Strength (सामर्थ्य)</span>
                   </button>
                 </div>
               </div>
@@ -692,8 +699,14 @@
                   <div class="ios-spinner"></div>
                 </div>
               </div>
-              
-                            <!-- Quick Prev/Next buttons at bottom of text -->
+              <!-- Marathi / BSI Official Copyright Notice -->
+              <div id="reader-bsi-copyright-notice" style="margin: 28px 0 18px 0; padding: 14px 18px; background: rgba(0, 0, 0, 0.025); border: 1px dashed var(--border); border-radius: 14px; text-align: center;">
+                <p style="margin: 0; font-size: 12px; line-height: 1.55; color: var(--text-muted); font-weight: 500;">
+                  📖 <strong>मराठी पवित्र शास्त्र (BSI):</strong> जुना व नवा करार. &copy; The Bible Society of India (BSI). सर्व हक्क राखीव. व्यक्तिगत वाचन व अभ्यासासाठी.
+                </p>
+              </div>
+
+              <!-- Quick Prev/Next buttons at bottom of text -->
               <div class="reader-navigation-row">
                 <button id="btn-prev-chapter" class="chapter-nav-btn">
                   <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
@@ -1481,15 +1494,186 @@
           <div class="view-scroll-content">
             <div class="welcome-header-card" style="margin-bottom: 16px;">
               <div>
-                <span class="date-label">FELLOWSHIP HUB</span>
-                <h2 class="greeting-text" style="font-size: 24px;">Prayer Meetings / प्रार्थना सभा</h2>
+                <span class="date-label">FELLOWSHIP & COMMUNITY HUB</span>
+                <h2 class="greeting-text" style="font-size: 24px;">Fellowship & Gatherings / सहभागिता व संगती</h2>
               </div>
               <button id="btn-schedule-meeting-trigger" class="btn-primary-mini" style="display: none; margin: 0; padding: 10px 16px; border-radius: 12px; font-weight: 700; align-self: center;">
                 + Schedule / सभा आयोजित करा
               </button>
             </div>
 
-            <!-- Meetings Subtabs Row (Segmented Pill Carousel style) -->
+            <!-- 1. Pinned Community Announcement: Sunday Holy Communion (Migrated from Home) -->
+            <div class="fellowship-pinned-announcement" style="background: linear-gradient(135deg, rgba(247,0,47,0.08), rgba(217,119,6,0.08)); border: 1.5px solid rgba(247,0,47,0.3); border-radius: 18px; padding: 16px 20px; margin-bottom: 20px; box-shadow: var(--shadow-sm);">
+              <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+                <div style="display: flex; align-items: center; gap: 14px;">
+                  <div style="width: 48px; height: 48px; border-radius: 14px; background: #F7002F; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 14px rgba(247,0,47,0.35); flex-shrink: 0;">🍷</div>
+                  <div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <span style="font-size: 10.5px; font-weight: 800; color: #F7002F; text-transform: uppercase; letter-spacing: 0.5px;">COMMUNITY SACRAMENT • पवित्र सहभागिता</span>
+                      <span style="font-size: 10px; font-weight: 700; color: #fff; background: #F7002F; padding: 2px 7px; border-radius: 6px;">PINNED</span>
+                    </div>
+                    <h3 style="margin: 3px 0 2px 0; font-size: 17px; font-weight: 800; color: var(--text);">Sunday Holy Communion (रविवार पवित्र प्रभूभोजन)</h3>
+                    <p style="margin: 0; font-size: 13px; color: var(--text-muted); line-height: 1.4;">या रविवारी सकाळी ९:३० वाजता सर्व मंडळीने एकत्र येऊन प्रभूच्या मेजात सहभागी व्हावे. १ करिंथ ११:२४-२६.</p>
+                  </div>
+                </div>
+                <button class="btn-primary-mini" onclick="showToast('📅 Communion reminder set for Sunday morning!')" style="background: #F7002F; color: #fff; border: none; padding: 8px 16px; border-radius: 10px; font-size: 12.5px; font-weight: 700; cursor: pointer;">
+                  Set Reminder / आठवण ठेवा
+                </button>
+              </div>
+            </div>
+
+            <!-- 2. Featured Video Banner (Sunday Service Replay / Livestream) -->
+            <div class="fellowship-video-banner" style="background: linear-gradient(135deg, #18181b 0%, #27272a 100%); border-radius: 20px; overflow: hidden; margin-bottom: 22px; border: 1.5px solid rgba(255,255,255,0.12); box-shadow: var(--shadow-md); color: #fff;">
+              <div style="position: relative; width: 100%; height: 210px; background-image: url('assets/images/morning_grace_art.jpg'); background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center;">
+                <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 100%);"></div>
+                <button onclick="showToast('▶ Playing Featured Sunday Service Replay...')" style="position: relative; z-index: 2; width: 62px; height: 62px; border-radius: 50%; background: rgba(247,0,47,0.95); border: 2px solid #fff; color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 8px 25px rgba(247,0,47,0.6); transition: transform 0.2s;" onmouseenter="this.style.transform='scale(1.1)'" onmouseleave="this.style.transform='scale(1)'">
+                  <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor" style="margin-left: 3px;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                </button>
+                <span style="position: absolute; bottom: 12px; left: 16px; z-index: 2; font-size: 11px; font-weight: 800; background: rgba(247,0,47,0.9); padding: 4px 10px; border-radius: 6px; letter-spacing: 0.5px;">🔴 FEATURED SERVICE REPLAY</span>
+                <span style="position: absolute; bottom: 12px; right: 16px; z-index: 2; font-size: 11px; font-weight: 600; background: rgba(0,0,0,0.65); padding: 3px 8px; border-radius: 6px;">1:14:20</span>
+              </div>
+              <div style="padding: 16px 20px;">
+                <h3 style="margin: 0 0 4px 0; font-size: 18px; font-weight: 800; color: #ffffff;">The River of Life & Divine Restoration (जीवनाच्या नदीचे सामर्थ्य)</h3>
+                <p style="margin: 0; font-size: 13px; color: rgba(255,255,255,0.75); line-height: 1.45;">Pastor Gaurav Salve • Ezekiel 47:1-9 • Sunday Worship Celebration</p>
+              </div>
+            </div>
+
+            <!-- 3. Audio Sermons Hub with Embedded Player -->
+            <div class="fellowship-audio-sermons-section" style="margin-bottom: 24px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div>
+                  <h3 style="margin: 0; font-size: 17px; font-weight: 800; color: var(--text);">Audio Sermons (ऑडिओ संदेश)</h3>
+                  <span style="font-size: 12px; color: var(--text-muted);">Listen to inspiring biblical sermons and messages</span>
+                </div>
+              </div>
+
+              <!-- Active Sermon Audio Bar -->
+              <div id="fellowship-sermon-player-bar" style="display: none; background: var(--bg-content); border: 1.5px solid var(--primary); border-radius: 14px; padding: 12px 16px; margin-bottom: 12px; box-shadow: var(--shadow-sm); align-items: center; justify-content: space-between; gap: 12px;">
+                <div style="display: flex; align-items: center; gap: 12px; flex: 1; overflow: hidden;">
+                  <button id="btn-sermon-toggle-play" onclick="toggleFellowshipSermonPlay()" style="width: 38px; height: 38px; border-radius: 50%; background: #F7002F; border: none; color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;">
+                    <span id="sermon-play-icon">❚❚</span>
+                  </button>
+                  <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    <h5 id="active-sermon-title" style="margin: 0; font-size: 14px; font-weight: 800; color: var(--text);">Sermon Title</h5>
+                    <span id="active-sermon-preacher" style="font-size: 12px; color: var(--text-muted);">Preacher Name</span>
+                  </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <span id="sermon-play-timer" style="font-size: 12px; font-weight: 700; color: var(--primary);">02:45 / 38:20</span>
+                  <button onclick="stopFellowshipSermon()" style="background: none; border: none; font-size: 16px; color: var(--text-muted); cursor: pointer;">✕</button>
+                </div>
+              </div>
+
+              <!-- Sermons List -->
+              <div style="display: flex; flex-direction: column; gap: 10px;">
+                <div class="sermon-item-card" onclick="playFellowshipSermon('Walking by Faith in Hard Times', 'Pastor Gaurav', 'Hebrews 11:1-6', '38 mins')" style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 14px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; box-shadow: var(--shadow-sm);">
+                  <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(247,0,47,0.1); color: #F7002F; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;">🎧</div>
+                    <div>
+                      <h4 style="margin: 0 0 3px 0; font-size: 15px; font-weight: 800; color: var(--text);">संकटात विश्वासाने चालणे (Walking by Faith in Hard Times)</h4>
+                      <p style="margin: 0; font-size: 12px; color: var(--text-muted);">Pastor Gaurav • इब्री लोकांस ११:१-६</p>
+                    </div>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 11.5px; font-weight: 700; color: var(--text-muted); background: var(--bg); padding: 3px 8px; border-radius: 6px;">38 mins</span>
+                    <span style="color: #F7002F; font-size: 16px;">▶</span>
+                  </div>
+                </div>
+
+                <div class="sermon-item-card" onclick="playFellowshipSermon('The Peace That Surpasses Understanding', 'Pastor Gaurav', 'Philippians 4:6-7', '42 mins')" style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 14px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; box-shadow: var(--shadow-sm);">
+                  <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(59,130,246,0.1); color: #3b82f6; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;">🎧</div>
+                    <div>
+                      <h4 style="margin: 0 0 3px 0; font-size: 15px; font-weight: 800; color: var(--text);">सर्व समजुतीच्या पलीकडची शांती (Peace Beyond Understanding)</h4>
+                      <p style="margin: 0; font-size: 12px; color: var(--text-muted);">Pastor Gaurav • फिलिप्पैकरांस ४:६-७</p>
+                    </div>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 11.5px; font-weight: 700; color: var(--text-muted); background: var(--bg); padding: 3px 8px; border-radius: 6px;">42 mins</span>
+                    <span style="color: #3b82f6; font-size: 16px;">▶</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 4. Church Community Photo Gallery -->
+            <div class="fellowship-gallery-section" style="margin-bottom: 24px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div>
+                  <h3 style="margin: 0; font-size: 17px; font-weight: 800; color: var(--text);">Community Gallery (मंडळीची छायाचित्रे)</h3>
+                  <span style="font-size: 12px; color: var(--text-muted);">Snapshots of worship, baptisms, and fellowship</span>
+                </div>
+              </div>
+              <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px;">
+                <div onclick="openGalleryLightbox('assets/images/wedding_cana_miracle.jpg', 'Sunday Worship & Praise Celebration')" style="border-radius: 12px; overflow: hidden; aspect-ratio: 1; cursor: pointer; box-shadow: var(--shadow-sm); position: relative;">
+                  <img src="assets/images/wedding_cana_miracle.jpg" style="width: 100%; height: 100%; object-fit: cover;" alt="Worship Celebration">
+                  <div style="position: absolute; bottom: 0; inset-inline: 0; background: linear-gradient(transparent, rgba(0,0,0,0.7)); padding: 6px 8px; font-size: 10.5px; font-weight: 700; color: #fff;">Worship Night</div>
+                </div>
+                <div onclick="openGalleryLightbox('assets/images/dawn_valley_genesis.jpg', 'Baptism & Spiritual Renewal Service')" style="border-radius: 12px; overflow: hidden; aspect-ratio: 1; cursor: pointer; box-shadow: var(--shadow-sm); position: relative;">
+                  <img src="assets/images/dawn_valley_genesis.jpg" style="width: 100%; height: 100%; object-fit: cover;" alt="Baptism Service">
+                  <div style="position: absolute; bottom: 0; inset-inline: 0; background: linear-gradient(transparent, rgba(0,0,0,0.7)); padding: 6px 8px; font-size: 10.5px; font-weight: 700; color: #fff;">Baptism Service</div>
+                </div>
+                <div onclick="openGalleryLightbox('assets/images/winding_path_journey.jpg', 'Youth Retreat & Fellowship Camp')" style="border-radius: 12px; overflow: hidden; aspect-ratio: 1; cursor: pointer; box-shadow: var(--shadow-sm); position: relative;">
+                  <img src="assets/images/winding_path_journey.jpg" style="width: 100%; height: 100%; object-fit: cover;" alt="Youth Retreat">
+                  <div style="position: absolute; bottom: 0; inset-inline: 0; background: linear-gradient(transparent, rgba(0,0,0,0.7)); padding: 6px 8px; font-size: 10.5px; font-weight: 700; color: #fff;">Youth Retreat</div>
+                </div>
+                <div onclick="openGalleryLightbox('assets/images/serene_sky_prayer.jpg', 'Community Outreach & Food Distribution')" style="border-radius: 12px; overflow: hidden; aspect-ratio: 1; cursor: pointer; box-shadow: var(--shadow-sm); position: relative;">
+                  <img src="assets/images/serene_sky_prayer.jpg" style="width: 100%; height: 100%; object-fit: cover;" alt="Community Outreach">
+                  <div style="position: absolute; bottom: 0; inset-inline: 0; background: linear-gradient(transparent, rgba(0,0,0,0.7)); padding: 6px 8px; font-size: 10.5px; font-weight: 700; color: #fff;">Outreach Mission</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 5. Upcoming Community Events Feed with RSVP -->
+            <div class="fellowship-events-feed" style="margin-bottom: 24px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div>
+                  <h3 style="margin: 0; font-size: 17px; font-weight: 800; color: var(--text);">Upcoming Events (आगामी कार्यक्रम)</h3>
+                  <span style="font-size: 12px; color: var(--text-muted);">Mark your calendars and join our fellowship</span>
+                </div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 10px;">
+                <!-- Event 1 -->
+                <div class="fellowship-event-card" style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 14px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-sm); flex-wrap: wrap; gap: 10px;">
+                  <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(245,158,11,0.12); color: #d97706; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 800; flex-shrink: 0; line-height: 1.1;">
+                      <span style="font-size: 10px; text-transform: uppercase;">WED</span>
+                      <span style="font-size: 16px;">16</span>
+                    </div>
+                    <div>
+                      <h4 style="margin: 0 0 2px 0; font-size: 15px; font-weight: 800; color: var(--text);">Mid-Week Fasting & Prayer (उपवास व प्रार्थना)</h4>
+                      <p style="margin: 0; font-size: 12px; color: var(--text-muted);">Wednesday • 7:00 PM - 8:30 PM • Main Sanctuary & Online</p>
+                    </div>
+                  </div>
+                  <button class="btn-event-rsvp" onclick="toggleEventRsvp(this, 'Mid-Week Fasting Prayer')" style="background: var(--bg); border: 1.5px solid var(--border); color: var(--text); padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;">
+                    ✓ RSVP / उपस्थित राहा
+                  </button>
+                </div>
+
+                <!-- Event 2 -->
+                <div class="fellowship-event-card" style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 14px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-sm); flex-wrap: wrap; gap: 10px;">
+                  <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(16,185,129,0.12); color: #10b981; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 800; flex-shrink: 0; line-height: 1.1;">
+                      <span style="font-size: 10px; text-transform: uppercase;">SAT</span>
+                      <span style="font-size: 16px;">19</span>
+                    </div>
+                    <div>
+                      <h4 style="margin: 0 0 2px 0; font-size: 15px; font-weight: 800; color: var(--text);">Youth Fellowship & Music Night (युवक संगती)</h4>
+                      <p style="margin: 0; font-size: 12px; color: var(--text-muted);">Saturday • 6:30 PM • Youth Hall & Live Stream</p>
+                    </div>
+                  </div>
+                  <button class="btn-event-rsvp" onclick="toggleEventRsvp(this, 'Youth Fellowship')" style="background: var(--bg); border: 1.5px solid var(--border); color: var(--text); padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;">
+                    ✓ RSVP / उपस्थित राहा
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 6. Prayer Meetings Hub Subtabs Row (Segmented Pill style) -->
+            <div style="margin-bottom: 12px;">
+              <h3 style="margin: 0 0 4px 0; font-size: 17px; font-weight: 800; color: var(--text);">Online Prayer Meetings (ऑनलाइन प्रार्थना दालन)</h3>
+              <span style="font-size: 12px; color: var(--text-muted);">Join live virtual prayer rooms with church family</span>
+            </div>
             <div class="meetings-subnav-row">
               <button class="meetings-subnav-btn active" data-meetings-subtab="live">🔴 LIVE NOW / थेट सरू</button>
               <button class="meetings-subnav-btn" data-meetings-subtab="upcoming">UPCOMING / आगामी</button>
@@ -1571,8 +1755,8 @@
         <section id="view-you" class="app-view">
           <div class="view-scroll-content">
             
-            <!-- Admin & Pastor Console Quick Entry Card (Always visible on You view) -->
-            <div id="you-admin-panel-card" class="profile-badges-card-new" style="max-width: 680px; margin: 0 auto 16px auto; padding: 14px 18px; border: 1.5px solid rgba(224, 83, 95, 0.35); background: linear-gradient(135deg, rgba(224, 83, 95, 0.08), rgba(217, 119, 6, 0.08)); cursor: pointer; border-radius: 16px;" onclick="switchTab('admin')">
+            <!-- Admin & Pastor Console Quick Entry Card (Hidden by default; shown only to Admins/Pastors) -->
+            <div id="you-admin-panel-card" class="profile-badges-card-new" style="display: none; max-width: 680px; margin: 0 auto 16px auto; padding: 14px 18px; border: 1.5px solid rgba(224, 83, 95, 0.35); background: linear-gradient(135deg, rgba(224, 83, 95, 0.08), rgba(217, 119, 6, 0.08)); cursor: pointer; border-radius: 16px;" onclick="switchTab('admin')">
               <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
                 <div style="display: flex; align-items: center; gap: 12px;">
                   <div style="width: 40px; height: 40px; border-radius: 10px; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 4px 12px rgba(224,83,95,0.3);">🛡</div>
@@ -1692,11 +1876,6 @@
                     <div class="profile-pill-buttons-row">
                       <button class="profile-pill-btn" onclick="showToast('Add friends feature')">Add friends</button>
                       <button class="profile-pill-btn" onclick="showToast('Following list')">Following 0</button>
-                    </div>
-                    
-                    <div class="profile-location-row">
-                      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                      <span id="profile-location-text">Maharashtra, India</span>
                     </div>
                   </div>
                   
@@ -1902,14 +2081,6 @@
                       <option value="eng">English (KJV)</option>
                       <option value="parallel">Parallel Mode</option>
                     </select>
-                  </div>
-
-                  <div class="settings-action-row" style="margin-top: 16px; border-top: 1px solid var(--border); padding-top: 12px;">
-                    <div class="action-desc">
-                      <span>Wipe App Data</span>
-                      <p style="font-size: 11px; color: var(--text-muted); margin: 2px 0 0 0;">Reset all database entries</p>
-                    </div>
-                    <button id="you-btn-clear-cache" class="btn-danger-mini">Wipe Data</button>
                   </div>
                 </div>
                 
@@ -2426,6 +2597,87 @@
                 </div>
 
               </div>
+
+              <!-- 2. Hymns & Spiritual Songs Card Section (Card-based with cover art & 1-tap lyrics) -->
+              <div class="grow-hymns-preview-section" style="margin-top: 26px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                  <div>
+                    <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: var(--text);">Popular Hymns & Worship (लोकप्रिय भजने व गीते)</h3>
+                    <span style="font-size: 12.5px; color: var(--text-muted);">Sing praises with authentic Marathi Christian lyrics</span>
+                  </div>
+                  <button onclick="switchTab('hymns')" style="background: none; border: none; color: #F7002F; font-size: 12.5px; font-weight: 800; cursor: pointer;">
+                    View All 50+ &rarr;
+                  </button>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px;">
+                  <!-- Card 1 -->
+                  <div onclick="switchTab('hymns'); openHymnDetail(1);" style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 16px; padding: 14px; cursor: pointer; display: flex; align-items: center; gap: 12px; box-shadow: var(--shadow-sm); transition: transform 0.15s ease;">
+                    <div style="width: 44px; height: 44px; border-radius: 10px; background: linear-gradient(135deg, #F7002F, #d97706); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; flex-shrink: 0;">#1</div>
+                    <div style="flex: 1; overflow: hidden;">
+                      <span style="font-size: 10.5px; font-weight: 800; color: #F7002F; text-transform: uppercase;">स्तुती व आराधना</span>
+                      <h4 style="margin: 2px 0 2px 0; font-size: 15px; font-weight: 800; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">देवा तुझी स्तुती असो (Praise to God)</h4>
+                      <p style="margin: 0; font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">देवा तुझी स्तुती असो, सर्वकाळ तुझी...</p>
+                    </div>
+                  </div>
+
+                  <!-- Card 2 -->
+                  <div onclick="switchTab('hymns'); openHymnDetail(2);" style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 16px; padding: 14px; cursor: pointer; display: flex; align-items: center; gap: 12px; box-shadow: var(--shadow-sm); transition: transform 0.15s ease;">
+                    <div style="width: 44px; height: 44px; border-radius: 10px; background: linear-gradient(135deg, #3b82f6, #6366f1); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; flex-shrink: 0;">#2</div>
+                    <div style="flex: 1; overflow: hidden;">
+                      <span style="font-size: 10.5px; font-weight: 800; color: #3b82f6; text-transform: uppercase;">तारण व कृपा</span>
+                      <h4 style="margin: 2px 0 2px 0; font-size: 15px; font-weight: 800; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">येशू माझे तारण (Jesus My Salvation)</h4>
+                      <p style="margin: 0; font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">येशू माझे तारण, येशू माझा त्राता...</p>
+                    </div>
+                  </div>
+
+                  <!-- Card 3 -->
+                  <div onclick="switchTab('hymns'); openHymnDetail(3);" style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 16px; padding: 14px; cursor: pointer; display: flex; align-items: center; gap: 12px; box-shadow: var(--shadow-sm); transition: transform 0.15s ease;">
+                    <div style="width: 44px; height: 44px; border-radius: 10px; background: linear-gradient(135deg, #10b981, #059669); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; flex-shrink: 0;">#3</div>
+                    <div style="flex: 1; overflow: hidden;">
+                      <span style="font-size: 10.5px; font-weight: 800; color: #10b981; text-transform: uppercase;">प्रार्थना व समर्पण</span>
+                      <h4 style="margin: 2px 0 2px 0; font-size: 15px; font-weight: 800; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">माझ्या जिवा देवाकडे वळ (Return My Soul)</h4>
+                      <p style="margin: 0; font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">माझ्या जिवा देवाकडे वळ, तोच तुझे...</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 3. Interactive Bible Quiz Experience Card -->
+              <div class="grow-quiz-promo-card" style="background: linear-gradient(135deg, rgba(168,85,247,0.08), rgba(99,102,241,0.08)); border: 1.5px solid rgba(168,85,247,0.3); border-radius: 20px; padding: 20px; margin-top: 26px; box-shadow: var(--shadow-sm);">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+                  <div style="display: flex; align-items: center; gap: 14px;">
+                    <div style="width: 50px; height: 50px; border-radius: 14px; background: linear-gradient(135deg, #a855f7, #6366f1); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 26px; box-shadow: 0 4px 14px rgba(168,85,247,0.35); flex-shrink: 0;">🎯</div>
+                    <div>
+                      <span style="font-size: 10.5px; font-weight: 800; color: #a855f7; letter-spacing: 0.5px; text-transform: uppercase;">TEST YOUR SCRIPTURE KNOWLEDGE</span>
+                      <h3 style="margin: 3px 0 2px 0; font-size: 17px; font-weight: 800; color: var(--text);">Daily Scripture Quiz (दैनिक बायबल प्रश्नमंजुषा)</h3>
+                      <p style="margin: 0; font-size: 13px; color: var(--text-muted);">Multi-question challenges, instant green/red answer feedback & live leaderboard points!</p>
+                    </div>
+                  </div>
+                  <button onclick="openBibleQuizModal()" style="background: linear-gradient(135deg, #a855f7, #6366f1); color: #fff; border: none; padding: 10px 18px; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 12px rgba(168,85,247,0.3);">
+                    Start Quiz Now / प्रश्नमंजुषा सुरू करा &rarr;
+                  </button>
+                </div>
+              </div>
+
+              <!-- 4. OT / NT 66 Books of the Bible Overviews Section -->
+              <div class="grow-book-overviews-section" style="margin-top: 28px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 14px;">
+                  <div>
+                    <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: var(--text);">66 Books of the Bible Overviews (६६ पुस्तकांचा सारांश)</h3>
+                    <span style="font-size: 12.5px; color: var(--text-muted);">Author, key themes, and spiritual context from Genesis to Revelation</span>
+                  </div>
+                  <!-- Filter buttons -->
+                  <div style="display: flex; gap: 6px;">
+                    <button class="book-filter-pill active" onclick="filterBookOverviews('all', this)" style="background: var(--primary); color: #fff; border: none; padding: 5px 12px; border-radius: 8px; font-size: 11.5px; font-weight: 700; cursor: pointer;">All (६६)</button>
+                    <button class="book-filter-pill" onclick="filterBookOverviews('ot', this)" style="background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 5px 12px; border-radius: 8px; font-size: 11.5px; font-weight: 700; cursor: pointer;">Old Testament (३९)</button>
+                    <button class="book-filter-pill" onclick="filterBookOverviews('nt', this)" style="background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 5px 12px; border-radius: 8px; font-size: 11.5px; font-weight: 700; cursor: pointer;">New Testament (२७)</button>
+                  </div>
+                </div>
+
+                <div id="grow-book-overviews-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px;">
+                  <!-- Book cards populated dynamically by app.js -->
+                </div>
+              </div>
             </div>
           </section>
         </main>
@@ -2745,16 +2997,19 @@
         <div class="drawer-body-list">
           <button class="select-row-item" data-lang="mar">
             <span class="title">मराठी (MARVBSI)</span>
-            <span class="subtitle">Marathi Bible translation</span>
+            <span class="subtitle">Marathi Holy Bible &copy; The Bible Society of India (BSI)</span>
           </button>
           <button class="select-row-item" data-lang="eng">
             <span class="title">English (NLT)</span>
-            <span class="subtitle">New Living Translation</span>
+            <span class="subtitle">New Living Translation &copy; Tyndale House</span>
           </button>
           <button class="select-row-item" data-lang="parallel">
             <span class="title">Bilingual Parallel Mode</span>
             <span class="subtitle">Stack English and Marathi verses side-by-side</span>
           </button>
+        </div>
+        <div style="padding: 12px 18px; margin: 12px 18px 16px 18px; background: rgba(0,0,0,0.03); border: 1px dashed var(--border); border-radius: 12px; font-size: 11.5px; color: var(--text-muted); line-height: 1.5; text-align: center;">
+          📖 <strong>BSI Copyright:</strong> Marathi Bible text and audio streams &copy; The Bible Society of India. All rights reserved. Used for spiritual devotion & discipleship.
         </div>
       </div>
     </div>
@@ -3358,6 +3613,15 @@
           </button>
         </div>
 
+      </div>
+    </div>
+
+    <!-- Gallery Photo Lightbox Modal -->
+    <div id="modal-gallery-lightbox" class="app-modal-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.88); z-index: 99999; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); justify-content: center; align-items: center; padding: 20px;" onclick="closeGalleryLightbox()">
+      <div style="max-width: 600px; width: 100%; position: relative; display: flex; flex-direction: column; align-items: center;" onclick="event.stopPropagation()">
+        <button onclick="closeGalleryLightbox()" style="position: absolute; top: -45px; right: 0; background: rgba(255,255,255,0.2); border: none; color: #fff; width: 36px; height: 36px; border-radius: 50%; font-size: 18px; cursor: pointer;">✕</button>
+        <img id="lightbox-img" src="" alt="Enlarged gallery photo" style="width: 100%; max-height: 70vh; object-fit: contain; border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+        <p id="lightbox-caption" style="margin-top: 14px; font-size: 14px; font-weight: 700; color: #ffffff; text-align: center; line-height: 1.4;"></p>
       </div>
     </div>
 
@@ -4046,7 +4310,7 @@
               </div>
             </div>
             <button type="submit" id="btn-create-meeting-submit" class="btn-primary-block" style="margin-top: 10px; padding: 12px;">
-              <script>const CURRENT_VER = "v75_PULL_TO_REFRESH_AND_ANTI_FLICKER";</script><span>CREATE PRAYER MEETING / सभा आयोजित करा</span>
+              <span>CREATE PRAYER MEETING / सभा आयोजित करा</span>
             </button>
           </form>
         </div>

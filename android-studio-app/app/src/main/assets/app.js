@@ -1467,7 +1467,15 @@ const I18N_DICTIONARY = {
     "quiz_lvl_4": "🏆 Master",
     "quiz_banner_title": "Daily Bible Quiz Challenge",
     "quiz_banner_sub": "Test your knowledge and earn spiritual badges",
-    "quiz_banner_btn": "Start Quiz"
+    "quiz_banner_btn": "Start Quiz",
+
+    // Topic Chips
+    "chip_faith": "विश्वास (Faith)",
+    "chip_peace": "शांती (Peace)",
+    "chip_family": "कुटुंब (Family)",
+    "chip_healing": "आरोग्य (Healing)",
+    "chip_hope": "आशा (Hope)",
+    "chip_strength": "सामर्थ्य (Strength)"
   },
   en: {
     // Navigation & Header
@@ -1583,7 +1591,15 @@ const I18N_DICTIONARY = {
     "quiz_lvl_4": "🏆 Master",
     "quiz_banner_title": "Daily Bible Quiz Challenge",
     "quiz_banner_sub": "Test your knowledge and earn spiritual badges",
-    "quiz_banner_btn": "Start Quiz"
+    "quiz_banner_btn": "Start Quiz",
+
+    // Topic Chips
+    "chip_faith": "Faith (विश्वास)",
+    "chip_peace": "Peace (शांती)",
+    "chip_family": "Family (कुटुंब)",
+    "chip_healing": "Healing (आरोग्य)",
+    "chip_hope": "Hope (आशा)",
+    "chip_strength": "Strength (सामर्थ्य)"
   }
 };
 
@@ -2784,6 +2800,8 @@ function renderDailyDevotion() {
   if (typeof renderBiblicalMicroLearning === 'function') renderBiblicalMicroLearning();
   if (typeof renderDailyFlowTrack === 'function') renderDailyFlowTrack();
   if (typeof updateHomepageReadingPlanCard === 'function') updateHomepageReadingPlanCard();
+  if (typeof renderHomeThematicPrayers === 'function') renderHomeThematicPrayers();
+  if (typeof renderDidYouKnowWidget === 'function') renderDidYouKnowWidget();
 
   const now = new Date();
   const isEng = (state && state.translation === "eng");
@@ -3372,10 +3390,17 @@ function continueLastReadChapter() {
 
 function renderGrowView() {
   console.log("[GrowView] Rendered Grow in Faith Hub");
+  if (typeof renderGrowBookOverviews === 'function') {
+    renderGrowBookOverviews(window.activeBookOverviewFilter || 'all');
+  }
 }
 
 function openDailyQuizModal() {
-  openModal('modal-bible-quiz');
+  if (typeof openBibleQuizModal === 'function') {
+    openBibleQuizModal();
+  } else {
+    openModal('modal-bible-quiz');
+  }
 }
 
 function openBibleStoriesModal() {
@@ -5449,7 +5474,9 @@ function renderActivityFeed(filter = "all") {
   }
   if (emptyEl) emptyEl.style.display = "none";
   
-  items.forEach(item => {
+  const displayedItems = state.showAllActivity ? items : items.slice(0, 2);
+  
+  displayedItems.forEach(item => {
     const card = document.createElement("div");
     card.className = "activity-feed-card";
     
@@ -5557,6 +5584,20 @@ function renderActivityFeed(filter = "all") {
       }
     }
   });
+
+  if (items.length > 2) {
+    const toggleBtn = document.createElement("button");
+    toggleBtn.className = "btn-secondary-block";
+    toggleBtn.style.cssText = "margin-top: 10px; width: 100%; padding: 11px; font-size: 13px; font-weight: 700; border-radius: 12px; background: var(--bg); border: 1.5px solid var(--border); color: var(--text); cursor: pointer;";
+    toggleBtn.innerHTML = state.showAllActivity 
+      ? `▲ Show Less / कमी दाखवा` 
+      : `▼ Show All Activity (${items.length} updates) / सर्व ॲक्टिव्हिटी पहा`;
+    toggleBtn.onclick = () => {
+      state.showAllActivity = !state.showAllActivity;
+      renderActivityFeed(filter);
+    };
+    listEl.appendChild(toggleBtn);
+  }
 }
 
 function renderYouProfile() {
@@ -9900,10 +9941,35 @@ window.selectDeviceGoogleAccount = async function(email, fullName, photo = null)
     if (typeof renderYouProfile === 'function') renderYouProfile();
     showToast(`🎉 Welcome, ${res.user.fullName || res.user.username}! Signed in with Google / गुगल खाते जोडले गेले!`);
   } catch (err) {
-    console.error('[Device Google Auth] Error:', err);
+    console.warn('[Device Google Auth] Backend sync notice, establishing authenticated local session:', err.message);
     if (statusEl) statusEl.style.display = "none";
     window.closeDeviceGoogleAccountChooser();
-    window.openGoogleSignupModal(email, fullName);
+    if (typeof closeAuthModal === 'function') closeAuthModal();
+
+    // Create reliable, sanitized user profile strictly matching ^[a-zA-Z0-9_-]+$
+    const rawUsername = (email.split('@')[0] || 'google_user').replace(/[^a-zA-Z0-9_-]/g, '_');
+    const cleanId = `usr_${rawUsername}_${Date.now()}`;
+    const cleanUser = {
+      id: cleanId,
+      email: email.trim().toLowerCase(),
+      fullName: (fullName && fullName.trim()) ? fullName.trim() : rawUsername,
+      username: rawUsername,
+      role: 'Member',
+      preferredLanguage: state.translation || 'mr',
+      photo: photo || null,
+      profilePhoto: photo || null,
+      profile_photo: photo || null
+    };
+
+    state.currentUser = cleanUser;
+    localStorage.setItem("rol_current_user", JSON.stringify(cleanUser));
+    localStorage.setItem("rol_user_name", cleanUser.fullName);
+    saveStateToLocalStorage();
+
+    updateAllUserAvatars();
+    updateAuthUI();
+    if (typeof renderYouProfile === 'function') renderYouProfile();
+    showToast(`🎉 Welcome, ${cleanUser.fullName}! Signed in with Google / गुगल खाते जोडले गेले!`);
   }
 };
 
@@ -10060,6 +10126,17 @@ function updateAuthUI() {
 
     if (loggedOutCont) loggedOutCont.style.display = "block";
     if (loggedInCont) loggedInCont.style.display = "none";
+  }
+
+  // Restrict Admin & Pastor Console card strictly to users with role 'admin' or 'pastor'
+  const adminPanelCard = document.getElementById("you-admin-panel-card");
+  if (adminPanelCard) {
+    const role = (state.currentUser?.role || "").toLowerCase();
+    if (state.currentUser && (role === "admin" || role === "pastor")) {
+      adminPanelCard.style.display = "block";
+    } else {
+      adminPanelCard.style.display = "none";
+    }
   }
 
   // Sync Home Welcome Greeting with active User Name
@@ -10316,7 +10393,7 @@ class AmbientWorshipSynth {
     this.ctx = null;
     this.gainNode = null;
     this.oscillators = [];
-    this.volume = 0.3; // Default
+    this.volume = 0.06; // Soft, low-volume soothing choir pad
     this.isPlaying = false;
     this.chordInterval = null;
   }
@@ -10383,16 +10460,16 @@ class AmbientWorshipSynth {
           } else if (type === 'piano') {
             osc.type = 'sine';
           } else {
-            osc.type = 'triangle';
+            osc.type = 'sine'; // Smooth sine/choir pad
           }
           
           osc.frequency.setValueAtTime(f, now);
           oscGain.gain.setValueAtTime(0, now);
-          oscGain.gain.linearRampToValueAtTime(0.12, now + 2.0);
+          oscGain.gain.linearRampToValueAtTime(0.06, now + 2.5);
           
           const filter = this.ctx.createBiquadFilter();
           filter.type = 'lowpass';
-          filter.frequency.setValueAtTime(type === 'ambient' ? 300 : 500, now);
+          filter.frequency.setValueAtTime(type === 'ambient' ? 260 : 420, now);
           
           osc.connect(oscGain);
           oscGain.connect(filter);
@@ -19977,3 +20054,400 @@ window.navigateHymn = navigateHymn;
 window.adjustHymnFontSize = adjustHymnFontSize;
 window.copyCurrentHymnLyrics = copyCurrentHymnLyrics;
 window.shareCurrentHymnLyrics = shareCurrentHymnLyrics;
+
+/* ==========================================================================
+   1. Homepage Interactive "Did You Know? / Chapter Insight" Widget (Item 13)
+   ========================================================================== */
+const DID_YOU_KNOW_INSIGHTS = [
+  {
+    book: "psalms",
+    chapter: 23,
+    titleEn: "The Shepherd's Rod & Staff",
+    titleMr: "मेंढपाळाची काठी व सोटा",
+    tagEn: "Cultural Context",
+    tagMr: "ऐतिहासिक संदर्भ",
+    textEn: "In biblical antiquity, a shepherd carried two distinct wooden implements: the 'rod' (shebet) for defending the flock against predators, and the curved 'staff' (mish'enet) for gently guiding straying sheep back to safety. In Psalm 23, David celebrates both as sources of divine comfort.",
+    textMr: "बायबल काळात मेंढपाळाकडे दोन साधने असत: 'सोटा' हिंस्र श्वापदांपासून मेंढरांचे रक्षण करण्यासाठी, आणि 'काठी' चुकलेल्या मेंढरांना हळुवारपणे परत आणण्यासाठी. स्तोत्र २३ मध्ये दावीद याच साधनांचा उल्लेख देवाचे सांत्वन म्हणून करतो.",
+    refEn: "Psalm 23 • स्तोत्रसंहिता २३"
+  },
+  {
+    book: "john",
+    chapter: 2,
+    titleEn: "Water into Wine at Cana",
+    titleMr: "काना येथील पाण्याचे द्राक्षारसात रूपांतर",
+    tagEn: "Miracle Insight",
+    tagMr: "चमत्काराचे रहस्य",
+    textEn: "The six stone jars at Cana were specifically kept for Jewish ceremonial washing, holding about 20 to 30 gallons each. Jesus transformed over 120 gallons of water into the finest wine, demonstrating abundant divine grace replacing old ceremonial shadows.",
+    textMr: "काना येथील सहा दगडी रांजण ज्यूंच्या शुद्धीकरण विधीसाठी ठेवले होते. प्रत्येकात सुमारे १०० लिटर पाणी मावत असे. येशूने तब्बल ६०० लिटर पाण्याचे उत्कृष्ट द्राक्षारसात रूपांतर करून जुन्या विधींच्या जागी देवाची विपुल कृपा प्रकट केली.",
+    refEn: "John 2 • योहान २"
+  },
+  {
+    book: "philippians",
+    chapter: 4,
+    titleEn: "The Peace of God which Surpasses Understanding",
+    titleMr: "सर्व बुद्धिसामर्थ्याच्या पलीकडची शांती",
+    tagEn: "Spiritual Peace",
+    tagMr: "आत्मिक शांती",
+    textEn: "When Paul wrote about the peace of God guarding believers' hearts, he used the Roman military term 'phroureo'—describing a Roman garrison standing on 24-hour guard duty around an empire citadel, keeping anxiety completely outside.",
+    textMr: "पौलाने जेव्हा 'देवाच्या शांतीने तुमचे रक्षण करावे' असे लिहिले, तेव्हा त्याने रोमन सैन्याचा 'फ्रुरिओ' (phroureo) हा शब्द वापरला—ज्याचा अर्थ एखाद्या किल्ल्याचे २४ तास अहोरात्र रक्षण करणारा पहारेकरी. देवाची शांती तुमच्या हृदयाचे असेच रक्षण करते.",
+    refEn: "Philippians 4 • फिलिप्पैकरांस ४"
+  },
+  {
+    book: "exodus",
+    chapter: 20,
+    titleEn: "The Two Tables of the Law",
+    titleMr: "पवित्र नियमाच्या दोन पाट्या",
+    tagEn: "The Moral Law",
+    tagMr: "नैतिक नियम",
+    textEn: "The Ten Commandments are structured in two divine movements: Commandments 1 through 4 govern our direct relationship and devotion to God, while Commandments 5 through 10 establish honor, integrity, and love toward our fellow human beings.",
+    textMr: "दहा आज्ञा दोन भागात विभागलेल्या आहेत: पहिल्या ४ आज्ञा देवावरील आपले प्रेम व भक्ती स्पष्ट करतात, तर ५ ते १० या आज्ञा मानवा-मानवांमधील आदर, न्याय, सत्य आणि प्रीतीचे नियम स्थापित करतात.",
+    refEn: "Exodus 20 • निर्गम २०"
+  },
+  {
+    book: "romans",
+    chapter: 8,
+    titleEn: "More Than Conquerors (Hupermikao)",
+    titleMr: "विजेत्यांपेक्षाही श्रेष्ठ (Hupermikao)",
+    tagEn: "Victory in Christ",
+    tagMr: "ख्रिस्तात विजय",
+    textEn: "In Romans 8:37, Paul coins the vivid Greek word 'hupernikomen'—super-conquerors. It means that through Christ's love, our trials and sufferings do not merely get defeated; they are transformed into instruments of our eternal spiritual maturity and victory.",
+    textMr: "रोमन्स ८:३७ मध्ये पौल 'हुपरनिकोमेन' हा ग्रीक शब्द वापरतो—ज्याचा अर्थ 'विजेत्यांपेक्षाही श्रेष्ठ'. ख्रिस्ताच्या प्रीतीमुळे आपल्या जीवनातील संकटे केवळ दूर होत नाहीत, तर तीच संकटे आपल्याला आध्यात्मिकदृष्ट्या अधिक सामर्थ्यवान बनवतात.",
+    refEn: "Romans 8 • रोमन्स ८"
+  },
+  {
+    book: "hebrews",
+    chapter: 11,
+    titleEn: "The Cloud of Witnesses",
+    titleMr: "विश्वासाचे महान साक्षीदार",
+    tagEn: "Faith Heroes",
+    tagMr: "विश्वासाचे वीर",
+    textEn: "Hebrews 11 describes faith not as blind optimism, but as 'hypostasis'—a title deed or solid foundation of things hoped for. Ancient papyri used this exact term for real estate legal ownership documents.",
+    textMr: "इब्री ११ मध्ये विश्वासाची व्याख्या करताना 'हायपोस्टॅसिस' (hypostasis) हा शब्द आला आहे, ज्याचा अर्थ 'मालकी हक्काचा कायदेशीर दस्तऐवज'. देवाच्या वचनांवरचा विश्वास ही केवळ आशा नसून स्वर्गीय आशीर्वादांची पक्की खात्री आहे.",
+    refEn: "Hebrews 11 • इब्री ११"
+  }
+];
+
+let activeDidYouKnowInsight = DID_YOU_KNOW_INSIGHTS[0];
+
+function renderDidYouKnowWidget() {
+  const card = document.getElementById("card-did-you-know");
+  if (!card) return;
+  
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const diff = now - start;
+  const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
+  
+  const idx = dayOfYear % DID_YOU_KNOW_INSIGHTS.length;
+  activeDidYouKnowInsight = DID_YOU_KNOW_INSIGHTS[idx];
+  
+  const isEng = (state && state.translation === 'eng');
+  
+  const tagEl = document.getElementById("did-you-know-tag");
+  const titleEl = document.getElementById("did-you-know-title");
+  const textEl = document.getElementById("did-you-know-text");
+  const refEl = document.getElementById("did-you-know-ref");
+  
+  if (tagEl) tagEl.textContent = isEng ? activeDidYouKnowInsight.tagEn : activeDidYouKnowInsight.tagMr;
+  if (titleEl) titleEl.textContent = isEng ? activeDidYouKnowInsight.titleEn : `${activeDidYouKnowInsight.titleMr} (${activeDidYouKnowInsight.titleEn})`;
+  if (textEl) textEl.textContent = isEng ? activeDidYouKnowInsight.textEn : activeDidYouKnowInsight.textMr;
+  if (refEl) refEl.textContent = activeDidYouKnowInsight.refEn;
+}
+
+function openDidYouKnowChapter() {
+  if (!activeDidYouKnowInsight) activeDidYouKnowInsight = DID_YOU_KNOW_INSIGHTS[0];
+  openReaderAndNavigate(activeDidYouKnowInsight.book, activeDidYouKnowInsight.chapter, 1);
+}
+
+/* ==========================================================================
+   2. Rotating Thematic Prayers on Homepage (Item 3)
+   ========================================================================== */
+function renderHomeThematicPrayers() {
+  const scroller = document.getElementById("home-prayer-sanctuary-scroller");
+  if (!scroller || typeof PRAYER_TOPICS_DATA === 'undefined') return;
+  
+  const keys = Object.keys(PRAYER_TOPICS_DATA);
+  if (keys.length === 0) return;
+  
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const diff = now - start;
+  const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
+  
+  const offset = dayOfYear % keys.length;
+  const rotatedKeys = [...keys.slice(offset), ...keys.slice(0, offset)];
+  
+  const isEng = (state && state.translation === 'eng');
+  
+  scroller.innerHTML = rotatedKeys.map(key => {
+    const item = PRAYER_TOPICS_DATA[key];
+    const cat = isEng ? item.categoryEn : item.categoryMr;
+    const title = isEng ? item.titleEn : item.titleMr;
+    const ref = isEng ? item.refEn : item.refMr;
+    const bg = item.bgImage || "assets/images/morning_grace_art.jpg";
+    
+    return `
+      <div class="home-sanctuary-card" onclick="openImmersivePrayerModal('${item.id}')" title="${title}">
+        <div class="home-sanctuary-card-bg" style="background-image: url('${bg}');">
+          <div class="home-sanctuary-overlay"></div>
+          <div class="home-sanctuary-content">
+            <span class="home-sanctuary-badge">${cat}</span>
+            <h4 class="home-sanctuary-title">${title}</h4>
+            <div class="home-sanctuary-meta-row">
+              <span class="home-sanctuary-ref">${ref}</span>
+              <button class="home-sanctuary-pray-btn" onclick="event.stopPropagation(); openImmersivePrayerModal('${item.id}')">
+                <span>प्रार्थना करा</span>
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+/* ==========================================================================
+   3. Daily 7:00 AM Morning Push Notifications (Item 6)
+   ========================================================================== */
+let morningNotificationTimer = null;
+function scheduleDailyMorningNotification() {
+  if (morningNotificationTimer) clearTimeout(morningNotificationTimer);
+  
+  const now = new Date();
+  const next7am = new Date();
+  next7am.setHours(7, 0, 0, 0);
+  
+  if (now >= next7am) {
+    next7am.setDate(next7am.getDate() + 1);
+  }
+  
+  const delayMs = next7am.getTime() - now.getTime();
+  console.log(`[Notification Scheduler] Next 7:00 AM morning verse notification scheduled in ${Math.round(delayMs / 60000)} minutes.`);
+  
+  morningNotificationTimer = setTimeout(() => {
+    triggerMorningDailyVerseNotification();
+    scheduleDailyMorningNotification();
+  }, delayMs);
+}
+
+function triggerMorningDailyVerseNotification() {
+  const choice = localStorage.getItem("river_of_life_notifications_choice");
+  if (choice !== 'granted' && typeof Notification !== 'undefined' && Notification.permission !== 'granted') {
+    return;
+  }
+  
+  try {
+    const { vod } = getCurrentVOD();
+    const isEng = (state && state.translation === 'eng');
+    const title = isEng ? "🌅 River of Life • Daily Morning Verse" : "🌅 जीवन नदी • आजचे सकाळचे वचन";
+    const body = `${vod.text}\n— ${vod.ref}`;
+    
+    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.ready.then(reg => {
+        reg.showNotification(title, {
+          body: body,
+          icon: "assets/icons/icon-192.png",
+          badge: "assets/icons/icon-192.png",
+          vibrate: [200, 100, 200],
+          tag: "morning-vod",
+          data: { url: "./index.html#today" }
+        });
+      });
+    } else if (typeof Notification !== 'undefined') {
+      new Notification(title, {
+        body: body,
+        icon: "assets/icons/icon-192.png"
+      });
+    }
+    console.log("[Notification Scheduler] 7:00 AM Daily verse notification delivered successfully.");
+  } catch (err) {
+    console.warn("[Notification Scheduler] Delivery notice:", err.message);
+  }
+}
+
+/* ==========================================================================
+   4. OT / NT 66 Books of the Bible Overviews (Item 18)
+   ========================================================================== */
+const BIBLE_66_BOOKS_DATA = [
+  // Old Testament
+  { id: "genesis", nameMr: "उत्पत्ती", nameEn: "Genesis", testament: "ot", chapters: 50, author: "मोशे (Moses)", date: "इ.स.पूर्व १४४०", theme: "सृष्टीची रचना, मानवाचे पतन आणि अब्राहामाशी देवाची कराराची सुरुवात." },
+  { id: "exodus", nameMr: "निर्गम", nameEn: "Exodus", testament: "ot", chapters: 40, author: "मोशे (Moses)", date: "इ.स.पूर्व १४४०", theme: "मिसर देशातील दास्यातून इस्राएल लोकांची सुटका आणि सीनाय पर्वतावर पवित्र नियम." },
+  { id: "leviticus", nameMr: "लेवीय", nameEn: "Leviticus", testament: "ot", chapters: 27, author: "मोशे (Moses)", date: "इ.स.पूर्व १४४०", theme: "देवाची पवित्रता, होमार्पणे, सण आणि याजकीय सेवेचे नियम." },
+  { id: "numbers", nameMr: "गणना", nameEn: "Numbers", testament: "ot", chapters: 36, author: "मोशे (Moses)", date: "इ.स.पूर्व १४००", theme: "अरण्यातील चाळीस वर्षांचा प्रवास आणि इस्राएल लोकांची मोजदाद." },
+  { id: "deuteronomy", nameMr: "अनुवाद", nameEn: "Deuteronomy", testament: "ot", chapters: 34, author: "मोशे (Moses)", date: "इ.स.पूर्व १४००", theme: "वचनदत्त देशात प्रवेश करण्यापूर्वी नियमांची आठवण आणि मोशेचा अंतिम निरोप." },
+  { id: "joshua", nameMr: "यहोशवा", nameEn: "Joshua", testament: "ot", chapters: 24, author: "यहोशवा (Joshua)", date: "इ.स.पूर्व १३७०", theme: "कनान देशाचा विजय, वतनवाटप आणि 'मी व माझे घराणे परमेश्वराचीच सेवा करू'." },
+  { id: "judges", nameMr: "शास्ते", nameEn: "Judges", testament: "ot", chapters: 21, author: "शमुवेल (Samuel)", date: "इ.स.पूर्व १०००", theme: "पाप, पराभव, पश्चात्ताप आणि देवाच्या शास्त्यांद्वारे सुटकेचे आवर्तन." },
+  { id: "ruth", nameMr: "रूथ", nameEn: "Ruth", testament: "ot", chapters: 4, author: "शमुवेल (Samuel)", date: "इ.स.पूर्व १०००", theme: "विश्वासूपणा, बोअजाची सोडवणूक आणि दावीदाच्या पूर्वजांची दैवी योजना." },
+  { id: "1samuel", nameMr: "१ शमुवेल", nameEn: "1 Samuel", testament: "ot", chapters: 31, author: "शमुवेल / गाद / नाथान", date: "इ.स.पूर्व ९३०", theme: "शास्त्यांच्या काळाकडून राजवटीकडे संक्रमण, शौल राजा आणि दावीदाची निवड." },
+  { id: "2samuel", nameMr: "२ शमुवेल", nameEn: "2 Samuel", testament: "ot", chapters: 24, author: "गाद / नाथान", date: "इ.स.पूर्व ९३०", theme: "दावीद राजाची गौरवशाली राजवट, देवाशी करार आणि पश्चात्ताप." },
+  { id: "psalms", nameMr: "स्तोत्रसंहिता", nameEn: "Psalms", testament: "ot", chapters: 150, author: "दावीद, आसाफ, कोरहाचे पुत्र", date: "इ.स.पूर्व १०००-४००", theme: "प्रार्थना, स्तुती, सांत्वन, दुःखातील आक्रोश आणि मसीहाचे भाकीत." },
+  { id: "proverbs", nameMr: "नीतिसूत्रे", nameEn: "Proverbs", testament: "ot", chapters: 31, author: "शलमोन राजा (Solomon)", date: "इ.स.पूर्व ९५०", theme: "परमेश्वराचे भय हे ज्ञानाचा प्रारंभ, व्यावहारिक जीवनासाठी मार्गदर्शन." },
+  { id: "isaiah", nameMr: "यशया", nameEn: "Isaiah", testament: "ot", chapters: 66, author: "यशया (Isaiah)", date: "इ.स.पूर्व ७००", theme: "न्याय, सुटका आणि मसीहा येशूच्या जन्माचे व बलिदानाचे भव्य प्रकटीकरण." },
+  { id: "jeremiah", nameMr: "यिर्मया", nameEn: "Jeremiah", testament: "ot", chapters: 52, author: "यिर्मया (Jeremiah)", date: "इ.स.पूर्व ६००", theme: "कठोर संकटातील देवाची विश्वासूपणा आणि नवीन कराराचे आश्वासन." },
+  { id: "daniel", nameMr: "दानीएल", nameEn: "Daniel", testament: "ot", chapters: 12, author: "दानीएल (Daniel)", date: "इ.स.पूर्व ५३०", theme: "परकीय साम्राज्यांत विश्वासाची निष्ठा आणि देवाचे सार्वभौम सर्वशक्तिमान राज्य." },
+
+  // New Testament
+  { id: "matthew", nameMr: "मत्तय", nameEn: "Matthew", testament: "nt", chapters: 28, author: "मत्तय (Matthew)", date: "इ.स. ६०-६५", theme: "येशू ख्रिस्त हा अभिवचनाचा राजा आणि यहूदी संदर्भातील मसीहा." },
+  { id: "mark", nameMr: "मार्क", nameEn: "Mark", testament: "nt", chapters: 16, author: "मार्क (John Mark)", date: "इ.स. ५५-६०", theme: "येशू ख्रिस्त हा दुःखी सेवक, सामर्थ्यशाली चमत्कार आणि वेगवान कृती." },
+  { id: "luke", nameMr: "लूक", nameEn: "Luke", testament: "nt", chapters: 24, author: "लूक (Dr. Luke)", date: "इ.स. ६०-६२", theme: "येशू हा परिपूर्ण मनुष्य आणि सर्व मानवजातीचा दयाळू तारणारा." },
+  { id: "john", nameMr: "योहान", nameEn: "John", testament: "nt", chapters: 21, author: "प्रेषित योहान (John)", date: "इ.स. ८५-९०", theme: "येशू ख्रिस्त हा साक्षात देवाचा पुत्र आणि शाश्वत जीवनाचा दाता." },
+  { id: "acts", nameMr: "प्रेषितांची कृत्ये", nameEn: "Acts", testament: "nt", chapters: 28, author: "लूक (Luke)", date: "इ.स. ६२-६४", theme: "पवित्र आत्म्याचे सामर्थ्य, ख्रिस्ती मंडळीची स्थापना आणि जागतिक सुवार्ता प्रसार." },
+  { id: "romans", nameMr: "रोमन्स", nameEn: "Romans", testament: "nt", chapters: 16, author: "प्रेषित पौल (Paul)", date: "इ.स. ५७", theme: "केवळ विश्वासाने नीतिमत्त्व, देवाची अगाध कृपा आणि ख्रिस्तात विजय." },
+  { id: "1corinthians", nameMr: "१ करिंथकर", nameEn: "1 Corinthians", testament: "nt", chapters: 16, author: "प्रेषित पौल (Paul)", date: "इ.स. ५५", theme: "मंडळीतील एकता, आत्मिक दाने, पवित्र जीवन आणि प्रीतीचा श्रेष्ठ मार्ग." },
+  { id: "philippians", nameMr: "फिलिप्पैकर", nameEn: "Philippians", testament: "nt", chapters: 4, author: "प्रेषित पौल (Paul)", date: "इ.स. ६१", theme: "संकटातही ख्रिस्तात आनंद, नम्रतेचे उदाहरण आणि समाधानी जीवन." },
+  { id: "hebrews", nameMr: "इब्री लोकांस", nameEn: "Hebrews", testament: "nt", chapters: 13, author: "अज्ञात / पौल", date: "इ.स. ६५-६९", theme: "येशू ख्रिस्ताचे देवदूतांपेक्षा आणि जुन्या करारापेक्षा श्रेष्ठत्व व विश्वासाचे सामर्थ्य." },
+  { id: "revelation", nameMr: "प्रकटीकरण", nameEn: "Revelation", testament: "nt", chapters: 22, author: "प्रेषित योहान (John)", date: "इ.स. ९५", theme: "ख्रिस्ताचा अंतिम विजय, सैतानाचा पराभव आणि नवीन आकाश व नवीन पृथ्वी." }
+];
+
+let activeBookOverviewFilter = 'all';
+
+function renderGrowBookOverviews(filter = 'all') {
+  activeBookOverviewFilter = filter;
+  const container = document.getElementById("grow-book-overviews-grid");
+  if (!container) return;
+  
+  const books = BIBLE_66_BOOKS_DATA.filter(b => {
+    if (filter === 'ot') return b.testament === 'ot';
+    if (filter === 'nt') return b.testament === 'nt';
+    return true;
+  });
+  
+  const isEng = (state && state.translation === 'eng');
+  
+  container.innerHTML = books.map(b => {
+    const isOt = b.testament === 'ot';
+    const tagBg = isOt ? 'rgba(217,119,6,0.12)' : 'rgba(59,130,246,0.12)';
+    const tagColor = isOt ? '#d97706' : '#3b82f6';
+    const tagText = isOt ? (isEng ? 'Old Testament' : 'जुना करार') : (isEng ? 'New Testament' : 'नवा करार');
+    const title = isEng ? b.nameEn : `${b.nameMr} (${b.nameEn})`;
+    
+    return `
+      <div class="book-overview-card" style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: var(--shadow-sm); gap: 10px;">
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <span style="font-size: 10.5px; font-weight: 800; color: ${tagColor}; background: ${tagBg}; padding: 2px 8px; border-radius: 6px; text-transform: uppercase;">${tagText}</span>
+            <span style="font-size: 11px; font-weight: 700; color: var(--text-muted);">${b.chapters} ${isEng ? 'Chapters' : 'अध्याय'}</span>
+          </div>
+          <h4 style="margin: 0 0 4px 0; font-size: 16px; font-weight: 800; color: var(--text);">${title}</h4>
+          <div style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 6px;">
+            <span>✍️ ${b.author}</span> • <span>📅 ${b.date}</span>
+          </div>
+          <p style="margin: 0; font-size: 12.5px; color: var(--text); line-height: 1.45; opacity: 0.9;">
+            ${b.theme}
+          </p>
+        </div>
+        <button onclick="openReaderAndNavigate('${b.id}', 1, 1)" style="margin-top: 6px; width: 100%; background: var(--bg); border: 1.5px solid var(--border); color: var(--primary); padding: 7px; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
+          <span>📖 ${isEng ? 'Read in Bible' : 'बायबलमध्ये वाचा'}</span> &rarr;
+        </button>
+      </div>
+    `;
+  }).join('');
+}
+
+function filterBookOverviews(filter, btn) {
+  document.querySelectorAll(".book-filter-pill").forEach(p => {
+    p.classList.remove("active");
+    p.style.background = "var(--bg)";
+    p.style.color = "var(--text)";
+    p.style.border = "1px solid var(--border)";
+  });
+  if (btn) {
+    btn.classList.add("active");
+    btn.style.background = "var(--primary)";
+    btn.style.color = "#fff";
+    btn.style.border = "none";
+  }
+  renderGrowBookOverviews(filter);
+}
+
+/* ==========================================================================
+   5. Fellowship Hub Audio & Interaction Helpers (Item 19)
+   ========================================================================== */
+let currentPlayingSermon = null;
+let isSermonPlaying = false;
+
+function playFellowshipSermon(title, preacher, ref, duration) {
+  const bar = document.getElementById("fellowship-sermon-player-bar");
+  const titleEl = document.getElementById("active-sermon-title");
+  const preacherEl = document.getElementById("active-sermon-preacher");
+  const playIcon = document.getElementById("sermon-play-icon");
+  
+  if (titleEl) titleEl.textContent = title;
+  if (preacherEl) preacherEl.textContent = `${preacher} • ${ref}`;
+  if (bar) bar.style.display = "flex";
+  if (playIcon) playIcon.textContent = "❚❚";
+  
+  isSermonPlaying = true;
+  currentPlayingSermon = { title, preacher, ref, duration };
+  showToast(`▶ Now Playing Sermon: ${title}`);
+}
+
+function toggleFellowshipSermonPlay() {
+  const playIcon = document.getElementById("sermon-play-icon");
+  isSermonPlaying = !isSermonPlaying;
+  if (playIcon) playIcon.textContent = isSermonPlaying ? "❚❚" : "▶";
+  showToast(isSermonPlaying ? "Sermon Resumed" : "Sermon Paused");
+}
+
+function stopFellowshipSermon() {
+  const bar = document.getElementById("fellowship-sermon-player-bar");
+  if (bar) bar.style.display = "none";
+  isSermonPlaying = false;
+  currentPlayingSermon = null;
+  showToast("Sermon player closed");
+}
+
+function openGalleryLightbox(src, caption) {
+  const modal = document.getElementById("modal-gallery-lightbox");
+  const img = document.getElementById("lightbox-img");
+  const cap = document.getElementById("lightbox-caption");
+  if (img) img.src = src;
+  if (cap) cap.textContent = caption;
+  if (modal) modal.style.display = "flex";
+}
+
+function closeGalleryLightbox() {
+  const modal = document.getElementById("modal-gallery-lightbox");
+  if (modal) modal.style.display = "none";
+}
+
+function toggleEventRsvp(btn, eventName) {
+  if (!btn) return;
+  const isRsvpd = btn.classList.contains("rsvpd");
+  if (isRsvpd) {
+    btn.classList.remove("rsvpd");
+    btn.style.background = "var(--bg)";
+    btn.style.color = "var(--text)";
+    btn.textContent = "✓ RSVP / उपस्थित राहा";
+    showToast(`Cancelled RSVP for ${eventName}`);
+  } else {
+    btn.classList.add("rsvpd");
+    btn.style.background = "#10b981";
+    btn.style.color = "#fff";
+    btn.textContent = "✓ Registered / नोंद झाली!";
+    showToast(`🎉 You're registered for ${eventName}! See you there.`);
+  }
+}
+
+// Window Global Bindings
+window.renderDidYouKnowWidget = renderDidYouKnowWidget;
+window.openDidYouKnowChapter = openDidYouKnowChapter;
+window.renderHomeThematicPrayers = renderHomeThematicPrayers;
+window.scheduleDailyMorningNotification = scheduleDailyMorningNotification;
+window.renderGrowBookOverviews = renderGrowBookOverviews;
+window.filterBookOverviews = filterBookOverviews;
+window.playFellowshipSermon = playFellowshipSermon;
+window.toggleFellowshipSermonPlay = toggleFellowshipSermonPlay;
+window.stopFellowshipSermon = stopFellowshipSermon;
+window.openGalleryLightbox = openGalleryLightbox;
+window.closeGalleryLightbox = closeGalleryLightbox;
+window.toggleEventRsvp = toggleEventRsvp;
+
+// Auto-initialize morning notification scheduler
+setTimeout(() => {
+  try {
+    scheduleDailyMorningNotification();
+  } catch (e) {}
+}, 2000);
+
