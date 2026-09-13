@@ -885,6 +885,217 @@ const VOD_LIST = [
 let touchStartX = 0;
 let touchEndX = 0;
 
+var DID_YOU_KNOW_INSIGHTS = [
+  {
+    id: "dyk_women_books",
+    theme: "dyk-theme-emerald",
+    image: "assets/images/did_you_know_esther.jpg",
+    alt: "Classical illustration of biblical Queen Esther standing before King Ahasuerus",
+    questionEn: "Which Books of the Bible Are Named After Women?",
+    questionMr: "बायबलमधील कोणत्या पुस्तकांना स्त्रियांची नावे आहेत?",
+    bulletsEn: [
+      { icon: "📖", text: "Esther 👑 (Queen of Persia & Deliverer)" },
+      { icon: "🌾", text: "Ruth (Model of Faithfulness & Lineage of Christ)" },
+      { icon: "📜", text: "Judith (Historical Apocrypha)" },
+      { icon: "🪻", text: "Susanna (Historical Apocrypha)" }
+    ],
+    bulletsMr: [
+      { icon: "📖", text: "एस्तेर (Esther) 👑 — पारसाची राणी व तारणहार" },
+      { icon: "🌾", text: "रूथ (Ruth) — विश्वासूपणाची आदर्श व दाविदाची पूर्वज" },
+      { icon: "📜", text: "यहूदीथ (Judith) — ऐतिहासिक प्राचीन ग्रंथ" },
+      { icon: "🪻", text: "सुसान्ना (Susanna) — ऐतिहासिक प्राचीन ग्रंथ" }
+    ],
+    refEn: "Esther 1 • एस्तेर १",
+    refMr: "एस्तेर १ • Esther 1",
+    book: "esther",
+    chapter: 1,
+    verse: 1
+  },
+  {
+    id: "dyk_shortest_verse",
+    theme: "dyk-theme-indigo",
+    image: "assets/images/did_you_know_jesus_wept.jpg",
+    alt: "Classical chiaroscuro engraving of Jesus Christ weeping in deep prayer",
+    questionEn: "What Is the Shortest Verse in the Bible?",
+    questionMr: "बायबलमधील सर्वात लहान वचन कोणते आहे?",
+    bulletsEn: [
+      { icon: "💧", text: "John 11:35: \"Jesus wept.\"" },
+      { icon: "🕊️", text: "Just 2 words in English & Marathi (3 in Greek: Ἐδάκρυσεν ὁ Ἰηसोῦς)" },
+      { icon: "❤️", text: "The most profound display of divine empathy & love" },
+      { icon: "🙏", text: "Christ shares deeply in all our earthly sorrows" }
+    ],
+    bulletsMr: [
+      { icon: "💧", text: "योहान ११:३५: \"येशू रडला.\"" },
+      { icon: "🕊️", text: "केवळ २ शब्द (मूळ ग्रीकमध्ये ३ शब्द: Ἐδάκρυσεν ὁ Ἰηसोῦς)" },
+      { icon: "❤️", text: "ईश्वरी करुणा व संवेदनशीलतेची सर्वात सखोल साक्ष" },
+      { icon: "🙏", text: "आपल्या अश्रूंमध्ये ख्रिस्त स्वतः सहभागी होतो" }
+    ],
+    refEn: "John 11:35 • योहान ११:३५",
+    refMr: "योहान ११:३५ • John 11:35",
+    book: "john",
+    chapter: 11,
+    verse: 35
+  },
+  {
+    id: "dyk_noahs_ark",
+    theme: "dyk-theme-teal",
+    image: "assets/images/did_you_know_noahs_ark.jpg",
+    alt: "Classical engraving of Noah's Ark floating upon great flood waters",
+    questionEn: "How Long Did Noah's Ark Float?",
+    questionMr: "नोहाचे तारू पुराच्या पाण्यावर किती काळ तरंगत होते?",
+    bulletsEn: [
+      { icon: "🌧️", text: "40 days & nights of torrential rainfall" },
+      { icon: "🌊", text: "150 days floodwaters surged across the earth" },
+      { icon: "⛰️", text: "Rested on mountains of Ararat in 7th month (Gen 8:4)" },
+      { icon: "☀️", text: "370+ total days Noah remained inside the Ark" }
+    ],
+    bulletsMr: [
+      { icon: "🌧️", text: "४० दिवस व रात्री अखंड मुसळधार पाऊस पडला" },
+      { icon: "🌊", text: "१५० दिवस पुराचे पाणी पृथ्वीवर वाहत राहिले" },
+      { icon: "⛰️", text: "७ व्या महिन्यात अरारात पर्वतावर तारू स्थिरावले" },
+      { icon: "☀️", text: "एकूण ३७० हून अधिक दिवस नोहा तारवात होता" }
+    ],
+    refEn: "Genesis 7-8 • उत्पत्ती ७-८",
+    refMr: "उत्पत्ती ७-८ • Genesis 7-8",
+    book: "genesis",
+    chapter: 7,
+    verse: 17
+  },
+  {
+    id: "dyk_shepherd_rod",
+    theme: "dyk-theme-emerald",
+    image: "assets/images/did_you_know_shepherd.jpg",
+    alt: "Classical oil painting of biblical shepherd with rod and staff",
+    questionEn: "What Is the Secret of the Shepherd's Rod & Staff?",
+    questionMr: "मेंढपाळाची काठी व सोटा यातील आध्यात्मिक रहस्य काय?",
+    bulletsEn: [
+      { icon: "🛡️", text: "Rod (Shebet): Weapon defending flock against beasts" },
+      { icon: "🌿", text: "Staff (Mish'enet): Curved crook to gently guide sheep" },
+      { icon: "✝️", text: "Psalm 23:4: \"Thy rod and thy staff they comfort me\"" },
+      { icon: "🕊️", text: "Divine protection paired with tender, loving direction" }
+    ],
+    bulletsMr: [
+      { icon: "🛡️", text: "सोटा (Rod): हिंस्र श्वापदांपासून मेंढरांचे रक्षण करणारे हत्यार" },
+      { icon: "🌿", text: "काठी (Staff): वळलेली काठी चुकलेल्या मेंढरांना परत आणण्यासाठी" },
+      { icon: "✝️", text: "स्तोत्र २३:४: \"तुझा सोटा व तुझी काठी मला धीर देतात\"" },
+      { icon: "🕊️", text: "देवाचे अजिंक्य रक्षण आणि प्रेमळ मार्गदर्शन" }
+    ],
+    refEn: "Psalm 23:4 • स्तोत्रसंहिता २३:४",
+    refMr: "स्तोत्रसंहिता २३:४ • Psalm 23:4",
+    book: "psalms",
+    chapter: 23,
+    verse: 4
+  },
+  {
+    id: "dyk_water_into_wine",
+    theme: "dyk-theme-mahogany",
+    image: "assets/images/wedding_cana_miracle.jpg",
+    alt: "Classical painting of Jesus turning water into wine at the wedding at Cana",
+    questionEn: "How Much Water Was Turned into Wine at Cana?",
+    questionMr: "काना येथील लग्नात येशूने किती लिटर पाण्याचे रूपांतर केले?",
+    bulletsEn: [
+      { icon: "🏺", text: "6 massive stone jars used for ceremonial washing" },
+      { icon: "🍷", text: "20 to 30 gallons each (total 120-180 gallons / 500-700L)" },
+      { icon: "🍇", text: "Master of banquet declared it the finest wine" },
+      { icon: "✨", text: "Revealed His glory and the overflowing abundance of grace" }
+    ],
+    bulletsMr: [
+      { icon: "🏺", text: "शुद्धीकरणासाठी ठेवलेले ६ भव्य दगडी रांजण" },
+      { icon: "🍷", text: "प्रत्येकात सुमारे १०० लिटर (एकूण ५०० ते ७०० लिटर)" },
+      { icon: "🍇", text: "यजमानाने या द्राक्षारसाला उत्कृष्ट दर्जाचा ठरवले" },
+      { icon: "✨", text: "देवाची असीम कृपा आणि महिमा येथे प्रकट झाला" }
+    ],
+    refEn: "John 2:6-10 • योहान २:६-१०",
+    refMr: "योहान २:६-१० • John 2:6-10",
+    book: "john",
+    chapter: 2,
+    verse: 1
+  },
+  {
+    id: "dyk_peace_phroureo",
+    theme: "dyk-theme-indigo",
+    image: "assets/images/peace_anxiety_art.jpg",
+    alt: "Classical illustration of divine peace guarding believer amidst storm",
+    questionEn: "What Does Paul Mean by 'The Peace of God'?",
+    questionMr: "पौल जेव्हा 'देवाच्या शांती'चा उल्लेख करतो तेव्हा त्याचा खरा अर्थ काय?",
+    bulletsEn: [
+      { icon: "🛡️", text: "Uses Roman military term 'Phroureo' (φρουρέω)" },
+      { icon: "🏰", text: "Describes an armed garrison guarding a fortress 24/7" },
+      { icon: "🕊️", text: "Transcends all human understanding and anxiety" },
+      { icon: "❤️", text: "Keeps worry and panic completely outside your heart" }
+    ],
+    bulletsMr: [
+      { icon: "🛡️", text: "'फ्रुरिओ' (Phroureo) हा रोमन सैन्याचा लष्करी शब्द वापरला" },
+      { icon: "🏰", text: "किल्ल्याचे २४ तास अहोरात्र खडा पहारा देणारा पहारेकरी" },
+      { icon: "🕊️", text: "सर्व बुद्धी व समजेच्या पलीकडची स्वर्गीय शांती" },
+      { icon: "❤️", text: "चिंता, भीती व नैराश्याला हृदयाबाहेरच थोपवून धरते" }
+    ],
+    refEn: "Philippians 4:7 • फिलिप्पैकरांस ४:७",
+    refMr: "फिलिप्पैकरांस ४:७ • Philippians 4:7",
+    book: "philippians",
+    chapter: 4,
+    verse: 6
+  }
+];
+
+// FEATURED_SCRIPTURES_CONFIG hoisted before DOMContentLoaded to prevent temporal dead zone ReferenceError
+var FEATURED_SCRIPTURES_CONFIG = [
+  {
+    id: "psalms",
+    nameEn: "Psalms",
+    nameMr: "स्तोत्रसंहिता",
+    cover: "assets/images/book_psalms_cover.png",
+    themeClass: "recent-card-psalms",
+    totalChapters: 150,
+    chapters: [23, 70, 91, 121, 27, 46, 1, 19, 34, 37, 51, 62, 84, 100, 103, 119, 139, 145, 8, 15, 16, 24, 25, 32, 40, 42, 63, 67, 72, 86, 90, 92, 95, 96, 98, 111, 112, 116, 122, 126, 127, 128, 130, 133, 138, 146, 147, 148, 150]
+  },
+  {
+    id: "proverbs",
+    nameEn: "Proverbs",
+    nameMr: "नीतिसूत्रे",
+    cover: "assets/images/book_proverbs_cover.jpg",
+    themeClass: "recent-card-proverbs",
+    totalChapters: 31,
+    chapters: [3, 4, 8, 10, 15, 16, 22, 27, 31, 1, 2, 5, 6, 7, 9, 11, 12, 13, 14, 17, 18, 19, 20, 21, 23, 24, 25, 26, 28, 29, 30]
+  },
+  {
+    id: "matthew",
+    nameEn: "Matthew",
+    nameMr: "मत्तय",
+    cover: "assets/images/book_matthew_cover.jpg",
+    themeClass: "recent-card-matthew",
+    totalChapters: 28,
+    chapters: [5, 6, 7, 11, 13, 14, 18, 24, 25, 26, 27, 28, 1, 2, 3, 4, 8, 9, 10, 12, 15, 16, 17, 19, 20, 21, 22, 23]
+  },
+  {
+    id: "john",
+    nameEn: "John",
+    nameMr: "योहान",
+    cover: "assets/images/book_john_cover.jpg",
+    themeClass: "recent-card-john",
+    totalChapters: 21,
+    chapters: [1, 3, 4, 6, 10, 11, 14, 15, 16, 17, 20, 21, 2, 5, 7, 8, 9, 12, 13, 18, 19]
+  },
+  {
+    id: "romans",
+    nameEn: "Romans",
+    nameMr: "रोमन्स",
+    cover: "assets/images/book_romans_cover.jpg",
+    themeClass: "recent-card-romans",
+    totalChapters: 16,
+    chapters: [8, 12, 1, 3, 5, 6, 7, 10, 11, 13, 14, 15, 16, 2, 4, 9]
+  },
+  {
+    id: "genesis",
+    nameEn: "Genesis",
+    nameMr: "उत्पत्ती",
+    cover: "assets/images/book_genesis_cover.jpg",
+    themeClass: "recent-card-genesis",
+    totalChapters: 50,
+    chapters: [1, 12, 15, 22, 28, 37, 39, 45, 50, 2, 3, 6, 7, 8, 9, 11]
+  }
+];
+
 /* ==========================================================================
    Initialization and Listeners
    ========================================================================== */
@@ -21173,158 +21384,7 @@ window.shareCurrentHymnLyrics = shareCurrentHymnLyrics;
 /* ==========================================================================
    1. Homepage Interactive "Did You Know? / Chapter Insight" Widget (Item 13)
    ========================================================================== */
-const DID_YOU_KNOW_INSIGHTS = [
-  {
-    id: "dyk_women_books",
-    theme: "dyk-theme-emerald",
-    image: "assets/images/did_you_know_esther.jpg",
-    alt: "Classical illustration of biblical Queen Esther standing before King Ahasuerus",
-    questionEn: "Which Books of the Bible Are Named After Women?",
-    questionMr: "बायबलमधील कोणत्या पुस्तकांना स्त्रियांची नावे आहेत?",
-    bulletsEn: [
-      { icon: "📖", text: "Esther 👑 (Queen of Persia & Deliverer)" },
-      { icon: "🌾", text: "Ruth (Model of Faithfulness & Lineage of Christ)" },
-      { icon: "📜", text: "Judith (Historical Apocrypha)" },
-      { icon: "🪻", text: "Susanna (Historical Apocrypha)" }
-    ],
-    bulletsMr: [
-      { icon: "📖", text: "एस्तेर (Esther) 👑 — पारसाची राणी व तारणहार" },
-      { icon: "🌾", text: "रूथ (Ruth) — विश्वासूपणाची आदर्श व दाविदाची पूर्वज" },
-      { icon: "📜", text: "यहूदीथ (Judith) — ऐतिहासिक प्राचीन ग्रंथ" },
-      { icon: "🪻", text: "सुसान्ना (Susanna) — ऐतिहासिक प्राचीन ग्रंथ" }
-    ],
-    refEn: "Esther 1 • एस्तेर १",
-    refMr: "एस्तेर १ • Esther 1",
-    book: "esther",
-    chapter: 1,
-    verse: 1
-  },
-  {
-    id: "dyk_shortest_verse",
-    theme: "dyk-theme-indigo",
-    image: "assets/images/did_you_know_jesus_wept.jpg",
-    alt: "Classical chiaroscuro engraving of Jesus Christ weeping in deep prayer",
-    questionEn: "What Is the Shortest Verse in the Bible?",
-    questionMr: "बायबलमधील सर्वात लहान वचन कोणते आहे?",
-    bulletsEn: [
-      { icon: "💧", text: "John 11:35: \"Jesus wept.\"" },
-      { icon: "🕊️", text: "Just 2 words in English & Marathi (3 in Greek: Ἐδάκρυσεν ὁ Ἰηसोῦς)" },
-      { icon: "❤️", text: "The most profound display of divine empathy & love" },
-      { icon: "🙏", text: "Christ shares deeply in all our earthly sorrows" }
-    ],
-    bulletsMr: [
-      { icon: "💧", text: "योहान ११:३५: \"येशू रडला.\"" },
-      { icon: "🕊️", text: "केवळ २ शब्द (मूळ ग्रीकमध्ये ३ शब्द: Ἐδάκρυσεν ὁ Ἰηसोῦς)" },
-      { icon: "❤️", text: "ईश्वरी करुणा व संवेदनशीलतेची सर्वात सखोल साक्ष" },
-      { icon: "🙏", text: "आपल्या अश्रूंमध्ये ख्रिस्त स्वतः सहभागी होतो" }
-    ],
-    refEn: "John 11:35 • योहान ११:३५",
-    refMr: "योहान ११:३५ • John 11:35",
-    book: "john",
-    chapter: 11,
-    verse: 35
-  },
-  {
-    id: "dyk_noahs_ark",
-    theme: "dyk-theme-teal",
-    image: "assets/images/did_you_know_noahs_ark.jpg",
-    alt: "Classical engraving of Noah's Ark floating upon great flood waters",
-    questionEn: "How Long Did Noah's Ark Float?",
-    questionMr: "नोहाचे तारू पुराच्या पाण्यावर किती काळ तरंगत होते?",
-    bulletsEn: [
-      { icon: "🌧️", text: "40 days & nights of torrential rainfall" },
-      { icon: "🌊", text: "150 days floodwaters surged across the earth" },
-      { icon: "⛰️", text: "Rested on mountains of Ararat in 7th month (Gen 8:4)" },
-      { icon: "☀️", text: "370+ total days Noah remained inside the Ark" }
-    ],
-    bulletsMr: [
-      { icon: "🌧️", text: "४० दिवस व रात्री अखंड मुसळधार पाऊस पडला" },
-      { icon: "🌊", text: "१५० दिवस पुराचे पाणी पृथ्वीवर वाहत राहिले" },
-      { icon: "⛰️", text: "७ व्या महिन्यात अरारात पर्वतावर तारू स्थिरावले" },
-      { icon: "☀️", text: "एकूण ३७० हून अधिक दिवस नोहा तारवात होता" }
-    ],
-    refEn: "Genesis 7-8 • उत्पत्ती ७-८",
-    refMr: "उत्पत्ती ७-८ • Genesis 7-8",
-    book: "genesis",
-    chapter: 7,
-    verse: 17
-  },
-  {
-    id: "dyk_shepherd_rod",
-    theme: "dyk-theme-emerald",
-    image: "assets/images/did_you_know_shepherd.jpg",
-    alt: "Classical oil painting of biblical shepherd with rod and staff",
-    questionEn: "What Is the Secret of the Shepherd's Rod & Staff?",
-    questionMr: "मेंढपाळाची काठी व सोटा यातील आध्यात्मिक रहस्य काय?",
-    bulletsEn: [
-      { icon: "🛡️", text: "Rod (Shebet): Weapon defending flock against beasts" },
-      { icon: "🌿", text: "Staff (Mish'enet): Curved crook to gently guide sheep" },
-      { icon: "✝️", text: "Psalm 23:4: \"Thy rod and thy staff they comfort me\"" },
-      { icon: "🕊️", text: "Divine protection paired with tender, loving direction" }
-    ],
-    bulletsMr: [
-      { icon: "🛡️", text: "सोटा (Rod): हिंस्र श्वापदांपासून मेंढरांचे रक्षण करणारे हत्यार" },
-      { icon: "🌿", text: "काठी (Staff): वळलेली काठी चुकलेल्या मेंढरांना परत आणण्यासाठी" },
-      { icon: "✝️", text: "स्तोत्र २३:४: \"तुझा सोटा व तुझी काठी मला धीर देतात\"" },
-      { icon: "🕊️", text: "देवाचे अजिंक्य रक्षण आणि प्रेमळ मार्गदर्शन" }
-    ],
-    refEn: "Psalm 23:4 • स्तोत्रसंहिता २३:४",
-    refMr: "स्तोत्रसंहिता २३:४ • Psalm 23:4",
-    book: "psalms",
-    chapter: 23,
-    verse: 4
-  },
-  {
-    id: "dyk_water_into_wine",
-    theme: "dyk-theme-mahogany",
-    image: "assets/images/wedding_cana_miracle.jpg",
-    alt: "Classical painting of Jesus turning water into wine at the wedding at Cana",
-    questionEn: "How Much Water Was Turned into Wine at Cana?",
-    questionMr: "काना येथील लग्नात येशूने किती लिटर पाण्याचे रूपांतर केले?",
-    bulletsEn: [
-      { icon: "🏺", text: "6 massive stone jars used for ceremonial washing" },
-      { icon: "🍷", text: "20 to 30 gallons each (total 120-180 gallons / 500-700L)" },
-      { icon: "🍇", text: "Master of banquet declared it the finest wine" },
-      { icon: "✨", text: "Revealed His glory and the overflowing abundance of grace" }
-    ],
-    bulletsMr: [
-      { icon: "🏺", text: "शुद्धीकरणासाठी ठेवलेले ६ भव्य दगडी रांजण" },
-      { icon: "🍷", text: "प्रत्येकात सुमारे १०० लिटर (एकूण ५०० ते ७०० लिटर)" },
-      { icon: "🍇", text: "यजमानाने या द्राक्षारसाला उत्कृष्ट दर्जाचा ठरवले" },
-      { icon: "✨", text: "देवाची असीम कृपा आणि महिमा येथे प्रकट झाला" }
-    ],
-    refEn: "John 2:6-10 • योहान २:६-१०",
-    refMr: "योहान २:६-१० • John 2:6-10",
-    book: "john",
-    chapter: 2,
-    verse: 1
-  },
-  {
-    id: "dyk_peace_phroureo",
-    theme: "dyk-theme-indigo",
-    image: "assets/images/peace_anxiety_art.jpg",
-    alt: "Classical illustration of divine peace guarding believer amidst storm",
-    questionEn: "What Does Paul Mean by 'The Peace of God'?",
-    questionMr: "पौल जेव्हा 'देवाच्या शांती'चा उल्लेख करतो तेव्हा त्याचा खरा अर्थ काय?",
-    bulletsEn: [
-      { icon: "🛡️", text: "Uses Roman military term 'Phroureo' (φρουρέω)" },
-      { icon: "🏰", text: "Describes an armed garrison guarding a fortress 24/7" },
-      { icon: "🕊️", text: "Transcends all human understanding and anxiety" },
-      { icon: "❤️", text: "Keeps worry and panic completely outside your heart" }
-    ],
-    bulletsMr: [
-      { icon: "🛡️", text: "'फ्रुरिओ' (Phroureo) हा रोमन सैन्याचा लष्करी शब्द वापरला" },
-      { icon: "🏰", text: "किल्ल्याचे २४ तास अहोरात्र खडा पहारा देणारा पहारेकरी" },
-      { icon: "🕊️", text: "सर्व बुद्धी व समजेच्या पलीकडची स्वर्गीय शांती" },
-      { icon: "❤️", text: "चिंता, भीती व नैराश्याला हृदयाबाहेरच थोपवून धरते" }
-    ],
-    refEn: "Philippians 4:7 • फिलिप्पैकरांस ४:७",
-    refMr: "फिलिप्पैकरांस ४:७ • Philippians 4:7",
-    book: "philippians",
-    chapter: 4,
-    verse: 6
-  }
-];
+// DID_YOU_KNOW_INSIGHTS declared in upper scope before DOMContentLoaded
 
 let didYouKnowOffset = 0;
 let activeDidYouKnowInsight = DID_YOU_KNOW_INSIGHTS[0];
@@ -21762,63 +21822,8 @@ function toMarathiDigits(num) {
 }
 window.toMarathiDigits = toMarathiDigits;
 
-const FEATURED_SCRIPTURES_CONFIG = [
-  {
-    id: "psalms",
-    nameEn: "Psalms",
-    nameMr: "स्तोत्रसंहिता",
-    cover: "assets/images/book_psalms_cover.png",
-    themeClass: "recent-card-psalms",
-    totalChapters: 150,
-    // Daily rotating curated chapters: Psalm 23 today, Psalm 70 tomorrow, then 91, 121, etc.
-    chapters: [23, 70, 91, 121, 27, 46, 1, 19, 34, 37, 51, 62, 84, 100, 103, 119, 139, 145, 8, 15, 16, 24, 25, 32, 40, 42, 63, 67, 72, 86, 90, 92, 95, 96, 98, 111, 112, 116, 122, 126, 127, 128, 130, 133, 138, 146, 147, 148, 150]
-  },
-  {
-    id: "proverbs",
-    nameEn: "Proverbs",
-    nameMr: "नीतिसूत्रे",
-    cover: "assets/images/book_proverbs_cover.jpg",
-    themeClass: "recent-card-proverbs",
-    totalChapters: 31,
-    chapters: [3, 4, 8, 10, 15, 16, 22, 27, 31, 1, 2, 5, 6, 7, 9, 11, 12, 13, 14, 17, 18, 19, 20, 21, 23, 24, 25, 26, 28, 29, 30]
-  },
-  {
-    id: "matthew",
-    nameEn: "Matthew",
-    nameMr: "मत्तय",
-    cover: "assets/images/book_matthew_cover.jpg",
-    themeClass: "recent-card-matthew",
-    totalChapters: 28,
-    chapters: [5, 6, 7, 11, 13, 14, 18, 24, 25, 26, 27, 28, 1, 2, 3, 4, 8, 9, 10, 12, 15, 16, 17, 19, 20, 21, 22, 23]
-  },
-  {
-    id: "john",
-    nameEn: "John",
-    nameMr: "योहान",
-    cover: "assets/images/book_john_cover.jpg",
-    themeClass: "recent-card-john",
-    totalChapters: 21,
-    chapters: [1, 3, 4, 6, 10, 11, 14, 15, 16, 17, 20, 21, 2, 5, 7, 8, 9, 12, 13, 18, 19]
-  },
-  {
-    id: "romans",
-    nameEn: "Romans",
-    nameMr: "रोमन्स",
-    cover: "assets/images/book_romans_cover.jpg",
-    themeClass: "recent-card-romans",
-    totalChapters: 16,
-    chapters: [8, 12, 1, 3, 5, 6, 7, 10, 11, 13, 14, 15, 16, 2, 4, 9]
-  },
-  {
-    id: "genesis",
-    nameEn: "Genesis",
-    nameMr: "उत्पत्ती",
-    cover: "assets/images/book_genesis_cover.jpg",
-    themeClass: "recent-card-genesis",
-    totalChapters: 50,
-    chapters: [1, 12, 15, 22, 28, 37, 39, 45, 50, 2, 3, 6, 7, 8, 9, 11]
-  }
-];
+// FEATURED_SCRIPTURES_CONFIG declared in upper scope before DOMContentLoaded
+
 
 function getFeaturedScriptureDayIndex(customDate) {
   const d = customDate ? new Date(customDate) : new Date();

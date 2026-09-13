@@ -415,7 +415,7 @@ async function login(req, res) {
     }
 
     const cleanEmail = email.trim().toLowerCase();
-    const user = await dbQuery.get('SELECT * FROM users WHERE LOWER(email) = $1', [cleanEmail]);
+    const user = await dbQuery.get('SELECT * FROM users WHERE LOWER(email) = $1 OR LOWER(username) = $1', [cleanEmail]);
     if (!user || !user.password_hash) {
       return res.status(401).json({ error: 'Invalid email or password.' });
     }
