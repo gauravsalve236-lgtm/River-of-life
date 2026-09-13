@@ -10505,12 +10505,19 @@ function updateAuthUI() {
     if (loggedInCont) loggedInCont.style.display = "none";
   }
 
-  // Restrict Admin & Pastor Console card strictly to users with role 'admin' or 'pastor'
+  // Restrict Admin & Pastor Console card strictly to users with administrative roles
   const adminPanelCard = document.getElementById("you-admin-panel-card");
   if (adminPanelCard) {
-    const role = (state.currentUser?.role || "").toLowerCase();
-    if (state.currentUser && (role === "admin" || role === "pastor")) {
+    const rawRole = (state.currentUser?.role || localStorage.getItem("rol_user_role") || "").toLowerCase().replace(/[\s-]+/g, "_");
+    const allowedAdminRoles = ["super_admin", "pastor", "prayer_team", "admin", "church_admin"];
+    if (state.currentUser && allowedAdminRoles.includes(rawRole)) {
       adminPanelCard.style.display = "block";
+      const badgeTitle = document.querySelector("#you-admin-panel-card h4");
+      if (badgeTitle) {
+        if (rawRole === "super_admin") badgeTitle.textContent = "Super-Admin Master Portal / महा-नियंत्रक";
+        else if (rawRole === "prayer_team") badgeTitle.textContent = "Prayer Team Intercession Console / प्रार्थना कक्ष";
+        else badgeTitle.textContent = "Pastor & Admin Console / पास्टर व प्रशासन कक्ष";
+      }
     } else {
       adminPanelCard.style.display = "none";
     }
@@ -19336,33 +19343,69 @@ function switchAdminSubtab(subtab) {
 }
 
 /* ── 1. Members Management ── */
-function renderAdminMembers(filterText = "", roleFilter = "all") {
+async function renderAdminMembers(filterText = "", roleFilter = "all") {
   const container = document.getElementById("admin-members-list-container");
   if (!container) return;
 
-  const members = getAdminMembers();
-  const filtered = members.filter(m => {
-    const matchesText = !filterText || m.username.toLowerCase().includes(filterText.toLowerCase()) || m.email.toLowerCase().includes(filterText.toLowerCase());
-    const matchesRole = (roleFilter === "all") || (m.role && m.role.toLowerCase() === roleFilter.toLowerCase());
-    return matchesText && matchesRole;
-  });
+  container.innerHTML = `<div style="text-align: center; padding: 20px; color: var(--text-muted);">⏳ Loading congregation directory...</div>`;
 
-  if (filtered.length === 0) {
+  let members = [];
+  try {
+    const apiBase = (typeof ROL_API_BASE !== 'undefined') ? ROL_API_BASE : 'http://localhost:7880';
+    let url = `${apiBase}/api/admin/users?`;
+    if (filterText) url += `search=${encodeURIComponent(filterText)}&`;
+    if (roleFilter && roleFilter !== 'all') url += `role=${encodeURIComponent(roleFilter)}&`;
+
+    const res = await fetch(url, {
+      headers: {
+        "Authorization": "Bearer " + (localStorage.getItem("rol_access_token") || "")
+      }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && Array.isArray(data.users)) {
+        members = data.users.map(u => ({
+          id: u.id,
+          username: u.username || u.full_name || 'Member',
+          fullName: u.full_name || '',
+          email: u.email || 'N/A',
+          phone: u.phone || '',
+          role: u.role || 'User',
+          status: u.status || 'Active'
+        }));
+      }
+    }
+  } catch (err) {
+    console.warn("Falling back to local admin members:", err.message);
+  }
+
+  if (!members || members.length === 0) {
+    members = getAdminMembers();
+    members = members.filter(m => {
+      const matchesText = !filterText || (m.username || '').toLowerCase().includes(filterText.toLowerCase()) || (m.email || '').toLowerCase().includes(filterText.toLowerCase());
+      const rTarget = (roleFilter || '').toLowerCase().replace(/[\s-]+/g, '_');
+      const mRole = (m.role || '').toLowerCase().replace(/[\s-]+/g, '_');
+      const matchesRole = (roleFilter === "all") || (mRole === rTarget) || ((rTarget === 'user' || rTarget === 'member') && (mRole === 'user' || mRole === 'member'));
+      return matchesText && matchesRole;
+    });
+  }
+
+  if (members.length === 0) {
     container.innerHTML = `<div class="panel-empty-state" style="padding: 24px 0; text-align: center; color: var(--text-muted);">No members match the search query.</div>`;
     return;
   }
 
-  container.innerHTML = filtered.map(m => {
-    const roleLower = (m.role || "member").toLowerCase();
+  container.innerHTML = members.map(m => {
+    const roleLower = (m.role || "user").toLowerCase().replace(/[\s-]+/g, '_');
     let badgeClass = "role-badge-member";
-    if (roleLower === "admin") badgeClass = "role-badge-admin";
+    if (roleLower === "super_admin") badgeClass = "role-badge-admin";
     else if (roleLower === "pastor") badgeClass = "role-badge-pastor";
-    else if (roleLower === "leader") badgeClass = "role-badge-leader";
+    else if (roleLower === "prayer_team") badgeClass = "role-badge-leader";
 
     const initial = (m.username || "U")[0].toUpperCase();
 
     return `
-      <div class="admin-member-card">
+      <div class="admin-member-card" style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
         <div style="display: flex; align-items: center; gap: 12px;">
           <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px;">
             ${initial}
@@ -19370,18 +19413,18 @@ function renderAdminMembers(filterText = "", roleFilter = "all") {
           <div>
             <div style="display: flex; align-items: center; gap: 8px;">
               <strong style="font-size: 14.5px; color: var(--text);">${m.username}</strong>
-              <span class="${badgeClass}">${m.role || "Member"}</span>
+              <span class="${badgeClass}">${m.role || "User"}</span>
             </div>
             <span style="font-size: 12px; color: var(--text-muted);">${m.email}</span>
           </div>
         </div>
 
         <div style="display: flex; align-items: center; gap: 8px;">
-          <select onchange="updateAdminMemberRole('${m.id}', this.value)" style="padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 12px; font-weight: 700;">
-            <option value="Member" ${m.role === "Member" ? "selected" : ""}>Member</option>
-            <option value="Leader" ${m.role === "Leader" ? "selected" : ""}>Leader</option>
-            <option value="Pastor" ${m.role === "Pastor" ? "selected" : ""}>Pastor</option>
-            <option value="Admin" ${m.role === "Admin" ? "selected" : ""}>Admin</option>
+          <select onchange="updateAdminMemberRole('${m.id}', this.value)" style="padding: 7px 12px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--bg); color: var(--text); font-size: 12px; font-weight: 700;">
+            <option value="User" ${['user', 'member'].includes(roleLower) ? "selected" : ""}>User</option>
+            <option value="Pastor" ${roleLower === "pastor" ? "selected" : ""}>Pastor</option>
+            <option value="Prayer Team" ${roleLower === "prayer_team" ? "selected" : ""}>Prayer Team</option>
+            <option value="Super-Admin" ${roleLower === "super_admin" ? "selected" : ""}>Super-Admin</option>
           </select>
           <button onclick="deleteAdminMember('${m.id}')" title="Delete member" style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #ef4444; border-radius: 8px; padding: 6px 10px; cursor: pointer; font-size: 12px; font-weight: 700;">
             ✕
@@ -19435,18 +19478,31 @@ function handleAdminAddMember(e) {
   showToast(`✅ Added ${name} as ${role}!`);
 }
 
-function updateAdminMemberRole(memberId, newRole) {
+async function updateAdminMemberRole(memberId, newRole) {
+  try {
+    const apiBase = (typeof ROL_API_BASE !== 'undefined') ? ROL_API_BASE : 'http://localhost:7880';
+    const res = await fetch(`${apiBase}/api/admin/users/${memberId}/role`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + (localStorage.getItem("rol_access_token") || "")
+      },
+      body: JSON.stringify({ role: newRole })
+    });
+    if (res.ok) {
+      showToast(`✅ User role updated to ${newRole}!`);
+    }
+  } catch (err) {
+    console.warn("Failed to update role via API:", err.message);
+  }
+
   const members = getAdminMembers();
   const member = members.find(m => m.id === memberId);
   if (member) {
     member.role = newRole;
-    member.isPastor = newRole === "Pastor";
-    member.isAdmin = newRole === "Admin";
-    member.isLeader = newRole === "Leader";
     saveAdminMembersList(members);
-    renderAdminMembers();
-    showToast(`Updated ${member.username}'s role to ${newRole}`);
   }
+  renderAdminMembers();
 }
 
 function deleteAdminMember(memberId) {
@@ -19621,6 +19677,7 @@ function copyAdminMeetingInvite(roomId) {
 
 /* ── 4. Pastoral Prayers Moderation ── */
 let currentAdminPrayerFilter = "all";
+window._rolAdminPrayerQueue = [];
 
 function filterAdminPrayers(filter) {
   currentAdminPrayerFilter = filter;
@@ -19630,71 +19687,132 @@ function filterAdminPrayers(filter) {
   renderAdminPrayers();
 }
 
-function renderAdminPrayers() {
+async function renderAdminPrayers() {
   const container = document.getElementById("admin-prayers-list-container");
   if (!container) return;
 
-  const prayers = window._rolPrayers || [];
-  const filtered = prayers.filter(p => {
-    if (currentAdminPrayerFilter === "all") return true;
-    return p.status === currentAdminPrayerFilter;
-  });
+  container.innerHTML = `<div style="text-align: center; padding: 24px; color: var(--text-muted);">⏳ Loading congregation prayer queue...</div>`;
 
-  if (filtered.length === 0) {
-    container.innerHTML = `<div class="panel-empty-state" style="padding: 24px 0; text-align: center; color: var(--text-muted);">No prayer requests in this category.</div>`;
+  try {
+    const apiBase = (typeof ROL_API_BASE !== 'undefined') ? ROL_API_BASE : 'http://localhost:7880';
+    let url = `${apiBase}/api/prayer-requests/admin/queue`;
+    if (currentAdminPrayerFilter && currentAdminPrayerFilter !== 'all') {
+      url += `?status=${encodeURIComponent(currentAdminPrayerFilter)}`;
+    }
+
+    const res = await fetch(url, {
+      headers: {
+        "Authorization": "Bearer " + (localStorage.getItem("rol_access_token") || "")
+      }
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      if (data && Array.isArray(data.queue)) {
+        window._rolAdminPrayerQueue = data.queue;
+      }
+    }
+  } catch (err) {
+    console.warn("Falling back to local prayer queue:", err.message);
+  }
+
+  let queue = window._rolAdminPrayerQueue || [];
+  if (currentAdminPrayerFilter !== "all") {
+    queue = queue.filter(p => {
+      if (currentAdminPrayerFilter === 'pending' || currentAdminPrayerFilter === 'Sent to Pastor') {
+        return p.status === 'Sent to Pastor' || p.status === 'pending';
+      }
+      if (currentAdminPrayerFilter === 'prayed' || currentAdminPrayerFilter === 'Prayed For') {
+        return p.status === 'Prayed For' || p.status === 'prayed';
+      }
+      if (currentAdminPrayerFilter === 'answered' || currentAdminPrayerFilter === 'Answered') {
+        return p.status === 'Answered' || p.status === 'answered';
+      }
+      return p.status === currentAdminPrayerFilter;
+    });
+  }
+
+  if (queue.length === 0) {
+    container.innerHTML = `
+      <div class="panel-empty-state" style="padding: 32px 16px; text-align: center; color: var(--text-muted); background: var(--bg); border: 1.5px dashed var(--border); border-radius: 14px;">
+        <span style="font-size: 28px; display: block; margin-bottom: 6px;">🙏</span>
+        <strong style="color: var(--text); font-size: 14px; display: block; margin-bottom: 4px;">No prayer requests in this category.</strong>
+        <span>All requests in this view have been processed or none have been submitted yet.</span>
+      </div>
+    `;
     return;
   }
 
-  container.innerHTML = filtered.map(p => {
-    let badgeClass = "role-badge-member";
-    let badgeText = "Pending";
-    if (p.status === "answered") {
-      badgeClass = "role-badge-leader";
-      badgeText = "Answered";
-    } else if (p.status === "acknowledged") {
-      badgeClass = "role-badge-pastor";
-      badgeText = "Acknowledged";
+  container.innerHTML = queue.map(p => {
+    let badgeClass = "badge-status-sent";
+    let badgeText = "🔵 Sent to Pastor";
+    if (p.status === "Prayed For" || p.status === "prayed") {
+      badgeClass = "badge-status-prayed";
+      badgeText = "🟣 Prayed For";
+    } else if (p.status === "Answered" || p.status === "answered") {
+      badgeClass = "badge-status-answered";
+      badgeText = "🟢 Answered";
     }
 
-    const timeStr = formatTimeAgo ? formatTimeAgo(p.createdAt || Date.now()) : "Recently";
-    const privacy = p.isPublic ? "🌐 Congregation Circle" : "🔒 Confidential (Pastor Only)";
+    const timeStr = (typeof formatTimeAgo === 'function') ? formatTimeAgo(p.createdAt || Date.now()) : "Recently";
+    
+    // Privacy styling & masking
+    let privacyBadge = "🔒 Pastor Only (Private)";
+    let privacyStyle = "background: #fee2e2; color: #991b1b;";
+    if (p.privacyLevel === "Church Prayer Team") {
+      privacyBadge = "👥 Church Prayer Team";
+      privacyStyle = "background: #eff6ff; color: #1d4ed8;";
+    } else if (p.privacyLevel === "Anonymous" || p.requester?.isAnonymous) {
+      privacyBadge = "🥷 Anonymous";
+      privacyStyle = "background: #f3f4f6; color: #374151;";
+    }
+
+    const requesterName = p.requester ? p.requester.name : (p.username || "Anonymous Believer");
+    const requesterContact = (p.requester && p.requester.email) ? ` • ${p.requester.email}` : "";
 
     return `
-      <div style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 10px;">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
+      <div class="admin-prayer-card" id="admin-prayer-card-${p.id}" style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 10px; box-shadow: var(--shadow-sm);">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-weight: 800; font-size: 14.5px; color: var(--text);">From: @${p.username || "Anonymous"}</span>
-            <span class="${badgeClass}">${badgeText}</span>
+            <span style="font-size: 11px; font-weight: 800; background: var(--bg); border: 1px solid var(--border); padding: 3px 8px; border-radius: 6px; color: var(--text);">
+              🏷️ ${p.categoryTag || 'Healing'}
+            </span>
+            <span style="font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; ${privacyStyle}">
+              ${privacyBadge}
+            </span>
           </div>
-          <span style="font-size: 12px; color: var(--text-muted);">${timeStr} • ${privacy}</span>
+          <span class="badge-prayer-status ${badgeClass}" id="admin-badge-status-${p.id}">
+            ${badgeText}
+          </span>
         </div>
 
-        <p style="font-size: 14px; line-height: 1.5; color: var(--text); margin: 0; background: var(--bg); padding: 12px; border-radius: 10px; border: 1px solid var(--border);">
-          "${p.text}"
+        <div style="font-size: 12.5px; color: var(--text-muted);">
+          <strong>From:</strong> <span style="color: var(--text); font-weight: 700;">${requesterName}</span>${requesterContact} • <span>${timeStr}</span>
+        </div>
+
+        <p style="font-size: 14px; line-height: 1.55; color: var(--text); margin: 0; background: var(--bg); padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border); font-family: var(--font-body);">
+          "${p.content}"
         </p>
 
         ${p.pastorNote ? `
-          <div style="background: rgba(245,158,11,0.1); border-left: 3px solid #f59e0b; padding: 10px 14px; border-radius: 6px; font-size: 13px; color: var(--text);">
-            <strong>Pastoral Blessing Response:</strong>
-            <div style="margin-top: 2px;">"${p.pastorNote}"</div>
+          <div style="background: rgba(245,158,11,0.08); border-left: 3px solid #f59e0b; padding: 8px 12px; border-radius: 6px; font-size: 12.5px; color: var(--text);">
+            <strong>Pastoral Note:</strong> ${p.pastorNote}
           </div>
         ` : ""}
 
-        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px;">
-          ${p.status !== "answered" ? `
-            <button onclick="adminAcknowledgePrayerPrompt('${p.id}')" class="btn-primary-mini" style="font-size: 12px; padding: 6px 12px;">
-              ✍️ Write Blessing Note & Pray
-            </button>
-            <button onclick="adminToggleAnsweredPrayer('${p.id}')" class="btn-secondary-mini" style="font-size: 12px; padding: 6px 12px; border: 1px solid var(--border); background: transparent; color: var(--text);">
-              ✅ Mark Answered
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; align-items: center;">
+          ${p.status !== "Prayed For" ? `
+            <button type="button" class="btn-mark-as-prayed" onclick="adminMarkPrayerAsPrayed('${p.id}')" style="background: #8b5cf6; color: #ffffff; border: none; padding: 7px 15px; border-radius: 10px; font-size: 12.5px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(139,92,246,0.25);">
+              <span>🙏 Mark as Prayed</span>
             </button>
           ` : `
-            <button onclick="adminToggleAnsweredPrayer('${p.id}')" class="btn-secondary-mini" style="font-size: 12px; padding: 6px 12px; border: 1px solid var(--border); background: transparent; color: var(--text);">
-              Reopen Request
-            </button>
+            <span style="font-size: 12px; font-weight: 800; color: #8b5cf6; background: rgba(139,92,246,0.1); padding: 6px 12px; border-radius: 8px; display: inline-flex; align-items: center; gap: 4px;">
+              ✓ Prayed For
+            </span>
           `}
-          <button onclick="adminDeletePrayer('${p.id}')" class="btn-danger-mini" style="font-size: 12px; padding: 6px 10px;">
-            Delete ✕
+          
+          <button type="button" onclick="adminToggleAnsweredPrayer('${p.id}')" class="btn-secondary-mini" style="font-size: 12px; padding: 6px 12px; border: 1px solid var(--border); background: transparent; color: var(--text); border-radius: 8px; cursor: pointer;">
+            ${p.status === "Answered" ? "↩ Reopen" : "✅ Mark Answered"}
           </button>
         </div>
       </div>
@@ -19702,39 +19820,72 @@ function renderAdminPrayers() {
   }).join("");
 }
 
-function adminAcknowledgePrayerPrompt(prayerId) {
-  const note = prompt("Enter Pastoral Blessing / संदेश for this prayer request:", "Standing with you in prayer! May the Lord's peace and strength be with you.");
-  if (note && note.trim()) {
-    const prayers = window._rolPrayers || [];
-    const p = prayers.find(x => x.id === prayerId);
-    if (p) {
-      p.status = "acknowledged";
-      p.pastorNote = note.trim();
-      renderAdminPrayers();
-      if (typeof renderPastorPortal === "function") renderPastorPortal();
-      showToast("🙏 Blessing note sent to member!");
+async function adminMarkPrayerAsPrayed(prayerId) {
+  try {
+    const apiBase = (typeof ROL_API_BASE !== 'undefined') ? ROL_API_BASE : 'http://localhost:7880';
+    const res = await fetch(`${apiBase}/api/prayer-requests/${prayerId}/mark-prayed`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + (localStorage.getItem("rol_access_token") || "")
+      }
+    });
+
+    if (res.ok) {
+      if (typeof showToast === "function") {
+        showToast("🙏 Marked as Prayed! Believer has received an in-app notification.");
+      }
     }
+  } catch (err) {
+    console.warn("API mark-prayed notice:", err.message);
+  }
+
+  // Update local queue entry
+  const queue = window._rolAdminPrayerQueue || [];
+  const req = queue.find(x => x.id === prayerId);
+  if (req) {
+    req.status = "Prayed For";
+  }
+
+  // Also update locally cached believer journal if matching
+  try {
+    const rawJ = localStorage.getItem("rol_my_prayer_journal");
+    if (rawJ) {
+      const list = JSON.parse(rawJ);
+      const jItem = list.find(x => x.id === prayerId);
+      if (jItem) {
+        jItem.status = "Prayed For";
+        localStorage.setItem("rol_my_prayer_journal", JSON.stringify(list));
+      }
+    }
+  } catch (e) {}
+
+  renderAdminPrayers();
+  if (typeof loadMyPrayerJournal === 'function') {
+    loadMyPrayerJournal();
   }
 }
 
-function adminToggleAnsweredPrayer(prayerId) {
-  const prayers = window._rolPrayers || [];
-  const p = prayers.find(x => x.id === prayerId);
-  if (p) {
-    p.status = p.status === "answered" ? "pending" : "answered";
-    renderAdminPrayers();
-    if (typeof renderPastorPortal === "function") renderPastorPortal();
-    showToast(p.status === "answered" ? "Marked prayer as answered! 🎉" : "Reopened prayer request");
-  }
-}
+async function adminToggleAnsweredPrayer(prayerId) {
+  const queue = window._rolAdminPrayerQueue || [];
+  const p = queue.find(x => x.id === prayerId);
+  const newStatus = (p && p.status === "Answered") ? "Prayed For" : "Answered";
 
-function adminDeletePrayer(prayerId) {
-  if (confirm("Delete this prayer request?")) {
-    window._rolPrayers = (window._rolPrayers || []).filter(p => p.id !== prayerId);
-    renderAdminPrayers();
-    if (typeof renderPastorPortal === "function") renderPastorPortal();
-    showToast("Prayer request deleted");
-  }
+  try {
+    const apiBase = (typeof ROL_API_BASE !== 'undefined') ? ROL_API_BASE : 'http://localhost:7880';
+    await fetch(`${apiBase}/api/prayer-requests/${prayerId}/status`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + (localStorage.getItem("rol_access_token") || "")
+      },
+      body: JSON.stringify({ status: newStatus })
+    });
+  } catch(e) {}
+
+  if (p) p.status = newStatus;
+  renderAdminPrayers();
+  showToast(`Prayer status updated to ${newStatus}`);
 }
 
 /* ── 5. Announcements & Live Broadcast Banner ── */

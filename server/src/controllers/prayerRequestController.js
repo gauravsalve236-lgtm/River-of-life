@@ -200,6 +200,184 @@ async function getUserPrayerRequests(req, res) {
 }
 
 /**
+ * GET /api/prayer-requests/admin/queue
+ * Admin & Pastor Queue displaying congregation requests with privacy tiers
+ */
+async function getAdminPrayerRequestsQueue(req, res) {
+  try {
+    const viewerRole = (req.user && req.user.role) ? req.user.role.toString().toLowerCase().replace(/[\s-]+/g, '_') : 'pastor';
+    const isSuperAdminOrPastor = viewerRole === 'super_admin' || viewerRole === 'pastor' || viewerRole === 'admin';
+    const { status, category, search } = req.query;
+
+    let query = `
+      SELECT p.id, p.user_id, p.content, p.description, p.title, p.category, p.category_tag,
+             p.visibility, p.privacy_level, p.voice_note_url, p.status, p.pastor_note,
+             p.created_at, p.updated_at,
+             u.full_name AS requester_name, u.email AS requester_email, u.phone AS requester_phone, u.username AS requester_username
+      FROM prayer_requests p
+      LEFT JOIN users u ON p.user_id = u.id
+      WHERE 1=1
+    `;
+    const params = [];
+
+    if (status && status !== 'all') {
+      query += ` AND p.status = ?`;
+      params.push(status);
+    }
+
+    if (category && category !== 'all') {
+      query += ` AND (p.category_tag = ? OR p.category = ?)`;
+      params.push(category, category);
+    }
+
+    query += ` ORDER BY p.created_at DESC`;
+
+    const rows = await db.all(query, params);
+
+    const queue = (rows || []).map(r => {
+      const rawEncrypted = r.content || r.description || '';
+      const decryptedText = decryptPrayerContent(rawEncrypted);
+      const privacyLevel = r.privacy_level || r.visibility || 'Private (Pastor Only)';
+      const isAnonymous = privacyLevel.toLowerCase().includes('anonymous');
+      const isPastorOnly = privacyLevel.toLowerCase().includes('pastor');
+
+      // Privacy Enforcement
+      let requester = {
+        name: isAnonymous ? 'Anonymous Believer (निनावी विश्वासू)' : (r.requester_name || r.requester_username || 'Church Member'),
+        email: isAnonymous ? null : (r.requester_email || null),
+        phone: isAnonymous ? null : (r.requester_phone || null),
+        userId: isAnonymous ? 'anonymous' : r.user_id
+      };
+
+      let visibleContent = decryptedText;
+      let restricted = false;
+
+      // If viewer is only prayer_team and request is Pastor Only
+      if (isPastorOnly && !isSuperAdminOrPastor) {
+        restricted = true;
+        visibleContent = '🔒 Confidential: Visible only to pastors and elders.';
+        requester.name = 'Confidential Member';
+        requester.email = null;
+        requester.phone = null;
+      }
+
+      // Filter by search query if provided
+      if (search && search.trim()) {
+        const term = search.trim().toLowerCase();
+        const matchesContent = decryptedText.toLowerCase().includes(term);
+        const matchesName = (requester.name || '').toLowerCase().includes(term);
+        const matchesCat = (r.category_tag || '').toLowerCase().includes(term);
+        if (!matchesContent && !matchesName && !matchesCat) {
+          return null;
+        }
+      }
+
+      return {
+        id: r.id,
+        userId: r.user_id,
+        requester,
+        content: visibleContent,
+        categoryTag: r.category_tag || r.category || 'Healing',
+        privacyLevel: privacyLevel,
+        voiceNoteUrl: r.voice_note_url || null,
+        status: r.status || 'Sent to Pastor',
+        pastorNote: r.pastor_note || null,
+        createdAt: r.created_at,
+        restricted
+      };
+    }).filter(Boolean);
+
+    return res.json({
+      success: true,
+      count: queue.length,
+      queue
+    });
+  } catch (err) {
+    console.error('Get admin prayer queue error:', err);
+    return res.status(500).json({ success: false, error: 'Failed to retrieve prayer requests queue: ' + err.message });
+  }
+}
+
+/**
+ * POST /api/prayer-requests/:id/mark-prayed
+ * Marks request as "Prayed For", generates notification handshake to believer
+ */
+async function markPrayerRequestAsPrayed(req, res) {
+  try {
+    const { id } = req.params;
+    const adminUser = req.user ? (req.user.full_name || req.user.username || 'Pastor') : 'Pastor';
+    const nowIso = new Date().toISOString();
+
+    // 1. Fetch existing request
+    const existing = await db.get(`SELECT * FROM prayer_requests WHERE id = ?`, [id]);
+    if (!existing) {
+      return res.status(404).json({ success: false, error: 'Prayer request not found.' });
+    }
+
+    // 2. Update status in DB
+    await db.run(`
+      UPDATE prayer_requests
+      SET status = 'Prayed For',
+          pastor_note = COALESCE(?, pastor_note),
+          updated_at = ?
+      WHERE id = ?
+    `, [`Prayed for with love by ${adminUser}`, nowIso, id]);
+
+    // 3. User Notification Handshake
+    if (existing.user_id && !existing.user_id.startsWith('guest_') && existing.user_id !== 'anonymous_user') {
+      try {
+        const notifId = 'notif_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+        const catTag = existing.category_tag || existing.category || 'Prayer';
+        const notifTitle = `🙏 Your ${catTag} Prayer Has Been Prayed For!`;
+        const notifBody = `Pastor ${adminUser} and the River of Life prayer team have lifted your ${catTag} petition to the Lord. (पास्टर आणि प्रार्थना पथकाने तुमच्या प्रार्थनेसाठी प्रार्थना केली आहे.)`;
+
+        await db.run(`
+          INSERT INTO notifications (id, user_id, title, body, type, read, data, created_at)
+          VALUES (?, ?, ?, ?, ?, 0, ?, ?)
+        `, [
+          notifId,
+          existing.user_id,
+          notifTitle,
+          notifBody,
+          'prayer_prayed',
+          JSON.stringify({
+            requestId: id,
+            category: catTag,
+            newStatus: 'Prayed For',
+            prayedBy: adminUser,
+            timestamp: nowIso
+          }),
+          nowIso
+        ]);
+      } catch (notifErr) {
+        console.warn('[Notification Handshake Notice]:', notifErr.message);
+      }
+    }
+
+    const updated = await db.get(`SELECT * FROM prayer_requests WHERE id = ?`, [id]);
+    const decryptedContent = decryptPrayerContent(updated.content || updated.description || '');
+
+    return res.json({
+      success: true,
+      message: 'Prayer request marked as Prayed For! Believer has been notified.',
+      request: {
+        id: updated.id,
+        userId: updated.user_id,
+        content: decryptedContent,
+        categoryTag: updated.category_tag,
+        privacyLevel: updated.privacy_level,
+        status: updated.status,
+        pastorNote: updated.pastor_note,
+        updatedAt: updated.updated_at
+      }
+    });
+  } catch (err) {
+    console.error('Mark as prayed error:', err);
+    return res.status(500).json({ success: false, error: 'Failed to mark prayer as prayed: ' + err.message });
+  }
+}
+
+/**
  * PATCH /api/prayer-requests/:id/status
  */
 async function updatePrayerStatus(req, res) {
@@ -230,7 +408,10 @@ async function updatePrayerStatus(req, res) {
 module.exports = {
   createPrayerRequest,
   getUserPrayerRequests,
+  getAdminPrayerRequestsQueue,
+  markPrayerRequestAsPrayed,
   updatePrayerStatus,
   encryptPrayerContent,
   decryptPrayerContent
 };
+
