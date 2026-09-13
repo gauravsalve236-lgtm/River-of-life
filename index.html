@@ -12,7 +12,7 @@
   <script>
     // Force immediate hard purge of all stale Service Workers and CacheStorage
     (function() {
-      const CURRENT_VER = "v138_ALL_19_SYSTEMIC_FIXES_AND_ENHANCEMENTS";
+      const CURRENT_VER = "v139_BSI_DRAMATIZED_AUDIO_STREAM_FIX";
       if (localStorage.getItem("rol_app_ver") !== CURRENT_VER) {
         localStorage.setItem("rol_app_ver", CURRENT_VER);
         if ('serviceWorker' in navigator) {
@@ -5821,7 +5821,7 @@
   <!-- App Main Logic (Cache-Busted for 100% MARVBSI Church Bible) -->
   <script src="sarvam-tts.js?v=132_MARVBSI_FULL_CHURCH_BIBLE"></script>
   <script src="bible-study.js?v=138_MUSEUM_STUDY_HUB"></script>
-  <script src="app.js?v=136_DAILY_VERSE_STATUS_ALIGNMENT_AND_WATERMARK"></script>
+  <script src="app.js?v=139_BSI_DRAMATIZED_AUDIO_STREAM_FIX"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 4.5s no matter what

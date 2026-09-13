@@ -3888,7 +3888,7 @@ const BSI_USFM_MAP = {
   "jude": "JUD", "revelation": "REV"
 };
 
-let bsiCloudFrontToken = 'Key-Pair-Id=KCC7HS8KPVISV&Signature=V0p9WSTU7Q~Sg-IBpKdlvmzVmAsz7SIldFE~kY~lBq~9ndFWebawfjTmzLZcSO6nf8wN45eIMkQ65uO2cKwMNxpL3ZFpoN4YWeFBLHIH6NbeaRteHtdDscS0A8TnkYPDRgbaGuGNukT9E4ShwZ5VDZM7oTwBDrcKDOuABRkrk0HzIoPSrLVpxV8cOPihirPitlFtmDCZAcXl86KTKVMEUepskwNTaOm3b3udV3ETbO8kuprPgDtZpWPHzJ0hmZsWR9XGucUIkugzcEFbJZiLOw-g~A9FoDkTFnC-NF7UbjlBkZnAcp5r5jMVXFWLpN3c13H0Z~bWpWTo425SJNMKQA__&Expires=1789112157&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9kMWhrcHV6Mm81YTJ4dy5jbG91ZGZyb250Lm5ldC9zb3VyY2UvNTU1NDc2YzIzOTBjMTAyZC0wNC8qIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzg5MTEyMTU3fX19XX0_';
+let bsiCloudFrontToken = 'Key-Pair-Id=KCC7HS8KPVISV&Signature=DE9BLkvIQme61wSlLZqNDeY~jZbRg1eVp~cdsCy7NZC88cH~WkymZiNkz40dY9gZYMZOZ2B8CA2pXLDR4RNsRNVrmhG5uCJP8LRQfa93ES~v9pj1iP0pRczIWj7laFM7jEmvDJF21rIPImxCyJbRDsXrqg-ZNeF1j37OFUXUvda3NEYEzN4TR9D8CQptz14o3DW5xwW8y8BSGnlronu4CETcWRD3iuNV3k6Chvv2P3ko1ZSpdLFha9bgdSjltcXzj2jmpG8XMD21Im6TFIhLbFWGfQqK7glao4oEqRW6w7OI-NEtU63DVuiuC9NAUNP7y2d6bBOAWvbIqm5v9Vh3sw__&Expires=1789294063&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9kMWhrcHV6Mm81YTJ4dy5jbG91ZGZyb250Lm5ldC9zb3VyY2UvNTU1NDc2YzIzOTBjMTAyZC0wNC8qIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzg5Mjk0MDYzfX19XX0_';
 
 function isBsiTokenValid(token) {
   if (!token || typeof token !== 'string') return false;
@@ -3919,17 +3919,19 @@ async function getBsiCloudFrontToken() {
   }
 
   // 2. Try raw.githubusercontent.com live branch fallback (instant bypass of GitHub Pages deployment lag)
-  try {
-    const rawRes = await fetch(`https://raw.githubusercontent.com/gauravsalve236-lgtm/River-of-life/main/assets/bsi_token.json?t=${Date.now()}`, { cache: 'no-store' });
-    if (rawRes.ok) {
-      const data = await rawRes.json();
-      if (data && isBsiTokenValid(data.token)) {
-        bsiCloudFrontToken = data.token;
-        return bsiCloudFrontToken;
+  for (const branch of ['main', 'develop']) {
+    try {
+      const rawRes = await fetch(`https://raw.githubusercontent.com/gauravsalve236-lgtm/River-of-life/${branch}/assets/bsi_token.json?t=${Date.now()}`, { cache: 'no-store' });
+      if (rawRes.ok) {
+        const data = await rawRes.json();
+        if (data && isBsiTokenValid(data.token)) {
+          bsiCloudFrontToken = data.token;
+          return bsiCloudFrontToken;
+        }
       }
+    } catch (err) {
+      console.warn(`[BSI Audio] Raw GitHub token (${branch}) fallback failed:`, err);
     }
-  } catch (err) {
-    console.warn("[BSI Audio] Raw GitHub token fallback failed:", err);
   }
 
   // 3. If local development server is reachable, ask backend
@@ -3973,8 +3975,8 @@ async function playBsiDramatizedAudio(bookKey, chapterNum, resumeTime = null) {
   
   let audioUrl = `https://d1hkpuz2o5a2xw.cloudfront.net/source/555476c2390c102d-04/${usfm}_${chStr}.mp3?${bsiCloudFrontToken}`;
 
-  // If local server is reachable, use local resilient streaming proxy
-  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+  // If local server streaming proxy is explicitly enabled, use it
+  if (window.USE_LOCAL_BSI_PROXY && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
     audioUrl = `/api/bsi-audio-stream?book=${cleanBook}&chapter=${chNum}`;
   }
 

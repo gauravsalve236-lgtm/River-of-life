@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const path = require('path');
+const fs = require('fs');
 const dotenv = require('dotenv');
 
 dotenv.config();
@@ -57,6 +58,24 @@ app.get('/api/health', (req, res) => {
     app: 'River of Life Production API Engine',
     version: '1.0.0',
     timestamp: new Date().toISOString()
+  });
+});
+
+// Dynamic BSI Token Refresh endpoint
+app.get('/api/refresh-bsi-token', async (req, res) => {
+  const { exec } = require('child_process');
+  const pythonScript = path.join(__dirname, '../../scripts/refresh_bsi_token.py');
+  exec(`python "${pythonScript}"`, (error, stdout, stderr) => {
+    try {
+      const tokenPath = path.join(__dirname, '../../assets/bsi_token.json');
+      if (fs.existsSync(tokenPath)) {
+        const data = JSON.parse(fs.readFileSync(tokenPath, 'utf8'));
+        return res.json({ success: true, token: data.token });
+      }
+      return res.status(500).json({ success: false, error: 'Token file not found' });
+    } catch (err) {
+      return res.status(500).json({ success: false, error: String(err) });
+    }
   });
 });
 

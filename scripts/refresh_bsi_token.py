@@ -1,4 +1,4 @@
-﻿import urllib.request
+import urllib.request
 import re
 import json
 import time
@@ -68,6 +68,7 @@ def update_files(token):
     target_json_files = [
         os.path.join(base_dir, "assets", "bsi_token.json"),
         os.path.join(base_dir, "docs", "assets", "bsi_token.json"),
+        os.path.join(base_dir, "android-studio-app", "app", "src", "main", "assets", "assets", "bsi_token.json"),
         os.path.join(base_dir, ".bsi_token.json")
     ]
     
@@ -77,10 +78,11 @@ def update_files(token):
             json.dump(payload, f, indent=2)
         print(f"[Saved JSON] {path}")
 
-    # Update hardcoded fallback in app.js and docs/app.js
+    # Update hardcoded fallback in app.js, docs/app.js, and android-studio-app/app/src/main/assets/app.js
     target_js_files = [
         os.path.join(base_dir, "app.js"),
-        os.path.join(base_dir, "docs", "app.js")
+        os.path.join(base_dir, "docs", "app.js"),
+        os.path.join(base_dir, "android-studio-app", "app", "src", "main", "assets", "app.js")
     ]
     for js_path in target_js_files:
         if os.path.exists(js_path):
