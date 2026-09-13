@@ -1800,6 +1800,7 @@ function switchTab(rawRoute) {
       if (typeof renderHomeThematicPrayers === "function") renderHomeThematicPrayers();
       if (typeof renderDidYouKnowWidget === "function") renderDidYouKnowWidget();
       if (typeof renderEducationalMicroLearning === "function") renderEducationalMicroLearning();
+      if (typeof renderFeaturedScriptures === "function") renderFeaturedScriptures();
     } else if (route === "study") {
       if (window.BibleStudy && typeof window.BibleStudy.init === "function") {
         window.BibleStudy.init();
@@ -1888,20 +1889,26 @@ window.closeMoreMenu = closeMoreMenu;
 
 
 function adjustHeaderForRoute(route) {
+  const appHeader = document.querySelector(".app-header");
+  const mobileTabs = document.querySelector(".mobile-bottom-tabs");
   const readerCtrls = document.getElementById("nav-reader-controls");
   const staticCtrls = document.getElementById("nav-static-controls");
   const staticTitle = document.getElementById("static-header-title");
   
   if (route === "reader") {
+    if (appHeader) appHeader.style.display = "none";
+    if (mobileTabs) mobileTabs.style.setProperty("display", "none", "important");
     if (readerCtrls) {
-      readerCtrls.classList.add("active");
-      readerCtrls.style.display = "flex";
+      readerCtrls.classList.remove("active");
+      readerCtrls.style.display = "none";
     }
     if (staticCtrls) {
       staticCtrls.classList.remove("active");
       staticCtrls.style.display = "none";
     }
   } else {
+    if (appHeader) appHeader.style.display = "";
+    if (mobileTabs) mobileTabs.style.removeProperty("display");
     if (readerCtrls) {
       readerCtrls.classList.remove("active");
       readerCtrls.style.display = "none";
@@ -2093,6 +2100,192 @@ function formatScriptureText(bookKey, chapterNum, verseNum, text, lang) {
 }
 
 /* ==========================================================================
+   Bible Section Headings Dataset & Translation Alignment
+   ========================================================================== */
+const SECTION_HEADINGS = {
+  "matthew_7": {
+    1: { mr: "इतरांचा न्याय करू नका", eng: "Do Not Judge" },
+    7: { mr: "मागा, शोधा, ठोका", eng: "Ask, Seek, Knock" },
+    12: { mr: "सुवर्ण नियम", eng: "The Golden Rule" },
+    13: { mr: "दोन रस्ते", eng: "The Narrow and Wide Gates" },
+    15: { mr: "खरे व खोटे शिक्षक", eng: "True and False Teachers (A Tree and Its Fruit)" },
+    21: { mr: "मी तुम्हाला कधीच ओळखले नाही", eng: "I Never Knew You" },
+    24: { mr: "दोन घरे", eng: "The Wise and Foolish Builders" }
+  },
+  "matthew_5": {
+    1: { mr: "डोंगरावरील प्रवचन: धन्यवचने", eng: "The Beatitudes" },
+    13: { mr: "मीठ व प्रकाश", eng: "Salt and Light" },
+    17: { mr: "नियमशास्त्राची पूर्णता", eng: "The Fulfillment of the Law" },
+    21: { mr: "राग व हत्या", eng: "Murder and Anger" },
+    27: { mr: "व्यभिचार", eng: "Adultery" },
+    31: { mr: "घटस्फोट", eng: "Divorce" },
+    33: { mr: "शपथा", eng: "Oaths" },
+    38: { mr: "डोळ्याबद्दल डोळा: सूड", eng: "An Eye for an Eye" },
+    43: { mr: "शत्रूंवर प्रेम करा", eng: "Love for Enemies" }
+  },
+  "matthew_6": {
+    1: { mr: "दानधर्म", eng: "Giving to the Needy" },
+    5: { mr: "प्रार्थना व प्रभूची प्रार्थना", eng: "Prayer and The Lord's Prayer" },
+    16: { mr: "उपवास", eng: "Fasting" },
+    19: { mr: "स्वर्गातील संपत्ती", eng: "Treasures in Heaven" },
+    22: { mr: "शरीराचा दिवा", eng: "The Lamp of the Body" },
+    24: { mr: "देव आणि धन", eng: "God and Money" },
+    25: { mr: "काळजी करू नका", eng: "Do Not Worry" }
+  },
+  "john_1": {
+    1: { mr: "शब्द देहधारी झाला", eng: "The Word Became Flesh" },
+    19: { mr: "बाप्तिस्मा करणाऱ्या योहानाची साक्ष", eng: "John the Baptist's Testimony" },
+    29: { mr: "देवाचे कोकरू", eng: "The Lamb of God" },
+    35: { mr: "पहिले शिष्य", eng: "The First Disciples" },
+    43: { mr: "येशूने फिलिप्प व नथनेलला पाचारण केले", eng: "Jesus Calls Philip and Nathanael" }
+  },
+  "john_2": {
+    1: { mr: "कानामधील लग्न", eng: "The Wedding at Cana" },
+    13: { mr: "येशूने मंदिर स्वच्छ केले", eng: "Jesus Clears the Temple" }
+  },
+  "john_3": {
+    1: { mr: "येशू आणि निकदेम", eng: "Jesus Teaches Nicodemus" },
+    22: { mr: "योहान बाप्तिस्मा करणाऱ्याची येशूबद्दल साक्ष", eng: "John the Baptist's Testimony" }
+  },
+  "john_4": {
+    1: { mr: "येशू आणि शोमरोनी स्त्री", eng: "Jesus and the Samaritan Woman" },
+    43: { mr: "अधिकाऱ्याच्या मुलाला बरे करणे", eng: "Jesus Heals an Official's Son" }
+  },
+  "psalms_23": {
+    1: { mr: "परमेश्वर माझा मेंढपाळ आहे", eng: "The Lord is My Shepherd" }
+  },
+  "romans_8": {
+    1: { mr: "आत्म्यामधील जीवन", eng: "Life Through the Spirit" },
+    18: { mr: "भावी गौरव", eng: "Present Suffering and Future Glory" },
+    31: { mr: "देवाचे विजयी प्रेम", eng: "More Than Conquerors" }
+  },
+  "genesis_1": {
+    1: { mr: "उत्पत्ती: विश्वाची निर्मिती", eng: "The Beginning of Creation" },
+    26: { mr: "मानवाची निर्मिती", eng: "The Creation of Humanity" }
+  },
+  "exodus_20": {
+    1: { mr: "दहा आज्ञा", eng: "The Ten Commandments" }
+  }
+};
+
+function getVersionCode() {
+  if (state.translation === 'eng') {
+    return state.engVariant === 'kjv' ? 'KJV' : 'NLT';
+  }
+  if (state.translation === 'parallel') {
+    return 'PARALLEL';
+  }
+  return state.marathiVariant === 'irv' ? 'MARIRV' : 'MARVBSI';
+}
+
+function updateVersionPill() {
+  const pillText = document.getElementById('reader-version-pill-text');
+  if (pillText) {
+    pillText.textContent = getVersionCode();
+  }
+}
+
+function handleReaderBackNavigation() {
+  if (typeof switchTab === 'function') {
+    switchTab('home');
+  }
+}
+
+function openTranslationSelectorDrawer() {
+  openDrawer('drawer-translation-selector');
+  document.querySelectorAll('#drawer-translation-selector .select-row-item').forEach(btn => {
+    const isLangMatch = btn.dataset.lang === state.translation;
+    const isVariantMatch = !btn.dataset.variant || (
+      state.translation === 'mar' && (state.marathiVariant || 'bsi') === btn.dataset.variant
+    ) || (
+      state.translation === 'eng' && (state.engVariant || 'nlt') === btn.dataset.variant
+    );
+    btn.classList.toggle("active", isLangMatch && isVariantMatch);
+  });
+}
+
+function openReaderMoreOptionsDrawer() {
+  openDrawer('drawer-reader-more-options');
+}
+
+function openReaderSearchDrawer() {
+  if (typeof switchTab === 'function') {
+    switchTab('discover');
+  }
+}
+
+function updateReaderPlanBottomBar() {
+  const bar = document.getElementById('reader-plan-bottom-bar');
+  if (!bar) return;
+
+  let title = "उद्दिष्टपूर्ण जीवन जगणे!";
+  let currentDay = 1;
+  let totalDays = 30;
+  let portionIndex = 1;
+  let totalPortions = 2;
+
+  if (typeof state !== 'undefined' && state.readingPlan && state.readingPlan !== 'none') {
+    const planInfo = (typeof PLANS_DB !== 'undefined') ? PLANS_DB[state.readingPlan] : null;
+    if (planInfo) {
+      totalDays = planInfo.days || 30;
+      title = planInfo.title || title;
+      currentDay = state.planDay || 1;
+    } else if (state.readingPlan.startsWith("custom_") && state.customPlan) {
+      totalDays = state.customPlan.duration || 30;
+      title = state.customPlan.title || title;
+      currentDay = state.planDay || 1;
+    }
+  }
+
+  const titleEl = document.getElementById('reader-plan-bar-title');
+  const dayEl = document.getElementById('reader-plan-bar-day');
+  const pctEl = document.getElementById('reader-plan-bar-percent');
+  const fillEl = document.getElementById('reader-plan-progress-bar');
+  const btnLabel = document.getElementById('reader-plan-btn-label');
+
+  const pct = Math.min(100, Math.max(0, Math.round((currentDay / totalDays) * 100)));
+
+  if (titleEl) titleEl.textContent = title;
+  if (dayEl) dayEl.textContent = `Day ${currentDay} • ${portionIndex} of ${totalPortions}`;
+  if (pctEl) pctEl.textContent = `${pct}% पूर्ण`;
+  if (fillEl) fillEl.style.width = `${pct}%`;
+  if (btnLabel) btnLabel.textContent = "पुढील";
+}
+
+function handleReaderPlanAdvance() {
+  if (typeof state !== 'undefined' && state.readingPlan && state.readingPlan !== 'none') {
+    const planInfo = (typeof PLANS_DB !== 'undefined') ? PLANS_DB[state.readingPlan] : null;
+    const totalDays = planInfo ? (planInfo.days || 30) : 30;
+    if (state.planDay < totalDays) {
+      state.planDay++;
+      showToast(`अभिनंदन! दिवस ${state.planDay} अनलॉक झाला आहे (Day ${state.planDay} Unlocked) 🎉`);
+    } else {
+      showToast("हालेलुया! तुम्ही वाचन योजना पूर्ण केली आहे! 🙏✨");
+    }
+    saveStateToLocalStorage();
+    updateReaderPlanBottomBar();
+    if (typeof updateHomepageReadingPlanCard === 'function') {
+      updateHomepageReadingPlanCard();
+    }
+    if (typeof navigateChapter === 'function') {
+      navigateChapter(1);
+    }
+  } else {
+    // Standard reader navigation forward
+    if (typeof navigateChapter === 'function') {
+      navigateChapter(1);
+    }
+  }
+}
+window.handleReaderBackNavigation = handleReaderBackNavigation;
+window.openTranslationSelectorDrawer = openTranslationSelectorDrawer;
+window.openReaderMoreOptionsDrawer = openReaderMoreOptionsDrawer;
+window.openReaderSearchDrawer = openReaderSearchDrawer;
+window.updateReaderPlanBottomBar = updateReaderPlanBottomBar;
+window.handleReaderPlanAdvance = handleReaderPlanAdvance;
+window.updateVersionPill = updateVersionPill;
+
+/* ==========================================================================
    Bible Reader Engine (Verses & Navigation UI rendering)
    ========================================================================== */
 async function openReader(bookKey, chapterNum) {
@@ -2142,11 +2335,14 @@ async function openReader(bookKey, chapterNum) {
   const inlineBookNameEl = document.getElementById("inline-reader-book-name");
   if (inlineBookNameEl) inlineBookNameEl.textContent = `${activeBookName} ${chapterNum}`;
   
+  updateVersionPill();
+  updateReaderPlanBottomBar();
+  
   const inlineTransEl = document.getElementById("inline-reader-translation-name");
   if (inlineTransEl) {
-    if (state.translation === "eng") inlineTransEl.textContent = "English (NLT)";
+    if (state.translation === "eng") inlineTransEl.textContent = `English (${getVersionCode()})`;
     else if (state.translation === "parallel") inlineTransEl.textContent = "Parallel";
-    else inlineTransEl.textContent = "मराठी (BSI)";
+    else inlineTransEl.textContent = `मराठी (${getVersionCode()})`;
   }
   const inlineVoiceSelect = document.getElementById("reader-inline-voice-select");
   if (inlineVoiceSelect) {
@@ -2210,34 +2406,24 @@ async function openReader(bookKey, chapterNum) {
   populateQuickSelectors(metadata, chapterNum, totalVerses);
   
   let currentParagraph = null;
+  const chapterHeadings = SECTION_HEADINGS[`${bookKey}_${chapterNum}`] || {};
   let pStarts = [1];
-  if (bookKey === 'john' && chapterNum === 2) {
-    pStarts = [1, 4, 5, 6, 9, 11, 12, 13, 14, 17, 18, 19, 20];
-  } else {
-    for (let v = 6; v <= totalVerses; v += 5) {
-      pStarts.push(v);
-    }
+  for (let v = 6; v <= totalVerses; v += 5) {
+    pStarts.push(v);
   }
   
   for (let vIdx = 0; vIdx < totalVerses; vIdx++) {
     const verseNum = vIdx + 1;
     const verseKey = `${bookKey}_${chapterNum}_${verseNum}`;
     
-    // Inject Section Headings dynamically
-    if (bookKey === 'john' && chapterNum === 2) {
-      if (verseNum === 1) {
-        currentParagraph = null;
-        const headingEl = document.createElement("div");
-        headingEl.className = "bible-section-heading";
-        headingEl.textContent = (state.translation === 'eng') ? "The Wedding at Cana" : "कानामधील लग्न";
-        versesContainer.appendChild(headingEl);
-      } else if (verseNum === 13) {
-        currentParagraph = null;
-        const headingEl = document.createElement("div");
-        headingEl.className = "bible-section-heading";
-        headingEl.textContent = (state.translation === 'eng') ? "Jesus Clears the Temple" : "येशूने मंदिर स्वच्छ केले";
-        versesContainer.appendChild(headingEl);
-      }
+    // Inject Distinct Section Headings dynamically
+    if (chapterHeadings[verseNum]) {
+      currentParagraph = null;
+      const headingData = chapterHeadings[verseNum];
+      const headingEl = document.createElement("div");
+      headingEl.className = "bible-section-heading";
+      headingEl.textContent = (state.translation === 'eng') ? headingData.eng : headingData.mr;
+      versesContainer.appendChild(headingEl);
     }
     
     const verseEl = document.createElement("div");
@@ -2259,15 +2445,15 @@ async function openReader(bookKey, chapterNum) {
       
       verseEl.dataset.text = rawTextMr;
       
-      if (verseNum === 1) {
+      if (verseNum === 1 && !chapterHeadings[1]) {
         verseEl.innerHTML = `
-          <div class="verse-parallel-mr"><span class="giant-chapter-num">${chapterNum}</span>${vTextMr}</div>
-          <div class="verse-parallel-en">${vTextEng}</div>
+          <div class="verse-parallel-mr"><span class="giant-chapter-num">${chapterNum}</span><sup class="verse-num">1</sup>${vTextMr}</div>
+          <div class="verse-parallel-en"><sup class="verse-num" style="font-size:9px;color:var(--text-muted);">1</sup>${vTextEng}</div>
         `;
       } else {
         verseEl.innerHTML = `
-          <div class="verse-parallel-mr"><span class="verse-num">${verseNum}</span>${vTextMr}</div>
-          <div class="verse-parallel-en"><span class="verse-num" style="font-size:9px;color:var(--text-muted);">${verseNum}</span>${vTextEng}</div>
+          <div class="verse-parallel-mr"><sup class="verse-num">${verseNum}</sup>${vTextMr}</div>
+          <div class="verse-parallel-en"><sup class="verse-num" style="font-size:9px;color:var(--text-muted);">${verseNum}</sup>${vTextEng}</div>
         `;
       }
     } else {
@@ -2278,10 +2464,10 @@ async function openReader(bookKey, chapterNum) {
       
       verseEl.dataset.text = rawText;
       
-      if (verseNum === 1) {
-        verseEl.innerHTML = `<span class="giant-chapter-num">${chapterNum}</span>${vText}`;
+      if (verseNum === 1 && !chapterHeadings[1]) {
+        verseEl.innerHTML = `<span class="giant-chapter-num">${chapterNum}</span><sup class="verse-num">1</sup>${vText}`;
       } else {
-        verseEl.innerHTML = `<span class="verse-num">${verseNum}</span>${vText}`;
+        verseEl.innerHTML = `<sup class="verse-num">${verseNum}</sup>${vText}`;
       }
     }
     
@@ -2295,7 +2481,7 @@ async function openReader(bookKey, chapterNum) {
     if (state.translation === "parallel") {
       versesContainer.appendChild(verseEl);
     } else {
-      if (pStarts.includes(verseNum) || !currentParagraph) {
+      if (chapterHeadings[verseNum] || pStarts.includes(verseNum) || !currentParagraph) {
         currentParagraph = document.createElement("p");
         currentParagraph.className = "bible-paragraph";
         versesContainer.appendChild(currentParagraph);
@@ -6198,18 +6384,45 @@ function setupEventListeners() {
   }
 
   // Reader Translation Header Selector
+  // Reader Translation Header Selector & Version Pill
   document.getElementById("btn-translation-selector")?.addEventListener("click", () => {
-    openDrawer("drawer-translation-selector");
-    document.querySelectorAll(".select-row-item").forEach(btn => {
-      btn.classList.toggle("active", btn.dataset.lang === state.translation);
-    });
+    openTranslationSelectorDrawer();
   });
   
-  document.querySelectorAll(".select-row-item").forEach(btn => {
+  document.getElementById("btn-reader-version-pill")?.addEventListener("click", () => {
+    openTranslationSelectorDrawer();
+  });
+
+  document.getElementById("btn-reader-back-nav")?.addEventListener("click", () => {
+    handleReaderBackNavigation();
+  });
+
+  document.getElementById("btn-reader-audio-speaker")?.addEventListener("click", () => {
+    toggleAudioNarration();
+  });
+
+  document.getElementById("btn-reader-search-icon")?.addEventListener("click", () => {
+    openReaderSearchDrawer();
+  });
+
+  document.getElementById("btn-reader-more-options")?.addEventListener("click", () => {
+    openReaderMoreOptionsDrawer();
+  });
+
+  document.getElementById("btn-reader-plan-complete-next")?.addEventListener("click", () => {
+    handleReaderPlanAdvance();
+  });
+  
+  document.querySelectorAll("#drawer-translation-selector .select-row-item").forEach(btn => {
     btn.addEventListener("click", () => {
-      state.translation = btn.dataset.lang;
+      if (btn.dataset.lang) state.translation = btn.dataset.lang;
+      if (btn.dataset.variant) {
+        if (state.translation === 'mar') state.marathiVariant = btn.dataset.variant;
+        if (state.translation === 'eng') state.engVariant = btn.dataset.variant;
+      }
       applyStylesFromState();
       saveStateToLocalStorage();
+      updateVersionPill();
       closeAllDrawers();
       
       openReader(state.activeBook, state.activeChapter);
@@ -20481,235 +20694,154 @@ window.shareCurrentHymnLyrics = shareCurrentHymnLyrics;
    ========================================================================== */
 const DID_YOU_KNOW_INSIGHTS = [
   {
+    id: "dyk_women_books",
+    theme: "dyk-theme-emerald",
+    image: "assets/images/did_you_know_esther.jpg",
+    alt: "Classical illustration of biblical Queen Esther standing before King Ahasuerus",
+    questionEn: "Which Books of the Bible Are Named After Women?",
+    questionMr: "बायबलमधील कोणत्या पुस्तकांना स्त्रियांची नावे आहेत?",
+    bulletsEn: [
+      { icon: "📖", text: "Esther 👑 (Queen of Persia & Deliverer)" },
+      { icon: "🌾", text: "Ruth (Model of Faithfulness & Lineage of Christ)" },
+      { icon: "📜", text: "Judith (Historical Apocrypha)" },
+      { icon: "🪻", text: "Susanna (Historical Apocrypha)" }
+    ],
+    bulletsMr: [
+      { icon: "📖", text: "एस्तेर (Esther) 👑 — पारसाची राणी व तारणहार" },
+      { icon: "🌾", text: "रूथ (Ruth) — विश्वासूपणाची आदर्श व दाविदाची पूर्वज" },
+      { icon: "📜", text: "यहूदीथ (Judith) — ऐतिहासिक प्राचीन ग्रंथ" },
+      { icon: "🪻", text: "सुसान्ना (Susanna) — ऐतिहासिक प्राचीन ग्रंथ" }
+    ],
+    refEn: "Esther 1 • एस्तेर १",
+    refMr: "एस्तेर १ • Esther 1",
+    book: "esther",
+    chapter: 1,
+    verse: 1
+  },
+  {
+    id: "dyk_shortest_verse",
+    theme: "dyk-theme-indigo",
+    image: "assets/images/did_you_know_jesus_wept.jpg",
+    alt: "Classical chiaroscuro engraving of Jesus Christ weeping in deep prayer",
+    questionEn: "What Is the Shortest Verse in the Bible?",
+    questionMr: "बायबलमधील सर्वात लहान वचन कोणते आहे?",
+    bulletsEn: [
+      { icon: "💧", text: "John 11:35: \"Jesus wept.\"" },
+      { icon: "🕊️", text: "Just 2 words in English & Marathi (3 in Greek: Ἐδάκρυσεν ὁ Ἰηसोῦς)" },
+      { icon: "❤️", text: "The most profound display of divine empathy & love" },
+      { icon: "🙏", text: "Christ shares deeply in all our earthly sorrows" }
+    ],
+    bulletsMr: [
+      { icon: "💧", text: "योहान ११:३५: \"येशू रडला.\"" },
+      { icon: "🕊️", text: "केवळ २ शब्द (मूळ ग्रीकमध्ये ३ शब्द: Ἐδάκρυσεν ὁ Ἰηसोῦς)" },
+      { icon: "❤️", text: "ईश्वरी करुणा व संवेदनशीलतेची सर्वात सखोल साक्ष" },
+      { icon: "🙏", text: "आपल्या अश्रूंमध्ये ख्रिस्त स्वतः सहभागी होतो" }
+    ],
+    refEn: "John 11:35 • योहान ११:३५",
+    refMr: "योहान ११:३५ • John 11:35",
+    book: "john",
+    chapter: 11,
+    verse: 35
+  },
+  {
+    id: "dyk_noahs_ark",
+    theme: "dyk-theme-teal",
+    image: "assets/images/did_you_know_noahs_ark.jpg",
+    alt: "Classical engraving of Noah's Ark floating upon great flood waters",
+    questionEn: "How Long Did Noah's Ark Float?",
+    questionMr: "नोहाचे तारू पुराच्या पाण्यावर किती काळ तरंगत होते?",
+    bulletsEn: [
+      { icon: "🌧️", text: "40 days & nights of torrential rainfall" },
+      { icon: "🌊", text: "150 days floodwaters surged across the earth" },
+      { icon: "⛰️", text: "Rested on mountains of Ararat in 7th month (Gen 8:4)" },
+      { icon: "☀️", text: "370+ total days Noah remained inside the Ark" }
+    ],
+    bulletsMr: [
+      { icon: "🌧️", text: "४० दिवस व रात्री अखंड मुसळधार पाऊस पडला" },
+      { icon: "🌊", text: "१५० दिवस पुराचे पाणी पृथ्वीवर वाहत राहिले" },
+      { icon: "⛰️", text: "७ व्या महिन्यात अरारात पर्वतावर तारू स्थिरावले" },
+      { icon: "☀️", text: "एकूण ३७० हून अधिक दिवस नोहा तारवात होता" }
+    ],
+    refEn: "Genesis 7-8 • उत्पत्ती ७-८",
+    refMr: "उत्पत्ती ७-८ • Genesis 7-8",
+    book: "genesis",
+    chapter: 7,
+    verse: 17
+  },
+  {
+    id: "dyk_shepherd_rod",
+    theme: "dyk-theme-emerald",
+    image: "assets/images/did_you_know_shepherd.jpg",
+    alt: "Classical oil painting of biblical shepherd with rod and staff",
+    questionEn: "What Is the Secret of the Shepherd's Rod & Staff?",
+    questionMr: "मेंढपाळाची काठी व सोटा यातील आध्यात्मिक रहस्य काय?",
+    bulletsEn: [
+      { icon: "🛡️", text: "Rod (Shebet): Weapon defending flock against beasts" },
+      { icon: "🌿", text: "Staff (Mish'enet): Curved crook to gently guide sheep" },
+      { icon: "✝️", text: "Psalm 23:4: \"Thy rod and thy staff they comfort me\"" },
+      { icon: "🕊️", text: "Divine protection paired with tender, loving direction" }
+    ],
+    bulletsMr: [
+      { icon: "🛡️", text: "सोटा (Rod): हिंस्र श्वापदांपासून मेंढरांचे रक्षण करणारे हत्यार" },
+      { icon: "🌿", text: "काठी (Staff): वळलेली काठी चुकलेल्या मेंढरांना परत आणण्यासाठी" },
+      { icon: "✝️", text: "स्तोत्र २३:४: \"तुझा सोटा व तुझी काठी मला धीर देतात\"" },
+      { icon: "🕊️", text: "देवाचे अजिंक्य रक्षण आणि प्रेमळ मार्गदर्शन" }
+    ],
+    refEn: "Psalm 23:4 • स्तोत्रसंहिता २३:४",
+    refMr: "स्तोत्रसंहिता २३:४ • Psalm 23:4",
     book: "psalms",
     chapter: 23,
-    titleEn: "The Shepherd's Rod & Staff",
-    titleMr: "मेंढपाळाची काठी व सोटा",
-    tagEn: "Cultural Context",
-    tagMr: "ऐतिहासिक संदर्भ",
-    textEn: "In biblical antiquity, a shepherd carried two distinct wooden implements: the 'rod' (shebet) for defending the flock against wild beasts, and the curved 'staff' (mish'enet) for gently guiding straying sheep back to safety. In Psalm 23, David celebrates both as sources of divine comfort.",
-    textMr: "बायबल काळात मेंढपाळाकडे दोन साधने असत: 'सोटा' हिंस्र श्वापदांपासून मेंढरांचे रक्षण करण्यासाठी, आणि 'काठी' चुकलेल्या मेंढरांना हळुवारपणे परत आणण्यासाठी. स्तोत्र २३ मध्ये दावीद याच साधनांचा उल्लेख देवाचे सांत्वन म्हणून करतो.",
-    refEn: "Psalm 23 • स्तोत्रसंहिता २३"
+    verse: 4
   },
   {
+    id: "dyk_water_into_wine",
+    theme: "dyk-theme-mahogany",
+    image: "assets/images/wedding_cana_miracle.jpg",
+    alt: "Classical painting of Jesus turning water into wine at the wedding at Cana",
+    questionEn: "How Much Water Was Turned into Wine at Cana?",
+    questionMr: "काना येथील लग्नात येशूने किती लिटर पाण्याचे रूपांतर केले?",
+    bulletsEn: [
+      { icon: "🏺", text: "6 massive stone jars used for ceremonial washing" },
+      { icon: "🍷", text: "20 to 30 gallons each (total 120-180 gallons / 500-700L)" },
+      { icon: "🍇", text: "Master of banquet declared it the finest wine" },
+      { icon: "✨", text: "Revealed His glory and the overflowing abundance of grace" }
+    ],
+    bulletsMr: [
+      { icon: "🏺", text: "शुद्धीकरणासाठी ठेवलेले ६ भव्य दगडी रांजण" },
+      { icon: "🍷", text: "प्रत्येकात सुमारे १०० लिटर (एकूण ५०० ते ७०० लिटर)" },
+      { icon: "🍇", text: "यजमानाने या द्राक्षारसाला उत्कृष्ट दर्जाचा ठरवले" },
+      { icon: "✨", text: "देवाची असीम कृपा आणि महिमा येथे प्रकट झाला" }
+    ],
+    refEn: "John 2:6-10 • योहान २:६-१०",
+    refMr: "योहान २:६-१० • John 2:6-10",
     book: "john",
     chapter: 2,
-    titleEn: "Water into Wine at Cana",
-    titleMr: "काना येथील पाण्याचे द्राक्षारसात रूपांतर",
-    tagEn: "Miracle Insight",
-    tagMr: "चमत्काराचे रहस्य",
-    textEn: "The six stone jars at Cana were kept specifically for Jewish ceremonial purification, holding about 20 to 30 gallons each. Jesus transformed over 120 gallons of water into the finest wine, demonstrating abundant divine grace replacing old ceremonial shadows.",
-    textMr: "काना येथील सहा दगडी रांजण ज्यूंच्या शुद्धीकरण विधीसाठी ठेवले होते. प्रत्येकात सुमारे १०० लिटर पाणी मावत असे. येशूने तब्बल ६०० लिटर पाण्याचे उत्कृष्ट द्राक्षारसात रूपांतर करून जुन्या विधींच्या जागी देवाची विपुल कृपा प्रकट केली.",
-    refEn: "John 2 • योहान २"
+    verse: 1
   },
   {
+    id: "dyk_peace_phroureo",
+    theme: "dyk-theme-indigo",
+    image: "assets/images/peace_anxiety_art.jpg",
+    alt: "Classical illustration of divine peace guarding believer amidst storm",
+    questionEn: "What Does Paul Mean by 'The Peace of God'?",
+    questionMr: "पौल जेव्हा 'देवाच्या शांती'चा उल्लेख करतो तेव्हा त्याचा खरा अर्थ काय?",
+    bulletsEn: [
+      { icon: "🛡️", text: "Uses Roman military term 'Phroureo' (φρουρέω)" },
+      { icon: "🏰", text: "Describes an armed garrison guarding a fortress 24/7" },
+      { icon: "🕊️", text: "Transcends all human understanding and anxiety" },
+      { icon: "❤️", text: "Keeps worry and panic completely outside your heart" }
+    ],
+    bulletsMr: [
+      { icon: "🛡️", text: "'फ्रुरिओ' (Phroureo) हा रोमन सैन्याचा लष्करी शब्द वापरला" },
+      { icon: "🏰", text: "किल्ल्याचे २४ तास अहोरात्र खडा पहारा देणारा पहारेकरी" },
+      { icon: "🕊️", text: "सर्व बुद्धी व समजेच्या पलीकडची स्वर्गीय शांती" },
+      { icon: "❤️", text: "चिंता, भीती व नैराश्याला हृदयाबाहेरच थोपवून धरते" }
+    ],
+    refEn: "Philippians 4:7 • फिलिप्पैकरांस ४:७",
+    refMr: "फिलिप्पैकरांस ४:७ • Philippians 4:7",
     book: "philippians",
     chapter: 4,
-    titleEn: "The Peace that Guards Your Heart",
-    titleMr: "सर्व बुद्धिसामर्थ्याच्या पलीकडची शांती",
-    tagEn: "Spiritual Peace",
-    tagMr: "आत्मिक शांती",
-    textEn: "When Paul wrote about the peace of God guarding believers' hearts, he used the Roman military term 'phroureo'—describing an armed garrison standing on 24-hour guard duty around an empire fortress, keeping anxiety completely outside.",
-    textMr: "पौलाने जेव्हा 'देवाच्या शांतीने तुमचे रक्षण करावे' असे लिहिले, तेव्हा त्याने रोमन सैन्याचा 'फ्रुरिओ' (phroureo) हा शब्द वापरला—ज्याचा अर्थ एखाद्या किल्ल्याचे २४ तास अहोरात्र रक्षण करणारा पहारेकरी. देवाची शांती तुमच्या हृदयाचे असेच रक्षण करते.",
-    refEn: "Philippians 4 • फिलिप्पैकरांस ४"
-  },
-  {
-    book: "exodus",
-    chapter: 20,
-    titleEn: "The Two Tables of the Law",
-    titleMr: "पवित्र नियमाच्या दोन पाट्या",
-    tagEn: "The Moral Law",
-    tagMr: "नैतिक नियम",
-    textEn: "The Ten Commandments are structured in two divine movements: Commandments 1 through 4 govern our direct relationship and devotion to God, while Commandments 5 through 10 establish honor, integrity, and love toward our fellow human beings.",
-    textMr: "दहा आज्ञा दोन भागात विभागलेल्या आहेत: पहिल्या ४ आज्ञा देवावरील आपले प्रेम व भक्ती स्पष्ट करतात, तर ५ ते १० या आज्ञा मानवा-मानवांमधील आदर, न्याय, सत्य आणि प्रीतीचे नियम स्थापित करतात.",
-    refEn: "Exodus 20 • निर्गम २०"
-  },
-  {
-    book: "romans",
-    chapter: 8,
-    titleEn: "More Than Conquerors (Hupermikao)",
-    titleMr: "विजेत्यांपेक्षाही श्रेष्ठ (Hupermikao)",
-    tagEn: "Victory in Christ",
-    tagMr: "ख्रिस्तात विजय",
-    textEn: "In Romans 8:37, Paul coins the vivid Greek word 'hupernikomen'—super-conquerors. It means that through Christ's love, our trials and sufferings do not merely get defeated; they are transformed into instruments of our eternal spiritual maturity and victory.",
-    textMr: "रोमन्स ८:३७ मध्ये पौल 'हुपरनिकोमेन' हा ग्रीक शब्द वापरतो—ज्याचा अर्थ 'विजेत्यांपेक्षाही श्रेष्ठ'. ख्रिस्ताच्या प्रीतीमुळे आपल्या जीवनातील संकटे केवळ दूर होत नाहीत, तर तीच संकटे आपल्याला आध्यात्मिकदृष्ट्या अधिक सामर्थ्यवान बनवतात.",
-    refEn: "Romans 8 • रोमन्स ८"
-  },
-  {
-    book: "hebrews",
-    chapter: 11,
-    titleEn: "The Cloud of Witnesses",
-    titleMr: "विश्वासाचे महान साक्षीदार",
-    tagEn: "Faith Heroes",
-    tagMr: "विश्वासाचे वीर",
-    textEn: "Hebrews 11 describes faith not as blind optimism, but as 'hypostasis'—a title deed or solid foundation of things hoped for. Ancient papyri used this exact term for real estate legal ownership documents.",
-    textMr: "इब्री ११ मध्ये विश्वासाची व्याख्या करताना 'हायपोस्टॅसिस' (hypostasis) हा शब्द आला आहे, ज्याचा अर्थ 'मालकी हक्काचा कायदेशीर दस्तऐवज'. देवाच्या वचनांवरचा विश्वास ही केवळ आशा नसून स्वर्गीय आशीर्वादांची पक्की खात्री आहे.",
-    refEn: "Hebrews 11 • इब्री ११"
-  },
-  {
-    book: "genesis",
-    chapter: 1,
-    titleEn: "Creation Out of Nothing ('Bara')",
-    titleMr: "शून्यातून विश्वाची दैवी निर्मिती ('बारा')",
-    tagEn: "Creation Truth",
-    tagMr: "सृष्टीचे रहस्य",
-    textEn: "In Genesis 1:1, the Hebrew verb used for God creating the heavens and earth is 'bara' (בָּרָא)—a word reserved exclusively in Scripture for God's sovereign creation out of absolute nothingness (creatio ex nihilo).",
-    textMr: "उत्पत्ती १:१ मध्ये देवाने आकाश व पृथ्वी निर्माण केली यासाठी 'बारा' (bara) हा हिब्रू शब्द वापरला आहे. संपूर्ण पवित्र शास्त्रात हा शब्द केवळ देवाने शून्यातून केलेल्या अलौकिक निर्मितीसाठीच वापरला जातो.",
-    refEn: "Genesis 1 • उत्पत्ती १"
-  },
-  {
-    book: "matthew",
-    chapter: 5,
-    titleEn: "The Salt of the Earth",
-    titleMr: "पृथ्वीचे मीठ आणि जगाचा प्रकाश",
-    tagEn: "Kingdom Culture",
-    tagMr: "देवाचे राज्य",
-    textEn: "In the ancient Mediterranean world, salt was not just for flavor—it was the primary preservative preventing food from decaying and was even used as a form of currency. Jesus calls His followers the moral preservative of the world.",
-    textMr: "प्राचीन काळात मीठ केवळ चवीसाठी नव्हे तर अन्नाला सडण्यापासून वाचवणारे मुख्य संरक्षक साधन होते. येशूने आपल्या अनुयायांना 'पृथ्वीचे मीठ' म्हणून या जगात सत्य व नैतिकतेचे रक्षण करण्याची जबाबदारी दिली.",
-    refEn: "Matthew 5 • मत्तय ५"
-  },
-  {
-    book: "isaiah",
-    chapter: 40,
-    titleEn: "Soaring on Eagle's Wings",
-    titleMr: "गरुडासारखे उंच उड्डाण",
-    tagEn: "Divine Strength",
-    tagMr: "दैवी सामर्थ्य",
-    textEn: "Unlike other birds that flee from storms, eagles lock their wings into storm updrafts to soar effortlessly above turbulence. Isaiah 40:31 teaches that those who wait on the Lord rise above trials on the wind of His Spirit.",
-    textMr: "इतर पक्षी वादळाला घाबरून पळतात, परंतु गरुड वादळातील हवेच्या वेगाचा वापर करून अधिक उंचावर भरारी घेतो. यशया ४०:३१ सांगते की जे परमेश्वराची वाट पाहतात, ते संकटांवर मात करून उंच झेपावतात.",
-    refEn: "Isaiah 40 • यशया ४०"
-  },
-  {
-    book: "john",
-    chapter: 1,
-    titleEn: "The Word Made Flesh (Logos)",
-    titleMr: "शब्द देहधारी झाला (Logos)",
-    tagEn: "The Incarnation",
-    tagMr: "देहधारण",
-    textEn: "The apostle John adopted the term 'Logos'—which in Greek philosophy meant the ultimate cosmic order and reason of the universe—and revealed that this Logos is a living, loving Person: Jesus Christ.",
-    textMr: "ग्रीक तत्त्वज्ञानात 'लोगोस' (Logos) म्हणजे विश्वाला चालवणारी वैश्विक बुद्धी. योहान १ मध्ये जाहीर करतो की हा 'शब्द' कोणती अमूर्त कल्पना नसून साक्षात प्रभू येशू ख्रिस्त आहे जो आपल्यामध्ये राहिला.",
-    refEn: "John 1 • योहान १"
-  },
-  {
-    book: "proverbs",
-    chapter: 3,
-    titleEn: "Straight Paths in Divine Wisdom",
-    titleMr: "सरळ मार्ग आणि स्वर्गीय बुद्धी",
-    tagEn: "Wisdom Nuance",
-    tagMr: "दैवी ज्ञान",
-    textEn: "In Proverbs 3:6, 'He will direct your paths' uses the Hebrew verb 'yashar' (יָשַׁר), which means to level out rugged mountains and remove impassable obstacles from a traveller's road.",
-    textMr: "नीतिसूत्रे ३:६ मध्ये 'तो तुझे मार्ग नीट करील' यासाठी 'याशार' (yashar) हा मूळ शब्द आहे, ज्याचा अर्थ वाटसरूच्या मार्गातील उंच-सखल डोंगर सपाट करणे आणि सर्व अडथळे दूर करणे.",
-    refEn: "Proverbs 3 • नीतिसूत्रे ३"
-  },
-  {
-    book: "1corinthians",
-    chapter: 13,
-    titleEn: "The Greatest Gift: Agape",
-    titleMr: "प्रीतीचा अमर स्तोत्र (अगापे)",
-    tagEn: "Unconditional Love",
-    tagMr: "निःस्वार्थी प्रीती",
-    textEn: "Ancient Greek had four distinct words for love: Eros (romantic), Storge (familial), Philia (brotherly friendship), and Agape (sacrificial divine love). In 1 Corinthians 13, Paul exclusively uses Agape.",
-    textMr: "ग्रीक भाषेत प्रेमासाठी चार शब्द आहेत: एरोस (शारीरिक), स्टोर्गे (कौटुंबिक), फिलिया (मित्रप्रेम) आणि अगापे (दैवी निःस्वार्थी प्रेम). १ करिंथ १३ मध्ये पौलाने केवळ 'अगापे' प्रीतीचे वर्णन केले आहे.",
-    refEn: "1 Corinthians 13 • १ करिंथकरांस १३"
-  },
-  {
-    book: "ephesians",
-    chapter: 6,
-    titleEn: "The Roman Scutum (Shield of Faith)",
-    titleMr: "विश्वासाची महाढाल (रोमन स्कूटम)",
-    tagEn: "Spiritual Warfare",
-    tagMr: "आत्मिक शस्त्रे",
-    textEn: "The 'shield of faith' in Ephesians 6:16 refers to the Roman 'scutum'—a massive four-foot tall door-like shield covered in leather and soaked in water to instantly extinguish flaming pitch arrows.",
-    textMr: "इफिसकरांस ६:१६ मधील 'विश्वासाची ढाल' म्हणजे रोमन सैनिकांची चार फूट उंच 'स्कूटम' ढाल, ज्यावर चामड्याचे आवरण असून ती पाण्यात भिजवली जात असे जेणेकरून शत्रूचे जळते बाण तात्काळ विझत असत.",
-    refEn: "Ephesians 6 • इफिसकरांस ६"
-  },
-  {
-    book: "joshua",
-    chapter: 1,
-    titleEn: "Be Strong & Courageous ('Chazaq')",
-    titleMr: "बळ धर आणि धीर धर ('हझाक')",
-    tagEn: "Courage in Crisis",
-    tagMr: "संकटात धैर्य",
-    textEn: "God repeats 'Chazaq ve-emats' (חֲזַק וֶאֱמָץ) to Joshua three times. 'Chazaq' means to hold tightly with a firm grip, while 'Emats' means internal mental fortitude rooted in God's presence.",
-    textMr: "देवाने यहोशूला तीन वेळा 'बळ धर व धैर्याने राहा' सांगितले. हिब्रू भाषेत 'हझाक' म्हणजे देवाची वचने घट्ट धरून ठेवणे आणि 'एमात्स' म्हणजे संकटात मनाचा समतोल ढळू न देणे.",
-    refEn: "Joshua 1 • यहोशू १"
-  },
-  {
-    book: "revelation",
-    chapter: 22,
-    titleEn: "The River of Life & Healing Leaves",
-    titleMr: "जीवनाच्या पाण्याचा शुद्ध प्रवाह",
-    tagEn: "Eternal Hope",
-    tagMr: "सार्वकालिक आशा",
-    textEn: "In Revelation 22:2, the leaves of the Tree of Life beside the crystal river are for the 'therapeia' (healing) of nations—the Greek root of our modern word 'therapy'. God's ultimate plan is complete restoration.",
-    textMr: "प्रकटीकरण २२:२ मध्ये जीवनाच्या वृक्षाची पाने राष्ट्रांच्या आरोग्यासाठी आहेत. येथे 'थेरेपिया' (therapeia) हा ग्रीक शब्द आला आहे, ज्यातून इंग्रजीतील 'थेरपी' शब्द आला आहे. देव सर्वांना पूर्ण आरोग्य देतो.",
-    refEn: "Revelation 22 • प्रकटीकरण २२"
-  },
-  {
-    book: "psalms",
-    chapter: 91,
-    titleEn: "Under His Feathers & Wings",
-    titleMr: "परात्पराच्या गुप्त स्थानी आश्रय",
-    tagEn: "Divine Protection",
-    tagMr: "दैवी संरक्षण",
-    textEn: "Psalm 91:4 uses tender maternal bird imagery: mother birds shield their fledglings beneath their wings even through forest fires, sacrificing themselves to ensure the safety of their young.",
-    textMr: "स्तोत्रसंहिता ९१:४ मधील पक्ष्याच्या पंखांखालील आश्रयाचे रूपक मातृप्रेमाचे प्रतीक आहे. पक्षी वणव्यातही स्वतःच्या अंगावर जाळ सोसून पंखांखालील पिल्लांचे प्राण वाचवतो; देव आपल्यावर असाच पहारा ठेवतो.",
-    refEn: "Psalm 91 • स्तोत्रसंहिता ९१"
-  },
-  {
-    book: "luke",
-    chapter: 15,
-    titleEn: "The Running Father",
-    titleMr: "उधळ्या पुत्रासाठी धावणारा पिता",
-    tagEn: "Grace Unmeasured",
-    tagMr: "अथांग कृपा",
-    textEn: "In Middle Eastern culture, an honorable patriarch never ran in public as it was considered humiliating. Yet in Luke 15:20, the father threw off his robes and ran to embrace his repentant son before anyone could shame him.",
-    textMr: "प्राचीन मध्यपूर्वेत प्रतिष्ठित घरातील वयोवृद्ध पिता कधीही सार्वजनिक ठिकाणी धावत नसे. परंतु लूक १५:२० मध्ये बापाने सर्व सामाजिक मर्यादा बाजूला ठेवून आपल्या पश्चात्तापी मुलाला मिठी मारण्यासाठी धाव घेतली.",
-    refEn: "Luke 15 • लूक १५"
-  },
-  {
-    book: "jeremiah",
-    chapter: 29,
-    titleEn: "Plans for Peace in Captivity",
-    titleMr: "भविष्याची व आशेची दैवी योजना",
-    tagEn: "Prophetic Promise",
-    tagMr: "भविष्यसूचक वचन",
-    textEn: "Jeremiah 29:11 ('plans to give you hope and a future') was not given in peacetime, but to displaced Hebrew captives weeping in Babylon, assuring them that God works redemptively even through exile.",
-    textMr: "यिर्मया २९:११ मधील 'कल्याणाची योजना' हे वचन सुखाच्या काळात नव्हे, तर बाबेलच्या पारतंत्र्यात रडणाऱ्या इस्राएली लोकांना दिले गेले होते, की देव कठीण परिस्थितीतूनही उज्ज्वल भविष्य घडवतो.",
-    refEn: "Jeremiah 29 • यिर्मया २९"
-  },
-  {
-    book: "mark",
-    chapter: 4,
-    titleEn: "Peace, Be Still ('Siopa, Pephimoso')",
-    titleMr: "शांत हो, स्तब्ध राहा ('सियोपा')",
-    tagEn: "Sovereign Authority",
-    tagMr: "सार्वभौम अधिकार",
-    textEn: "When Jesus calmed the storm on the Sea of Galilee, He commanded the raging waves: 'Siopa! Pephimoso!'—literally, 'Silence! Put a muzzle on it!' The sea immediately responded like a disciplined child.",
-    textMr: "गालीलाच्या समुद्रावर जेव्हा वादळ उसळले, तेव्हा येशूने लाटांना 'सियोपा, पेफिमोसो' अशी आज्ञा दिली—ज्याचा अर्थ 'शांत हो, तोंडावर लगाम घाल!' आणि एका क्षणात संपूर्ण वादळ शमून नितांत शांतता झाली.",
-    refEn: "Mark 4 • मार्क ४"
-  },
-  {
-    book: "acts",
-    chapter: 2,
-    titleEn: "The Reversal of Babel at Pentecost",
-    titleMr: "पेन्टेकॉस्ट: बाबेलच्या फाळणीचा अंत",
-    tagEn: "Holy Spirit Power",
-    tagMr: "पवित्र आत्म्याचे कार्य",
-    textEn: "At the Tower of Babel in Genesis 11, human pride divided nations by scattering languages. At Pentecost in Acts 2, the Holy Spirit unified diverse nations by allowing everyone to hear God's praises in their own tongue.",
-    textMr: "उत्पत्ती ११ मधील बाबेलच्या मनोऱ्यापाशी मानवी अहंकारामुळे भाषांमध्ये फूट पडली. परंतु प्रेषितांची कृत्ये २ मध्ये पेन्टेकॉस्टच्या दिवशी पवित्र आत्म्याने सर्व भाषांतील लोकांना ख्रिस्ताच्या प्रेमात एकत्र आणले.",
-    refEn: "Acts 2 • प्रेषितांची कृत्ये २"
-  },
-  {
-    book: "colossians",
-    chapter: 3,
-    titleEn: "The Peace of Christ as Umpire ('Brabeuo')",
-    titleMr: "ख्रिस्ताची शांती तुमच्या मनाचा मुख्य पंच",
-    tagEn: "Decision Discernment",
-    tagMr: "योग्य निर्णय विवेक",
-    textEn: "In Colossians 3:15, Paul writes 'let the peace of God rule in your hearts.' The Greek word 'brabeuo' (βραβεύω) means to act as the head referee or umpire in athletic games, making the decisive ruling in every conflict.",
-    textMr: "कलसैकर ३:१५ मध्ये 'ख्रिस्ताच्या शांतीने तुमच्या अंतःकरणात राज्य करावे' असे म्हटले आहे. येथे 'ब्राबेउओ' (brabeuo) हा मूळ ग्रीक शब्द आहे, ज्याचा अर्थ ऑलिम्पिक खेळातील मुख्य पंच. जीवनातील प्रत्येक निर्णयात देवाची शांतीच अंतिम कौल देते.",
-    refEn: "Colossians 3 • कलसैकर ३"
+    verse: 6
   }
 ];
 
@@ -20717,42 +20849,87 @@ let didYouKnowOffset = 0;
 let activeDidYouKnowInsight = DID_YOU_KNOW_INSIGHTS[0];
 
 function renderDidYouKnowWidget() {
-  const card = document.getElementById("card-did-you-know");
-  if (!card) return;
-  
-  const now = new Date();
-  const start = new Date(now.getFullYear(), 0, 0);
-  const diff = now - start;
-  const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
-  
-  const idx = Math.abs(dayOfYear + didYouKnowOffset) % DID_YOU_KNOW_INSIGHTS.length;
-  activeDidYouKnowInsight = DID_YOU_KNOW_INSIGHTS[idx] || DID_YOU_KNOW_INSIGHTS[0];
+  const track = document.getElementById("dyk-carousel-track");
+  if (!track) return;
   
   const isEng = (window.state && (window.state.translation === 'eng' || window.state.language === 'en'));
+  const total = DID_YOU_KNOW_INSIGHTS.length;
   
-  const tagEl = document.getElementById("did-you-know-tag");
-  const titleEl = document.getElementById("did-you-know-title");
-  const textEl = document.getElementById("did-you-know-text");
-  const refEl = document.getElementById("did-you-know-ref");
-  
-  if (tagEl) tagEl.textContent = isEng ? activeDidYouKnowInsight.tagEn : activeDidYouKnowInsight.tagMr;
-  if (titleEl) titleEl.textContent = isEng ? activeDidYouKnowInsight.titleEn : `${activeDidYouKnowInsight.titleMr} (${activeDidYouKnowInsight.titleEn})`;
-  if (textEl) textEl.textContent = isEng ? activeDidYouKnowInsight.textEn : activeDidYouKnowInsight.textMr;
-  if (refEl) refEl.textContent = activeDidYouKnowInsight.refEn;
+  track.innerHTML = DID_YOU_KNOW_INSIGHTS.map((item, idx) => {
+    const qTitle = item.questionEn || item.titleEn;
+    const qSub = item.questionMr || item.titleMr;
+    const bullets = (isEng ? item.bulletsEn : (item.bulletsEn || item.bulletsMr)) || [];
+    const ref = isEng ? item.refEn : item.refMr;
+    const btnLabel = "Explore Devotional";
+    const bgImage = item.image || "assets/images/did_you_know_esther.jpg";
+    
+    return `
+      <div class="dyk-carousel-card ${item.theme || 'dyk-theme-emerald'}" data-index="${idx}">
+        <div class="dyk-card-header">
+          <div class="dyk-header-left">
+            <span class="dyk-scroll-icon">📜</span>
+            <span class="dyk-header-title">DID U KNOW ?</span>
+          </div>
+          <span class="dyk-card-counter">${idx + 1} / ${total}</span>
+        </div>
+        
+        <div class="dyk-illustration-frame">
+          <img src="${bgImage}" alt="${item.alt || ''}" class="dyk-illustration-img" loading="lazy">
+          <div class="dyk-illustration-scrim"></div>
+        </div>
+        
+        <div>
+          <h4 class="dyk-question">${qTitle}</h4>
+          ${qSub ? `<p class="dyk-question-mr">${qSub}</p>` : ''}
+        </div>
+        
+        <div class="dyk-bullet-list">
+          ${bullets.map(b => `
+            <div class="dyk-bullet-item">
+              <span class="dyk-bullet-icon">${b.icon}</span>
+              <span class="dyk-bullet-text">${b.text}</span>
+            </div>
+          `).join('')}
+        </div>
+        
+        <div class="dyk-card-footer">
+          <span class="dyk-ref-badge">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+            <span>${ref}</span>
+          </span>
+          <button class="dyk-explore-btn" onclick="openDidYouKnowIndex(${idx})" title="Explore Devotional & Scripture">
+            <span>${btnLabel}</span>
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
 }
 
-function nextDidYouKnowInsight() {
-  didYouKnowOffset++;
-  renderDidYouKnowWidget();
-  if (typeof showToast === 'function') {
-    const isEng = (window.state && (window.state.translation === 'eng' || window.state.language === 'en'));
-    showToast(isEng ? "✨ Next insight loaded!" : "✨ पुढील आध्यात्मिक रहस्य लोड झाले!");
+function slideDykCarousel(direction) {
+  const track = document.getElementById("dyk-carousel-track");
+  if (!track) return;
+  const card = track.querySelector(".dyk-carousel-card");
+  const scrollAmount = card ? (card.offsetWidth + 16) : 320;
+  track.scrollBy({ left: direction * scrollAmount, behavior: "smooth" });
+}
+
+function openDidYouKnowIndex(idx) {
+  const item = DID_YOU_KNOW_INSIGHTS[idx] || DID_YOU_KNOW_INSIGHTS[0];
+  if (item && typeof openReaderAndNavigate === 'function') {
+    openReaderAndNavigate(item.book, item.chapter, item.verse || 1);
   }
 }
 
+function nextDidYouKnowInsight() {
+  slideDykCarousel(1);
+}
+
 function openDidYouKnowChapter() {
-  if (!activeDidYouKnowInsight) activeDidYouKnowInsight = DID_YOU_KNOW_INSIGHTS[0];
-  openReaderAndNavigate(activeDidYouKnowInsight.book, activeDidYouKnowInsight.chapter, 1);
+  openDidYouKnowIndex(0);
 }
 
 /* ==========================================================================
@@ -21036,6 +21213,8 @@ function toggleEventRsvp(btn, eventName) {
 window.renderDidYouKnowWidget = renderDidYouKnowWidget;
 window.nextDidYouKnowInsight = nextDidYouKnowInsight;
 window.openDidYouKnowChapter = openDidYouKnowChapter;
+window.slideDykCarousel = slideDykCarousel;
+window.openDidYouKnowIndex = openDidYouKnowIndex;
 window.renderHomeThematicPrayers = renderHomeThematicPrayers;
 window.scheduleDailyMorningNotification = scheduleDailyMorningNotification;
 window.renderGrowBookOverviews = renderGrowBookOverviews;
@@ -21093,12 +21272,129 @@ window.toggleStudyAccordion = toggleStudyAccordion;
 window.switchStudyToolTab = switchStudyToolTab;
 window.openStudyToolsModal = openStudyToolsModal;
 
+/* ==========================================================================
+   FEATURED SCRIPTURES DAILY ROTATION & DYNAMIC CAROUSEL
+   ========================================================================== */
+function toMarathiDigits(num) {
+  const digits = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
+  return String(num).replace(/[0-9]/g, d => digits[d]);
+}
+window.toMarathiDigits = toMarathiDigits;
+
+const FEATURED_SCRIPTURES_CONFIG = [
+  {
+    id: "psalms",
+    nameEn: "Psalms",
+    nameMr: "स्तोत्रसंहिता",
+    cover: "assets/images/book_psalms_cover.png",
+    themeClass: "recent-card-psalms",
+    totalChapters: 150,
+    // Daily rotating curated chapters: Psalm 23 today, Psalm 70 tomorrow, then 91, 121, etc.
+    chapters: [23, 70, 91, 121, 27, 46, 1, 19, 34, 37, 51, 62, 84, 100, 103, 119, 139, 145, 8, 15, 16, 24, 25, 32, 40, 42, 63, 67, 72, 86, 90, 92, 95, 96, 98, 111, 112, 116, 122, 126, 127, 128, 130, 133, 138, 146, 147, 148, 150]
+  },
+  {
+    id: "proverbs",
+    nameEn: "Proverbs",
+    nameMr: "नीतिसूत्रे",
+    cover: "assets/images/book_proverbs_cover.jpg",
+    themeClass: "recent-card-proverbs",
+    totalChapters: 31,
+    chapters: [3, 4, 8, 10, 15, 16, 22, 27, 31, 1, 2, 5, 6, 7, 9, 11, 12, 13, 14, 17, 18, 19, 20, 21, 23, 24, 25, 26, 28, 29, 30]
+  },
+  {
+    id: "matthew",
+    nameEn: "Matthew",
+    nameMr: "मत्तय",
+    cover: "assets/images/book_matthew_cover.jpg",
+    themeClass: "recent-card-matthew",
+    totalChapters: 28,
+    chapters: [5, 6, 7, 11, 13, 14, 18, 24, 25, 26, 27, 28, 1, 2, 3, 4, 8, 9, 10, 12, 15, 16, 17, 19, 20, 21, 22, 23]
+  },
+  {
+    id: "john",
+    nameEn: "John",
+    nameMr: "योहान",
+    cover: "assets/images/book_john_cover.jpg",
+    themeClass: "recent-card-john",
+    totalChapters: 21,
+    chapters: [1, 3, 4, 6, 10, 11, 14, 15, 16, 17, 20, 21, 2, 5, 7, 8, 9, 12, 13, 18, 19]
+  },
+  {
+    id: "romans",
+    nameEn: "Romans",
+    nameMr: "रोमन्स",
+    cover: "assets/images/book_romans_cover.jpg",
+    themeClass: "recent-card-romans",
+    totalChapters: 16,
+    chapters: [8, 12, 1, 3, 5, 6, 7, 10, 11, 13, 14, 15, 16, 2, 4, 9]
+  },
+  {
+    id: "genesis",
+    nameEn: "Genesis",
+    nameMr: "उत्पत्ती",
+    cover: "assets/images/book_genesis_cover.jpg",
+    themeClass: "recent-card-genesis",
+    totalChapters: 50,
+    chapters: [1, 12, 15, 22, 28, 37, 39, 45, 50, 2, 3, 6, 7, 8, 9, 11]
+  }
+];
+
+function getFeaturedScriptureDayIndex(customDate) {
+  const d = customDate ? new Date(customDate) : new Date();
+  const start = new Date(d.getFullYear(), 0, 0);
+  const diff = (d - start) + ((start.getTimezoneOffset() - d.getTimezoneOffset()) * 60 * 1000);
+  const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
+  // Day 256 of year aligns with index 0
+  return Math.max(0, dayOfYear - 256);
+}
+
+function renderFeaturedScriptures(targetDate) {
+  const container = document.getElementById("home-featured-scriptures-scroller") || document.querySelector(".figma-recent-scroller");
+  if (!container) return;
+
+  const dayIdx = getFeaturedScriptureDayIndex(targetDate);
+  const isEng = (window.state && (window.state.translation === 'eng' || window.state.language === 'en'));
+
+  const html = FEATURED_SCRIPTURES_CONFIG.map(book => {
+    let chapter = 1;
+    if (Array.isArray(book.chapters) && book.chapters.length > 0) {
+      chapter = book.chapters[dayIdx % book.chapters.length];
+    } else if (book.totalChapters && book.totalChapters > 0) {
+      chapter = (dayIdx % book.totalChapters) + 1;
+    }
+
+    const mrNum = toMarathiDigits(chapter);
+    const chBadge = `Ch ${chapter}`;
+    const subtitle = isEng ? `${book.nameEn} ${chapter}` : `${book.nameMr} ${mrNum}`;
+
+    return `
+      <div class="figma-recent-card ${book.themeClass || ''}" onclick="openReaderAndNavigate('${book.id}', ${chapter}, 1)" title="Open ${book.nameEn} ${chapter}">
+        <div class="figma-recent-cover-wrapper">
+          <img src="${book.cover}" alt="${book.nameEn}" class="figma-recent-cover-img" loading="lazy" onerror="this.onerror=null; this.src='assets/images/book_psalms_cover.png';">
+          <span class="figma-recent-ch-badge">${chBadge}</span>
+        </div>
+        <div class="figma-recent-meta">
+          <h4 class="figma-recent-book">${book.nameEn}</h4>
+          <p class="figma-recent-ch">${subtitle}</p>
+        </div>
+      </div>
+    `;
+  }).join('\n');
+
+  container.innerHTML = html;
+}
+
+window.renderFeaturedScriptures = renderFeaturedScriptures;
+window.FEATURED_SCRIPTURES_CONFIG = FEATURED_SCRIPTURES_CONFIG;
+window.getFeaturedScriptureDayIndex = getFeaturedScriptureDayIndex;
+
 // Auto-initialize homepage engagement widgets
 setTimeout(() => {
   try {
     if (typeof renderHomeThematicPrayers === 'function') renderHomeThematicPrayers();
     if (typeof renderDidYouKnowWidget === 'function') renderDidYouKnowWidget();
     if (typeof renderEducationalMicroLearning === 'function') renderEducationalMicroLearning();
+    if (typeof renderFeaturedScriptures === 'function') renderFeaturedScriptures();
   } catch (e) {
     console.warn("Home widgets auto-init warning:", e);
   }

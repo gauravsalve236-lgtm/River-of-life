@@ -12,7 +12,7 @@
   <script>
     // Force immediate hard purge of all stale Service Workers and CacheStorage
     (function() {
-      const CURRENT_VER = "v140_ROBUST_BSI_USFM_RESOLUTION_AND_AUTO_REFRESH";
+      const CURRENT_VER = "v145_FEATURED_SCRIPTURES_ROTATION";
       if (localStorage.getItem("rol_app_ver") !== CURRENT_VER) {
         localStorage.setItem("rol_app_ver", CURRENT_VER);
         if ('serviceWorker' in navigator) {
@@ -48,7 +48,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Noto+Serif+Devanagari:wght@500;600;700;800;900&family=Outfit:wght@500;600;700;800;900&family=Poppins:wght@600;700;800;900&family=Rozha+One&display=swap" rel="stylesheet">
   
   <!-- Main Stylesheet (Cache-Busted for Authentic Male Audio V27) -->
-  <link rel="stylesheet" href="index.css?v=136_DAILY_VERSE_STATUS_ALIGNMENT_AND_WATERMARK">
+  <link rel="stylesheet" href="index.css?v=144_DID_YOU_KNOW_CAROUSEL">
 
   <!-- Official LiveKit WebRTC Client SDK -->
   <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.0.8/dist/livekit-client.umd.min.js"></script>
@@ -262,7 +262,7 @@
                 <div class="home-vod-overlay"></div>
                 <div class="home-vod-badge-row" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                   <span class="home-vod-badge" data-i18n="vod_label">VERSE OF THE DAY</span>
-                  <span class="home-vod-gallery-pill" style="font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.95); display: flex; align-items: center; gap: 4px; background: rgba(0,0,0,0.35); padding: 3px 9px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.25); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);">
+                  <span class="home-vod-gallery-pill">
                     <span>🎨 Studio & Gallery</span> &rarr;
                   </span>
                 </div>
@@ -310,7 +310,31 @@
                 </div>
               </div>
 
-              <!-- 4. Word for the Day (Repositioned directly below Continue Reading) -->
+              <!-- 4. Daily Reading Plan (Active plan tracker) -->
+              <div class="minimal-reading-card" id="home-plan-card" onclick="switchTab('plans')" style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 16px; padding: 16px 18px; cursor: pointer; box-shadow: var(--shadow-sm); transition: transform 0.15s ease, box-shadow 0.15s ease;" title="Open Reading Plans / वाचन योजना उघडा">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 18px;">📅</span>
+                    <span style="font-size: 11px; font-weight: 800; color: #3b82f6; letter-spacing: 0.5px; text-transform: uppercase;" data-i18n="plan_card_heading">DAILY READING PLAN • दैनिक वाचन योजना</span>
+                  </div>
+                  <span id="home-plan-day" style="font-size: 11.5px; font-weight: 700; color: var(--text-muted); background: var(--bg); padding: 3px 8px; border-radius: 8px; border: 1px solid var(--border);">Day 15 of 30 • 50%</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <div>
+                    <h3 id="home-plan-title" style="margin: 0; font-size: 17px; font-weight: 800; color: var(--text);">Through the New Testament</h3>
+                    <p style="margin: 2px 0 0 0; font-size: 12.5px; color: var(--text-muted); font-weight: 600;">नवा करार वाचन योजना • ३० दिवस</p>
+                  </div>
+                  <button class="btn-primary-mini" style="margin: 0; padding: 8px 14px; border-radius: 10px; font-size: 12.5px; font-weight: 800; background: #3b82f6; color: #fff; border: none; display: flex; align-items: center; gap: 6px;" onclick="event.stopPropagation(); switchTab('plans');">
+                    <span data-i18n="btn_continue">Plan</span>
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                  </button>
+                </div>
+                <div style="height: 5px; width: 100%; background: var(--bg); border-radius: 6px; overflow: hidden; margin-top: 12px; border: 1px solid rgba(0,0,0,0.04);">
+                  <div id="home-plan-progress-fill" style="height: 100%; width: 50%; background: #3b82f6; border-radius: 6px; transition: width 0.3s ease;"></div>
+                </div>
+              </div>
+
+              <!-- 5. Biblical word of the day (Daily vocabulary card) -->
               <div class="educational-microlearning-section" id="educational-microlearning-section" style="margin: 4px 0 2px 0;">
                 <div class="microlearning-header-row">
                   <div class="microlearning-title-group">
@@ -361,81 +385,7 @@
                 </div>
               </div>
 
-              <!-- 5. Interactive "Did You Know? / Chapter Insight" Engagement Card -->
-              <div class="home-insight-card" id="card-did-you-know" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(234, 88, 12, 0.06)); border: 1.5px solid rgba(245, 158, 11, 0.3); border-radius: 16px; padding: 16px 18px; box-shadow: var(--shadow-sm); cursor: pointer;" onclick="openDidYouKnowChapter()">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                  <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="font-size: 18px;">💡</span>
-                    <span style="font-size: 11px; font-weight: 800; color: #d97706; letter-spacing: 0.5px; text-transform: uppercase;">DID YOU KNOW? • माहिती आहे का?</span>
-                  </div>
-                  <div style="display: flex; align-items: center; gap: 6px;">
-                    <button onclick="event.stopPropagation(); nextDidYouKnowInsight();" title="Next Insight / पुढील रहस्य" style="background: rgba(245, 158, 11, 0.15); border: none; border-radius: 6px; padding: 2px 7px; color: #d97706; font-size: 11px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 3px;">
-                      <span>🔄</span><span>Next</span>
-                    </button>
-                    <span id="did-you-know-tag" style="font-size: 10.5px; font-weight: 700; color: #d97706; background: rgba(245, 158, 11, 0.15); padding: 2px 8px; border-radius: 6px;">Chapter Insight</span>
-                  </div>
-                </div>
-                <h4 id="did-you-know-title" style="margin: 0 0 6px 0; font-size: 16.5px; font-weight: 800; color: var(--text);">The Shepherd's Rod & Staff (मेंढपाळाची काठी व सोटा)</h4>
-                <p id="did-you-know-text" style="margin: 0 0 12px 0; font-size: 13px; color: var(--text); line-height: 1.5;">बायबल काळात मेंढपाळाचा सोटा हिंस्र पशूंपासून रक्षण करण्यासाठी आणि वळलेली काठी चुकलेल्या मेंढरांना प्रेमाने परत आणण्यासाठी वापरली जात असे. स्तोत्र २३ मध्ये दावीद याच साधनांचा उल्लेख देवाचे सांत्वन म्हणून करतो.</p>
-                <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(245, 158, 11, 0.2); padding-top: 10px;">
-                  <span id="did-you-know-ref" style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Psalm 23 • स्तोत्रसंहिता २३</span>
-                  <button id="did-you-know-btn" class="btn-primary-mini" style="margin: 0; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 800; background: #d97706; color: #fff; border: none; cursor: pointer;" onclick="event.stopPropagation(); openDidYouKnowChapter();">
-                    Read Chapter / अध्याय वाचा &rarr;
-                  </button>
-                </div>
-              </div>
-
-              <!-- 5. Today's Prayer Card (Unified Soft-Bordered Tile Style) -->
-              <div class="figma-home-tile tile-prayer-card" id="home-prayer-preview-card" onclick="openImmersivePrayerModal('peace_anxiety')" title="Pray Now / प्रार्थना करा">
-                <div class="figma-tile-cover-wrapper">
-                  <img src="assets/images/serene_sky_prayer.jpg" alt="Serene Sky Prayer" class="figma-tile-cover-img">
-                  <span class="figma-tile-floating-badge">
-                    <span>🕊️</span> <span class="home-prayer-ref">Philippians 4:6-7</span>
-                  </span>
-                </div>
-                <div class="figma-tile-meta">
-                  <div class="figma-tile-tag-row">
-                    <span class="figma-tile-category-tag" data-i18n="tag_todays_prayer">TODAY'S PRAYER • आजची प्रार्थना</span>
-                  </div>
-                  <h3 class="figma-tile-title-en" id="home-prayer-title">Peace Over Anxiety</h3>
-                  <p class="figma-tile-sub-mr">सर्व बुद्धीपलीकडची देवाची शांती</p>
-                  <p class="figma-tile-excerpt" id="home-prayer-excerpt">
-                    "सर्व बुद्धीपलीकडची देवाची शांती तुमच्या हृदयाचे आणि मनाचे ख्रिस्त येशूमध्ये रक्षण करो."
-                  </p>
-                  <div class="figma-tile-actions-row">
-                    <button class="figma-tile-action-btn" onclick="event.stopPropagation(); openImmersivePrayerModal('peace_anxiety');">
-                      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                      <span data-i18n="btn_pray_now">Pray Now (प्रार्थना करा)</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 6. Reading Plan Progress Card (Clean Text-First Minimalist Module) -->
-              <div class="minimal-reading-card" id="home-plan-card" onclick="switchTab('plans')" style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 16px; padding: 16px 18px; cursor: pointer; box-shadow: var(--shadow-sm); transition: transform 0.15s ease, box-shadow 0.15s ease;" title="Open Reading Plans / वाचन योजना उघडा">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                  <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="font-size: 18px;">📅</span>
-                    <span style="font-size: 11px; font-weight: 800; color: #3b82f6; letter-spacing: 0.5px; text-transform: uppercase;" data-i18n="plan_card_heading">DAILY READING PLAN • दैनिक वाचन योजना</span>
-                  </div>
-                  <span id="home-plan-day" style="font-size: 11.5px; font-weight: 700; color: var(--text-muted); background: var(--bg); padding: 3px 8px; border-radius: 8px; border: 1px solid var(--border);">Day 15 of 30 • 50%</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                  <div>
-                    <h3 id="home-plan-title" style="margin: 0; font-size: 17px; font-weight: 800; color: var(--text);">Through the New Testament</h3>
-                    <p style="margin: 2px 0 0 0; font-size: 12.5px; color: var(--text-muted); font-weight: 600;">नवा करार वाचन योजना • ३० दिवस</p>
-                  </div>
-                  <button class="btn-primary-mini" style="margin: 0; padding: 8px 14px; border-radius: 10px; font-size: 12.5px; font-weight: 800; background: #3b82f6; color: #fff; border: none; display: flex; align-items: center; gap: 6px;" onclick="event.stopPropagation(); switchTab('plans');">
-                    <span data-i18n="btn_continue">Plan</span>
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                  </button>
-                </div>
-                <div style="height: 5px; width: 100%; background: var(--bg); border-radius: 6px; overflow: hidden; margin-top: 12px; border: 1px solid rgba(0,0,0,0.04);">
-                  <div id="home-plan-progress-fill" style="height: 100%; width: 50%; background: #3b82f6; border-radius: 6px; transition: width 0.3s ease;"></div>
-                </div>
-              </div>
-
-              <!-- 7. For You Chips: Horizontal Scrollable Topic Chips (Moved above 10 Commandments) -->
+              <!-- 6. For you (Personalized recommendations feed) -->
               <div class="home-for-you-section" style="margin-top: 6px; margin-bottom: 8px;">
                 <div class="home-section-heading-row">
                   <h3 class="home-section-title" data-i18n="for_you_title">For You</h3>
@@ -469,81 +419,33 @@
                 </div>
               </div>
 
-              <!-- 8. Gaurav's Custom-Designed Featured Scriptures -->
-              <div class="home-scripture-covers-section" style="display: flex; flex-direction: column; gap: 10px; margin-top: 2px;">
-                <div class="home-section-heading-row">
-                  <h3 class="home-section-title" data-i18n="featured_books_title">Featured Scriptures • प्रमुख पुस्तके</h3>
-                  <span class="home-section-sub">Read & Explore</span>
-                </div>
-                <div class="figma-recent-scroller" style="padding-bottom: 4px;">
-                  <!-- Card 1: Psalms 23 -->
-                  <div class="figma-recent-card recent-card-psalms" onclick="openReaderAndNavigate('psalms', 23, 1)" title="Open Psalms 23">
-                    <div class="figma-recent-cover-wrapper">
-                      <img src="assets/images/book_psalms_cover.png" alt="Book of Psalms" class="figma-recent-cover-img">
-                      <span class="figma-recent-ch-badge">Ch 23</span>
-                    </div>
-                    <div class="figma-recent-meta">
-                      <h4 class="figma-recent-book">Psalms</h4>
-                      <p class="figma-recent-ch">स्तोत्रसंहिता २३</p>
-                    </div>
-                  </div>
-
-                  <!-- Card 2: Proverbs 3 -->
-                  <div class="figma-recent-card recent-card-proverbs" onclick="openReaderAndNavigate('proverbs', 3, 1)" title="Open Proverbs 3">
-                    <div class="figma-recent-cover-wrapper">
-                      <img src="assets/images/book_proverbs_cover.jpg" alt="Book of Proverbs" class="figma-recent-cover-img">
-                      <span class="figma-recent-ch-badge">Ch 3</span>
-                    </div>
-                    <div class="figma-recent-meta">
-                      <h4 class="figma-recent-book">Proverbs</h4>
-                      <p class="figma-recent-ch">नीतिसूत्रे ३</p>
-                    </div>
-                  </div>
-
-                  <!-- Card 3: Matthew 5 -->
-                  <div class="figma-recent-card recent-card-matthew" onclick="openReaderAndNavigate('matthew', 5, 1)" title="Open Matthew 5">
-                    <div class="figma-recent-cover-wrapper">
-                      <img src="assets/images/book_matthew_cover.jpg" alt="The Gospel of Matthew" class="figma-recent-cover-img">
-                      <span class="figma-recent-ch-badge">Ch 5</span>
-                    </div>
-                    <div class="figma-recent-meta">
-                      <h4 class="figma-recent-book">Matthew</h4>
-                      <p class="figma-recent-ch">मत्तय ५</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- The 10 Commandments Hub Card (Unified Soft-Bordered Tile Style) -->
-              <div class="figma-home-tile tile-commandments-card" id="home-commandments-card" onclick="toggleTenCommandmentsModal()" title="Explore The 10 Commandments / दहा आज्ञा वाचा व शिका">
+              <!-- 7. Todays prayer (Daily guided prayer prompt) -->
+              <div class="figma-home-tile tile-prayer-card" id="home-prayer-preview-card" onclick="openImmersivePrayerModal('peace_anxiety')" title="Pray Now / प्रार्थना करा">
                 <div class="figma-tile-cover-wrapper">
-                  <img src="assets/images/moses_mount_sinai_art.jpg" alt="Moses atop Mount Sinai holding Ten Commandments" class="figma-tile-cover-img">
+                  <img src="assets/images/serene_sky_prayer.jpg" alt="Serene Sky Prayer" class="figma-tile-cover-img">
                   <span class="figma-tile-floating-badge">
-                    <span>📜</span> <span>Exodus 20 • निर्गम २०</span>
+                    <span>🕊️</span> <span class="home-prayer-ref">Philippians 4:6-7</span>
                   </span>
                 </div>
                 <div class="figma-tile-meta">
                   <div class="figma-tile-tag-row">
-                    <span class="figma-tile-category-tag" data-i18n="tag_commandments">THE MORAL LAW • पवित्र नियम</span>
+                    <span class="figma-tile-category-tag" data-i18n="tag_todays_prayer">TODAY'S PRAYER • आजची प्रार्थना</span>
                   </div>
-                  <h3 class="figma-tile-title-en">The 10 Commandments</h3>
-                  <p class="figma-tile-sub-mr">पवित्र शास्त्रातील १० आज्ञा</p>
-                  <p class="figma-tile-excerpt">
-                    देवाने सीनाय पर्वतावर दिलेला शाश्वत नियम आणि येशू ख्रिस्ताने शिकवलेला प्रीतीचा नियम.
+                  <h3 class="figma-tile-title-en" id="home-prayer-title">Peace Over Anxiety</h3>
+                  <p class="figma-tile-sub-mr">सर्व बुद्धीपलीकडची देवाची शांती</p>
+                  <p class="figma-tile-excerpt" id="home-prayer-excerpt">
+                    "सर्व बुद्धीपलीकडची देवाची शांती तुमच्या हृदयाचे आणि मनाचे ख्रिस्त येशूमध्ये रक्षण करो."
                   </p>
-                  <div class="figma-tile-actions-row" style="flex-wrap: wrap; gap: 8px;">
-                    <button class="figma-tile-action-btn" onclick="event.stopPropagation(); toggleTenCommandmentsModal();" title="Explore 10 Commandments">
-                      <span>Explore All 10 Commandments (सर्व १० आज्ञा)</span>
-                      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                    </button>
-                    <button onclick="event.stopPropagation(); openReaderAndNavigate('exodus', 20, 1);" style="background: rgba(0,0,0,0.06); color: var(--text); font-family: var(--font-ui); font-size: 12.5px; font-weight: 700; border: 1px solid var(--border); padding: 7px 12px; border-radius: 10px; cursor: pointer;">
-                      📖 Read Exodus 20
+                  <div class="figma-tile-actions-row">
+                    <button class="figma-tile-action-btn" onclick="event.stopPropagation(); openImmersivePrayerModal('peace_anxiety');">
+                      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                      <span data-i18n="btn_pray_now">Pray Now (प्रार्थना करा)</span>
                     </button>
                   </div>
                 </div>
               </div>
 
-              <!-- 8. Interactive Prayer Sanctuary Cards -->
+              <!-- 8. Prayer Sanctuary (Dedicated quiet time and prayer module) -->
               <div class="home-prayer-sanctuary-section" id="home-prayer-sanctuary-section">
                 <div class="home-section-heading-row">
                   <div>
@@ -640,7 +542,141 @@
                 </div>
               </div>
 
-              <!-- 10. Your Journey Stats -->
+              <!-- 9. Featured Scriptures (Curated thematic verses) -->
+              <div class="home-scripture-covers-section" style="display: flex; flex-direction: column; gap: 10px; margin-top: 2px;">
+                <div class="home-section-heading-row">
+                  <h3 class="home-section-title" data-i18n="featured_books_title">Featured Scriptures • प्रमुख पुस्तके</h3>
+                  <span class="home-section-sub">Read & Explore</span>
+                </div>
+                <div class="figma-recent-scroller" id="home-featured-scriptures-scroller" style="padding-bottom: 4px;">
+                  <!-- Card 1: Psalms 23 -->
+                  <div class="figma-recent-card recent-card-psalms" onclick="openReaderAndNavigate('psalms', 23, 1)" title="Open Psalms 23">
+                    <div class="figma-recent-cover-wrapper">
+                      <img src="assets/images/book_psalms_cover.png" alt="Book of Psalms" class="figma-recent-cover-img" loading="lazy">
+                      <span class="figma-recent-ch-badge">Ch 23</span>
+                    </div>
+                    <div class="figma-recent-meta">
+                      <h4 class="figma-recent-book">Psalms</h4>
+                      <p class="figma-recent-ch">स्तोत्रसंहिता २३</p>
+                    </div>
+                  </div>
+
+                  <!-- Card 2: Proverbs 3 -->
+                  <div class="figma-recent-card recent-card-proverbs" onclick="openReaderAndNavigate('proverbs', 3, 1)" title="Open Proverbs 3">
+                    <div class="figma-recent-cover-wrapper">
+                      <img src="assets/images/book_proverbs_cover.jpg" alt="Book of Proverbs" class="figma-recent-cover-img" loading="lazy">
+                      <span class="figma-recent-ch-badge">Ch 3</span>
+                    </div>
+                    <div class="figma-recent-meta">
+                      <h4 class="figma-recent-book">Proverbs</h4>
+                      <p class="figma-recent-ch">नीतिसूत्रे ३</p>
+                    </div>
+                  </div>
+
+                  <!-- Card 3: Matthew 5 -->
+                  <div class="figma-recent-card recent-card-matthew" onclick="openReaderAndNavigate('matthew', 5, 1)" title="Open Matthew 5">
+                    <div class="figma-recent-cover-wrapper">
+                      <img src="assets/images/book_matthew_cover.jpg" alt="The Gospel of Matthew" class="figma-recent-cover-img" loading="lazy">
+                      <span class="figma-recent-ch-badge">Ch 5</span>
+                    </div>
+                    <div class="figma-recent-meta">
+                      <h4 class="figma-recent-book">Matthew</h4>
+                      <p class="figma-recent-ch">मत्तय ५</p>
+                    </div>
+                  </div>
+
+                  <!-- Card 4: John 1 -->
+                  <div class="figma-recent-card recent-card-john" onclick="openReaderAndNavigate('john', 1, 1)" title="Open John 1">
+                    <div class="figma-recent-cover-wrapper">
+                      <img src="assets/images/book_john_cover.jpg" alt="The Gospel of John" class="figma-recent-cover-img" loading="lazy">
+                      <span class="figma-recent-ch-badge">Ch 1</span>
+                    </div>
+                    <div class="figma-recent-meta">
+                      <h4 class="figma-recent-book">John</h4>
+                      <p class="figma-recent-ch">योहान १</p>
+                    </div>
+                  </div>
+
+                  <!-- Card 5: Romans 8 -->
+                  <div class="figma-recent-card recent-card-romans" onclick="openReaderAndNavigate('romans', 8, 1)" title="Open Romans 8">
+                    <div class="figma-recent-cover-wrapper">
+                      <img src="assets/images/book_romans_cover.jpg" alt="The Epistle to the Romans" class="figma-recent-cover-img" loading="lazy">
+                      <span class="figma-recent-ch-badge">Ch 8</span>
+                    </div>
+                    <div class="figma-recent-meta">
+                      <h4 class="figma-recent-book">Romans</h4>
+                      <p class="figma-recent-ch">रोमन्स ८</p>
+                    </div>
+                  </div>
+
+                  <!-- Card 6: Genesis 1 -->
+                  <div class="figma-recent-card recent-card-genesis" onclick="openReaderAndNavigate('genesis', 1, 1)" title="Open Genesis 1">
+                    <div class="figma-recent-cover-wrapper">
+                      <img src="assets/images/book_genesis_cover.jpg" alt="The Book of Genesis" class="figma-recent-cover-img" loading="lazy">
+                      <span class="figma-recent-ch-badge">Ch 1</span>
+                    </div>
+                    <div class="figma-recent-meta">
+                      <h4 class="figma-recent-book">Genesis</h4>
+                      <p class="figma-recent-ch">उत्पत्ती १</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 10. Did u know ? (Horizontal swipeable carousel with aged-parchment styling & HD illustrations) -->
+              <div class="dyk-carousel-section" id="card-did-you-know">
+                <div class="dyk-carousel-wrapper">
+                  <!-- Left navigation chevron arrow -->
+                  <button class="dyk-nav-arrow dyk-arrow-left" id="btn-dyk-prev" onclick="slideDykCarousel(-1)" aria-label="Previous Trivia Card" title="Previous Trivia">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                  </button>
+
+                  <!-- Horizontal Swipeable Track -->
+                  <div class="dyk-carousel-track" id="dyk-carousel-track">
+                    <!-- Dynamic cards populated by renderDidYouKnowWidget() -->
+                  </div>
+
+                  <!-- Right navigation chevron arrow -->
+                  <button class="dyk-nav-arrow dyk-arrow-right" id="btn-dyk-next" onclick="slideDykCarousel(1)" aria-label="Next Trivia Card" title="Next Trivia">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- 11. 10 Commandments (Foundational reference tool) -->
+              <div class="figma-home-tile tile-commandments-card" id="home-commandments-card" onclick="toggleTenCommandmentsModal()" title="Explore The 10 Commandments / दहा आज्ञा वाचा व शिका">
+                <div class="figma-tile-cover-wrapper">
+                  <img src="assets/images/moses_mount_sinai_art.jpg" alt="Moses atop Mount Sinai holding Ten Commandments" class="figma-tile-cover-img">
+                  <span class="figma-tile-floating-badge">
+                    <span>📜</span> <span>Exodus 20 • निर्गम २०</span>
+                  </span>
+                </div>
+                <div class="figma-tile-meta">
+                  <div class="figma-tile-tag-row">
+                    <span class="figma-tile-category-tag" data-i18n="tag_commandments">THE MORAL LAW • पवित्र नियम</span>
+                  </div>
+                  <h3 class="figma-tile-title-en">The 10 Commandments</h3>
+                  <p class="figma-tile-sub-mr">पवित्र शास्त्रातील १० आज्ञा</p>
+                  <p class="figma-tile-excerpt">
+                    देवाने सीनाय पर्वतावर दिलेला शाश्वत नियम आणि येशू ख्रिस्ताने शिकवलेला प्रीतीचा नियम.
+                  </p>
+                  <div class="figma-tile-actions-row" style="flex-wrap: wrap; gap: 8px;">
+                    <button class="figma-tile-action-btn" onclick="event.stopPropagation(); toggleTenCommandmentsModal();" title="Explore 10 Commandments">
+                      <span>Explore All 10 Commandments (सर्व १० आज्ञा)</span>
+                      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </button>
+                    <button onclick="event.stopPropagation(); openReaderAndNavigate('exodus', 20, 1);" style="background: rgba(0,0,0,0.06); color: var(--text); font-family: var(--font-ui); font-size: 12.5px; font-weight: 700; border: 1px solid var(--border); padding: 7px 12px; border-radius: 10px; cursor: pointer;">
+                      📖 Read Exodus 20
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 12. Your Spiritual Journey (Milestone and growth summary at the bottom) -->
               <div class="home-journey-card" onclick="switchTab('you')">
                 <div class="home-journey-header">
                   <div class="home-journey-tag" data-i18n="journey_tag">YOUR SPIRITUAL JOURNEY</div>
@@ -676,21 +712,53 @@
             <!-- Sticky / Fixed Top Bible Action Bar (ALWAYS PINNED AND VISIBLE AT TOP) -->
             <!-- Clean Minimal Top Chapter Bar (Single-line, Uncluttered) -->
             <div class="bible-minimal-chapter-bar">
-              <button id="btn-reader-open-book-picker" class="reader-chapter-pill" title="Change Book/Chapter">
-                <span class="icon">📖</span>
-                <span id="inline-reader-book-name" class="name">बायबल</span>
-                <span class="badge">बदला ▾</span>
-              </button>
-              
-              <div class="reader-right-tools" style="display: flex; align-items: center; gap: 6px;">
-                <button id="btn-reader-open-explanation" class="reader-explanation-btn" onclick="openChapterExplanation()" title="Read Chapter Explanation & Study Notes (अध्याय स्पष्टीकरण)">
-                  <span class="explanation-icon">💡</span>
-                  <span class="explanation-label">स्पष्टीकरण</span>
+              <div class="reader-header-left">
+                <!-- Standard back navigation arrow -->
+                <button id="btn-reader-back-nav" class="reader-back-btn" onclick="handleReaderBackNavigation()" title="Go Back / मागे" aria-label="Go Back">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                  </svg>
                 </button>
 
-                
+                <!-- Book / Chapter Title indicator button (e.g., मत्तय 7) -->
+                <button id="btn-reader-open-book-picker" class="reader-chapter-pill" title="Change Book/Chapter">
+                  <span id="inline-reader-book-name" class="name">मत्तय 7</span>
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.8" style="opacity: 0.6;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
 
-                <button id="btn-reader-open-text-settings" class="reader-tool-btn" title="Text & Display Settings">Aa</button>
+                <!-- Version Selector Pill (e.g. MARVBSI) -->
+                <button id="btn-reader-version-pill" class="reader-version-pill" onclick="openTranslationSelectorDrawer()" title="Switch Bible Version / भाषांतर निवडा">
+                  <span id="reader-version-pill-text">MARVBSI</span>
+                  <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="3" style="margin-left: 2px; opacity: 0.7;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
+              </div>
+
+              <!-- Top utility icons: Audio/Speaker toggle (🔊), Search (🔍), More Options (...) -->
+              <div class="reader-right-tools">
+                <!-- Audio / Speaker Toggle (🔊) -->
+                <button id="btn-reader-audio-speaker" class="reader-tool-btn" onclick="toggleAudioNarration()" title="Audio Narration / ऑडिओ ऐका" aria-label="Audio Narration">
+                  <svg id="reader-audio-speaker-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                  </svg>
+                </button>
+
+                <!-- Search (🔍) -->
+                <button id="btn-reader-search-icon" class="reader-tool-btn" onclick="openReaderSearchDrawer()" title="Search Scripture / शोधा" aria-label="Search">
+                  <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                  </svg>
+                </button>
+
+                <!-- More Options (...) -->
+                <button id="btn-reader-more-options" class="reader-tool-btn" onclick="openReaderMoreOptionsDrawer()" title="More Options / अधिक पर्याय" aria-label="More Options">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="1.5" fill="currentColor"></circle>
+                    <circle cx="19" cy="12" r="1.5" fill="currentColor"></circle>
+                    <circle cx="5" cy="12" r="1.5" fill="currentColor"></circle>
+                  </svg>
+                </button>
               </div>
             </div>
 
@@ -722,6 +790,31 @@
                   <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
                 </button>
               </div>
+            </div>
+
+            <!-- Clean Bottom Chapter Navigation & Reading Plan Progress Bar -->
+            <div id="reader-plan-bottom-bar" class="reader-plan-bottom-bar">
+              <div class="reader-plan-info-col" onclick="switchTab('plans')" title="Open Reading Plans / वाचन योजना उघडा">
+                <div class="reader-plan-title-row">
+                  <span class="reader-plan-icon">📅</span>
+                  <span id="reader-plan-bar-title" class="reader-plan-title">उद्दिष्टपूर्ण जीवन जगणे!</span>
+                </div>
+                <div class="reader-plan-sub-row">
+                  <span id="reader-plan-bar-day" class="reader-plan-day-breakdown">Day 1 • 2 of 2</span>
+                  <span class="reader-plan-dot">•</span>
+                  <span id="reader-plan-bar-percent" class="reader-plan-pct">50% पूर्ण</span>
+                </div>
+                <div class="reader-plan-progress-track">
+                  <div id="reader-plan-progress-bar" class="reader-plan-progress-fill" style="width: 50%;"></div>
+                </div>
+              </div>
+
+              <button id="btn-reader-plan-complete-next" class="reader-plan-action-btn" onclick="handleReaderPlanAdvance()" title="Complete & Next Reading / पुढील वाचन" aria-label="Next Reading">
+                <span id="reader-plan-btn-label" class="reader-plan-action-label">पुढील</span>
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </button>
             </div>
           </div>
 
@@ -3470,29 +3563,102 @@
     </div>
     
     <!-- Translation Selector Drawer -->
+    <!-- Translation Selector Drawer -->
     <div id="drawer-translation-selector" class="drawer-overlay">
       <div class="ios-drawer-sheet">
         <div class="drawer-header-row">
           <div class="grabber-bar"></div>
-          <h3>Select Translation</h3>
-          <button class="close-drawer-btn">&times;</button>
+          <h3>Select Translation • भाषांतर निवडा</h3>
+          <button class="close-drawer-btn" onclick="closeDrawer('drawer-translation-selector')">&times;</button>
         </div>
         <div class="drawer-body-list">
-          <button class="select-row-item" data-lang="mar">
-            <span class="title">मराठी (MARVBSI)</span>
+          <button class="select-row-item" data-lang="mar" data-variant="bsi" data-code="MARVBSI">
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+              <span class="title">मराठी (MARVBSI)</span>
+              <span class="badge" style="font-size: 10.5px; background: var(--primary, #F7002F); color: #fff; padding: 2px 7px; border-radius: 10px; font-weight: 700;">Standard BSI</span>
+            </div>
             <span class="subtitle">Marathi Holy Bible &copy; The Bible Society of India (BSI)</span>
           </button>
-          <button class="select-row-item" data-lang="eng">
-            <span class="title">English (NLT)</span>
+          <button class="select-row-item" data-lang="mar" data-variant="irv" data-code="MARIRV">
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+              <span class="title">मराठी (IRV)</span>
+              <span class="badge" style="font-size: 10.5px; background: rgba(0,0,0,0.06); color: var(--text-muted); padding: 2px 7px; border-radius: 10px; font-weight: 700;">सुलभ आवृत्ती</span>
+            </div>
+            <span class="subtitle">Indian Revised Version (समकालीन सुलभ भाषांतर)</span>
+          </button>
+          <button class="select-row-item" data-lang="eng" data-variant="nlt" data-code="NLT">
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+              <span class="title">English (NLT)</span>
+              <span class="badge" style="font-size: 10.5px; background: rgba(59,130,246,0.12); color: #2563eb; padding: 2px 7px; border-radius: 10px; font-weight: 700;">Dynamic</span>
+            </div>
             <span class="subtitle">New Living Translation &copy; Tyndale House</span>
           </button>
-          <button class="select-row-item" data-lang="parallel">
-            <span class="title">Bilingual Parallel Mode</span>
+          <button class="select-row-item" data-lang="eng" data-variant="kjv" data-code="KJV">
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+              <span class="title">English (KJV)</span>
+              <span class="badge" style="font-size: 10.5px; background: rgba(0,0,0,0.06); color: var(--text-muted); padding: 2px 7px; border-radius: 10px; font-weight: 700;">Classic</span>
+            </div>
+            <span class="subtitle">Authorized King James Version (Public Domain)</span>
+          </button>
+          <button class="select-row-item" data-lang="parallel" data-variant="parallel" data-code="PARALLEL">
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+              <span class="title">Bilingual Parallel Mode (द्विभाषिक)</span>
+              <span class="badge" style="font-size: 10.5px; background: rgba(16,185,129,0.12); color: #059669; padding: 2px 7px; border-radius: 10px; font-weight: 700;">Side-by-Side</span>
+            </div>
             <span class="subtitle">Stack English and Marathi verses side-by-side</span>
           </button>
         </div>
         <div style="padding: 12px 18px; margin: 12px 18px 16px 18px; background: rgba(0,0,0,0.03); border: 1px dashed var(--border); border-radius: 12px; font-size: 11.5px; color: var(--text-muted); line-height: 1.5; text-align: center;">
           📖 <strong>BSI Copyright:</strong> Marathi Bible text and audio streams &copy; The Bible Society of India. All rights reserved. Used for spiritual devotion & discipleship.
+        </div>
+      </div>
+    </div>
+
+    <!-- Reader More Options Drawer (...) -->
+    <div id="drawer-reader-more-options" class="drawer-overlay">
+      <div class="ios-drawer-sheet">
+        <div class="drawer-header-row">
+          <div class="grabber-bar"></div>
+          <h3>Reading Options • पर्याय</h3>
+          <button class="close-drawer-btn" onclick="closeDrawer('drawer-reader-more-options')">&times;</button>
+        </div>
+        <div class="drawer-body-list">
+          <button class="select-row-item" onclick="closeDrawer('drawer-reader-more-options'); openDrawer('drawer-text-settings');">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <span style="font-size: 20px;">Aa</span>
+              <div>
+                <span class="title">Text & Display Settings</span>
+                <span class="subtitle">Font size, typography, line height & theme</span>
+              </div>
+            </div>
+          </button>
+          <button class="select-row-item" onclick="closeDrawer('drawer-reader-more-options'); openChapterExplanation();">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <span style="font-size: 20px;">💡</span>
+              <div>
+                <span class="title">Study Notes & Commentary (स्पष्टीकरण)</span>
+                <span class="subtitle">Chapter context, themes & verse explanations</span>
+              </div>
+            </div>
+          </button>
+          <button class="select-row-item" onclick="closeDrawer('drawer-reader-more-options'); openModal('modal-audio-settings');">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <span style="font-size: 20px;">🎙</span>
+              <div>
+                <span class="title">Audio Narrator & Speed Settings</span>
+                <span class="subtitle">Choose voices, pace & authentic male narration</span>
+              </div>
+            </div>
+          </button>
+          <button class="select-row-item" onclick="closeDrawer('drawer-reader-more-options'); openTranslationSelectorDrawer();">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <span style="font-size: 20px;">🌐</span>
+              <div>
+                <span class="title">Switch Translation (भाषांतर बदला)</span>
+                <span class="subtitle">MARVBSI, IRV, NLT, KJV, Parallel</span>
+              </div>
+            </div>
+          </button>
         </div>
       </div>
     </div>
@@ -5821,7 +5987,7 @@
   <!-- App Main Logic (Cache-Busted for 100% MARVBSI Church Bible) -->
   <script src="sarvam-tts.js?v=132_MARVBSI_FULL_CHURCH_BIBLE"></script>
   <script src="bible-study.js?v=138_MUSEUM_STUDY_HUB"></script>
-  <script src="app.js?v=140_ROBUST_BSI_USFM_RESOLUTION_AND_AUTO_REFRESH"></script>
+  <script src="app.js?v=143_BIBLE_VERSION_SELECTOR_AND_FORMATTING"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 4.5s no matter what
