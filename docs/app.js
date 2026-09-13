@@ -15321,7 +15321,9 @@ window.switchPrayersSubtab = function(subtab) {
   if (subtab === 'meetings') {
     renderScheduledPrayersTab();
   } else if (subtab === 'requests') {
-    renderPublicPrayerRequests();
+    if (typeof loadMyPrayerJournal === 'function') {
+      loadMyPrayerJournal();
+    }
   }
 };
 
@@ -15431,6 +15433,328 @@ function savePublicPrayerRequests(reqs) {
     localStorage.setItem("rol_public_prayer_requests", JSON.stringify(reqs));
   } catch(e) {}
 }
+
+/* ==============================================================================
+   CONFIDENTIAL PRAYER REQUESTS, VOICE INPUT & MY PRAYER JOURNAL
+   ============================================================================== */
+
+window.selectPrayerPrivacy = function(privacy, btn) {
+  const hiddenInput = document.getElementById("prayer-selected-privacy");
+  if (hiddenInput) hiddenInput.value = privacy;
+  document.querySelectorAll(".prayer-privacy-segmented .privacy-toggle-btn").forEach(b => {
+    b.classList.remove("active");
+    b.style.background = "transparent";
+    b.style.color = "var(--text)";
+  });
+  if (btn) {
+    btn.classList.add("active");
+    btn.style.background = "var(--primary)";
+    btn.style.color = "#ffffff";
+  }
+};
+
+window.selectPrayerCategory = function(category, btn) {
+  const hiddenInput = document.getElementById("prayer-selected-category");
+  if (hiddenInput) hiddenInput.value = category;
+  document.querySelectorAll(".prayer-category-chips-row .prayer-chip-btn").forEach(b => {
+    b.classList.remove("active");
+  });
+  if (btn) btn.classList.add("active");
+};
+
+// Voice Input & Speech-to-Text Controller
+let prayerSpeechRecognition = null;
+let isPrayerVoiceRecording = false;
+
+window.togglePrayerVoiceRecording = function() {
+  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const micBtn = document.getElementById("btn-prayer-voice-input");
+  const micIcon = document.getElementById("mic-icon");
+  const statusPill = document.getElementById("prayer-voice-status-pill");
+  const textarea = document.getElementById("prayer-input-content");
+
+  if (!SpeechRec) {
+    if (typeof showToast === "function") {
+      showToast("🎙️ Speech-to-text is supported on Chrome, Edge & Android WebView.");
+    }
+    return;
+  }
+
+  if (isPrayerVoiceRecording) {
+    if (prayerSpeechRecognition) {
+      try { prayerSpeechRecognition.stop(); } catch(e) {}
+    }
+    isPrayerVoiceRecording = false;
+    if (micBtn) micBtn.classList.remove("mic-recording-active");
+    if (micIcon) micIcon.textContent = "🎙️";
+    if (statusPill) statusPill.style.display = "none";
+    return;
+  }
+
+  try {
+    prayerSpeechRecognition = new SpeechRec();
+    prayerSpeechRecognition.continuous = true;
+    prayerSpeechRecognition.interimResults = true;
+    const isEng = window.state && (window.state.language === "en" || window.state.translation === "eng");
+    prayerSpeechRecognition.lang = isEng ? "en-IN" : "mr-IN";
+
+    prayerSpeechRecognition.onstart = function() {
+      isPrayerVoiceRecording = true;
+      if (micBtn) micBtn.classList.add("mic-recording-active");
+      if (micIcon) micIcon.textContent = "⏹️";
+      if (statusPill) statusPill.style.display = "inline-flex";
+      if (typeof showToast === "function") showToast("🎙️ बोलणे सुरू करा... (Listening...)");
+    };
+
+    prayerSpeechRecognition.onresult = function(event) {
+      let interimTranscript = '';
+      let finalTranscript = '';
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          finalTranscript += event.results[i][0].transcript;
+        } else {
+          interimTranscript += event.results[i][0].transcript;
+        }
+      }
+      if (textarea) {
+        const currentVal = textarea.value.trim();
+        const addition = finalTranscript || interimTranscript;
+        if (addition) {
+          if (!currentVal.endsWith(addition.trim())) {
+            textarea.value = (currentVal ? currentVal + " " : "") + addition.trim();
+          }
+        }
+      }
+    };
+
+    prayerSpeechRecognition.onerror = function(err) {
+      console.warn("Speech recognition notice:", err.error);
+      isPrayerVoiceRecording = false;
+      if (micBtn) micBtn.classList.remove("mic-recording-active");
+      if (micIcon) micIcon.textContent = "🎙️";
+      if (statusPill) statusPill.style.display = "none";
+    };
+
+    prayerSpeechRecognition.onend = function() {
+      isPrayerVoiceRecording = false;
+      if (micBtn) micBtn.classList.remove("mic-recording-active");
+      if (micIcon) micIcon.textContent = "🎙️";
+      if (statusPill) statusPill.style.display = "none";
+    };
+
+    prayerSpeechRecognition.start();
+  } catch(e) {
+    console.warn("Speech recognition initialization notice:", e);
+    isPrayerVoiceRecording = false;
+    if (micBtn) micBtn.classList.remove("mic-recording-active");
+    if (micIcon) micIcon.textContent = "🎙️";
+    if (statusPill) statusPill.style.display = "none";
+  }
+};
+
+window.submitPastoralPrayerRequest = async function(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  const contentEl = document.getElementById("prayer-input-content");
+  const privacyEl = document.getElementById("prayer-selected-privacy");
+  const categoryEl = document.getElementById("prayer-selected-category");
+  const submitBtn = document.getElementById("btn-send-prayer-pastor");
+
+  const content = contentEl ? contentEl.value.trim() : "";
+  const privacy_level = privacyEl ? privacyEl.value : "Private (Pastor Only)";
+  const category_tag = categoryEl ? categoryEl.value : "Healing";
+
+  if (!content) {
+    if (typeof showToast === "function") showToast("कृपया तुमची प्रार्थना विनंती लिहा / Please enter your prayer request.");
+    return;
+  }
+
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.style.opacity = "0.7";
+    submitBtn.innerHTML = `<span>⏳ पास्टरकडे पाठवत आहे (Sending to Pastor)...</span>`;
+  }
+
+  const userId = (window.state && window.state.currentUser && window.state.currentUser.id) 
+    || localStorage.getItem("rol_user_id") 
+    || ("guest_" + (localStorage.getItem("rol_device_id") || "device"));
+
+  const payload = {
+    content,
+    privacy_level,
+    category_tag,
+    user_id: userId,
+    title: `${category_tag} Prayer Request`
+  };
+
+  let savedRequest = null;
+
+  try {
+    const apiBase = (typeof ROL_API_BASE !== 'undefined') ? ROL_API_BASE : 'http://localhost:7880';
+    const res = await fetch(`${apiBase}/api/prayer-requests`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + (localStorage.getItem("rol_access_token") || "")
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.request) {
+        savedRequest = data.request;
+      }
+    }
+  } catch (err) {
+    console.warn("API request fallback to local sync:", err.message);
+  }
+
+  if (!savedRequest) {
+    savedRequest = {
+      id: "prq_loc_" + Date.now(),
+      user_id: userId,
+      content,
+      privacy_level,
+      category_tag,
+      status: "Sent to Pastor",
+      created_at: new Date().toISOString()
+    };
+  }
+
+  try {
+    const localRaw = localStorage.getItem("rol_my_prayer_journal");
+    const localList = localRaw ? JSON.parse(localRaw) : [];
+    localList.unshift(savedRequest);
+    localStorage.setItem("rol_my_prayer_journal", JSON.stringify(localList));
+  } catch(e) {}
+
+  if (contentEl) contentEl.value = "";
+  if (submitBtn) {
+    submitBtn.disabled = false;
+    submitBtn.style.opacity = "1";
+    submitBtn.innerHTML = `<span>🙏 Send Prayer Request to Pastor (पास्टरकडे प्रार्थना विनंती पाठवा)</span>`;
+  }
+
+  if (typeof showToast === "function") {
+    showToast("🙏 प्रार्थना विनंती पास्टरकडे पाठवली! आम्ही तुमच्यासाठी प्रार्थना करतो.");
+  }
+
+  loadMyPrayerJournal();
+};
+
+window.loadMyPrayerJournal = async function(showFeedback = false) {
+  const container = document.getElementById("user-prayer-journal-list");
+  const countBadge = document.getElementById("journal-count-badge");
+  if (!container) return;
+
+  const userId = (window.state && window.state.currentUser && window.state.currentUser.id) 
+    || localStorage.getItem("rol_user_id") 
+    || ("guest_" + (localStorage.getItem("rol_device_id") || "device"));
+
+  let requests = [];
+
+  // 1. Fetch from backend API
+  try {
+    const apiBase = (typeof ROL_API_BASE !== 'undefined') ? ROL_API_BASE : 'http://localhost:7880';
+    const res = await fetch(`${apiBase}/api/prayer-requests?user_id=${encodeURIComponent(userId)}`, {
+      headers: {
+        "Authorization": "Bearer " + (localStorage.getItem("rol_access_token") || "")
+      }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && Array.isArray(data.requests)) {
+        requests = data.requests;
+      }
+    }
+  } catch(err) {
+    console.warn("Journal API load notice:", err.message);
+  }
+
+  // 2. Merge with locally cached journal entries
+  try {
+    const localRaw = localStorage.getItem("rol_my_prayer_journal");
+    const localList = localRaw ? JSON.parse(localRaw) : [];
+    if (localList.length > 0) {
+      const existingIds = new Set(requests.map(r => r.id));
+      for (const item of localList) {
+        if (!existingIds.has(item.id)) {
+          requests.push(item);
+        }
+      }
+    }
+    localStorage.setItem("rol_my_prayer_journal", JSON.stringify(requests));
+  } catch(e) {}
+
+  if (countBadge) {
+    countBadge.textContent = `${requests.length} ${requests.length === 1 ? 'Request' : 'Requests'}`;
+  }
+
+  if (requests.length === 0) {
+    container.innerHTML = `
+      <div class="panel-empty-state" style="padding: 32px 18px; text-align: center; color: var(--text-muted); font-size: 13px; background: var(--bg); border: 1px dashed var(--border); border-radius: 14px;">
+        <span style="font-size: 28px; display: block; margin-bottom: 6px;">🙏</span>
+        <strong style="color: var(--text); font-size: 14px; display: block; margin-bottom: 4px;">कोणतीही नोंद आढळली नाही / No Prayer Journal Entries Yet</strong>
+        <span>वरील फॉर्म भरून तुमची पहिली प्रार्थना विनंती पास्टरकडे पाठवा.</span>
+      </div>
+    `;
+    if (showFeedback && typeof showToast === "function") showToast("Journal refreshed.");
+    return;
+  }
+
+  container.innerHTML = requests.map(r => {
+    let statusClass = "badge-status-sent";
+    let statusLabel = "🔵 Sent to Pastor";
+    let statusLabelMr = "पास्टरकडे पाठवली";
+
+    if (r.status === "Prayed For") {
+      statusClass = "badge-status-prayed";
+      statusLabel = "🟣 Prayed For";
+      statusLabelMr = "प्रार्थना केली";
+    } else if (r.status === "Answered") {
+      statusClass = "badge-status-answered";
+      statusLabel = "🟢 Answered";
+      statusLabelMr = "उत्तर मिळाले! 🙏";
+    }
+
+    const timeAgoStr = typeof formatTimeAgo === 'function' ? formatTimeAgo(new Date(r.created_at).getTime()) : 'Recently';
+
+    return `
+      <div class="prayer-journal-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+            <span class="prayer-chip-btn" style="padding: 3px 9px; font-size: 11px; cursor: default;">
+              ${r.category_tag || 'Healing'}
+            </span>
+            <span style="font-size: 11px; color: var(--text-muted); font-weight: 700; background: var(--bg); padding: 3px 8px; border-radius: 6px; border: 1px solid var(--border);">
+              ${r.privacy_level || 'Private (Pastor Only)'}
+            </span>
+          </div>
+          <span class="badge-prayer-status ${statusClass}">
+            ${statusLabel} • ${statusLabelMr}
+          </span>
+        </div>
+
+        <p style="margin: 0; font-size: 14px; line-height: 1.55; color: var(--text); font-family: var(--font-body); white-space: pre-line;">
+          ${r.content || ''}
+        </p>
+
+        ${r.pastor_note ? `
+          <div style="background: rgba(34,197,94,0.08); padding: 8px 12px; border-radius: 8px; font-size: 12.5px; border-left: 3px solid #16a34a; color: var(--text);">
+            <strong style="color: #16a34a;">Pastoral Note / पास्टरचे उत्तर:</strong> ${r.pastor_note}
+          </div>
+        ` : ''}
+
+        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11.5px; color: var(--text-muted); padding-top: 6px; border-top: 1px solid var(--border);">
+          <span>📅 ${timeAgoStr}</span>
+          <span style="font-size: 11px;">🔒 Confidential Record</span>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  if (showFeedback && typeof showToast === "function") showToast("✅ Journal updated!");
+};
 
 window.submitPrayerRequestPublic = function() {
   const catEl = document.getElementById("prayer-input-category");

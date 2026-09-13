@@ -223,13 +223,17 @@ if (USE_POSTGRES) {
       CREATE TABLE IF NOT EXISTS prayer_requests (
         id TEXT PRIMARY KEY,
         user_id TEXT NOT NULL,
-        title TEXT NOT NULL,
-        description TEXT NOT NULL,
-        category TEXT NOT NULL DEFAULT 'Personal',
-        visibility TEXT NOT NULL DEFAULT 'Private',
+        title TEXT,
+        description TEXT,
+        content TEXT,
+        category TEXT DEFAULT 'Personal',
+        category_tag TEXT DEFAULT 'Healing',
+        visibility TEXT DEFAULT 'Private',
+        privacy_level TEXT DEFAULT 'Private (Pastor Only)',
         group_id TEXT,
         church_id TEXT,
-        status TEXT NOT NULL DEFAULT 'Active',
+        voice_note_url TEXT,
+        status TEXT NOT NULL DEFAULT 'Sent to Pastor',
         pastor_note TEXT,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -237,6 +241,10 @@ if (USE_POSTGRES) {
       )
     `);
 
+    sqliteDb.run(`ALTER TABLE prayer_requests ADD COLUMN content TEXT`, () => {});
+    sqliteDb.run(`ALTER TABLE prayer_requests ADD COLUMN privacy_level TEXT DEFAULT 'Private (Pastor Only)'`, () => {});
+    sqliteDb.run(`ALTER TABLE prayer_requests ADD COLUMN category_tag TEXT DEFAULT 'Healing'`, () => {});
+    sqliteDb.run(`ALTER TABLE prayer_requests ADD COLUMN voice_note_url TEXT`, () => {});
     sqliteDb.run(`ALTER TABLE prayer_requests ADD COLUMN visibility TEXT DEFAULT 'Private'`, () => {});
     sqliteDb.run(`ALTER TABLE prayer_requests ADD COLUMN group_id TEXT`, () => {});
     sqliteDb.run(`ALTER TABLE prayer_requests ADD COLUMN church_id TEXT`, () => {});

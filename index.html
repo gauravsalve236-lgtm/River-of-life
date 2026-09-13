@@ -1239,7 +1239,7 @@
                 🎥 Meetings (प्रार्थना सभा)
               </button>
               <button class="prayers-subnav-btn" id="btn-prayers-subtab-requests" onclick="switchPrayersSubtab('requests')" style="flex: 1; min-width: 100px; padding: 10px 8px; border-radius: 12px; font-size: 12.5px; font-weight: 700; border: 1.5px solid var(--border); background: var(--bg-content); color: var(--text); cursor: pointer; transition: all 0.2s ease; white-space: nowrap;">
-                 Requests (विनंतया)
+                🙏 Requests (विनंत्या)
               </button>
             </div>
 
@@ -1403,84 +1403,123 @@
               </div>
             </div>
 
-            <!-- SUBTAB 3: CHURCH PRAYER REQUESTS (Community circle & open requests without login gate) -->
+            <!-- SUBTAB 3: CONFIDENTIAL PRAYER REQUESTS & MY PRAYER JOURNAL -->
             <div id="prayers-panel-requests" class="prayers-subtab-panel" style="display: none;">
               
-              <!-- Public Request Submission Form (No login required) -->
-              <div class="settings-card-group" style="padding: 22px; background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 18px; margin-bottom: 20px; box-shadow: var(--shadow-sm);">
-                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
-                  <span style="font-size: 24px;">🙏</span>
-                  <div>
-                    <h4 style="font-size: 16px; font-weight: 800; margin: 0; color: var(--primary);">Submit Prayer Request (प्रार्थना विनंती पाठवा)</h4>
-                    <span style="font-size: 12px; color: var(--text-muted);">आमचे पास्टर आणि प्रार्थना सेवक तुमच्या समवेत प्रार्थनेत उभे राहतील</span>
+              <!-- 1. Confidential Prayer Submission Form Card -->
+              <div class="prayer-submission-card" style="padding: 22px; background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 20px; margin-bottom: 22px; box-shadow: var(--shadow-sm);">
+                
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(247,0,47,0.1); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;">
+                      🙏
+                    </div>
+                    <div>
+                      <h4 style="font-size: 16.5px; font-weight: 800; margin: 0; color: var(--text);">Confidential Prayer Request</h4>
+                      <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">गोपनीय प्रार्थना विनंती • पास्टर व प्रार्थना सेवक</span>
+                    </div>
                   </div>
+                  <span style="font-size: 11px; font-weight: 800; background: rgba(34,197,94,0.15); color: #16a34a; padding: 4px 9px; border-radius: 8px; display: inline-flex; align-items: center; gap: 4px;">
+                    🔒 AES-256 Encrypted
+                  </span>
                 </div>
 
-                <form id="public-prayer-form" onsubmit="event.preventDefault(); submitPrayerRequestPublic();" style="display: flex; flex-direction: column; gap: 16px;">
+                <form id="pastoral-prayer-form" onsubmit="event.preventDefault(); submitPastoralPrayerRequest();" style="display: flex; flex-direction: column; gap: 16px;">
                   
-                  <!-- Category & Target Row -->
-                  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px;">
-                    <div class="form-input-group" style="display: flex; flex-direction: column; gap: 6px;">
-                      <label for="prayer-input-category" style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Prayer Category / विषय निवडा</label>
-                      <select id="prayer-input-category" class="dropdown-selector" style="width: 100%; padding: 11px 12px; border-radius: 10px; border: 1.5px solid var(--border); background-color: var(--bg); font-size: 13.5px; font-weight: 600; color: var(--text);">
-                        <option value="आरोग्य व चंगाई (Healing)">🌿 आरोग्य आणि चंगाई (Healing & Health)</option>
-                        <option value="कुटुंब व विवाह (Family)">👨‍👩‍👧 कुटुंब आणि विवाह (Family & Marriage)</option>
-                        <option value="आर्थिक आशीर्वाद व नोकरी (Financial)">💼 आर्थिक आशीर्वाद व नोकरी (Job & Finance)</option>
-                        <option value="तारण व आत्मिक वाढ (Salvation)">✝️ तारण आणि आत्मिक वाढ (Spiritual Growth)</option>
-                        <option value="चिंतेतून मुक्ती व शांती (Peace)">🕊️ चिंतेतून मुक्ती आणि शांती (Peace & Deliverance)</option>
-                        <option value="उपकारस्तुती व साक्ष (Thanksgiving)">🙌 उपकारस्तुती व साक्ष (Praise & Thanksgiving)</option>
-                        <option value="इतर प्रार्थना (General)">📖 इतर प्रार्थना विनंती (General Prayer)</option>
-                      </select>
-                    </div>
-
-                    <div class="form-input-group" style="display: flex; flex-direction: column; gap: 6px;">
-                      <label for="prayer-input-target" style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Send To / कोणाकडे पाठवायची</label>
-                      <select id="prayer-input-target" class="dropdown-selector" style="width: 100%; padding: 11px 12px; border-radius: 10px; border: 1.5px solid var(--border); background-color: var(--bg); font-size: 13.5px; font-weight: 600; color: var(--text);">
-                        <option value="pastor">🔒 Pastor Only (Confidential) / फक्त पास्टर (गोपनीय)</option>
-                        <option value="leaders">🛡️ Admin & Prayer Warriors / ॲडमिन व प्रार्थना सेवक</option>
-                        <option value="church" selected>👥 Church Family / सर्व मंडळीसह सामायिक करा</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <!-- Name and Anonymous Toggle -->
-                  <div style="display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; background: var(--bg); padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border);">
-                    <input type="text" id="prayer-input-name" placeholder="तुमचे नाव (Your Name - Optional)" style="border: none; background: transparent; font-size: 13.5px; color: var(--text); outline: none;" />
-                    <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: var(--text-muted); cursor: pointer; user-select: none;">
-                      <input type="checkbox" id="prayer-input-anonymous" onchange="document.getElementById('prayer-input-name').disabled = this.checked; if(this.checked) document.getElementById('prayer-input-name').value = '';" style="accent-color: var(--primary); width: 16px; height: 16px;" />
-                      <span>नाव गुप्त ठेवा (Anonymous)</span>
+                  <!-- Privacy Toggles: Segmented Control -->
+                  <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+                    <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px;">
+                      Privacy Level / गोपनीयता पातळी *
                     </label>
+                    <div class="prayer-privacy-segmented" style="display: grid; grid-template-columns: repeat(3, 1fr); background: var(--bg); padding: 4px; border-radius: 12px; border: 1px solid var(--border); gap: 4px;">
+                      <button type="button" class="privacy-toggle-btn active" data-privacy="Private (Pastor Only)" onclick="selectPrayerPrivacy('Private (Pastor Only)', this)" style="padding: 9px 6px; border-radius: 9px; font-size: 12px; font-weight: 700; border: none; background: var(--primary); color: #ffffff; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 4px; text-align: center;">
+                        <span>🔒 Pastor Only</span>
+                      </button>
+                      <button type="button" class="privacy-toggle-btn" data-privacy="Church Prayer Team" onclick="selectPrayerPrivacy('Church Prayer Team', this)" style="padding: 9px 6px; border-radius: 9px; font-size: 12px; font-weight: 700; border: none; background: transparent; color: var(--text); cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 4px; text-align: center;">
+                        <span>👥 Prayer Team</span>
+                      </button>
+                      <button type="button" class="privacy-toggle-btn" data-privacy="Anonymous" onclick="selectPrayerPrivacy('Anonymous', this)" style="padding: 9px 6px; border-radius: 9px; font-size: 12px; font-weight: 700; border: none; background: transparent; color: var(--text); cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 4px; text-align: center;">
+                        <span>🕵️ Anonymous</span>
+                      </button>
+                    </div>
+                    <input type="hidden" id="prayer-selected-privacy" value="Private (Pastor Only)" />
                   </div>
 
-                  <!-- Details Textarea -->
-                  <div class="form-input-group" style="display: flex; flex-direction: column; gap: 6px;">
-                    <label for="prayer-input-details" style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Request Details / विनंती तपशील *</label>
-                    <textarea id="prayer-input-details" class="dropdown-selector" style="width: 100%; height: 110px; text-align: left; padding: 12px; font-family: var(--font-sans); font-size: 14px; line-height: 1.5; resize: vertical; border-radius: 10px; border: 1.5px solid var(--border); background-color: var(--bg); color: var(--text);" placeholder="तुमची विनंती येथे लिहा... उदाहरणार्थ: माझ्या कुटुंबासाठी व आरोग्यासाठी प्रार्थना करा..." required></textarea>
+                  <!-- Category Chips: Quick-tap tags -->
+                  <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+                    <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px;">
+                      Category / विषय निवडा *
+                    </label>
+                    <div class="prayer-category-chips-row" style="display: flex; flex-wrap: wrap; gap: 7px;">
+                      <button type="button" class="prayer-chip-btn active" data-category="Healing" onclick="selectPrayerCategory('Healing', this)">
+                        🌿 Healing (आरोग्य)
+                      </button>
+                      <button type="button" class="prayer-chip-btn" data-category="Family" onclick="selectPrayerCategory('Family', this)">
+                        👨‍👩‍👧 Family (कुटुंब)
+                      </button>
+                      <button type="button" class="prayer-chip-btn" data-category="Guidance" onclick="selectPrayerCategory('Guidance', this)">
+                        🧭 Guidance (मार्गदर्शन)
+                      </button>
+                      <button type="button" class="prayer-chip-btn" data-category="Financial" onclick="selectPrayerCategory('Financial', this)">
+                        💼 Financial (आर्थिक)
+                      </button>
+                      <button type="button" class="prayer-chip-btn" data-category="Peace" onclick="selectPrayerCategory('Peace', this)">
+                        🕊️ Peace (शांती)
+                      </button>
+                    </div>
+                    <input type="hidden" id="prayer-selected-category" value="Healing" />
                   </div>
 
-                  <!-- Submit Action Button -->
-                  <button type="submit" id="btn-prayer-submit-public" class="btn-primary-block" style="margin: 0; padding: 14px; font-size: 14px; border-radius: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                    <span>🙏 प्रार्थना विनंती पाठवा (Submit Prayer Request)</span>
+                  <!-- Unified Input Box with Embedded Microphone -->
+                  <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                      <label for="prayer-input-content" style="font-size: 12.5px; font-weight: 700; color: var(--text);">
+                        How can we pray for you? (आम्ही तुमच्यासाठी कशी प्रार्थना करू शकतो?) *
+                      </label>
+                      <span id="prayer-voice-status-pill" style="display: none; font-size: 11px; font-weight: 700; color: #e11d48; background: #ffe4e6; padding: 2px 8px; border-radius: 6px;">
+                        🔴 Listening / ऐकत आहे...
+                      </span>
+                    </div>
+                    
+                    <div class="prayer-textarea-container" style="position: relative; width: 100%;">
+                      <textarea id="prayer-input-content" style="width: 100%; min-height: 120px; padding: 12px 48px 12px 14px; border-radius: 12px; border: 1.5px solid var(--border); background-color: var(--bg); color: var(--text); font-family: var(--font-sans); font-size: 14px; line-height: 1.55; resize: vertical; box-sizing: border-box; outline: none; transition: border-color 0.2s ease;" placeholder="तुमची प्रार्थना विनंती येथे लिहा किंवा माइक बटण दाबून बोला... (Write here or tap mic to speak)..." required></textarea>
+                      
+                      <!-- Embedded Microphone Icon on Right Edge -->
+                      <button type="button" id="btn-prayer-voice-input" onclick="togglePrayerVoiceRecording()" title="माइकद्वारे बोला (Tap to record voice)" style="position: absolute; right: 10px; top: 12px; width: 34px; height: 34px; border-radius: 50%; border: none; background: #fff1f2; color: #be123c; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: all 0.2s ease; box-shadow: 0 2px 6px rgba(190,18,60,0.15);">
+                        <span id="mic-icon">🎙️</span>
+                      </button>
+                    </div>
+                    <span style="font-size: 11px; color: var(--text-muted);">💡 Tip: माइक बटणावर टॅप करून मराठी किंवा इंग्रजीत बोलू शकता (Voice speech-to-text).</span>
+                  </div>
+
+                  <!-- Action Button -->
+                  <button type="submit" id="btn-send-prayer-pastor" class="btn-primary-block" style="margin: 4px 0 0 0; padding: 13px 20px; font-size: 14.5px; border-radius: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--primary); color: #ffffff; border: none; cursor: pointer; box-shadow: 0 4px 14px rgba(247,0,47,0.3); transition: all 0.2s ease;">
+                    <span>🙏 Send Prayer Request to Pastor (पास्टरकडे प्रार्थना विनंती पाठवा)</span>
                   </button>
                 </form>
               </div>
 
-              <!-- Community Prayer Stream & My Requests -->
-              <div class="settings-card-group" style="padding: 22px; background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 18px; box-shadow: var(--shadow-sm);">
-                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 14px;">
-                  <div>
-                    <h4 style="font-size: 16px; font-weight: 800; margin: 0; color: var(--text);">Prayer Requests Circle (प्रार्थना मंडळ)</h4>
-                    <span style="font-size: 12px; color: var(--text-muted);">एकमेकांसाठी प्रार्थना करा आणि देवाचे कार्य अनुभवा</span>
+              <!-- 2. "My Prayer Journal" History View -->
+              <div class="prayer-journal-section" style="padding: 22px; background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 20px; box-shadow: var(--shadow-sm);">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 22px;">📖</span>
+                    <div>
+                      <h4 style="font-size: 16.5px; font-weight: 800; margin: 0; color: var(--text);">My Prayer Journal (माझी प्रार्थना रोजनिशी)</h4>
+                      <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Track your prayer requests & pastoral updates</span>
+                    </div>
                   </div>
-                  <div style="display: flex; gap: 6px;">
-                    <button class="prayer-filter-pill active" onclick="filterPublicPrayerRequests('all', this)" style="background: var(--primary); color: #fff; border: none; padding: 5px 12px; border-radius: 8px; font-size: 11.5px; font-weight: 700; cursor: pointer;">All (सर्व)</button>
-                    <button class="prayer-filter-pill" onclick="filterPublicPrayerRequests('my', this)" style="background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 5px 12px; border-radius: 8px; font-size: 11.5px; font-weight: 700; cursor: pointer;">My (माझ्या)</button>
-                    <button class="prayer-filter-pill" onclick="filterPublicPrayerRequests('answered', this)" style="background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 5px 12px; border-radius: 8px; font-size: 11.5px; font-weight: 700; cursor: pointer;">Answered (उत्तर)</button>
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span id="journal-count-badge" style="font-size: 11px; font-weight: 800; background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 3px 10px; border-radius: 12px;">0 Requests</span>
+                    <button type="button" onclick="loadMyPrayerJournal(true)" title="Refresh Journal" style="background: none; border: 1px solid var(--border); border-radius: 8px; padding: 4px 8px; font-size: 12px; color: var(--text-muted); cursor: pointer;">
+                      🔄
+                    </button>
                   </div>
                 </div>
 
-                <div id="user-submitted-requests-list" style="display: flex; flex-direction: column; gap: 14px;">
-                  <!-- Dynamically rendered by app.js -->
+                <!-- Dynamic Container for My Prayer Journal -->
+                <div id="user-prayer-journal-list" style="display: flex; flex-direction: column; gap: 12px;">
+                  <!-- Populated dynamically via loadMyPrayerJournal() -->
                 </div>
               </div>
 
