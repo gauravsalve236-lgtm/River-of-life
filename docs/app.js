@@ -2445,17 +2445,10 @@ async function openReader(bookKey, chapterNum) {
       
       verseEl.dataset.text = rawTextMr;
       
-      if (verseNum === 1 && !chapterHeadings[1]) {
-        verseEl.innerHTML = `
-          <div class="verse-parallel-mr"><span class="giant-chapter-num">${chapterNum}</span><sup class="verse-num">1</sup>${vTextMr}</div>
-          <div class="verse-parallel-en"><sup class="verse-num" style="font-size:9px;color:var(--text-muted);">1</sup>${vTextEng}</div>
-        `;
-      } else {
-        verseEl.innerHTML = `
-          <div class="verse-parallel-mr"><sup class="verse-num">${verseNum}</sup>${vTextMr}</div>
-          <div class="verse-parallel-en"><sup class="verse-num" style="font-size:9px;color:var(--text-muted);">${verseNum}</sup>${vTextEng}</div>
-        `;
-      }
+      verseEl.innerHTML = `
+        <div class="verse-parallel-mr"><sup class="verse-num">${verseNum}</sup>${vTextMr}</div>
+        <div class="verse-parallel-en"><sup class="verse-num" style="font-size:9px;color:var(--text-muted);">${verseNum}</sup>${vTextEng}</div>
+      `;
     } else {
       verseEl.className = "verse-row";
       const rawText = (state.translation === "eng") ? versesEng[vIdx] : versesMr[vIdx];
@@ -2463,12 +2456,7 @@ async function openReader(bookKey, chapterNum) {
       const vText = formatScriptureText(bookKey, chapterNum, verseNum, rawText, langCode);
       
       verseEl.dataset.text = rawText;
-      
-      if (verseNum === 1 && !chapterHeadings[1]) {
-        verseEl.innerHTML = `<span class="giant-chapter-num">${chapterNum}</span><sup class="verse-num">1</sup>${vText}`;
-      } else {
-        verseEl.innerHTML = `<sup class="verse-num">${verseNum}</sup>${vText}`;
-      }
+      verseEl.innerHTML = `<sup class="verse-num">${verseNum}</sup>${vText}`;
     }
     
     // Selection listener

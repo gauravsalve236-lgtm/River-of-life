@@ -12,7 +12,7 @@
   <script>
     // Force immediate hard purge of all stale Service Workers and CacheStorage
     (function() {
-      const CURRENT_VER = "v148_BSI_AUDIO_AND_COMPACT_WHITE_DYK";
+      const CURRENT_VER = "v149_CLEAN_FULLSCREEN_READER_TYPOGRAPHY";
       if (localStorage.getItem("rol_app_ver") !== CURRENT_VER) {
         localStorage.setItem("rol_app_ver", CURRENT_VER);
         if ('serviceWorker' in navigator) {
@@ -799,8 +799,9 @@
                   <span>पढे</span>
                   <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
                 </button>
+              </div>
             </div>
-          </div>
+          </div> <!-- /.reader-pane-left -->
 
           <!-- Backdrop overlay for study explanation bottom sheet on mobile -->
           <div id="study-backdrop-overlay" class="study-backdrop-overlay" onclick="closeStudySplitPane()"></div>

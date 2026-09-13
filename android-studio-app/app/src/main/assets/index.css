@@ -875,9 +875,11 @@ body {
 }
 
 .verses-text-layout {
-  font-size: 18px;
-  line-height: 1.65;
+  font-size: 20px;
+  line-height: 1.85;
   text-align: left;
+  letter-spacing: 0.15px;
+  font-family: var(--font-marathi), var(--font-body), Georgia, serif;
 }
 
 /* Center and set maximum width for reader blocks */
@@ -906,6 +908,8 @@ body {
 /* Verse Line layout */
 .verse-row {
   display: inline;
+  font-size: 20px;
+  line-height: 1.85;
   padding: 1px 3px;
   margin: 0 1px;
   cursor: pointer;
@@ -921,12 +925,14 @@ body {
   background-color: rgba(var(--border-rgb), 0.15);
 }
 
-.verse-num {
-  font-size: 11px;
+.verse-num,
+sup.verse-num {
+  font-size: 12px;
   font-weight: 800;
-  color: var(--text-muted);
+  color: var(--primary, #e11d48) !important;
   vertical-align: super;
-  margin-right: 8px;
+  margin-right: 6px;
+  margin-left: 2px;
   user-select: none;
 }
 
@@ -3009,7 +3015,13 @@ body {
   }
 
   .verses-scroller {
-    padding: 16px 14px 140px 14px;
+    padding: 16px 16px 140px 16px;
+  }
+
+  .verses-text-layout,
+  .verse-row {
+    font-size: 20px !important;
+    line-height: 1.85 !important;
   }
 
   .floating-playbar-container {
