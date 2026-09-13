@@ -9189,8 +9189,9 @@ body:has(#view-reader.active) .mobile-bottom-tabs {
   display: none !important;
 }
 
-/* Reader Plan Bottom Navigation Bar */
+/* Reader Plan Bottom Navigation Bar (Removed per user request) */
 .reader-plan-bottom-bar {
+  display: none !important;
   flex-shrink: 0;
   background: var(--bg-content, #ffffff);
   border-top: 1px solid var(--border);

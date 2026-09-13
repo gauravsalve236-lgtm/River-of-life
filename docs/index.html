@@ -12,7 +12,7 @@
   <script>
     // Force immediate hard purge of all stale Service Workers and CacheStorage
     (function() {
-      const CURRENT_VER = "v146_FEATURED_SCRIPTURES_NAV_ARROWS";
+      const CURRENT_VER = "v147_CLEAN_READER_AND_FLAT_COVERS";
       if (localStorage.getItem("rol_app_ver") !== CURRENT_VER) {
         localStorage.setItem("rol_app_ver", CURRENT_VER);
         if ('serviceWorker' in navigator) {
@@ -799,32 +799,6 @@
                   <span>पढे</span>
                   <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
                 </button>
-              </div>
-            </div>
-
-            <!-- Clean Bottom Chapter Navigation & Reading Plan Progress Bar -->
-            <div id="reader-plan-bottom-bar" class="reader-plan-bottom-bar">
-              <div class="reader-plan-info-col" onclick="switchTab('plans')" title="Open Reading Plans / वाचन योजना उघडा">
-                <div class="reader-plan-title-row">
-                  <span class="reader-plan-icon">📅</span>
-                  <span id="reader-plan-bar-title" class="reader-plan-title">उद्दिष्टपूर्ण जीवन जगणे!</span>
-                </div>
-                <div class="reader-plan-sub-row">
-                  <span id="reader-plan-bar-day" class="reader-plan-day-breakdown">Day 1 • 2 of 2</span>
-                  <span class="reader-plan-dot">•</span>
-                  <span id="reader-plan-bar-percent" class="reader-plan-pct">50% पूर्ण</span>
-                </div>
-                <div class="reader-plan-progress-track">
-                  <div id="reader-plan-progress-bar" class="reader-plan-progress-fill" style="width: 50%;"></div>
-                </div>
-              </div>
-
-              <button id="btn-reader-plan-complete-next" class="reader-plan-action-btn" onclick="handleReaderPlanAdvance()" title="Complete & Next Reading / पुढील वाचन" aria-label="Next Reading">
-                <span id="reader-plan-btn-label" class="reader-plan-action-label">पुढील</span>
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="9 18 15 12 9 6"></polyline>
-                </svg>
-              </button>
             </div>
           </div>
 
