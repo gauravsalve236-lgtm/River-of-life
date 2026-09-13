@@ -12610,250 +12610,285 @@ body:has(#view-reader.active) .mobile-bottom-tabs {
 
 .microlearning-card {
   background: #FFFFFF !important;
-  border: 1.5px solid #FECDD3 !important;
-  border-radius: 20px !important;
-  padding: 20px 22px !important;
-  box-shadow: 0 4px 20px rgba(247, 0, 47, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 16px !important;
+  padding: 13px 15px !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02) !important;
   display: flex !important;
   flex-direction: column !important;
-  gap: 14px !important;
-  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s ease, border-color 0.22s ease !important;
+  gap: 9px !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease !important;
   box-sizing: border-box;
 }
 
 .microlearning-card:hover {
   transform: translateY(-2px);
-  border-color: var(--primary, #F7002F) !important;
-  box-shadow: 0 8px 28px rgba(247, 0, 47, 0.15) !important;
+  border-color: rgba(190, 18, 60, 0.35) !important;
+  box-shadow: 0 6px 18px rgba(190, 18, 60, 0.08) !important;
 }
 
 .microlearning-top-row {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 12px;
+  gap: 6px;
 }
 
 .microlearning-term-group {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
+  width: 100%;
 }
 
 .microlearning-meta-tags {
   display: flex;
   align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
+  justify-content: space-between;
+  width: 100%;
+  gap: 6px;
 }
 
 .micro-tag-origin {
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 800;
   color: #BE123C;
   background: #FFF1F2;
-  padding: 3px 9px;
-  border-radius: 7px;
-  border: 1px solid #FFE4E6;
-  letter-spacing: 0.3px;
+  padding: 2px 7px;
+  border-radius: 6px;
+  border: 1px solid #FECDD3;
+  letter-spacing: 0.2px;
 }
 
 .micro-tag-pronunciation {
-  font-size: 12.5px;
-  font-weight: 700;
-  color: #881337;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #64748B;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  transition: color 0.15s ease;
+}
+
+.micro-tag-pronunciation:hover {
+  color: #BE123C;
 }
 
 .micro-word-title {
-  margin: 4px 0 0 0;
+  margin: 1px 0 0 0;
   display: flex;
-  align-items: center;
+  align-items: baseline;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 7px;
   line-height: 1.25;
 }
 
 .micro-word-highlighted {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: linear-gradient(135deg, #FFE4E6 0%, #FECDD3 50%, #FDA4AF 100%);
+  display: inline-block;
   color: #9F1239;
-  border: 1.5px solid #F43F5E;
-  padding: 4px 14px;
-  border-radius: 12px;
-  font-size: 22px;
-  font-weight: 900;
-  letter-spacing: -0.3px;
-  box-shadow: 0 4px 14px rgba(244, 63, 94, 0.22);
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.micro-word-highlighted:hover {
-  transform: translateY(-1px) scale(1.02);
-  box-shadow: 0 6px 18px rgba(244, 63, 94, 0.32);
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+  background: none !important;
+  border: none !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
 }
 
 .micro-word-original-script {
-  font-size: 20px;
-  font-weight: 700;
-  color: #BE123C;
-  font-family: var(--font-serif, "Georgia", serif);
-  letter-spacing: 0.5px;
+  font-size: 17px;
+  font-weight: 600;
+  color: #475569;
+  font-family: Georgia, "Times New Roman", serif;
+  font-style: italic;
+  letter-spacing: 0.3px;
 }
 
 .microlearning-listen-btn {
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  background: var(--primary, #F7002F);
-  border: none;
-  color: #ffffff;
+  background: #FFF1F2;
+  border: 1px solid #FECDD3;
+  color: #BE123C;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(247, 0, 47, 0.32);
   transition: all 0.2s ease;
   flex-shrink: 0;
 }
 
 .microlearning-listen-btn:hover {
-  background: #D40028;
-  transform: scale(1.06);
-  box-shadow: 0 6px 16px rgba(247, 0, 47, 0.45);
+  background: #BE123C;
+  color: #FFFFFF;
 }
 
 .microlearning-meaning-box {
   background: #FFF5F6;
-  border: 1.5px solid #FFE4E6;
-  border-radius: 14px;
-  padding: 13px 16px;
+  border-left: 3.5px solid #BE123C;
+  border-top: none;
+  border-right: none;
+  border-bottom: none;
+  border-radius: 0 8px 8px 0;
+  padding: 7px 11px;
 }
 
 .microlearning-label {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 800;
   text-transform: uppercase;
-  color: var(--primary, #F7002F);
-  letter-spacing: 0.6px;
+  color: #BE123C;
+  letter-spacing: 0.5px;
   display: block;
-  margin-bottom: 3px;
+  margin-bottom: 2px;
 }
 
 .micro-word-meaning-text {
   margin: 0;
-  font-size: 15px;
+  font-size: 13.5px;
   font-weight: 700;
   color: #1E293B;
-  line-height: 1.55;
+  line-height: 1.45;
   font-family: 'Noto Serif Devanagari', Georgia, serif;
 }
 
 .microlearning-insight-box {
-  padding: 2px 2px 0 2px;
+  padding: 0 2px;
 }
 
 .microlearning-insight-box .microlearning-label {
-  color: #64748b;
+  color: #64748B;
+  font-size: 10px;
+  margin-bottom: 2px;
 }
 
 .micro-word-insight-text {
-  margin: 4px 0 0 0;
-  font-size: 13.5px;
+  margin: 0;
+  font-size: 12.5px;
   color: #334155;
-  line-height: 1.65;
-  font-weight: 500;
+  line-height: 1.5;
+  font-weight: 450;
   font-family: 'Noto Serif Devanagari', Georgia, serif;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .microlearning-footer-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-top: 1px solid #FFE4E6;
-  padding-top: 14px;
-  margin-top: 2px;
-  flex-wrap: wrap;
-  gap: 10px;
+  border-top: 1px solid #F1F5F9;
+  padding-top: 9px;
+  margin-top: 1px;
+  gap: 8px;
+  flex-wrap: nowrap;
 }
 
 .microlearning-ref-group {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 13px;
+  gap: 5px;
+  font-size: 12px;
   font-weight: 700;
   color: #BE123C;
+  flex: 1;
+  min-width: 0;
+}
+
+.microlearning-ref-group svg {
+  flex-shrink: 0;
+  stroke: #BE123C;
+}
+
+.micro-word-ref-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 12px;
+  line-height: 1.3;
 }
 
 .microlearning-read-btn {
   background: #FFF1F2;
-  border: 1.5px solid #FECDD3;
+  border: 1px solid #FECDD3;
   color: #BE123C;
-  padding: 7px 16px;
-  border-radius: 12px;
+  padding: 5px 12px;
+  border-radius: 9px;
   font-weight: 700;
-  font-size: 12.5px;
+  font-size: 11.5px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .microlearning-read-btn:hover {
-  background: var(--primary, #F7002F);
+  background: #BE123C;
   color: #FFFFFF;
-  border-color: var(--primary, #F7002F);
+  border-color: #BE123C;
   transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(247, 0, 47, 0.28);
+  box-shadow: 0 3px 10px rgba(190, 18, 60, 0.2);
 }
 
 /* Dark mode overrides */
 .ios-theme-dark .microlearning-card {
-  background: #151822 !important;
-  border-color: rgba(247, 0, 47, 0.3) !important;
+  background: #1A1D27 !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
 }
 .ios-theme-dark .microlearning-card:hover {
-  border-color: var(--primary, #F7002F) !important;
-  box-shadow: 0 8px 28px rgba(247, 0, 47, 0.22) !important;
+  border-color: rgba(244, 63, 94, 0.4) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35) !important;
 }
 .ios-theme-dark .microlearning-heading {
-  color: #f8fafc;
+  color: #F8FAFC;
 }
 .ios-theme-dark .micro-word-highlighted {
-  background: linear-gradient(135deg, rgba(225, 29, 72, 0.25) 0%, rgba(190, 18, 60, 0.4) 100%);
-  color: #FFE4E6;
-  border-color: #FB7185;
-  box-shadow: 0 4px 16px rgba(244, 63, 94, 0.35);
-  text-shadow: none;
-}
-.ios-theme-dark .micro-word-original-script {
   color: #FDA4AF;
 }
+.ios-theme-dark .micro-word-original-script {
+  color: #CBD5E1;
+}
+.ios-theme-dark .micro-tag-origin {
+  background: rgba(190, 18, 60, 0.2);
+  border-color: rgba(244, 63, 94, 0.35);
+  color: #FDA4AF;
+}
+.ios-theme-dark .micro-tag-pronunciation {
+  color: #94A3B8;
+}
 .ios-theme-dark .microlearning-meaning-box {
-  background: rgba(247, 0, 47, 0.08);
-  border-color: rgba(247, 0, 47, 0.22);
+  background: rgba(190, 18, 60, 0.12);
+  border-left-color: #FB7185;
 }
 .ios-theme-dark .micro-word-meaning-text {
-  color: #ffe4e6;
+  color: #FFE4E6;
 }
 .ios-theme-dark .micro-word-insight-text {
-  color: #cbd5e1;
+  color: #CBD5E1;
 }
 .ios-theme-dark .microlearning-footer-row {
-  border-top-color: #262b3a;
+  border-top-color: rgba(255, 255, 255, 0.08);
+}
+.ios-theme-dark .microlearning-ref-group {
+  color: #FDA4AF;
 }
 .ios-theme-dark .microlearning-read-btn {
-  background: rgba(247, 0, 47, 0.12);
-  border-color: rgba(247, 0, 47, 0.3);
-  color: #fda4af;
+  background: rgba(190, 18, 60, 0.2);
+  border-color: rgba(244, 63, 94, 0.35);
+  color: #FDA4AF;
 }
 .ios-theme-dark .microlearning-read-btn:hover {
-  background: #F7002F;
-  color: #ffffff;
+  background: #BE123C;
+  color: #FFFFFF;
 }
 
 /* The 10 Commandments Sacred Covenant Card */

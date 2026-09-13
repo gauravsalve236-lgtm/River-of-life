@@ -12,7 +12,7 @@
   <script>
     // Force immediate hard purge of all stale Service Workers and CacheStorage
     (function() {
-      const CURRENT_VER = "v149_CLEAN_FULLSCREEN_READER_TYPOGRAPHY";
+      const CURRENT_VER = "v150_COMPACT_WORD_OF_THE_DAY";
       if (localStorage.getItem("rol_app_ver") !== CURRENT_VER) {
         localStorage.setItem("rol_app_ver", CURRENT_VER);
         if ('serviceWorker' in navigator) {
@@ -352,7 +352,7 @@
                     <div class="microlearning-term-group">
                       <div class="microlearning-meta-tags">
                         <span id="micro-word-origin" class="micro-tag-origin">Greek (ग्रीक)</span>
-                        <span id="micro-word-pronunciation" class="micro-tag-pronunciation">उच्चार: अगापे</span>
+                        <span id="micro-word-pronunciation" class="micro-tag-pronunciation" onclick="speakMicroLearningWord()" style="cursor: pointer;" title="उच्चार ऐका / Listen">उच्चार: अगापे 🔊</span>
                       </div>
                       <h4 id="micro-word-term" class="micro-word-title"><span class="micro-word-highlighted">Agape</span> <span class="micro-word-original-script">(ἀγάπη)</span></h4>
                     </div>

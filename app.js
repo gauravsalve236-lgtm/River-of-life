@@ -18064,7 +18064,11 @@ window.renderBiblicalMicroLearning = function() {
     }
   }
   if (originEl) originEl.textContent = word.origin;
-  if (pronEl) pronEl.textContent = isEng ? `Pronunciation: ${word.pronunciation}` : `उच्चार: ${word.pronunciation}`;
+  if (pronEl) {
+    pronEl.innerHTML = (isEng ? `Pronunciation: ${word.pronunciation}` : `उच्चार: ${word.pronunciation}`) + ` <span style="font-size: 11px; margin-left: 2px;">🔊</span>`;
+    pronEl.onclick = function() { if (typeof window.speakMicroLearningWord === "function") window.speakMicroLearningWord(); };
+    pronEl.title = isEng ? "Tap to listen" : "उच्चार ऐकण्यासाठी टॅप करा";
+  }
   if (meaningEl) meaningEl.textContent = isEng ? word.meaningEn : word.meaningMr;
   if (insightEl) insightEl.textContent = (isEng && word.insightEn) ? word.insightEn : word.insightMr;
   if (refEl) refEl.textContent = isEng ? word.refEn : word.refMr;
