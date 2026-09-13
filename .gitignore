@@ -9,3 +9,4 @@ __pycache__/
 verified_*.png
 test_*.py
 .bsi_token.json
+*.db
