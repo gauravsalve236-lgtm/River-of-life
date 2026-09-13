@@ -9184,9 +9184,9 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
   border-color: var(--primary);
 }
 
-/* In Reader view, hide global mobile bottom tabs to give full focus to Scripture and the Reader Plan bottom bar */
+/* In Reader view, keep global mobile bottom tabs accessible (Daily Plan bar removed) */
 body:has(#view-reader.active) .mobile-bottom-tabs {
-  display: none !important;
+  display: flex !important;
 }
 
 /* Reader Plan Bottom Navigation Bar (Removed per user request) */
@@ -16536,28 +16536,28 @@ body:has(#view-reader.active) .mobile-bottom-tabs {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
-  background: rgba(28, 18, 10, 0.76);
+  background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  border: 1.5px solid rgba(223, 177, 91, 0.85);
-  color: #fef08a;
+  border: 1px solid #cbd5e1;
+  color: #1e293b;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   z-index: 5;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35), 0 0 10px rgba(234, 179, 8, 0.4);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .dyk-nav-arrow:hover {
-  background: rgba(45, 25, 12, 0.94);
-  border-color: #fef08a;
+  background: #ffffff;
+  border-color: #94a3b8;
   transform: translateY(-50%) scale(1.08);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45), 0 0 14px rgba(253, 224, 71, 0.6);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
 }
 
 .dyk-nav-arrow:active {
@@ -16581,42 +16581,39 @@ body:has(#view-reader.active) .mobile-bottom-tabs {
   }
 }
 
-/* Individual Card (Authentic Aged-Parchment with Golden Border Glow) */
+/* Individual Card (Modern Clean White Card, Shorter & Compact) */
 .dyk-carousel-card {
   flex: 0 0 88%;
-  max-width: 360px;
-  min-width: 285px;
+  max-width: 350px;
+  min-width: 280px;
   scroll-snap-align: center;
   scroll-snap-stop: always;
-  background: 
-    radial-gradient(ellipse at 50% 15%, rgba(255, 255, 255, 0.65) 0%, rgba(248, 240, 227, 0.95) 45%, rgba(226, 204, 173, 1) 100%),
-    linear-gradient(145deg, #f5ead8 0%, #e8d6bd 50%, #d8be97 100%);
-  border: 2px solid #dfb15b;
-  border-radius: 22px;
-  padding: 16px 18px 14px 18px;
+  background: #ffffff;
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 18px;
+  padding: 12px 14px 12px 14px;
   box-shadow: 
-    0 12px 32px rgba(45, 25, 5, 0.18),
-    0 0 20px rgba(223, 177, 91, 0.35),
-    inset 0 0 24px rgba(180, 130, 50, 0.18);
+    0 4px 16px rgba(0, 0, 0, 0.06),
+    0 1px 3px rgba(0, 0, 0, 0.04);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
   position: relative;
   overflow: hidden;
   box-sizing: border-box;
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
-.dyk-carousel-card::before {
-  content: '';
-  position: absolute;
-  inset: 4px;
-  border: 1px dashed rgba(180, 130, 60, 0.4);
-  border-radius: 18px;
-  pointer-events: none;
+.dyk-carousel-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.09);
 }
 
-/* Ornate Header */
+.dyk-carousel-card::before {
+  display: none;
+}
+
+/* Header */
 .dyk-card-header {
   display: flex;
   align-items: center;
@@ -16627,45 +16624,43 @@ body:has(#view-reader.active) .mobile-bottom-tabs {
 .dyk-header-left {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .dyk-scroll-icon {
-  font-size: 20px;
-  filter: drop-shadow(0 2px 4px rgba(120, 53, 15, 0.3));
+  font-size: 17px;
 }
 
 .dyk-header-title {
   font-family: 'Cinzel', 'Playfair Display', Georgia, serif;
-  font-size: 14.5px;
+  font-size: 13.5px;
   font-weight: 800;
-  letter-spacing: 1.8px;
+  letter-spacing: 1.2px;
   text-transform: uppercase;
-  color: #78350f;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+  color: #1e293b;
 }
 
 .dyk-card-counter {
   font-size: 11px;
-  font-weight: 800;
-  color: #92400e;
-  background: rgba(180, 130, 60, 0.18);
-  border: 1px solid rgba(180, 130, 60, 0.3);
-  padding: 3px 8px;
-  border-radius: 12px;
+  font-weight: 700;
+  color: #64748b;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  padding: 2px 7px;
+  border-radius: 10px;
   letter-spacing: 0.5px;
 }
 
-/* High-Definition Illustration Frame */
+/* High-Definition Illustration Frame (Compact 120px) */
 .dyk-illustration-frame {
   width: 100%;
-  height: 165px;
-  border-radius: 14px;
+  height: 120px;
+  border-radius: 12px;
   overflow: hidden;
   position: relative;
-  border: 1.5px solid rgba(180, 130, 60, 0.5);
-  box-shadow: 0 6px 18px rgba(45, 25, 5, 0.25);
-  background: #1e1b18;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  background: #f1f5f9;
 }
 
 .dyk-illustration-img {
@@ -16683,54 +16678,53 @@ body:has(#view-reader.active) .mobile-bottom-tabs {
 .dyk-illustration-scrim {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(0,0,0,0) 60%, rgba(20, 12, 6, 0.5) 100%);
+  background: linear-gradient(180deg, rgba(0,0,0,0) 65%, rgba(0, 0, 0, 0.35) 100%);
   pointer-events: none;
 }
 
 /* Question Typography */
 .dyk-question {
   font-family: 'Cinzel', 'Playfair Display', Georgia, serif;
-  font-size: 16.5px;
-  font-weight: 800;
-  line-height: 1.35;
-  color: #2b1808;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #0f172a;
   margin: 0;
-  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.6);
 }
 
 .dyk-question-mr {
   font-family: var(--font-marathi), var(--font-sans);
-  font-size: 13px;
+  font-size: 11.5px;
   font-weight: 600;
-  color: #5c3814;
-  margin: 3px 0 0 0;
-  line-height: 1.4;
+  color: #475569;
+  margin: 2px 0 0 0;
+  line-height: 1.35;
 }
 
 /* Bulleted Answer Choices */
 .dyk-bullet-list {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  background: rgba(255, 255, 255, 0.55);
-  border: 1px solid rgba(180, 130, 60, 0.3);
-  border-radius: 12px;
-  padding: 10px 12px;
+  gap: 4px;
+  background: #f8fafc;
+  border: 1px solid #edf2f7;
+  border-radius: 10px;
+  padding: 7px 10px;
 }
 
 .dyk-bullet-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 12.5px;
-  font-weight: 700;
-  color: #3b230e;
-  line-height: 1.35;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #334155;
+  line-height: 1.3;
   font-family: var(--font-sans);
 }
 
 .dyk-bullet-icon {
-  font-size: 15px;
+  font-size: 13px;
   flex-shrink: 0;
 }
 
@@ -16743,16 +16737,16 @@ body:has(#view-reader.active) .mobile-bottom-tabs {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  margin-top: 2px;
-  padding-top: 8px;
-  border-top: 1px dashed rgba(180, 130, 60, 0.35);
+  gap: 8px;
+  margin-top: 1px;
+  padding-top: 6px;
+  border-top: 1px solid #f1f5f9;
 }
 
 .dyk-ref-badge {
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 700;
-  color: #78350f;
+  color: #64748b;
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -16762,16 +16756,16 @@ body:has(#view-reader.active) .mobile-bottom-tabs {
 .dyk-explore-btn {
   background: linear-gradient(135deg, #0d5f4e 0%, #064e3b 100%);
   color: #ffffff;
-  border: 1.5px solid rgba(253, 224, 71, 0.45);
-  border-radius: 20px;
-  padding: 7px 15px;
-  font-size: 12px;
-  font-weight: 800;
+  border: none;
+  border-radius: 16px;
+  padding: 6px 12px;
+  font-size: 11.5px;
+  font-weight: 700;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   cursor: pointer;
-  box-shadow: 0 3px 10px rgba(6, 78, 59, 0.35);
+  box-shadow: 0 2px 8px rgba(6, 78, 59, 0.25);
   transition: all 0.2s ease;
   font-family: var(--font-ui);
 }

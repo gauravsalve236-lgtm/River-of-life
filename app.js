@@ -1897,7 +1897,7 @@ function adjustHeaderForRoute(route) {
   
   if (route === "reader") {
     if (appHeader) appHeader.style.display = "none";
-    if (mobileTabs) mobileTabs.style.setProperty("display", "none", "important");
+    if (mobileTabs) mobileTabs.style.removeProperty("display");
     if (readerCtrls) {
       readerCtrls.classList.remove("active");
       readerCtrls.style.display = "none";
@@ -4094,7 +4094,7 @@ function getBsiUsfmCode(bookInput) {
   return BSI_USFM_MAP[str] || "GEN";
 }
 
-let bsiCloudFrontToken = 'Key-Pair-Id=KCC7HS8KPVISV&Signature=DE9BLkvIQme61wSlLZqNDeY~jZbRg1eVp~cdsCy7NZC88cH~WkymZiNkz40dY9gZYMZOZ2B8CA2pXLDR4RNsRNVrmhG5uCJP8LRQfa93ES~v9pj1iP0pRczIWj7laFM7jEmvDJF21rIPImxCyJbRDsXrqg-ZNeF1j37OFUXUvda3NEYEzN4TR9D8CQptz14o3DW5xwW8y8BSGnlronu4CETcWRD3iuNV3k6Chvv2P3ko1ZSpdLFha9bgdSjltcXzj2jmpG8XMD21Im6TFIhLbFWGfQqK7glao4oEqRW6w7OI-NEtU63DVuiuC9NAUNP7y2d6bBOAWvbIqm5v9Vh3sw__&Expires=1789294063&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9kMWhrcHV6Mm81YTJ4dy5jbG91ZGZyb250Lm5ldC9zb3VyY2UvNTU1NDc2YzIzOTBjMTAyZC0wNC8qIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzg5Mjk0MDYzfX19XX0_';
+let bsiCloudFrontToken = 'Key-Pair-Id=KCC7HS8KPVISV&Signature=g3fQetI89JVPZlRCtRgNOEr4R6MZwcu2xThCfi7rjfpr6xc~IKR7vW0UlUpt~s0InM5Xy08qYOrwHSBc58rrX28SrMUt1j34cuG0q2mST0Gci1LmBO0syPBb3l-qsX8H5ZswoGyy9pO2R5zABiG~BOHp9tkGovxaK6jm7aMtP39TXTnUkOE~AXrs-mTGikzERLJbXk78LcwpmC7TTyYeCtalXRbn6mQdWHkugT~7E6aFhSIXtr0wUeEa9ggyXHzI8QE5fnkGvCbCjom8TWuXAy1fEXh8jafZAlXNOk07g0ByBGRgfbBQQ01opy6KnIg4ngwTrxWJx5drRVklgdqmAQ__&Expires=1789316974&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9kMWhrcHV6Mm81YTJ4dy5jbG91ZGZyb250Lm5ldC9zb3VyY2UvNTU1NDc2YzIzOTBjMTAyZC0wNC8qIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzg5MzE2OTc0fX19XX0_';
 
 function isBsiTokenValid(token) {
   if (!token || typeof token !== 'string') return false;
@@ -4105,42 +4105,23 @@ function isBsiTokenValid(token) {
   return now < (exp - 180); // 3-minute proactive safety buffer
 }
 
-async function getBsiCloudFrontToken() {
-  if (isBsiTokenValid(bsiCloudFrontToken)) {
+async function getBsiCloudFrontToken(forceRefresh = false) {
+  if (!forceRefresh && isBsiTokenValid(bsiCloudFrontToken)) {
     return bsiCloudFrontToken;
   }
 
-  // 1. Try local assets/bsi_token.json with no-store cache control
-  try {
-    const res = await fetch(`assets/bsi_token.json?t=${Date.now()}`, { cache: 'no-store' });
-    if (res.ok) {
-      const data = await res.json();
-      if (data && isBsiTokenValid(data.token)) {
-        bsiCloudFrontToken = data.token;
+  // Check cached token in localStorage
+  if (!forceRefresh) {
+    try {
+      const stored = localStorage.getItem("rol_bsi_token");
+      if (stored && isBsiTokenValid(stored)) {
+        bsiCloudFrontToken = stored;
         return bsiCloudFrontToken;
       }
-    }
-  } catch (err) {
-    console.warn("[BSI Audio] Could not fetch assets/bsi_token.json:", err);
+    } catch(e) {}
   }
 
-  // 2. Try raw.githubusercontent.com live branch fallback (instant bypass of GitHub Pages deployment lag)
-  for (const branch of ['main', 'develop']) {
-    try {
-      const rawRes = await fetch(`https://raw.githubusercontent.com/gauravsalve236-lgtm/River-of-life/${branch}/assets/bsi_token.json?t=${Date.now()}`, { cache: 'no-store' });
-      if (rawRes.ok) {
-        const data = await rawRes.json();
-        if (data && isBsiTokenValid(data.token)) {
-          bsiCloudFrontToken = data.token;
-          return bsiCloudFrontToken;
-        }
-      }
-    } catch (err) {
-      console.warn(`[BSI Audio] Raw GitHub token (${branch}) fallback failed:`, err);
-    }
-  }
-
-  // 3. If local development server is reachable, ask backend
+  // 1. If local development server is reachable and forceRefresh is requested, ask backend to scrape fresh token
   if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
     try {
       const localRes = await fetch('/api/refresh-bsi-token');
@@ -4148,10 +4129,43 @@ async function getBsiCloudFrontToken() {
         const data = await localRes.json();
         if (data && isBsiTokenValid(data.token)) {
           bsiCloudFrontToken = data.token;
+          try { localStorage.setItem("rol_bsi_token", bsiCloudFrontToken); } catch(e) {}
           return bsiCloudFrontToken;
         }
       }
     } catch(e) {}
+  }
+
+  // 2. Try local assets/bsi_token.json with no-store cache control
+  try {
+    const res = await fetch(`assets/bsi_token.json?t=${Date.now()}`, { cache: 'no-store' });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && isBsiTokenValid(data.token)) {
+        bsiCloudFrontToken = data.token;
+        try { localStorage.setItem("rol_bsi_token", bsiCloudFrontToken); } catch(e) {}
+        return bsiCloudFrontToken;
+      }
+    }
+  } catch (err) {
+    console.warn("[BSI Audio] Could not fetch assets/bsi_token.json:", err);
+  }
+
+  // 3. Try raw.githubusercontent.com live branch fallback (instant bypass of GitHub Pages deployment lag)
+  for (const branch of ['main', 'develop']) {
+    try {
+      const rawRes = await fetch(`https://raw.githubusercontent.com/gauravsalve236-lgtm/River-of-life/${branch}/assets/bsi_token.json?t=${Date.now()}`, { cache: 'no-store' });
+      if (rawRes.ok) {
+        const data = await rawRes.json();
+        if (data && isBsiTokenValid(data.token)) {
+          bsiCloudFrontToken = data.token;
+          try { localStorage.setItem("rol_bsi_token", bsiCloudFrontToken); } catch(e) {}
+          return bsiCloudFrontToken;
+        }
+      }
+    } catch (err) {
+      console.warn(`[BSI Audio] Raw GitHub token (${branch}) fallback failed:`, err);
+    }
   }
 
   return bsiCloudFrontToken;
@@ -4300,7 +4314,7 @@ async function playBsiDramatizedAudio(bookKey, chapterNum, resumeTime = null) {
       bibleChapterAudioPlayer._retried = true;
       try {
         bsiCloudFrontToken = null;
-        const freshToken = await getBsiCloudFrontToken();
+        const freshToken = await getBsiCloudFrontToken(true);
         if (freshToken) {
           console.log("[BSI Audio] Retrying playback with fresh token...");
           bibleChapterAudioPlayer.src = `https://d1hkpuz2o5a2xw.cloudfront.net/source/555476c2390c102d-04/${usfm}_${chStr}.mp3?${freshToken}`;
