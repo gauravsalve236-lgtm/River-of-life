@@ -21384,7 +21384,16 @@ function renderFeaturedScriptures(targetDate) {
   container.innerHTML = html;
 }
 
+function scrollFeaturedScriptures(direction) {
+  const scroller = document.getElementById("home-featured-scriptures-scroller");
+  if (!scroller) return;
+  const card = scroller.querySelector(".figma-recent-card");
+  const scrollAmount = card ? (card.offsetWidth + 14) * 2 : 320;
+  scroller.scrollBy({ left: direction * scrollAmount, behavior: "smooth" });
+}
+
 window.renderFeaturedScriptures = renderFeaturedScriptures;
+window.scrollFeaturedScriptures = scrollFeaturedScriptures;
 window.FEATURED_SCRIPTURES_CONFIG = FEATURED_SCRIPTURES_CONFIG;
 window.getFeaturedScriptureDayIndex = getFeaturedScriptureDayIndex;
 

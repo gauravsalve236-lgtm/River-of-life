@@ -12,7 +12,7 @@
   <script>
     // Force immediate hard purge of all stale Service Workers and CacheStorage
     (function() {
-      const CURRENT_VER = "v145_FEATURED_SCRIPTURES_ROTATION";
+      const CURRENT_VER = "v146_FEATURED_SCRIPTURES_NAV_ARROWS";
       if (localStorage.getItem("rol_app_ver") !== CURRENT_VER) {
         localStorage.setItem("rol_app_ver", CURRENT_VER);
         if ('serviceWorker' in navigator) {
@@ -544,9 +544,19 @@
 
               <!-- 9. Featured Scriptures (Curated thematic verses) -->
               <div class="home-scripture-covers-section" style="display: flex; flex-direction: column; gap: 10px; margin-top: 2px;">
-                <div class="home-section-heading-row">
-                  <h3 class="home-section-title" data-i18n="featured_books_title">Featured Scriptures • प्रमुख पुस्तके</h3>
-                  <span class="home-section-sub">Read & Explore</span>
+                <div class="home-section-heading-row" style="display: flex; justify-content: space-between; align-items: center;">
+                  <div style="display: flex; align-items: baseline; gap: 8px;">
+                    <h3 class="home-section-title" data-i18n="featured_books_title">Featured Scriptures • प्रमुख पुस्तके</h3>
+                    <span class="home-section-sub">6 Books • स्वाइप करा &rarr;</span>
+                  </div>
+                  <div class="featured-scroller-nav-buttons" style="display: flex; gap: 6px; align-items: center;">
+                    <button class="featured-nav-btn" onclick="scrollFeaturedScriptures(-1)" title="मागे (Previous Books)" aria-label="Previous books">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                    </button>
+                    <button class="featured-nav-btn" onclick="scrollFeaturedScriptures(1)" title="पुढे - Genesis, Romans, John (More Books)" aria-label="Next books">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </button>
+                  </div>
                 </div>
                 <div class="figma-recent-scroller" id="home-featured-scriptures-scroller" style="padding-bottom: 4px;">
                   <!-- Card 1: Psalms 23 -->

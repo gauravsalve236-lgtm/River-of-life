@@ -11788,6 +11788,8 @@ body:has(#view-reader.active) .mobile-bottom-tabs {
   display: flex;
   gap: 14px;
   overflow-x: auto;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
   padding-bottom: 8px;
   padding-right: 16px;
   margin-bottom: 24px;
@@ -11797,6 +11799,41 @@ body:has(#view-reader.active) .mobile-bottom-tabs {
 
 .figma-recent-scroller::-webkit-scrollbar {
   display: none;
+}
+
+.featured-scroller-nav-buttons {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.featured-nav-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--bg-content, #FFFFFF);
+  border: 1.5px solid var(--border, #E2E8F0);
+  color: var(--text, #1E293B);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.featured-nav-btn:hover {
+  background: var(--primary, #e11d48);
+  color: #FFFFFF;
+  border-color: var(--primary, #e11d48);
+  transform: scale(1.08);
+}
+
+[data-theme="dark"] .featured-nav-btn {
+  background: #202225;
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #F3F4F6;
 }
 
 /* ==========================================================================
@@ -12237,6 +12274,7 @@ body:has(#view-reader.active) .mobile-bottom-tabs {
   flex-direction: column;
   transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s ease, border-color 0.22s ease;
   box-sizing: border-box;
+  scroll-snap-align: start;
 }
 
 .figma-recent-card:hover {
