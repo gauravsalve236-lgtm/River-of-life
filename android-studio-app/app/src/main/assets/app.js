@@ -21370,7 +21370,7 @@ function renderFeaturedScriptures(targetDate) {
     return `
       <div class="figma-recent-card ${book.themeClass || ''}" onclick="openReaderAndNavigate('${book.id}', ${chapter}, 1)" title="Open ${book.nameEn} ${chapter}">
         <div class="figma-recent-cover-wrapper">
-          <img src="${book.cover}" alt="${book.nameEn}" class="figma-recent-cover-img" loading="lazy" onerror="this.onerror=null; this.src='assets/images/book_psalms_cover.png';">
+          <img src="${book.cover}" alt="${book.nameEn}" class="figma-recent-cover-img" loading="eager" onerror="this.onerror=null; this.src='assets/images/book_psalms_cover.png';">
           <span class="figma-recent-ch-badge">${chBadge}</span>
         </div>
         <div class="figma-recent-meta">
