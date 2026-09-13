@@ -3888,6 +3888,26 @@ const BSI_USFM_MAP = {
   "jude": "JUD", "revelation": "REV"
 };
 
+function getBsiUsfmCode(bookInput) {
+  if (!bookInput) return "GEN";
+  const str = String(bookInput).trim().toLowerCase().replace(".json", "").replace(/[\s_\-]+/g, "");
+  if (BSI_USFM_MAP[str]) return BSI_USFM_MAP[str];
+
+  // Try matching against booksMetadataMr if available
+  if (typeof booksMetadataMr !== 'undefined' && Array.isArray(booksMetadataMr)) {
+    const found = booksMetadataMr.find(b => 
+      b.name === bookInput || 
+      (b.engName && b.engName.toLowerCase().replace(/[\s_\-]+/g, "") === str) ||
+      b.filename.replace(".json", "").toLowerCase().replace(/[\s_\-]+/g, "") === str
+    );
+    if (found) {
+      const fn = found.filename.replace(".json", "").toLowerCase().replace(/[\s_\-]+/g, "");
+      if (BSI_USFM_MAP[fn]) return BSI_USFM_MAP[fn];
+    }
+  }
+  return BSI_USFM_MAP[str] || "GEN";
+}
+
 let bsiCloudFrontToken = 'Key-Pair-Id=KCC7HS8KPVISV&Signature=DE9BLkvIQme61wSlLZqNDeY~jZbRg1eVp~cdsCy7NZC88cH~WkymZiNkz40dY9gZYMZOZ2B8CA2pXLDR4RNsRNVrmhG5uCJP8LRQfa93ES~v9pj1iP0pRczIWj7laFM7jEmvDJF21rIPImxCyJbRDsXrqg-ZNeF1j37OFUXUvda3NEYEzN4TR9D8CQptz14o3DW5xwW8y8BSGnlronu4CETcWRD3iuNV3k6Chvv2P3ko1ZSpdLFha9bgdSjltcXzj2jmpG8XMD21Im6TFIhLbFWGfQqK7glao4oEqRW6w7OI-NEtU63DVuiuC9NAUNP7y2d6bBOAWvbIqm5v9Vh3sw__&Expires=1789294063&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9kMWhrcHV6Mm81YTJ4dy5jbG91ZGZyb250Lm5ldC9zb3VyY2UvNTU1NDc2YzIzOTBjMTAyZC0wNC8qIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzg5Mjk0MDYzfX19XX0_';
 
 function isBsiTokenValid(token) {
@@ -3896,7 +3916,7 @@ function isBsiTokenValid(token) {
   if (!m) return false;
   const exp = parseInt(m[1], 10);
   const now = Math.floor(Date.now() / 1000);
-  return now < (exp - 60);
+  return now < (exp - 180); // 3-minute proactive safety buffer
 }
 
 async function getBsiCloudFrontToken() {
@@ -3970,7 +3990,7 @@ async function playBsiDramatizedAudio(bookKey, chapterNum, resumeTime = null) {
 
   const cleanBook = (bookKey || state.activeBook || "genesis").toLowerCase().replace(".json", "");
   const chNum = parseInt(chapterNum || state.activeChapter || 1, 10);
-  const usfm = BSI_USFM_MAP[cleanBook] || "GEN";
+  const usfm = getBsiUsfmCode(bookKey || cleanBook);
   const chStr = String(chNum).padStart(3, '0');
   
   let audioUrl = `https://d1hkpuz2o5a2xw.cloudfront.net/source/555476c2390c102d-04/${usfm}_${chStr}.mp3?${bsiCloudFrontToken}`;
