@@ -698,8 +698,8 @@ let state = {
   fontSize: 100,           // percentage (70 - 180)
   fontFamily: 'serif',     // 'serif', 'sans', 'rounded'
   lineHeight: 1.5,         // line height (1.5, 1.8, 2.1)
-  activeBook: 'judges',    // active book filename (e.g. 'judges')
-  activeChapter: 13,       // active chapter number (1-indexed)
+  activeBook: 'psalms',    // active book filename (e.g. 'psalms')
+  activeChapter: 23,       // active chapter number (1-indexed)
   translation: 'mar',      // 'mar', 'eng', 'parallel'
   bookSort: 'traditional', // 'traditional', 'alphabetical'
   readingPlan: 'none',     // active plan ('none', 'nt90', 'bible365')
@@ -3279,13 +3279,25 @@ function renderDailyDevotion() {
   const imgUrl = (typeof getVodImageUrl === "function") ? getVodImageUrl(dailyImg) : (dailyImg.includes('.') ? `assets/daily_verses/${dailyImg}` : `assets/daily_verses/${dailyImg}.png`);
   
   const bgEl = document.getElementById("vod-dynamic-bg") || document.querySelector(".youversion-vod-bg") || document.querySelector(".daily-verse-card-bg");
-  if (bgEl) bgEl.style.backgroundImage = `url('${imgUrl}')`;
+  if (bgEl) {
+    bgEl.style.backgroundImage = `url('${imgUrl}')`;
+    bgEl.style.backgroundSize = "cover";
+    bgEl.style.backgroundPosition = "center";
+  }
 
   const heroCard = document.getElementById("card-daily-verse-home");
-  if (heroCard) heroCard.style.backgroundImage = `url('${imgUrl}')`;
+  if (heroCard) {
+    heroCard.style.backgroundImage = `url('${imgUrl}')`;
+    heroCard.style.backgroundSize = "cover";
+    heroCard.style.backgroundPosition = "center";
+  }
 
   const fsCapsule = document.querySelector(".fullscreen-vod-capsule");
-  if (fsCapsule) fsCapsule.style.backgroundImage = `url('${imgUrl}')`;
+  if (fsCapsule) {
+    fsCapsule.style.backgroundImage = `url('${imgUrl}')`;
+    fsCapsule.style.backgroundSize = "cover";
+    fsCapsule.style.backgroundPosition = "center";
+  }
   
   // Continue Reading Card Data Sync
   const contBookEl = document.getElementById("home-continue-book-chapter");
@@ -3302,6 +3314,11 @@ function renderDailyDevotion() {
   const totalChs = bookMetaMr?.chaptersCount || bookMetaEng?.chaptersCount || 150;
   const readPercent = Math.min(100, Math.max(8, Math.round((curCh / totalChs) * 100)));
   
+  const contCardEl = document.getElementById("home-continue-reading-card");
+  if (contCardEl) {
+    contCardEl.dataset.bookKey = curBook;
+    contCardEl.dataset.chapterNum = curCh;
+  }
   if (contBookEl) contBookEl.textContent = `${engBookName} ${curCh}`;
   if (contMrEl) contMrEl.textContent = `${mrBookName} ${curCh}`;
   if (contPercentEl) contPercentEl.textContent = isEng ? `Chapter ${curCh} of ${totalChs}` : `अध्याय ${curCh} / ${totalChs}`;
@@ -3785,10 +3802,40 @@ function playDailyVerseAudio() { console.log("playDailyVerseAudio disabled per u
 }
 
 function continueLastReadChapter() {
-  const book = state.activeBook || "psalms";
-  const ch = state.activeChapter || 23;
+  const card = document.getElementById("home-continue-reading-card");
+  let book = card?.dataset?.bookKey || state.activeBook || "psalms";
+  let ch = parseInt(card?.dataset?.chapterNum || state.activeChapter || 23, 10);
   openReaderAndNavigate(book, ch, 1);
 }
+
+function triggerHomepageSearch(customQuery = null) {
+  const input = document.getElementById("home-search-input");
+  const query = (typeof customQuery === "string" ? customQuery : (input ? input.value : "")).trim();
+  if (!query) {
+    if (input) input.focus();
+    return;
+  }
+  
+  if (typeof switchTab === "function") {
+    switchTab("discover");
+  }
+  window.location.hash = "#/discover";
+  
+  setTimeout(() => {
+    const discoverInput = document.getElementById("discover-search-input");
+    const sClear = document.getElementById("btn-discover-search-clear");
+    if (discoverInput) {
+      discoverInput.value = query;
+      if (sClear) sClear.style.display = "flex";
+      if (typeof executeDiscoverSearch === "function") {
+        executeDiscoverSearch();
+      }
+      const emptyState = document.getElementById("search-empty-state-content");
+      if (emptyState) emptyState.style.display = "none";
+    }
+  }, 180);
+}
+window.triggerHomepageSearch = triggerHomepageSearch;
 
 function renderGrowView() {
   console.log("[GrowView] Rendered Grow in Faith Hub");
@@ -4293,7 +4340,7 @@ function getBsiUsfmCode(bookInput) {
   return BSI_USFM_MAP[str] || "GEN";
 }
 
-let bsiCloudFrontToken = 'Key-Pair-Id=KCC7HS8KPVISV&Signature=g3fQetI89JVPZlRCtRgNOEr4R6MZwcu2xThCfi7rjfpr6xc~IKR7vW0UlUpt~s0InM5Xy08qYOrwHSBc58rrX28SrMUt1j34cuG0q2mST0Gci1LmBO0syPBb3l-qsX8H5ZswoGyy9pO2R5zABiG~BOHp9tkGovxaK6jm7aMtP39TXTnUkOE~AXrs-mTGikzERLJbXk78LcwpmC7TTyYeCtalXRbn6mQdWHkugT~7E6aFhSIXtr0wUeEa9ggyXHzI8QE5fnkGvCbCjom8TWuXAy1fEXh8jafZAlXNOk07g0ByBGRgfbBQQ01opy6KnIg4ngwTrxWJx5drRVklgdqmAQ__&Expires=1789316974&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9kMWhrcHV6Mm81YTJ4dy5jbG91ZGZyb250Lm5ldC9zb3VyY2UvNTU1NDc2YzIzOTBjMTAyZC0wNC8qIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzg5MzE2OTc0fX19XX0_';
+let bsiCloudFrontToken = 'Key-Pair-Id=KCC7HS8KPVISV&Signature=X68FFv7YGRCkHrMzz2lmwZOUBmQlpQgnc7qhojMi7W7Kr~SKthTRTldXfAyuvT5WHRw7fjmhz76VRIkOyGFkfPSqKVruSLQ-nKLmmR4n~jk4zO-k~pk6f-Dc6YVUKdY8jKGuAtNcL8R8jMxcWNh5HgjXS1ZBm0Hic2jwX8vfoEYOInJxbAy4s2WJrHflXSMrMP-VfFsQvdTFzHblmjQB-HuRuAWOuN-vFfIP2sCVszDrQQteAsqDHoFdI4kryoEGEnD5V5M2xQ9jdu-hI8pVKB7Pc~V8X0ISzWLfFukp1Vh9n9KbiMmJ1SQt6CD03osc5sMtL1e-h-df2smZwDzZBg__&Expires=1789365992&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9kMWhrcHV6Mm81YTJ4dy5jbG91ZGZyb250Lm5ldC9zb3VyY2UvNTU1NDc2YzIzOTBjMTAyZC0wNC8qIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzg5MzY1OTkyfX19XX0_';
 
 function isBsiTokenValid(token) {
   if (!token || typeof token !== 'string') return false;
@@ -4309,33 +4356,7 @@ async function getBsiCloudFrontToken(forceRefresh = false) {
     return bsiCloudFrontToken;
   }
 
-  // Check cached token in localStorage
-  if (!forceRefresh) {
-    try {
-      const stored = localStorage.getItem("rol_bsi_token");
-      if (stored && isBsiTokenValid(stored)) {
-        bsiCloudFrontToken = stored;
-        return bsiCloudFrontToken;
-      }
-    } catch(e) {}
-  }
-
-  // 1. If local development server is reachable and forceRefresh is requested, ask backend to scrape fresh token
-  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-    try {
-      const localRes = await fetch('/api/refresh-bsi-token');
-      if (localRes.ok) {
-        const data = await localRes.json();
-        if (data && isBsiTokenValid(data.token)) {
-          bsiCloudFrontToken = data.token;
-          try { localStorage.setItem("rol_bsi_token", bsiCloudFrontToken); } catch(e) {}
-          return bsiCloudFrontToken;
-        }
-      }
-    } catch(e) {}
-  }
-
-  // 2. Try local assets/bsi_token.json with no-store cache control
+  // 1. Try local assets/bsi_token.json with no-store cache control (primary ground truth)
   try {
     const res = await fetch(`assets/bsi_token.json?t=${Date.now()}`, { cache: 'no-store' });
     if (res.ok) {
@@ -4350,7 +4371,33 @@ async function getBsiCloudFrontToken(forceRefresh = false) {
     console.warn("[BSI Audio] Could not fetch assets/bsi_token.json:", err);
   }
 
-  // 3. Try raw.githubusercontent.com live branch fallback (instant bypass of GitHub Pages deployment lag)
+  // 2. If local development server is reachable and forceRefresh is requested, ask backend to scrape fresh token
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    try {
+      const localRes = await fetch('/api/refresh-bsi-token');
+      if (localRes.ok) {
+        const data = await localRes.json();
+        if (data && isBsiTokenValid(data.token)) {
+          bsiCloudFrontToken = data.token;
+          try { localStorage.setItem("rol_bsi_token", bsiCloudFrontToken); } catch(e) {}
+          return bsiCloudFrontToken;
+        }
+      }
+    } catch(e) {}
+  }
+
+  // 3. Try cached token in localStorage
+  if (!forceRefresh) {
+    try {
+      const stored = localStorage.getItem("rol_bsi_token");
+      if (stored && isBsiTokenValid(stored)) {
+        bsiCloudFrontToken = stored;
+        return bsiCloudFrontToken;
+      }
+    } catch(e) {}
+  }
+
+  // 4. Try raw.githubusercontent.com live branch fallback (instant bypass of GitHub Pages deployment lag)
   for (const branch of ['main', 'develop']) {
     try {
       const rawRes = await fetch(`https://raw.githubusercontent.com/gauravsalve236-lgtm/River-of-life/${branch}/assets/bsi_token.json?t=${Date.now()}`, { cache: 'no-store' });
@@ -4509,6 +4556,8 @@ async function playBsiDramatizedAudio(bookKey, chapterNum, resumeTime = null) {
 
   bibleChapterAudioPlayer.onerror = async function(e) {
     console.warn("[BSI Audio] Player error:", e);
+    const mediaErr = bibleChapterAudioPlayer.error;
+    console.warn("[BSI Audio] MediaError code:", mediaErr ? mediaErr.code : "none");
     if (!bibleChapterAudioPlayer._retried) {
       bibleChapterAudioPlayer._retried = true;
       try {
@@ -4535,6 +4584,9 @@ async function playBsiDramatizedAudio(bookKey, chapterNum, resumeTime = null) {
     await bibleChapterAudioPlayer.play();
   } catch(err) {
     console.warn("[BSI Audio] Play error:", err);
+    if (err.name === 'NotAllowedError') {
+      showToast("▶️ ऑडिओ सुरू करण्यासाठी प्ले बटनावर टॅप करा");
+    }
   }
 }
 window.playBsiDramatizedAudio = playBsiDramatizedAudio;
@@ -6924,6 +6976,17 @@ function setupEventListeners() {
   // Discover search triggers
   const sInput = document.getElementById("discover-search-input");
   const sClear = document.getElementById("btn-discover-search-clear");
+  
+  // Homepage search triggers
+  const homeSearchInput = document.getElementById("home-search-input");
+  if (homeSearchInput) {
+    homeSearchInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        triggerHomepageSearch();
+      }
+    });
+  }
   
   sInput.addEventListener("input", () => {
     sClear.style.display = (sInput.value.length > 0) ? "flex" : "none";
@@ -20572,23 +20635,7 @@ function openDiscoverMoodTopic(topic) {
 }
 window.openDiscoverMoodTopic = openDiscoverMoodTopic;
 
-async function openReaderAndNavigate(bookKey, chapterNum = 1, verseNum = 1) {
-  switchTab('reader');
-  if (typeof openReader === 'function') {
-    await openReader(bookKey, chapterNum);
-    if (verseNum > 1) {
-      setTimeout(() => {
-        const vEl = document.getElementById(`verse-${verseNum}`);
-        if (vEl) {
-          vEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          vEl.classList.add('highlight-flash');
-          setTimeout(() => vEl.classList.remove('highlight-flash'), 2500);
-        }
-      }, 350);
-    }
-  }
-}
-window.openReaderAndNavigate = openReaderAndNavigate;
+
 
 /* ==========================================================================
    DYNAMIC DAILY DISCOVER TOPICS & DIRECT CHAPTER OPENER (66 BOOKS ROTATION)

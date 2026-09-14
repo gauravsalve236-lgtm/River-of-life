@@ -256,9 +256,21 @@
                 </div>
               </div>
 
+              <!-- 1b. Homepage Bible Topic & Keyword Search Bar -->
+              <div class="home-search-container" style="margin-bottom: 20px; position: relative;">
+                <div style="display: flex; align-items: center; background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 16px; padding: 10px 14px; box-shadow: var(--shadow-sm); gap: 10px; transition: border-color 0.2s ease, box-shadow 0.2s ease;">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--primary)" stroke-width="2.3" style="flex-shrink: 0;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                  <input type="search" id="home-search-input" placeholder="Search Bible, topic, or keyword (उदा. प्रीती, शांती, faith)..." autocomplete="off" style="flex: 1; border: none; outline: none; background: transparent; font-family: var(--font-ui); font-size: 14px; color: var(--text); padding: 0;">
+                  <button id="home-search-btn-go" onclick="triggerHomepageSearch()" style="background: var(--primary); color: #ffffff; border: none; border-radius: 10px; padding: 6px 14px; font-family: var(--font-ui); font-size: 12.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(158,22,34,0.25);">
+                    <span data-i18n="btn_search_go">शोधा</span>
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                  </button>
+                </div>
+              </div>
+
               <!-- LIVE CHURCH ANNOUNCEMENTS BROADCAST (If Active) -->
               <!-- 2. Daily Verse Card: Prominent card with inline action buttons (Read, Listen, Save, Share) -->
-              <div class="home-vod-card" id="card-daily-verse-home" onclick="openFullscreenVOD()" title="Open Daily Verse Studio & Gallery / दैनिक वचन स्टुडिओ उघडा" style="background-image: url('assets/daily_verses/golden_dawn.png');">
+              <div class="home-vod-card" id="card-daily-verse-home" onclick="openFullscreenVOD()" title="Open Daily Verse Studio & Gallery / दैनिक वचन स्टुडिओ उघडा" style="background-image: url('assets/daily_verses/golden_dawn.png'); background-size: cover; background-position: center; background-repeat: no-repeat;">
                 <div class="home-vod-overlay"></div>
                 <div class="home-vod-badge-row" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                   <span class="home-vod-badge" data-i18n="vod_label">VERSE OF THE DAY</span>
