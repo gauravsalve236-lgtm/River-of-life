@@ -19654,39 +19654,79 @@ function filterAdminMembers() {
 
 function openAdminAddMemberModal() {
   const modal = document.getElementById("modal-admin-add-member");
-  if (modal) modal.style.display = "flex";
+  if (modal) {
+    modal.style.display = "flex";
+    const nameInput = document.getElementById("admin-input-new-name");
+    if (nameInput) nameInput.focus();
+  }
 }
 
-function handleAdminAddMember(e) {
+function closeAdminAddMemberModal() {
+  const modal = document.getElementById("modal-admin-add-member");
+  if (modal) modal.style.display = "none";
+}
+
+async function handleAdminAddMember(e) {
   if (e) e.preventDefault();
   const name = document.getElementById("admin-input-new-name")?.value.trim();
   const email = document.getElementById("admin-input-new-email")?.value.trim();
-  const role = document.getElementById("admin-input-new-role")?.value || "Member";
+  const role = document.getElementById("admin-input-new-role")?.value || "User";
+  const submitBtn = document.getElementById("btn-admin-add-member-submit");
 
   if (!name || !email) {
     showToast("Please provide both name and email / नाव व ईमेल भरा");
     return;
   }
 
-  const members = getAdminMembers();
-  const newMember = {
-    id: `usr_${Date.now()}`,
-    username: name,
-    email: email.toLowerCase(),
-    role: role,
-    isPastor: role === "Pastor",
-    isAdmin: role === "Admin",
-    isLeader: role === "Leader",
-    addedAt: Date.now()
-  };
+  const originalBtnText = submitBtn ? submitBtn.innerText : "Add Member";
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerText = "⏳ Adding & Sending Email...";
+  }
 
-  members.unshift(newMember);
-  saveAdminMembersList(members);
+  try {
+    const apiBase = (typeof ROL_API_BASE !== 'undefined') ? ROL_API_BASE : 'http://localhost:7880';
+    const token = localStorage.getItem("rol_access_token") || "";
 
-  closeModal("modal-admin-add-member");
-  document.getElementById("form-admin-add-member")?.reset();
-  renderAdminMembers();
-  showToast(`✅ Added ${name} as ${role}!`);
+    const res = await fetch(`${apiBase}/api/admin/users`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify({
+        fullName: name,
+        email: email,
+        role: role,
+        sendEmail: true
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || "Failed to create user account.");
+    }
+
+    closeAdminAddMemberModal();
+    document.getElementById("form-admin-add-member")?.reset();
+
+    if (data.emailSent) {
+      showToast(`✅ Added ${name}! Invitation email sent to ${email} ✉️`);
+    } else {
+      showToast(`✅ Added ${name} as ${role}!`);
+    }
+
+    await renderAdminMembers();
+  } catch (err) {
+    console.error("Add member error:", err);
+    showToast(`❌ Error: ${err.message}`);
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerText = originalBtnText;
+    }
+  }
 }
 
 async function updateAdminMemberRole(memberId, newRole) {
@@ -19700,31 +19740,46 @@ async function updateAdminMemberRole(memberId, newRole) {
       },
       body: JSON.stringify({ role: newRole })
     });
+    const data = await res.json();
     if (res.ok) {
       showToast(`✅ User role updated to ${newRole}!`);
+    } else {
+      showToast(`❌ ${data.error || 'Failed to update role'}`);
     }
   } catch (err) {
     console.warn("Failed to update role via API:", err.message);
+    showToast(`❌ ${err.message}`);
   }
 
-  const members = getAdminMembers();
-  const member = members.find(m => m.id === memberId);
-  if (member) {
-    member.role = newRole;
-    saveAdminMembersList(members);
-  }
   renderAdminMembers();
 }
 
-function deleteAdminMember(memberId) {
-  let members = getAdminMembers();
-  const member = members.find(m => m.id === memberId);
-  if (!member) return;
-  if (confirm(`Are you sure you want to remove ${member.username} from the directory?`)) {
-    members = members.filter(m => m.id !== memberId);
-    saveAdminMembersList(members);
-    renderAdminMembers();
-    showToast(`Removed ${member.username}`);
+async function deleteAdminMember(memberId) {
+  if (!confirm(`Are you sure you want to permanently delete this member? / या सदस्याचे खाते कायमचे काढून टाकायचे आहे का?`)) {
+    return;
+  }
+
+  try {
+    const apiBase = (typeof ROL_API_BASE !== 'undefined') ? ROL_API_BASE : 'http://localhost:7880';
+    const token = localStorage.getItem("rol_access_token") || "";
+
+    const res = await fetch(`${apiBase}/api/admin/users/${memberId}`, {
+      method: "DELETE",
+      headers: {
+        "Authorization": "Bearer " + token
+      }
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || "Failed to delete member.");
+    }
+
+    showToast(`🗑️ ${data.message || 'Member deleted successfully'}`);
+    await renderAdminMembers();
+  } catch (err) {
+    console.error("Delete member error:", err);
+    showToast(`❌ Error: ${err.message}`);
   }
 }
 
@@ -20301,6 +20356,7 @@ window.applyStylesFromState = applyStylesFromState;
 window.renderAdminPanel = renderAdminPanel;
 window.switchAdminSubtab = switchAdminSubtab;
 window.openAdminAddMemberModal = openAdminAddMemberModal;
+window.closeAdminAddMemberModal = closeAdminAddMemberModal;
 window.handleAdminAddMember = handleAdminAddMember;
 window.updateAdminMemberRole = updateAdminMemberRole;
 window.deleteAdminMember = deleteAdminMember;

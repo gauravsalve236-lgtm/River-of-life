@@ -13,11 +13,12 @@
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
+    "elevenlabs": "^1.50.0",
     "express": "^4.19.2",
     "express-rate-limit": "^7.3.1",
     "jsonwebtoken": "^9.0.2",
     "livekit-server-sdk": "^2.18.0",
-    "elevenlabs": "^1.50.0",
+    "nodemailer": "^10.0.9",
     "pg": "^8.11.5",
     "sqlite3": "^5.1.7"
   }

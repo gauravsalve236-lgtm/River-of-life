@@ -2323,6 +2323,47 @@
                   <!-- Rendered dynamically -->
                 </div>
               </div>
+
+              <!-- Modal: Add New Member -->
+              <div id="modal-admin-add-member" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.7); z-index: 10000; align-items: center; justify-content: center; padding: 16px;">
+                <div style="background: var(--surface, #1e293b); border: 1.5px solid var(--border, rgba(255,255,255,0.15)); border-radius: 20px; width: 100%; max-width: 480px; padding: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+                    <div>
+                      <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: var(--text, #fff);">Add Member / नवीन सदस्य जोडा</h3>
+                      <p style="margin: 4px 0 0; font-size: 12.5px; color: var(--text-muted, #94a3b8);">Sends an email invitation with login access credentials.</p>
+                    </div>
+                    <button onclick="closeAdminAddMemberModal()" style="background: transparent; border: none; font-size: 20px; color: var(--text-muted, #94a3b8); cursor: pointer; padding: 4px;">✕</button>
+                  </div>
+                  <form id="form-admin-add-member" onsubmit="handleAdminAddMember(event)">
+                    <div style="display: flex; flex-direction: column; gap: 14px;">
+                      <div>
+                        <label style="display: block; font-size: 12.5px; font-weight: 700; margin-bottom: 6px; color: var(--text, #fff);">Full Name / नाव *</label>
+                        <input type="text" id="admin-input-new-name" required placeholder="e.g. John Doe / जॉन डो" style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border, #334155); background: var(--bg, #0f172a); color: var(--text, #fff); font-size: 13.5px; box-sizing: border-box;">
+                      </div>
+                      <div>
+                        <label style="display: block; font-size: 12.5px; font-weight: 700; margin-bottom: 6px; color: var(--text, #fff);">Email Address / ईमेल *</label>
+                        <input type="email" id="admin-input-new-email" required placeholder="e.g. believer@gmail.com" style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border, #334155); background: var(--bg, #0f172a); color: var(--text, #fff); font-size: 13.5px; box-sizing: border-box;">
+                      </div>
+                      <div>
+                        <label style="display: block; font-size: 12.5px; font-weight: 700; margin-bottom: 6px; color: var(--text, #fff);">Role / भूमिका *</label>
+                        <select id="admin-input-new-role" style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border, #334155); background: var(--bg, #0f172a); color: var(--text, #fff); font-size: 13.5px; box-sizing: border-box;">
+                          <option value="User">User (सामान्य सदस्य)</option>
+                          <option value="Pastor">Pastor (पाळक)</option>
+                          <option value="Prayer Team">Prayer Team (प्रार्थना संघ)</option>
+                          <option value="Super-Admin">Super-Admin (मुख्य ॲडमिन)</option>
+                        </select>
+                      </div>
+                      <div style="background: rgba(30,107,119,0.15); border: 1px solid rgba(30,107,119,0.3); border-radius: 10px; padding: 12px; font-size: 12px; color: #7dd3fc; line-height: 1.45;">
+                        ✉️ <strong>Email Invitation:</strong> An invitation email containing generated login credentials and app access will be sent directly to their inbox.
+                      </div>
+                      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px;">
+                        <button type="button" onclick="closeAdminAddMemberModal()" style="padding: 10px 18px; border-radius: 10px; border: 1px solid var(--border, #334155); background: transparent; color: var(--text, #fff); font-size: 13px; font-weight: 700; cursor: pointer;">Cancel / रद्द करा</button>
+                        <button type="submit" id="btn-admin-add-member-submit" style="padding: 10px 22px; border-radius: 10px; border: none; background: var(--primary, #1e6b77); color: #fff; font-size: 13px; font-weight: 800; cursor: pointer;">Add Member &amp; Send Invite</button>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
             </div>
 
             <!-- SUBPANEL 3: VERSE OF THE DAY (VOD) -->
