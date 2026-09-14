@@ -4097,7 +4097,7 @@ function getBsiUsfmCode(bookInput) {
   return BSI_USFM_MAP[str] || "GEN";
 }
 
-let bsiCloudFrontToken = 'Key-Pair-Id=KCC7HS8KPVISV&Signature=X68FFv7YGRCkHrMzz2lmwZOUBmQlpQgnc7qhojMi7W7Kr~SKthTRTldXfAyuvT5WHRw7fjmhz76VRIkOyGFkfPSqKVruSLQ-nKLmmR4n~jk4zO-k~pk6f-Dc6YVUKdY8jKGuAtNcL8R8jMxcWNh5HgjXS1ZBm0Hic2jwX8vfoEYOInJxbAy4s2WJrHflXSMrMP-VfFsQvdTFzHblmjQB-HuRuAWOuN-vFfIP2sCVszDrQQteAsqDHoFdI4kryoEGEnD5V5M2xQ9jdu-hI8pVKB7Pc~V8X0ISzWLfFukp1Vh9n9KbiMmJ1SQt6CD03osc5sMtL1e-h-df2smZwDzZBg__&Expires=1789365992&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9kMWhrcHV6Mm81YTJ4dy5jbG91ZGZyb250Lm5ldC9zb3VyY2UvNTU1NDc2YzIzOTBjMTAyZC0wNC8qIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzg5MzY1OTkyfX19XX0_';
+let bsiCloudFrontToken = 'Key-Pair-Id=KCC7HS8KPVISV&Signature=QkrmRAi0CUFRcxYMbaJmE2sNw7eken4TjfKCcIYyopc-yQpxzsHpZm8yKr30hihTDyKlQZHjb~GVu6Uf3a8HA4h1Wc3hZuSGOdPe9PTnsP3GrEabYXQZJj31V4pnbvUJSbyIE8DDYfhnCEgB7LXVBVToE0GP~cmdBpkdXGZwITHKVEp0z3m~iTA-j1XBNQjR4dbAUcPPkbqHWXRJIEEnlUObyTW~XG81OE7Nv3~WDGBzCfwWlZgdOwrS2PiCP2-IiQW-fxIIYELPgfqJf~QJKfxhMezZDHU~KqVX87Xk~LUodQxNxKfQQUe67QJ-B90Jxts3jN4Ju5zn66Zq5RxPsQ__&Expires=1789373545&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9kMWhrcHV6Mm81YTJ4dy5jbG91ZGZyb250Lm5ldC9zb3VyY2UvNTU1NDc2YzIzOTBjMTAyZC0wNC8qIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzg5MzczNTQ1fX19XX0_';
 
 function isBsiTokenValid(token) {
   if (!token || typeof token !== 'string') return false;
@@ -4105,7 +4105,17 @@ function isBsiTokenValid(token) {
   if (!m) return false;
   const exp = parseInt(m[1], 10);
   const now = Math.floor(Date.now() / 1000);
-  return now < (exp - 180); // 3-minute proactive safety buffer
+  // On GitHub Pages (non-localhost) we cannot refresh the token server-side.
+  // Always return true so we attempt playback — CloudFront will return 403 if
+  // the token is truly expired, which triggers the onerror retry + fallback chain.
+  const isGitHubPages = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+  if (isGitHubPages) {
+    if (now >= (exp - 180)) {
+      console.warn('[BSI Audio] Token may be near expiry on GitHub Pages — attempting playback anyway, fallback ready.');
+    }
+    return true; // Always attempt; let CloudFront decide
+  }
+  return now < (exp - 180); // 3-minute proactive safety buffer (localhost only)
 }
 
 async function getBsiCloudFrontToken(forceRefresh = false) {
