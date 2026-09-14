@@ -698,8 +698,8 @@ let state = {
   fontSize: 100,           // percentage (70 - 180)
   fontFamily: 'serif',     // 'serif', 'sans', 'rounded'
   lineHeight: 1.5,         // line height (1.5, 1.8, 2.1)
-  activeBook: 'psalms',    // active book filename (e.g. 'psalms')
-  activeChapter: 23,       // active chapter number (1-indexed)
+  activeBook: 'judges',    // active book filename (e.g. 'judges')
+  activeChapter: 13,       // active chapter number (1-indexed)
   translation: 'mar',      // 'mar', 'eng', 'parallel'
   bookSort: 'traditional', // 'traditional', 'alphabetical'
   readingPlan: 'none',     // active plan ('none', 'nt90', 'bible365')
@@ -884,217 +884,6 @@ const VOD_LIST = [
 
 let touchStartX = 0;
 let touchEndX = 0;
-
-var DID_YOU_KNOW_INSIGHTS = [
-  {
-    id: "dyk_women_books",
-    theme: "dyk-theme-emerald",
-    image: "assets/images/did_you_know_esther.jpg",
-    alt: "Classical illustration of biblical Queen Esther standing before King Ahasuerus",
-    questionEn: "Which Books of the Bible Are Named After Women?",
-    questionMr: "बायबलमधील कोणत्या पुस्तकांना स्त्रियांची नावे आहेत?",
-    bulletsEn: [
-      { icon: "📖", text: "Esther 👑 (Queen of Persia & Deliverer)" },
-      { icon: "🌾", text: "Ruth (Model of Faithfulness & Lineage of Christ)" },
-      { icon: "📜", text: "Judith (Historical Apocrypha)" },
-      { icon: "🪻", text: "Susanna (Historical Apocrypha)" }
-    ],
-    bulletsMr: [
-      { icon: "📖", text: "एस्तेर (Esther) 👑 — पारसाची राणी व तारणहार" },
-      { icon: "🌾", text: "रूथ (Ruth) — विश्वासूपणाची आदर्श व दाविदाची पूर्वज" },
-      { icon: "📜", text: "यहूदीथ (Judith) — ऐतिहासिक प्राचीन ग्रंथ" },
-      { icon: "🪻", text: "सुसान्ना (Susanna) — ऐतिहासिक प्राचीन ग्रंथ" }
-    ],
-    refEn: "Esther 1 • एस्तेर १",
-    refMr: "एस्तेर १ • Esther 1",
-    book: "esther",
-    chapter: 1,
-    verse: 1
-  },
-  {
-    id: "dyk_shortest_verse",
-    theme: "dyk-theme-indigo",
-    image: "assets/images/did_you_know_jesus_wept.jpg",
-    alt: "Classical chiaroscuro engraving of Jesus Christ weeping in deep prayer",
-    questionEn: "What Is the Shortest Verse in the Bible?",
-    questionMr: "बायबलमधील सर्वात लहान वचन कोणते आहे?",
-    bulletsEn: [
-      { icon: "💧", text: "John 11:35: \"Jesus wept.\"" },
-      { icon: "🕊️", text: "Just 2 words in English & Marathi (3 in Greek: Ἐδάκρυσεν ὁ Ἰηसोῦς)" },
-      { icon: "❤️", text: "The most profound display of divine empathy & love" },
-      { icon: "🙏", text: "Christ shares deeply in all our earthly sorrows" }
-    ],
-    bulletsMr: [
-      { icon: "💧", text: "योहान ११:३५: \"येशू रडला.\"" },
-      { icon: "🕊️", text: "केवळ २ शब्द (मूळ ग्रीकमध्ये ३ शब्द: Ἐδάκρυσεν ὁ Ἰηसोῦς)" },
-      { icon: "❤️", text: "ईश्वरी करुणा व संवेदनशीलतेची सर्वात सखोल साक्ष" },
-      { icon: "🙏", text: "आपल्या अश्रूंमध्ये ख्रिस्त स्वतः सहभागी होतो" }
-    ],
-    refEn: "John 11:35 • योहान ११:३५",
-    refMr: "योहान ११:३५ • John 11:35",
-    book: "john",
-    chapter: 11,
-    verse: 35
-  },
-  {
-    id: "dyk_noahs_ark",
-    theme: "dyk-theme-teal",
-    image: "assets/images/did_you_know_noahs_ark.jpg",
-    alt: "Classical engraving of Noah's Ark floating upon great flood waters",
-    questionEn: "How Long Did Noah's Ark Float?",
-    questionMr: "नोहाचे तारू पुराच्या पाण्यावर किती काळ तरंगत होते?",
-    bulletsEn: [
-      { icon: "🌧️", text: "40 days & nights of torrential rainfall" },
-      { icon: "🌊", text: "150 days floodwaters surged across the earth" },
-      { icon: "⛰️", text: "Rested on mountains of Ararat in 7th month (Gen 8:4)" },
-      { icon: "☀️", text: "370+ total days Noah remained inside the Ark" }
-    ],
-    bulletsMr: [
-      { icon: "🌧️", text: "४० दिवस व रात्री अखंड मुसळधार पाऊस पडला" },
-      { icon: "🌊", text: "१५० दिवस पुराचे पाणी पृथ्वीवर वाहत राहिले" },
-      { icon: "⛰️", text: "७ व्या महिन्यात अरारात पर्वतावर तारू स्थिरावले" },
-      { icon: "☀️", text: "एकूण ३७० हून अधिक दिवस नोहा तारवात होता" }
-    ],
-    refEn: "Genesis 7-8 • उत्पत्ती ७-८",
-    refMr: "उत्पत्ती ७-८ • Genesis 7-8",
-    book: "genesis",
-    chapter: 7,
-    verse: 17
-  },
-  {
-    id: "dyk_shepherd_rod",
-    theme: "dyk-theme-emerald",
-    image: "assets/images/did_you_know_shepherd.jpg",
-    alt: "Classical oil painting of biblical shepherd with rod and staff",
-    questionEn: "What Is the Secret of the Shepherd's Rod & Staff?",
-    questionMr: "मेंढपाळाची काठी व सोटा यातील आध्यात्मिक रहस्य काय?",
-    bulletsEn: [
-      { icon: "🛡️", text: "Rod (Shebet): Weapon defending flock against beasts" },
-      { icon: "🌿", text: "Staff (Mish'enet): Curved crook to gently guide sheep" },
-      { icon: "✝️", text: "Psalm 23:4: \"Thy rod and thy staff they comfort me\"" },
-      { icon: "🕊️", text: "Divine protection paired with tender, loving direction" }
-    ],
-    bulletsMr: [
-      { icon: "🛡️", text: "सोटा (Rod): हिंस्र श्वापदांपासून मेंढरांचे रक्षण करणारे हत्यार" },
-      { icon: "🌿", text: "काठी (Staff): वळलेली काठी चुकलेल्या मेंढरांना परत आणण्यासाठी" },
-      { icon: "✝️", text: "स्तोत्र २३:४: \"तुझा सोटा व तुझी काठी मला धीर देतात\"" },
-      { icon: "🕊️", text: "देवाचे अजिंक्य रक्षण आणि प्रेमळ मार्गदर्शन" }
-    ],
-    refEn: "Psalm 23:4 • स्तोत्रसंहिता २३:४",
-    refMr: "स्तोत्रसंहिता २३:४ • Psalm 23:4",
-    book: "psalms",
-    chapter: 23,
-    verse: 4
-  },
-  {
-    id: "dyk_water_into_wine",
-    theme: "dyk-theme-mahogany",
-    image: "assets/images/wedding_cana_miracle.jpg",
-    alt: "Classical painting of Jesus turning water into wine at the wedding at Cana",
-    questionEn: "How Much Water Was Turned into Wine at Cana?",
-    questionMr: "काना येथील लग्नात येशूने किती लिटर पाण्याचे रूपांतर केले?",
-    bulletsEn: [
-      { icon: "🏺", text: "6 massive stone jars used for ceremonial washing" },
-      { icon: "🍷", text: "20 to 30 gallons each (total 120-180 gallons / 500-700L)" },
-      { icon: "🍇", text: "Master of banquet declared it the finest wine" },
-      { icon: "✨", text: "Revealed His glory and the overflowing abundance of grace" }
-    ],
-    bulletsMr: [
-      { icon: "🏺", text: "शुद्धीकरणासाठी ठेवलेले ६ भव्य दगडी रांजण" },
-      { icon: "🍷", text: "प्रत्येकात सुमारे १०० लिटर (एकूण ५०० ते ७०० लिटर)" },
-      { icon: "🍇", text: "यजमानाने या द्राक्षारसाला उत्कृष्ट दर्जाचा ठरवले" },
-      { icon: "✨", text: "देवाची असीम कृपा आणि महिमा येथे प्रकट झाला" }
-    ],
-    refEn: "John 2:6-10 • योहान २:६-१०",
-    refMr: "योहान २:६-१० • John 2:6-10",
-    book: "john",
-    chapter: 2,
-    verse: 1
-  },
-  {
-    id: "dyk_peace_phroureo",
-    theme: "dyk-theme-indigo",
-    image: "assets/images/peace_anxiety_art.jpg",
-    alt: "Classical illustration of divine peace guarding believer amidst storm",
-    questionEn: "What Does Paul Mean by 'The Peace of God'?",
-    questionMr: "पौल जेव्हा 'देवाच्या शांती'चा उल्लेख करतो तेव्हा त्याचा खरा अर्थ काय?",
-    bulletsEn: [
-      { icon: "🛡️", text: "Uses Roman military term 'Phroureo' (φρουρέω)" },
-      { icon: "🏰", text: "Describes an armed garrison guarding a fortress 24/7" },
-      { icon: "🕊️", text: "Transcends all human understanding and anxiety" },
-      { icon: "❤️", text: "Keeps worry and panic completely outside your heart" }
-    ],
-    bulletsMr: [
-      { icon: "🛡️", text: "'फ्रुरिओ' (Phroureo) हा रोमन सैन्याचा लष्करी शब्द वापरला" },
-      { icon: "🏰", text: "किल्ल्याचे २४ तास अहोरात्र खडा पहारा देणारा पहारेकरी" },
-      { icon: "🕊️", text: "सर्व बुद्धी व समजेच्या पलीकडची स्वर्गीय शांती" },
-      { icon: "❤️", text: "चिंता, भीती व नैराश्याला हृदयाबाहेरच थोपवून धरते" }
-    ],
-    refEn: "Philippians 4:7 • फिलिप्पैकरांस ४:७",
-    refMr: "फिलिप्पैकरांस ४:७ • Philippians 4:7",
-    book: "philippians",
-    chapter: 4,
-    verse: 6
-  }
-];
-
-// FEATURED_SCRIPTURES_CONFIG hoisted before DOMContentLoaded to prevent temporal dead zone ReferenceError
-var FEATURED_SCRIPTURES_CONFIG = [
-  {
-    id: "psalms",
-    nameEn: "Psalms",
-    nameMr: "स्तोत्रसंहिता",
-    cover: "assets/images/book_psalms_cover.png",
-    themeClass: "recent-card-psalms",
-    totalChapters: 150,
-    chapters: [23, 70, 91, 121, 27, 46, 1, 19, 34, 37, 51, 62, 84, 100, 103, 119, 139, 145, 8, 15, 16, 24, 25, 32, 40, 42, 63, 67, 72, 86, 90, 92, 95, 96, 98, 111, 112, 116, 122, 126, 127, 128, 130, 133, 138, 146, 147, 148, 150]
-  },
-  {
-    id: "proverbs",
-    nameEn: "Proverbs",
-    nameMr: "नीतिसूत्रे",
-    cover: "assets/images/book_proverbs_cover.jpg",
-    themeClass: "recent-card-proverbs",
-    totalChapters: 31,
-    chapters: [3, 4, 8, 10, 15, 16, 22, 27, 31, 1, 2, 5, 6, 7, 9, 11, 12, 13, 14, 17, 18, 19, 20, 21, 23, 24, 25, 26, 28, 29, 30]
-  },
-  {
-    id: "matthew",
-    nameEn: "Matthew",
-    nameMr: "मत्तय",
-    cover: "assets/images/book_matthew_cover.jpg",
-    themeClass: "recent-card-matthew",
-    totalChapters: 28,
-    chapters: [5, 6, 7, 11, 13, 14, 18, 24, 25, 26, 27, 28, 1, 2, 3, 4, 8, 9, 10, 12, 15, 16, 17, 19, 20, 21, 22, 23]
-  },
-  {
-    id: "john",
-    nameEn: "John",
-    nameMr: "योहान",
-    cover: "assets/images/book_john_cover.jpg",
-    themeClass: "recent-card-john",
-    totalChapters: 21,
-    chapters: [1, 3, 4, 6, 10, 11, 14, 15, 16, 17, 20, 21, 2, 5, 7, 8, 9, 12, 13, 18, 19]
-  },
-  {
-    id: "romans",
-    nameEn: "Romans",
-    nameMr: "रोमन्स",
-    cover: "assets/images/book_romans_cover.jpg",
-    themeClass: "recent-card-romans",
-    totalChapters: 16,
-    chapters: [8, 12, 1, 3, 5, 6, 7, 10, 11, 13, 14, 15, 16, 2, 4, 9]
-  },
-  {
-    id: "genesis",
-    nameEn: "Genesis",
-    nameMr: "उत्पत्ती",
-    cover: "assets/images/book_genesis_cover.jpg",
-    themeClass: "recent-card-genesis",
-    totalChapters: 50,
-    chapters: [1, 12, 15, 22, 28, 37, 39, 45, 50, 2, 3, 6, 7, 8, 9, 11]
-  }
-];
 
 /* ==========================================================================
    Initialization and Listeners
@@ -2945,6 +2734,21 @@ function selectBookForChapterScreen(bookMeta) {
   }
 }
 
+function openReaderBookChapterPicker() {
+  openDrawer("drawer-book-selector");
+  const cleanBook = (state.activeBook || "genesis").toLowerCase().replace(".json", "");
+  const currentMeta = (typeof booksMetadataMr !== 'undefined' && Array.isArray(booksMetadataMr))
+    ? booksMetadataMr.find(b => b.filename.replace(".json", "").toLowerCase() === cleanBook)
+    : null;
+  if (currentMeta) {
+    selectBookForChapterScreen(currentMeta);
+  } else {
+    switchSelectorStep("books");
+    populateBookSelector();
+  }
+}
+window.openReaderBookChapterPicker = openReaderBookChapterPicker;
+
 async function selectChapterForVerseScreen(bookMeta, chapterNum) {
   selectorTargetBookMeta = bookMeta;
   selectorTargetChapter = chapterNum;
@@ -3271,7 +3075,7 @@ function renderDailyDevotion() {
   
   // Expanded Luminous Rotating Scenic Wallpapers from assets/daily_verses/
   const images = (window.dailyVersesImageList && window.dailyVersesImageList.length > 0) ? window.dailyVersesImageList : [
-    'golden_dawn.png', 'sunrise.png', 'mountains.png', 'ocean.png', 'calm_waters.png', 'healing_light.png', 'river_of_life.png'
+    'sunrise.png', 'forest.png', 'mountains.png', 'ocean.png', 'path.png', 'stars.png', 'mist.png'
   ];
   const imgIdx = ((dayOfYear + offset) % images.length + images.length) % images.length;
   window.currentVodImageIndex = imgIdx;
@@ -3279,25 +3083,13 @@ function renderDailyDevotion() {
   const imgUrl = (typeof getVodImageUrl === "function") ? getVodImageUrl(dailyImg) : (dailyImg.includes('.') ? `assets/daily_verses/${dailyImg}` : `assets/daily_verses/${dailyImg}.png`);
   
   const bgEl = document.getElementById("vod-dynamic-bg") || document.querySelector(".youversion-vod-bg") || document.querySelector(".daily-verse-card-bg");
-  if (bgEl) {
-    bgEl.style.backgroundImage = `url('${imgUrl}')`;
-    bgEl.style.backgroundSize = "cover";
-    bgEl.style.backgroundPosition = "center";
-  }
+  if (bgEl) bgEl.style.backgroundImage = `url('${imgUrl}')`;
 
   const heroCard = document.getElementById("card-daily-verse-home");
-  if (heroCard) {
-    heroCard.style.backgroundImage = `url('${imgUrl}')`;
-    heroCard.style.backgroundSize = "cover";
-    heroCard.style.backgroundPosition = "center";
-  }
+  if (heroCard) heroCard.style.backgroundImage = `url('${imgUrl}')`;
 
   const fsCapsule = document.querySelector(".fullscreen-vod-capsule");
-  if (fsCapsule) {
-    fsCapsule.style.backgroundImage = `url('${imgUrl}')`;
-    fsCapsule.style.backgroundSize = "cover";
-    fsCapsule.style.backgroundPosition = "center";
-  }
+  if (fsCapsule) fsCapsule.style.backgroundImage = `url('${imgUrl}')`;
   
   // Continue Reading Card Data Sync
   const contBookEl = document.getElementById("home-continue-book-chapter");
@@ -3314,11 +3106,6 @@ function renderDailyDevotion() {
   const totalChs = bookMetaMr?.chaptersCount || bookMetaEng?.chaptersCount || 150;
   const readPercent = Math.min(100, Math.max(8, Math.round((curCh / totalChs) * 100)));
   
-  const contCardEl = document.getElementById("home-continue-reading-card");
-  if (contCardEl) {
-    contCardEl.dataset.bookKey = curBook;
-    contCardEl.dataset.chapterNum = curCh;
-  }
   if (contBookEl) contBookEl.textContent = `${engBookName} ${curCh}`;
   if (contMrEl) contMrEl.textContent = `${mrBookName} ${curCh}`;
   if (contPercentEl) contPercentEl.textContent = isEng ? `Chapter ${curCh} of ${totalChs}` : `अध्याय ${curCh} / ${totalChs}`;
@@ -3802,40 +3589,10 @@ function playDailyVerseAudio() { console.log("playDailyVerseAudio disabled per u
 }
 
 function continueLastReadChapter() {
-  const card = document.getElementById("home-continue-reading-card");
-  let book = card?.dataset?.bookKey || state.activeBook || "psalms";
-  let ch = parseInt(card?.dataset?.chapterNum || state.activeChapter || 23, 10);
+  const book = state.activeBook || "psalms";
+  const ch = state.activeChapter || 23;
   openReaderAndNavigate(book, ch, 1);
 }
-
-function triggerHomepageSearch(customQuery = null) {
-  const input = document.getElementById("home-search-input");
-  const query = (typeof customQuery === "string" ? customQuery : (input ? input.value : "")).trim();
-  if (!query) {
-    if (input) input.focus();
-    return;
-  }
-  
-  if (typeof switchTab === "function") {
-    switchTab("discover");
-  }
-  window.location.hash = "#/discover";
-  
-  setTimeout(() => {
-    const discoverInput = document.getElementById("discover-search-input");
-    const sClear = document.getElementById("btn-discover-search-clear");
-    if (discoverInput) {
-      discoverInput.value = query;
-      if (sClear) sClear.style.display = "flex";
-      if (typeof executeDiscoverSearch === "function") {
-        executeDiscoverSearch();
-      }
-      const emptyState = document.getElementById("search-empty-state-content");
-      if (emptyState) emptyState.style.display = "none";
-    }
-  }, 180);
-}
-window.triggerHomepageSearch = triggerHomepageSearch;
 
 function renderGrowView() {
   console.log("[GrowView] Rendered Grow in Faith Hub");
@@ -4356,22 +4113,18 @@ async function getBsiCloudFrontToken(forceRefresh = false) {
     return bsiCloudFrontToken;
   }
 
-  // 1. Try local assets/bsi_token.json with no-store cache control (primary ground truth)
-  try {
-    const res = await fetch(`assets/bsi_token.json?t=${Date.now()}`, { cache: 'no-store' });
-    if (res.ok) {
-      const data = await res.json();
-      if (data && isBsiTokenValid(data.token)) {
-        bsiCloudFrontToken = data.token;
-        try { localStorage.setItem("rol_bsi_token", bsiCloudFrontToken); } catch(e) {}
+  // Check cached token in localStorage
+  if (!forceRefresh) {
+    try {
+      const stored = localStorage.getItem("rol_bsi_token");
+      if (stored && isBsiTokenValid(stored)) {
+        bsiCloudFrontToken = stored;
         return bsiCloudFrontToken;
       }
-    }
-  } catch (err) {
-    console.warn("[BSI Audio] Could not fetch assets/bsi_token.json:", err);
+    } catch(e) {}
   }
 
-  // 2. If local development server is reachable and forceRefresh is requested, ask backend to scrape fresh token
+  // 1. If local development server is reachable and forceRefresh is requested, ask backend to scrape fresh token
   if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
     try {
       const localRes = await fetch('/api/refresh-bsi-token');
@@ -4386,18 +4139,22 @@ async function getBsiCloudFrontToken(forceRefresh = false) {
     } catch(e) {}
   }
 
-  // 3. Try cached token in localStorage
-  if (!forceRefresh) {
-    try {
-      const stored = localStorage.getItem("rol_bsi_token");
-      if (stored && isBsiTokenValid(stored)) {
-        bsiCloudFrontToken = stored;
+  // 2. Try local assets/bsi_token.json with no-store cache control
+  try {
+    const res = await fetch(`assets/bsi_token.json?t=${Date.now()}`, { cache: 'no-store' });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && isBsiTokenValid(data.token)) {
+        bsiCloudFrontToken = data.token;
+        try { localStorage.setItem("rol_bsi_token", bsiCloudFrontToken); } catch(e) {}
         return bsiCloudFrontToken;
       }
-    } catch(e) {}
+    }
+  } catch (err) {
+    console.warn("[BSI Audio] Could not fetch assets/bsi_token.json:", err);
   }
 
-  // 4. Try raw.githubusercontent.com live branch fallback (instant bypass of GitHub Pages deployment lag)
+  // 3. Try raw.githubusercontent.com live branch fallback (instant bypass of GitHub Pages deployment lag)
   for (const branch of ['main', 'develop']) {
     try {
       const rawRes = await fetch(`https://raw.githubusercontent.com/gauravsalve236-lgtm/River-of-life/${branch}/assets/bsi_token.json?t=${Date.now()}`, { cache: 'no-store' });
@@ -4556,8 +4313,6 @@ async function playBsiDramatizedAudio(bookKey, chapterNum, resumeTime = null) {
 
   bibleChapterAudioPlayer.onerror = async function(e) {
     console.warn("[BSI Audio] Player error:", e);
-    const mediaErr = bibleChapterAudioPlayer.error;
-    console.warn("[BSI Audio] MediaError code:", mediaErr ? mediaErr.code : "none");
     if (!bibleChapterAudioPlayer._retried) {
       bibleChapterAudioPlayer._retried = true;
       try {
@@ -4576,7 +4331,25 @@ async function playBsiDramatizedAudio(bookKey, chapterNum, resumeTime = null) {
         console.warn("[BSI Audio] Retry token failed:", retryErr);
       }
     }
-    showToast("⚠️ BSI ऑडिओ लोड होत नाही, AI वाचकावर पुनर्निर्देशित करत आहे...");
+
+    // Direct Seamless Fallback: High quality authentic Marathi voice (WordProject 28)
+    if (!bibleChapterAudioPlayer._wpFallback) {
+      bibleChapterAudioPlayer._wpFallback = true;
+      try {
+        const bookNum = getBookNumber(cleanBook);
+        const wpUrl = getBibleAudioUrl(bookNum, chNum, state.translation);
+        console.log("[BSI Audio] Falling back to authentic Marathi audio:", wpUrl);
+        bibleChapterAudioPlayer.src = wpUrl;
+        if (targetTime > 0) {
+          bibleChapterAudioPlayer.currentTime = targetTime;
+        }
+        await bibleChapterAudioPlayer.play();
+        return;
+      } catch(wpErr) {
+        console.warn("[BSI Audio] WordProject fallback failed:", wpErr);
+      }
+    }
+
     startSpeechNarration(0);
   };
 
@@ -4584,9 +4357,6 @@ async function playBsiDramatizedAudio(bookKey, chapterNum, resumeTime = null) {
     await bibleChapterAudioPlayer.play();
   } catch(err) {
     console.warn("[BSI Audio] Play error:", err);
-    if (err.name === 'NotAllowedError') {
-      showToast("▶️ ऑडिओ सुरू करण्यासाठी प्ले बटनावर टॅप करा");
-    }
   }
 }
 window.playBsiDramatizedAudio = playBsiDramatizedAudio;
@@ -6772,9 +6542,7 @@ function setupEventListeners() {
   const btnInlineBookPicker = document.getElementById("btn-reader-open-book-picker");
   if (btnInlineBookPicker) {
     btnInlineBookPicker.addEventListener("click", () => {
-      openDrawer("drawer-book-selector");
-      switchSelectorStep("books");
-      populateBookSelector();
+      openReaderBookChapterPicker();
     });
   }
 
@@ -6976,17 +6744,6 @@ function setupEventListeners() {
   // Discover search triggers
   const sInput = document.getElementById("discover-search-input");
   const sClear = document.getElementById("btn-discover-search-clear");
-  
-  // Homepage search triggers
-  const homeSearchInput = document.getElementById("home-search-input");
-  if (homeSearchInput) {
-    homeSearchInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        triggerHomepageSearch();
-      }
-    });
-  }
   
   sInput.addEventListener("input", () => {
     sClear.style.display = (sInput.value.length > 0) ? "flex" : "none";
@@ -10779,19 +10536,12 @@ function updateAuthUI() {
     if (loggedInCont) loggedInCont.style.display = "none";
   }
 
-  // Restrict Admin & Pastor Console card strictly to users with administrative roles
+  // Restrict Admin & Pastor Console card strictly to users with role 'admin' or 'pastor'
   const adminPanelCard = document.getElementById("you-admin-panel-card");
   if (adminPanelCard) {
-    const rawRole = (state.currentUser?.role || localStorage.getItem("rol_user_role") || "").toLowerCase().replace(/[\s-]+/g, "_");
-    const allowedAdminRoles = ["super_admin", "pastor", "prayer_team", "admin", "church_admin"];
-    if (state.currentUser && allowedAdminRoles.includes(rawRole)) {
+    const role = (state.currentUser?.role || "").toLowerCase();
+    if (state.currentUser && (role === "admin" || role === "pastor")) {
       adminPanelCard.style.display = "block";
-      const badgeTitle = document.querySelector("#you-admin-panel-card h4");
-      if (badgeTitle) {
-        if (rawRole === "super_admin") badgeTitle.textContent = "Super-Admin Master Portal / महा-नियंत्रक";
-        else if (rawRole === "prayer_team") badgeTitle.textContent = "Prayer Team Intercession Console / प्रार्थना कक्ष";
-        else badgeTitle.textContent = "Pastor & Admin Console / पास्टर व प्रशासन कक्ष";
-      }
     } else {
       adminPanelCard.style.display = "none";
     }
@@ -14163,7 +13913,7 @@ window.submitPastoralPrayerRequest = function(e) {
    ========================================================================== */
 
 window.dailyVersesImageList = [
-  'stars.png', 'forest.png', 'mist.png', 'mountains.png', 'mount_zion.png', 'ocean.png', 'path.png', 'sunrise.png'
+  'sunrise.png', 'forest.png', 'mountains.png', 'ocean.png', 'path.png', 'stars.png', 'mist.png'
 ];
 window.currentVodImageIndex = 0;
 let vodAutoRotateTimer = null;
@@ -15602,9 +15352,7 @@ window.switchPrayersSubtab = function(subtab) {
   if (subtab === 'meetings') {
     renderScheduledPrayersTab();
   } else if (subtab === 'requests') {
-    if (typeof loadMyPrayerJournal === 'function') {
-      loadMyPrayerJournal();
-    }
+    renderPublicPrayerRequests();
   }
 };
 
@@ -15714,328 +15462,6 @@ function savePublicPrayerRequests(reqs) {
     localStorage.setItem("rol_public_prayer_requests", JSON.stringify(reqs));
   } catch(e) {}
 }
-
-/* ==============================================================================
-   CONFIDENTIAL PRAYER REQUESTS, VOICE INPUT & MY PRAYER JOURNAL
-   ============================================================================== */
-
-window.selectPrayerPrivacy = function(privacy, btn) {
-  const hiddenInput = document.getElementById("prayer-selected-privacy");
-  if (hiddenInput) hiddenInput.value = privacy;
-  document.querySelectorAll(".prayer-privacy-segmented .privacy-toggle-btn").forEach(b => {
-    b.classList.remove("active");
-    b.style.background = "transparent";
-    b.style.color = "var(--text)";
-  });
-  if (btn) {
-    btn.classList.add("active");
-    btn.style.background = "var(--primary)";
-    btn.style.color = "#ffffff";
-  }
-};
-
-window.selectPrayerCategory = function(category, btn) {
-  const hiddenInput = document.getElementById("prayer-selected-category");
-  if (hiddenInput) hiddenInput.value = category;
-  document.querySelectorAll(".prayer-category-chips-row .prayer-chip-btn").forEach(b => {
-    b.classList.remove("active");
-  });
-  if (btn) btn.classList.add("active");
-};
-
-// Voice Input & Speech-to-Text Controller
-let prayerSpeechRecognition = null;
-let isPrayerVoiceRecording = false;
-
-window.togglePrayerVoiceRecording = function() {
-  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const micBtn = document.getElementById("btn-prayer-voice-input");
-  const micIcon = document.getElementById("mic-icon");
-  const statusPill = document.getElementById("prayer-voice-status-pill");
-  const textarea = document.getElementById("prayer-input-content");
-
-  if (!SpeechRec) {
-    if (typeof showToast === "function") {
-      showToast("🎙️ Speech-to-text is supported on Chrome, Edge & Android WebView.");
-    }
-    return;
-  }
-
-  if (isPrayerVoiceRecording) {
-    if (prayerSpeechRecognition) {
-      try { prayerSpeechRecognition.stop(); } catch(e) {}
-    }
-    isPrayerVoiceRecording = false;
-    if (micBtn) micBtn.classList.remove("mic-recording-active");
-    if (micIcon) micIcon.textContent = "🎙️";
-    if (statusPill) statusPill.style.display = "none";
-    return;
-  }
-
-  try {
-    prayerSpeechRecognition = new SpeechRec();
-    prayerSpeechRecognition.continuous = true;
-    prayerSpeechRecognition.interimResults = true;
-    const isEng = window.state && (window.state.language === "en" || window.state.translation === "eng");
-    prayerSpeechRecognition.lang = isEng ? "en-IN" : "mr-IN";
-
-    prayerSpeechRecognition.onstart = function() {
-      isPrayerVoiceRecording = true;
-      if (micBtn) micBtn.classList.add("mic-recording-active");
-      if (micIcon) micIcon.textContent = "⏹️";
-      if (statusPill) statusPill.style.display = "inline-flex";
-      if (typeof showToast === "function") showToast("🎙️ बोलणे सुरू करा... (Listening...)");
-    };
-
-    prayerSpeechRecognition.onresult = function(event) {
-      let interimTranscript = '';
-      let finalTranscript = '';
-      for (let i = event.resultIndex; i < event.results.length; ++i) {
-        if (event.results[i].isFinal) {
-          finalTranscript += event.results[i][0].transcript;
-        } else {
-          interimTranscript += event.results[i][0].transcript;
-        }
-      }
-      if (textarea) {
-        const currentVal = textarea.value.trim();
-        const addition = finalTranscript || interimTranscript;
-        if (addition) {
-          if (!currentVal.endsWith(addition.trim())) {
-            textarea.value = (currentVal ? currentVal + " " : "") + addition.trim();
-          }
-        }
-      }
-    };
-
-    prayerSpeechRecognition.onerror = function(err) {
-      console.warn("Speech recognition notice:", err.error);
-      isPrayerVoiceRecording = false;
-      if (micBtn) micBtn.classList.remove("mic-recording-active");
-      if (micIcon) micIcon.textContent = "🎙️";
-      if (statusPill) statusPill.style.display = "none";
-    };
-
-    prayerSpeechRecognition.onend = function() {
-      isPrayerVoiceRecording = false;
-      if (micBtn) micBtn.classList.remove("mic-recording-active");
-      if (micIcon) micIcon.textContent = "🎙️";
-      if (statusPill) statusPill.style.display = "none";
-    };
-
-    prayerSpeechRecognition.start();
-  } catch(e) {
-    console.warn("Speech recognition initialization notice:", e);
-    isPrayerVoiceRecording = false;
-    if (micBtn) micBtn.classList.remove("mic-recording-active");
-    if (micIcon) micIcon.textContent = "🎙️";
-    if (statusPill) statusPill.style.display = "none";
-  }
-};
-
-window.submitPastoralPrayerRequest = async function(e) {
-  if (e && e.preventDefault) e.preventDefault();
-  const contentEl = document.getElementById("prayer-input-content");
-  const privacyEl = document.getElementById("prayer-selected-privacy");
-  const categoryEl = document.getElementById("prayer-selected-category");
-  const submitBtn = document.getElementById("btn-send-prayer-pastor");
-
-  const content = contentEl ? contentEl.value.trim() : "";
-  const privacy_level = privacyEl ? privacyEl.value : "Private (Pastor Only)";
-  const category_tag = categoryEl ? categoryEl.value : "Healing";
-
-  if (!content) {
-    if (typeof showToast === "function") showToast("कृपया तुमची प्रार्थना विनंती लिहा / Please enter your prayer request.");
-    return;
-  }
-
-  if (submitBtn) {
-    submitBtn.disabled = true;
-    submitBtn.style.opacity = "0.7";
-    submitBtn.innerHTML = `<span>⏳ पास्टरकडे पाठवत आहे (Sending to Pastor)...</span>`;
-  }
-
-  const userId = (window.state && window.state.currentUser && window.state.currentUser.id) 
-    || localStorage.getItem("rol_user_id") 
-    || ("guest_" + (localStorage.getItem("rol_device_id") || "device"));
-
-  const payload = {
-    content,
-    privacy_level,
-    category_tag,
-    user_id: userId,
-    title: `${category_tag} Prayer Request`
-  };
-
-  let savedRequest = null;
-
-  try {
-    const apiBase = (typeof ROL_API_BASE !== 'undefined') ? ROL_API_BASE : 'http://localhost:7880';
-    const res = await fetch(`${apiBase}/api/prayer-requests`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + (localStorage.getItem("rol_access_token") || "")
-      },
-      body: JSON.stringify(payload)
-    });
-
-    if (res.ok) {
-      const data = await res.json();
-      if (data && data.request) {
-        savedRequest = data.request;
-      }
-    }
-  } catch (err) {
-    console.warn("API request fallback to local sync:", err.message);
-  }
-
-  if (!savedRequest) {
-    savedRequest = {
-      id: "prq_loc_" + Date.now(),
-      user_id: userId,
-      content,
-      privacy_level,
-      category_tag,
-      status: "Sent to Pastor",
-      created_at: new Date().toISOString()
-    };
-  }
-
-  try {
-    const localRaw = localStorage.getItem("rol_my_prayer_journal");
-    const localList = localRaw ? JSON.parse(localRaw) : [];
-    localList.unshift(savedRequest);
-    localStorage.setItem("rol_my_prayer_journal", JSON.stringify(localList));
-  } catch(e) {}
-
-  if (contentEl) contentEl.value = "";
-  if (submitBtn) {
-    submitBtn.disabled = false;
-    submitBtn.style.opacity = "1";
-    submitBtn.innerHTML = `<span>🙏 Send Prayer Request to Pastor (पास्टरकडे प्रार्थना विनंती पाठवा)</span>`;
-  }
-
-  if (typeof showToast === "function") {
-    showToast("🙏 प्रार्थना विनंती पास्टरकडे पाठवली! आम्ही तुमच्यासाठी प्रार्थना करतो.");
-  }
-
-  loadMyPrayerJournal();
-};
-
-window.loadMyPrayerJournal = async function(showFeedback = false) {
-  const container = document.getElementById("user-prayer-journal-list");
-  const countBadge = document.getElementById("journal-count-badge");
-  if (!container) return;
-
-  const userId = (window.state && window.state.currentUser && window.state.currentUser.id) 
-    || localStorage.getItem("rol_user_id") 
-    || ("guest_" + (localStorage.getItem("rol_device_id") || "device"));
-
-  let requests = [];
-
-  // 1. Fetch from backend API
-  try {
-    const apiBase = (typeof ROL_API_BASE !== 'undefined') ? ROL_API_BASE : 'http://localhost:7880';
-    const res = await fetch(`${apiBase}/api/prayer-requests?user_id=${encodeURIComponent(userId)}`, {
-      headers: {
-        "Authorization": "Bearer " + (localStorage.getItem("rol_access_token") || "")
-      }
-    });
-    if (res.ok) {
-      const data = await res.json();
-      if (data && Array.isArray(data.requests)) {
-        requests = data.requests;
-      }
-    }
-  } catch(err) {
-    console.warn("Journal API load notice:", err.message);
-  }
-
-  // 2. Merge with locally cached journal entries
-  try {
-    const localRaw = localStorage.getItem("rol_my_prayer_journal");
-    const localList = localRaw ? JSON.parse(localRaw) : [];
-    if (localList.length > 0) {
-      const existingIds = new Set(requests.map(r => r.id));
-      for (const item of localList) {
-        if (!existingIds.has(item.id)) {
-          requests.push(item);
-        }
-      }
-    }
-    localStorage.setItem("rol_my_prayer_journal", JSON.stringify(requests));
-  } catch(e) {}
-
-  if (countBadge) {
-    countBadge.textContent = `${requests.length} ${requests.length === 1 ? 'Request' : 'Requests'}`;
-  }
-
-  if (requests.length === 0) {
-    container.innerHTML = `
-      <div class="panel-empty-state" style="padding: 32px 18px; text-align: center; color: var(--text-muted); font-size: 13px; background: var(--bg); border: 1px dashed var(--border); border-radius: 14px;">
-        <span style="font-size: 28px; display: block; margin-bottom: 6px;">🙏</span>
-        <strong style="color: var(--text); font-size: 14px; display: block; margin-bottom: 4px;">कोणतीही नोंद आढळली नाही / No Prayer Journal Entries Yet</strong>
-        <span>वरील फॉर्म भरून तुमची पहिली प्रार्थना विनंती पास्टरकडे पाठवा.</span>
-      </div>
-    `;
-    if (showFeedback && typeof showToast === "function") showToast("Journal refreshed.");
-    return;
-  }
-
-  container.innerHTML = requests.map(r => {
-    let statusClass = "badge-status-sent";
-    let statusLabel = "🔵 Sent to Pastor";
-    let statusLabelMr = "पास्टरकडे पाठवली";
-
-    if (r.status === "Prayed For") {
-      statusClass = "badge-status-prayed";
-      statusLabel = "🟣 Prayed For";
-      statusLabelMr = "प्रार्थना केली";
-    } else if (r.status === "Answered") {
-      statusClass = "badge-status-answered";
-      statusLabel = "🟢 Answered";
-      statusLabelMr = "उत्तर मिळाले! 🙏";
-    }
-
-    const timeAgoStr = typeof formatTimeAgo === 'function' ? formatTimeAgo(new Date(r.created_at).getTime()) : 'Recently';
-
-    return `
-      <div class="prayer-journal-card">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-          <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-            <span class="prayer-chip-btn" style="padding: 3px 9px; font-size: 11px; cursor: default;">
-              ${r.category_tag || 'Healing'}
-            </span>
-            <span style="font-size: 11px; color: var(--text-muted); font-weight: 700; background: var(--bg); padding: 3px 8px; border-radius: 6px; border: 1px solid var(--border);">
-              ${r.privacy_level || 'Private (Pastor Only)'}
-            </span>
-          </div>
-          <span class="badge-prayer-status ${statusClass}">
-            ${statusLabel} • ${statusLabelMr}
-          </span>
-        </div>
-
-        <p style="margin: 0; font-size: 14px; line-height: 1.55; color: var(--text); font-family: var(--font-body); white-space: pre-line;">
-          ${r.content || ''}
-        </p>
-
-        ${r.pastor_note ? `
-          <div style="background: rgba(34,197,94,0.08); padding: 8px 12px; border-radius: 8px; font-size: 12.5px; border-left: 3px solid #16a34a; color: var(--text);">
-            <strong style="color: #16a34a;">Pastoral Note / पास्टरचे उत्तर:</strong> ${r.pastor_note}
-          </div>
-        ` : ''}
-
-        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11.5px; color: var(--text-muted); padding-top: 6px; border-top: 1px solid var(--border);">
-          <span>📅 ${timeAgoStr}</span>
-          <span style="font-size: 11px;">🔒 Confidential Record</span>
-        </div>
-      </div>
-    `;
-  }).join("");
-
-  if (showFeedback && typeof showToast === "function") showToast("✅ Journal updated!");
-};
 
 window.submitPrayerRequestPublic = function() {
   const catEl = document.getElementById("prayer-input-category");
@@ -16588,7 +16014,7 @@ window.openFullscreenVOD = function() {
   if (fsRefBadge) fsRefBadge.textContent = `${displayRef} ${state.translation === "eng" ? "NLT" : "MARVBSI"}`;
 
   const images = (window.dailyVersesImageList && window.dailyVersesImageList.length > 0) ? window.dailyVersesImageList : [
-    'stars.png', 'forest.png', 'mist.png', 'mountains.png', 'mount_zion.png', 'ocean.png', 'path.png', 'sunrise.png'
+    'sunrise.png', 'forest.png', 'mountains.png', 'ocean.png', 'path.png', 'stars.png', 'mist.png'
   ];
   
   // Deterministic 1 image per day unless user manually chose a wallpaper
@@ -16636,7 +16062,7 @@ window.toggleVodOptionsMenu = function() {
 
 window.cycleVodWallpaper = function() {
   const images = (window.dailyVersesImageList && window.dailyVersesImageList.length > 0) ? window.dailyVersesImageList : [
-    'stars.png', 'forest.png', 'mist.png', 'mountains.png', 'mount_zion.png', 'ocean.png', 'path.png', 'sunrise.png'
+    'sunrise.png', 'forest.png', 'mountains.png', 'ocean.png', 'path.png', 'stars.png', 'mist.png'
   ];
   if (typeof window.currentVodImageIndex !== 'number') {
     const { dayOfYear, offset } = getCurrentVOD();
@@ -16683,7 +16109,7 @@ window.generateExactVerseImageBlob = function() {
     const displayText = (state.translation === "eng") ? vod.engText : vod.text;
 
     const images = (window.dailyVersesImageList && window.dailyVersesImageList.length > 0) ? window.dailyVersesImageList : [
-      'stars.png', 'forest.png', 'mist.png', 'mountains.png', 'mount_zion.png', 'ocean.png', 'path.png', 'sunrise.png'
+      'sunrise.png', 'forest.png', 'mountains.png', 'ocean.png', 'path.png', 'stars.png', 'mist.png'
     ];
     const imgIdx = (typeof window.currentVodImageIndex === 'number') ? window.currentVodImageIndex : (((dayOfYear + offset) % images.length + images.length) % images.length);
     const dailyImg = images[imgIdx];
@@ -19617,69 +19043,33 @@ function switchAdminSubtab(subtab) {
 }
 
 /* ── 1. Members Management ── */
-async function renderAdminMembers(filterText = "", roleFilter = "all") {
+function renderAdminMembers(filterText = "", roleFilter = "all") {
   const container = document.getElementById("admin-members-list-container");
   if (!container) return;
 
-  container.innerHTML = `<div style="text-align: center; padding: 20px; color: var(--text-muted);">⏳ Loading congregation directory...</div>`;
+  const members = getAdminMembers();
+  const filtered = members.filter(m => {
+    const matchesText = !filterText || m.username.toLowerCase().includes(filterText.toLowerCase()) || m.email.toLowerCase().includes(filterText.toLowerCase());
+    const matchesRole = (roleFilter === "all") || (m.role && m.role.toLowerCase() === roleFilter.toLowerCase());
+    return matchesText && matchesRole;
+  });
 
-  let members = [];
-  try {
-    const apiBase = (typeof ROL_API_BASE !== 'undefined') ? ROL_API_BASE : 'http://localhost:7880';
-    let url = `${apiBase}/api/admin/users?`;
-    if (filterText) url += `search=${encodeURIComponent(filterText)}&`;
-    if (roleFilter && roleFilter !== 'all') url += `role=${encodeURIComponent(roleFilter)}&`;
-
-    const res = await fetch(url, {
-      headers: {
-        "Authorization": "Bearer " + (localStorage.getItem("rol_access_token") || "")
-      }
-    });
-    if (res.ok) {
-      const data = await res.json();
-      if (data && Array.isArray(data.users)) {
-        members = data.users.map(u => ({
-          id: u.id,
-          username: u.username || u.full_name || 'Member',
-          fullName: u.full_name || '',
-          email: u.email || 'N/A',
-          phone: u.phone || '',
-          role: u.role || 'User',
-          status: u.status || 'Active'
-        }));
-      }
-    }
-  } catch (err) {
-    console.warn("Falling back to local admin members:", err.message);
-  }
-
-  if (!members || members.length === 0) {
-    members = getAdminMembers();
-    members = members.filter(m => {
-      const matchesText = !filterText || (m.username || '').toLowerCase().includes(filterText.toLowerCase()) || (m.email || '').toLowerCase().includes(filterText.toLowerCase());
-      const rTarget = (roleFilter || '').toLowerCase().replace(/[\s-]+/g, '_');
-      const mRole = (m.role || '').toLowerCase().replace(/[\s-]+/g, '_');
-      const matchesRole = (roleFilter === "all") || (mRole === rTarget) || ((rTarget === 'user' || rTarget === 'member') && (mRole === 'user' || mRole === 'member'));
-      return matchesText && matchesRole;
-    });
-  }
-
-  if (members.length === 0) {
+  if (filtered.length === 0) {
     container.innerHTML = `<div class="panel-empty-state" style="padding: 24px 0; text-align: center; color: var(--text-muted);">No members match the search query.</div>`;
     return;
   }
 
-  container.innerHTML = members.map(m => {
-    const roleLower = (m.role || "user").toLowerCase().replace(/[\s-]+/g, '_');
+  container.innerHTML = filtered.map(m => {
+    const roleLower = (m.role || "member").toLowerCase();
     let badgeClass = "role-badge-member";
-    if (roleLower === "super_admin") badgeClass = "role-badge-admin";
+    if (roleLower === "admin") badgeClass = "role-badge-admin";
     else if (roleLower === "pastor") badgeClass = "role-badge-pastor";
-    else if (roleLower === "prayer_team") badgeClass = "role-badge-leader";
+    else if (roleLower === "leader") badgeClass = "role-badge-leader";
 
     const initial = (m.username || "U")[0].toUpperCase();
 
     return `
-      <div class="admin-member-card" style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+      <div class="admin-member-card">
         <div style="display: flex; align-items: center; gap: 12px;">
           <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px;">
             ${initial}
@@ -19687,18 +19077,18 @@ async function renderAdminMembers(filterText = "", roleFilter = "all") {
           <div>
             <div style="display: flex; align-items: center; gap: 8px;">
               <strong style="font-size: 14.5px; color: var(--text);">${m.username}</strong>
-              <span class="${badgeClass}">${m.role || "User"}</span>
+              <span class="${badgeClass}">${m.role || "Member"}</span>
             </div>
             <span style="font-size: 12px; color: var(--text-muted);">${m.email}</span>
           </div>
         </div>
 
         <div style="display: flex; align-items: center; gap: 8px;">
-          <select onchange="updateAdminMemberRole('${m.id}', this.value)" style="padding: 7px 12px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--bg); color: var(--text); font-size: 12px; font-weight: 700;">
-            <option value="User" ${['user', 'member'].includes(roleLower) ? "selected" : ""}>User</option>
-            <option value="Pastor" ${roleLower === "pastor" ? "selected" : ""}>Pastor</option>
-            <option value="Prayer Team" ${roleLower === "prayer_team" ? "selected" : ""}>Prayer Team</option>
-            <option value="Super-Admin" ${roleLower === "super_admin" ? "selected" : ""}>Super-Admin</option>
+          <select onchange="updateAdminMemberRole('${m.id}', this.value)" style="padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 12px; font-weight: 700;">
+            <option value="Member" ${m.role === "Member" ? "selected" : ""}>Member</option>
+            <option value="Leader" ${m.role === "Leader" ? "selected" : ""}>Leader</option>
+            <option value="Pastor" ${m.role === "Pastor" ? "selected" : ""}>Pastor</option>
+            <option value="Admin" ${m.role === "Admin" ? "selected" : ""}>Admin</option>
           </select>
           <button onclick="deleteAdminMember('${m.id}')" title="Delete member" style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #ef4444; border-radius: 8px; padding: 6px 10px; cursor: pointer; font-size: 12px; font-weight: 700;">
             ✕
@@ -19717,132 +19107,64 @@ function filterAdminMembers() {
 
 function openAdminAddMemberModal() {
   const modal = document.getElementById("modal-admin-add-member");
-  if (modal) {
-    modal.style.display = "flex";
-    const nameInput = document.getElementById("admin-input-new-name");
-    if (nameInput) nameInput.focus();
-  }
+  if (modal) modal.style.display = "flex";
 }
 
-function closeAdminAddMemberModal() {
-  const modal = document.getElementById("modal-admin-add-member");
-  if (modal) modal.style.display = "none";
-}
-
-async function handleAdminAddMember(e) {
+function handleAdminAddMember(e) {
   if (e) e.preventDefault();
   const name = document.getElementById("admin-input-new-name")?.value.trim();
   const email = document.getElementById("admin-input-new-email")?.value.trim();
-  const role = document.getElementById("admin-input-new-role")?.value || "User";
-  const submitBtn = document.getElementById("btn-admin-add-member-submit");
+  const role = document.getElementById("admin-input-new-role")?.value || "Member";
 
   if (!name || !email) {
     showToast("Please provide both name and email / नाव व ईमेल भरा");
     return;
   }
 
-  const originalBtnText = submitBtn ? submitBtn.innerText : "Add Member";
-  if (submitBtn) {
-    submitBtn.disabled = true;
-    submitBtn.innerText = "⏳ Adding & Sending Email...";
-  }
+  const members = getAdminMembers();
+  const newMember = {
+    id: `usr_${Date.now()}`,
+    username: name,
+    email: email.toLowerCase(),
+    role: role,
+    isPastor: role === "Pastor",
+    isAdmin: role === "Admin",
+    isLeader: role === "Leader",
+    addedAt: Date.now()
+  };
 
-  try {
-    const apiBase = (typeof ROL_API_BASE !== 'undefined') ? ROL_API_BASE : 'http://localhost:7880';
-    const token = localStorage.getItem("rol_access_token") || "";
+  members.unshift(newMember);
+  saveAdminMembersList(members);
 
-    const res = await fetch(`${apiBase}/api/admin/users`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + token
-      },
-      body: JSON.stringify({
-        fullName: name,
-        email: email,
-        role: role,
-        sendEmail: true
-      })
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      throw new Error(data.error || "Failed to create user account.");
-    }
-
-    closeAdminAddMemberModal();
-    document.getElementById("form-admin-add-member")?.reset();
-
-    if (data.emailSent) {
-      showToast(`✅ Added ${name}! Invitation email sent to ${email} ✉️`);
-    } else {
-      showToast(`✅ Added ${name} as ${role}!`);
-    }
-
-    await renderAdminMembers();
-  } catch (err) {
-    console.error("Add member error:", err);
-    showToast(`❌ Error: ${err.message}`);
-  } finally {
-    if (submitBtn) {
-      submitBtn.disabled = false;
-      submitBtn.innerText = originalBtnText;
-    }
-  }
-}
-
-async function updateAdminMemberRole(memberId, newRole) {
-  try {
-    const apiBase = (typeof ROL_API_BASE !== 'undefined') ? ROL_API_BASE : 'http://localhost:7880';
-    const res = await fetch(`${apiBase}/api/admin/users/${memberId}/role`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + (localStorage.getItem("rol_access_token") || "")
-      },
-      body: JSON.stringify({ role: newRole })
-    });
-    const data = await res.json();
-    if (res.ok) {
-      showToast(`✅ User role updated to ${newRole}!`);
-    } else {
-      showToast(`❌ ${data.error || 'Failed to update role'}`);
-    }
-  } catch (err) {
-    console.warn("Failed to update role via API:", err.message);
-    showToast(`❌ ${err.message}`);
-  }
-
+  closeModal("modal-admin-add-member");
+  document.getElementById("form-admin-add-member")?.reset();
   renderAdminMembers();
+  showToast(`✅ Added ${name} as ${role}!`);
 }
 
-async function deleteAdminMember(memberId) {
-  if (!confirm(`Are you sure you want to permanently delete this member? / या सदस्याचे खाते कायमचे काढून टाकायचे आहे का?`)) {
-    return;
+function updateAdminMemberRole(memberId, newRole) {
+  const members = getAdminMembers();
+  const member = members.find(m => m.id === memberId);
+  if (member) {
+    member.role = newRole;
+    member.isPastor = newRole === "Pastor";
+    member.isAdmin = newRole === "Admin";
+    member.isLeader = newRole === "Leader";
+    saveAdminMembersList(members);
+    renderAdminMembers();
+    showToast(`Updated ${member.username}'s role to ${newRole}`);
   }
+}
 
-  try {
-    const apiBase = (typeof ROL_API_BASE !== 'undefined') ? ROL_API_BASE : 'http://localhost:7880';
-    const token = localStorage.getItem("rol_access_token") || "";
-
-    const res = await fetch(`${apiBase}/api/admin/users/${memberId}`, {
-      method: "DELETE",
-      headers: {
-        "Authorization": "Bearer " + token
-      }
-    });
-
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.error || "Failed to delete member.");
-    }
-
-    showToast(`🗑️ ${data.message || 'Member deleted successfully'}`);
-    await renderAdminMembers();
-  } catch (err) {
-    console.error("Delete member error:", err);
-    showToast(`❌ Error: ${err.message}`);
+function deleteAdminMember(memberId) {
+  let members = getAdminMembers();
+  const member = members.find(m => m.id === memberId);
+  if (!member) return;
+  if (confirm(`Are you sure you want to remove ${member.username} from the directory?`)) {
+    members = members.filter(m => m.id !== memberId);
+    saveAdminMembersList(members);
+    renderAdminMembers();
+    showToast(`Removed ${member.username}`);
   }
 }
 
@@ -20006,7 +19328,6 @@ function copyAdminMeetingInvite(roomId) {
 
 /* ── 4. Pastoral Prayers Moderation ── */
 let currentAdminPrayerFilter = "all";
-window._rolAdminPrayerQueue = [];
 
 function filterAdminPrayers(filter) {
   currentAdminPrayerFilter = filter;
@@ -20016,132 +19337,71 @@ function filterAdminPrayers(filter) {
   renderAdminPrayers();
 }
 
-async function renderAdminPrayers() {
+function renderAdminPrayers() {
   const container = document.getElementById("admin-prayers-list-container");
   if (!container) return;
 
-  container.innerHTML = `<div style="text-align: center; padding: 24px; color: var(--text-muted);">⏳ Loading congregation prayer queue...</div>`;
+  const prayers = window._rolPrayers || [];
+  const filtered = prayers.filter(p => {
+    if (currentAdminPrayerFilter === "all") return true;
+    return p.status === currentAdminPrayerFilter;
+  });
 
-  try {
-    const apiBase = (typeof ROL_API_BASE !== 'undefined') ? ROL_API_BASE : 'http://localhost:7880';
-    let url = `${apiBase}/api/prayer-requests/admin/queue`;
-    if (currentAdminPrayerFilter && currentAdminPrayerFilter !== 'all') {
-      url += `?status=${encodeURIComponent(currentAdminPrayerFilter)}`;
-    }
-
-    const res = await fetch(url, {
-      headers: {
-        "Authorization": "Bearer " + (localStorage.getItem("rol_access_token") || "")
-      }
-    });
-
-    if (res.ok) {
-      const data = await res.json();
-      if (data && Array.isArray(data.queue)) {
-        window._rolAdminPrayerQueue = data.queue;
-      }
-    }
-  } catch (err) {
-    console.warn("Falling back to local prayer queue:", err.message);
-  }
-
-  let queue = window._rolAdminPrayerQueue || [];
-  if (currentAdminPrayerFilter !== "all") {
-    queue = queue.filter(p => {
-      if (currentAdminPrayerFilter === 'pending' || currentAdminPrayerFilter === 'Sent to Pastor') {
-        return p.status === 'Sent to Pastor' || p.status === 'pending';
-      }
-      if (currentAdminPrayerFilter === 'prayed' || currentAdminPrayerFilter === 'Prayed For') {
-        return p.status === 'Prayed For' || p.status === 'prayed';
-      }
-      if (currentAdminPrayerFilter === 'answered' || currentAdminPrayerFilter === 'Answered') {
-        return p.status === 'Answered' || p.status === 'answered';
-      }
-      return p.status === currentAdminPrayerFilter;
-    });
-  }
-
-  if (queue.length === 0) {
-    container.innerHTML = `
-      <div class="panel-empty-state" style="padding: 32px 16px; text-align: center; color: var(--text-muted); background: var(--bg); border: 1.5px dashed var(--border); border-radius: 14px;">
-        <span style="font-size: 28px; display: block; margin-bottom: 6px;">🙏</span>
-        <strong style="color: var(--text); font-size: 14px; display: block; margin-bottom: 4px;">No prayer requests in this category.</strong>
-        <span>All requests in this view have been processed or none have been submitted yet.</span>
-      </div>
-    `;
+  if (filtered.length === 0) {
+    container.innerHTML = `<div class="panel-empty-state" style="padding: 24px 0; text-align: center; color: var(--text-muted);">No prayer requests in this category.</div>`;
     return;
   }
 
-  container.innerHTML = queue.map(p => {
-    let badgeClass = "badge-status-sent";
-    let badgeText = "🔵 Sent to Pastor";
-    if (p.status === "Prayed For" || p.status === "prayed") {
-      badgeClass = "badge-status-prayed";
-      badgeText = "🟣 Prayed For";
-    } else if (p.status === "Answered" || p.status === "answered") {
-      badgeClass = "badge-status-answered";
-      badgeText = "🟢 Answered";
+  container.innerHTML = filtered.map(p => {
+    let badgeClass = "role-badge-member";
+    let badgeText = "Pending";
+    if (p.status === "answered") {
+      badgeClass = "role-badge-leader";
+      badgeText = "Answered";
+    } else if (p.status === "acknowledged") {
+      badgeClass = "role-badge-pastor";
+      badgeText = "Acknowledged";
     }
 
-    const timeStr = (typeof formatTimeAgo === 'function') ? formatTimeAgo(p.createdAt || Date.now()) : "Recently";
-    
-    // Privacy styling & masking
-    let privacyBadge = "🔒 Pastor Only (Private)";
-    let privacyStyle = "background: #fee2e2; color: #991b1b;";
-    if (p.privacyLevel === "Church Prayer Team") {
-      privacyBadge = "👥 Church Prayer Team";
-      privacyStyle = "background: #eff6ff; color: #1d4ed8;";
-    } else if (p.privacyLevel === "Anonymous" || p.requester?.isAnonymous) {
-      privacyBadge = "🥷 Anonymous";
-      privacyStyle = "background: #f3f4f6; color: #374151;";
-    }
-
-    const requesterName = p.requester ? p.requester.name : (p.username || "Anonymous Believer");
-    const requesterContact = (p.requester && p.requester.email) ? ` • ${p.requester.email}` : "";
+    const timeStr = formatTimeAgo ? formatTimeAgo(p.createdAt || Date.now()) : "Recently";
+    const privacy = p.isPublic ? "🌐 Congregation Circle" : "🔒 Confidential (Pastor Only)";
 
     return `
-      <div class="admin-prayer-card" id="admin-prayer-card-${p.id}" style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 10px; box-shadow: var(--shadow-sm);">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+      <div style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 11px; font-weight: 800; background: var(--bg); border: 1px solid var(--border); padding: 3px 8px; border-radius: 6px; color: var(--text);">
-              🏷️ ${p.categoryTag || 'Healing'}
-            </span>
-            <span style="font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; ${privacyStyle}">
-              ${privacyBadge}
-            </span>
+            <span style="font-weight: 800; font-size: 14.5px; color: var(--text);">From: @${p.username || "Anonymous"}</span>
+            <span class="${badgeClass}">${badgeText}</span>
           </div>
-          <span class="badge-prayer-status ${badgeClass}" id="admin-badge-status-${p.id}">
-            ${badgeText}
-          </span>
+          <span style="font-size: 12px; color: var(--text-muted);">${timeStr} • ${privacy}</span>
         </div>
 
-        <div style="font-size: 12.5px; color: var(--text-muted);">
-          <strong>From:</strong> <span style="color: var(--text); font-weight: 700;">${requesterName}</span>${requesterContact} • <span>${timeStr}</span>
-        </div>
-
-        <p style="font-size: 14px; line-height: 1.55; color: var(--text); margin: 0; background: var(--bg); padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border); font-family: var(--font-body);">
-          "${p.content}"
+        <p style="font-size: 14px; line-height: 1.5; color: var(--text); margin: 0; background: var(--bg); padding: 12px; border-radius: 10px; border: 1px solid var(--border);">
+          "${p.text}"
         </p>
 
         ${p.pastorNote ? `
-          <div style="background: rgba(245,158,11,0.08); border-left: 3px solid #f59e0b; padding: 8px 12px; border-radius: 6px; font-size: 12.5px; color: var(--text);">
-            <strong>Pastoral Note:</strong> ${p.pastorNote}
+          <div style="background: rgba(245,158,11,0.1); border-left: 3px solid #f59e0b; padding: 10px 14px; border-radius: 6px; font-size: 13px; color: var(--text);">
+            <strong>Pastoral Blessing Response:</strong>
+            <div style="margin-top: 2px;">"${p.pastorNote}"</div>
           </div>
         ` : ""}
 
-        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; align-items: center;">
-          ${p.status !== "Prayed For" ? `
-            <button type="button" class="btn-mark-as-prayed" onclick="adminMarkPrayerAsPrayed('${p.id}')" style="background: #8b5cf6; color: #ffffff; border: none; padding: 7px 15px; border-radius: 10px; font-size: 12.5px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(139,92,246,0.25);">
-              <span>🙏 Mark as Prayed</span>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px;">
+          ${p.status !== "answered" ? `
+            <button onclick="adminAcknowledgePrayerPrompt('${p.id}')" class="btn-primary-mini" style="font-size: 12px; padding: 6px 12px;">
+              ✍️ Write Blessing Note & Pray
+            </button>
+            <button onclick="adminToggleAnsweredPrayer('${p.id}')" class="btn-secondary-mini" style="font-size: 12px; padding: 6px 12px; border: 1px solid var(--border); background: transparent; color: var(--text);">
+              ✅ Mark Answered
             </button>
           ` : `
-            <span style="font-size: 12px; font-weight: 800; color: #8b5cf6; background: rgba(139,92,246,0.1); padding: 6px 12px; border-radius: 8px; display: inline-flex; align-items: center; gap: 4px;">
-              ✓ Prayed For
-            </span>
+            <button onclick="adminToggleAnsweredPrayer('${p.id}')" class="btn-secondary-mini" style="font-size: 12px; padding: 6px 12px; border: 1px solid var(--border); background: transparent; color: var(--text);">
+              Reopen Request
+            </button>
           `}
-          
-          <button type="button" onclick="adminToggleAnsweredPrayer('${p.id}')" class="btn-secondary-mini" style="font-size: 12px; padding: 6px 12px; border: 1px solid var(--border); background: transparent; color: var(--text); border-radius: 8px; cursor: pointer;">
-            ${p.status === "Answered" ? "↩ Reopen" : "✅ Mark Answered"}
+          <button onclick="adminDeletePrayer('${p.id}')" class="btn-danger-mini" style="font-size: 12px; padding: 6px 10px;">
+            Delete ✕
           </button>
         </div>
       </div>
@@ -20149,72 +19409,39 @@ async function renderAdminPrayers() {
   }).join("");
 }
 
-async function adminMarkPrayerAsPrayed(prayerId) {
-  try {
-    const apiBase = (typeof ROL_API_BASE !== 'undefined') ? ROL_API_BASE : 'http://localhost:7880';
-    const res = await fetch(`${apiBase}/api/prayer-requests/${prayerId}/mark-prayed`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + (localStorage.getItem("rol_access_token") || "")
-      }
-    });
-
-    if (res.ok) {
-      if (typeof showToast === "function") {
-        showToast("🙏 Marked as Prayed! Believer has received an in-app notification.");
-      }
+function adminAcknowledgePrayerPrompt(prayerId) {
+  const note = prompt("Enter Pastoral Blessing / संदेश for this prayer request:", "Standing with you in prayer! May the Lord's peace and strength be with you.");
+  if (note && note.trim()) {
+    const prayers = window._rolPrayers || [];
+    const p = prayers.find(x => x.id === prayerId);
+    if (p) {
+      p.status = "acknowledged";
+      p.pastorNote = note.trim();
+      renderAdminPrayers();
+      if (typeof renderPastorPortal === "function") renderPastorPortal();
+      showToast("🙏 Blessing note sent to member!");
     }
-  } catch (err) {
-    console.warn("API mark-prayed notice:", err.message);
-  }
-
-  // Update local queue entry
-  const queue = window._rolAdminPrayerQueue || [];
-  const req = queue.find(x => x.id === prayerId);
-  if (req) {
-    req.status = "Prayed For";
-  }
-
-  // Also update locally cached believer journal if matching
-  try {
-    const rawJ = localStorage.getItem("rol_my_prayer_journal");
-    if (rawJ) {
-      const list = JSON.parse(rawJ);
-      const jItem = list.find(x => x.id === prayerId);
-      if (jItem) {
-        jItem.status = "Prayed For";
-        localStorage.setItem("rol_my_prayer_journal", JSON.stringify(list));
-      }
-    }
-  } catch (e) {}
-
-  renderAdminPrayers();
-  if (typeof loadMyPrayerJournal === 'function') {
-    loadMyPrayerJournal();
   }
 }
 
-async function adminToggleAnsweredPrayer(prayerId) {
-  const queue = window._rolAdminPrayerQueue || [];
-  const p = queue.find(x => x.id === prayerId);
-  const newStatus = (p && p.status === "Answered") ? "Prayed For" : "Answered";
+function adminToggleAnsweredPrayer(prayerId) {
+  const prayers = window._rolPrayers || [];
+  const p = prayers.find(x => x.id === prayerId);
+  if (p) {
+    p.status = p.status === "answered" ? "pending" : "answered";
+    renderAdminPrayers();
+    if (typeof renderPastorPortal === "function") renderPastorPortal();
+    showToast(p.status === "answered" ? "Marked prayer as answered! 🎉" : "Reopened prayer request");
+  }
+}
 
-  try {
-    const apiBase = (typeof ROL_API_BASE !== 'undefined') ? ROL_API_BASE : 'http://localhost:7880';
-    await fetch(`${apiBase}/api/prayer-requests/${prayerId}/status`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + (localStorage.getItem("rol_access_token") || "")
-      },
-      body: JSON.stringify({ status: newStatus })
-    });
-  } catch(e) {}
-
-  if (p) p.status = newStatus;
-  renderAdminPrayers();
-  showToast(`Prayer status updated to ${newStatus}`);
+function adminDeletePrayer(prayerId) {
+  if (confirm("Delete this prayer request?")) {
+    window._rolPrayers = (window._rolPrayers || []).filter(p => p.id !== prayerId);
+    renderAdminPrayers();
+    if (typeof renderPastorPortal === "function") renderPastorPortal();
+    showToast("Prayer request deleted");
+  }
 }
 
 /* ── 5. Announcements & Live Broadcast Banner ── */
@@ -20419,7 +19646,6 @@ window.applyStylesFromState = applyStylesFromState;
 window.renderAdminPanel = renderAdminPanel;
 window.switchAdminSubtab = switchAdminSubtab;
 window.openAdminAddMemberModal = openAdminAddMemberModal;
-window.closeAdminAddMemberModal = closeAdminAddMemberModal;
 window.handleAdminAddMember = handleAdminAddMember;
 window.updateAdminMemberRole = updateAdminMemberRole;
 window.deleteAdminMember = deleteAdminMember;
@@ -20635,7 +19861,23 @@ function openDiscoverMoodTopic(topic) {
 }
 window.openDiscoverMoodTopic = openDiscoverMoodTopic;
 
-
+async function openReaderAndNavigate(bookKey, chapterNum = 1, verseNum = 1) {
+  switchTab('reader');
+  if (typeof openReader === 'function') {
+    await openReader(bookKey, chapterNum);
+    if (verseNum > 1) {
+      setTimeout(() => {
+        const vEl = document.getElementById(`verse-${verseNum}`);
+        if (vEl) {
+          vEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          vEl.classList.add('highlight-flash');
+          setTimeout(() => vEl.classList.remove('highlight-flash'), 2500);
+        }
+      }, 350);
+    }
+  }
+}
+window.openReaderAndNavigate = openReaderAndNavigate;
 
 /* ==========================================================================
    DYNAMIC DAILY DISCOVER TOPICS & DIRECT CHAPTER OPENER (66 BOOKS ROTATION)
@@ -21487,7 +20729,158 @@ window.shareCurrentHymnLyrics = shareCurrentHymnLyrics;
 /* ==========================================================================
    1. Homepage Interactive "Did You Know? / Chapter Insight" Widget (Item 13)
    ========================================================================== */
-// DID_YOU_KNOW_INSIGHTS declared in upper scope before DOMContentLoaded
+const DID_YOU_KNOW_INSIGHTS = [
+  {
+    id: "dyk_women_books",
+    theme: "dyk-theme-emerald",
+    image: "assets/images/did_you_know_esther.jpg",
+    alt: "Classical illustration of biblical Queen Esther standing before King Ahasuerus",
+    questionEn: "Which Books of the Bible Are Named After Women?",
+    questionMr: "बायबलमधील कोणत्या पुस्तकांना स्त्रियांची नावे आहेत?",
+    bulletsEn: [
+      { icon: "📖", text: "Esther 👑 (Queen of Persia & Deliverer)" },
+      { icon: "🌾", text: "Ruth (Model of Faithfulness & Lineage of Christ)" },
+      { icon: "📜", text: "Judith (Historical Apocrypha)" },
+      { icon: "🪻", text: "Susanna (Historical Apocrypha)" }
+    ],
+    bulletsMr: [
+      { icon: "📖", text: "एस्तेर (Esther) 👑 — पारसाची राणी व तारणहार" },
+      { icon: "🌾", text: "रूथ (Ruth) — विश्वासूपणाची आदर्श व दाविदाची पूर्वज" },
+      { icon: "📜", text: "यहूदीथ (Judith) — ऐतिहासिक प्राचीन ग्रंथ" },
+      { icon: "🪻", text: "सुसान्ना (Susanna) — ऐतिहासिक प्राचीन ग्रंथ" }
+    ],
+    refEn: "Esther 1 • एस्तेर १",
+    refMr: "एस्तेर १ • Esther 1",
+    book: "esther",
+    chapter: 1,
+    verse: 1
+  },
+  {
+    id: "dyk_shortest_verse",
+    theme: "dyk-theme-indigo",
+    image: "assets/images/did_you_know_jesus_wept.jpg",
+    alt: "Classical chiaroscuro engraving of Jesus Christ weeping in deep prayer",
+    questionEn: "What Is the Shortest Verse in the Bible?",
+    questionMr: "बायबलमधील सर्वात लहान वचन कोणते आहे?",
+    bulletsEn: [
+      { icon: "💧", text: "John 11:35: \"Jesus wept.\"" },
+      { icon: "🕊️", text: "Just 2 words in English & Marathi (3 in Greek: Ἐδάκρυσεν ὁ Ἰηसोῦς)" },
+      { icon: "❤️", text: "The most profound display of divine empathy & love" },
+      { icon: "🙏", text: "Christ shares deeply in all our earthly sorrows" }
+    ],
+    bulletsMr: [
+      { icon: "💧", text: "योहान ११:३५: \"येशू रडला.\"" },
+      { icon: "🕊️", text: "केवळ २ शब्द (मूळ ग्रीकमध्ये ३ शब्द: Ἐδάκρυσεν ὁ Ἰηसोῦς)" },
+      { icon: "❤️", text: "ईश्वरी करुणा व संवेदनशीलतेची सर्वात सखोल साक्ष" },
+      { icon: "🙏", text: "आपल्या अश्रूंमध्ये ख्रिस्त स्वतः सहभागी होतो" }
+    ],
+    refEn: "John 11:35 • योहान ११:३५",
+    refMr: "योहान ११:३५ • John 11:35",
+    book: "john",
+    chapter: 11,
+    verse: 35
+  },
+  {
+    id: "dyk_noahs_ark",
+    theme: "dyk-theme-teal",
+    image: "assets/images/did_you_know_noahs_ark.jpg",
+    alt: "Classical engraving of Noah's Ark floating upon great flood waters",
+    questionEn: "How Long Did Noah's Ark Float?",
+    questionMr: "नोहाचे तारू पुराच्या पाण्यावर किती काळ तरंगत होते?",
+    bulletsEn: [
+      { icon: "🌧️", text: "40 days & nights of torrential rainfall" },
+      { icon: "🌊", text: "150 days floodwaters surged across the earth" },
+      { icon: "⛰️", text: "Rested on mountains of Ararat in 7th month (Gen 8:4)" },
+      { icon: "☀️", text: "370+ total days Noah remained inside the Ark" }
+    ],
+    bulletsMr: [
+      { icon: "🌧️", text: "४० दिवस व रात्री अखंड मुसळधार पाऊस पडला" },
+      { icon: "🌊", text: "१५० दिवस पुराचे पाणी पृथ्वीवर वाहत राहिले" },
+      { icon: "⛰️", text: "७ व्या महिन्यात अरारात पर्वतावर तारू स्थिरावले" },
+      { icon: "☀️", text: "एकूण ३७० हून अधिक दिवस नोहा तारवात होता" }
+    ],
+    refEn: "Genesis 7-8 • उत्पत्ती ७-८",
+    refMr: "उत्पत्ती ७-८ • Genesis 7-8",
+    book: "genesis",
+    chapter: 7,
+    verse: 17
+  },
+  {
+    id: "dyk_shepherd_rod",
+    theme: "dyk-theme-emerald",
+    image: "assets/images/did_you_know_shepherd.jpg",
+    alt: "Classical oil painting of biblical shepherd with rod and staff",
+    questionEn: "What Is the Secret of the Shepherd's Rod & Staff?",
+    questionMr: "मेंढपाळाची काठी व सोटा यातील आध्यात्मिक रहस्य काय?",
+    bulletsEn: [
+      { icon: "🛡️", text: "Rod (Shebet): Weapon defending flock against beasts" },
+      { icon: "🌿", text: "Staff (Mish'enet): Curved crook to gently guide sheep" },
+      { icon: "✝️", text: "Psalm 23:4: \"Thy rod and thy staff they comfort me\"" },
+      { icon: "🕊️", text: "Divine protection paired with tender, loving direction" }
+    ],
+    bulletsMr: [
+      { icon: "🛡️", text: "सोटा (Rod): हिंस्र श्वापदांपासून मेंढरांचे रक्षण करणारे हत्यार" },
+      { icon: "🌿", text: "काठी (Staff): वळलेली काठी चुकलेल्या मेंढरांना परत आणण्यासाठी" },
+      { icon: "✝️", text: "स्तोत्र २३:४: \"तुझा सोटा व तुझी काठी मला धीर देतात\"" },
+      { icon: "🕊️", text: "देवाचे अजिंक्य रक्षण आणि प्रेमळ मार्गदर्शन" }
+    ],
+    refEn: "Psalm 23:4 • स्तोत्रसंहिता २३:४",
+    refMr: "स्तोत्रसंहिता २३:४ • Psalm 23:4",
+    book: "psalms",
+    chapter: 23,
+    verse: 4
+  },
+  {
+    id: "dyk_water_into_wine",
+    theme: "dyk-theme-mahogany",
+    image: "assets/images/wedding_cana_miracle.jpg",
+    alt: "Classical painting of Jesus turning water into wine at the wedding at Cana",
+    questionEn: "How Much Water Was Turned into Wine at Cana?",
+    questionMr: "काना येथील लग्नात येशूने किती लिटर पाण्याचे रूपांतर केले?",
+    bulletsEn: [
+      { icon: "🏺", text: "6 massive stone jars used for ceremonial washing" },
+      { icon: "🍷", text: "20 to 30 gallons each (total 120-180 gallons / 500-700L)" },
+      { icon: "🍇", text: "Master of banquet declared it the finest wine" },
+      { icon: "✨", text: "Revealed His glory and the overflowing abundance of grace" }
+    ],
+    bulletsMr: [
+      { icon: "🏺", text: "शुद्धीकरणासाठी ठेवलेले ६ भव्य दगडी रांजण" },
+      { icon: "🍷", text: "प्रत्येकात सुमारे १०० लिटर (एकूण ५०० ते ७०० लिटर)" },
+      { icon: "🍇", text: "यजमानाने या द्राक्षारसाला उत्कृष्ट दर्जाचा ठरवले" },
+      { icon: "✨", text: "देवाची असीम कृपा आणि महिमा येथे प्रकट झाला" }
+    ],
+    refEn: "John 2:6-10 • योहान २:६-१०",
+    refMr: "योहान २:६-१० • John 2:6-10",
+    book: "john",
+    chapter: 2,
+    verse: 1
+  },
+  {
+    id: "dyk_peace_phroureo",
+    theme: "dyk-theme-indigo",
+    image: "assets/images/peace_anxiety_art.jpg",
+    alt: "Classical illustration of divine peace guarding believer amidst storm",
+    questionEn: "What Does Paul Mean by 'The Peace of God'?",
+    questionMr: "पौल जेव्हा 'देवाच्या शांती'चा उल्लेख करतो तेव्हा त्याचा खरा अर्थ काय?",
+    bulletsEn: [
+      { icon: "🛡️", text: "Uses Roman military term 'Phroureo' (φρουρέω)" },
+      { icon: "🏰", text: "Describes an armed garrison guarding a fortress 24/7" },
+      { icon: "🕊️", text: "Transcends all human understanding and anxiety" },
+      { icon: "❤️", text: "Keeps worry and panic completely outside your heart" }
+    ],
+    bulletsMr: [
+      { icon: "🛡️", text: "'फ्रुरिओ' (Phroureo) हा रोमन सैन्याचा लष्करी शब्द वापरला" },
+      { icon: "🏰", text: "किल्ल्याचे २४ तास अहोरात्र खडा पहारा देणारा पहारेकरी" },
+      { icon: "🕊️", text: "सर्व बुद्धी व समजेच्या पलीकडची स्वर्गीय शांती" },
+      { icon: "❤️", text: "चिंता, भीती व नैराश्याला हृदयाबाहेरच थोपवून धरते" }
+    ],
+    refEn: "Philippians 4:7 • फिलिप्पैकरांस ४:७",
+    refMr: "फिलिप्पैकरांस ४:७ • Philippians 4:7",
+    book: "philippians",
+    chapter: 4,
+    verse: 6
+  }
+];
 
 let didYouKnowOffset = 0;
 let activeDidYouKnowInsight = DID_YOU_KNOW_INSIGHTS[0];
@@ -21925,8 +21318,63 @@ function toMarathiDigits(num) {
 }
 window.toMarathiDigits = toMarathiDigits;
 
-// FEATURED_SCRIPTURES_CONFIG declared in upper scope before DOMContentLoaded
-
+const FEATURED_SCRIPTURES_CONFIG = [
+  {
+    id: "psalms",
+    nameEn: "Psalms",
+    nameMr: "स्तोत्रसंहिता",
+    cover: "assets/images/book_psalms_cover.png",
+    themeClass: "recent-card-psalms",
+    totalChapters: 150,
+    // Daily rotating curated chapters: Psalm 23 today, Psalm 70 tomorrow, then 91, 121, etc.
+    chapters: [23, 70, 91, 121, 27, 46, 1, 19, 34, 37, 51, 62, 84, 100, 103, 119, 139, 145, 8, 15, 16, 24, 25, 32, 40, 42, 63, 67, 72, 86, 90, 92, 95, 96, 98, 111, 112, 116, 122, 126, 127, 128, 130, 133, 138, 146, 147, 148, 150]
+  },
+  {
+    id: "proverbs",
+    nameEn: "Proverbs",
+    nameMr: "नीतिसूत्रे",
+    cover: "assets/images/book_proverbs_cover.jpg",
+    themeClass: "recent-card-proverbs",
+    totalChapters: 31,
+    chapters: [3, 4, 8, 10, 15, 16, 22, 27, 31, 1, 2, 5, 6, 7, 9, 11, 12, 13, 14, 17, 18, 19, 20, 21, 23, 24, 25, 26, 28, 29, 30]
+  },
+  {
+    id: "matthew",
+    nameEn: "Matthew",
+    nameMr: "मत्तय",
+    cover: "assets/images/book_matthew_cover.jpg",
+    themeClass: "recent-card-matthew",
+    totalChapters: 28,
+    chapters: [5, 6, 7, 11, 13, 14, 18, 24, 25, 26, 27, 28, 1, 2, 3, 4, 8, 9, 10, 12, 15, 16, 17, 19, 20, 21, 22, 23]
+  },
+  {
+    id: "john",
+    nameEn: "John",
+    nameMr: "योहान",
+    cover: "assets/images/book_john_cover.jpg",
+    themeClass: "recent-card-john",
+    totalChapters: 21,
+    chapters: [1, 3, 4, 6, 10, 11, 14, 15, 16, 17, 20, 21, 2, 5, 7, 8, 9, 12, 13, 18, 19]
+  },
+  {
+    id: "romans",
+    nameEn: "Romans",
+    nameMr: "रोमन्स",
+    cover: "assets/images/book_romans_cover.jpg",
+    themeClass: "recent-card-romans",
+    totalChapters: 16,
+    chapters: [8, 12, 1, 3, 5, 6, 7, 10, 11, 13, 14, 15, 16, 2, 4, 9]
+  },
+  {
+    id: "genesis",
+    nameEn: "Genesis",
+    nameMr: "उत्पत्ती",
+    cover: "assets/images/book_genesis_cover.jpg",
+    themeClass: "recent-card-genesis",
+    totalChapters: 50,
+    chapters: [1, 12, 15, 22, 28, 37, 39, 45, 50, 2, 3, 6, 7, 8, 9, 11]
+  }
+];
 
 function getFeaturedScriptureDayIndex(customDate) {
   const d = customDate ? new Date(customDate) : new Date();

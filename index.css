@@ -11387,7 +11387,7 @@ body:has(#view-reader.active) .mobile-bottom-tabs {
 /* 2. Hero Verse of the Day Card */
 .figma-hero-card {
   background-color: #0a0a0f;
-  background-image: url('assets/daily_verses/golden_dawn.png');
+  background-image: url('assets/daily_verses/sunrise.png');
   background-size: cover;
   background-position: center;
   color: #FFFFFF;
@@ -16848,136 +16848,6 @@ body:has(#view-reader.active) .mobile-bottom-tabs {
   background: linear-gradient(135deg, #881337 0%, #4c0519 100%);
   border-color: rgba(254, 205, 211, 0.45);
   box-shadow: 0 3px 10px rgba(136, 19, 55, 0.35);
-}
-
-/* ==============================================================================
-   PRAYER REQUESTS & MY PRAYER JOURNAL COMPONENT STYLES
-   ============================================================================== */
-.prayer-privacy-segmented {
-  user-select: none;
-}
-.prayer-privacy-segmented .privacy-toggle-btn {
-  font-family: var(--font-sans);
-}
-.prayer-privacy-segmented .privacy-toggle-btn.active {
-  background: var(--primary, #be123c) !important;
-  color: #ffffff !important;
-  box-shadow: 0 2px 6px rgba(190, 18, 60, 0.25);
-}
-
-/* Category Quick-Chips */
-.prayer-chip-btn {
-  padding: 6px 13px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 700;
-  border: 1px solid var(--border, #e2e8f0);
-  background: var(--bg, #f8fafc);
-  color: var(--text, #334155);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  transition: all 0.18s ease;
-  user-select: none;
-}
-.prayer-chip-btn:hover {
-  border-color: #fecdd3;
-  background: #fff1f2;
-}
-.prayer-chip-btn.active {
-  background: #fff1f2 !important;
-  color: #9f1239 !important;
-  border-color: #f43f5e !important;
-  font-weight: 800;
-  box-shadow: 0 2px 8px rgba(244, 63, 94, 0.15);
-}
-
-/* Embedded Mic Recording Pulse Animation */
-@keyframes micPulseRecord {
-  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(225, 29, 72, 0.5); }
-  50% { transform: scale(1.12); box-shadow: 0 0 0 8px rgba(225, 29, 72, 0); }
-  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(225, 29, 72, 0); }
-}
-.mic-recording-active {
-  background: #e11d48 !important;
-  color: #ffffff !important;
-  animation: micPulseRecord 1.2s infinite ease-in-out;
-}
-
-/* Status Badges for Prayer Journal */
-.badge-prayer-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 11px;
-  font-weight: 800;
-  padding: 3px 9px;
-  border-radius: 8px;
-  letter-spacing: 0.2px;
-}
-.badge-status-sent {
-  background: #eff6ff;
-  color: #2563eb;
-  border: 1px solid #bfdbfe;
-}
-.badge-status-prayed {
-  background: #faf5ff;
-  color: #7c3aed;
-  border: 1px solid #e9d5ff;
-}
-.badge-status-answered {
-  background: #ecfdf5;
-  color: #059669;
-  border: 1px solid #a7f3d0;
-}
-
-/* Journal Entry Cards */
-.prayer-journal-card {
-  background: var(--surface, #ffffff);
-  border: 1.5px solid var(--border, #e2e8f0);
-  border-radius: 16px;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  box-shadow: var(--shadow-xs, 0 1px 3px rgba(0,0,0,0.02));
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
-}
-.prayer-journal-card:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
-}
-
-/* Dark Mode Overrides */
-.ios-theme-dark .prayer-chip-btn {
-  background: #1e2230;
-  border-color: rgba(255, 255, 255, 0.1);
-  color: #cbd5e1;
-}
-.ios-theme-dark .prayer-chip-btn.active {
-  background: rgba(225, 29, 72, 0.25) !important;
-  color: #fda4af !important;
-  border-color: #fb7185 !important;
-}
-.ios-theme-dark .badge-status-sent {
-  background: rgba(37, 99, 235, 0.18);
-  color: #93c5fd;
-  border-color: rgba(59, 130, 246, 0.3);
-}
-.ios-theme-dark .badge-status-prayed {
-  background: rgba(124, 58, 237, 0.18);
-  color: #c4b5fd;
-  border-color: rgba(139, 92, 246, 0.3);
-}
-.ios-theme-dark .badge-status-answered {
-  background: rgba(16, 185, 129, 0.18);
-  color: #6ee7b7;
-  border-color: rgba(16, 185, 129, 0.3);
-}
-.ios-theme-dark .prayer-journal-card {
-  background: #181b26;
-  border-color: rgba(255, 255, 255, 0.08);
 }
 
 
