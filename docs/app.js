@@ -12015,30 +12015,129 @@ function launchLiveMeetingRoom(meeting, stream) {
       isHost: isHost
     };
 
-    // Load Clean Video Conference Room: Exactly 3 essential buttons (Mic, Camera, Hangup)
+    // Video Conference Mounting: Daily.co (Primary), External Link, or Jitsi Meet (Fallback)
     const jitsiCont = document.getElementById("meeting-jitsi-container");
     if (jitsiCont) {
       jitsiCont.style.display = "block";
-      const meetingIdSlug = (meeting && meeting.id) ? meeting.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
-      const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
       
-      const buttonsParam = encodeURIComponent(JSON.stringify(["microphone","camera","hangup"]));
-      const emptyArrayParam = encodeURIComponent(JSON.stringify([]));
-      const roomUrl = `https://meet.jit.si/${roomSlug}#config.prejoinPageEnabled=false&config.toolbarButtons=${buttonsParam}&config.disableDeepLinking=true&config.disableThirdPartyRequests=true&config.enableWelcomePage=false&config.startWithAudioMuted=false&config.startWithVideoMuted=false&interfaceConfig.TOOLBAR_BUTTONS=${buttonsParam}&interfaceConfig.SETTINGS_SECTIONS=${emptyArrayParam}&interfaceConfig.SHOW_JITSI_WATERMARK=false&interfaceConfig.SHOW_WATERMARK_FOR_GUESTS=false&userInfo.displayName=${encodeURIComponent(loggedIn)}`;
+      // 1. Check if meeting has an external link (Google Meet, Zoom, WhatsApp)
+      const hasCustomExtUrl = meeting && meeting.customUrl && 
+        (meeting.customUrl.includes("meet.google.com") || 
+         meeting.customUrl.includes("zoom.us") || 
+         meeting.customUrl.includes("whatsapp.com") || 
+         meeting.customUrl.includes("wa.me"));
 
-      jitsiCont.innerHTML = `
-        <iframe 
-          id="webrtc-room-iframe"
-          src="${roomUrl}" 
-          width="100%" 
-          height="100%" 
-          allow="camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; accelerometer; gyroscope;" 
-          allowusermedia="true"
-          style="border: none; width: 100%; height: 100%; border-radius: 14px; background: #090d16;">
-        </iframe>
-      `;
+      if (hasCustomExtUrl) {
+        const extUrl = meeting.customUrl.trim();
+        jitsiCont.innerHTML = `
+          <div style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #090d16; padding: 20px; box-sizing: border-box;">
+            <div style="max-width: 320px; width: 100%; text-align: center; padding: 24px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); border-radius: 20px; color: #fff; box-shadow: 0 8px 32px rgba(0,0,0,0.4);">
+              <div style="font-size: 44px; margin-bottom: 12px;">🔗</div>
+              <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 800; color: #fff;">External Fellowship Call</h3>
+              <p style="font-size: 13px; color: #9ca3af; margin: 0 0 20px 0; line-height: 1.5;">This prayer meeting is hosted on an external platform.</p>
+              <a href="${extUrl}" target="_blank" rel="noopener noreferrer" style="display: block; padding: 14px 20px; background: linear-gradient(135deg, #2563eb, #3b82f6); color: #fff; font-weight: 800; border-radius: 12px; text-decoration: none; font-size: 14px; box-shadow: 0 4px 14px rgba(37,99,235,0.4);">
+                🚀 Open Meeting / सभेत सामील व्हा
+              </a>
+              <button onclick="exitLiveMeetingRoom()" style="margin-top: 14px; background: transparent; border: none; color: #9ca3af; font-size: 13px; cursor: pointer;">
+                Cancel / मागे जा
+              </button>
+            </div>
+          </div>
+        `;
+        logAudioDebug("External meeting card rendered.", { extUrl });
+        showToast("Opening External Meeting 🙏");
+        return;
+      }
 
-      logAudioDebug("Clean 3-Button Conference mounted successfully.", { roomUrl });
+      // 2. Check configured video provider: 'daily' (Default) vs 'jitsi'
+      const provider = localStorage.getItem("rol_video_provider") || "daily";
+
+      if (provider === "daily") {
+        const dailyBaseUrl = getDailyRoomUrl(meeting);
+        
+        if (dailyBaseUrl) {
+          const sep = dailyBaseUrl.includes("?") ? "&" : "?";
+          const dailyEmbedUrl = `${dailyBaseUrl}${sep}userName=${encodeURIComponent(loggedIn)}&showLeaveButton=true`;
+
+          jitsiCont.innerHTML = `
+            <iframe 
+              id="webrtc-room-iframe"
+              src="${dailyEmbedUrl}" 
+              width="100%" 
+              height="100%" 
+              allow="camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *;" 
+              allowusermedia="true"
+              style="border: none; width: 100%; height: 100%; border-radius: 14px; background: #090d16;">
+            </iframe>
+          `;
+
+          // Listen for Daily.co leave event to auto-close modal cleanly
+          if (window._dailyMessageListener) {
+            window.removeEventListener("message", window._dailyMessageListener);
+          }
+          window._dailyMessageListener = function(e) {
+            if (e && e.data) {
+              const act = e.data.action || e.data.event;
+              if (act === 'left-meeting' || act === 'meeting-session-ended') {
+                console.log("[Daily.co] Participant left meeting, exiting modal.");
+                exitLiveMeetingRoom();
+              }
+            }
+          };
+          window.addEventListener("message", window._dailyMessageListener);
+
+          logAudioDebug("Daily.co clean conference mounted successfully.", { dailyEmbedUrl });
+          showToast("Joined Online Fellowship (Daily.co) 🙏");
+        } else {
+          // Daily.co is selected, but user hasn't configured their room link yet
+          jitsiCont.innerHTML = `
+            <div style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #090d16; padding: 20px; box-sizing: border-box;">
+              <div style="max-width: 340px; width: 100%; text-align: center; padding: 24px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 20px; color: #fff; box-shadow: 0 8px 32px rgba(0,0,0,0.5);">
+                <div style="font-size: 40px; margin-bottom: 12px;">📹</div>
+                <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 800; color: #fff;">Daily.co Video Fellowship</h3>
+                <p style="font-size: 12.5px; color: #9ca3af; margin: 0 0 16px 0; line-height: 1.5;">
+                  Connect your church's free Daily.co room (create free at <a href="https://www.daily.co" target="_blank" rel="noopener noreferrer" style="color: #60a5fa; font-weight: 700; text-decoration: underline;">daily.co</a>) or use instant Jitsi Meet.
+                </p>
+                <div style="margin-bottom: 14px; text-align: left;">
+                  <label style="font-size: 11px; font-weight: 700; color: #cbd5e1; display: block; margin-bottom: 4px;">Paste Daily.co Room URL:</label>
+                  <input type="url" id="inline-daily-url-input" placeholder="https://yourchurch.daily.co/prayer" style="width: 100%; box-sizing: border-box; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.25); background: rgba(0,0,0,0.4); color: #fff; font-size: 13px;">
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                  <button onclick="saveAndLaunchInlineDaily()" style="padding: 12px; background: linear-gradient(135deg, #16a34a, #22c55e); border: none; border-radius: 12px; color: #fff; font-weight: 800; font-size: 13.5px; cursor: pointer; box-shadow: 0 4px 12px rgba(34,197,94,0.3);">
+                    ✓ Save & Connect Daily.co
+                  </button>
+                  <button onclick="switchToJitsiAndReload()" style="padding: 12px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; color: #fff; font-weight: 700; font-size: 13px; cursor: pointer;">
+                    ⚡ Use Instant Jitsi Room
+                  </button>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+      } else {
+        // Fallback: Clean 3-Button Jitsi Conference
+        const meetingIdSlug = (meeting && meeting.id) ? meeting.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
+        const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
+        
+        const buttonsParam = encodeURIComponent(JSON.stringify(["microphone","camera","hangup"]));
+        const emptyArrayParam = encodeURIComponent(JSON.stringify([]));
+        const roomUrl = `https://meet.jit.si/${roomSlug}#config.prejoinPageEnabled=false&config.toolbarButtons=${buttonsParam}&config.disableDeepLinking=true&config.disableThirdPartyRequests=true&config.enableWelcomePage=false&config.startWithAudioMuted=false&config.startWithVideoMuted=false&interfaceConfig.TOOLBAR_BUTTONS=${buttonsParam}&interfaceConfig.SETTINGS_SECTIONS=${emptyArrayParam}&interfaceConfig.SHOW_JITSI_WATERMARK=false&interfaceConfig.SHOW_WATERMARK_FOR_GUESTS=false&userInfo.displayName=${encodeURIComponent(loggedIn)}`;
+
+        jitsiCont.innerHTML = `
+          <iframe 
+            id="webrtc-room-iframe"
+            src="${roomUrl}" 
+            width="100%" 
+            height="100%" 
+            allow="camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; accelerometer; gyroscope;" 
+            allowusermedia="true"
+            style="border: none; width: 100%; height: 100%; border-radius: 14px; background: #090d16;">
+          </iframe>
+        `;
+
+        logAudioDebug("Clean 3-Button Jitsi Conference mounted successfully.", { roomUrl });
+        showToast("Joined Online Fellowship (Jitsi) 🙏");
+      }
     }
 
     // Auto-enumerate devices for settings drawer
@@ -12048,12 +12147,54 @@ function launchLiveMeetingRoom(meeting, stream) {
     setTimeout(() => {
       unlockAndPlayRemoteAudio();
     }, 1000);
-
-    showToast("Joined Online Video Fellowship Room 🙏 (Mic & Speaker Active)");
   } catch (err) {
     logAudioDebug("launchLiveMeetingRoom notice:", err);
   }
 }
+
+function getDailyRoomUrl(meeting) {
+  // 1. If meeting has a custom Daily.co link
+  if (meeting && meeting.customUrl && meeting.customUrl.includes("daily.co")) {
+    return meeting.customUrl.trim();
+  }
+  // 2. If church admin/user configured a custom Daily room URL in settings
+  const customConfigured = localStorage.getItem("rol_daily_room_url");
+  if (customConfigured && customConfigured.includes("daily.co")) {
+    return customConfigured.trim();
+  }
+  return null;
+}
+window.getDailyRoomUrl = getDailyRoomUrl;
+
+function saveAndLaunchInlineDaily() {
+  const inp = document.getElementById("inline-daily-url-input");
+  const val = inp ? inp.value.trim() : "";
+  if (!val || !val.includes("daily.co")) {
+    showToast("Please enter a valid Daily.co URL (e.g. https://yourchurch.daily.co/room)");
+    return;
+  }
+  localStorage.setItem("rol_daily_room_url", val);
+  localStorage.setItem("rol_video_provider", "daily");
+  showToast("Daily.co Room Connected! 🙏");
+  if (activeMeetingSession && activeMeetingSession.meetingId) {
+    const meetings = getMeetingsFromStorage();
+    const curMeeting = meetings.find(m => m.id === activeMeetingSession.meetingId);
+    launchLiveMeetingRoom(curMeeting || { id: activeMeetingSession.meetingId }, null);
+  }
+}
+
+function switchToJitsiAndReload() {
+  localStorage.setItem("rol_video_provider", "jitsi");
+  showToast("Switched to Instant Jitsi Room 🙏");
+  if (activeMeetingSession && activeMeetingSession.meetingId) {
+    const meetings = getMeetingsFromStorage();
+    const curMeeting = meetings.find(m => m.id === activeMeetingSession.meetingId);
+    launchLiveMeetingRoom(curMeeting || { id: activeMeetingSession.meetingId }, null);
+  }
+}
+
+window.saveAndLaunchInlineDaily = saveAndLaunchInlineDaily;
+window.switchToJitsiAndReload = switchToJitsiAndReload;
 
 
 // ═══════════════════════════════════════════════════════════════
@@ -12215,6 +12356,12 @@ function exitLiveMeetingRoom() {
       jitsiCont.style.display = "none";
     }
 
+    // Clean up Daily.co message listener
+    if (window._dailyMessageListener) {
+      window.removeEventListener("message", window._dailyMessageListener);
+      window._dailyMessageListener = null;
+    }
+
     // Stop all local camera and microphone media tracks
     if (activeMeetingSession && activeMeetingSession.localStream) {
       try {
@@ -12228,6 +12375,56 @@ function exitLiveMeetingRoom() {
     console.warn("exitLiveMeetingRoom notice:", err);
   }
 }
+
+// ═══════════════════════════════════════════════════════════════
+// VIDEO CALL PROVIDER SETTINGS (Daily.co & Jitsi Meet)
+// ═══════════════════════════════════════════════════════════════
+
+function openMeetingProviderSettingsModal() {
+  const cur = localStorage.getItem("rol_video_provider") || "daily";
+  const radios = document.querySelectorAll('input[name="video-provider-choice"]');
+  radios.forEach(r => { r.checked = (r.value === cur); });
+  const urlInput = document.getElementById("input-daily-room-url");
+  if (urlInput) {
+    urlInput.value = localStorage.getItem("rol_daily_room_url") || "";
+  }
+  openModal("modal-meeting-provider-settings");
+}
+
+function saveVideoProviderChoice(provider) {
+  localStorage.setItem("rol_video_provider", provider);
+  const radios = document.querySelectorAll('input[name="video-provider-choice"]');
+  radios.forEach(r => { r.checked = (r.value === provider); });
+}
+
+function applyAndCloseProviderSettings() {
+  const selectedRadio = document.querySelector('input[name="video-provider-choice"]:checked');
+  if (selectedRadio) {
+    localStorage.setItem("rol_video_provider", selectedRadio.value);
+  }
+  const urlInput = document.getElementById("input-daily-room-url");
+  if (urlInput) {
+    const val = urlInput.value.trim();
+    if (val) {
+      localStorage.setItem("rol_daily_room_url", val);
+    } else {
+      localStorage.removeItem("rol_daily_room_url");
+    }
+  }
+  closeModal("modal-meeting-provider-settings");
+  showToast("Video Provider Settings Saved! 🙏");
+  
+  // If user is currently in a meeting, reload room with new provider
+  if (activeMeetingSession && activeMeetingSession.meetingId) {
+    const meetings = getMeetingsFromStorage();
+    const curMeeting = meetings.find(m => m.id === activeMeetingSession.meetingId);
+    launchLiveMeetingRoom(curMeeting || { id: activeMeetingSession.meetingId }, null);
+  }
+}
+
+window.openMeetingProviderSettingsModal = openMeetingProviderSettingsModal;
+window.saveVideoProviderChoice = saveVideoProviderChoice;
+window.applyAndCloseProviderSettings = applyAndCloseProviderSettings;
 
 
 function setupMeetingRoomControls() {

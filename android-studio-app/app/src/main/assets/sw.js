@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v149_PERMANENT_MARATHI_AUDIO_AND_CLEAN_MEETINGS';
+const CACHE_NAME = 'river-of-life-cache-v150_DAILY_CO_VIDEO_CONFERENCE';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
