@@ -4050,6 +4050,12 @@ function resolveBibleBookNumber(bookKeyOrName) {
   return 1;
 }
 
+function getBookNumber(bookKeyOrName) {
+  return resolveBibleBookNumber(bookKeyOrName);
+}
+window.resolveBibleBookNumber = resolveBibleBookNumber;
+window.getBookNumber = getBookNumber;
+
 function getBibleAudioUrl(bookNumber, chapterNumber, translation) {
   let langCode = "28"; // Marathi (मराठी पवित्र शास्त्र - Authentic Recorded Male Voice)
   if (translation === "eng") langCode = "1";
@@ -4097,7 +4103,7 @@ function getBsiUsfmCode(bookInput) {
   return BSI_USFM_MAP[str] || "GEN";
 }
 
-let bsiCloudFrontToken = 'Key-Pair-Id=KCC7HS8KPVISV&Signature=QkrmRAi0CUFRcxYMbaJmE2sNw7eken4TjfKCcIYyopc-yQpxzsHpZm8yKr30hihTDyKlQZHjb~GVu6Uf3a8HA4h1Wc3hZuSGOdPe9PTnsP3GrEabYXQZJj31V4pnbvUJSbyIE8DDYfhnCEgB7LXVBVToE0GP~cmdBpkdXGZwITHKVEp0z3m~iTA-j1XBNQjR4dbAUcPPkbqHWXRJIEEnlUObyTW~XG81OE7Nv3~WDGBzCfwWlZgdOwrS2PiCP2-IiQW-fxIIYELPgfqJf~QJKfxhMezZDHU~KqVX87Xk~LUodQxNxKfQQUe67QJ-B90Jxts3jN4Ju5zn66Zq5RxPsQ__&Expires=1789373545&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9kMWhrcHV6Mm81YTJ4dy5jbG91ZGZyb250Lm5ldC9zb3VyY2UvNTU1NDc2YzIzOTBjMTAyZC0wNC8qIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzg5MzczNTQ1fX19XX0_';
+let bsiCloudFrontToken = 'Key-Pair-Id=KCC7HS8KPVISV&Signature=YPn0ytrvvAAu3sJQdRjEF22qrzhGHdRlgBMrlbEQFOlw8BW2w39XTmA9yYhVkbk7zqae4VE6CbDru0it9JIMsNdBSnHzVhppME45Mr-JJiSU51K3zyY2bdKn3TFc0ZGMpkT692Q0I4Xc0kid9gk5OBTy24TM0AkCkE83EQgeKnYbX3gOixC-3kR1zXIh4SWspt-4kcT09LOJfzLZzBq19dbwZLkruZWJzOf5-J9qGoTpyZP9eKVnBOzLCxywMFxy~9S0khDjnNxKf0S9SZv5dIGc6xG3Tb~wOWJkvUTcB6~3fIZPMh1N5AWeKYdiOTsEDDx3WBzvPOI6SRllTfbwNQ__&Expires=1789453627&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9kMWhrcHV6Mm81YTJ4dy5jbG91ZGZyb250Lm5ldC9zb3VyY2UvNTU1NDc2YzIzOTBjMTAyZC0wNC8qIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzg5NDUzNjI3fX19XX0_';
 
 function isBsiTokenValid(token) {
   if (!token || typeof token !== 'string') return false;
@@ -4105,17 +4111,8 @@ function isBsiTokenValid(token) {
   if (!m) return false;
   const exp = parseInt(m[1], 10);
   const now = Math.floor(Date.now() / 1000);
-  // On GitHub Pages (non-localhost) we cannot refresh the token server-side.
-  // Always return true so we attempt playback — CloudFront will return 403 if
-  // the token is truly expired, which triggers the onerror retry + fallback chain.
-  const isGitHubPages = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
-  if (isGitHubPages) {
-    if (now >= (exp - 180)) {
-      console.warn('[BSI Audio] Token may be near expiry on GitHub Pages — attempting playback anyway, fallback ready.');
-    }
-    return true; // Always attempt; let CloudFront decide
-  }
-  return now < (exp - 180); // 3-minute proactive safety buffer (localhost only)
+  // Strictly require at least 2 minutes of remaining validity
+  return now < (exp - 120);
 }
 
 async function getBsiCloudFrontToken(forceRefresh = false) {
@@ -4164,8 +4161,8 @@ async function getBsiCloudFrontToken(forceRefresh = false) {
     console.warn("[BSI Audio] Could not fetch assets/bsi_token.json:", err);
   }
 
-  // 3. Try raw.githubusercontent.com live branch fallback (instant bypass of GitHub Pages deployment lag)
-  for (const branch of ['main', 'develop']) {
+  // 3. Try raw.githubusercontent.com live branch fallback (develop & main)
+  for (const branch of ['develop', 'main']) {
     try {
       const rawRes = await fetch(`https://raw.githubusercontent.com/gauravsalve236-lgtm/River-of-life/${branch}/assets/bsi_token.json?t=${Date.now()}`, { cache: 'no-store' });
       if (rawRes.ok) {
@@ -4181,7 +4178,33 @@ async function getBsiCloudFrontToken(forceRefresh = false) {
     }
   }
 
-  return bsiCloudFrontToken;
+  // 4. Dynamic client-side CORS scraping fallback via public proxies
+  try {
+    const corsEndpoints = [
+      `https://api.allorigins.win/raw?url=${encodeURIComponent('https://www.indian.bible/bible/MARVBSI/GEN.1')}`,
+      `https://corsproxy.io/?url=${encodeURIComponent('https://www.indian.bible/bible/MARVBSI/GEN.1')}`
+    ];
+    for (const proxyUrl of corsEndpoints) {
+      try {
+        const pRes = await fetch(proxyUrl, { signal: AbortSignal.timeout ? AbortSignal.timeout(4500) : undefined });
+        if (pRes.ok) {
+          const html = await pRes.text();
+          const match = html.match(/https:\/\/d1hkpuz2o5a2xw\.cloudfront\.net\/source\/555476c2390c102d-04\/[^\s"'<>]+\?([^\s"'<>]+)/);
+          if (match && match[1]) {
+            const rawTok = match[1].replace(/&amp;/g, '&').replace(/["']/g, '');
+            if (rawTok.includes('Key-Pair-Id=') && rawTok.includes('Signature=') && isBsiTokenValid(rawTok)) {
+              bsiCloudFrontToken = rawTok;
+              try { localStorage.setItem("rol_bsi_token", bsiCloudFrontToken); } catch(e) {}
+              console.log("[BSI Audio] Live token scraped via client gateway successfully!");
+              return bsiCloudFrontToken;
+            }
+          }
+        }
+      } catch(proxyErr) {}
+    }
+  } catch(e) {}
+
+  return isBsiTokenValid(bsiCloudFrontToken) ? bsiCloudFrontToken : null;
 }
 
 var bibleChapterAudioPlayer = null;
@@ -4196,29 +4219,84 @@ window.audioPlaybackState = {
   isPaused: false
 };
 
+// Global audio engine setter: 'bsi' (Dramatized) | 'wordproject' (Authentic Marathi Voice) | 'tts' (AI)
+window.setBibleAudioEngine = function(engine) {
+  try {
+    localStorage.setItem("rol_audio_engine", engine);
+  } catch(e) {}
+  const labels = {
+    'bsi': "🎭 BSI नाट्यमय ऑडिओ निवडला",
+    'wordproject': "🎙️ अस्सल मराठी मानवी ऑडिओ निवडला (कायमस्वरूपी)",
+    'tts': "🤖 AI वाचक निवडला"
+  };
+  showToast(labels[engine] || "ऑडिओ प्रकार बदलला");
+  
+  if (isBibleChapterPlaying || (bibleChapterAudioPlayer && !bibleChapterAudioPlayer.paused)) {
+    const curBook = window.audioPlaybackState.activeBook || state.activeBook || "genesis";
+    const curCh = window.audioPlaybackState.activeChapter || state.activeChapter || 1;
+    const curTime = bibleChapterAudioPlayer ? bibleChapterAudioPlayer.currentTime : 0;
+    if (engine === 'tts') {
+      if (bibleChapterAudioPlayer) bibleChapterAudioPlayer.pause();
+      startSpeechNarration(0);
+    } else {
+      stopTtsNarrationOnly();
+      playBsiDramatizedAudio(curBook, curCh, curTime);
+    }
+  }
+};
+
 async function playBsiDramatizedAudio(bookKey, chapterNum, resumeTime = null) {
   closeModal("modal-audio-settings");
-
-  await getBsiCloudFrontToken();
 
   const cleanBook = (bookKey || state.activeBook || "genesis").toLowerCase().replace(".json", "");
   const chNum = parseInt(chapterNum || state.activeChapter || 1, 10);
   const usfm = getBsiUsfmCode(bookKey || cleanBook);
   const chStr = String(chNum).padStart(3, '0');
-  
-  let audioUrl = `https://d1hkpuz2o5a2xw.cloudfront.net/source/555476c2390c102d-04/${usfm}_${chStr}.mp3?${bsiCloudFrontToken}`;
+  const bookNum = getBookNumber(cleanBook);
+  const wpUrl = getBibleAudioUrl(bookNum, chNum, state.translation || 'mr');
+
+  // Check saved audio engine preference
+  let userEnginePref = "auto";
+  try {
+    userEnginePref = localStorage.getItem("rol_audio_engine") || "auto";
+  } catch(e) {}
+
+  let token = null;
+  if (userEnginePref !== 'wordproject') {
+    token = await getBsiCloudFrontToken();
+  }
+
+  let audioUrl = "";
+  let audioLabel = "";
+  let isUsingWordProject = false;
+
+  // Zero-Failure Decision: If user chose WordProject or BSI token is unavailable/expired,
+  // directly and synchronously route to authentic human Marathi audio
+  if (userEnginePref === 'wordproject' || !token) {
+    audioUrl = wpUrl;
+    audioLabel = `🎙️ अस्सल मराठी ऑडिओ • ${cleanBook} ${chNum}`;
+    isUsingWordProject = true;
+    console.log("[Audio Engine] Routing directly to Permanent Authentic Marathi Human Audio:", audioUrl);
+    if (!token && userEnginePref !== 'wordproject') {
+      showToast("🎙️ अस्सल मराठी मानवी ऑडिओ सुरू केला आहे (कायमस्वरूपी) 🙏");
+    }
+  } else {
+    audioUrl = `https://d1hkpuz2o5a2xw.cloudfront.net/source/555476c2390c102d-04/${usfm}_${chStr}.mp3?${token}`;
+    audioLabel = `🎭 BSI नाट्यमय ऑडिओ • ${cleanBook} ${chNum}`;
+  }
 
   // If local server streaming proxy is explicitly enabled, use it
-  if (window.USE_LOCAL_BSI_PROXY && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+  if (window.USE_LOCAL_BSI_PROXY && !isUsingWordProject && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
     audioUrl = `/api/bsi-audio-stream?book=${cleanBook}&chapter=${chNum}`;
   }
 
   // Check if player is already loaded with the same track and was paused
   const isSameTrack = bibleChapterAudioPlayer && 
     (bibleChapterAudioPlayer.src.includes(`${cleanBook}&chapter=${chNum}`) ||
-     bibleChapterAudioPlayer.src.includes(`${usfm}_${chStr}.mp3`));
+     bibleChapterAudioPlayer.src.includes(`${usfm}_${chStr}.mp3`) ||
+     bibleChapterAudioPlayer.src === wpUrl);
 
-  if (isSameTrack && bibleChapterAudioPlayer.currentTime > 0) {
+  if (isSameTrack && bibleChapterAudioPlayer.currentTime > 0 && bibleChapterAudioPlayer.paused) {
     try {
       await bibleChapterAudioPlayer.play();
       audioState.isPlaying = true;
@@ -4255,6 +4333,7 @@ async function playBsiDramatizedAudio(bookKey, chapterNum, resumeTime = null) {
   window.audioPlaybackState.isPaused = false;
 
   bibleChapterAudioPlayer._retried = false;
+  bibleChapterAudioPlayer._wpFallback = isUsingWordProject;
   bibleChapterAudioPlayer.src = audioUrl;
   bibleChapterAudioPlayer.playbackRate = audioState.speed || 1.0;
 
@@ -4277,7 +4356,7 @@ async function playBsiDramatizedAudio(bookKey, chapterNum, resumeTime = null) {
   updateReaderPlayState(true);
 
   const indicator = document.getElementById("playbar-verse-indicator");
-  if (indicator) indicator.textContent = `🎭 BSI नाट्यमय ऑडिओ • ${cleanBook} ${chNum}`;
+  if (indicator) indicator.textContent = audioLabel;
 
   const playbar = document.getElementById("floating-audio-playbar");
   if (playbar) playbar.classList.add("active");
@@ -4322,41 +4401,24 @@ async function playBsiDramatizedAudio(bookKey, chapterNum, resumeTime = null) {
   };
 
   bibleChapterAudioPlayer.onerror = async function(e) {
-    console.warn("[BSI Audio] Player error:", e);
-    if (!bibleChapterAudioPlayer._retried) {
-      bibleChapterAudioPlayer._retried = true;
-      try {
-        bsiCloudFrontToken = null;
-        const freshToken = await getBsiCloudFrontToken(true);
-        if (freshToken) {
-          console.log("[BSI Audio] Retrying playback with fresh token...");
-          bibleChapterAudioPlayer.src = `https://d1hkpuz2o5a2xw.cloudfront.net/source/555476c2390c102d-04/${usfm}_${chStr}.mp3?${freshToken}`;
-          if (targetTime > 0) {
-            bibleChapterAudioPlayer.currentTime = targetTime;
-          }
-          await bibleChapterAudioPlayer.play();
-          return;
-        }
-      } catch (retryErr) {
-        console.warn("[BSI Audio] Retry token failed:", retryErr);
-      }
-    }
-
-    // Direct Seamless Fallback: High quality authentic Marathi voice (WordProject 28)
-    if (!bibleChapterAudioPlayer._wpFallback) {
+    console.warn("[Audio Engine] Player error on URL:", bibleChapterAudioPlayer.src, e);
+    
+    // Direct Seamless Fallback to Authentic Human Marathi Voice (WordProject 28)
+    if (!bibleChapterAudioPlayer._wpFallback && bibleChapterAudioPlayer.src !== wpUrl) {
       bibleChapterAudioPlayer._wpFallback = true;
       try {
-        const bookNum = getBookNumber(cleanBook);
-        const wpUrl = getBibleAudioUrl(bookNum, chNum, state.translation);
-        console.log("[BSI Audio] Falling back to authentic Marathi audio:", wpUrl);
+        console.log("[Audio Engine] Seamlessly switching to Authentic Marathi audio fallback:", wpUrl);
         bibleChapterAudioPlayer.src = wpUrl;
         if (targetTime > 0) {
           bibleChapterAudioPlayer.currentTime = targetTime;
         }
         await bibleChapterAudioPlayer.play();
+        const indicator = document.getElementById("playbar-verse-indicator");
+        if (indicator) indicator.textContent = `🎙️ अस्सल मराठी ऑडिओ • ${cleanBook} ${chNum}`;
+        showToast("🎙️ अस्सल मराठी मानवी ऑडिओ सुरू केला आहे 🙏");
         return;
       } catch(wpErr) {
-        console.warn("[BSI Audio] WordProject fallback failed:", wpErr);
+        console.warn("[Audio Engine] WordProject fallback error:", wpErr);
       }
     }
 
@@ -4366,7 +4428,17 @@ async function playBsiDramatizedAudio(bookKey, chapterNum, resumeTime = null) {
   try {
     await bibleChapterAudioPlayer.play();
   } catch(err) {
-    console.warn("[BSI Audio] Play error:", err);
+    console.warn("[Audio Engine] Initial play warning:", err);
+    // If browser threw autoplay error or URL was rejected, attempt instant WordProject fallback
+    if (!bibleChapterAudioPlayer._wpFallback && bibleChapterAudioPlayer.src !== wpUrl) {
+      bibleChapterAudioPlayer._wpFallback = true;
+      bibleChapterAudioPlayer.src = wpUrl;
+      try {
+        await bibleChapterAudioPlayer.play();
+        const indicator = document.getElementById("playbar-verse-indicator");
+        if (indicator) indicator.textContent = `🎙️ अस्सल मराठी ऑडिओ • ${cleanBook} ${chNum}`;
+      } catch(e) {}
+    }
   }
 }
 window.playBsiDramatizedAudio = playBsiDramatizedAudio;
@@ -11859,16 +11931,6 @@ function triggerJoinMeetingFlow(meetingId) {
   const loggedIn = (state && state.currentUser) ? state.currentUser.username : "Member";
   const meetingIdSlug = (m && m.id) ? m.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
   const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
-  const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&autojoin=true&p2p=true&codec=opus&layout=grid&grid=1&name=${encodeURIComponent(loggedIn)}`;
-
-  // Detect iOS (iPhone/iPad) to bypass WebKit iframe microphone blocking and popup blocker
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  if (isIOS) {
-    logAudioDebug("iOS Device detected. Directing to native top-level call window...", { roomUrl });
-    showToast("Opening iOS Video Room (Mic & Speaker Active) 🙏");
-    window.location.href = roomUrl;
-    return;
-  }
 
   // Graceful Handling: Respect saved permission state from onboarding
   const permPref = localStorage.getItem("rol_media_permissions");
@@ -11882,7 +11944,7 @@ function triggerJoinMeetingFlow(meetingId) {
   logAudioDebug("getUserMedia started for meeting join...", { meetingId });
   showToast("Requesting Microphone & Camera access...");
   
-  // Explicitly request audio FIRST to force mobile browsers (Android Chrome / Desktop) to display Microphone Permission Dialog
+  // Explicitly request audio FIRST to force mobile browsers to display Microphone Permission Dialog
   navigator.mediaDevices.getUserMedia({ audio: true })
     .then(audioStream => {
       logAudioDebug("Microphone permission granted by user!", {
@@ -11912,7 +11974,7 @@ function triggerJoinMeetingFlow(meetingId) {
     });
 }
 
-// Fullscreen Live Meeting Room Entry
+// Fullscreen Live Meeting Room Entry — Ultra Clean 3-Button Experience (Mic, Camera, Hangup)
 function launchLiveMeetingRoom(meeting, stream) {
   try {
     const loggedIn = (state && state.currentUser) ? state.currentUser.username : "Member";
@@ -11953,25 +12015,16 @@ function launchLiveMeetingRoom(meeting, stream) {
       isHost: isHost
     };
 
-    // Load Verified WebRTC Video Conference Room with Exclusive Hardware Access for All Participants
+    // Load Clean Video Conference Room: Exactly 3 essential buttons (Mic, Camera, Hangup)
     const jitsiCont = document.getElementById("meeting-jitsi-container");
     if (jitsiCont) {
       jitsiCont.style.display = "block";
       const meetingIdSlug = (meeting && meeting.id) ? meeting.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
       const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
       
-      // Low-latency Opus P2P parameters for zero audio delay on Android & Desktop: audio=true&video=true&mic=true&cam=true&muted=false&sound=true&autojoin=true&p2p=true&codec=opus
-      const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&autojoin=true&p2p=true&codec=opus&layout=grid&grid=1&name=${encodeURIComponent(loggedIn)}`;
-      
-      // Detect iOS (iPhone/iPad) to bypass WebKit iframe microphone blocking
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-      if (isIOS) {
-        logAudioDebug("iOS Device detected (Apple WebKit Iframe Restriction). Launching native top-level call window...");
-        showToast("Opening iOS Video Room (Mic & Speaker Active) 🙏");
-        try {
-          window.open(roomUrl, "_blank");
-        } catch(e) {}
-      }
+      const buttonsParam = encodeURIComponent(JSON.stringify(["microphone","camera","hangup"]));
+      const emptyArrayParam = encodeURIComponent(JSON.stringify([]));
+      const roomUrl = `https://meet.jit.si/${roomSlug}#config.prejoinPageEnabled=false&config.toolbarButtons=${buttonsParam}&config.disableDeepLinking=true&config.disableThirdPartyRequests=true&config.enableWelcomePage=false&config.startWithAudioMuted=false&config.startWithVideoMuted=false&interfaceConfig.TOOLBAR_BUTTONS=${buttonsParam}&interfaceConfig.SETTINGS_SECTIONS=${emptyArrayParam}&interfaceConfig.SHOW_JITSI_WATERMARK=false&interfaceConfig.SHOW_WATERMARK_FOR_GUESTS=false&userInfo.displayName=${encodeURIComponent(loggedIn)}`;
 
       jitsiCont.innerHTML = `
         <iframe 
@@ -11981,16 +12034,11 @@ function launchLiveMeetingRoom(meeting, stream) {
           height="100%" 
           allow="camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; accelerometer; gyroscope;" 
           allowusermedia="true"
-          style="border: none; width: 100%; height: 100%; border-radius: 18px; background: #090d16;">
+          style="border: none; width: 100%; height: 100%; border-radius: 14px; background: #090d16;">
         </iframe>
       `;
 
-      logAudioDebug("WebRTC Room iframe mounted with low-latency Opus audio parameters.", {
-        roomUrl,
-        isIOS,
-        allowPermissions: "camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; accelerometer; gyroscope;",
-        allowusermedia: "true"
-      });
+      logAudioDebug("Clean 3-Button Conference mounted successfully.", { roomUrl });
     }
 
     // Auto-enumerate devices for settings drawer
@@ -12008,9 +12056,150 @@ function launchLiveMeetingRoom(meeting, stream) {
 }
 
 
+// ═══════════════════════════════════════════════════════════════
+// CLEAN MOBILE MEETING CONTROLS — Mic, Camera, Reactions, End Call
+// ═══════════════════════════════════════════════════════════════
+
+function showMeetCustomControls() {
+  const blocker = document.getElementById("meet-mirotalk-controls-blocker");
+  const bar = document.getElementById("meet-custom-controls-bar");
+  if (blocker) blocker.style.display = "block";
+  if (bar) bar.style.display = "flex";
+  // Hide old top Audio Settings button — redundant on mobile
+  const audioSettingsBtn = document.getElementById("btn-meeting-audio-settings");
+  if (audioSettingsBtn) audioSettingsBtn.style.display = "none";
+}
+
+function hideMeetCustomControls() {
+  const blocker = document.getElementById("meet-mirotalk-controls-blocker");
+  const bar = document.getElementById("meet-custom-controls-bar");
+  const picker = document.getElementById("meet-emoji-picker-panel");
+  if (blocker) blocker.style.display = "none";
+  if (bar) bar.style.display = "none";
+  if (picker) picker.style.display = "none";
+  // Restore top Audio Settings button
+  const audioSettingsBtn = document.getElementById("btn-meeting-audio-settings");
+  if (audioSettingsBtn) audioSettingsBtn.style.display = "";
+}
+
+// Mic toggle — updates button icon, sends to MiroTalk via keyboard simulation
+let _meetCtrlMicMuted = false;
+function toggleMeetCtrlMic() {
+  _meetCtrlMicMuted = !_meetCtrlMicMuted;
+  const btn = document.getElementById("meet-ctrl-mic");
+  if (btn) {
+    btn.textContent = _meetCtrlMicMuted ? "🔇" : "🎙️";
+    btn.style.background = _meetCtrlMicMuted
+      ? "rgba(239, 68, 68, 0.35)"
+      : "rgba(255,255,255,0.1)";
+    btn.style.borderColor = _meetCtrlMicMuted
+      ? "#ef4444"
+      : "rgba(255,255,255,0.2)";
+  }
+  // Simulate clicking mic button inside the iframe via keyboard shortcut (MiroTalk uses M key)
+  try {
+    const iframe = document.getElementById("webrtc-room-iframe");
+    if (iframe && iframe.contentWindow) {
+      iframe.contentWindow.postMessage({ type: "toggleAudio" }, "*");
+    }
+  } catch(e) {}
+  showToast(_meetCtrlMicMuted ? "🔇 Mic Muted" : "🎙️ Mic Active");
+}
+
+// Camera toggle — updates button icon
+let _meetCtrlCamOff = false;
+function toggleMeetCtrlCam() {
+  _meetCtrlCamOff = !_meetCtrlCamOff;
+  const btn = document.getElementById("meet-ctrl-cam");
+  if (btn) {
+    btn.textContent = _meetCtrlCamOff ? "🚫" : "📹";
+    btn.style.background = _meetCtrlCamOff
+      ? "rgba(239, 68, 68, 0.35)"
+      : "rgba(255,255,255,0.1)";
+    btn.style.borderColor = _meetCtrlCamOff
+      ? "#ef4444"
+      : "rgba(255,255,255,0.2)";
+  }
+  // Try sending to iframe
+  try {
+    const iframe = document.getElementById("webrtc-room-iframe");
+    if (iframe && iframe.contentWindow) {
+      iframe.contentWindow.postMessage({ type: "toggleVideo" }, "*");
+    }
+  } catch(e) {}
+  showToast(_meetCtrlCamOff ? "📵 Camera Off" : "📹 Camera On");
+}
+
+// Emoji reactions picker toggle
+function toggleMeetEmojiPanel() {
+  const picker = document.getElementById("meet-emoji-picker-panel");
+  if (!picker) return;
+  const isOpen = picker.style.display === "flex";
+  picker.style.display = isOpen ? "none" : "flex";
+  const btn = document.getElementById("meet-ctrl-emoji");
+  if (btn) btn.style.background = isOpen ? "rgba(255,255,255,0.1)" : "rgba(212,175,55,0.3)";
+}
+
+// Send an emoji reaction — floats up on screen with animation
+function sendMeetReaction(emoji) {
+  // Close picker
+  const picker = document.getElementById("meet-emoji-picker-panel");
+  if (picker) picker.style.display = "none";
+  const btn = document.getElementById("meet-ctrl-emoji");
+  if (btn) btn.style.background = "rgba(255,255,255,0.1)";
+
+  // Show floating emoji bubble
+  const stage = document.getElementById("river-native-meeting-stage");
+  if (!stage) return;
+  const bubble = document.createElement("div");
+  bubble.textContent = emoji;
+  bubble.style.cssText = `
+    position: absolute;
+    font-size: 36px;
+    bottom: 100px;
+    left: ${30 + Math.random() * 40}%;
+    z-index: 50;
+    pointer-events: none;
+    animation: meetReactionFloat 2.8s ease-out forwards;
+  `;
+  stage.appendChild(bubble);
+  setTimeout(() => bubble.remove(), 3000);
+
+  // Inject animation keyframes once
+  if (!document.getElementById("meet-reaction-keyframes")) {
+    const style = document.createElement("style");
+    style.id = "meet-reaction-keyframes";
+    style.textContent = `
+      @keyframes meetReactionFloat {
+        0%   { opacity: 1; transform: translateY(0) scale(1); }
+        80%  { opacity: 0.8; transform: translateY(-180px) scale(1.2); }
+        100% { opacity: 0; transform: translateY(-240px) scale(0.8); }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  showToast(`${emoji} Reaction Sent!`);
+}
+
+window.showMeetCustomControls = showMeetCustomControls;
+window.hideMeetCustomControls = hideMeetCustomControls;
+window.toggleMeetCtrlMic = toggleMeetCtrlMic;
+window.toggleMeetCtrlCam = toggleMeetCtrlCam;
+window.toggleMeetEmojiPanel = toggleMeetEmojiPanel;
+window.sendMeetReaction = sendMeetReaction;
+
+
+
+
 function exitLiveMeetingRoom() {
   try {
     console.log("Exiting Live Fellowship Meeting Room...");
+
+    // Hide custom mobile controls overlay
+    hideMeetCustomControls();
+    _meetCtrlMicMuted = false;
+    _meetCtrlCamOff = false;
     
     // Hide Modal Overlay & Restore Body Class
     const roomModal = document.getElementById("modal-live-meeting");

@@ -5077,9 +5077,6 @@
             <h3 id="meeting-room-title-display" style="font-family: var(--font-ui); font-size: 13.5px; font-weight: 800; color: #fff; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">River of Life Meeting</h3>
           </div>
           <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
-            <button id="btn-meeting-audio-settings" onclick="openDrawer('drawer-meet-audio-settings')" style="padding: 6px 12px; border-radius: 18px; font-size: 11px; font-weight: 700; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #fff; cursor: pointer; display: flex; align-items: center; gap: 4px;">
-              ⚙ <span>Audio</span>
-            </button>
             <button id="btn-meeting-leave-top" onclick="exitLiveMeetingRoom()" style="padding: 7px 14px; border-radius: 18px; font-size: 12px; font-weight: 800; background: linear-gradient(135deg, #dc2626, #ef4444); border: none; color: #fff; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(239,68,68,0.4);" title="End Meeting">
               <span>🚪 End Call / सभा सोडा</span>
             </button>
@@ -5094,9 +5091,11 @@
             <!-- Dynamically populated with .river-video-tile elements -->
           </div>
 
-          <!-- Embedded Fallback Iframe Container for compatibility -->
+          <!-- Embedded Clean 3-Button Conference Container -->
           <div id="meeting-jitsi-container" style="display: none; width: 100%; height: 100%; position: absolute; inset: 0; z-index: 5;"></div>
+
         </div>
+
 
       </div>
     </div>
