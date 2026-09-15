@@ -12054,66 +12054,38 @@ function launchLiveMeetingRoom(meeting, stream) {
 
       if (provider === "daily") {
         const dailyBaseUrl = getDailyRoomUrl(meeting);
-        
-        if (dailyBaseUrl) {
-          const sep = dailyBaseUrl.includes("?") ? "&" : "?";
-          const dailyEmbedUrl = `${dailyBaseUrl}${sep}userName=${encodeURIComponent(loggedIn)}&showLeaveButton=true`;
+        const sep = dailyBaseUrl.includes("?") ? "&" : "?";
+        const dailyEmbedUrl = `${dailyBaseUrl}${sep}userName=${encodeURIComponent(loggedIn)}&showLeaveButton=true`;
 
-          jitsiCont.innerHTML = `
-            <iframe 
-              id="webrtc-room-iframe"
-              src="${dailyEmbedUrl}" 
-              width="100%" 
-              height="100%" 
-              allow="camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *;" 
-              allowusermedia="true"
-              style="border: none; width: 100%; height: 100%; border-radius: 14px; background: #090d16;">
-            </iframe>
-          `;
+        jitsiCont.innerHTML = `
+          <iframe 
+            id="webrtc-room-iframe"
+            src="${dailyEmbedUrl}" 
+            width="100%" 
+            height="100%" 
+            allow="camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *;" 
+            allowusermedia="true"
+            style="border: none; width: 100%; height: 100%; border-radius: 14px; background: #090d16;">
+          </iframe>
+        `;
 
-          // Listen for Daily.co leave event to auto-close modal cleanly
-          if (window._dailyMessageListener) {
-            window.removeEventListener("message", window._dailyMessageListener);
-          }
-          window._dailyMessageListener = function(e) {
-            if (e && e.data) {
-              const act = e.data.action || e.data.event;
-              if (act === 'left-meeting' || act === 'meeting-session-ended') {
-                console.log("[Daily.co] Participant left meeting, exiting modal.");
-                exitLiveMeetingRoom();
-              }
-            }
-          };
-          window.addEventListener("message", window._dailyMessageListener);
-
-          logAudioDebug("Daily.co clean conference mounted successfully.", { dailyEmbedUrl });
-          showToast("Joined Online Fellowship (Daily.co) 🙏");
-        } else {
-          // Daily.co is selected, but user hasn't configured their room link yet
-          jitsiCont.innerHTML = `
-            <div style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #090d16; padding: 20px; box-sizing: border-box;">
-              <div style="max-width: 340px; width: 100%; text-align: center; padding: 24px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 20px; color: #fff; box-shadow: 0 8px 32px rgba(0,0,0,0.5);">
-                <div style="font-size: 40px; margin-bottom: 12px;">📹</div>
-                <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 800; color: #fff;">Daily.co Video Fellowship</h3>
-                <p style="font-size: 12.5px; color: #9ca3af; margin: 0 0 16px 0; line-height: 1.5;">
-                  Connect your church's free Daily.co room (create free at <a href="https://www.daily.co" target="_blank" rel="noopener noreferrer" style="color: #60a5fa; font-weight: 700; text-decoration: underline;">daily.co</a>) or use instant Jitsi Meet.
-                </p>
-                <div style="margin-bottom: 14px; text-align: left;">
-                  <label style="font-size: 11px; font-weight: 700; color: #cbd5e1; display: block; margin-bottom: 4px;">Paste Daily.co Room URL:</label>
-                  <input type="url" id="inline-daily-url-input" placeholder="https://yourchurch.daily.co/prayer" style="width: 100%; box-sizing: border-box; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.25); background: rgba(0,0,0,0.4); color: #fff; font-size: 13px;">
-                </div>
-                <div style="display: flex; flex-direction: column; gap: 8px;">
-                  <button onclick="saveAndLaunchInlineDaily()" style="padding: 12px; background: linear-gradient(135deg, #16a34a, #22c55e); border: none; border-radius: 12px; color: #fff; font-weight: 800; font-size: 13.5px; cursor: pointer; box-shadow: 0 4px 12px rgba(34,197,94,0.3);">
-                    ✓ Save & Connect Daily.co
-                  </button>
-                  <button onclick="switchToJitsiAndReload()" style="padding: 12px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; color: #fff; font-weight: 700; font-size: 13px; cursor: pointer;">
-                    ⚡ Use Instant Jitsi Room
-                  </button>
-                </div>
-              </div>
-            </div>
-          `;
+        // Listen for Daily.co leave event to auto-close modal cleanly
+        if (window._dailyMessageListener) {
+          window.removeEventListener("message", window._dailyMessageListener);
         }
+        window._dailyMessageListener = function(e) {
+          if (e && e.data) {
+            const act = e.data.action || e.data.event;
+            if (act === 'left-meeting' || act === 'meeting-session-ended') {
+              console.log("[Daily.co] Participant left meeting, exiting modal.");
+              exitLiveMeetingRoom();
+            }
+          }
+        };
+        window.addEventListener("message", window._dailyMessageListener);
+
+        logAudioDebug("Daily.co clean conference mounted successfully.", { dailyEmbedUrl });
+        showToast("Joined Online Fellowship (Daily.co) 🙏");
       } else {
         // Fallback: Clean 3-Button Jitsi Conference
         const meetingIdSlug = (meeting && meeting.id) ? meeting.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
@@ -12152,6 +12124,8 @@ function launchLiveMeetingRoom(meeting, stream) {
   }
 }
 
+const OFFICIAL_DAILY_ROOM_URL = "https://riveroflife.daily.co/River_Of_Life";
+
 function getDailyRoomUrl(meeting) {
   // 1. If meeting has a custom Daily.co link
   if (meeting && meeting.customUrl && meeting.customUrl.includes("daily.co")) {
@@ -12162,7 +12136,8 @@ function getDailyRoomUrl(meeting) {
   if (customConfigured && customConfigured.includes("daily.co")) {
     return customConfigured.trim();
   }
-  return null;
+  // 3. Permanent official Daily.co sanctuary room
+  return OFFICIAL_DAILY_ROOM_URL;
 }
 window.getDailyRoomUrl = getDailyRoomUrl;
 

@@ -12,7 +12,7 @@
   <script>
     // Force immediate hard purge of all stale Service Workers and CacheStorage
     (function() {
-      const CURRENT_VER = "v2327.0";
+      const CURRENT_VER = "v2328.0";
       if (localStorage.getItem("rol_app_ver") !== CURRENT_VER) {
         localStorage.setItem("rol_app_ver", CURRENT_VER);
         if ('serviceWorker' in navigator) {
@@ -5128,8 +5128,8 @@
             </div>
           </label>
           <div style="margin-top: 6px;">
-            <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Church's Daily.co Room URL [Optional]:</label>
-            <input type="url" id="input-daily-room-url" class="dropdown-selector" style="width: 100%; text-align: left; padding: 10px; font-size: 12.5px; border-radius: 10px;" placeholder="https://yourchurch.daily.co/sanctuary">
+            <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Church's Daily.co Room URL:</label>
+            <input type="url" id="input-daily-room-url" class="dropdown-selector" style="width: 100%; text-align: left; padding: 10px; font-size: 12.5px; border-radius: 10px;" placeholder="https://riveroflife.daily.co/River_Of_Life">
             <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Free permanent room link available at <a href="https://www.daily.co" target="_blank" style="color: var(--primary); font-weight: 700;">daily.co</a></div>
           </div>
           <button onclick="applyAndCloseProviderSettings()" class="btn-primary-block" style="margin-top: 10px; padding: 12px; border-radius: 12px; font-size: 13.5px; font-weight: 800;">
@@ -6010,7 +6010,7 @@
   <!-- App Main Logic (Cache-Busted for 100% MARVBSI Church Bible) -->
   <script src="sarvam-tts.js?v=132_MARVBSI_FULL_CHURCH_BIBLE"></script>
   <script src="bible-study.js?v=138_MUSEUM_STUDY_HUB"></script>
-  <script src="app.js?v=150_DAILY_CO_VIDEO_CONFERENCE"></script>
+  <script src="app.js?v=151_RIVER_OF_LIFE_DAILY_ROOM"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 4.5s no matter what
