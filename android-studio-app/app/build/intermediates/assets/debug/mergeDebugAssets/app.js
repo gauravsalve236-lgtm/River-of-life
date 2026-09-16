@@ -9570,3 +9570,22 @@ function fallbackCopyInviteLink(text) {
   const allow=()=>document.querySelectorAll('iframe').forEach(f=>{if(/jitsi/i.test(f.src||'')){f.setAttribute('allow','camera; microphone; autoplay; fullscreen; display-capture');f.setAttribute('allowfullscreen','true')}});
   allow();new MutationObserver(allow).observe(document.documentElement,{childList:true,subtree:true});
 })();
+
+(function(){
+  if(window.__rolJitsiMicPermissionPatch)return;window.__rolJitsiMicPermissionPatch=true;
+  const allow=()=>document.querySelectorAll('iframe').forEach(f=>{if(/jitsi/i.test(f.src||'')){f.setAttribute('allow','camera; microphone; autoplay; fullscreen; display-capture');f.setAttribute('allowfullscreen','true')}});
+  allow();new MutationObserver(allow).observe(document.documentElement,{childList:true,subtree:true});
+})();
+
+(function(){
+  if(window.__rolJitsiAudioStartupPatch||typeof window.JitsiMeetExternalAPI!=='function')return;
+  window.__rolJitsiAudioStartupPatch=true;
+  const Original=window.JitsiMeetExternalAPI;
+  window.JitsiMeetExternalAPI=function(){
+    const api=Reflect.construct(Original,Array.from(arguments),window.JitsiMeetExternalAPI);
+    const ensure=function(){try{api.isAudioMuted().then(function(muted){if(muted)api.executeCommand('toggleAudio')}).catch(function(){})}catch(e){}};
+    try{api.addListener('videoConferenceJoined',function(){const f=api.getIFrame&&api.getIFrame();if(f)f.setAttribute('allow','camera; microphone; autoplay; fullscreen; display-capture');ensure();setTimeout(ensure,350);setTimeout(ensure,1000);setTimeout(ensure,2000)})}catch(e){}
+    return api;
+  };
+  window.JitsiMeetExternalAPI.prototype=Original.prototype;
+})();
