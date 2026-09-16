@@ -11914,64 +11914,37 @@ function generateICSFile(meeting) {
 }
 
 // Trigger Joining Flow (Camera preview checks)
-function triggerJoinMeetingFlow(meetingId) {
-  const meetings = getMeetingsFromStorage();
-  const m = meetings.find(x => x.id === meetingId);
-  if (!m) return;
-
-  // Synchronous user-gesture audio context unlock
+function unlockMobileSpeakerAudio() {
   try {
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     if (AudioContextClass) {
       if (!window.webrtcAudioCtx) window.webrtcAudioCtx = new AudioContextClass();
       if (window.webrtcAudioCtx.state === 'suspended') window.webrtcAudioCtx.resume();
+      // Warm up mobile speaker output pipeline
+      const buffer = window.webrtcAudioCtx.createBuffer(1, 1, 22050);
+      const source = window.webrtcAudioCtx.createBufferSource();
+      source.buffer = buffer;
+      source.connect(window.webrtcAudioCtx.destination);
+      source.start(0);
     }
-  } catch(e) {}
-
-  const loggedIn = (state && state.currentUser) ? state.currentUser.username : "Member";
-  const meetingIdSlug = (m && m.id) ? m.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
-  const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
-
-  // Graceful Handling: Respect saved permission state from onboarding
-  const permPref = localStorage.getItem("rol_media_permissions");
-  if (permPref === "listen_only" || permPref === "skipped") {
-    logAudioDebug("User previously configured listen-only mode. Bypassing redundant media prompt.");
-    showToast("Joining Live Sanctuary in Listen Mode 🎧");
-    launchLiveMeetingRoom(m, null);
-    return;
+  } catch(e) {
+    console.warn("Audio unlock notice:", e);
   }
+}
+window.unlockMobileSpeakerAudio = unlockMobileSpeakerAudio;
 
-  logAudioDebug("getUserMedia started for meeting join...", { meetingId });
-  showToast("Requesting Microphone & Camera access...");
-  
-  // Explicitly request audio FIRST to force mobile browsers to display Microphone Permission Dialog
-  navigator.mediaDevices.getUserMedia({ audio: true })
-    .then(audioStream => {
-      logAudioDebug("Microphone permission granted by user!", {
-        audioTracks: audioStream.getAudioTracks().map(t => ({ id: t.id, label: t.label, enabled: t.enabled, readyState: t.readyState }))
-      });
+// Trigger Joining Flow — Clean, direct entry without hardware device locking
+function triggerJoinMeetingFlow(meetingId) {
+  const meetings = getMeetingsFromStorage();
+  const m = meetings.find(x => x.id === meetingId);
+  if (!m) return;
 
-      // Stop parent frame pre-check tracks so hardware mic device lock is released before iframe initialization
-      if (audioStream && audioStream.getTracks) {
-        audioStream.getTracks().forEach(t => t.stop());
-        logAudioDebug("Parent frame audio tracks released for exclusive iframe hardware capture.");
-      }
+  // 1. Unlock phone speaker output via user gesture
+  unlockMobileSpeakerAudio();
 
-      // Also attempt joint video request
-      navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-        .then(fullStream => {
-          if (fullStream && fullStream.getTracks) fullStream.getTracks().forEach(t => t.stop());
-          launchLiveMeetingRoom(m, null);
-        })
-        .catch(() => {
-          launchLiveMeetingRoom(m, null);
-        });
-    })
-    .catch(err => {
-      logAudioDebug("Microphone permission denied or unavailable on mobile:", err);
-      showToast("Microphone permission denied. Joining in listen mode.");
-      launchLiveMeetingRoom(m, null);
-    });
+  // 2. Launch Live Meeting Room directly so the in-app WebRTC engine has sole hardware access
+  showToast("Joining Live Sanctuary 🙏");
+  launchLiveMeetingRoom(m, null);
 }
 
 // Fullscreen Live Meeting Room Entry — Ultra Clean 3-Button Experience (Mic, Camera, Hangup)
@@ -12108,14 +12081,28 @@ function launchLiveMeetingRoom(meeting, stream) {
           "config.disableThirdPartyRequests=true",
           "config.startWithAudioMuted=false",
           "config.startWithVideoMuted=false",
-          "config.resolution=720",
-          // Acoustic Echo Cancellation & Audio Quality (No voice eco / feedback loop)
+          "config.startSilent=false",
+          "config.startAudioOnly=false",
+          // Ultra HD 1080p Camera Video Constraints
+          "config.resolution=1080",
+          "config.constraints.video.height.ideal=1080",
+          "config.constraints.video.height.max=1080",
+          "config.constraints.video.width.ideal=1920",
+          "config.constraints.video.width.max=1920",
+          "config.constraints.video.frameRate.ideal=30",
+          "config.constraints.video.frameRate.max=30",
+          "config.channelLastN=-1",
+          "config.adaptiveLastN=false",
+          "config.videoQuality.maxBitratesVideo.low=350000",
+          "config.videoQuality.maxBitratesVideo.standard=1000000",
+          "config.videoQuality.maxBitratesVideo.high=4000000",
+          // Acoustic Echo Cancellation & HD 96kbps Audio Quality (Zero Voice Echo)
           "config.disableEchoCancellation=false",
           "config.noiseSuppression=true",
           "config.autoGainControl=true",
           "config.stereo=false",
           "config.audioQuality.stereo=false",
-          "config.audioQuality.opusMaxAverageBitrate=64000",
+          "config.audioQuality.opusMaxAverageBitrate=96000",
           "config.disableAudioLevels=false",
           // Screen Sharing (desktop) options for host content presentation
           "config.desktopSharingFrameRate.min=15",
@@ -12142,13 +12129,15 @@ function launchLiveMeetingRoom(meeting, stream) {
             src="${roomUrl}" 
             width="100%" 
             height="100%" 
-            allow="camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; clipboard-write *; accelerometer; gyroscope;" 
+            allow="camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; clipboard-write *; camera; microphone; autoplay; display-capture; fullscreen; speaker-selection;" 
             allowusermedia="true"
+            playsinline="true"
+            webkit-playsinline="true"
             style="border: none; width: 100%; height: 100%; border-radius: 14px; background: #090d16;">
           </iframe>
         `;
 
-        logAudioDebug("River of Life LiveMeet mounted successfully.", { roomUrl });
+        logAudioDebug("River of Life LiveMeet mounted successfully with 1080p HD and 96kbps audio.", { roomUrl });
         showToast("Joined River of Life LiveMeet 🙏");
       }
     }
@@ -12156,10 +12145,11 @@ function launchLiveMeetingRoom(meeting, stream) {
     // Auto-enumerate devices for settings drawer
     enumerateAndPopulateAudioDevices();
 
-    // Trigger audio autoplay unlock
+    // Trigger audio autoplay unlock & mobile speaker warm-up
     setTimeout(() => {
+      unlockMobileSpeakerAudio();
       unlockAndPlayRemoteAudio();
-    }, 1000);
+    }, 500);
   } catch (err) {
     logAudioDebug("launchLiveMeetingRoom notice:", err);
   }
