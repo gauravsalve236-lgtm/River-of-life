@@ -12308,39 +12308,32 @@ function launchLiveMeetingRoom(meeting, stream) {
 
           // Unmute microphone on joining to bypass iOS mobile mute defaults
           api.on("videoConferenceJoined", function() {
-  try {
-    const jf = api.getIFrame && api.getIFrame();
-    if (jf) {
-      jf.setAttribute("allow", "camera; microphone; autoplay; fullscreen; display-capture");
-      jf.setAttribute("allowfullscreen", "true");
-    }
-    const ensureMicOn = function() {
-      api.isAudioMuted().then(function(muted) {
-        if (muted) api.executeCommand("toggleAudio");
-      }).catch(function() {});
-    };
-    ensureMicOn();
-    setTimeout(ensureMicOn, 350);
-    setTimeout(ensureMicOn, 1000);
-    setTimeout(ensureMicOn, 2000);
-  } catch (e) { console.warn("RoL microphone startup:", e); }
-});
             logAudioDebug("Jitsi conference joined. Verifying active microphone...");
-            setTimeout(() => {
-              try {
+            try {
+              const jf = api.getIFrame && api.getIFrame();
+              if (jf) {
+                jf.setAttribute("allow", "camera; microphone; autoplay; fullscreen; display-capture");
+                jf.setAttribute("allowfullscreen", "true");
+              }
+              const ensureMicOn = function() {
                 if (typeof api.isAudioMuted === "function") {
-                  api.isAudioMuted().then(muted => {
+                  api.isAudioMuted().then(function(muted) {
                     logAudioDebug("Live mic mute status:", muted);
                     if (muted) {
                       logAudioDebug("Mobile mic detected muted, calling toggleAudio to unmute...");
                       api.executeCommand("toggleAudio");
                     }
-                  }).catch(e => console.warn("isAudioMuted error:", e));
+                  }).catch(function(e) { console.warn("isAudioMuted error:", e); });
                 }
-              } catch(e) {
-                logAudioDebug("Auto-unmute check exception:", e);
-              }
-            }, 600);
+              };
+              ensureMicOn();
+              setTimeout(ensureMicOn, 350);
+              setTimeout(ensureMicOn, 600);
+              setTimeout(ensureMicOn, 1000);
+              setTimeout(ensureMicOn, 2000);
+            } catch (e) {
+              console.warn("RoL microphone startup:", e);
+            }
           });
 
           api.on("readyToClose", function() {
