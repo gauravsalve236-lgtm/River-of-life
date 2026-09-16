@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v159_IOS_MIC_AUDIO_CONSTRAINT_FIX';
+const CACHE_NAME = 'river-of-life-cache-v160_HARD_PURGE';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
@@ -8,11 +8,7 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
-        cacheNames.map((cache) => {
-          if (cache !== CACHE_NAME) {
-            return caches.delete(cache);
-          }
-        })
+        cacheNames.map((cache) => caches.delete(cache))
       );
     })
   );
@@ -38,19 +34,31 @@ self.addEventListener('notificationclick', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   
-  // NEVER cache BSI tokens, CloudFront audio, daily_verses images, or backend APIs
+  const url = event.request.url;
+
+  // CRITICAL: NEVER cache HTML, JavaScript, stylesheets, or API calls!
+  // Always fetch live from network to guarantee instant updates on mobile phones
   if (
-    event.request.url.includes('bsi_token') ||
-    event.request.url.includes('cloudfront.net') ||
-    event.request.url.includes('daily_verses') ||
-    event.request.url.includes('/api/')
+    url.includes('.js') ||
+    url.includes('.css') ||
+    url.includes('index.html') ||
+    event.request.mode === 'navigate' ||
+    url.includes('bsi_token') ||
+    url.includes('cloudfront.net') ||
+    url.includes('daily_verses') ||
+    url.includes('/api/')
   ) {
+    event.respondWith(
+      fetch(event.request, { cache: 'no-store' }).catch(() => caches.match(event.request))
+    );
     return;
   }
 
+  // Cache static media and assets only
   event.respondWith(
-    fetch(event.request)
-      .then((networkResponse) => {
+    caches.match(event.request).then((cachedResponse) => {
+      if (cachedResponse) return cachedResponse;
+      return fetch(event.request).then((networkResponse) => {
         if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
           const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
@@ -58,9 +66,7 @@ self.addEventListener('fetch', (event) => {
           });
         }
         return networkResponse;
-      })
-      .catch(() => {
-        return caches.match(event.request);
-      })
+      });
+    })
   );
 });
