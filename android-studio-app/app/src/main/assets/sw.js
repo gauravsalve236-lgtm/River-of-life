@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v160_HARD_PURGE';
+const CACHE_NAME = 'river-of-life-cache-v165_HARD_PURGE';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

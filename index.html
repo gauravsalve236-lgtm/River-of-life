@@ -12,7 +12,7 @@
   <script>
     // Force immediate hard purge of all stale Service Workers and CacheStorage
     (function() {
-      const CURRENT_VER = "v2335_HARD_PURGE_DAILY_VERSE_MIC_FIX";
+      const CURRENT_VER = "v2340_MARATHI_VERSE_MIC_SAFARI_FIX";
       if (localStorage.getItem("rol_app_ver") !== CURRENT_VER) {
         localStorage.setItem("rol_app_ver", CURRENT_VER);
         if ('serviceWorker' in navigator) {
@@ -29,6 +29,11 @@
             }
           });
         }
+      }
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.addEventListener('controllerchange', function() {
+          window.location.reload();
+        });
       }
     })();
   </script>
@@ -48,7 +53,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Noto+Serif+Devanagari:wght@500;600;700;800;900&family=Outfit:wght@500;600;700;800;900&family=Poppins:wght@600;700;800;900&family=Rozha+One&display=swap" rel="stylesheet">
   
   <!-- Main Stylesheet (Cache-Busted for Authentic Male Audio V27) -->
-  <link rel="stylesheet" href="index.css?v=147_SUNRISE_WALLPAPER_PERFECT">
+  <link rel="stylesheet" href="index.css?v=165_MARATHI_VERSE_MIC_SAFARI_FIX">
 
   <!-- Official LiveKit WebRTC Client SDK -->
   <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.0.8/dist/livekit-client.umd.min.js"></script>
@@ -2082,6 +2087,14 @@
                       <option value="parallel">Parallel Mode</option>
                     </select>
                   </div>
+                </div>
+                
+                <div class="settings-card-group margin-top" style="padding: 16px; background: rgba(59, 130, 246, 0.08); border: 1.5px solid rgba(59, 130, 246, 0.25); border-radius: 16px; margin-bottom: 14px; text-align: center;">
+                  <h4 style="margin: 0 0 6px 0; font-size: 14px; font-weight: 800; color: #2563eb;">🔄 ॲप अपडेट व कॅशे साफ करा (Clear Cache)</h4>
+                  <p style="margin: 0 0 12px 0; font-size: 12px; color: var(--text-muted); line-height: 1.4;">नवीन दैनिक वचन डिझाईन आणि ऑडिओ सुधारणा मिळवण्यासाठी खालील बटण दाबा.</p>
+                  <button onclick="forceHardRefreshApp()" style="width: 100%; padding: 12px; border-radius: 12px; font-weight: 800; font-size: 13.5px; background: linear-gradient(135deg, #2563eb, #3b82f6); border: none; color: #fff; cursor: pointer; box-shadow: 0 4px 12px rgba(37,99,235,0.3);">
+                    🚀 Update App Now / त्वरित अपडेट करा
+                  </button>
                 </div>
                 
                 <div class="settings-card-group margin-top" style="padding: 0; background: transparent; border: none;">
@@ -5064,6 +5077,29 @@
       </div>
     </div>
 
+    <!-- iOS Optimized Meeting Join Sheet (Resolves iPhone Safari & PWA Mic Capture) -->
+    <div id="modal-ios-meeting-choice" class="app-modal-backdrop" onclick="if(event.target === this) closeModal('modal-ios-meeting-choice');" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 99999; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); justify-content: center; align-items: center; padding: 16px;">
+      <div style="background: var(--bg-content, #ffffff); color: var(--text, #1f2937); max-width: 380px; width: 100%; border-radius: 24px; padding: 26px 22px; box-shadow: 0 20px 50px rgba(0,0,0,0.4); border: 1.5px solid var(--border, rgba(0,0,0,0.1)); text-align: center; animation: popInModal 0.25s ease;">
+        <div style="font-size: 40px; margin-bottom: 8px;">🎙️</div>
+        <h3 style="margin: 0 0 8px 0; font-size: 19px; font-weight: 800; color: var(--text, #1f2937);">Join Live Fellowship</h3>
+        <p style="margin: 0 0 18px 0; font-size: 13.5px; color: var(--text-muted, #4b5563); line-height: 1.5; font-weight: 500;">
+          आयफोनवर स्पष्ट आवाज आणि मायक्रोफोनसाठी <strong>Safari</strong> निवडा.<br>
+          <span style="font-size: 12px; color: var(--text-muted, #6b7280);">(For full microphone & audio access on iPhone, open via Safari)</span>
+        </p>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <button id="btn-ios-join-safari" onclick="proceedJoinMeetingSafari()" style="width: 100%; padding: 14px; border-radius: 14px; font-size: 14px; font-weight: 800; background: linear-gradient(135deg, #2563eb, #3b82f6); color: #ffffff; border: none; cursor: pointer; box-shadow: 0 4px 14px rgba(37,99,235,0.35); display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <span>🌐 Open in Safari (Audio & Mic)</span>
+          </button>
+          <button id="btn-ios-join-inapp" onclick="proceedJoinMeetingInApp()" style="width: 100%; padding: 13px; border-radius: 14px; font-size: 13.5px; font-weight: 700; background: var(--surface, #f3f4f6); color: var(--text, #1f2937); border: 1.5px solid var(--border, rgba(0,0,0,0.1)); cursor: pointer;">
+            <span>📱 Join Inside App (ॲपमध्ये सामील व्हा)</span>
+          </button>
+          <button onclick="closeModal('modal-ios-meeting-choice')" style="background: transparent; border: none; color: var(--text-muted, #6b7280); font-size: 13px; font-weight: 700; cursor: pointer; padding: 6px;">
+            Cancel / रद्द करा
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Fullscreen Live Meeting Room Modal -->
     <div id="modal-live-meeting" class="meeting-modal-overlay">
       <div class="meeting-room-container" style="position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; box-sizing: border-box; background: #17181b;">
@@ -5077,9 +5113,6 @@
             <h3 id="meeting-room-title-display" style="font-family: var(--font-ui); font-size: 13.5px; font-weight: 800; color: #fff; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">River of Life Meeting</h3>
           </div>
           <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
-            <button id="btn-meeting-open-browser" onclick="openCurrentMeetingInExternalBrowser()" style="padding: 6px 12px; border-radius: 18px; font-size: 11.5px; font-weight: 800; background: rgba(59,130,246,0.25); border: 1.5px solid #3b82f6; color: #93c5fd; cursor: pointer; display: flex; align-items: center; gap: 4px;" title="Open in Safari / Browser (Direct Audio)">
-              <span>🌐 Safari</span>
-            </button>
             <button id="btn-meeting-provider-toggle" onclick="openMeetingProviderSettingsModal()" style="padding: 7px 11px; border-radius: 18px; font-size: 12px; font-weight: 700; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.18); color: #fff; cursor: pointer; display: flex; align-items: center; gap: 4px;" title="Video Provider Settings">
               <span>⚙️</span>
             </button>
@@ -6053,7 +6086,7 @@
   <script src="sarvam-tts.js?v=132_MARVBSI_FULL_CHURCH_BIBLE"></script>
   <script src="bible-study.js?v=138_MUSEUM_STUDY_HUB"></script>
   <script src="https://jitsi.riot.im/external_api.js"></script>
-  <script src="app.js?v=160_HARD_PURGE_DAILY_VERSE_AND_MIC_FIX"></script>
+  <script src="app.js?v=165_MARATHI_VERSE_MIC_SAFARI_FIX"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 4.5s no matter what
