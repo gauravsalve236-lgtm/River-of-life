@@ -1,0 +1,46 @@
+name: Fix Daily Verse Share Centering
+on:
+  workflow_dispatch:
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch Daily Verse renderer
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('app.js')
+          s=p.read_text(encoding='utf-8')
+          marker='/* DAILY_VERSE_CENTER_FIX_V2 */'
+          if marker in s:
+              print('Patch already present')
+              raise SystemExit(0)
+          patch=r'''\n\n/* DAILY_VERSE_CENTER_FIX_V2\n   Draw the Daily Bible Verse directly onto a fixed 1080x1080 canvas so the\n   shared/downloaded wallpaper cannot inherit the DOM text positioning. */\n(function(){\n  const W=1080,H=1080;\n  function wrap(ctx,text,maxWidth){\n    const words=String(text||'').trim().split(/\\s+/);\n    const lines=[]; let line='';\n    for(const word of words){\n      const test=line?line+' '+word:word;\n      if(ctx.measureText(test).width<=maxWidth || !line) line=test;\n      else { lines.push(line); line=word; }\n    }\n    if(line) lines.push(line);\n    return lines;\n  }\n  async function loadImage(src){\n    return new Promise((resolve,reject)=>{\n      const im=new Image(); im.crossOrigin='anonymous';\n      im.onload=()=>resolve(im); im.onerror=reject; im.src=src;\n    });\n  }\n  async function buildDailyVerseImage(){\n    const card=document.getElementById('card-daily-verse-home');\n    const verseEl=card?.querySelector('.home-vod-text, .daily-verse-text, [class*=verse-text]');\n    const refEl=card?.querySelector('.home-vod-reference, .daily-verse-reference, [class*=reference]');\n    const verse=(verseEl?.innerText||card?.dataset?.verse||'').trim();\n    const reference=(refEl?.innerText||card?.dataset?.reference||'').trim();\n    if(!verse) throw new Error('Daily verse text not found');\n\n    const canvas=document.createElement('canvas'); canvas.width=W; canvas.height=H;\n    const ctx=canvas.getContext('2d');\n    ctx.textAlign='center'; ctx.textBaseline='middle';\n\n    // Preserve the existing wallpaper/background when one is available.\n    const bg=card?.querySelector('img');\n    if(bg?.src){\n      try{ const im=await loadImage(bg.src); const scale=Math.max(W/im.width,H/im.height); const iw=im.width*scale,ih=im.height*scale; ctx.drawImage(im,(W-iw)/2,(H-ih)/2,iw,ih); }\n      catch(e){ ctx.fillStyle='#111'; ctx.fillRect(0,0,W,H); }\n    } else {\n      ctx.fillStyle='#111'; ctx.fillRect(0,0,W,H);\n    }\n\n    // Read the visible card styling where possible, but always center using canvas coordinates.\n    ctx.fillStyle='rgba(0,0,0,0.20)'; ctx.fillRect(0,0,W,H);\n    ctx.fillStyle='#fff';\n    ctx.font='600 48px Arial, sans-serif';\n    const lines=wrap(ctx,verse,760);\n    ctx.font='600 48px Arial, sans-serif';\n    const lineH=68, refGap=52, refH=42;\n    const totalH=lines.length*lineH + (reference?refGap+refH:0);\n    let y=(H-totalH)/2 + lineH/2;\n    ctx.textAlign='center';\n    for(const line of lines){ ctx.fillText(line,W/2,y); y+=lineH; }\n    if(reference){ ctx.font='700 32px Arial, sans-serif'; ctx.fillText(reference,W/2,y+refGap-lineH/2+refH/2); }\n\n    return new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error('Could not create image')),'image/png',1));\n  }\n  window.saveExactDailyVerseImage=async function(){\n    try{\n      const blob=await buildDailyVerseImage();\n      const file=new File([blob],'daily-bible-verse.png',{type:'image/png'});\n      if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){ await navigator.share({files:[file],title:'Daily Bible Verse'}); }\n      else { const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='daily-bible-verse.png'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); }\n    }catch(e){ console.error('[Daily Verse Share]',e); }\n  };\n  window.shareDailyVerseToWhatsApp=async function(){\n    try{\n      const blob=await buildDailyVerseImage();\n      const file=new File([blob],'daily-bible-verse.png',{type:'image/png'});\n      if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){ await navigator.share({files:[file],title:'Daily Bible Verse'}); return; }\n      const url='https://wa.me/?text='+encodeURIComponent('Daily Bible Verse');\n      window.open(url,'_blank');\n    }catch(e){ console.error('[Daily Verse WhatsApp]',e); }\n  };\n})();\n'''
+          s += patch
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Bump cache version
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('index.html'); s=p.read_text(encoding='utf-8')
+          s=s.replace('v2343_IN_APP_MIC_DAILY_VERSE_FIX','v2344_DAILY_VERSE_CENTER_FIX')
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit changes
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add app.js index.html
+          git diff --cached --quiet || git commit -m 'fix: center daily bible verse share image'
+          git push
+      - name: Remove temporary workflow
+        run: |
+          rm -f .github/workflows/fix-daily-verse-center.yml
+          git add .github/workflows/fix-daily-verse-center.yml
+          git commit -m 'chore: remove temporary daily verse patch workflow' || true
+          git push || true
