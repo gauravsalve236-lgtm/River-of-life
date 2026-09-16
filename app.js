@@ -12133,7 +12133,8 @@ function launchLiveMeetingRoom(meeting, stream) {
           `userInfo.displayName=${encodeURIComponent(loggedIn)}`
         ].join("&");
 
-        const roomUrl = `https://meet.jit.si/${roomSlug}#${jitsiConfig}`;
+        const jitsiServer = (localStorage.getItem("rol_jitsi_server") || "https://jitsi.riot.im").replace(/\/+$/, "");
+        const roomUrl = `${jitsiServer}/${roomSlug}#${jitsiConfig}`;
 
         jitsiCont.innerHTML = `
           <iframe 
