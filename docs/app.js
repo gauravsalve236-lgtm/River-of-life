@@ -11933,20 +11933,23 @@ function unlockMobileSpeakerAudio() {
 }
 window.unlockMobileSpeakerAudio = unlockMobileSpeakerAudio;
 
-// Trigger Joining Flow — Authorizes microphone on user gesture for iOS Safari & Android, then launches meeting
+let _pendingMeetingToJoin = null;
+
+// Trigger Joining Flow — Authorizes BOTH Camera & Microphone simultaneously on user gesture for iOS Safari & Android
 function triggerJoinMeetingFlow(meetingId) {
   const meetings = getMeetingsFromStorage();
-  const m = meetings.find(x => x.id === meetingId);
-  if (!m) return;
+  const m = meetings.find(x => x.id === meetingId) || { id: meetingId, title: "Live Fellowship", host: "Pastor" };
+  _pendingMeetingToJoin = m;
 
   // 1. Unlock phone speaker output via user gesture
   unlockMobileSpeakerAudio();
 
-  // 2. On iOS Safari and mobile browsers, request mic permission once in parent to authorize WebKit
+  // 2. Request BOTH audio AND video simultaneously in a single getUserMedia call.
+  // This ensures iOS Safari displays a unified "Camera and Microphone" prompt rather than asking only for camera!
   if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-    navigator.mediaDevices.getUserMedia({ audio: true })
+    navigator.mediaDevices.getUserMedia({ audio: true, video: true })
       .then(tempStream => {
-        // Stop the temp track immediately so device is ready for conference
+        // Stop temporary tracks immediately so devices are cleanly released for the conference room
         if (tempStream && tempStream.getTracks) {
           tempStream.getTracks().forEach(t => t.stop());
         }
@@ -11954,15 +11957,96 @@ function triggerJoinMeetingFlow(meetingId) {
         launchLiveMeetingRoom(m, null);
       })
       .catch(err => {
-        console.warn("Parent getUserMedia prompt result:", err);
-        showToast("Joining Live Sanctuary 🙏");
-        launchLiveMeetingRoom(m, null);
+        console.warn("Parent getUserMedia joint prompt result:", err);
+
+        // Check if error is due to user denial or permission block
+        if (err && (err.name === "NotAllowedError" || err.name === "PermissionDeniedError")) {
+          // Check if audio alone fails (meaning Microphone is blocked in iPhone / Safari Settings):
+          navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(audioStream => {
+              if (audioStream && audioStream.getTracks) audioStream.getTracks().forEach(t => t.stop());
+              // Audio is allowed! Video was the one denied. Launch room.
+              showToast("Joining Live Sanctuary 🙏");
+              launchLiveMeetingRoom(m, null);
+            })
+            .catch(micErr => {
+              // Microphone is explicitly blocked in iOS Safari Website Settings!
+              console.warn("Microphone access is blocked in iOS Safari website settings:", micErr);
+              showMicrophonePermissionHelpModal(m);
+            });
+          return;
+        }
+
+        // For constraint errors (e.g. mobile camera constraint issue), fallback to audio-only check
+        navigator.mediaDevices.getUserMedia({ audio: true })
+          .then(audioStream => {
+            if (audioStream && audioStream.getTracks) audioStream.getTracks().forEach(t => t.stop());
+            showToast("Joining Live Sanctuary 🙏");
+            launchLiveMeetingRoom(m, null);
+          })
+          .catch(fallbackErr => {
+            if (fallbackErr && (fallbackErr.name === "NotAllowedError" || fallbackErr.name === "PermissionDeniedError")) {
+              showMicrophonePermissionHelpModal(m);
+            } else {
+              showToast("Joining Live Sanctuary 🙏");
+              launchLiveMeetingRoom(m, null);
+            }
+          });
       });
   } else {
     showToast("Joining Live Sanctuary 🙏");
     launchLiveMeetingRoom(m, null);
   }
 }
+window.triggerJoinMeetingFlow = triggerJoinMeetingFlow;
+
+function showMicrophonePermissionHelpModal(meeting) {
+  _pendingMeetingToJoin = meeting;
+  const modal = document.getElementById("modal-mic-permission-help");
+  if (modal) {
+    modal.classList.add("active");
+  } else {
+    showToast("⚠️ Please enable Microphone in Safari: tap 'aA' -> Website Settings -> Microphone: Allow");
+    launchLiveMeetingRoom(meeting, null);
+  }
+}
+window.showMicrophonePermissionHelpModal = showMicrophonePermissionHelpModal;
+
+function retryEnableMicrophone() {
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    navigator.mediaDevices.getUserMedia({ audio: true, video: true })
+      .then(stream => {
+        if (stream && stream.getTracks) stream.getTracks().forEach(t => t.stop());
+        const modal = document.getElementById("modal-mic-permission-help");
+        if (modal) modal.classList.remove("active");
+        showToast("Microphone & Camera Enabled! 🙏");
+        if (_pendingMeetingToJoin) {
+          launchLiveMeetingRoom(_pendingMeetingToJoin, null);
+        }
+      })
+      .catch(err => {
+        if (err && (err.name === "NotAllowedError" || err.name === "PermissionDeniedError")) {
+          showToast("⚠️ Still blocked: In Safari, tap 'aA' -> Website Settings -> Microphone -> Allow");
+        } else {
+          continueMeetingWithoutMic();
+        }
+      });
+  } else {
+    continueMeetingWithoutMic();
+  }
+}
+window.retryEnableMicrophone = retryEnableMicrophone;
+
+function continueMeetingWithoutMic() {
+  const modal = document.getElementById("modal-mic-permission-help");
+  if (modal) modal.classList.remove("active");
+  if (_pendingMeetingToJoin) {
+    showToast("Joining Live Sanctuary (Listen Only) 🙏");
+    launchLiveMeetingRoom(_pendingMeetingToJoin, null);
+  }
+}
+window.continueMeetingWithoutMic = continueMeetingWithoutMic;
+
 
 // Fullscreen Live Meeting Room Entry — Ultra Clean 3-Button Experience (Mic, Camera, Hangup)
 function launchLiveMeetingRoom(meeting, stream) {
@@ -12477,6 +12561,19 @@ function toggleQuickMeetingMic() {
   if (window._jitsiApi) {
     try {
       window._jitsiApi.executeCommand("toggleAudio");
+      
+      // If mic was muted, verify if hardware permission is blocked in iOS Safari settings
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ audio: true })
+          .then(stream => {
+            if (stream && stream.getTracks) stream.getTracks().forEach(t => t.stop());
+          })
+          .catch(err => {
+            if (err && (err.name === "NotAllowedError" || err.name === "PermissionDeniedError")) {
+              showMicrophonePermissionHelpModal(activeMeetingSession ? { id: activeMeetingSession.meetingId } : null);
+            }
+          });
+      }
       return;
     } catch(e) {
       console.warn("toggleAudio command error:", e);
@@ -12485,6 +12582,7 @@ function toggleQuickMeetingMic() {
   showToast("Microphone toggled 🙏");
 }
 window.toggleQuickMeetingMic = toggleQuickMeetingMic;
+
 
 function updateQuickMeetingMicUI(isMuted) {
   const btn = document.getElementById("btn-meeting-quick-mic");

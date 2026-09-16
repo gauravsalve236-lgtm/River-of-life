@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v155_IPHONE_MIC_UNMUTED';
+const CACHE_NAME = 'river-of-life-cache-v156_MIC_AND_CAM_UNIFIED_PROMPT';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
