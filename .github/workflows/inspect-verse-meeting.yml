@@ -1,0 +1,18 @@
+name: Inspect verse and meeting code
+on:
+  push:
+    paths:
+      - '.github/workflows/inspect-verse-meeting.yml'
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect
+        run: |
+          echo '--- MEETING ---'
+          grep -n -E 'proceedJoinMeeting|triggerJoinMeeting|modal-ios-meeting|startWithAudioMuted|videoConferenceJoined|JitsiMeetExternalAPI' app.js | head -120 || true
+          echo '--- DAILY/SHARE ---'
+          grep -RniE 'daily.*verse|verse.*daily|share.*verse|download.*verse|whatsapp|WhatsApp|navigator.share|canvas' --include='*.js' --include='*.html' . | head -240 || true
