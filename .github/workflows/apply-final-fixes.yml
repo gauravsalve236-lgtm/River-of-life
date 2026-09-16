@@ -1,0 +1,19 @@
+name: Apply final River of Life fixes
+on: push
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 scripts/apply_fixes.py
+      - name: Commit and clean up
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add app.js index.html android-studio-app/app/src/main/assets/index.html android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/app.js
+          git commit -m 'fix: strengthen in-app microphone and verse sharing' || true
+          git rm .github/workflows/apply-final-fixes.yml
+          git commit -m 'chore: remove final fix workflow' || true
+          git push
