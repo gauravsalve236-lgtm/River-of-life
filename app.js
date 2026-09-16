@@ -11948,21 +11948,21 @@ function proceedJoinMeetingSafari() {
   const jitsiServerDomain = (localStorage.getItem("rol_jitsi_server") || "jitsi.riot.im")
     .replace(/^https?:\/\//, '')
     .replace(/\/+$/, "");
-  const extUrl = `https://${jitsiServerDomain}/${roomSlug}#config.disableDeepLinking=true&config.startWithAudioMuted=false&config.prejoinPageEnabled=false&userInfo.displayName=${encodeURIComponent(loggedIn)}`;
+  const extUrl = `https://${jitsiServerDomain}/${roomSlug}#config.disableDeepLinking=true&config.startWithAudioMuted=false&config.startAudioMuted=9999&config.prejoinPageEnabled=false&userInfo.displayName=${encodeURIComponent(loggedIn)}`;
   window.open(extUrl, "_blank");
   showToast("Opening Live Fellowship in Safari 🙏");
 }
 window.proceedJoinMeetingSafari = proceedJoinMeetingSafari;
 
 function proceedJoinMeetingInApp() {
+  // iOS Safari: use a top-level Jitsi page instead of a cross-origin iframe.
+  // This gives the Jitsi origin direct ownership of microphone permission/capture.
   if (typeof closeModal === "function") closeModal("modal-ios-meeting-choice");
   else {
     const el = document.getElementById("modal-ios-meeting-choice");
     if (el) el.style.display = "none";
   }
-  const m = _pendingMeetingToJoin || { id: "default", title: "Live Fellowship" };
-  showToast("Joining Live Sanctuary 🙏");
-  launchLiveMeetingRoom(m, null);
+  proceedJoinMeetingSafari();
 }
 window.proceedJoinMeetingInApp = proceedJoinMeetingInApp;
 
@@ -12194,6 +12194,7 @@ function launchLiveMeetingRoom(meeting, stream) {
             userInfo: { displayName: loggedIn },
             configOverwrite: {
               startWithAudioMuted: false,
+              startAudioMuted: 9999,
               startWithVideoMuted: false,
               startSilent: false,
               startAudioOnly: false,
@@ -12335,6 +12336,7 @@ function launchLiveMeetingRoom(meeting, stream) {
             "config.enableClosePage=false",
             "config.disableThirdPartyRequests=true",
             "config.startWithAudioMuted=false",
+            "config.startAudioMuted=9999",
             "config.startWithVideoMuted=false",
             "config.startSilent=false",
             "config.startAudioOnly=false",
