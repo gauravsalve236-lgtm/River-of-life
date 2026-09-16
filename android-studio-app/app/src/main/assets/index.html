@@ -12,7 +12,7 @@
   <script>
     // Force immediate hard purge of all stale Service Workers and CacheStorage
     (function() {
-      const CURRENT_VER = "v2323.1";
+      const CURRENT_VER = "v2332.0";
       if (localStorage.getItem("rol_app_ver") !== CURRENT_VER) {
         localStorage.setItem("rol_app_ver", CURRENT_VER);
         if ('serviceWorker' in navigator) {
@@ -48,7 +48,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Noto+Serif+Devanagari:wght@500;600;700;800;900&family=Outfit:wght@500;600;700;800;900&family=Poppins:wght@600;700;800;900&family=Rozha+One&display=swap" rel="stylesheet">
   
   <!-- Main Stylesheet (Cache-Busted for Authentic Male Audio V27) -->
-  <link rel="stylesheet" href="index.css?v=144_DID_YOU_KNOW_CAROUSEL">
+  <link rel="stylesheet" href="index.css?v=147_SUNRISE_WALLPAPER_PERFECT">
 
   <!-- Official LiveKit WebRTC Client SDK -->
   <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.0.8/dist/livekit-client.umd.min.js"></script>
@@ -256,21 +256,9 @@
                 </div>
               </div>
 
-              <!-- 1b. Homepage Bible Topic & Keyword Search Bar -->
-              <div class="home-search-container" style="margin-bottom: 20px; position: relative;">
-                <div style="display: flex; align-items: center; background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 16px; padding: 10px 14px; box-shadow: var(--shadow-sm); gap: 10px; transition: border-color 0.2s ease, box-shadow 0.2s ease;">
-                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--primary)" stroke-width="2.3" style="flex-shrink: 0;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                  <input type="search" id="home-search-input" placeholder="Search Bible, topic, or keyword (उदा. प्रीती, शांती, faith)..." autocomplete="off" style="flex: 1; border: none; outline: none; background: transparent; font-family: var(--font-ui); font-size: 14px; color: var(--text); padding: 0;">
-                  <button id="home-search-btn-go" onclick="triggerHomepageSearch()" style="background: var(--primary); color: #ffffff; border: none; border-radius: 10px; padding: 6px 14px; font-family: var(--font-ui); font-size: 12.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(158,22,34,0.25);">
-                    <span data-i18n="btn_search_go">शोधा</span>
-                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                  </button>
-                </div>
-              </div>
-
               <!-- LIVE CHURCH ANNOUNCEMENTS BROADCAST (If Active) -->
               <!-- 2. Daily Verse Card: Prominent card with inline action buttons (Read, Listen, Save, Share) -->
-              <div class="home-vod-card" id="card-daily-verse-home" onclick="openFullscreenVOD()" title="Open Daily Verse Studio & Gallery / दैनिक वचन स्टुडिओ उघडा" style="background-image: url('assets/daily_verses/golden_dawn.png'); background-size: cover; background-position: center; background-repeat: no-repeat;">
+              <div class="home-vod-card" id="card-daily-verse-home" onclick="openFullscreenVOD()" title="Open Daily Verse Studio & Gallery / दैनिक वचन स्टुडिओ उघडा" style="background-image: url('assets/daily_verses/sunrise.png');">
                 <div class="home-vod-overlay"></div>
                 <div class="home-vod-badge-row" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                   <span class="home-vod-badge" data-i18n="vod_label">VERSE OF THE DAY</span>
@@ -743,7 +731,7 @@
                 </button>
 
                 <!-- Book / Chapter Title indicator button (e.g., मत्तय 7) -->
-                <button id="btn-reader-open-book-picker" class="reader-chapter-pill" title="Change Book/Chapter">
+                <button id="btn-reader-open-book-picker" class="reader-chapter-pill" onclick="openReaderBookChapterPicker()" title="Change Book/Chapter / पुस्तक व अध्याय निवडा">
                   <span id="inline-reader-book-name" class="name">मत्तय 7</span>
                   <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.8" style="opacity: 0.6;"><polyline points="6 9 12 15 18 9"></polyline></svg>
                 </button>
@@ -1251,7 +1239,7 @@
                 🎥 Meetings (प्रार्थना सभा)
               </button>
               <button class="prayers-subnav-btn" id="btn-prayers-subtab-requests" onclick="switchPrayersSubtab('requests')" style="flex: 1; min-width: 100px; padding: 10px 8px; border-radius: 12px; font-size: 12.5px; font-weight: 700; border: 1.5px solid var(--border); background: var(--bg-content); color: var(--text); cursor: pointer; transition: all 0.2s ease; white-space: nowrap;">
-                🙏 Requests (विनंत्या)
+                 Requests (विनंतया)
               </button>
             </div>
 
@@ -1415,123 +1403,84 @@
               </div>
             </div>
 
-            <!-- SUBTAB 3: CONFIDENTIAL PRAYER REQUESTS & MY PRAYER JOURNAL -->
+            <!-- SUBTAB 3: CHURCH PRAYER REQUESTS (Community circle & open requests without login gate) -->
             <div id="prayers-panel-requests" class="prayers-subtab-panel" style="display: none;">
               
-              <!-- 1. Confidential Prayer Submission Form Card -->
-              <div class="prayer-submission-card" style="padding: 22px; background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 20px; margin-bottom: 22px; box-shadow: var(--shadow-sm);">
-                
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 12px; flex-wrap: wrap; gap: 8px;">
-                  <div style="display: flex; align-items: center; gap: 10px;">
-                    <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(247,0,47,0.1); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;">
-                      🙏
-                    </div>
-                    <div>
-                      <h4 style="font-size: 16.5px; font-weight: 800; margin: 0; color: var(--text);">Confidential Prayer Request</h4>
-                      <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">गोपनीय प्रार्थना विनंती • पास्टर व प्रार्थना सेवक</span>
-                    </div>
+              <!-- Public Request Submission Form (No login required) -->
+              <div class="settings-card-group" style="padding: 22px; background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 18px; margin-bottom: 20px; box-shadow: var(--shadow-sm);">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
+                  <span style="font-size: 24px;">🙏</span>
+                  <div>
+                    <h4 style="font-size: 16px; font-weight: 800; margin: 0; color: var(--primary);">Submit Prayer Request (प्रार्थना विनंती पाठवा)</h4>
+                    <span style="font-size: 12px; color: var(--text-muted);">आमचे पास्टर आणि प्रार्थना सेवक तुमच्या समवेत प्रार्थनेत उभे राहतील</span>
                   </div>
-                  <span style="font-size: 11px; font-weight: 800; background: rgba(34,197,94,0.15); color: #16a34a; padding: 4px 9px; border-radius: 8px; display: inline-flex; align-items: center; gap: 4px;">
-                    🔒 AES-256 Encrypted
-                  </span>
                 </div>
 
-                <form id="pastoral-prayer-form" onsubmit="event.preventDefault(); submitPastoralPrayerRequest();" style="display: flex; flex-direction: column; gap: 16px;">
+                <form id="public-prayer-form" onsubmit="event.preventDefault(); submitPrayerRequestPublic();" style="display: flex; flex-direction: column; gap: 16px;">
                   
-                  <!-- Privacy Toggles: Segmented Control -->
-                  <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
-                    <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px;">
-                      Privacy Level / गोपनीयता पातळी *
+                  <!-- Category & Target Row -->
+                  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px;">
+                    <div class="form-input-group" style="display: flex; flex-direction: column; gap: 6px;">
+                      <label for="prayer-input-category" style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Prayer Category / विषय निवडा</label>
+                      <select id="prayer-input-category" class="dropdown-selector" style="width: 100%; padding: 11px 12px; border-radius: 10px; border: 1.5px solid var(--border); background-color: var(--bg); font-size: 13.5px; font-weight: 600; color: var(--text);">
+                        <option value="आरोग्य व चंगाई (Healing)">🌿 आरोग्य आणि चंगाई (Healing & Health)</option>
+                        <option value="कुटुंब व विवाह (Family)">👨‍👩‍👧 कुटुंब आणि विवाह (Family & Marriage)</option>
+                        <option value="आर्थिक आशीर्वाद व नोकरी (Financial)">💼 आर्थिक आशीर्वाद व नोकरी (Job & Finance)</option>
+                        <option value="तारण व आत्मिक वाढ (Salvation)">✝️ तारण आणि आत्मिक वाढ (Spiritual Growth)</option>
+                        <option value="चिंतेतून मुक्ती व शांती (Peace)">🕊️ चिंतेतून मुक्ती आणि शांती (Peace & Deliverance)</option>
+                        <option value="उपकारस्तुती व साक्ष (Thanksgiving)">🙌 उपकारस्तुती व साक्ष (Praise & Thanksgiving)</option>
+                        <option value="इतर प्रार्थना (General)">📖 इतर प्रार्थना विनंती (General Prayer)</option>
+                      </select>
+                    </div>
+
+                    <div class="form-input-group" style="display: flex; flex-direction: column; gap: 6px;">
+                      <label for="prayer-input-target" style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Send To / कोणाकडे पाठवायची</label>
+                      <select id="prayer-input-target" class="dropdown-selector" style="width: 100%; padding: 11px 12px; border-radius: 10px; border: 1.5px solid var(--border); background-color: var(--bg); font-size: 13.5px; font-weight: 600; color: var(--text);">
+                        <option value="pastor">🔒 Pastor Only (Confidential) / फक्त पास्टर (गोपनीय)</option>
+                        <option value="leaders">🛡️ Admin & Prayer Warriors / ॲडमिन व प्रार्थना सेवक</option>
+                        <option value="church" selected>👥 Church Family / सर्व मंडळीसह सामायिक करा</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <!-- Name and Anonymous Toggle -->
+                  <div style="display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; background: var(--bg); padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border);">
+                    <input type="text" id="prayer-input-name" placeholder="तुमचे नाव (Your Name - Optional)" style="border: none; background: transparent; font-size: 13.5px; color: var(--text); outline: none;" />
+                    <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: var(--text-muted); cursor: pointer; user-select: none;">
+                      <input type="checkbox" id="prayer-input-anonymous" onchange="document.getElementById('prayer-input-name').disabled = this.checked; if(this.checked) document.getElementById('prayer-input-name').value = '';" style="accent-color: var(--primary); width: 16px; height: 16px;" />
+                      <span>नाव गुप्त ठेवा (Anonymous)</span>
                     </label>
-                    <div class="prayer-privacy-segmented" style="display: grid; grid-template-columns: repeat(3, 1fr); background: var(--bg); padding: 4px; border-radius: 12px; border: 1px solid var(--border); gap: 4px;">
-                      <button type="button" class="privacy-toggle-btn active" data-privacy="Private (Pastor Only)" onclick="selectPrayerPrivacy('Private (Pastor Only)', this)" style="padding: 9px 6px; border-radius: 9px; font-size: 12px; font-weight: 700; border: none; background: var(--primary); color: #ffffff; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 4px; text-align: center;">
-                        <span>🔒 Pastor Only</span>
-                      </button>
-                      <button type="button" class="privacy-toggle-btn" data-privacy="Church Prayer Team" onclick="selectPrayerPrivacy('Church Prayer Team', this)" style="padding: 9px 6px; border-radius: 9px; font-size: 12px; font-weight: 700; border: none; background: transparent; color: var(--text); cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 4px; text-align: center;">
-                        <span>👥 Prayer Team</span>
-                      </button>
-                      <button type="button" class="privacy-toggle-btn" data-privacy="Anonymous" onclick="selectPrayerPrivacy('Anonymous', this)" style="padding: 9px 6px; border-radius: 9px; font-size: 12px; font-weight: 700; border: none; background: transparent; color: var(--text); cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 4px; text-align: center;">
-                        <span>🕵️ Anonymous</span>
-                      </button>
-                    </div>
-                    <input type="hidden" id="prayer-selected-privacy" value="Private (Pastor Only)" />
                   </div>
 
-                  <!-- Category Chips: Quick-tap tags -->
-                  <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
-                    <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px;">
-                      Category / विषय निवडा *
-                    </label>
-                    <div class="prayer-category-chips-row" style="display: flex; flex-wrap: wrap; gap: 7px;">
-                      <button type="button" class="prayer-chip-btn active" data-category="Healing" onclick="selectPrayerCategory('Healing', this)">
-                        🌿 Healing (आरोग्य)
-                      </button>
-                      <button type="button" class="prayer-chip-btn" data-category="Family" onclick="selectPrayerCategory('Family', this)">
-                        👨‍👩‍👧 Family (कुटुंब)
-                      </button>
-                      <button type="button" class="prayer-chip-btn" data-category="Guidance" onclick="selectPrayerCategory('Guidance', this)">
-                        🧭 Guidance (मार्गदर्शन)
-                      </button>
-                      <button type="button" class="prayer-chip-btn" data-category="Financial" onclick="selectPrayerCategory('Financial', this)">
-                        💼 Financial (आर्थिक)
-                      </button>
-                      <button type="button" class="prayer-chip-btn" data-category="Peace" onclick="selectPrayerCategory('Peace', this)">
-                        🕊️ Peace (शांती)
-                      </button>
-                    </div>
-                    <input type="hidden" id="prayer-selected-category" value="Healing" />
+                  <!-- Details Textarea -->
+                  <div class="form-input-group" style="display: flex; flex-direction: column; gap: 6px;">
+                    <label for="prayer-input-details" style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Request Details / विनंती तपशील *</label>
+                    <textarea id="prayer-input-details" class="dropdown-selector" style="width: 100%; height: 110px; text-align: left; padding: 12px; font-family: var(--font-sans); font-size: 14px; line-height: 1.5; resize: vertical; border-radius: 10px; border: 1.5px solid var(--border); background-color: var(--bg); color: var(--text);" placeholder="तुमची विनंती येथे लिहा... उदाहरणार्थ: माझ्या कुटुंबासाठी व आरोग्यासाठी प्रार्थना करा..." required></textarea>
                   </div>
 
-                  <!-- Unified Input Box with Embedded Microphone -->
-                  <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                      <label for="prayer-input-content" style="font-size: 12.5px; font-weight: 700; color: var(--text);">
-                        How can we pray for you? (आम्ही तुमच्यासाठी कशी प्रार्थना करू शकतो?) *
-                      </label>
-                      <span id="prayer-voice-status-pill" style="display: none; font-size: 11px; font-weight: 700; color: #e11d48; background: #ffe4e6; padding: 2px 8px; border-radius: 6px;">
-                        🔴 Listening / ऐकत आहे...
-                      </span>
-                    </div>
-                    
-                    <div class="prayer-textarea-container" style="position: relative; width: 100%;">
-                      <textarea id="prayer-input-content" style="width: 100%; min-height: 120px; padding: 12px 48px 12px 14px; border-radius: 12px; border: 1.5px solid var(--border); background-color: var(--bg); color: var(--text); font-family: var(--font-sans); font-size: 14px; line-height: 1.55; resize: vertical; box-sizing: border-box; outline: none; transition: border-color 0.2s ease;" placeholder="तुमची प्रार्थना विनंती येथे लिहा किंवा माइक बटण दाबून बोला... (Write here or tap mic to speak)..." required></textarea>
-                      
-                      <!-- Embedded Microphone Icon on Right Edge -->
-                      <button type="button" id="btn-prayer-voice-input" onclick="togglePrayerVoiceRecording()" title="माइकद्वारे बोला (Tap to record voice)" style="position: absolute; right: 10px; top: 12px; width: 34px; height: 34px; border-radius: 50%; border: none; background: #fff1f2; color: #be123c; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: all 0.2s ease; box-shadow: 0 2px 6px rgba(190,18,60,0.15);">
-                        <span id="mic-icon">🎙️</span>
-                      </button>
-                    </div>
-                    <span style="font-size: 11px; color: var(--text-muted);">💡 Tip: माइक बटणावर टॅप करून मराठी किंवा इंग्रजीत बोलू शकता (Voice speech-to-text).</span>
-                  </div>
-
-                  <!-- Action Button -->
-                  <button type="submit" id="btn-send-prayer-pastor" class="btn-primary-block" style="margin: 4px 0 0 0; padding: 13px 20px; font-size: 14.5px; border-radius: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--primary); color: #ffffff; border: none; cursor: pointer; box-shadow: 0 4px 14px rgba(247,0,47,0.3); transition: all 0.2s ease;">
-                    <span>🙏 Send Prayer Request to Pastor (पास्टरकडे प्रार्थना विनंती पाठवा)</span>
+                  <!-- Submit Action Button -->
+                  <button type="submit" id="btn-prayer-submit-public" class="btn-primary-block" style="margin: 0; padding: 14px; font-size: 14px; border-radius: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <span>🙏 प्रार्थना विनंती पाठवा (Submit Prayer Request)</span>
                   </button>
                 </form>
               </div>
 
-              <!-- 2. "My Prayer Journal" History View -->
-              <div class="prayer-journal-section" style="padding: 22px; background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 20px; box-shadow: var(--shadow-sm);">
-                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
-                  <div style="display: flex; align-items: center; gap: 10px;">
-                    <span style="font-size: 22px;">📖</span>
-                    <div>
-                      <h4 style="font-size: 16.5px; font-weight: 800; margin: 0; color: var(--text);">My Prayer Journal (माझी प्रार्थना रोजनिशी)</h4>
-                      <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Track your prayer requests & pastoral updates</span>
-                    </div>
+              <!-- Community Prayer Stream & My Requests -->
+              <div class="settings-card-group" style="padding: 22px; background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 18px; box-shadow: var(--shadow-sm);">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 14px;">
+                  <div>
+                    <h4 style="font-size: 16px; font-weight: 800; margin: 0; color: var(--text);">Prayer Requests Circle (प्रार्थना मंडळ)</h4>
+                    <span style="font-size: 12px; color: var(--text-muted);">एकमेकांसाठी प्रार्थना करा आणि देवाचे कार्य अनुभवा</span>
                   </div>
-                  <div style="display: flex; align-items: center; gap: 8px;">
-                    <span id="journal-count-badge" style="font-size: 11px; font-weight: 800; background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 3px 10px; border-radius: 12px;">0 Requests</span>
-                    <button type="button" onclick="loadMyPrayerJournal(true)" title="Refresh Journal" style="background: none; border: 1px solid var(--border); border-radius: 8px; padding: 4px 8px; font-size: 12px; color: var(--text-muted); cursor: pointer;">
-                      🔄
-                    </button>
+                  <div style="display: flex; gap: 6px;">
+                    <button class="prayer-filter-pill active" onclick="filterPublicPrayerRequests('all', this)" style="background: var(--primary); color: #fff; border: none; padding: 5px 12px; border-radius: 8px; font-size: 11.5px; font-weight: 700; cursor: pointer;">All (सर्व)</button>
+                    <button class="prayer-filter-pill" onclick="filterPublicPrayerRequests('my', this)" style="background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 5px 12px; border-radius: 8px; font-size: 11.5px; font-weight: 700; cursor: pointer;">My (माझ्या)</button>
+                    <button class="prayer-filter-pill" onclick="filterPublicPrayerRequests('answered', this)" style="background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 5px 12px; border-radius: 8px; font-size: 11.5px; font-weight: 700; cursor: pointer;">Answered (उत्तर)</button>
                   </div>
                 </div>
 
-                <!-- Dynamic Container for My Prayer Journal -->
-                <div id="user-prayer-journal-list" style="display: flex; flex-direction: column; gap: 12px;">
-                  <!-- Populated dynamically via loadMyPrayerJournal() -->
+                <div id="user-submitted-requests-list" style="display: flex; flex-direction: column; gap: 14px;">
+                  <!-- Dynamically rendered by app.js -->
                 </div>
               </div>
 
@@ -2135,24 +2084,6 @@
                   </div>
                 </div>
                 
-                <!-- Dedicated Admin / Pastor Portal Card (Dynamically displayed for pastors & admins) -->
-                <div id="you-admin-panel-card" class="settings-card-group margin-top" style="display: none; padding: 18px 20px; border-radius: 16px; background: linear-gradient(135deg, rgba(224, 83, 95, 0.08) 0%, rgba(139, 92, 246, 0.08) 100%); border: 1.5px solid rgba(224, 83, 95, 0.35); box-shadow: 0 4px 18px rgba(0,0,0,0.04);">
-                  <div style="display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap;">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                      <div style="width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, #e0535f, #8b5cf6); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; box-shadow: 0 4px 12px rgba(224,83,95,0.3);">
-                        🛡️
-                      </div>
-                      <div>
-                        <h4 style="margin: 0; font-size: 15px; font-weight: 800; color: var(--text);">Pastor & Admin Console / पास्टर व प्रशासन कक्ष</h4>
-                        <p style="margin: 3px 0 0 0; font-size: 12px; color: var(--text-muted);">Congregation directory, prayer queue & church management portal.</p>
-                      </div>
-                    </div>
-                    <button type="button" onclick="switchTab('admin')" class="btn-primary-mini" style="margin: 0; padding: 10px 18px; border-radius: 10px; font-weight: 800; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
-                      <span>Open Console &rarr;</span>
-                    </button>
-                  </div>
-                </div>
-
                 <div class="settings-card-group margin-top" style="padding: 0; background: transparent; border: none;">
                   <button id="you-btn-logout" class="btn-danger-block" style="width: 100%; padding: 14px; border-radius: 12px; font-weight: 800; font-size: 14px; background-color: var(--danger); border: none; color: #fff; cursor: pointer;">Log Out / लॉग आउट करा</button>
                 </div>
@@ -2323,57 +2254,16 @@
                   <input type="text" id="admin-member-search" placeholder="Search members by name or email..." style="flex: 1; min-width: 200px; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 13px;" oninput="filterAdminMembers()">
                   <select id="admin-member-role-filter" style="padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 13px; font-weight: 700;" onchange="filterAdminMembers()">
                     <option value="all">All Roles</option>
-                    <option value="Super-Admin">Super-Admin</option>
+                    <option value="Admin">Admin</option>
                     <option value="Pastor">Pastor</option>
-                    <option value="Prayer Team">Prayer Team</option>
-                    <option value="User">User</option>
+                    <option value="Leader">Leader</option>
+                    <option value="Member">Member</option>
                   </select>
                 </div>
 
                 <!-- Members List Container -->
                 <div id="admin-members-list-container" style="display: flex; flex-direction: column; gap: 10px;">
                   <!-- Rendered dynamically -->
-                </div>
-              </div>
-
-              <!-- Modal: Add New Member -->
-              <div id="modal-admin-add-member" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.7); z-index: 10000; align-items: center; justify-content: center; padding: 16px;">
-                <div style="background: var(--surface, #1e293b); border: 1.5px solid var(--border, rgba(255,255,255,0.15)); border-radius: 20px; width: 100%; max-width: 480px; padding: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
-                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
-                    <div>
-                      <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: var(--text, #fff);">Add Member / नवीन सदस्य जोडा</h3>
-                      <p style="margin: 4px 0 0; font-size: 12.5px; color: var(--text-muted, #94a3b8);">Sends an email invitation with login access credentials.</p>
-                    </div>
-                    <button onclick="closeAdminAddMemberModal()" style="background: transparent; border: none; font-size: 20px; color: var(--text-muted, #94a3b8); cursor: pointer; padding: 4px;">✕</button>
-                  </div>
-                  <form id="form-admin-add-member" onsubmit="handleAdminAddMember(event)">
-                    <div style="display: flex; flex-direction: column; gap: 14px;">
-                      <div>
-                        <label style="display: block; font-size: 12.5px; font-weight: 700; margin-bottom: 6px; color: var(--text, #fff);">Full Name / नाव *</label>
-                        <input type="text" id="admin-input-new-name" required placeholder="e.g. John Doe / जॉन डो" style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border, #334155); background: var(--bg, #0f172a); color: var(--text, #fff); font-size: 13.5px; box-sizing: border-box;">
-                      </div>
-                      <div>
-                        <label style="display: block; font-size: 12.5px; font-weight: 700; margin-bottom: 6px; color: var(--text, #fff);">Email Address / ईमेल *</label>
-                        <input type="email" id="admin-input-new-email" required placeholder="e.g. believer@gmail.com" style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border, #334155); background: var(--bg, #0f172a); color: var(--text, #fff); font-size: 13.5px; box-sizing: border-box;">
-                      </div>
-                      <div>
-                        <label style="display: block; font-size: 12.5px; font-weight: 700; margin-bottom: 6px; color: var(--text, #fff);">Role / भूमिका *</label>
-                        <select id="admin-input-new-role" style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border, #334155); background: var(--bg, #0f172a); color: var(--text, #fff); font-size: 13.5px; box-sizing: border-box;">
-                          <option value="User">User (सामान्य सदस्य)</option>
-                          <option value="Pastor">Pastor (पाळक)</option>
-                          <option value="Prayer Team">Prayer Team (प्रार्थना संघ)</option>
-                          <option value="Super-Admin">Super-Admin (मुख्य ॲडमिन)</option>
-                        </select>
-                      </div>
-                      <div style="background: rgba(30,107,119,0.15); border: 1px solid rgba(30,107,119,0.3); border-radius: 10px; padding: 12px; font-size: 12px; color: #7dd3fc; line-height: 1.45;">
-                        ✉️ <strong>Email Invitation:</strong> An invitation email containing generated login credentials and app access will be sent directly to their inbox.
-                      </div>
-                      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px;">
-                        <button type="button" onclick="closeAdminAddMemberModal()" style="padding: 10px 18px; border-radius: 10px; border: 1px solid var(--border, #334155); background: transparent; color: var(--text, #fff); font-size: 13px; font-weight: 700; cursor: pointer;">Cancel / रद्द करा</button>
-                        <button type="submit" id="btn-admin-add-member-submit" style="padding: 10px 22px; border-radius: 10px; border: none; background: var(--primary, #1e6b77); color: #fff; font-size: 13px; font-weight: 800; cursor: pointer;">Add Member &amp; Send Invite</button>
-                      </div>
-                    </div>
-                  </form>
                 </div>
               </div>
             </div>
@@ -2489,15 +2379,14 @@
               <div class="settings-card-group" style="padding: 20px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
                   <div>
-                    <h3 style="margin: 0; font-size: 17.5px; font-weight: 800; color: var(--text);">Pastoral Prayer Moderation & Intercession Queue</h3>
-                    <p style="margin: 2px 0 0 0; font-size: 12px; color: var(--text-muted);">Incoming congregation requests with privacy tiers & "Mark as Prayed" handshake.</p>
+                    <h3 style="margin: 0; font-size: 17px; font-weight: 800; color: var(--text);">Pastoral Prayer Moderation Console</h3>
+                    <p style="margin: 2px 0 0 0; font-size: 12px; color: var(--text-muted);">Review congregation requests, write pastoral blessings, and mark answered prayers.</p>
                   </div>
-                  <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
-                    <button class="btn-secondary-mini active" data-admin-prayer-filter="all" onclick="filterAdminPrayers('all')">All (सर्व)</button>
-                    <button class="btn-secondary-mini" data-admin-prayer-filter="Sent to Pastor" onclick="filterAdminPrayers('Sent to Pastor')">🔵 Sent to Pastor (नवीन)</button>
-                    <button class="btn-secondary-mini" data-admin-prayer-filter="Prayed For" onclick="filterAdminPrayers('Prayed For')">🟣 Prayed For (प्रार्थना केली)</button>
-                    <button class="btn-secondary-mini" data-admin-prayer-filter="Answered" onclick="filterAdminPrayers('Answered')">🟢 Answered (उत्तर मिळाले)</button>
-                    <button type="button" onclick="renderAdminPrayers()" style="background: none; border: 1px solid var(--border); border-radius: 8px; padding: 5px 9px; font-size: 12px; cursor: pointer; color: var(--text-muted);" title="Refresh Queue">🔄</button>
+                  <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                    <button class="btn-secondary-mini active" data-admin-prayer-filter="all" onclick="filterAdminPrayers('all')">All</button>
+                    <button class="btn-secondary-mini" data-admin-prayer-filter="pending" onclick="filterAdminPrayers('pending')">Pending</button>
+                    <button class="btn-secondary-mini" data-admin-prayer-filter="acknowledged" onclick="filterAdminPrayers('acknowledged')">Acknowledged</button>
+                    <button class="btn-secondary-mini" data-admin-prayer-filter="answered" onclick="filterAdminPrayers('answered')">Answered</button>
                   </div>
                 </div>
 
@@ -3809,7 +3698,7 @@
           <!-- Step 1: Books Selection View -->
           <div id="selector-books-pane" class="selector-pane-view active">
             <div class="testament-block" id="section-ot-books">
-              <h4 class="testament-heading">जना करार (Old Testament - ३९ पुस्तके)</h4>
+              <h4 class="testament-heading">जुना करार (Old Testament - ३९ पुस्तके)</h4>
               <div id="ot-books-grid" class="books-buttons-grid">
                 <!-- OT books grid loads here -->
               </div>
@@ -4049,7 +3938,7 @@
 
           <!-- Right Wallpaper Switcher Thumbnail Button (Cycles Scenic Photos) -->
           <div id="btn-vod-fs-wallpaper" onclick="cycleVodWallpaper();" title="Change Background Wallpaper / वॉलपेपर बदला" style="width: 46px; height: 56px; border-radius: 10px; border: 2px solid #ffffff; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.6); cursor: pointer; background: #222; transform: rotate(3deg); transition: transform 0.2s ease; flex-shrink: 0;">
-            <img id="vod-thumbnail-preview" src="assets/daily_verses/golden_dawn.png" alt="Wallpaper" style="width: 100%; height: 100%; object-fit: cover;" />
+            <img id="vod-thumbnail-preview" src="assets/daily_verses/sunrise.png" alt="Wallpaper" style="width: 100%; height: 100%; object-fit: cover;" />
           </div>
 
         </div>
@@ -5009,8 +4898,8 @@
                 </select>
               </div>
               <div class="form-input-group" style="display: flex; flex-direction: column; gap: 4px;">
-                <label for="meeting-custom-url" style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Custom Meeting Link (e.g. Google Meet, Zoom) [Optional] / सभेची सवतःची लिंक</label>
-                <input type="url" id="meeting-custom-url" class="dropdown-selector" style="width: 100%; text-align: left; padding: 8px;" placeholder="https://meet.google.com/abc-def-ghi">
+                <label for="meeting-custom-url" style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Meeting Link (Daily.co, Google Meet, Zoom) [Optional] / सभेची लिंक</label>
+                <input type="url" id="meeting-custom-url" class="dropdown-selector" style="width: 100%; text-align: left; padding: 8px;" placeholder="https://yourchurch.daily.co/prayer or Google Meet">
               </div>
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
@@ -5188,8 +5077,11 @@
             <h3 id="meeting-room-title-display" style="font-family: var(--font-ui); font-size: 13.5px; font-weight: 800; color: #fff; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">River of Life Meeting</h3>
           </div>
           <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
-            <button id="btn-meeting-audio-settings" onclick="openDrawer('drawer-meet-audio-settings')" style="padding: 6px 12px; border-radius: 18px; font-size: 11px; font-weight: 700; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #fff; cursor: pointer; display: flex; align-items: center; gap: 4px;">
-              ⚙ <span>Audio</span>
+            <button id="btn-meeting-quick-mic" onclick="toggleQuickMeetingMic()" style="padding: 7px 11px; border-radius: 18px; font-size: 11.5px; font-weight: 800; background: rgba(37,99,235,0.3); border: 1px solid rgba(59,130,246,0.6); color: #93c5fd; cursor: pointer; display: flex; align-items: center; gap: 4px;" title="Unmute/Mute Microphone">
+              <span id="quick-mic-icon">🎙️</span> <span>Mic</span>
+            </button>
+            <button id="btn-meeting-provider-toggle" onclick="openMeetingProviderSettingsModal()" style="padding: 7px 11px; border-radius: 18px; font-size: 12px; font-weight: 700; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.18); color: #fff; cursor: pointer; display: flex; align-items: center; gap: 4px;" title="Video Provider Settings">
+              <span>⚙️</span>
             </button>
             <button id="btn-meeting-leave-top" onclick="exitLiveMeetingRoom()" style="padding: 7px 14px; border-radius: 18px; font-size: 12px; font-weight: 800; background: linear-gradient(135deg, #dc2626, #ef4444); border: none; color: #fff; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(239,68,68,0.4);" title="End Meeting">
               <span>🚪 End Call / सभा सोडा</span>
@@ -5205,10 +5097,48 @@
             <!-- Dynamically populated with .river-video-tile elements -->
           </div>
 
-          <!-- Embedded Fallback Iframe Container for compatibility -->
+          <!-- Embedded Clean Video Conference Container (Daily.co / Jitsi) -->
           <div id="meeting-jitsi-container" style="display: none; width: 100%; height: 100%; position: absolute; inset: 0; z-index: 5;"></div>
+
         </div>
 
+      </div>
+    </div>
+
+    <!-- Video Meeting Provider Settings Modal -->
+    <div id="modal-meeting-provider-settings" class="drawer-overlay centered-align" style="z-index: 1000000 !important;">
+      <div class="centered-modal-card" style="max-width: 380px; text-align: left; padding: 22px; border-radius: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+          <h3 style="font-family: var(--font-ui); font-size: 16px; font-weight: 800; margin: 0; color: var(--text);">📹 Video Call Provider</h3>
+          <button onclick="closeModal('modal-meeting-provider-settings')" style="background: transparent; border: none; font-size: 22px; cursor: pointer; color: var(--text);">&times;</button>
+        </div>
+        <p style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 14px; line-height: 1.4;">
+          Choose your preferred video calling platform for online fellowship meetings:
+        </p>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <label style="display: flex; align-items: center; gap: 10px; padding: 12px; border: 1.5px solid var(--border); border-radius: 14px; cursor: pointer; background: var(--card-bg, #fff);">
+            <input type="radio" name="video-provider-choice" value="jitsi" checked onchange="saveVideoProviderChoice('jitsi')">
+            <div>
+              <div style="font-weight: 800; font-size: 13.5px; color: var(--text);">River of Life LiveMeet (Recommended)</div>
+              <div style="font-size: 11.5px; color: var(--text-muted);">100% Free, In-App, Echo Cancellation, Screen Sharing, No Card</div>
+            </div>
+          </label>
+          <label style="display: flex; align-items: center; gap: 10px; padding: 12px; border: 1.5px solid var(--border); border-radius: 14px; cursor: pointer; background: var(--card-bg, #fff);">
+            <input type="radio" name="video-provider-choice" value="daily" onchange="saveVideoProviderChoice('daily')">
+            <div>
+              <div style="font-weight: 800; font-size: 13.5px; color: var(--text);">Daily.co (Optional)</div>
+              <div style="font-size: 11.5px; color: var(--text-muted);">Requires active card in Daily dashboard</div>
+            </div>
+          </label>
+          <div style="margin-top: 6px;">
+            <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Church's Daily.co Room URL:</label>
+            <input type="url" id="input-daily-room-url" class="dropdown-selector" style="width: 100%; text-align: left; padding: 10px; font-size: 12.5px; border-radius: 10px;" placeholder="https://riveroflife.daily.co/River_Of_Life">
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Free permanent room link available at <a href="https://www.daily.co" target="_blank" style="color: var(--primary); font-weight: 700;">daily.co</a></div>
+          </div>
+          <button onclick="applyAndCloseProviderSettings()" class="btn-primary-block" style="margin-top: 10px; padding: 12px; border-radius: 12px; font-size: 13.5px; font-weight: 800;">
+            Save & Apply / जतन करा
+          </button>
+        </div>
       </div>
     </div>
 
@@ -5974,10 +5904,10 @@
           <div class="form-input-group" style="display: flex; flex-direction: column; gap: 6px;">
             <label style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Assigned Role / पद</label>
             <select id="admin-input-new-role" style="padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 13.5px; font-weight: 700;">
-              <option value="User">User / Member (विश्वासू / सदस्य)</option>
-              <option value="Prayer Team">Prayer Team (प्रार्थना गट)</option>
-              <option value="Pastor">Pastor (पास्टर / उपदेशक)</option>
-              <option value="Super-Admin">Super-Admin (मुख्य प्रशासक)</option>
+              <option value="Member">Member (सामानय सदसय)</option>
+              <option value="Leader">Youth / Cell Leader (आघाडी नेते)</option>
+              <option value="Pastor">Pastor (पासटर / उपदेशक)</option>
+              <option value="Admin">Administrator (परशासक)</option>
             </select>
           </div>
 
@@ -6083,7 +6013,8 @@
   <!-- App Main Logic (Cache-Busted for 100% MARVBSI Church Bible) -->
   <script src="sarvam-tts.js?v=132_MARVBSI_FULL_CHURCH_BIBLE"></script>
   <script src="bible-study.js?v=138_MUSEUM_STUDY_HUB"></script>
-  <script src="app.js?v=143_BIBLE_VERSION_SELECTOR_AND_FORMATTING"></script>
+  <script src="https://jitsi.riot.im/external_api.js"></script>
+  <script src="app.js?v=155_IPHONE_MIC_UNMUTED"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 4.5s no matter what

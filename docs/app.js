@@ -698,8 +698,8 @@ let state = {
   fontSize: 100,           // percentage (70 - 180)
   fontFamily: 'serif',     // 'serif', 'sans', 'rounded'
   lineHeight: 1.5,         // line height (1.5, 1.8, 2.1)
-  activeBook: 'psalms',    // active book filename (e.g. 'psalms')
-  activeChapter: 23,       // active chapter number (1-indexed)
+  activeBook: 'judges',    // active book filename (e.g. 'judges')
+  activeChapter: 13,       // active chapter number (1-indexed)
   translation: 'mar',      // 'mar', 'eng', 'parallel'
   bookSort: 'traditional', // 'traditional', 'alphabetical'
   readingPlan: 'none',     // active plan ('none', 'nt90', 'bible365')
@@ -884,217 +884,6 @@ const VOD_LIST = [
 
 let touchStartX = 0;
 let touchEndX = 0;
-
-var DID_YOU_KNOW_INSIGHTS = [
-  {
-    id: "dyk_women_books",
-    theme: "dyk-theme-emerald",
-    image: "assets/images/did_you_know_esther.jpg",
-    alt: "Classical illustration of biblical Queen Esther standing before King Ahasuerus",
-    questionEn: "Which Books of the Bible Are Named After Women?",
-    questionMr: "बायबलमधील कोणत्या पुस्तकांना स्त्रियांची नावे आहेत?",
-    bulletsEn: [
-      { icon: "📖", text: "Esther 👑 (Queen of Persia & Deliverer)" },
-      { icon: "🌾", text: "Ruth (Model of Faithfulness & Lineage of Christ)" },
-      { icon: "📜", text: "Judith (Historical Apocrypha)" },
-      { icon: "🪻", text: "Susanna (Historical Apocrypha)" }
-    ],
-    bulletsMr: [
-      { icon: "📖", text: "एस्तेर (Esther) 👑 — पारसाची राणी व तारणहार" },
-      { icon: "🌾", text: "रूथ (Ruth) — विश्वासूपणाची आदर्श व दाविदाची पूर्वज" },
-      { icon: "📜", text: "यहूदीथ (Judith) — ऐतिहासिक प्राचीन ग्रंथ" },
-      { icon: "🪻", text: "सुसान्ना (Susanna) — ऐतिहासिक प्राचीन ग्रंथ" }
-    ],
-    refEn: "Esther 1 • एस्तेर १",
-    refMr: "एस्तेर १ • Esther 1",
-    book: "esther",
-    chapter: 1,
-    verse: 1
-  },
-  {
-    id: "dyk_shortest_verse",
-    theme: "dyk-theme-indigo",
-    image: "assets/images/did_you_know_jesus_wept.jpg",
-    alt: "Classical chiaroscuro engraving of Jesus Christ weeping in deep prayer",
-    questionEn: "What Is the Shortest Verse in the Bible?",
-    questionMr: "बायबलमधील सर्वात लहान वचन कोणते आहे?",
-    bulletsEn: [
-      { icon: "💧", text: "John 11:35: \"Jesus wept.\"" },
-      { icon: "🕊️", text: "Just 2 words in English & Marathi (3 in Greek: Ἐδάκρυσεν ὁ Ἰηसोῦς)" },
-      { icon: "❤️", text: "The most profound display of divine empathy & love" },
-      { icon: "🙏", text: "Christ shares deeply in all our earthly sorrows" }
-    ],
-    bulletsMr: [
-      { icon: "💧", text: "योहान ११:३५: \"येशू रडला.\"" },
-      { icon: "🕊️", text: "केवळ २ शब्द (मूळ ग्रीकमध्ये ३ शब्द: Ἐδάκρυσεν ὁ Ἰηसोῦς)" },
-      { icon: "❤️", text: "ईश्वरी करुणा व संवेदनशीलतेची सर्वात सखोल साक्ष" },
-      { icon: "🙏", text: "आपल्या अश्रूंमध्ये ख्रिस्त स्वतः सहभागी होतो" }
-    ],
-    refEn: "John 11:35 • योहान ११:३५",
-    refMr: "योहान ११:३५ • John 11:35",
-    book: "john",
-    chapter: 11,
-    verse: 35
-  },
-  {
-    id: "dyk_noahs_ark",
-    theme: "dyk-theme-teal",
-    image: "assets/images/did_you_know_noahs_ark.jpg",
-    alt: "Classical engraving of Noah's Ark floating upon great flood waters",
-    questionEn: "How Long Did Noah's Ark Float?",
-    questionMr: "नोहाचे तारू पुराच्या पाण्यावर किती काळ तरंगत होते?",
-    bulletsEn: [
-      { icon: "🌧️", text: "40 days & nights of torrential rainfall" },
-      { icon: "🌊", text: "150 days floodwaters surged across the earth" },
-      { icon: "⛰️", text: "Rested on mountains of Ararat in 7th month (Gen 8:4)" },
-      { icon: "☀️", text: "370+ total days Noah remained inside the Ark" }
-    ],
-    bulletsMr: [
-      { icon: "🌧️", text: "४० दिवस व रात्री अखंड मुसळधार पाऊस पडला" },
-      { icon: "🌊", text: "१५० दिवस पुराचे पाणी पृथ्वीवर वाहत राहिले" },
-      { icon: "⛰️", text: "७ व्या महिन्यात अरारात पर्वतावर तारू स्थिरावले" },
-      { icon: "☀️", text: "एकूण ३७० हून अधिक दिवस नोहा तारवात होता" }
-    ],
-    refEn: "Genesis 7-8 • उत्पत्ती ७-८",
-    refMr: "उत्पत्ती ७-८ • Genesis 7-8",
-    book: "genesis",
-    chapter: 7,
-    verse: 17
-  },
-  {
-    id: "dyk_shepherd_rod",
-    theme: "dyk-theme-emerald",
-    image: "assets/images/did_you_know_shepherd.jpg",
-    alt: "Classical oil painting of biblical shepherd with rod and staff",
-    questionEn: "What Is the Secret of the Shepherd's Rod & Staff?",
-    questionMr: "मेंढपाळाची काठी व सोटा यातील आध्यात्मिक रहस्य काय?",
-    bulletsEn: [
-      { icon: "🛡️", text: "Rod (Shebet): Weapon defending flock against beasts" },
-      { icon: "🌿", text: "Staff (Mish'enet): Curved crook to gently guide sheep" },
-      { icon: "✝️", text: "Psalm 23:4: \"Thy rod and thy staff they comfort me\"" },
-      { icon: "🕊️", text: "Divine protection paired with tender, loving direction" }
-    ],
-    bulletsMr: [
-      { icon: "🛡️", text: "सोटा (Rod): हिंस्र श्वापदांपासून मेंढरांचे रक्षण करणारे हत्यार" },
-      { icon: "🌿", text: "काठी (Staff): वळलेली काठी चुकलेल्या मेंढरांना परत आणण्यासाठी" },
-      { icon: "✝️", text: "स्तोत्र २३:४: \"तुझा सोटा व तुझी काठी मला धीर देतात\"" },
-      { icon: "🕊️", text: "देवाचे अजिंक्य रक्षण आणि प्रेमळ मार्गदर्शन" }
-    ],
-    refEn: "Psalm 23:4 • स्तोत्रसंहिता २३:४",
-    refMr: "स्तोत्रसंहिता २३:४ • Psalm 23:4",
-    book: "psalms",
-    chapter: 23,
-    verse: 4
-  },
-  {
-    id: "dyk_water_into_wine",
-    theme: "dyk-theme-mahogany",
-    image: "assets/images/wedding_cana_miracle.jpg",
-    alt: "Classical painting of Jesus turning water into wine at the wedding at Cana",
-    questionEn: "How Much Water Was Turned into Wine at Cana?",
-    questionMr: "काना येथील लग्नात येशूने किती लिटर पाण्याचे रूपांतर केले?",
-    bulletsEn: [
-      { icon: "🏺", text: "6 massive stone jars used for ceremonial washing" },
-      { icon: "🍷", text: "20 to 30 gallons each (total 120-180 gallons / 500-700L)" },
-      { icon: "🍇", text: "Master of banquet declared it the finest wine" },
-      { icon: "✨", text: "Revealed His glory and the overflowing abundance of grace" }
-    ],
-    bulletsMr: [
-      { icon: "🏺", text: "शुद्धीकरणासाठी ठेवलेले ६ भव्य दगडी रांजण" },
-      { icon: "🍷", text: "प्रत्येकात सुमारे १०० लिटर (एकूण ५०० ते ७०० लिटर)" },
-      { icon: "🍇", text: "यजमानाने या द्राक्षारसाला उत्कृष्ट दर्जाचा ठरवले" },
-      { icon: "✨", text: "देवाची असीम कृपा आणि महिमा येथे प्रकट झाला" }
-    ],
-    refEn: "John 2:6-10 • योहान २:६-१०",
-    refMr: "योहान २:६-१० • John 2:6-10",
-    book: "john",
-    chapter: 2,
-    verse: 1
-  },
-  {
-    id: "dyk_peace_phroureo",
-    theme: "dyk-theme-indigo",
-    image: "assets/images/peace_anxiety_art.jpg",
-    alt: "Classical illustration of divine peace guarding believer amidst storm",
-    questionEn: "What Does Paul Mean by 'The Peace of God'?",
-    questionMr: "पौल जेव्हा 'देवाच्या शांती'चा उल्लेख करतो तेव्हा त्याचा खरा अर्थ काय?",
-    bulletsEn: [
-      { icon: "🛡️", text: "Uses Roman military term 'Phroureo' (φρουρέω)" },
-      { icon: "🏰", text: "Describes an armed garrison guarding a fortress 24/7" },
-      { icon: "🕊️", text: "Transcends all human understanding and anxiety" },
-      { icon: "❤️", text: "Keeps worry and panic completely outside your heart" }
-    ],
-    bulletsMr: [
-      { icon: "🛡️", text: "'फ्रुरिओ' (Phroureo) हा रोमन सैन्याचा लष्करी शब्द वापरला" },
-      { icon: "🏰", text: "किल्ल्याचे २४ तास अहोरात्र खडा पहारा देणारा पहारेकरी" },
-      { icon: "🕊️", text: "सर्व बुद्धी व समजेच्या पलीकडची स्वर्गीय शांती" },
-      { icon: "❤️", text: "चिंता, भीती व नैराश्याला हृदयाबाहेरच थोपवून धरते" }
-    ],
-    refEn: "Philippians 4:7 • फिलिप्पैकरांस ४:७",
-    refMr: "फिलिप्पैकरांस ४:७ • Philippians 4:7",
-    book: "philippians",
-    chapter: 4,
-    verse: 6
-  }
-];
-
-// FEATURED_SCRIPTURES_CONFIG hoisted before DOMContentLoaded to prevent temporal dead zone ReferenceError
-var FEATURED_SCRIPTURES_CONFIG = [
-  {
-    id: "psalms",
-    nameEn: "Psalms",
-    nameMr: "स्तोत्रसंहिता",
-    cover: "assets/images/book_psalms_cover.png",
-    themeClass: "recent-card-psalms",
-    totalChapters: 150,
-    chapters: [23, 70, 91, 121, 27, 46, 1, 19, 34, 37, 51, 62, 84, 100, 103, 119, 139, 145, 8, 15, 16, 24, 25, 32, 40, 42, 63, 67, 72, 86, 90, 92, 95, 96, 98, 111, 112, 116, 122, 126, 127, 128, 130, 133, 138, 146, 147, 148, 150]
-  },
-  {
-    id: "proverbs",
-    nameEn: "Proverbs",
-    nameMr: "नीतिसूत्रे",
-    cover: "assets/images/book_proverbs_cover.jpg",
-    themeClass: "recent-card-proverbs",
-    totalChapters: 31,
-    chapters: [3, 4, 8, 10, 15, 16, 22, 27, 31, 1, 2, 5, 6, 7, 9, 11, 12, 13, 14, 17, 18, 19, 20, 21, 23, 24, 25, 26, 28, 29, 30]
-  },
-  {
-    id: "matthew",
-    nameEn: "Matthew",
-    nameMr: "मत्तय",
-    cover: "assets/images/book_matthew_cover.jpg",
-    themeClass: "recent-card-matthew",
-    totalChapters: 28,
-    chapters: [5, 6, 7, 11, 13, 14, 18, 24, 25, 26, 27, 28, 1, 2, 3, 4, 8, 9, 10, 12, 15, 16, 17, 19, 20, 21, 22, 23]
-  },
-  {
-    id: "john",
-    nameEn: "John",
-    nameMr: "योहान",
-    cover: "assets/images/book_john_cover.jpg",
-    themeClass: "recent-card-john",
-    totalChapters: 21,
-    chapters: [1, 3, 4, 6, 10, 11, 14, 15, 16, 17, 20, 21, 2, 5, 7, 8, 9, 12, 13, 18, 19]
-  },
-  {
-    id: "romans",
-    nameEn: "Romans",
-    nameMr: "रोमन्स",
-    cover: "assets/images/book_romans_cover.jpg",
-    themeClass: "recent-card-romans",
-    totalChapters: 16,
-    chapters: [8, 12, 1, 3, 5, 6, 7, 10, 11, 13, 14, 15, 16, 2, 4, 9]
-  },
-  {
-    id: "genesis",
-    nameEn: "Genesis",
-    nameMr: "उत्पत्ती",
-    cover: "assets/images/book_genesis_cover.jpg",
-    themeClass: "recent-card-genesis",
-    totalChapters: 50,
-    chapters: [1, 12, 15, 22, 28, 37, 39, 45, 50, 2, 3, 6, 7, 8, 9, 11]
-  }
-];
 
 /* ==========================================================================
    Initialization and Listeners
@@ -2945,6 +2734,21 @@ function selectBookForChapterScreen(bookMeta) {
   }
 }
 
+function openReaderBookChapterPicker() {
+  openDrawer("drawer-book-selector");
+  const cleanBook = (state.activeBook || "genesis").toLowerCase().replace(".json", "");
+  const currentMeta = (typeof booksMetadataMr !== 'undefined' && Array.isArray(booksMetadataMr))
+    ? booksMetadataMr.find(b => b.filename.replace(".json", "").toLowerCase() === cleanBook)
+    : null;
+  if (currentMeta) {
+    selectBookForChapterScreen(currentMeta);
+  } else {
+    switchSelectorStep("books");
+    populateBookSelector();
+  }
+}
+window.openReaderBookChapterPicker = openReaderBookChapterPicker;
+
 async function selectChapterForVerseScreen(bookMeta, chapterNum) {
   selectorTargetBookMeta = bookMeta;
   selectorTargetChapter = chapterNum;
@@ -3271,7 +3075,7 @@ function renderDailyDevotion() {
   
   // Expanded Luminous Rotating Scenic Wallpapers from assets/daily_verses/
   const images = (window.dailyVersesImageList && window.dailyVersesImageList.length > 0) ? window.dailyVersesImageList : [
-    'golden_dawn.png', 'sunrise.png', 'mountains.png', 'ocean.png', 'calm_waters.png', 'healing_light.png', 'river_of_life.png'
+    'sunrise.png', 'forest.png', 'mountains.png', 'ocean.png', 'path.png', 'stars.png', 'mist.png'
   ];
   const imgIdx = ((dayOfYear + offset) % images.length + images.length) % images.length;
   window.currentVodImageIndex = imgIdx;
@@ -3279,25 +3083,13 @@ function renderDailyDevotion() {
   const imgUrl = (typeof getVodImageUrl === "function") ? getVodImageUrl(dailyImg) : (dailyImg.includes('.') ? `assets/daily_verses/${dailyImg}` : `assets/daily_verses/${dailyImg}.png`);
   
   const bgEl = document.getElementById("vod-dynamic-bg") || document.querySelector(".youversion-vod-bg") || document.querySelector(".daily-verse-card-bg");
-  if (bgEl) {
-    bgEl.style.backgroundImage = `url('${imgUrl}')`;
-    bgEl.style.backgroundSize = "cover";
-    bgEl.style.backgroundPosition = "center";
-  }
+  if (bgEl) bgEl.style.backgroundImage = `url('${imgUrl}')`;
 
   const heroCard = document.getElementById("card-daily-verse-home");
-  if (heroCard) {
-    heroCard.style.backgroundImage = `url('${imgUrl}')`;
-    heroCard.style.backgroundSize = "cover";
-    heroCard.style.backgroundPosition = "center";
-  }
+  if (heroCard) heroCard.style.backgroundImage = `url('${imgUrl}')`;
 
   const fsCapsule = document.querySelector(".fullscreen-vod-capsule");
-  if (fsCapsule) {
-    fsCapsule.style.backgroundImage = `url('${imgUrl}')`;
-    fsCapsule.style.backgroundSize = "cover";
-    fsCapsule.style.backgroundPosition = "center";
-  }
+  if (fsCapsule) fsCapsule.style.backgroundImage = `url('${imgUrl}')`;
   
   // Continue Reading Card Data Sync
   const contBookEl = document.getElementById("home-continue-book-chapter");
@@ -3314,11 +3106,6 @@ function renderDailyDevotion() {
   const totalChs = bookMetaMr?.chaptersCount || bookMetaEng?.chaptersCount || 150;
   const readPercent = Math.min(100, Math.max(8, Math.round((curCh / totalChs) * 100)));
   
-  const contCardEl = document.getElementById("home-continue-reading-card");
-  if (contCardEl) {
-    contCardEl.dataset.bookKey = curBook;
-    contCardEl.dataset.chapterNum = curCh;
-  }
   if (contBookEl) contBookEl.textContent = `${engBookName} ${curCh}`;
   if (contMrEl) contMrEl.textContent = `${mrBookName} ${curCh}`;
   if (contPercentEl) contPercentEl.textContent = isEng ? `Chapter ${curCh} of ${totalChs}` : `अध्याय ${curCh} / ${totalChs}`;
@@ -3802,40 +3589,10 @@ function playDailyVerseAudio() { console.log("playDailyVerseAudio disabled per u
 }
 
 function continueLastReadChapter() {
-  const card = document.getElementById("home-continue-reading-card");
-  let book = card?.dataset?.bookKey || state.activeBook || "psalms";
-  let ch = parseInt(card?.dataset?.chapterNum || state.activeChapter || 23, 10);
+  const book = state.activeBook || "psalms";
+  const ch = state.activeChapter || 23;
   openReaderAndNavigate(book, ch, 1);
 }
-
-function triggerHomepageSearch(customQuery = null) {
-  const input = document.getElementById("home-search-input");
-  const query = (typeof customQuery === "string" ? customQuery : (input ? input.value : "")).trim();
-  if (!query) {
-    if (input) input.focus();
-    return;
-  }
-  
-  if (typeof switchTab === "function") {
-    switchTab("discover");
-  }
-  window.location.hash = "#/discover";
-  
-  setTimeout(() => {
-    const discoverInput = document.getElementById("discover-search-input");
-    const sClear = document.getElementById("btn-discover-search-clear");
-    if (discoverInput) {
-      discoverInput.value = query;
-      if (sClear) sClear.style.display = "flex";
-      if (typeof executeDiscoverSearch === "function") {
-        executeDiscoverSearch();
-      }
-      const emptyState = document.getElementById("search-empty-state-content");
-      if (emptyState) emptyState.style.display = "none";
-    }
-  }, 180);
-}
-window.triggerHomepageSearch = triggerHomepageSearch;
 
 function renderGrowView() {
   console.log("[GrowView] Rendered Grow in Faith Hub");
@@ -4293,6 +4050,12 @@ function resolveBibleBookNumber(bookKeyOrName) {
   return 1;
 }
 
+function getBookNumber(bookKeyOrName) {
+  return resolveBibleBookNumber(bookKeyOrName);
+}
+window.resolveBibleBookNumber = resolveBibleBookNumber;
+window.getBookNumber = getBookNumber;
+
 function getBibleAudioUrl(bookNumber, chapterNumber, translation) {
   let langCode = "28"; // Marathi (मराठी पवित्र शास्त्र - Authentic Recorded Male Voice)
   if (translation === "eng") langCode = "1";
@@ -4340,7 +4103,7 @@ function getBsiUsfmCode(bookInput) {
   return BSI_USFM_MAP[str] || "GEN";
 }
 
-let bsiCloudFrontToken = 'Key-Pair-Id=KCC7HS8KPVISV&Signature=X68FFv7YGRCkHrMzz2lmwZOUBmQlpQgnc7qhojMi7W7Kr~SKthTRTldXfAyuvT5WHRw7fjmhz76VRIkOyGFkfPSqKVruSLQ-nKLmmR4n~jk4zO-k~pk6f-Dc6YVUKdY8jKGuAtNcL8R8jMxcWNh5HgjXS1ZBm0Hic2jwX8vfoEYOInJxbAy4s2WJrHflXSMrMP-VfFsQvdTFzHblmjQB-HuRuAWOuN-vFfIP2sCVszDrQQteAsqDHoFdI4kryoEGEnD5V5M2xQ9jdu-hI8pVKB7Pc~V8X0ISzWLfFukp1Vh9n9KbiMmJ1SQt6CD03osc5sMtL1e-h-df2smZwDzZBg__&Expires=1789365992&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9kMWhrcHV6Mm81YTJ4dy5jbG91ZGZyb250Lm5ldC9zb3VyY2UvNTU1NDc2YzIzOTBjMTAyZC0wNC8qIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzg5MzY1OTkyfX19XX0_';
+let bsiCloudFrontToken = 'Key-Pair-Id=KCC7HS8KPVISV&Signature=tR1o6g1lk9JtKH071s4pTydm-yEp1wLpwdDCW3P69kXFUCPCcus~9Nm2vLw4VI4xxVxeepkdRJZ4TN3BrLD6e-Gj07bR90kxKnDBleNXSvCFYuNMCDe7h3EOZa5nkTcrPnjWfI0qi4mBSrzcNn2o0ygsvjwvZSZN6P1u0A9-s8eW6NmemtBKOmb2i4hco~hYPj6Ltiz9Qzj4NyCD58QMkMG1EVAQoH8kDEcjpoocXEz~dgGX5~8zececaVk6X7lMqmShTtNWnj5dznOkeCsvp6fcCF4E8Mn0rBt~iHwz1~t71ZThH7azqx3ipA6neFUfD7eG-eSokzspaBLC7aRsEA__&Expires=1789463254&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9kMWhrcHV6Mm81YTJ4dy5jbG91ZGZyb250Lm5ldC9zb3VyY2UvNTU1NDc2YzIzOTBjMTAyZC0wNC8qIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzg5NDYzMjU0fX19XX0_';
 
 function isBsiTokenValid(token) {
   if (!token || typeof token !== 'string') return false;
@@ -4348,7 +4111,8 @@ function isBsiTokenValid(token) {
   if (!m) return false;
   const exp = parseInt(m[1], 10);
   const now = Math.floor(Date.now() / 1000);
-  return now < (exp - 180); // 3-minute proactive safety buffer
+  // Strictly require at least 2 minutes of remaining validity
+  return now < (exp - 120);
 }
 
 async function getBsiCloudFrontToken(forceRefresh = false) {
@@ -4356,22 +4120,18 @@ async function getBsiCloudFrontToken(forceRefresh = false) {
     return bsiCloudFrontToken;
   }
 
-  // 1. Try local assets/bsi_token.json with no-store cache control (primary ground truth)
-  try {
-    const res = await fetch(`assets/bsi_token.json?t=${Date.now()}`, { cache: 'no-store' });
-    if (res.ok) {
-      const data = await res.json();
-      if (data && isBsiTokenValid(data.token)) {
-        bsiCloudFrontToken = data.token;
-        try { localStorage.setItem("rol_bsi_token", bsiCloudFrontToken); } catch(e) {}
+  // Check cached token in localStorage
+  if (!forceRefresh) {
+    try {
+      const stored = localStorage.getItem("rol_bsi_token");
+      if (stored && isBsiTokenValid(stored)) {
+        bsiCloudFrontToken = stored;
         return bsiCloudFrontToken;
       }
-    }
-  } catch (err) {
-    console.warn("[BSI Audio] Could not fetch assets/bsi_token.json:", err);
+    } catch(e) {}
   }
 
-  // 2. If local development server is reachable and forceRefresh is requested, ask backend to scrape fresh token
+  // 1. If local development server is reachable and forceRefresh is requested, ask backend to scrape fresh token
   if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
     try {
       const localRes = await fetch('/api/refresh-bsi-token');
@@ -4386,19 +4146,23 @@ async function getBsiCloudFrontToken(forceRefresh = false) {
     } catch(e) {}
   }
 
-  // 3. Try cached token in localStorage
-  if (!forceRefresh) {
-    try {
-      const stored = localStorage.getItem("rol_bsi_token");
-      if (stored && isBsiTokenValid(stored)) {
-        bsiCloudFrontToken = stored;
+  // 2. Try local assets/bsi_token.json with no-store cache control
+  try {
+    const res = await fetch(`assets/bsi_token.json?t=${Date.now()}`, { cache: 'no-store' });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && isBsiTokenValid(data.token)) {
+        bsiCloudFrontToken = data.token;
+        try { localStorage.setItem("rol_bsi_token", bsiCloudFrontToken); } catch(e) {}
         return bsiCloudFrontToken;
       }
-    } catch(e) {}
+    }
+  } catch (err) {
+    console.warn("[BSI Audio] Could not fetch assets/bsi_token.json:", err);
   }
 
-  // 4. Try raw.githubusercontent.com live branch fallback (instant bypass of GitHub Pages deployment lag)
-  for (const branch of ['main', 'develop']) {
+  // 3. Try raw.githubusercontent.com live branch fallback (develop & main)
+  for (const branch of ['develop', 'main']) {
     try {
       const rawRes = await fetch(`https://raw.githubusercontent.com/gauravsalve236-lgtm/River-of-life/${branch}/assets/bsi_token.json?t=${Date.now()}`, { cache: 'no-store' });
       if (rawRes.ok) {
@@ -4414,7 +4178,33 @@ async function getBsiCloudFrontToken(forceRefresh = false) {
     }
   }
 
-  return bsiCloudFrontToken;
+  // 4. Dynamic client-side CORS scraping fallback via public proxies
+  try {
+    const corsEndpoints = [
+      `https://api.allorigins.win/raw?url=${encodeURIComponent('https://www.indian.bible/bible/MARVBSI/GEN.1')}`,
+      `https://corsproxy.io/?url=${encodeURIComponent('https://www.indian.bible/bible/MARVBSI/GEN.1')}`
+    ];
+    for (const proxyUrl of corsEndpoints) {
+      try {
+        const pRes = await fetch(proxyUrl, { signal: AbortSignal.timeout ? AbortSignal.timeout(4500) : undefined });
+        if (pRes.ok) {
+          const html = await pRes.text();
+          const match = html.match(/https:\/\/d1hkpuz2o5a2xw\.cloudfront\.net\/source\/555476c2390c102d-04\/[^\s"'<>]+\?([^\s"'<>]+)/);
+          if (match && match[1]) {
+            const rawTok = match[1].replace(/&amp;/g, '&').replace(/["']/g, '');
+            if (rawTok.includes('Key-Pair-Id=') && rawTok.includes('Signature=') && isBsiTokenValid(rawTok)) {
+              bsiCloudFrontToken = rawTok;
+              try { localStorage.setItem("rol_bsi_token", bsiCloudFrontToken); } catch(e) {}
+              console.log("[BSI Audio] Live token scraped via client gateway successfully!");
+              return bsiCloudFrontToken;
+            }
+          }
+        }
+      } catch(proxyErr) {}
+    }
+  } catch(e) {}
+
+  return isBsiTokenValid(bsiCloudFrontToken) ? bsiCloudFrontToken : null;
 }
 
 var bibleChapterAudioPlayer = null;
@@ -4429,29 +4219,84 @@ window.audioPlaybackState = {
   isPaused: false
 };
 
+// Global audio engine setter: 'bsi' (Dramatized) | 'wordproject' (Authentic Marathi Voice) | 'tts' (AI)
+window.setBibleAudioEngine = function(engine) {
+  try {
+    localStorage.setItem("rol_audio_engine", engine);
+  } catch(e) {}
+  const labels = {
+    'bsi': "🎭 BSI नाट्यमय ऑडिओ निवडला",
+    'wordproject': "🎙️ अस्सल मराठी मानवी ऑडिओ निवडला (कायमस्वरूपी)",
+    'tts': "🤖 AI वाचक निवडला"
+  };
+  showToast(labels[engine] || "ऑडिओ प्रकार बदलला");
+  
+  if (isBibleChapterPlaying || (bibleChapterAudioPlayer && !bibleChapterAudioPlayer.paused)) {
+    const curBook = window.audioPlaybackState.activeBook || state.activeBook || "genesis";
+    const curCh = window.audioPlaybackState.activeChapter || state.activeChapter || 1;
+    const curTime = bibleChapterAudioPlayer ? bibleChapterAudioPlayer.currentTime : 0;
+    if (engine === 'tts') {
+      if (bibleChapterAudioPlayer) bibleChapterAudioPlayer.pause();
+      startSpeechNarration(0);
+    } else {
+      stopTtsNarrationOnly();
+      playBsiDramatizedAudio(curBook, curCh, curTime);
+    }
+  }
+};
+
 async function playBsiDramatizedAudio(bookKey, chapterNum, resumeTime = null) {
   closeModal("modal-audio-settings");
-
-  await getBsiCloudFrontToken();
 
   const cleanBook = (bookKey || state.activeBook || "genesis").toLowerCase().replace(".json", "");
   const chNum = parseInt(chapterNum || state.activeChapter || 1, 10);
   const usfm = getBsiUsfmCode(bookKey || cleanBook);
   const chStr = String(chNum).padStart(3, '0');
-  
-  let audioUrl = `https://d1hkpuz2o5a2xw.cloudfront.net/source/555476c2390c102d-04/${usfm}_${chStr}.mp3?${bsiCloudFrontToken}`;
+  const bookNum = getBookNumber(cleanBook);
+  const wpUrl = getBibleAudioUrl(bookNum, chNum, state.translation || 'mr');
+
+  // Check saved audio engine preference
+  let userEnginePref = "auto";
+  try {
+    userEnginePref = localStorage.getItem("rol_audio_engine") || "auto";
+  } catch(e) {}
+
+  let token = null;
+  if (userEnginePref !== 'wordproject') {
+    token = await getBsiCloudFrontToken();
+  }
+
+  let audioUrl = "";
+  let audioLabel = "";
+  let isUsingWordProject = false;
+
+  // Zero-Failure Decision: If user chose WordProject or BSI token is unavailable/expired,
+  // directly and synchronously route to authentic human Marathi audio
+  if (userEnginePref === 'wordproject' || !token) {
+    audioUrl = wpUrl;
+    audioLabel = `🎙️ अस्सल मराठी ऑडिओ • ${cleanBook} ${chNum}`;
+    isUsingWordProject = true;
+    console.log("[Audio Engine] Routing directly to Permanent Authentic Marathi Human Audio:", audioUrl);
+    if (!token && userEnginePref !== 'wordproject') {
+      showToast("🎙️ अस्सल मराठी मानवी ऑडिओ सुरू केला आहे (कायमस्वरूपी) 🙏");
+    }
+  } else {
+    audioUrl = `https://d1hkpuz2o5a2xw.cloudfront.net/source/555476c2390c102d-04/${usfm}_${chStr}.mp3?${token}`;
+    audioLabel = `🎭 BSI नाट्यमय ऑडिओ • ${cleanBook} ${chNum}`;
+  }
 
   // If local server streaming proxy is explicitly enabled, use it
-  if (window.USE_LOCAL_BSI_PROXY && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+  if (window.USE_LOCAL_BSI_PROXY && !isUsingWordProject && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
     audioUrl = `/api/bsi-audio-stream?book=${cleanBook}&chapter=${chNum}`;
   }
 
   // Check if player is already loaded with the same track and was paused
   const isSameTrack = bibleChapterAudioPlayer && 
     (bibleChapterAudioPlayer.src.includes(`${cleanBook}&chapter=${chNum}`) ||
-     bibleChapterAudioPlayer.src.includes(`${usfm}_${chStr}.mp3`));
+     bibleChapterAudioPlayer.src.includes(`${usfm}_${chStr}.mp3`) ||
+     bibleChapterAudioPlayer.src === wpUrl);
 
-  if (isSameTrack && bibleChapterAudioPlayer.currentTime > 0) {
+  if (isSameTrack && bibleChapterAudioPlayer.currentTime > 0 && bibleChapterAudioPlayer.paused) {
     try {
       await bibleChapterAudioPlayer.play();
       audioState.isPlaying = true;
@@ -4488,6 +4333,7 @@ async function playBsiDramatizedAudio(bookKey, chapterNum, resumeTime = null) {
   window.audioPlaybackState.isPaused = false;
 
   bibleChapterAudioPlayer._retried = false;
+  bibleChapterAudioPlayer._wpFallback = isUsingWordProject;
   bibleChapterAudioPlayer.src = audioUrl;
   bibleChapterAudioPlayer.playbackRate = audioState.speed || 1.0;
 
@@ -4510,7 +4356,7 @@ async function playBsiDramatizedAudio(bookKey, chapterNum, resumeTime = null) {
   updateReaderPlayState(true);
 
   const indicator = document.getElementById("playbar-verse-indicator");
-  if (indicator) indicator.textContent = `🎭 BSI नाट्यमय ऑडिओ • ${cleanBook} ${chNum}`;
+  if (indicator) indicator.textContent = audioLabel;
 
   const playbar = document.getElementById("floating-audio-playbar");
   if (playbar) playbar.classList.add("active");
@@ -4555,37 +4401,43 @@ async function playBsiDramatizedAudio(bookKey, chapterNum, resumeTime = null) {
   };
 
   bibleChapterAudioPlayer.onerror = async function(e) {
-    console.warn("[BSI Audio] Player error:", e);
-    const mediaErr = bibleChapterAudioPlayer.error;
-    console.warn("[BSI Audio] MediaError code:", mediaErr ? mediaErr.code : "none");
-    if (!bibleChapterAudioPlayer._retried) {
-      bibleChapterAudioPlayer._retried = true;
+    console.warn("[Audio Engine] Player error on URL:", bibleChapterAudioPlayer.src, e);
+    
+    // Direct Seamless Fallback to Authentic Human Marathi Voice (WordProject 28)
+    if (!bibleChapterAudioPlayer._wpFallback && bibleChapterAudioPlayer.src !== wpUrl) {
+      bibleChapterAudioPlayer._wpFallback = true;
       try {
-        bsiCloudFrontToken = null;
-        const freshToken = await getBsiCloudFrontToken(true);
-        if (freshToken) {
-          console.log("[BSI Audio] Retrying playback with fresh token...");
-          bibleChapterAudioPlayer.src = `https://d1hkpuz2o5a2xw.cloudfront.net/source/555476c2390c102d-04/${usfm}_${chStr}.mp3?${freshToken}`;
-          if (targetTime > 0) {
-            bibleChapterAudioPlayer.currentTime = targetTime;
-          }
-          await bibleChapterAudioPlayer.play();
-          return;
+        console.log("[Audio Engine] Seamlessly switching to Authentic Marathi audio fallback:", wpUrl);
+        bibleChapterAudioPlayer.src = wpUrl;
+        if (targetTime > 0) {
+          bibleChapterAudioPlayer.currentTime = targetTime;
         }
-      } catch (retryErr) {
-        console.warn("[BSI Audio] Retry token failed:", retryErr);
+        await bibleChapterAudioPlayer.play();
+        const indicator = document.getElementById("playbar-verse-indicator");
+        if (indicator) indicator.textContent = `🎙️ अस्सल मराठी ऑडिओ • ${cleanBook} ${chNum}`;
+        showToast("🎙️ अस्सल मराठी मानवी ऑडिओ सुरू केला आहे 🙏");
+        return;
+      } catch(wpErr) {
+        console.warn("[Audio Engine] WordProject fallback error:", wpErr);
       }
     }
-    showToast("⚠️ BSI ऑडिओ लोड होत नाही, AI वाचकावर पुनर्निर्देशित करत आहे...");
+
     startSpeechNarration(0);
   };
 
   try {
     await bibleChapterAudioPlayer.play();
   } catch(err) {
-    console.warn("[BSI Audio] Play error:", err);
-    if (err.name === 'NotAllowedError') {
-      showToast("▶️ ऑडिओ सुरू करण्यासाठी प्ले बटनावर टॅप करा");
+    console.warn("[Audio Engine] Initial play warning:", err);
+    // If browser threw autoplay error or URL was rejected, attempt instant WordProject fallback
+    if (!bibleChapterAudioPlayer._wpFallback && bibleChapterAudioPlayer.src !== wpUrl) {
+      bibleChapterAudioPlayer._wpFallback = true;
+      bibleChapterAudioPlayer.src = wpUrl;
+      try {
+        await bibleChapterAudioPlayer.play();
+        const indicator = document.getElementById("playbar-verse-indicator");
+        if (indicator) indicator.textContent = `🎙️ अस्सल मराठी ऑडिओ • ${cleanBook} ${chNum}`;
+      } catch(e) {}
     }
   }
 }
@@ -6772,9 +6624,7 @@ function setupEventListeners() {
   const btnInlineBookPicker = document.getElementById("btn-reader-open-book-picker");
   if (btnInlineBookPicker) {
     btnInlineBookPicker.addEventListener("click", () => {
-      openDrawer("drawer-book-selector");
-      switchSelectorStep("books");
-      populateBookSelector();
+      openReaderBookChapterPicker();
     });
   }
 
@@ -6976,17 +6826,6 @@ function setupEventListeners() {
   // Discover search triggers
   const sInput = document.getElementById("discover-search-input");
   const sClear = document.getElementById("btn-discover-search-clear");
-  
-  // Homepage search triggers
-  const homeSearchInput = document.getElementById("home-search-input");
-  if (homeSearchInput) {
-    homeSearchInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        triggerHomepageSearch();
-      }
-    });
-  }
   
   sInput.addEventListener("input", () => {
     sClear.style.display = (sInput.value.length > 0) ? "flex" : "none";
@@ -10779,19 +10618,12 @@ function updateAuthUI() {
     if (loggedInCont) loggedInCont.style.display = "none";
   }
 
-  // Restrict Admin & Pastor Console card strictly to users with administrative roles
+  // Restrict Admin & Pastor Console card strictly to users with role 'admin' or 'pastor'
   const adminPanelCard = document.getElementById("you-admin-panel-card");
   if (adminPanelCard) {
-    const rawRole = (state.currentUser?.role || localStorage.getItem("rol_user_role") || "").toLowerCase().replace(/[\s-]+/g, "_");
-    const allowedAdminRoles = ["super_admin", "pastor", "prayer_team", "admin", "church_admin"];
-    if (state.currentUser && allowedAdminRoles.includes(rawRole)) {
+    const role = (state.currentUser?.role || "").toLowerCase();
+    if (state.currentUser && (role === "admin" || role === "pastor")) {
       adminPanelCard.style.display = "block";
-      const badgeTitle = document.querySelector("#you-admin-panel-card h4");
-      if (badgeTitle) {
-        if (rawRole === "super_admin") badgeTitle.textContent = "Super-Admin Master Portal / महा-नियंत्रक";
-        else if (rawRole === "prayer_team") badgeTitle.textContent = "Prayer Team Intercession Console / प्रार्थना कक्ष";
-        else badgeTitle.textContent = "Pastor & Admin Console / पास्टर व प्रशासन कक्ष";
-      }
     } else {
       adminPanelCard.style.display = "none";
     }
@@ -12082,77 +11914,57 @@ function generateICSFile(meeting) {
 }
 
 // Trigger Joining Flow (Camera preview checks)
-function triggerJoinMeetingFlow(meetingId) {
-  const meetings = getMeetingsFromStorage();
-  const m = meetings.find(x => x.id === meetingId);
-  if (!m) return;
-
-  // Synchronous user-gesture audio context unlock
+function unlockMobileSpeakerAudio() {
   try {
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     if (AudioContextClass) {
       if (!window.webrtcAudioCtx) window.webrtcAudioCtx = new AudioContextClass();
       if (window.webrtcAudioCtx.state === 'suspended') window.webrtcAudioCtx.resume();
+      // Warm up mobile speaker output pipeline
+      const buffer = window.webrtcAudioCtx.createBuffer(1, 1, 22050);
+      const source = window.webrtcAudioCtx.createBufferSource();
+      source.buffer = buffer;
+      source.connect(window.webrtcAudioCtx.destination);
+      source.start(0);
     }
-  } catch(e) {}
-
-  const loggedIn = (state && state.currentUser) ? state.currentUser.username : "Member";
-  const meetingIdSlug = (m && m.id) ? m.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
-  const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
-  const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&autojoin=true&p2p=true&codec=opus&layout=grid&grid=1&name=${encodeURIComponent(loggedIn)}`;
-
-  // Detect iOS (iPhone/iPad) to bypass WebKit iframe microphone blocking and popup blocker
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  if (isIOS) {
-    logAudioDebug("iOS Device detected. Directing to native top-level call window...", { roomUrl });
-    showToast("Opening iOS Video Room (Mic & Speaker Active) 🙏");
-    window.location.href = roomUrl;
-    return;
+  } catch(e) {
+    console.warn("Audio unlock notice:", e);
   }
+}
+window.unlockMobileSpeakerAudio = unlockMobileSpeakerAudio;
 
-  // Graceful Handling: Respect saved permission state from onboarding
-  const permPref = localStorage.getItem("rol_media_permissions");
-  if (permPref === "listen_only" || permPref === "skipped") {
-    logAudioDebug("User previously configured listen-only mode. Bypassing redundant media prompt.");
-    showToast("Joining Live Sanctuary in Listen Mode 🎧");
-    launchLiveMeetingRoom(m, null);
-    return;
-  }
+// Trigger Joining Flow — Authorizes microphone on user gesture for iOS Safari & Android, then launches meeting
+function triggerJoinMeetingFlow(meetingId) {
+  const meetings = getMeetingsFromStorage();
+  const m = meetings.find(x => x.id === meetingId);
+  if (!m) return;
 
-  logAudioDebug("getUserMedia started for meeting join...", { meetingId });
-  showToast("Requesting Microphone & Camera access...");
-  
-  // Explicitly request audio FIRST to force mobile browsers (Android Chrome / Desktop) to display Microphone Permission Dialog
-  navigator.mediaDevices.getUserMedia({ audio: true })
-    .then(audioStream => {
-      logAudioDebug("Microphone permission granted by user!", {
-        audioTracks: audioStream.getAudioTracks().map(t => ({ id: t.id, label: t.label, enabled: t.enabled, readyState: t.readyState }))
+  // 1. Unlock phone speaker output via user gesture
+  unlockMobileSpeakerAudio();
+
+  // 2. On iOS Safari and mobile browsers, request mic permission once in parent to authorize WebKit
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(tempStream => {
+        // Stop the temp track immediately so device is ready for conference
+        if (tempStream && tempStream.getTracks) {
+          tempStream.getTracks().forEach(t => t.stop());
+        }
+        showToast("Joining Live Sanctuary 🙏");
+        launchLiveMeetingRoom(m, null);
+      })
+      .catch(err => {
+        console.warn("Parent getUserMedia prompt result:", err);
+        showToast("Joining Live Sanctuary 🙏");
+        launchLiveMeetingRoom(m, null);
       });
-
-      // Stop parent frame pre-check tracks so hardware mic device lock is released before iframe initialization
-      if (audioStream && audioStream.getTracks) {
-        audioStream.getTracks().forEach(t => t.stop());
-        logAudioDebug("Parent frame audio tracks released for exclusive iframe hardware capture.");
-      }
-
-      // Also attempt joint video request
-      navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-        .then(fullStream => {
-          if (fullStream && fullStream.getTracks) fullStream.getTracks().forEach(t => t.stop());
-          launchLiveMeetingRoom(m, null);
-        })
-        .catch(() => {
-          launchLiveMeetingRoom(m, null);
-        });
-    })
-    .catch(err => {
-      logAudioDebug("Microphone permission denied or unavailable on mobile:", err);
-      showToast("Microphone permission denied. Joining in listen mode.");
-      launchLiveMeetingRoom(m, null);
-    });
+  } else {
+    showToast("Joining Live Sanctuary 🙏");
+    launchLiveMeetingRoom(m, null);
+  }
 }
 
-// Fullscreen Live Meeting Room Entry
+// Fullscreen Live Meeting Room Entry — Ultra Clean 3-Button Experience (Mic, Camera, Hangup)
 function launchLiveMeetingRoom(meeting, stream) {
   try {
     const loggedIn = (state && state.currentUser) ? state.currentUser.username : "Member";
@@ -12193,64 +12005,517 @@ function launchLiveMeetingRoom(meeting, stream) {
       isHost: isHost
     };
 
-    // Load Verified WebRTC Video Conference Room with Exclusive Hardware Access for All Participants
+    // Video Conference Mounting: Daily.co (Primary), External Link, or Jitsi Meet (Fallback)
     const jitsiCont = document.getElementById("meeting-jitsi-container");
     if (jitsiCont) {
       jitsiCont.style.display = "block";
-      const meetingIdSlug = (meeting && meeting.id) ? meeting.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
-      const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
       
-      // Low-latency Opus P2P parameters for zero audio delay on Android & Desktop: audio=true&video=true&mic=true&cam=true&muted=false&sound=true&autojoin=true&p2p=true&codec=opus
-      const roomUrl = `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&autojoin=true&p2p=true&codec=opus&layout=grid&grid=1&name=${encodeURIComponent(loggedIn)}`;
-      
-      // Detect iOS (iPhone/iPad) to bypass WebKit iframe microphone blocking
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-      if (isIOS) {
-        logAudioDebug("iOS Device detected (Apple WebKit Iframe Restriction). Launching native top-level call window...");
-        showToast("Opening iOS Video Room (Mic & Speaker Active) 🙏");
-        try {
-          window.open(roomUrl, "_blank");
-        } catch(e) {}
+      // 1. Check if meeting has an external link (Google Meet, Zoom, WhatsApp)
+      const hasCustomExtUrl = meeting && meeting.customUrl && 
+        (meeting.customUrl.includes("meet.google.com") || 
+         meeting.customUrl.includes("zoom.us") || 
+         meeting.customUrl.includes("whatsapp.com") || 
+         meeting.customUrl.includes("wa.me"));
+
+      if (hasCustomExtUrl) {
+        const extUrl = meeting.customUrl.trim();
+        jitsiCont.innerHTML = `
+          <div style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #090d16; padding: 20px; box-sizing: border-box;">
+            <div style="max-width: 320px; width: 100%; text-align: center; padding: 24px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); border-radius: 20px; color: #fff; box-shadow: 0 8px 32px rgba(0,0,0,0.4);">
+              <div style="font-size: 44px; margin-bottom: 12px;">🔗</div>
+              <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 800; color: #fff;">External Fellowship Call</h3>
+              <p style="font-size: 13px; color: #9ca3af; margin: 0 0 20px 0; line-height: 1.5;">This prayer meeting is hosted on an external platform.</p>
+              <a href="${extUrl}" target="_blank" rel="noopener noreferrer" style="display: block; padding: 14px 20px; background: linear-gradient(135deg, #2563eb, #3b82f6); color: #fff; font-weight: 800; border-radius: 12px; text-decoration: none; font-size: 14px; box-shadow: 0 4px 14px rgba(37,99,235,0.4);">
+                🚀 Open Meeting / सभेत सामील व्हा
+              </a>
+              <button onclick="exitLiveMeetingRoom()" style="margin-top: 14px; background: transparent; border: none; color: #9ca3af; font-size: 13px; cursor: pointer;">
+                Cancel / मागे जा
+              </button>
+            </div>
+          </div>
+        `;
+        logAudioDebug("External meeting card rendered.", { extUrl });
+        showToast("Opening External Meeting 🙏");
+        return;
       }
 
-      jitsiCont.innerHTML = `
-        <iframe 
-          id="webrtc-room-iframe"
-          src="${roomUrl}" 
-          width="100%" 
-          height="100%" 
-          allow="camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; accelerometer; gyroscope;" 
-          allowusermedia="true"
-          style="border: none; width: 100%; height: 100%; border-radius: 18px; background: #090d16;">
-        </iframe>
-      `;
+      // 2. Check configured video provider: 'jitsi' (Default, 100% Free, HD In-App, Screen Share, No Card) vs 'daily'
+      const provider = localStorage.getItem("rol_video_provider") || "jitsi";
 
-      logAudioDebug("WebRTC Room iframe mounted with low-latency Opus audio parameters.", {
-        roomUrl,
-        isIOS,
-        allowPermissions: "camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; accelerometer; gyroscope;",
-        allowusermedia: "true"
-      });
+      if (provider === "daily") {
+        const dailyBaseUrl = getDailyRoomUrl(meeting);
+        const sep = dailyBaseUrl.includes("?") ? "&" : "?";
+        const dailyEmbedUrl = `${dailyBaseUrl}${sep}userName=${encodeURIComponent(loggedIn)}&showLeaveButton=true`;
+
+        jitsiCont.innerHTML = `
+          <iframe 
+            id="webrtc-room-iframe"
+            src="${dailyEmbedUrl}" 
+            width="100%" 
+            height="100%" 
+            allow="camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *;" 
+            allowusermedia="true"
+            style="border: none; width: 100%; height: 100%; border-radius: 14px; background: #090d16;">
+          </iframe>
+        `;
+
+        // Listen for Daily.co leave event to auto-close modal cleanly
+        if (window._dailyMessageListener) {
+          window.removeEventListener("message", window._dailyMessageListener);
+        }
+        window._dailyMessageListener = function(e) {
+          if (e && e.data) {
+            const act = e.data.action || e.data.event;
+            if (act === 'left-meeting' || act === 'meeting-session-ended') {
+              console.log("[Daily.co] Participant left meeting, exiting modal.");
+              exitLiveMeetingRoom();
+            }
+          }
+        };
+        window.addEventListener("message", window._dailyMessageListener);
+
+        logAudioDebug("Daily.co clean conference mounted successfully.", { dailyEmbedUrl });
+        showToast("Joined Online Fellowship (Daily.co) 🙏");
+      } else {
+        // Optimized 100% Free In-App WebRTC Conference (River of Life LiveMeet)
+        // HD Audio & Video, Acoustic Echo Cancellation, Noise Suppression, Screen Sharing & Zero App Nags
+        const meetingIdSlug = (meeting && meeting.id) ? meeting.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
+        const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
+        
+        // Essential conference toolbar: Mic, Camera, Screen Share, Chat, Raise Hand, Grid View, Hangup
+        const toolbarButtons = ["microphone", "camera", "desktop", "chat", "raisehand", "tileview", "hangup"];
+
+        // Clean up any existing Jitsi instance
+        if (window._jitsiApi) {
+          try { window._jitsiApi.dispose(); } catch(e) {}
+          window._jitsiApi = null;
+        }
+        jitsiCont.innerHTML = "";
+
+        const jitsiServerDomain = (localStorage.getItem("rol_jitsi_server") || "jitsi.riot.im")
+          .replace(/^https?:\/\//, '')
+          .replace(/\/+$/, "");
+
+        if (typeof JitsiMeetExternalAPI !== "undefined") {
+          const options = {
+            roomName: roomSlug,
+            width: '100%',
+            height: '100%',
+            parentNode: jitsiCont,
+            userInfo: { displayName: loggedIn },
+            configOverwrite: {
+              startWithAudioMuted: false,
+              startWithVideoMuted: false,
+              startSilent: false,
+              startAudioOnly: false,
+              p2p: { enabled: false }, // Disables P2P so mobile Safari WebKit routes via SFU and doesn't freeze/mute mic
+              prejoinConfig: { enabled: false },
+              prejoinPageEnabled: false,
+              requireDisplayName: false,
+              disableDeepLinking: true,
+              enableWelcomePage: false,
+              enableClosePage: false,
+              disableThirdPartyRequests: true,
+              resolution: 1080,
+              constraints: {
+                video: {
+                  height: { ideal: 1080, max: 1080 },
+                  width: { ideal: 1920, max: 1920 },
+                  frameRate: { ideal: 30, max: 30 }
+                }
+              },
+              channelLastN: -1,
+              adaptiveLastN: false,
+              videoQuality: {
+                maxBitratesVideo: {
+                  low: 350000,
+                  standard: 1000000,
+                  high: 4000000
+                }
+              },
+              disableEchoCancellation: false,
+              noiseSuppression: true,
+              autoGainControl: true,
+              audioQuality: {
+                stereo: false,
+                opusMaxAverageBitrate: 96000
+              },
+              disableAudioLevels: false,
+              desktopSharingFrameRate: { min: 15, max: 30 },
+              toolbarButtons: toolbarButtons
+            },
+            interfaceConfigOverwrite: {
+              TOOLBAR_BUTTONS: toolbarButtons,
+              SETTINGS_SECTIONS: [],
+              SHOW_JITSI_WATERMARK: false,
+              SHOW_WATERMARK_FOR_GUESTS: false,
+              SHOW_BRAND_WATERMARK: false,
+              SHOW_POWERED_BY: false,
+              MOBILE_APP_PROMO: false,
+              HIDE_DEEP_LINKING_LOGO: true
+            }
+          };
+
+          const api = new JitsiMeetExternalAPI(jitsiServerDomain, options);
+          window._jitsiApi = api;
+
+          // Keep native top-bar quick mic button synchronized
+          api.on("audioMuteStatusChanged", function(e) {
+            updateQuickMeetingMicUI(e && e.muted);
+          });
+
+          // Unmute microphone on joining to bypass iOS mobile mute defaults
+          api.on("videoConferenceJoined", function() {
+            logAudioDebug("Jitsi conference joined. Verifying active microphone...");
+            setTimeout(() => {
+              try {
+                if (api.isAudioMuted) {
+                  api.isAudioMuted().then(muted => {
+                    logAudioDebug("Live mic mute status:", muted);
+                    if (muted) {
+                      logAudioDebug("Mobile mic detected muted, calling toggleAudio to unmute...");
+                      api.executeCommand("toggleAudio");
+                    }
+                  });
+                }
+              } catch(e) {
+                logAudioDebug("Auto-unmute check exception:", e);
+              }
+            }, 800);
+          });
+
+          api.on("readyToClose", function() {
+            exitLiveMeetingRoom();
+          });
+
+          // Style the generated iframe
+          const createdIframe = jitsiCont.querySelector("iframe");
+          if (createdIframe) {
+            createdIframe.id = "webrtc-room-iframe";
+            createdIframe.style.width = "100%";
+            createdIframe.style.height = "100%";
+            createdIframe.style.border = "none";
+            createdIframe.style.borderRadius = "14px";
+            createdIframe.style.background = "#090d16";
+            createdIframe.setAttribute("allow", "camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; clipboard-write *;");
+            createdIframe.setAttribute("allowusermedia", "true");
+            createdIframe.setAttribute("playsinline", "true");
+            createdIframe.setAttribute("webkit-playsinline", "true");
+          }
+
+          logAudioDebug("River of Life LiveMeet mounted via JitsiMeetExternalAPI with 1080p HD and 96kbps audio.", { roomSlug });
+          showToast("Joined River of Life LiveMeet 🙏");
+        } else {
+          // Fallback iframe
+          const buttonsParam = encodeURIComponent(JSON.stringify(toolbarButtons));
+          const emptyArrayParam = encodeURIComponent(JSON.stringify([]));
+
+          const jitsiConfig = [
+            "config.prejoinPageEnabled=false",
+            "config.prejoinConfig.enabled=false",
+            "config.requireDisplayName=false",
+            "config.disableDeepLinking=true",
+            "config.enableWelcomePage=false",
+            "config.enableClosePage=false",
+            "config.disableThirdPartyRequests=true",
+            "config.startWithAudioMuted=false",
+            "config.startWithVideoMuted=false",
+            "config.startSilent=false",
+            "config.startAudioOnly=false",
+            "config.p2p.enabled=false",
+            "config.resolution=1080",
+            "config.constraints.video.height.ideal=1080",
+            "config.constraints.video.height.max=1080",
+            "config.constraints.video.width.ideal=1920",
+            "config.constraints.video.width.max=1920",
+            "config.constraints.video.frameRate.ideal=30",
+            "config.constraints.video.frameRate.max=30",
+            "config.channelLastN=-1",
+            "config.adaptiveLastN=false",
+            "config.videoQuality.maxBitratesVideo.low=350000",
+            "config.videoQuality.maxBitratesVideo.standard=1000000",
+            "config.videoQuality.maxBitratesVideo.high=4000000",
+            "config.disableEchoCancellation=false",
+            "config.noiseSuppression=true",
+            "config.autoGainControl=true",
+            "config.stereo=false",
+            "config.audioQuality.stereo=false",
+            "config.audioQuality.opusMaxAverageBitrate=96000",
+            "config.disableAudioLevels=false",
+            "config.desktopSharingFrameRate.min=15",
+            "config.desktopSharingFrameRate.max=30",
+            `config.toolbarButtons=${buttonsParam}`,
+            `interfaceConfig.TOOLBAR_BUTTONS=${buttonsParam}`,
+            `interfaceConfig.SETTINGS_SECTIONS=${emptyArrayParam}`,
+            "interfaceConfig.SHOW_JITSI_WATERMARK=false",
+            "interfaceConfig.SHOW_WATERMARK_FOR_GUESTS=false",
+            "interfaceConfig.SHOW_BRAND_WATERMARK=false",
+            "interfaceConfig.SHOW_POWERED_BY=false",
+            "interfaceConfig.MOBILE_APP_PROMO=false",
+            "interfaceConfig.HIDE_DEEP_LINKING_LOGO=true",
+            `userInfo.displayName=${encodeURIComponent(loggedIn)}`
+          ].join("&");
+
+          const roomUrl = `https://${jitsiServerDomain}/${roomSlug}#${jitsiConfig}`;
+
+          jitsiCont.innerHTML = `
+            <iframe 
+              id="webrtc-room-iframe"
+              src="${roomUrl}" 
+              width="100%" 
+              height="100%" 
+              allow="camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; clipboard-write *; camera; microphone; autoplay; display-capture; fullscreen; speaker-selection;" 
+              allowusermedia="true"
+              playsinline="true"
+              webkit-playsinline="true"
+              style="border: none; width: 100%; height: 100%; border-radius: 14px; background: #090d16;">
+            </iframe>
+          `;
+
+          logAudioDebug("River of Life LiveMeet mounted fallback iframe with 1080p HD and 96kbps audio.", { roomUrl });
+          showToast("Joined River of Life LiveMeet 🙏");
+        }
+      }
     }
 
     // Auto-enumerate devices for settings drawer
     enumerateAndPopulateAudioDevices();
 
-    // Trigger audio autoplay unlock
+    // Trigger audio autoplay unlock & mobile speaker warm-up
     setTimeout(() => {
+      unlockMobileSpeakerAudio();
       unlockAndPlayRemoteAudio();
-    }, 1000);
-
-    showToast("Joined Online Video Fellowship Room 🙏 (Mic & Speaker Active)");
+    }, 500);
   } catch (err) {
     logAudioDebug("launchLiveMeetingRoom notice:", err);
   }
 }
 
+const OFFICIAL_DAILY_ROOM_URL = "https://riveroflife.daily.co/River_Of_Life";
+
+function getDailyRoomUrl(meeting) {
+  // 1. If meeting has a custom Daily.co link
+  if (meeting && meeting.customUrl && meeting.customUrl.includes("daily.co")) {
+    return meeting.customUrl.trim();
+  }
+  // 2. If church admin/user configured a custom Daily room URL in settings
+  const customConfigured = localStorage.getItem("rol_daily_room_url");
+  if (customConfigured && customConfigured.includes("daily.co")) {
+    return customConfigured.trim();
+  }
+  // 3. Permanent official Daily.co sanctuary room
+  return OFFICIAL_DAILY_ROOM_URL;
+}
+window.getDailyRoomUrl = getDailyRoomUrl;
+
+function saveAndLaunchInlineDaily() {
+  const inp = document.getElementById("inline-daily-url-input");
+  const val = inp ? inp.value.trim() : "";
+  if (!val || !val.includes("daily.co")) {
+    showToast("Please enter a valid Daily.co URL (e.g. https://yourchurch.daily.co/room)");
+    return;
+  }
+  localStorage.setItem("rol_daily_room_url", val);
+  localStorage.setItem("rol_video_provider", "daily");
+  showToast("Daily.co Room Connected! 🙏");
+  if (activeMeetingSession && activeMeetingSession.meetingId) {
+    const meetings = getMeetingsFromStorage();
+    const curMeeting = meetings.find(m => m.id === activeMeetingSession.meetingId);
+    launchLiveMeetingRoom(curMeeting || { id: activeMeetingSession.meetingId }, null);
+  }
+}
+
+function switchToJitsiAndReload() {
+  localStorage.setItem("rol_video_provider", "jitsi");
+  showToast("Switched to Instant Jitsi Room 🙏");
+  if (activeMeetingSession && activeMeetingSession.meetingId) {
+    const meetings = getMeetingsFromStorage();
+    const curMeeting = meetings.find(m => m.id === activeMeetingSession.meetingId);
+    launchLiveMeetingRoom(curMeeting || { id: activeMeetingSession.meetingId }, null);
+  }
+}
+
+window.saveAndLaunchInlineDaily = saveAndLaunchInlineDaily;
+window.switchToJitsiAndReload = switchToJitsiAndReload;
+
+
+// ═══════════════════════════════════════════════════════════════
+// CLEAN MOBILE MEETING CONTROLS — Mic, Camera, Reactions, End Call
+// ═══════════════════════════════════════════════════════════════
+
+function showMeetCustomControls() {
+  const blocker = document.getElementById("meet-mirotalk-controls-blocker");
+  const bar = document.getElementById("meet-custom-controls-bar");
+  if (blocker) blocker.style.display = "block";
+  if (bar) bar.style.display = "flex";
+  // Hide old top Audio Settings button — redundant on mobile
+  const audioSettingsBtn = document.getElementById("btn-meeting-audio-settings");
+  if (audioSettingsBtn) audioSettingsBtn.style.display = "none";
+}
+
+function hideMeetCustomControls() {
+  const blocker = document.getElementById("meet-mirotalk-controls-blocker");
+  const bar = document.getElementById("meet-custom-controls-bar");
+  const picker = document.getElementById("meet-emoji-picker-panel");
+  if (blocker) blocker.style.display = "none";
+  if (bar) bar.style.display = "none";
+  if (picker) picker.style.display = "none";
+  // Restore top Audio Settings button
+  const audioSettingsBtn = document.getElementById("btn-meeting-audio-settings");
+  if (audioSettingsBtn) audioSettingsBtn.style.display = "";
+}
+
+// Mic toggle — updates button icon, sends to MiroTalk via keyboard simulation
+let _meetCtrlMicMuted = false;
+function toggleMeetCtrlMic() {
+  _meetCtrlMicMuted = !_meetCtrlMicMuted;
+  const btn = document.getElementById("meet-ctrl-mic");
+  if (btn) {
+    btn.textContent = _meetCtrlMicMuted ? "🔇" : "🎙️";
+    btn.style.background = _meetCtrlMicMuted
+      ? "rgba(239, 68, 68, 0.35)"
+      : "rgba(255,255,255,0.1)";
+    btn.style.borderColor = _meetCtrlMicMuted
+      ? "#ef4444"
+      : "rgba(255,255,255,0.2)";
+  }
+  // Simulate clicking mic button inside the iframe via keyboard shortcut (MiroTalk uses M key)
+  try {
+    const iframe = document.getElementById("webrtc-room-iframe");
+    if (iframe && iframe.contentWindow) {
+      iframe.contentWindow.postMessage({ type: "toggleAudio" }, "*");
+    }
+  } catch(e) {}
+  showToast(_meetCtrlMicMuted ? "🔇 Mic Muted" : "🎙️ Mic Active");
+}
+
+// Camera toggle — updates button icon
+let _meetCtrlCamOff = false;
+function toggleMeetCtrlCam() {
+  _meetCtrlCamOff = !_meetCtrlCamOff;
+  const btn = document.getElementById("meet-ctrl-cam");
+  if (btn) {
+    btn.textContent = _meetCtrlCamOff ? "🚫" : "📹";
+    btn.style.background = _meetCtrlCamOff
+      ? "rgba(239, 68, 68, 0.35)"
+      : "rgba(255,255,255,0.1)";
+    btn.style.borderColor = _meetCtrlCamOff
+      ? "#ef4444"
+      : "rgba(255,255,255,0.2)";
+  }
+  // Try sending to iframe
+  try {
+    const iframe = document.getElementById("webrtc-room-iframe");
+    if (iframe && iframe.contentWindow) {
+      iframe.contentWindow.postMessage({ type: "toggleVideo" }, "*");
+    }
+  } catch(e) {}
+  showToast(_meetCtrlCamOff ? "📵 Camera Off" : "📹 Camera On");
+}
+
+// Emoji reactions picker toggle
+function toggleMeetEmojiPanel() {
+  const picker = document.getElementById("meet-emoji-picker-panel");
+  if (!picker) return;
+  const isOpen = picker.style.display === "flex";
+  picker.style.display = isOpen ? "none" : "flex";
+  const btn = document.getElementById("meet-ctrl-emoji");
+  if (btn) btn.style.background = isOpen ? "rgba(255,255,255,0.1)" : "rgba(212,175,55,0.3)";
+}
+
+// Send an emoji reaction — floats up on screen with animation
+function sendMeetReaction(emoji) {
+  // Close picker
+  const picker = document.getElementById("meet-emoji-picker-panel");
+  if (picker) picker.style.display = "none";
+  const btn = document.getElementById("meet-ctrl-emoji");
+  if (btn) btn.style.background = "rgba(255,255,255,0.1)";
+
+  // Show floating emoji bubble
+  const stage = document.getElementById("river-native-meeting-stage");
+  if (!stage) return;
+  const bubble = document.createElement("div");
+  bubble.textContent = emoji;
+  bubble.style.cssText = `
+    position: absolute;
+    font-size: 36px;
+    bottom: 100px;
+    left: ${30 + Math.random() * 40}%;
+    z-index: 50;
+    pointer-events: none;
+    animation: meetReactionFloat 2.8s ease-out forwards;
+  `;
+  stage.appendChild(bubble);
+  setTimeout(() => bubble.remove(), 3000);
+
+  // Inject animation keyframes once
+  if (!document.getElementById("meet-reaction-keyframes")) {
+    const style = document.createElement("style");
+    style.id = "meet-reaction-keyframes";
+    style.textContent = `
+      @keyframes meetReactionFloat {
+        0%   { opacity: 1; transform: translateY(0) scale(1); }
+        80%  { opacity: 0.8; transform: translateY(-180px) scale(1.2); }
+        100% { opacity: 0; transform: translateY(-240px) scale(0.8); }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  showToast(`${emoji} Reaction Sent!`);
+}
+
+window.showMeetCustomControls = showMeetCustomControls;
+window.hideMeetCustomControls = hideMeetCustomControls;
+window.toggleMeetCtrlMic = toggleMeetCtrlMic;
+window.toggleMeetCtrlCam = toggleMeetCtrlCam;
+window.toggleMeetEmojiPanel = toggleMeetEmojiPanel;
+window.sendMeetReaction = sendMeetReaction;
+
+// Quick Mic Controls for Top Bar in Meeting Room
+function toggleQuickMeetingMic() {
+  if (window._jitsiApi) {
+    try {
+      window._jitsiApi.executeCommand("toggleAudio");
+      return;
+    } catch(e) {
+      console.warn("toggleAudio command error:", e);
+    }
+  }
+  showToast("Microphone toggled 🙏");
+}
+window.toggleQuickMeetingMic = toggleQuickMeetingMic;
+
+function updateQuickMeetingMicUI(isMuted) {
+  const btn = document.getElementById("btn-meeting-quick-mic");
+  const icon = document.getElementById("quick-mic-icon");
+  if (!btn) return;
+  if (isMuted) {
+    btn.style.background = "rgba(239, 68, 68, 0.3)";
+    btn.style.border = "1px solid rgba(239, 68, 68, 0.7)";
+    btn.style.color = "#fca5a5";
+    if (icon) icon.textContent = "🔇";
+    const textSpan = btn.querySelector("span:last-child");
+    if (textSpan) textSpan.textContent = "Unmute";
+  } else {
+    btn.style.background = "rgba(37,99,235,0.3)";
+    btn.style.border = "1px solid rgba(59,130,246,0.6)";
+    btn.style.color = "#93c5fd";
+    if (icon) icon.textContent = "🎙️";
+    const textSpan = btn.querySelector("span:last-child");
+    if (textSpan) textSpan.textContent = "Mic";
+  }
+}
+window.updateQuickMeetingMicUI = updateQuickMeetingMicUI;
 
 function exitLiveMeetingRoom() {
   try {
     console.log("Exiting Live Fellowship Meeting Room...");
+
+    // Hide custom mobile controls overlay
+    hideMeetCustomControls();
+    _meetCtrlMicMuted = false;
+    _meetCtrlCamOff = false;
     
     // Hide Modal Overlay & Restore Body Class
     const roomModal = document.getElementById("modal-live-meeting");
@@ -12259,11 +12524,28 @@ function exitLiveMeetingRoom() {
       document.body.classList.remove("meeting-modal-open");
     }
 
+    // Cleanly terminate Jitsi External API instance
+    if (window._jitsiApi) {
+      try {
+        window._jitsiApi.dispose();
+      } catch(e) {}
+      window._jitsiApi = null;
+    }
+
     // Cleanly terminate Video Room Iframe
     const jitsiCont = document.getElementById("meeting-jitsi-container");
     if (jitsiCont) {
       jitsiCont.innerHTML = "";
       jitsiCont.style.display = "none";
+    }
+
+    // Reset quick mic button UI
+    updateQuickMeetingMicUI(false);
+
+    // Clean up Daily.co message listener
+    if (window._dailyMessageListener) {
+      window.removeEventListener("message", window._dailyMessageListener);
+      window._dailyMessageListener = null;
     }
 
     // Stop all local camera and microphone media tracks
@@ -12279,6 +12561,56 @@ function exitLiveMeetingRoom() {
     console.warn("exitLiveMeetingRoom notice:", err);
   }
 }
+
+// ═══════════════════════════════════════════════════════════════
+// VIDEO CALL PROVIDER SETTINGS (Daily.co & Jitsi Meet)
+// ═══════════════════════════════════════════════════════════════
+
+function openMeetingProviderSettingsModal() {
+  const cur = localStorage.getItem("rol_video_provider") || "jitsi";
+  const radios = document.querySelectorAll('input[name="video-provider-choice"]');
+  radios.forEach(r => { r.checked = (r.value === cur); });
+  const urlInput = document.getElementById("input-daily-room-url");
+  if (urlInput) {
+    urlInput.value = localStorage.getItem("rol_daily_room_url") || "";
+  }
+  openModal("modal-meeting-provider-settings");
+}
+
+function saveVideoProviderChoice(provider) {
+  localStorage.setItem("rol_video_provider", provider);
+  const radios = document.querySelectorAll('input[name="video-provider-choice"]');
+  radios.forEach(r => { r.checked = (r.value === provider); });
+}
+
+function applyAndCloseProviderSettings() {
+  const selectedRadio = document.querySelector('input[name="video-provider-choice"]:checked');
+  if (selectedRadio) {
+    localStorage.setItem("rol_video_provider", selectedRadio.value);
+  }
+  const urlInput = document.getElementById("input-daily-room-url");
+  if (urlInput) {
+    const val = urlInput.value.trim();
+    if (val) {
+      localStorage.setItem("rol_daily_room_url", val);
+    } else {
+      localStorage.removeItem("rol_daily_room_url");
+    }
+  }
+  closeModal("modal-meeting-provider-settings");
+  showToast("Video Provider Settings Saved! 🙏");
+  
+  // If user is currently in a meeting, reload room with new provider
+  if (activeMeetingSession && activeMeetingSession.meetingId) {
+    const meetings = getMeetingsFromStorage();
+    const curMeeting = meetings.find(m => m.id === activeMeetingSession.meetingId);
+    launchLiveMeetingRoom(curMeeting || { id: activeMeetingSession.meetingId }, null);
+  }
+}
+
+window.openMeetingProviderSettingsModal = openMeetingProviderSettingsModal;
+window.saveVideoProviderChoice = saveVideoProviderChoice;
+window.applyAndCloseProviderSettings = applyAndCloseProviderSettings;
 
 
 function setupMeetingRoomControls() {
@@ -14163,7 +14495,7 @@ window.submitPastoralPrayerRequest = function(e) {
    ========================================================================== */
 
 window.dailyVersesImageList = [
-  'stars.png', 'forest.png', 'mist.png', 'mountains.png', 'mount_zion.png', 'ocean.png', 'path.png', 'sunrise.png'
+  'sunrise.png', 'forest.png', 'mountains.png', 'ocean.png', 'path.png', 'stars.png', 'mist.png'
 ];
 window.currentVodImageIndex = 0;
 let vodAutoRotateTimer = null;
@@ -15602,9 +15934,7 @@ window.switchPrayersSubtab = function(subtab) {
   if (subtab === 'meetings') {
     renderScheduledPrayersTab();
   } else if (subtab === 'requests') {
-    if (typeof loadMyPrayerJournal === 'function') {
-      loadMyPrayerJournal();
-    }
+    renderPublicPrayerRequests();
   }
 };
 
@@ -15714,328 +16044,6 @@ function savePublicPrayerRequests(reqs) {
     localStorage.setItem("rol_public_prayer_requests", JSON.stringify(reqs));
   } catch(e) {}
 }
-
-/* ==============================================================================
-   CONFIDENTIAL PRAYER REQUESTS, VOICE INPUT & MY PRAYER JOURNAL
-   ============================================================================== */
-
-window.selectPrayerPrivacy = function(privacy, btn) {
-  const hiddenInput = document.getElementById("prayer-selected-privacy");
-  if (hiddenInput) hiddenInput.value = privacy;
-  document.querySelectorAll(".prayer-privacy-segmented .privacy-toggle-btn").forEach(b => {
-    b.classList.remove("active");
-    b.style.background = "transparent";
-    b.style.color = "var(--text)";
-  });
-  if (btn) {
-    btn.classList.add("active");
-    btn.style.background = "var(--primary)";
-    btn.style.color = "#ffffff";
-  }
-};
-
-window.selectPrayerCategory = function(category, btn) {
-  const hiddenInput = document.getElementById("prayer-selected-category");
-  if (hiddenInput) hiddenInput.value = category;
-  document.querySelectorAll(".prayer-category-chips-row .prayer-chip-btn").forEach(b => {
-    b.classList.remove("active");
-  });
-  if (btn) btn.classList.add("active");
-};
-
-// Voice Input & Speech-to-Text Controller
-let prayerSpeechRecognition = null;
-let isPrayerVoiceRecording = false;
-
-window.togglePrayerVoiceRecording = function() {
-  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const micBtn = document.getElementById("btn-prayer-voice-input");
-  const micIcon = document.getElementById("mic-icon");
-  const statusPill = document.getElementById("prayer-voice-status-pill");
-  const textarea = document.getElementById("prayer-input-content");
-
-  if (!SpeechRec) {
-    if (typeof showToast === "function") {
-      showToast("🎙️ Speech-to-text is supported on Chrome, Edge & Android WebView.");
-    }
-    return;
-  }
-
-  if (isPrayerVoiceRecording) {
-    if (prayerSpeechRecognition) {
-      try { prayerSpeechRecognition.stop(); } catch(e) {}
-    }
-    isPrayerVoiceRecording = false;
-    if (micBtn) micBtn.classList.remove("mic-recording-active");
-    if (micIcon) micIcon.textContent = "🎙️";
-    if (statusPill) statusPill.style.display = "none";
-    return;
-  }
-
-  try {
-    prayerSpeechRecognition = new SpeechRec();
-    prayerSpeechRecognition.continuous = true;
-    prayerSpeechRecognition.interimResults = true;
-    const isEng = window.state && (window.state.language === "en" || window.state.translation === "eng");
-    prayerSpeechRecognition.lang = isEng ? "en-IN" : "mr-IN";
-
-    prayerSpeechRecognition.onstart = function() {
-      isPrayerVoiceRecording = true;
-      if (micBtn) micBtn.classList.add("mic-recording-active");
-      if (micIcon) micIcon.textContent = "⏹️";
-      if (statusPill) statusPill.style.display = "inline-flex";
-      if (typeof showToast === "function") showToast("🎙️ बोलणे सुरू करा... (Listening...)");
-    };
-
-    prayerSpeechRecognition.onresult = function(event) {
-      let interimTranscript = '';
-      let finalTranscript = '';
-      for (let i = event.resultIndex; i < event.results.length; ++i) {
-        if (event.results[i].isFinal) {
-          finalTranscript += event.results[i][0].transcript;
-        } else {
-          interimTranscript += event.results[i][0].transcript;
-        }
-      }
-      if (textarea) {
-        const currentVal = textarea.value.trim();
-        const addition = finalTranscript || interimTranscript;
-        if (addition) {
-          if (!currentVal.endsWith(addition.trim())) {
-            textarea.value = (currentVal ? currentVal + " " : "") + addition.trim();
-          }
-        }
-      }
-    };
-
-    prayerSpeechRecognition.onerror = function(err) {
-      console.warn("Speech recognition notice:", err.error);
-      isPrayerVoiceRecording = false;
-      if (micBtn) micBtn.classList.remove("mic-recording-active");
-      if (micIcon) micIcon.textContent = "🎙️";
-      if (statusPill) statusPill.style.display = "none";
-    };
-
-    prayerSpeechRecognition.onend = function() {
-      isPrayerVoiceRecording = false;
-      if (micBtn) micBtn.classList.remove("mic-recording-active");
-      if (micIcon) micIcon.textContent = "🎙️";
-      if (statusPill) statusPill.style.display = "none";
-    };
-
-    prayerSpeechRecognition.start();
-  } catch(e) {
-    console.warn("Speech recognition initialization notice:", e);
-    isPrayerVoiceRecording = false;
-    if (micBtn) micBtn.classList.remove("mic-recording-active");
-    if (micIcon) micIcon.textContent = "🎙️";
-    if (statusPill) statusPill.style.display = "none";
-  }
-};
-
-window.submitPastoralPrayerRequest = async function(e) {
-  if (e && e.preventDefault) e.preventDefault();
-  const contentEl = document.getElementById("prayer-input-content");
-  const privacyEl = document.getElementById("prayer-selected-privacy");
-  const categoryEl = document.getElementById("prayer-selected-category");
-  const submitBtn = document.getElementById("btn-send-prayer-pastor");
-
-  const content = contentEl ? contentEl.value.trim() : "";
-  const privacy_level = privacyEl ? privacyEl.value : "Private (Pastor Only)";
-  const category_tag = categoryEl ? categoryEl.value : "Healing";
-
-  if (!content) {
-    if (typeof showToast === "function") showToast("कृपया तुमची प्रार्थना विनंती लिहा / Please enter your prayer request.");
-    return;
-  }
-
-  if (submitBtn) {
-    submitBtn.disabled = true;
-    submitBtn.style.opacity = "0.7";
-    submitBtn.innerHTML = `<span>⏳ पास्टरकडे पाठवत आहे (Sending to Pastor)...</span>`;
-  }
-
-  const userId = (window.state && window.state.currentUser && window.state.currentUser.id) 
-    || localStorage.getItem("rol_user_id") 
-    || ("guest_" + (localStorage.getItem("rol_device_id") || "device"));
-
-  const payload = {
-    content,
-    privacy_level,
-    category_tag,
-    user_id: userId,
-    title: `${category_tag} Prayer Request`
-  };
-
-  let savedRequest = null;
-
-  try {
-    const apiBase = (typeof ROL_API_BASE !== 'undefined') ? ROL_API_BASE : 'http://localhost:7880';
-    const res = await fetch(`${apiBase}/api/prayer-requests`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + (localStorage.getItem("rol_access_token") || "")
-      },
-      body: JSON.stringify(payload)
-    });
-
-    if (res.ok) {
-      const data = await res.json();
-      if (data && data.request) {
-        savedRequest = data.request;
-      }
-    }
-  } catch (err) {
-    console.warn("API request fallback to local sync:", err.message);
-  }
-
-  if (!savedRequest) {
-    savedRequest = {
-      id: "prq_loc_" + Date.now(),
-      user_id: userId,
-      content,
-      privacy_level,
-      category_tag,
-      status: "Sent to Pastor",
-      created_at: new Date().toISOString()
-    };
-  }
-
-  try {
-    const localRaw = localStorage.getItem("rol_my_prayer_journal");
-    const localList = localRaw ? JSON.parse(localRaw) : [];
-    localList.unshift(savedRequest);
-    localStorage.setItem("rol_my_prayer_journal", JSON.stringify(localList));
-  } catch(e) {}
-
-  if (contentEl) contentEl.value = "";
-  if (submitBtn) {
-    submitBtn.disabled = false;
-    submitBtn.style.opacity = "1";
-    submitBtn.innerHTML = `<span>🙏 Send Prayer Request to Pastor (पास्टरकडे प्रार्थना विनंती पाठवा)</span>`;
-  }
-
-  if (typeof showToast === "function") {
-    showToast("🙏 प्रार्थना विनंती पास्टरकडे पाठवली! आम्ही तुमच्यासाठी प्रार्थना करतो.");
-  }
-
-  loadMyPrayerJournal();
-};
-
-window.loadMyPrayerJournal = async function(showFeedback = false) {
-  const container = document.getElementById("user-prayer-journal-list");
-  const countBadge = document.getElementById("journal-count-badge");
-  if (!container) return;
-
-  const userId = (window.state && window.state.currentUser && window.state.currentUser.id) 
-    || localStorage.getItem("rol_user_id") 
-    || ("guest_" + (localStorage.getItem("rol_device_id") || "device"));
-
-  let requests = [];
-
-  // 1. Fetch from backend API
-  try {
-    const apiBase = (typeof ROL_API_BASE !== 'undefined') ? ROL_API_BASE : 'http://localhost:7880';
-    const res = await fetch(`${apiBase}/api/prayer-requests?user_id=${encodeURIComponent(userId)}`, {
-      headers: {
-        "Authorization": "Bearer " + (localStorage.getItem("rol_access_token") || "")
-      }
-    });
-    if (res.ok) {
-      const data = await res.json();
-      if (data && Array.isArray(data.requests)) {
-        requests = data.requests;
-      }
-    }
-  } catch(err) {
-    console.warn("Journal API load notice:", err.message);
-  }
-
-  // 2. Merge with locally cached journal entries
-  try {
-    const localRaw = localStorage.getItem("rol_my_prayer_journal");
-    const localList = localRaw ? JSON.parse(localRaw) : [];
-    if (localList.length > 0) {
-      const existingIds = new Set(requests.map(r => r.id));
-      for (const item of localList) {
-        if (!existingIds.has(item.id)) {
-          requests.push(item);
-        }
-      }
-    }
-    localStorage.setItem("rol_my_prayer_journal", JSON.stringify(requests));
-  } catch(e) {}
-
-  if (countBadge) {
-    countBadge.textContent = `${requests.length} ${requests.length === 1 ? 'Request' : 'Requests'}`;
-  }
-
-  if (requests.length === 0) {
-    container.innerHTML = `
-      <div class="panel-empty-state" style="padding: 32px 18px; text-align: center; color: var(--text-muted); font-size: 13px; background: var(--bg); border: 1px dashed var(--border); border-radius: 14px;">
-        <span style="font-size: 28px; display: block; margin-bottom: 6px;">🙏</span>
-        <strong style="color: var(--text); font-size: 14px; display: block; margin-bottom: 4px;">कोणतीही नोंद आढळली नाही / No Prayer Journal Entries Yet</strong>
-        <span>वरील फॉर्म भरून तुमची पहिली प्रार्थना विनंती पास्टरकडे पाठवा.</span>
-      </div>
-    `;
-    if (showFeedback && typeof showToast === "function") showToast("Journal refreshed.");
-    return;
-  }
-
-  container.innerHTML = requests.map(r => {
-    let statusClass = "badge-status-sent";
-    let statusLabel = "🔵 Sent to Pastor";
-    let statusLabelMr = "पास्टरकडे पाठवली";
-
-    if (r.status === "Prayed For") {
-      statusClass = "badge-status-prayed";
-      statusLabel = "🟣 Prayed For";
-      statusLabelMr = "प्रार्थना केली";
-    } else if (r.status === "Answered") {
-      statusClass = "badge-status-answered";
-      statusLabel = "🟢 Answered";
-      statusLabelMr = "उत्तर मिळाले! 🙏";
-    }
-
-    const timeAgoStr = typeof formatTimeAgo === 'function' ? formatTimeAgo(new Date(r.created_at).getTime()) : 'Recently';
-
-    return `
-      <div class="prayer-journal-card">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-          <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-            <span class="prayer-chip-btn" style="padding: 3px 9px; font-size: 11px; cursor: default;">
-              ${r.category_tag || 'Healing'}
-            </span>
-            <span style="font-size: 11px; color: var(--text-muted); font-weight: 700; background: var(--bg); padding: 3px 8px; border-radius: 6px; border: 1px solid var(--border);">
-              ${r.privacy_level || 'Private (Pastor Only)'}
-            </span>
-          </div>
-          <span class="badge-prayer-status ${statusClass}">
-            ${statusLabel} • ${statusLabelMr}
-          </span>
-        </div>
-
-        <p style="margin: 0; font-size: 14px; line-height: 1.55; color: var(--text); font-family: var(--font-body); white-space: pre-line;">
-          ${r.content || ''}
-        </p>
-
-        ${r.pastor_note ? `
-          <div style="background: rgba(34,197,94,0.08); padding: 8px 12px; border-radius: 8px; font-size: 12.5px; border-left: 3px solid #16a34a; color: var(--text);">
-            <strong style="color: #16a34a;">Pastoral Note / पास्टरचे उत्तर:</strong> ${r.pastor_note}
-          </div>
-        ` : ''}
-
-        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11.5px; color: var(--text-muted); padding-top: 6px; border-top: 1px solid var(--border);">
-          <span>📅 ${timeAgoStr}</span>
-          <span style="font-size: 11px;">🔒 Confidential Record</span>
-        </div>
-      </div>
-    `;
-  }).join("");
-
-  if (showFeedback && typeof showToast === "function") showToast("✅ Journal updated!");
-};
 
 window.submitPrayerRequestPublic = function() {
   const catEl = document.getElementById("prayer-input-category");
@@ -16588,7 +16596,7 @@ window.openFullscreenVOD = function() {
   if (fsRefBadge) fsRefBadge.textContent = `${displayRef} ${state.translation === "eng" ? "NLT" : "MARVBSI"}`;
 
   const images = (window.dailyVersesImageList && window.dailyVersesImageList.length > 0) ? window.dailyVersesImageList : [
-    'stars.png', 'forest.png', 'mist.png', 'mountains.png', 'mount_zion.png', 'ocean.png', 'path.png', 'sunrise.png'
+    'sunrise.png', 'forest.png', 'mountains.png', 'ocean.png', 'path.png', 'stars.png', 'mist.png'
   ];
   
   // Deterministic 1 image per day unless user manually chose a wallpaper
@@ -16636,7 +16644,7 @@ window.toggleVodOptionsMenu = function() {
 
 window.cycleVodWallpaper = function() {
   const images = (window.dailyVersesImageList && window.dailyVersesImageList.length > 0) ? window.dailyVersesImageList : [
-    'stars.png', 'forest.png', 'mist.png', 'mountains.png', 'mount_zion.png', 'ocean.png', 'path.png', 'sunrise.png'
+    'sunrise.png', 'forest.png', 'mountains.png', 'ocean.png', 'path.png', 'stars.png', 'mist.png'
   ];
   if (typeof window.currentVodImageIndex !== 'number') {
     const { dayOfYear, offset } = getCurrentVOD();
@@ -16683,7 +16691,7 @@ window.generateExactVerseImageBlob = function() {
     const displayText = (state.translation === "eng") ? vod.engText : vod.text;
 
     const images = (window.dailyVersesImageList && window.dailyVersesImageList.length > 0) ? window.dailyVersesImageList : [
-      'stars.png', 'forest.png', 'mist.png', 'mountains.png', 'mount_zion.png', 'ocean.png', 'path.png', 'sunrise.png'
+      'sunrise.png', 'forest.png', 'mountains.png', 'ocean.png', 'path.png', 'stars.png', 'mist.png'
     ];
     const imgIdx = (typeof window.currentVodImageIndex === 'number') ? window.currentVodImageIndex : (((dayOfYear + offset) % images.length + images.length) % images.length);
     const dailyImg = images[imgIdx];
@@ -19617,69 +19625,33 @@ function switchAdminSubtab(subtab) {
 }
 
 /* ── 1. Members Management ── */
-async function renderAdminMembers(filterText = "", roleFilter = "all") {
+function renderAdminMembers(filterText = "", roleFilter = "all") {
   const container = document.getElementById("admin-members-list-container");
   if (!container) return;
 
-  container.innerHTML = `<div style="text-align: center; padding: 20px; color: var(--text-muted);">⏳ Loading congregation directory...</div>`;
+  const members = getAdminMembers();
+  const filtered = members.filter(m => {
+    const matchesText = !filterText || m.username.toLowerCase().includes(filterText.toLowerCase()) || m.email.toLowerCase().includes(filterText.toLowerCase());
+    const matchesRole = (roleFilter === "all") || (m.role && m.role.toLowerCase() === roleFilter.toLowerCase());
+    return matchesText && matchesRole;
+  });
 
-  let members = [];
-  try {
-    const apiBase = (typeof ROL_API_BASE !== 'undefined') ? ROL_API_BASE : 'http://localhost:7880';
-    let url = `${apiBase}/api/admin/users?`;
-    if (filterText) url += `search=${encodeURIComponent(filterText)}&`;
-    if (roleFilter && roleFilter !== 'all') url += `role=${encodeURIComponent(roleFilter)}&`;
-
-    const res = await fetch(url, {
-      headers: {
-        "Authorization": "Bearer " + (localStorage.getItem("rol_access_token") || "")
-      }
-    });
-    if (res.ok) {
-      const data = await res.json();
-      if (data && Array.isArray(data.users)) {
-        members = data.users.map(u => ({
-          id: u.id,
-          username: u.username || u.full_name || 'Member',
-          fullName: u.full_name || '',
-          email: u.email || 'N/A',
-          phone: u.phone || '',
-          role: u.role || 'User',
-          status: u.status || 'Active'
-        }));
-      }
-    }
-  } catch (err) {
-    console.warn("Falling back to local admin members:", err.message);
-  }
-
-  if (!members || members.length === 0) {
-    members = getAdminMembers();
-    members = members.filter(m => {
-      const matchesText = !filterText || (m.username || '').toLowerCase().includes(filterText.toLowerCase()) || (m.email || '').toLowerCase().includes(filterText.toLowerCase());
-      const rTarget = (roleFilter || '').toLowerCase().replace(/[\s-]+/g, '_');
-      const mRole = (m.role || '').toLowerCase().replace(/[\s-]+/g, '_');
-      const matchesRole = (roleFilter === "all") || (mRole === rTarget) || ((rTarget === 'user' || rTarget === 'member') && (mRole === 'user' || mRole === 'member'));
-      return matchesText && matchesRole;
-    });
-  }
-
-  if (members.length === 0) {
+  if (filtered.length === 0) {
     container.innerHTML = `<div class="panel-empty-state" style="padding: 24px 0; text-align: center; color: var(--text-muted);">No members match the search query.</div>`;
     return;
   }
 
-  container.innerHTML = members.map(m => {
-    const roleLower = (m.role || "user").toLowerCase().replace(/[\s-]+/g, '_');
+  container.innerHTML = filtered.map(m => {
+    const roleLower = (m.role || "member").toLowerCase();
     let badgeClass = "role-badge-member";
-    if (roleLower === "super_admin") badgeClass = "role-badge-admin";
+    if (roleLower === "admin") badgeClass = "role-badge-admin";
     else if (roleLower === "pastor") badgeClass = "role-badge-pastor";
-    else if (roleLower === "prayer_team") badgeClass = "role-badge-leader";
+    else if (roleLower === "leader") badgeClass = "role-badge-leader";
 
     const initial = (m.username || "U")[0].toUpperCase();
 
     return `
-      <div class="admin-member-card" style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+      <div class="admin-member-card">
         <div style="display: flex; align-items: center; gap: 12px;">
           <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px;">
             ${initial}
@@ -19687,18 +19659,18 @@ async function renderAdminMembers(filterText = "", roleFilter = "all") {
           <div>
             <div style="display: flex; align-items: center; gap: 8px;">
               <strong style="font-size: 14.5px; color: var(--text);">${m.username}</strong>
-              <span class="${badgeClass}">${m.role || "User"}</span>
+              <span class="${badgeClass}">${m.role || "Member"}</span>
             </div>
             <span style="font-size: 12px; color: var(--text-muted);">${m.email}</span>
           </div>
         </div>
 
         <div style="display: flex; align-items: center; gap: 8px;">
-          <select onchange="updateAdminMemberRole('${m.id}', this.value)" style="padding: 7px 12px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--bg); color: var(--text); font-size: 12px; font-weight: 700;">
-            <option value="User" ${['user', 'member'].includes(roleLower) ? "selected" : ""}>User</option>
-            <option value="Pastor" ${roleLower === "pastor" ? "selected" : ""}>Pastor</option>
-            <option value="Prayer Team" ${roleLower === "prayer_team" ? "selected" : ""}>Prayer Team</option>
-            <option value="Super-Admin" ${roleLower === "super_admin" ? "selected" : ""}>Super-Admin</option>
+          <select onchange="updateAdminMemberRole('${m.id}', this.value)" style="padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 12px; font-weight: 700;">
+            <option value="Member" ${m.role === "Member" ? "selected" : ""}>Member</option>
+            <option value="Leader" ${m.role === "Leader" ? "selected" : ""}>Leader</option>
+            <option value="Pastor" ${m.role === "Pastor" ? "selected" : ""}>Pastor</option>
+            <option value="Admin" ${m.role === "Admin" ? "selected" : ""}>Admin</option>
           </select>
           <button onclick="deleteAdminMember('${m.id}')" title="Delete member" style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #ef4444; border-radius: 8px; padding: 6px 10px; cursor: pointer; font-size: 12px; font-weight: 700;">
             ✕
@@ -19717,132 +19689,64 @@ function filterAdminMembers() {
 
 function openAdminAddMemberModal() {
   const modal = document.getElementById("modal-admin-add-member");
-  if (modal) {
-    modal.style.display = "flex";
-    const nameInput = document.getElementById("admin-input-new-name");
-    if (nameInput) nameInput.focus();
-  }
+  if (modal) modal.style.display = "flex";
 }
 
-function closeAdminAddMemberModal() {
-  const modal = document.getElementById("modal-admin-add-member");
-  if (modal) modal.style.display = "none";
-}
-
-async function handleAdminAddMember(e) {
+function handleAdminAddMember(e) {
   if (e) e.preventDefault();
   const name = document.getElementById("admin-input-new-name")?.value.trim();
   const email = document.getElementById("admin-input-new-email")?.value.trim();
-  const role = document.getElementById("admin-input-new-role")?.value || "User";
-  const submitBtn = document.getElementById("btn-admin-add-member-submit");
+  const role = document.getElementById("admin-input-new-role")?.value || "Member";
 
   if (!name || !email) {
     showToast("Please provide both name and email / नाव व ईमेल भरा");
     return;
   }
 
-  const originalBtnText = submitBtn ? submitBtn.innerText : "Add Member";
-  if (submitBtn) {
-    submitBtn.disabled = true;
-    submitBtn.innerText = "⏳ Adding & Sending Email...";
-  }
+  const members = getAdminMembers();
+  const newMember = {
+    id: `usr_${Date.now()}`,
+    username: name,
+    email: email.toLowerCase(),
+    role: role,
+    isPastor: role === "Pastor",
+    isAdmin: role === "Admin",
+    isLeader: role === "Leader",
+    addedAt: Date.now()
+  };
 
-  try {
-    const apiBase = (typeof ROL_API_BASE !== 'undefined') ? ROL_API_BASE : 'http://localhost:7880';
-    const token = localStorage.getItem("rol_access_token") || "";
+  members.unshift(newMember);
+  saveAdminMembersList(members);
 
-    const res = await fetch(`${apiBase}/api/admin/users`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + token
-      },
-      body: JSON.stringify({
-        fullName: name,
-        email: email,
-        role: role,
-        sendEmail: true
-      })
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      throw new Error(data.error || "Failed to create user account.");
-    }
-
-    closeAdminAddMemberModal();
-    document.getElementById("form-admin-add-member")?.reset();
-
-    if (data.emailSent) {
-      showToast(`✅ Added ${name}! Invitation email sent to ${email} ✉️`);
-    } else {
-      showToast(`✅ Added ${name} as ${role}!`);
-    }
-
-    await renderAdminMembers();
-  } catch (err) {
-    console.error("Add member error:", err);
-    showToast(`❌ Error: ${err.message}`);
-  } finally {
-    if (submitBtn) {
-      submitBtn.disabled = false;
-      submitBtn.innerText = originalBtnText;
-    }
-  }
-}
-
-async function updateAdminMemberRole(memberId, newRole) {
-  try {
-    const apiBase = (typeof ROL_API_BASE !== 'undefined') ? ROL_API_BASE : 'http://localhost:7880';
-    const res = await fetch(`${apiBase}/api/admin/users/${memberId}/role`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + (localStorage.getItem("rol_access_token") || "")
-      },
-      body: JSON.stringify({ role: newRole })
-    });
-    const data = await res.json();
-    if (res.ok) {
-      showToast(`✅ User role updated to ${newRole}!`);
-    } else {
-      showToast(`❌ ${data.error || 'Failed to update role'}`);
-    }
-  } catch (err) {
-    console.warn("Failed to update role via API:", err.message);
-    showToast(`❌ ${err.message}`);
-  }
-
+  closeModal("modal-admin-add-member");
+  document.getElementById("form-admin-add-member")?.reset();
   renderAdminMembers();
+  showToast(`✅ Added ${name} as ${role}!`);
 }
 
-async function deleteAdminMember(memberId) {
-  if (!confirm(`Are you sure you want to permanently delete this member? / या सदस्याचे खाते कायमचे काढून टाकायचे आहे का?`)) {
-    return;
+function updateAdminMemberRole(memberId, newRole) {
+  const members = getAdminMembers();
+  const member = members.find(m => m.id === memberId);
+  if (member) {
+    member.role = newRole;
+    member.isPastor = newRole === "Pastor";
+    member.isAdmin = newRole === "Admin";
+    member.isLeader = newRole === "Leader";
+    saveAdminMembersList(members);
+    renderAdminMembers();
+    showToast(`Updated ${member.username}'s role to ${newRole}`);
   }
+}
 
-  try {
-    const apiBase = (typeof ROL_API_BASE !== 'undefined') ? ROL_API_BASE : 'http://localhost:7880';
-    const token = localStorage.getItem("rol_access_token") || "";
-
-    const res = await fetch(`${apiBase}/api/admin/users/${memberId}`, {
-      method: "DELETE",
-      headers: {
-        "Authorization": "Bearer " + token
-      }
-    });
-
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.error || "Failed to delete member.");
-    }
-
-    showToast(`🗑️ ${data.message || 'Member deleted successfully'}`);
-    await renderAdminMembers();
-  } catch (err) {
-    console.error("Delete member error:", err);
-    showToast(`❌ Error: ${err.message}`);
+function deleteAdminMember(memberId) {
+  let members = getAdminMembers();
+  const member = members.find(m => m.id === memberId);
+  if (!member) return;
+  if (confirm(`Are you sure you want to remove ${member.username} from the directory?`)) {
+    members = members.filter(m => m.id !== memberId);
+    saveAdminMembersList(members);
+    renderAdminMembers();
+    showToast(`Removed ${member.username}`);
   }
 }
 
@@ -20006,7 +19910,6 @@ function copyAdminMeetingInvite(roomId) {
 
 /* ── 4. Pastoral Prayers Moderation ── */
 let currentAdminPrayerFilter = "all";
-window._rolAdminPrayerQueue = [];
 
 function filterAdminPrayers(filter) {
   currentAdminPrayerFilter = filter;
@@ -20016,132 +19919,71 @@ function filterAdminPrayers(filter) {
   renderAdminPrayers();
 }
 
-async function renderAdminPrayers() {
+function renderAdminPrayers() {
   const container = document.getElementById("admin-prayers-list-container");
   if (!container) return;
 
-  container.innerHTML = `<div style="text-align: center; padding: 24px; color: var(--text-muted);">⏳ Loading congregation prayer queue...</div>`;
+  const prayers = window._rolPrayers || [];
+  const filtered = prayers.filter(p => {
+    if (currentAdminPrayerFilter === "all") return true;
+    return p.status === currentAdminPrayerFilter;
+  });
 
-  try {
-    const apiBase = (typeof ROL_API_BASE !== 'undefined') ? ROL_API_BASE : 'http://localhost:7880';
-    let url = `${apiBase}/api/prayer-requests/admin/queue`;
-    if (currentAdminPrayerFilter && currentAdminPrayerFilter !== 'all') {
-      url += `?status=${encodeURIComponent(currentAdminPrayerFilter)}`;
-    }
-
-    const res = await fetch(url, {
-      headers: {
-        "Authorization": "Bearer " + (localStorage.getItem("rol_access_token") || "")
-      }
-    });
-
-    if (res.ok) {
-      const data = await res.json();
-      if (data && Array.isArray(data.queue)) {
-        window._rolAdminPrayerQueue = data.queue;
-      }
-    }
-  } catch (err) {
-    console.warn("Falling back to local prayer queue:", err.message);
-  }
-
-  let queue = window._rolAdminPrayerQueue || [];
-  if (currentAdminPrayerFilter !== "all") {
-    queue = queue.filter(p => {
-      if (currentAdminPrayerFilter === 'pending' || currentAdminPrayerFilter === 'Sent to Pastor') {
-        return p.status === 'Sent to Pastor' || p.status === 'pending';
-      }
-      if (currentAdminPrayerFilter === 'prayed' || currentAdminPrayerFilter === 'Prayed For') {
-        return p.status === 'Prayed For' || p.status === 'prayed';
-      }
-      if (currentAdminPrayerFilter === 'answered' || currentAdminPrayerFilter === 'Answered') {
-        return p.status === 'Answered' || p.status === 'answered';
-      }
-      return p.status === currentAdminPrayerFilter;
-    });
-  }
-
-  if (queue.length === 0) {
-    container.innerHTML = `
-      <div class="panel-empty-state" style="padding: 32px 16px; text-align: center; color: var(--text-muted); background: var(--bg); border: 1.5px dashed var(--border); border-radius: 14px;">
-        <span style="font-size: 28px; display: block; margin-bottom: 6px;">🙏</span>
-        <strong style="color: var(--text); font-size: 14px; display: block; margin-bottom: 4px;">No prayer requests in this category.</strong>
-        <span>All requests in this view have been processed or none have been submitted yet.</span>
-      </div>
-    `;
+  if (filtered.length === 0) {
+    container.innerHTML = `<div class="panel-empty-state" style="padding: 24px 0; text-align: center; color: var(--text-muted);">No prayer requests in this category.</div>`;
     return;
   }
 
-  container.innerHTML = queue.map(p => {
-    let badgeClass = "badge-status-sent";
-    let badgeText = "🔵 Sent to Pastor";
-    if (p.status === "Prayed For" || p.status === "prayed") {
-      badgeClass = "badge-status-prayed";
-      badgeText = "🟣 Prayed For";
-    } else if (p.status === "Answered" || p.status === "answered") {
-      badgeClass = "badge-status-answered";
-      badgeText = "🟢 Answered";
+  container.innerHTML = filtered.map(p => {
+    let badgeClass = "role-badge-member";
+    let badgeText = "Pending";
+    if (p.status === "answered") {
+      badgeClass = "role-badge-leader";
+      badgeText = "Answered";
+    } else if (p.status === "acknowledged") {
+      badgeClass = "role-badge-pastor";
+      badgeText = "Acknowledged";
     }
 
-    const timeStr = (typeof formatTimeAgo === 'function') ? formatTimeAgo(p.createdAt || Date.now()) : "Recently";
-    
-    // Privacy styling & masking
-    let privacyBadge = "🔒 Pastor Only (Private)";
-    let privacyStyle = "background: #fee2e2; color: #991b1b;";
-    if (p.privacyLevel === "Church Prayer Team") {
-      privacyBadge = "👥 Church Prayer Team";
-      privacyStyle = "background: #eff6ff; color: #1d4ed8;";
-    } else if (p.privacyLevel === "Anonymous" || p.requester?.isAnonymous) {
-      privacyBadge = "🥷 Anonymous";
-      privacyStyle = "background: #f3f4f6; color: #374151;";
-    }
-
-    const requesterName = p.requester ? p.requester.name : (p.username || "Anonymous Believer");
-    const requesterContact = (p.requester && p.requester.email) ? ` • ${p.requester.email}` : "";
+    const timeStr = formatTimeAgo ? formatTimeAgo(p.createdAt || Date.now()) : "Recently";
+    const privacy = p.isPublic ? "🌐 Congregation Circle" : "🔒 Confidential (Pastor Only)";
 
     return `
-      <div class="admin-prayer-card" id="admin-prayer-card-${p.id}" style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 10px; box-shadow: var(--shadow-sm);">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+      <div style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 11px; font-weight: 800; background: var(--bg); border: 1px solid var(--border); padding: 3px 8px; border-radius: 6px; color: var(--text);">
-              🏷️ ${p.categoryTag || 'Healing'}
-            </span>
-            <span style="font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; ${privacyStyle}">
-              ${privacyBadge}
-            </span>
+            <span style="font-weight: 800; font-size: 14.5px; color: var(--text);">From: @${p.username || "Anonymous"}</span>
+            <span class="${badgeClass}">${badgeText}</span>
           </div>
-          <span class="badge-prayer-status ${badgeClass}" id="admin-badge-status-${p.id}">
-            ${badgeText}
-          </span>
+          <span style="font-size: 12px; color: var(--text-muted);">${timeStr} • ${privacy}</span>
         </div>
 
-        <div style="font-size: 12.5px; color: var(--text-muted);">
-          <strong>From:</strong> <span style="color: var(--text); font-weight: 700;">${requesterName}</span>${requesterContact} • <span>${timeStr}</span>
-        </div>
-
-        <p style="font-size: 14px; line-height: 1.55; color: var(--text); margin: 0; background: var(--bg); padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border); font-family: var(--font-body);">
-          "${p.content}"
+        <p style="font-size: 14px; line-height: 1.5; color: var(--text); margin: 0; background: var(--bg); padding: 12px; border-radius: 10px; border: 1px solid var(--border);">
+          "${p.text}"
         </p>
 
         ${p.pastorNote ? `
-          <div style="background: rgba(245,158,11,0.08); border-left: 3px solid #f59e0b; padding: 8px 12px; border-radius: 6px; font-size: 12.5px; color: var(--text);">
-            <strong>Pastoral Note:</strong> ${p.pastorNote}
+          <div style="background: rgba(245,158,11,0.1); border-left: 3px solid #f59e0b; padding: 10px 14px; border-radius: 6px; font-size: 13px; color: var(--text);">
+            <strong>Pastoral Blessing Response:</strong>
+            <div style="margin-top: 2px;">"${p.pastorNote}"</div>
           </div>
         ` : ""}
 
-        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; align-items: center;">
-          ${p.status !== "Prayed For" ? `
-            <button type="button" class="btn-mark-as-prayed" onclick="adminMarkPrayerAsPrayed('${p.id}')" style="background: #8b5cf6; color: #ffffff; border: none; padding: 7px 15px; border-radius: 10px; font-size: 12.5px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(139,92,246,0.25);">
-              <span>🙏 Mark as Prayed</span>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px;">
+          ${p.status !== "answered" ? `
+            <button onclick="adminAcknowledgePrayerPrompt('${p.id}')" class="btn-primary-mini" style="font-size: 12px; padding: 6px 12px;">
+              ✍️ Write Blessing Note & Pray
+            </button>
+            <button onclick="adminToggleAnsweredPrayer('${p.id}')" class="btn-secondary-mini" style="font-size: 12px; padding: 6px 12px; border: 1px solid var(--border); background: transparent; color: var(--text);">
+              ✅ Mark Answered
             </button>
           ` : `
-            <span style="font-size: 12px; font-weight: 800; color: #8b5cf6; background: rgba(139,92,246,0.1); padding: 6px 12px; border-radius: 8px; display: inline-flex; align-items: center; gap: 4px;">
-              ✓ Prayed For
-            </span>
+            <button onclick="adminToggleAnsweredPrayer('${p.id}')" class="btn-secondary-mini" style="font-size: 12px; padding: 6px 12px; border: 1px solid var(--border); background: transparent; color: var(--text);">
+              Reopen Request
+            </button>
           `}
-          
-          <button type="button" onclick="adminToggleAnsweredPrayer('${p.id}')" class="btn-secondary-mini" style="font-size: 12px; padding: 6px 12px; border: 1px solid var(--border); background: transparent; color: var(--text); border-radius: 8px; cursor: pointer;">
-            ${p.status === "Answered" ? "↩ Reopen" : "✅ Mark Answered"}
+          <button onclick="adminDeletePrayer('${p.id}')" class="btn-danger-mini" style="font-size: 12px; padding: 6px 10px;">
+            Delete ✕
           </button>
         </div>
       </div>
@@ -20149,72 +19991,39 @@ async function renderAdminPrayers() {
   }).join("");
 }
 
-async function adminMarkPrayerAsPrayed(prayerId) {
-  try {
-    const apiBase = (typeof ROL_API_BASE !== 'undefined') ? ROL_API_BASE : 'http://localhost:7880';
-    const res = await fetch(`${apiBase}/api/prayer-requests/${prayerId}/mark-prayed`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + (localStorage.getItem("rol_access_token") || "")
-      }
-    });
-
-    if (res.ok) {
-      if (typeof showToast === "function") {
-        showToast("🙏 Marked as Prayed! Believer has received an in-app notification.");
-      }
+function adminAcknowledgePrayerPrompt(prayerId) {
+  const note = prompt("Enter Pastoral Blessing / संदेश for this prayer request:", "Standing with you in prayer! May the Lord's peace and strength be with you.");
+  if (note && note.trim()) {
+    const prayers = window._rolPrayers || [];
+    const p = prayers.find(x => x.id === prayerId);
+    if (p) {
+      p.status = "acknowledged";
+      p.pastorNote = note.trim();
+      renderAdminPrayers();
+      if (typeof renderPastorPortal === "function") renderPastorPortal();
+      showToast("🙏 Blessing note sent to member!");
     }
-  } catch (err) {
-    console.warn("API mark-prayed notice:", err.message);
-  }
-
-  // Update local queue entry
-  const queue = window._rolAdminPrayerQueue || [];
-  const req = queue.find(x => x.id === prayerId);
-  if (req) {
-    req.status = "Prayed For";
-  }
-
-  // Also update locally cached believer journal if matching
-  try {
-    const rawJ = localStorage.getItem("rol_my_prayer_journal");
-    if (rawJ) {
-      const list = JSON.parse(rawJ);
-      const jItem = list.find(x => x.id === prayerId);
-      if (jItem) {
-        jItem.status = "Prayed For";
-        localStorage.setItem("rol_my_prayer_journal", JSON.stringify(list));
-      }
-    }
-  } catch (e) {}
-
-  renderAdminPrayers();
-  if (typeof loadMyPrayerJournal === 'function') {
-    loadMyPrayerJournal();
   }
 }
 
-async function adminToggleAnsweredPrayer(prayerId) {
-  const queue = window._rolAdminPrayerQueue || [];
-  const p = queue.find(x => x.id === prayerId);
-  const newStatus = (p && p.status === "Answered") ? "Prayed For" : "Answered";
+function adminToggleAnsweredPrayer(prayerId) {
+  const prayers = window._rolPrayers || [];
+  const p = prayers.find(x => x.id === prayerId);
+  if (p) {
+    p.status = p.status === "answered" ? "pending" : "answered";
+    renderAdminPrayers();
+    if (typeof renderPastorPortal === "function") renderPastorPortal();
+    showToast(p.status === "answered" ? "Marked prayer as answered! 🎉" : "Reopened prayer request");
+  }
+}
 
-  try {
-    const apiBase = (typeof ROL_API_BASE !== 'undefined') ? ROL_API_BASE : 'http://localhost:7880';
-    await fetch(`${apiBase}/api/prayer-requests/${prayerId}/status`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + (localStorage.getItem("rol_access_token") || "")
-      },
-      body: JSON.stringify({ status: newStatus })
-    });
-  } catch(e) {}
-
-  if (p) p.status = newStatus;
-  renderAdminPrayers();
-  showToast(`Prayer status updated to ${newStatus}`);
+function adminDeletePrayer(prayerId) {
+  if (confirm("Delete this prayer request?")) {
+    window._rolPrayers = (window._rolPrayers || []).filter(p => p.id !== prayerId);
+    renderAdminPrayers();
+    if (typeof renderPastorPortal === "function") renderPastorPortal();
+    showToast("Prayer request deleted");
+  }
 }
 
 /* ── 5. Announcements & Live Broadcast Banner ── */
@@ -20419,7 +20228,6 @@ window.applyStylesFromState = applyStylesFromState;
 window.renderAdminPanel = renderAdminPanel;
 window.switchAdminSubtab = switchAdminSubtab;
 window.openAdminAddMemberModal = openAdminAddMemberModal;
-window.closeAdminAddMemberModal = closeAdminAddMemberModal;
 window.handleAdminAddMember = handleAdminAddMember;
 window.updateAdminMemberRole = updateAdminMemberRole;
 window.deleteAdminMember = deleteAdminMember;
@@ -20635,7 +20443,23 @@ function openDiscoverMoodTopic(topic) {
 }
 window.openDiscoverMoodTopic = openDiscoverMoodTopic;
 
-
+async function openReaderAndNavigate(bookKey, chapterNum = 1, verseNum = 1) {
+  switchTab('reader');
+  if (typeof openReader === 'function') {
+    await openReader(bookKey, chapterNum);
+    if (verseNum > 1) {
+      setTimeout(() => {
+        const vEl = document.getElementById(`verse-${verseNum}`);
+        if (vEl) {
+          vEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          vEl.classList.add('highlight-flash');
+          setTimeout(() => vEl.classList.remove('highlight-flash'), 2500);
+        }
+      }, 350);
+    }
+  }
+}
+window.openReaderAndNavigate = openReaderAndNavigate;
 
 /* ==========================================================================
    DYNAMIC DAILY DISCOVER TOPICS & DIRECT CHAPTER OPENER (66 BOOKS ROTATION)
@@ -21487,7 +21311,158 @@ window.shareCurrentHymnLyrics = shareCurrentHymnLyrics;
 /* ==========================================================================
    1. Homepage Interactive "Did You Know? / Chapter Insight" Widget (Item 13)
    ========================================================================== */
-// DID_YOU_KNOW_INSIGHTS declared in upper scope before DOMContentLoaded
+const DID_YOU_KNOW_INSIGHTS = [
+  {
+    id: "dyk_women_books",
+    theme: "dyk-theme-emerald",
+    image: "assets/images/did_you_know_esther.jpg",
+    alt: "Classical illustration of biblical Queen Esther standing before King Ahasuerus",
+    questionEn: "Which Books of the Bible Are Named After Women?",
+    questionMr: "बायबलमधील कोणत्या पुस्तकांना स्त्रियांची नावे आहेत?",
+    bulletsEn: [
+      { icon: "📖", text: "Esther 👑 (Queen of Persia & Deliverer)" },
+      { icon: "🌾", text: "Ruth (Model of Faithfulness & Lineage of Christ)" },
+      { icon: "📜", text: "Judith (Historical Apocrypha)" },
+      { icon: "🪻", text: "Susanna (Historical Apocrypha)" }
+    ],
+    bulletsMr: [
+      { icon: "📖", text: "एस्तेर (Esther) 👑 — पारसाची राणी व तारणहार" },
+      { icon: "🌾", text: "रूथ (Ruth) — विश्वासूपणाची आदर्श व दाविदाची पूर्वज" },
+      { icon: "📜", text: "यहूदीथ (Judith) — ऐतिहासिक प्राचीन ग्रंथ" },
+      { icon: "🪻", text: "सुसान्ना (Susanna) — ऐतिहासिक प्राचीन ग्रंथ" }
+    ],
+    refEn: "Esther 1 • एस्तेर १",
+    refMr: "एस्तेर १ • Esther 1",
+    book: "esther",
+    chapter: 1,
+    verse: 1
+  },
+  {
+    id: "dyk_shortest_verse",
+    theme: "dyk-theme-indigo",
+    image: "assets/images/did_you_know_jesus_wept.jpg",
+    alt: "Classical chiaroscuro engraving of Jesus Christ weeping in deep prayer",
+    questionEn: "What Is the Shortest Verse in the Bible?",
+    questionMr: "बायबलमधील सर्वात लहान वचन कोणते आहे?",
+    bulletsEn: [
+      { icon: "💧", text: "John 11:35: \"Jesus wept.\"" },
+      { icon: "🕊️", text: "Just 2 words in English & Marathi (3 in Greek: Ἐδάκρυσεν ὁ Ἰηसोῦς)" },
+      { icon: "❤️", text: "The most profound display of divine empathy & love" },
+      { icon: "🙏", text: "Christ shares deeply in all our earthly sorrows" }
+    ],
+    bulletsMr: [
+      { icon: "💧", text: "योहान ११:३५: \"येशू रडला.\"" },
+      { icon: "🕊️", text: "केवळ २ शब्द (मूळ ग्रीकमध्ये ३ शब्द: Ἐδάκρυσεν ὁ Ἰηसोῦς)" },
+      { icon: "❤️", text: "ईश्वरी करुणा व संवेदनशीलतेची सर्वात सखोल साक्ष" },
+      { icon: "🙏", text: "आपल्या अश्रूंमध्ये ख्रिस्त स्वतः सहभागी होतो" }
+    ],
+    refEn: "John 11:35 • योहान ११:३५",
+    refMr: "योहान ११:३५ • John 11:35",
+    book: "john",
+    chapter: 11,
+    verse: 35
+  },
+  {
+    id: "dyk_noahs_ark",
+    theme: "dyk-theme-teal",
+    image: "assets/images/did_you_know_noahs_ark.jpg",
+    alt: "Classical engraving of Noah's Ark floating upon great flood waters",
+    questionEn: "How Long Did Noah's Ark Float?",
+    questionMr: "नोहाचे तारू पुराच्या पाण्यावर किती काळ तरंगत होते?",
+    bulletsEn: [
+      { icon: "🌧️", text: "40 days & nights of torrential rainfall" },
+      { icon: "🌊", text: "150 days floodwaters surged across the earth" },
+      { icon: "⛰️", text: "Rested on mountains of Ararat in 7th month (Gen 8:4)" },
+      { icon: "☀️", text: "370+ total days Noah remained inside the Ark" }
+    ],
+    bulletsMr: [
+      { icon: "🌧️", text: "४० दिवस व रात्री अखंड मुसळधार पाऊस पडला" },
+      { icon: "🌊", text: "१५० दिवस पुराचे पाणी पृथ्वीवर वाहत राहिले" },
+      { icon: "⛰️", text: "७ व्या महिन्यात अरारात पर्वतावर तारू स्थिरावले" },
+      { icon: "☀️", text: "एकूण ३७० हून अधिक दिवस नोहा तारवात होता" }
+    ],
+    refEn: "Genesis 7-8 • उत्पत्ती ७-८",
+    refMr: "उत्पत्ती ७-८ • Genesis 7-8",
+    book: "genesis",
+    chapter: 7,
+    verse: 17
+  },
+  {
+    id: "dyk_shepherd_rod",
+    theme: "dyk-theme-emerald",
+    image: "assets/images/did_you_know_shepherd.jpg",
+    alt: "Classical oil painting of biblical shepherd with rod and staff",
+    questionEn: "What Is the Secret of the Shepherd's Rod & Staff?",
+    questionMr: "मेंढपाळाची काठी व सोटा यातील आध्यात्मिक रहस्य काय?",
+    bulletsEn: [
+      { icon: "🛡️", text: "Rod (Shebet): Weapon defending flock against beasts" },
+      { icon: "🌿", text: "Staff (Mish'enet): Curved crook to gently guide sheep" },
+      { icon: "✝️", text: "Psalm 23:4: \"Thy rod and thy staff they comfort me\"" },
+      { icon: "🕊️", text: "Divine protection paired with tender, loving direction" }
+    ],
+    bulletsMr: [
+      { icon: "🛡️", text: "सोटा (Rod): हिंस्र श्वापदांपासून मेंढरांचे रक्षण करणारे हत्यार" },
+      { icon: "🌿", text: "काठी (Staff): वळलेली काठी चुकलेल्या मेंढरांना परत आणण्यासाठी" },
+      { icon: "✝️", text: "स्तोत्र २३:४: \"तुझा सोटा व तुझी काठी मला धीर देतात\"" },
+      { icon: "🕊️", text: "देवाचे अजिंक्य रक्षण आणि प्रेमळ मार्गदर्शन" }
+    ],
+    refEn: "Psalm 23:4 • स्तोत्रसंहिता २३:४",
+    refMr: "स्तोत्रसंहिता २३:४ • Psalm 23:4",
+    book: "psalms",
+    chapter: 23,
+    verse: 4
+  },
+  {
+    id: "dyk_water_into_wine",
+    theme: "dyk-theme-mahogany",
+    image: "assets/images/wedding_cana_miracle.jpg",
+    alt: "Classical painting of Jesus turning water into wine at the wedding at Cana",
+    questionEn: "How Much Water Was Turned into Wine at Cana?",
+    questionMr: "काना येथील लग्नात येशूने किती लिटर पाण्याचे रूपांतर केले?",
+    bulletsEn: [
+      { icon: "🏺", text: "6 massive stone jars used for ceremonial washing" },
+      { icon: "🍷", text: "20 to 30 gallons each (total 120-180 gallons / 500-700L)" },
+      { icon: "🍇", text: "Master of banquet declared it the finest wine" },
+      { icon: "✨", text: "Revealed His glory and the overflowing abundance of grace" }
+    ],
+    bulletsMr: [
+      { icon: "🏺", text: "शुद्धीकरणासाठी ठेवलेले ६ भव्य दगडी रांजण" },
+      { icon: "🍷", text: "प्रत्येकात सुमारे १०० लिटर (एकूण ५०० ते ७०० लिटर)" },
+      { icon: "🍇", text: "यजमानाने या द्राक्षारसाला उत्कृष्ट दर्जाचा ठरवले" },
+      { icon: "✨", text: "देवाची असीम कृपा आणि महिमा येथे प्रकट झाला" }
+    ],
+    refEn: "John 2:6-10 • योहान २:६-१०",
+    refMr: "योहान २:६-१० • John 2:6-10",
+    book: "john",
+    chapter: 2,
+    verse: 1
+  },
+  {
+    id: "dyk_peace_phroureo",
+    theme: "dyk-theme-indigo",
+    image: "assets/images/peace_anxiety_art.jpg",
+    alt: "Classical illustration of divine peace guarding believer amidst storm",
+    questionEn: "What Does Paul Mean by 'The Peace of God'?",
+    questionMr: "पौल जेव्हा 'देवाच्या शांती'चा उल्लेख करतो तेव्हा त्याचा खरा अर्थ काय?",
+    bulletsEn: [
+      { icon: "🛡️", text: "Uses Roman military term 'Phroureo' (φρουρέω)" },
+      { icon: "🏰", text: "Describes an armed garrison guarding a fortress 24/7" },
+      { icon: "🕊️", text: "Transcends all human understanding and anxiety" },
+      { icon: "❤️", text: "Keeps worry and panic completely outside your heart" }
+    ],
+    bulletsMr: [
+      { icon: "🛡️", text: "'फ्रुरिओ' (Phroureo) हा रोमन सैन्याचा लष्करी शब्द वापरला" },
+      { icon: "🏰", text: "किल्ल्याचे २४ तास अहोरात्र खडा पहारा देणारा पहारेकरी" },
+      { icon: "🕊️", text: "सर्व बुद्धी व समजेच्या पलीकडची स्वर्गीय शांती" },
+      { icon: "❤️", text: "चिंता, भीती व नैराश्याला हृदयाबाहेरच थोपवून धरते" }
+    ],
+    refEn: "Philippians 4:7 • फिलिप्पैकरांस ४:७",
+    refMr: "फिलिप्पैकरांस ४:७ • Philippians 4:7",
+    book: "philippians",
+    chapter: 4,
+    verse: 6
+  }
+];
 
 let didYouKnowOffset = 0;
 let activeDidYouKnowInsight = DID_YOU_KNOW_INSIGHTS[0];
@@ -21925,8 +21900,63 @@ function toMarathiDigits(num) {
 }
 window.toMarathiDigits = toMarathiDigits;
 
-// FEATURED_SCRIPTURES_CONFIG declared in upper scope before DOMContentLoaded
-
+const FEATURED_SCRIPTURES_CONFIG = [
+  {
+    id: "psalms",
+    nameEn: "Psalms",
+    nameMr: "स्तोत्रसंहिता",
+    cover: "assets/images/book_psalms_cover.png",
+    themeClass: "recent-card-psalms",
+    totalChapters: 150,
+    // Daily rotating curated chapters: Psalm 23 today, Psalm 70 tomorrow, then 91, 121, etc.
+    chapters: [23, 70, 91, 121, 27, 46, 1, 19, 34, 37, 51, 62, 84, 100, 103, 119, 139, 145, 8, 15, 16, 24, 25, 32, 40, 42, 63, 67, 72, 86, 90, 92, 95, 96, 98, 111, 112, 116, 122, 126, 127, 128, 130, 133, 138, 146, 147, 148, 150]
+  },
+  {
+    id: "proverbs",
+    nameEn: "Proverbs",
+    nameMr: "नीतिसूत्रे",
+    cover: "assets/images/book_proverbs_cover.jpg",
+    themeClass: "recent-card-proverbs",
+    totalChapters: 31,
+    chapters: [3, 4, 8, 10, 15, 16, 22, 27, 31, 1, 2, 5, 6, 7, 9, 11, 12, 13, 14, 17, 18, 19, 20, 21, 23, 24, 25, 26, 28, 29, 30]
+  },
+  {
+    id: "matthew",
+    nameEn: "Matthew",
+    nameMr: "मत्तय",
+    cover: "assets/images/book_matthew_cover.jpg",
+    themeClass: "recent-card-matthew",
+    totalChapters: 28,
+    chapters: [5, 6, 7, 11, 13, 14, 18, 24, 25, 26, 27, 28, 1, 2, 3, 4, 8, 9, 10, 12, 15, 16, 17, 19, 20, 21, 22, 23]
+  },
+  {
+    id: "john",
+    nameEn: "John",
+    nameMr: "योहान",
+    cover: "assets/images/book_john_cover.jpg",
+    themeClass: "recent-card-john",
+    totalChapters: 21,
+    chapters: [1, 3, 4, 6, 10, 11, 14, 15, 16, 17, 20, 21, 2, 5, 7, 8, 9, 12, 13, 18, 19]
+  },
+  {
+    id: "romans",
+    nameEn: "Romans",
+    nameMr: "रोमन्स",
+    cover: "assets/images/book_romans_cover.jpg",
+    themeClass: "recent-card-romans",
+    totalChapters: 16,
+    chapters: [8, 12, 1, 3, 5, 6, 7, 10, 11, 13, 14, 15, 16, 2, 4, 9]
+  },
+  {
+    id: "genesis",
+    nameEn: "Genesis",
+    nameMr: "उत्पत्ती",
+    cover: "assets/images/book_genesis_cover.jpg",
+    themeClass: "recent-card-genesis",
+    totalChapters: 50,
+    chapters: [1, 12, 15, 22, 28, 37, 39, 45, 50, 2, 3, 6, 7, 8, 9, 11]
+  }
+];
 
 function getFeaturedScriptureDayIndex(customDate) {
   const d = customDate ? new Date(customDate) : new Date();

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v139_PRAYER_IMAGES_DIDYOUKNOW_WORD_HIGHLIGHT';
+const CACHE_NAME = 'river-of-life-cache-v155_IPHONE_MIC_UNMUTED';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
@@ -38,10 +38,11 @@ self.addEventListener('notificationclick', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   
-  // NEVER cache BSI tokens, CloudFront audio, or backend APIs
+  // NEVER cache BSI tokens, CloudFront audio, daily_verses images, or backend APIs
   if (
     event.request.url.includes('bsi_token') ||
     event.request.url.includes('cloudfront.net') ||
+    event.request.url.includes('daily_verses') ||
     event.request.url.includes('/api/')
   ) {
     return;
