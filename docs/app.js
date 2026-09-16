@@ -12049,8 +12049,8 @@ function launchLiveMeetingRoom(meeting, stream) {
         return;
       }
 
-      // 2. Check configured video provider: 'daily' (Default) vs 'jitsi'
-      const provider = localStorage.getItem("rol_video_provider") || "daily";
+      // 2. Check configured video provider: 'jitsi' (Default, 100% Free, HD In-App, Screen Share, No Card) vs 'daily'
+      const provider = localStorage.getItem("rol_video_provider") || "jitsi";
 
       if (provider === "daily") {
         const dailyBaseUrl = getDailyRoomUrl(meeting);
@@ -12087,13 +12087,53 @@ function launchLiveMeetingRoom(meeting, stream) {
         logAudioDebug("Daily.co clean conference mounted successfully.", { dailyEmbedUrl });
         showToast("Joined Online Fellowship (Daily.co) 🙏");
       } else {
-        // Fallback: Clean 3-Button Jitsi Conference
+        // Optimized 100% Free In-App WebRTC Conference (River of Life LiveMeet)
+        // HD Audio & Video, Acoustic Echo Cancellation, Noise Suppression, Screen Sharing & Zero App Nags
         const meetingIdSlug = (meeting && meeting.id) ? meeting.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
         const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
         
-        const buttonsParam = encodeURIComponent(JSON.stringify(["microphone","camera","hangup"]));
+        // Essential conference toolbar: Mic, Camera, Screen Share, Chat, Raise Hand, Grid View, Hangup
+        const toolbarButtons = ["microphone", "camera", "desktop", "chat", "raisehand", "tileview", "hangup"];
+        const buttonsParam = encodeURIComponent(JSON.stringify(toolbarButtons));
         const emptyArrayParam = encodeURIComponent(JSON.stringify([]));
-        const roomUrl = `https://meet.jit.si/${roomSlug}#config.prejoinPageEnabled=false&config.toolbarButtons=${buttonsParam}&config.disableDeepLinking=true&config.disableThirdPartyRequests=true&config.enableWelcomePage=false&config.startWithAudioMuted=false&config.startWithVideoMuted=false&interfaceConfig.TOOLBAR_BUTTONS=${buttonsParam}&interfaceConfig.SETTINGS_SECTIONS=${emptyArrayParam}&interfaceConfig.SHOW_JITSI_WATERMARK=false&interfaceConfig.SHOW_WATERMARK_FOR_GUESTS=false&userInfo.displayName=${encodeURIComponent(loggedIn)}`;
+
+        // High-definition audio & video constraints with hardware acoustic echo cancellation
+        const jitsiConfig = [
+          "config.prejoinPageEnabled=false",
+          "config.prejoinConfig.enabled=false",
+          "config.requireDisplayName=false",
+          "config.disableDeepLinking=true",
+          "config.enableWelcomePage=false",
+          "config.enableClosePage=false",
+          "config.disableThirdPartyRequests=true",
+          "config.startWithAudioMuted=false",
+          "config.startWithVideoMuted=false",
+          "config.resolution=720",
+          // Acoustic Echo Cancellation & Audio Quality (No voice eco / feedback loop)
+          "config.disableEchoCancellation=false",
+          "config.noiseSuppression=true",
+          "config.autoGainControl=true",
+          "config.stereo=false",
+          "config.audioQuality.stereo=false",
+          "config.audioQuality.opusMaxAverageBitrate=64000",
+          "config.disableAudioLevels=false",
+          // Screen Sharing (desktop) options for host content presentation
+          "config.desktopSharingFrameRate.min=15",
+          "config.desktopSharingFrameRate.max=30",
+          // Toolbar & UI Clean Mobile Rules
+          `config.toolbarButtons=${buttonsParam}`,
+          `interfaceConfig.TOOLBAR_BUTTONS=${buttonsParam}`,
+          `interfaceConfig.SETTINGS_SECTIONS=${emptyArrayParam}`,
+          "interfaceConfig.SHOW_JITSI_WATERMARK=false",
+          "interfaceConfig.SHOW_WATERMARK_FOR_GUESTS=false",
+          "interfaceConfig.SHOW_BRAND_WATERMARK=false",
+          "interfaceConfig.SHOW_POWERED_BY=false",
+          "interfaceConfig.MOBILE_APP_PROMO=false",
+          "interfaceConfig.HIDE_DEEP_LINKING_LOGO=true",
+          `userInfo.displayName=${encodeURIComponent(loggedIn)}`
+        ].join("&");
+
+        const roomUrl = `https://meet.jit.si/${roomSlug}#${jitsiConfig}`;
 
         jitsiCont.innerHTML = `
           <iframe 
@@ -12101,14 +12141,14 @@ function launchLiveMeetingRoom(meeting, stream) {
             src="${roomUrl}" 
             width="100%" 
             height="100%" 
-            allow="camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; accelerometer; gyroscope;" 
+            allow="camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; clipboard-write *; accelerometer; gyroscope;" 
             allowusermedia="true"
             style="border: none; width: 100%; height: 100%; border-radius: 14px; background: #090d16;">
           </iframe>
         `;
 
-        logAudioDebug("Clean 3-Button Jitsi Conference mounted successfully.", { roomUrl });
-        showToast("Joined Online Fellowship (Jitsi) 🙏");
+        logAudioDebug("River of Life LiveMeet mounted successfully.", { roomUrl });
+        showToast("Joined River of Life LiveMeet 🙏");
       }
     }
 
@@ -12356,7 +12396,7 @@ function exitLiveMeetingRoom() {
 // ═══════════════════════════════════════════════════════════════
 
 function openMeetingProviderSettingsModal() {
-  const cur = localStorage.getItem("rol_video_provider") || "daily";
+  const cur = localStorage.getItem("rol_video_provider") || "jitsi";
   const radios = document.querySelectorAll('input[name="video-provider-choice"]');
   radios.forEach(r => { r.checked = (r.value === cur); });
   const urlInput = document.getElementById("input-daily-room-url");

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v151_RIVER_OF_LIFE_DAILY_ROOM';
+const CACHE_NAME = 'river-of-life-cache-v152_IN_APP_CLEAN_VIDEO_HD';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
