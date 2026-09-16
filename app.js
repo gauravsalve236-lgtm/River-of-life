@@ -12002,12 +12002,14 @@ window.triggerJoinMeetingFlow = triggerJoinMeetingFlow;
 
 function showMicrophonePermissionHelpModal(meeting) {
   _pendingMeetingToJoin = meeting;
-  const modal = document.getElementById("modal-mic-permission-help");
-  if (modal) {
-    modal.classList.add("active");
+  if (typeof openModal === "function") {
+    openModal("modal-mic-permission-help");
   } else {
-    showToast("⚠️ Please enable Microphone in Safari: tap 'aA' -> Website Settings -> Microphone: Allow");
-    launchLiveMeetingRoom(meeting, null);
+    const modal = document.getElementById("modal-mic-permission-help");
+    if (modal) {
+      modal.style.display = "flex";
+      modal.classList.add("active");
+    }
   }
 }
 window.showMicrophonePermissionHelpModal = showMicrophonePermissionHelpModal;
@@ -12017,8 +12019,15 @@ function retryEnableMicrophone() {
     navigator.mediaDevices.getUserMedia({ audio: true, video: true })
       .then(stream => {
         if (stream && stream.getTracks) stream.getTracks().forEach(t => t.stop());
-        const modal = document.getElementById("modal-mic-permission-help");
-        if (modal) modal.classList.remove("active");
+        if (typeof closeModal === "function") {
+          closeModal("modal-mic-permission-help");
+        } else {
+          const modal = document.getElementById("modal-mic-permission-help");
+          if (modal) {
+            modal.classList.remove("active");
+            modal.style.display = "none";
+          }
+        }
         showToast("Microphone & Camera Enabled! 🙏");
         if (_pendingMeetingToJoin) {
           launchLiveMeetingRoom(_pendingMeetingToJoin, null);
@@ -12038,8 +12047,15 @@ function retryEnableMicrophone() {
 window.retryEnableMicrophone = retryEnableMicrophone;
 
 function continueMeetingWithoutMic() {
-  const modal = document.getElementById("modal-mic-permission-help");
-  if (modal) modal.classList.remove("active");
+  if (typeof closeModal === "function") {
+    closeModal("modal-mic-permission-help");
+  } else {
+    const modal = document.getElementById("modal-mic-permission-help");
+    if (modal) {
+      modal.classList.remove("active");
+      modal.style.display = "none";
+    }
+  }
   if (_pendingMeetingToJoin) {
     showToast("Joining Live Sanctuary (Listen Only) 🙏");
     launchLiveMeetingRoom(_pendingMeetingToJoin, null);
@@ -12200,12 +12216,17 @@ function launchLiveMeetingRoom(meeting, stream) {
               enableWelcomePage: false,
               enableClosePage: false,
               disableThirdPartyRequests: true,
-              resolution: 1080,
+              resolution: 720,
               constraints: {
                 video: {
-                  height: { ideal: 1080, max: 1080 },
-                  width: { ideal: 1920, max: 1920 },
+                  height: { ideal: 720, max: 1080 },
+                  width: { ideal: 1280, max: 1920 },
                   frameRate: { ideal: 30, max: 30 }
+                },
+                audio: {
+                  autoGainControl: true,
+                  echoCancellation: true,
+                  noiseSuppression: true
                 }
               },
               channelLastN: -1,
@@ -12240,12 +12261,31 @@ function launchLiveMeetingRoom(meeting, stream) {
             }
           };
 
-          const api = new JitsiMeetExternalAPI(jitsiServerDomain, options);
+          // Intercept createElement for the iframe to guarantee WebKit permissions policy delegation (iPhone Safari)
+          const origCreateElement = document.createElement.bind(document);
+          document.createElement = function(tagName, opts) {
+            const el = origCreateElement(tagName, opts);
+            if (tagName && typeof tagName === "string" && tagName.toLowerCase() === "iframe") {
+              el.setAttribute("allow", "camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; clipboard-write *;");
+              el.setAttribute("allowusermedia", "true");
+              el.setAttribute("playsinline", "true");
+              el.setAttribute("webkit-playsinline", "true");
+              el.allow = "camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; clipboard-write *;";
+            }
+            return el;
+          };
+
+          let api = null;
+          try {
+            api = new JitsiMeetExternalAPI(jitsiServerDomain, options);
+          } finally {
+            document.createElement = origCreateElement;
+          }
           window._jitsiApi = api;
 
-          // Keep native top-bar quick mic button synchronized
+          // Keep audio state debugged
           api.on("audioMuteStatusChanged", function(e) {
-            updateQuickMeetingMicUI(e && e.muted);
+            logAudioDebug("Conference audio mute status changed:", e && e.muted);
           });
 
           // Unmute microphone on joining to bypass iOS mobile mute defaults
@@ -12253,19 +12293,19 @@ function launchLiveMeetingRoom(meeting, stream) {
             logAudioDebug("Jitsi conference joined. Verifying active microphone...");
             setTimeout(() => {
               try {
-                if (api.isAudioMuted) {
+                if (typeof api.isAudioMuted === "function") {
                   api.isAudioMuted().then(muted => {
                     logAudioDebug("Live mic mute status:", muted);
                     if (muted) {
                       logAudioDebug("Mobile mic detected muted, calling toggleAudio to unmute...");
                       api.executeCommand("toggleAudio");
                     }
-                  });
+                  }).catch(e => console.warn("isAudioMuted error:", e));
                 }
               } catch(e) {
                 logAudioDebug("Auto-unmute check exception:", e);
               }
-            }, 800);
+            }, 600);
           });
 
           api.on("readyToClose", function() {
@@ -12287,7 +12327,7 @@ function launchLiveMeetingRoom(meeting, stream) {
             createdIframe.setAttribute("webkit-playsinline", "true");
           }
 
-          logAudioDebug("River of Life LiveMeet mounted via JitsiMeetExternalAPI with 1080p HD and 96kbps audio.", { roomSlug });
+          logAudioDebug("River of Life LiveMeet mounted via JitsiMeetExternalAPI with HD audio/video.", { roomSlug });
           showToast("Joined River of Life LiveMeet 🙏");
         } else {
           // Fallback iframe
@@ -12307,13 +12347,16 @@ function launchLiveMeetingRoom(meeting, stream) {
             "config.startSilent=false",
             "config.startAudioOnly=false",
             "config.p2p.enabled=false",
-            "config.resolution=1080",
-            "config.constraints.video.height.ideal=1080",
+            "config.resolution=720",
+            "config.constraints.video.height.ideal=720",
             "config.constraints.video.height.max=1080",
-            "config.constraints.video.width.ideal=1920",
+            "config.constraints.video.width.ideal=1280",
             "config.constraints.video.width.max=1920",
             "config.constraints.video.frameRate.ideal=30",
             "config.constraints.video.frameRate.max=30",
+            "config.constraints.audio.autoGainControl=true",
+            "config.constraints.audio.echoCancellation=true",
+            "config.constraints.audio.noiseSuppression=true",
             "config.channelLastN=-1",
             "config.adaptiveLastN=false",
             "config.videoQuality.maxBitratesVideo.low=350000",
@@ -12356,7 +12399,7 @@ function launchLiveMeetingRoom(meeting, stream) {
             </iframe>
           `;
 
-          logAudioDebug("River of Life LiveMeet mounted fallback iframe with 1080p HD and 96kbps audio.", { roomUrl });
+          logAudioDebug("River of Life LiveMeet mounted fallback iframe with HD audio/video.", { roomUrl });
           showToast("Joined River of Life LiveMeet 🙏");
         }
       }
@@ -12556,53 +12599,15 @@ window.toggleMeetCtrlCam = toggleMeetCtrlCam;
 window.toggleMeetEmojiPanel = toggleMeetEmojiPanel;
 window.sendMeetReaction = sendMeetReaction;
 
-// Quick Mic Controls for Top Bar in Meeting Room
 function toggleQuickMeetingMic() {
   if (window._jitsiApi) {
-    try {
-      window._jitsiApi.executeCommand("toggleAudio");
-      
-      // If mic was muted, verify if hardware permission is blocked in iOS Safari settings
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        navigator.mediaDevices.getUserMedia({ audio: true })
-          .then(stream => {
-            if (stream && stream.getTracks) stream.getTracks().forEach(t => t.stop());
-          })
-          .catch(err => {
-            if (err && (err.name === "NotAllowedError" || err.name === "PermissionDeniedError")) {
-              showMicrophonePermissionHelpModal(activeMeetingSession ? { id: activeMeetingSession.meetingId } : null);
-            }
-          });
-      }
-      return;
-    } catch(e) {
-      console.warn("toggleAudio command error:", e);
-    }
+    try { window._jitsiApi.executeCommand("toggleAudio"); } catch(e) {}
   }
-  showToast("Microphone toggled 🙏");
 }
 window.toggleQuickMeetingMic = toggleQuickMeetingMic;
 
-
 function updateQuickMeetingMicUI(isMuted) {
-  const btn = document.getElementById("btn-meeting-quick-mic");
-  const icon = document.getElementById("quick-mic-icon");
-  if (!btn) return;
-  if (isMuted) {
-    btn.style.background = "rgba(239, 68, 68, 0.3)";
-    btn.style.border = "1px solid rgba(239, 68, 68, 0.7)";
-    btn.style.color = "#fca5a5";
-    if (icon) icon.textContent = "🔇";
-    const textSpan = btn.querySelector("span:last-child");
-    if (textSpan) textSpan.textContent = "Unmute";
-  } else {
-    btn.style.background = "rgba(37,99,235,0.3)";
-    btn.style.border = "1px solid rgba(59,130,246,0.6)";
-    btn.style.color = "#93c5fd";
-    if (icon) icon.textContent = "🎙️";
-    const textSpan = btn.querySelector("span:last-child");
-    if (textSpan) textSpan.textContent = "Mic";
-  }
+  // Top bar quick mic removed per user direction
 }
 window.updateQuickMeetingMicUI = updateQuickMeetingMicUI;
 
