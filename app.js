@@ -16861,25 +16861,26 @@ window.generateExactVerseImageBlob = function() {
 
     // 2. Artistic Vignette & Gradient Overlay (Protects legibility across all backgrounds)
     const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    grad.addColorStop(0, 'rgba(0, 0, 0, 0.55)');
-    grad.addColorStop(0.2, 'rgba(0, 0, 0, 0.35)');
+    grad.addColorStop(0, 'rgba(0, 0, 0, 0.60)');
+    grad.addColorStop(0.25, 'rgba(0, 0, 0, 0.38)');
     grad.addColorStop(0.5, 'rgba(0, 0, 0, 0.48)');
-    grad.addColorStop(0.8, 'rgba(0, 0, 0, 0.65)');
-    grad.addColorStop(1, 'rgba(0, 0, 0, 0.90)');
+    grad.addColorStop(0.75, 'rgba(0, 0, 0, 0.65)');
+    grad.addColorStop(1, 'rgba(0, 0, 0, 0.92)');
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // 3. Multi-Line Text Layout with Safe Margins & Perfect Centering
     const centerX = canvas.width / 2;
-    const textMaxWidth = 840; // 120px safe padding on each side
+    const textMaxWidth = 760; // 160px safe padding on each side for mobile screen balance
 
     // Dynamic font sizing for long / short scriptures
-    let fontSize = 48;
-    if (displayText.length > 220) fontSize = 38;
-    else if (displayText.length > 160) fontSize = 42;
-    else if (displayText.length > 110) fontSize = 46;
+    let fontSize = 36;
+    if (displayText.length <= 90) fontSize = 40;
+    else if (displayText.length <= 160) fontSize = 36;
+    else if (displayText.length <= 240) fontSize = 32;
+    else fontSize = 28;
 
-    const fontFamily = "'Noto Serif Devanagari', 'Poppins', Georgia, serif";
+    const fontFamily = theme.fontFamily || "'Noto Serif Devanagari', 'Poppins', Georgia, serif";
     ctx.font = `${theme.fontWeight || '700'} ${fontSize}px ${fontFamily}`;
 
     const words = displayText.split(/\s+/);
@@ -16897,21 +16898,21 @@ window.generateExactVerseImageBlob = function() {
     }
     if (currentLine) lines.push(currentLine);
 
-    const lineHeight = Math.round(fontSize * 1.65);
+    const lineHeight = Math.round(fontSize * 1.75);
     const textBlockHeight = lines.length * lineHeight;
-    const tagHeight = 44;
-    const quoteHeight = 56;
-    const refHeight = 52;
+    const tagHeight = 40;
+    const quoteHeight = 52;
+    const refHeight = 48;
     const totalContentHeight = tagHeight + quoteHeight + textBlockHeight + refHeight + 40;
 
     // Center in visual golden zone (upper-middle)
-    let startY = (canvas.height - totalContentHeight) / 2 - 40;
+    let startY = Math.round((canvas.height - totalContentHeight) / 2) - 40;
 
     // 3a. Top Tag
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillStyle = theme.accentColor || "#fbbf24";
-    ctx.font = "800 22px 'Outfit', sans-serif";
+    ctx.font = "800 20px 'Outfit', sans-serif";
     ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
     ctx.shadowBlur = 14;
     ctx.shadowOffsetX = 0;
@@ -16920,14 +16921,16 @@ window.generateExactVerseImageBlob = function() {
     startY += tagHeight;
 
     // 3b. Quotation Mark
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
     ctx.fillStyle = theme.quoteColor || theme.accentColor || "#fbbf24";
-    ctx.font = "700 80px Georgia, serif";
+    ctx.font = "700 64px Georgia, serif";
     ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
     ctx.shadowBlur = 18;
-    ctx.fillText("“", centerX, startY + 12);
+    ctx.fillText("“", centerX, startY + 8);
     startY += quoteHeight;
 
-    // 3c. Verse Body
+    // 3c. Verse Body (Explicitly enforce textAlign="center" and textBaseline="middle" on each line)
     ctx.fillStyle = theme.textColor || "#ffffff";
     ctx.font = `${theme.fontWeight || '700'} ${fontSize}px ${fontFamily}`;
     ctx.shadowColor = "rgba(0, 0, 0, 0.98)";
@@ -16936,19 +16939,21 @@ window.generateExactVerseImageBlob = function() {
     ctx.shadowOffsetY = 4;
 
     for (let i = 0; i < lines.length; i++) {
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
       ctx.fillText(lines[i], centerX, startY + (i * lineHeight));
     }
-    startY += textBlockHeight + 28;
+    startY += textBlockHeight + 24;
 
     // 3d. Scripture Reference with Accent Lines
     const refText = `${displayRef} ${state.translation === 'eng' ? 'NLT' : 'MARVBSI'}`;
-    ctx.font = "800 30px 'Outfit', sans-serif";
+    ctx.font = "800 26px 'Outfit', sans-serif";
     const refWidth = ctx.measureText(refText).width;
 
     ctx.strokeStyle = theme.accentColor || "#fbbf24";
     ctx.lineWidth = 2.5;
-    const lineLen = 54;
-    const gap = 18;
+    const lineLen = 48;
+    const gap = 16;
 
     ctx.beginPath();
     ctx.moveTo(centerX - (refWidth / 2) - gap - lineLen, startY);
@@ -16957,6 +16962,8 @@ window.generateExactVerseImageBlob = function() {
     ctx.lineTo(centerX + (refWidth / 2) + gap + lineLen, startY);
     ctx.stroke();
 
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
     ctx.fillStyle = theme.accentColor || "#fbbf24";
     ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
     ctx.shadowBlur = 14;
@@ -16968,20 +16975,20 @@ window.generateExactVerseImageBlob = function() {
     ctx.shadowOffsetX = 0;
     ctx.shadowOffsetY = 0;
 
-    // 4. WATERMARK & LOGO IN BOTTOM RIGHT CORNER (User Request)
-    const badgeW = 340;
-    const badgeH = 84;
-    const badgeX = canvas.width - badgeW - 48;
-    const badgeY = canvas.height - badgeH - 64; // Safe from WhatsApp send button & system bars
+    // 4. Centered Premium Watermark Pill at Bottom (Safe from WhatsApp reply bar & system gestures)
+    const badgeW = 400;
+    const badgeH = 76;
+    const badgeX = (canvas.width - badgeW) / 2;
+    const badgeY = canvas.height - badgeH - 96;
 
     ctx.save();
-    ctx.fillStyle = "rgba(15, 23, 42, 0.75)";
+    ctx.fillStyle = "rgba(15, 23, 42, 0.82)";
     ctx.strokeStyle = "rgba(255, 255, 255, 0.22)";
     ctx.lineWidth = 1.5;
 
     ctx.beginPath();
     if (typeof ctx.roundRect === 'function') {
-      ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 22);
+      ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 20);
     } else {
       ctx.rect(badgeX, badgeY, badgeW, badgeH);
     }
@@ -16989,24 +16996,21 @@ window.generateExactVerseImageBlob = function() {
     ctx.stroke();
 
     if (logoImg) {
-      const logoSize = 60;
+      const logoSize = 48;
       ctx.shadowColor = "rgba(0, 0, 0, 0.4)";
       ctx.shadowBlur = 8;
-      ctx.drawImage(logoImg, badgeX + 14, badgeY + (badgeH - logoSize) / 2, logoSize, logoSize);
+      ctx.drawImage(logoImg, badgeX + 18, badgeY + (badgeH - logoSize) / 2, logoSize, logoSize);
     }
 
-    ctx.shadowColor = "transparent";
-    ctx.textAlign = "left";
-    ctx.textBaseline = "top";
-
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
     ctx.fillStyle = "#ffffff";
-    ctx.font = "800 20px 'Outfit', sans-serif";
-    ctx.fillText("River of Life Bible", badgeX + 88, badgeY + 18);
+    ctx.font = "800 18px 'Outfit', sans-serif";
+    ctx.fillText("River of Life Bible", centerX + (logoImg ? 16 : 0), badgeY + 24);
 
-    ctx.fillStyle = "rgba(251, 191, 36, 0.92)"; // Brand Gold
-    ctx.font = "700 16px 'Noto Serif Devanagari', sans-serif";
-    ctx.fillText("जीवन नदी बायबल ॲप", badgeX + 88, badgeY + 46);
-
+    ctx.fillStyle = "rgba(251, 191, 36, 0.95)";
+    ctx.font = "700 14px 'Noto Serif Devanagari', sans-serif";
+    ctx.fillText("जीवन नदी बायबल ॲप • दैनिक वचन", centerX + (logoImg ? 16 : 0), badgeY + 50);
     ctx.restore();
 
     const filename = `River_of_Life_Daily_Verse_${displayRef.replace(/[: ]/g, "_")}.png`;

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v157_CLEAN_TOPBAR_IOS_MIC_FIX';
+const CACHE_NAME = 'river-of-life-cache-v158_DAILY_VERSE_FORMAT_ALIGN_FIX';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
