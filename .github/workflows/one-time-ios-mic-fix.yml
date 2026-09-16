@@ -1,0 +1,83 @@
+name: One-time iOS meeting microphone fix
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/one-time-ios-mic-fix.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Patch iOS meeting microphone flow
+        shell: python
+        run: |
+          from pathlib import Path
+          app = Path('app.js')
+          text = app.read_text(encoding='utf-8')
+
+          old = '''function proceedJoinMeetingInApp() {
+            if (typeof closeModal === "function") closeModal("modal-ios-meeting-choice");
+            else {
+              const el = document.getElementById("modal-ios-meeting-choice");
+              if (el) el.style.display = "none";
+            }
+            const m = _pendingMeetingToJoin || { id: "default", title: "Live Fellowship" };
+            showToast("Joining Live Sanctuary 🙏");
+            launchLiveMeetingRoom(m, null);
+          }'''
+          new = '''function proceedJoinMeetingInApp() {
+            // iOS Safari: use a top-level Jitsi page instead of a cross-origin iframe.
+            // This gives the Jitsi origin direct ownership of microphone permission/capture.
+            if (typeof closeModal === "function") closeModal("modal-ios-meeting-choice");
+            else {
+              const el = document.getElementById("modal-ios-meeting-choice");
+              if (el) el.style.display = "none";
+            }
+            proceedJoinMeetingSafari();
+          }'''
+          if old not in text:
+              raise SystemExit('Expected iOS join block not found; aborting.')
+          text = text.replace(old, new, 1)
+
+          old_url = 'const extUrl = `https://${jitsiServerDomain}/${roomSlug}#config.disableDeepLinking=true&config.startWithAudioMuted=false&config.prejoinPageEnabled=false&userInfo.displayName=${encodeURIComponent(loggedIn)}`;'
+          new_url = 'const extUrl = `https://${jitsiServerDomain}/${roomSlug}#config.disableDeepLinking=true&config.startWithAudioMuted=false&config.startAudioMuted=9999&config.prejoinPageEnabled=false&userInfo.displayName=${encodeURIComponent(loggedIn)}`;'
+          if old_url not in text:
+              raise SystemExit('Expected iOS Jitsi URL not found; aborting.')
+          text = text.replace(old_url, new_url, 1)
+
+          old_cfg = 'startWithAudioMuted: false,\n              startWithVideoMuted: false,'
+          new_cfg = 'startWithAudioMuted: false,\n              startAudioMuted: 9999,\n              startWithVideoMuted: false,'
+          if old_cfg not in text:
+              raise SystemExit('Expected Jitsi config not found; aborting.')
+          text = text.replace(old_cfg, new_cfg, 1)
+
+          old_fallback = '"config.startWithAudioMuted=false",\n            "config.startWithVideoMuted=false",'
+          new_fallback = '"config.startWithAudioMuted=false",\n            "config.startAudioMuted=9999",\n            "config.startWithVideoMuted=false",'
+          if old_fallback not in text:
+              raise SystemExit('Expected fallback Jitsi config not found; aborting.')
+          text = text.replace(old_fallback, new_fallback, 1)
+          app.write_text(text, encoding='utf-8')
+
+          index = Path('index.html')
+          html = index.read_text(encoding='utf-8')
+          html = html.replace('v2340_MARATHI_VERSE_MIC_SAFARI_FIX', 'v2341_IOS_JITSI_TOP_LEVEL_MIC_FIX')
+          html = html.replace('165_MARATHI_VERSE_MIC_SAFARI_FIX', '166_IOS_JITSI_TOP_LEVEL_MIC_FIX')
+          index.write_text(html, encoding='utf-8')
+
+      - name: Commit fix and remove one-time workflow
+        run: |
+          rm -f .github/workflows/one-time-ios-mic-fix.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app.js index.html .github/workflows/one-time-ios-mic-fix.yml
+          git diff --cached --check
+          git commit -m "fix: improve iOS meeting microphone startup"
+          git push
