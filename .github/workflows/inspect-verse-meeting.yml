@@ -4,15 +4,22 @@ on:
     paths:
       - '.github/workflows/inspect-verse-meeting.yml'
 permissions:
-  contents: read
+  contents: write
 jobs:
   inspect:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Inspect
+      - name: Inspect and save
         run: |
-          echo '--- MEETING ---'
-          grep -n -E 'proceedJoinMeeting|triggerJoinMeeting|modal-ios-meeting|startWithAudioMuted|videoConferenceJoined|JitsiMeetExternalAPI' app.js | head -120 || true
-          echo '--- DAILY/SHARE ---'
-          grep -RniE 'daily.*verse|verse.*daily|share.*verse|download.*verse|whatsapp|WhatsApp|navigator.share|canvas' --include='*.js' --include='*.html' . | head -240 || true
+          {
+            echo '--- MEETING ---'
+            grep -n -E 'proceedJoinMeeting|triggerJoinMeeting|modal-ios-meeting|startWithAudioMuted|videoConferenceJoined|JitsiMeetExternalAPI' app.js | head -180 || true
+            echo '--- DAILY/SHARE ---'
+            grep -RniE 'daily.*verse|verse.*daily|share.*verse|download.*verse|whatsapp|WhatsApp|navigator.share|canvas' --include='*.js' --include='*.html' . | head -400 || true
+          } > inspection.txt
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add inspection.txt
+          git commit -m 'chore: save code inspection output' || true
+          git push
