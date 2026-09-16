@@ -1,0 +1,429 @@
+--- MEETING ---
+11706:        card.addEventListener("click", () => triggerJoinMeetingFlow(m.id));
+11780:          triggerJoinMeetingFlow(m.id);
+11828:    triggerJoinMeetingFlow(m.id);
+11938:function proceedJoinMeetingSafari() {
+11939:  if (typeof closeModal === "function") closeModal("modal-ios-meeting-choice");
+11941:    const el = document.getElementById("modal-ios-meeting-choice");
+11951:  const extUrl = `https://${jitsiServerDomain}/${roomSlug}#config.disableDeepLinking=true&config.startWithAudioMuted=false&config.startAudioMuted=9999&config.prejoinPageEnabled=false&userInfo.displayName=${encodeURIComponent(loggedIn)}`;
+11955:window.proceedJoinMeetingSafari = proceedJoinMeetingSafari;
+11957:function proceedJoinMeetingInApp() {
+11960:  if (typeof closeModal === "function") closeModal("modal-ios-meeting-choice");
+11962:    const el = document.getElementById("modal-ios-meeting-choice");
+11965:  proceedJoinMeetingSafari();
+11967:window.proceedJoinMeetingInApp = proceedJoinMeetingInApp;
+11970:function triggerJoinMeetingFlow(meetingId) {
+11979:    const modalChoice = document.getElementById("modal-ios-meeting-choice");
+11990:window.triggerJoinMeetingFlow = triggerJoinMeetingFlow;
+12188:        if (typeof JitsiMeetExternalAPI !== "undefined") {
+12196:              startWithAudioMuted: false,
+12273:            api = new JitsiMeetExternalAPI(jitsiServerDomain, options);
+12285:          api.on("videoConferenceJoined", function() {
+12323:          logAudioDebug("River of Life LiveMeet mounted via JitsiMeetExternalAPI with HD audio/video.", { roomSlug });
+12338:            "config.startWithAudioMuted=false",
+12470:  const extUrl = `https://${jitsiServerDomain}/${roomSlug}#config.disableDeepLinking=true&config.startWithAudioMuted=false&config.prejoinPageEnabled=false&userInfo.displayName=${encodeURIComponent(loggedIn)}`;
+14164:if (typeof triggerJoinMeetingFlow !== 'undefined') window.triggerJoinMeetingFlow = triggerJoinMeetingFlow;
+16099:          <button onclick="triggerJoinMeetingFlow('${m.id}')" class="btn-primary-mini" style="flex: 1.4; padding: 11px 16px; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; background: ${isLive ? '#22c55e' : 'var(--primary)'}; color: #fff; border: none;">
+16313:    if (typeof triggerJoinMeetingFlow === 'function') {
+16326:      triggerJoinMeetingFlow(m.id || roomCode);
+--- DAILY/SHARE ---
+./sw.js:48:    url.includes('daily_verses') ||
+./android-studio-app/build/reports/problems/problems-report.html:199:canvas {
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/index.html:164:            <!-- WhatsApp Invite Friends Card -->
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/index.html:170:                  <span style="font-size: 12px; color: var(--text-muted);">Share River of Life on WhatsApp to register and study together.</span>
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/index.html:173:              <button id="btn-home-whatsapp-invite" class="btn-primary-mini" style="margin: 0; padding: 8px 16px; font-size: 12.5px; font-weight: 700; border-radius: 8px; background: #25d366; border-color: #25d366; color: #fff; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 5px rgba(37,211,102,0.2);">
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/index.html:180:              <!-- Card 1: Daily Bible Verse -->
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/index.html:181:              <div class="daily-verse-card" id="btn-open-fullscreen-vod">
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/index.html:182:                <div class="daily-verse-card-bg"></div>
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/index.html:183:                <div class="daily-verse-tint"></div>
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/index.html:184:                <div class="daily-verse-header-tabs">
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/index.html:185:                  <span class="tab-pill active">DAILY BIBLE VERSE</span>
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/index.html:189:                <div class="daily-verse-body">
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/index.html:193:                  <div class="daily-verse-nav-row">
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/index.html:208:                <div class="daily-verse-social-metrics">
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/index.html:1458:          <div class="daily-verse-nav-row" style="margin-top: 24px; justify-content: center; gap: 16px;">
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/index.html:1499:          <div id="share-card-canvas" class="verse-card-canvas gradient-1">
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/index.html:1505:          <div class="canvas-customization-tools">
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/index.html:2016:            <button id="btn-details-whatsapp-share" class="btn-secondary-mini" style="flex: 1; padding: 12px; border-radius: 12px; font-size: 13.5px; display: flex; align-items: center; justify-content: center; gap: 8px; min-width: 130px; background: rgba(37, 211, 102, 0.12); border-color: rgba(37, 211, 102, 0.3); color: #25d366 !important;">
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/index.html:2018:              <span>WhatsApp</span>
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/index.html:2138:    <!-- Meeting Share Hub Drawer (YouTube Videos, Audio Tracks & Bible Chapter/Verses) -->
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/index.html:2158:          <!-- Option 2: Share Bible Chapter & Verses -->
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/index.html:2160:            <h4 style="margin: 0 0 6px 0; font-size: 14px; color: #f59e0b;">📖 Share Bible Chapter & Verses / बायबल वचने शेअर करा</h4>
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/index.html:2169:              <button onclick="shareBibleVerseToMeeting()" class="btn-primary-block" style="padding: 12px; font-weight: 800; background: #d4af37; color: #000; border: none; border-radius: 8px; cursor: pointer;">
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/index.html:2179:              <span style="font-size: 11.5px; color: #94a3b8;">Share meeting link via WhatsApp or Email</span>
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/index.html:2224:              <span style="font-size: 18px;">📖</span> Share Bible Chapters & Verses
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/index.html:2456:              <select id="meeting-share-verse" class="dropdown-selector" style="width: 100%; background: #1e293b; color: #fff; border-color: #334155; padding: 10px;">
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/app.js:751:  vodDayOffset: 0          // Daily verse day navigation offset (0 for today, up to -6)
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/app.js:1814:  const bgEl = document.querySelector(".daily-verse-card-bg") || document.querySelector(".vod-image-background");
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/app.js:1834:  const homeTabPills = document.querySelectorAll(".daily-verse-card .tab-pill");
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/app.js:1837:  let labelTextHome = "✉ DAILY BIBLE VERSE";
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/app.js:2226:      indicatorEl.textContent = "🔊 Daily Bible Verse";
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/app.js:2353:function playDailyVerseAudio() {
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/app.js:2359:  const refText = vodRefEl ? vodRefEl.textContent : "Daily Verse";
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/app.js:3512:  document.getElementById("share-card-text").textContent = `"${selectedVerseMeta.text}"`;
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/app.js:3513:  document.getElementById("share-card-source").textContent = `${selectedVerseMeta.ref} • ${state.translation === 'eng' ? 'NLT' : 'MARVBSI'}`;
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/app.js:3522:  const canvas = document.getElementById("share-card-canvas");
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/app.js:3523:  canvas.className = "verse-card-canvas";
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/app.js:3524:  canvas.classList.add(gradClass);
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/app.js:3532:  const canvas = document.createElement("canvas");
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/app.js:3533:  canvas.width = 600;
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/app.js:3534:  canvas.height = 600;
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/app.js:3535:  const ctx = canvas.getContext("2d");
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/app.js:3599:    const dataUrl = canvas.toDataURL("image/png");
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/app.js:3613:    document.getElementById("share-card-canvas").style.display = "none";
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/app.js:3614:    container.insertBefore(img, document.querySelector(".canvas-customization-tools"));
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/app.js:3646:  document.getElementById("share-card-canvas").style.display = "flex";
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/app.js:3660:  // WhatsApp App Invite Trigger
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/app.js:3661:  const homeWaInviteBtn = document.getElementById("btn-home-whatsapp-invite");
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/app.js:3667:      window.open(`https://api.whatsapp.com/send?text=${encodedMsg}`, "_blank");
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/app.js:3921:      playDailyVerseAudio();
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/app.js:3938:  // Daily Verse Card tabs interaction
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/app.js:3939:  const dailyVerseTabPills = document.querySelectorAll(".daily-verse-header-tabs .tab-pill");
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/app.js:3940:  dailyVerseTabPills.forEach((pill, idx) => {
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/app.js:4578:      const verse = document.getElementById("meeting-share-verse").value;
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/app.js:4923:    en: `Study Commentary for ${bookName} ${chapter}:${verse}: This passage invites us to reflect on God's word and His purpose in our daily lives. Take time to meditate on these words.`
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/app.js:6066:                    body: "Daily Bible Verse Notifications enabled! 🙏",
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/app.js:6072:                  body: "Daily Bible Verse Notifications enabled! 🙏",
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/app.js:7194:  // Bind WhatsApp Share button
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/app.js:7195:  const waBtn = document.getElementById("btn-details-whatsapp-share");
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/app.js:7198:      shareMeetingToWhatsApp(m);
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/app.js:7210:// Share meeting invitation via WhatsApp
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/app.js:7211:function shareMeetingToWhatsApp(meeting) {
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/app.js:7218:  window.open(`https://api.whatsapp.com/send?text=${encodedText}`, "_blank");
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/app.js:7229:      showToast("Invitation Copied to Clipboard! Share to WhatsApp/Email.");
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/app.js:7231:      if (navigator.share) {
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/app.js:7232:        navigator.share({
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/app.js:7784:      syncSharedBiblePassage(bookVal, chapVal, verseVal, transVal);
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/app.js:8020:function syncSharedBiblePassage(book, chapter, verse, translation) {
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/app.js:9500:// Share Bible Chapter/Verse in Meeting
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/app.js:9501:window.shareBibleVerseToMeeting = function() {
+./android-studio-app/app/build/intermediates/assets/debug/mergeDebugAssets/app.js:9509:    window.nativeLiveKitMeetingManager.addChatMessage("📖 BIBLE BROADCAST", `${loggedIn} shared ${selectedVerse}`);
+./android-studio-app/app/src/main/assets/sw.js:48:    url.includes('daily_verses') ||
+./android-studio-app/app/src/main/assets/index.html:265:              <!-- 2. Daily Verse Card: Prominent card with inline action buttons (Read, Listen, Save, Share) -->
+./android-studio-app/app/src/main/assets/index.html:266:              <div class="home-vod-card" id="card-daily-verse-home" onclick="openFullscreenVOD()" title="Open Daily Verse Studio & Gallery / दैनिक वचन स्टुडिओ उघडा" style="background-image: url('assets/daily_verses/sunrise.png');">
+./android-studio-app/app/src/main/assets/index.html:285:                  <button class="home-vod-btn" id="home-vod-btn-save-img" onclick="saveExactDailyVerseImage(); event.stopPropagation();" title="Save Image to Gallery / फोटो सेव्ह करा" aria-label="Save to Gallery">
+./android-studio-app/app/src/main/assets/index.html:288:                  <button class="home-vod-btn" id="home-vod-btn-share" onclick="shareDailyVerseToWhatsApp(); event.stopPropagation();" title="Share Verse / शेअर करा" aria-label="Share Verse">
+./android-studio-app/app/src/main/assets/index.html:2290:                    <p style="margin: 2px 0 0 0; font-size: 12px; color: var(--text-muted);">Override and publish today's daily Bible verse displayed across all devices.</p>
+./android-studio-app/app/src/main/assets/index.html:2353:                        <span style="font-size: 11px; font-weight: 800; color: #fca5a5; letter-spacing: 0.5px;">✉ DAILY BIBLE VERSE</span>
+./android-studio-app/app/src/main/assets/index.html:2365:                    💾 Save & Publish Daily Verse / वचन परकाशित करा
+./android-studio-app/app/src/main/assets/index.html:3855:              <button onclick="saveExactDailyVerseImage(); toggleVodOptionsMenu();" style="display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; background: transparent; border: none; color: #fff; font-size: 13px; font-weight: 600; text-align: left; border-radius: 10px; cursor: pointer;">
+./android-studio-app/app/src/main/assets/index.html:3861:              <button onclick="shareDailyVerseToWhatsApp(); toggleVodOptionsMenu();" style="display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; background: transparent; border: none; color: #4ade80; font-size: 13px; font-weight: 600; text-align: left; border-radius: 10px; cursor: pointer;">
+./android-studio-app/app/src/main/assets/index.html:3862:                <span>💬</span> <span>WhatsApp Share / शेअर करा</span>
+./android-studio-app/app/src/main/assets/index.html:3864:              <button onclick="copyDailyVerseText(); toggleVodOptionsMenu();" style="display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; background: transparent; border: none; color: #fff; font-size: 13px; font-weight: 600; text-align: left; border-radius: 10px; cursor: pointer;">
+./android-studio-app/app/src/main/assets/index.html:3914:          <!-- Left Floating Action Controls (Like, Read, Save Image, Card Studio, Theme, WhatsApp) -->
+./android-studio-app/app/src/main/assets/index.html:3929:            <button id="btn-vod-fs-save" onclick="saveExactDailyVerseImage();" title="Save Image / गॅलरीमधये सेवह करा" style="background: transparent; border: none; color: #fff; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; padding: 4px;">
+./android-studio-app/app/src/main/assets/index.html:3946:            <!-- WhatsApp Share Button -->
+./android-studio-app/app/src/main/assets/index.html:3947:            <button id="btn-vod-fs-whatsapp" onclick="shareDailyVerseToWhatsApp();" title="WhatsApp Status / वहॉटसॲप सटेटस" style="background: rgba(34, 197, 94, 0.25); border: 1px solid #22c55e; color: #4ade80; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 12px rgba(34,197,94,0.3);">
+./android-studio-app/app/src/main/assets/index.html:3954:            <img id="vod-thumbnail-preview" src="assets/daily_verses/sunrise.png" alt="Wallpaper" style="width: 100%; height: 100%; object-fit: cover;" />
+./android-studio-app/app/src/main/assets/index.html:3980:          <img id="vod-preview-rendered-img" src="" alt="Daily Verse Image" style="width: 100%; max-height: 52vh; object-fit: contain; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.15);" />
+./android-studio-app/app/src/main/assets/index.html:3996:            <span>💬 WhatsApp Share</span>
+./android-studio-app/app/src/main/assets/index.html:4015:              <span style="font-size: 11.5px; color: var(--text-muted);">Daily verse, prayers & fellowship updates</span>
+./android-studio-app/app/src/main/assets/index.html:4024:          <!-- Item 1: Daily Scripture Verse -->
+./android-studio-app/app/src/main/assets/index.html:4089:    <!-- 2. DAILY BIBLE VERSE NOTIFICATIONS MODAL -->
+./android-studio-app/app/src/main/assets/index.html:4098:              <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #1F2937;">Daily Verse Reminder / दैनिक वचन सूचना</h3>
+./android-studio-app/app/src/main/assets/index.html:4200:          <!-- Live Interactive Widget Preview Canvas -->
+./android-studio-app/app/src/main/assets/index.html:4204:                 ROL DAILY VERSE
+./android-studio-app/app/src/main/assets/index.html:4243:                <li><strong>KWGT / Web Widget:</strong> खालील Daily Verse JSON Feed लिंक कॉपी करा व KWGT विजेटमधये सेट करा.</li>
+./android-studio-app/app/src/main/assets/index.html:4251:            <span>📋 Copy Daily Verse Live JSON Feed URL</span>
+./android-studio-app/app/src/main/assets/index.html:4283:          <div id="share-card-canvas" class="verse-card-canvas gradient-1">
+./android-studio-app/app/src/main/assets/index.html:4289:          <div class="canvas-customization-tools">
+./android-studio-app/app/src/main/assets/index.html:4555:            <!-- WhatsApp Share Button (Clean SVG, No Emoji) -->
+./android-studio-app/app/src/main/assets/index.html:4556:            <button class="prayer-action-btn secondary" id="btn-prayer-share-whatsapp" onclick="sharePrayerWhatsApp()">
+./android-studio-app/app/src/main/assets/index.html:5067:            <button id="btn-details-whatsapp-share" class="btn-secondary-mini" style="flex: 1; padding: 12px; border-radius: 12px; font-size: 13.5px; display: flex; align-items: center; justify-content: center; gap: 8px; min-width: 130px; background: rgba(37, 211, 102, 0.12); border-color: rgba(37, 211, 102, 0.3); color: #25d366 !important;">
+./android-studio-app/app/src/main/assets/index.html:5069:              <span>WhatsApp</span>
+./android-studio-app/app/src/main/assets/index.html:5463:              <select id="meeting-share-verse" class="dropdown-selector" style="width: 100%; background: #1e293b; color: #fff; border-color: #334155; padding: 10px;">
+./android-studio-app/app/src/main/assets/index.html:5895:            <button id="btn-drawer-whatsapp-share" onclick="try { if (window.shareAppViaWhatsApp) window.shareAppViaWhatsApp(); else showToast('App link copied to clipboard!'); } catch(e){}" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background: rgba(37, 211, 102, 0.1); border: 1px solid rgba(37, 211, 102, 0.3); color: #25d366; font-size: 13.5px; font-weight: 700; cursor: pointer; text-align: left;">
+./android-studio-app/app/src/main/assets/index.html:5899:                <div style="font-size: 11px; color: var(--text-muted); font-weight: 500;">Share River of Life Bible app on WhatsApp</div>
+./android-studio-app/app/src/main/assets/index.html:6269:            <span>WhatsApp</span>
+./android-studio-app/app/src/main/assets/app.js:749:  vodDayOffset: 0          // Daily verse day navigation offset (0 for today, up to -6)
+./android-studio-app/app/src/main/assets/app.js:944:  // Load local scripture indexes and daily verses manifest
+./android-studio-app/app/src/main/assets/app.js:946:    await Promise.all([loadBooksIndexEng(), loadBooksIndexMr(), loadDailyVersesManifest()]);
+./android-studio-app/app/src/main/assets/app.js:1503:    "vod_share_title": "Share to WhatsApp",
+./android-studio-app/app/src/main/assets/app.js:2938:window.toggleDailyVerseBookmark = function() {
+./android-studio-app/app/src/main/assets/app.js:2964:  if (typeof updateDailyVerseBookmarkUI === 'function') updateDailyVerseBookmarkUI();
+./android-studio-app/app/src/main/assets/app.js:2967:window.updateDailyVerseBookmarkUI = function() {
+./android-studio-app/app/src/main/assets/app.js:3061:    if (window.NativeWidgetBridge && typeof window.NativeWidgetBridge.updateDailyVerse === "function") {
+./android-studio-app/app/src/main/assets/app.js:3062:      window.NativeWidgetBridge.updateDailyVerse(displayText, displayRef);
+./android-studio-app/app/src/main/assets/app.js:3066:  if (typeof updateDailyVerseBookmarkUI === "function") {
+./android-studio-app/app/src/main/assets/app.js:3067:    updateDailyVerseBookmarkUI();
+./android-studio-app/app/src/main/assets/app.js:3076:  // Expanded Luminous Rotating Scenic Wallpapers from assets/daily_verses/
+./android-studio-app/app/src/main/assets/app.js:3077:  const images = (window.dailyVersesImageList && window.dailyVersesImageList.length > 0) ? window.dailyVersesImageList : [
+./android-studio-app/app/src/main/assets/app.js:3083:  const imgUrl = (typeof getVodImageUrl === "function") ? getVodImageUrl(dailyImg) : (dailyImg.includes('.') ? `assets/daily_verses/${dailyImg}` : `assets/daily_verses/${dailyImg}.png`);
+./android-studio-app/app/src/main/assets/app.js:3085:  const bgEl = document.getElementById("vod-dynamic-bg") || document.querySelector(".youversion-vod-bg") || document.querySelector(".daily-verse-card-bg");
+./android-studio-app/app/src/main/assets/app.js:3088:  const heroCard = document.getElementById("card-daily-verse-home");
+./android-studio-app/app/src/main/assets/app.js:3162:  const homeTabPills = document.querySelectorAll(".daily-verse-card .tab-pill");
+./android-studio-app/app/src/main/assets/app.js:3165:  let offsetLabelEn = "DAILY BIBLE VERSE";
+./android-studio-app/app/src/main/assets/app.js:3571:function playDailyVerseAudio() { console.log("playDailyVerseAudio disabled per user configuration - Bible reading audio only"); return;
+./android-studio-app/app/src/main/assets/app.js:3762:window.playDailyVerseAudio = playDailyVerseAudio;
+./android-studio-app/app/src/main/assets/app.js:5023:function playDailyVerseAudio() { console.log("playDailyVerseAudio disabled per user configuration - Bible reading audio only"); return;
+./android-studio-app/app/src/main/assets/app.js:5029:  const refText = vodRefEl ? vodRefEl.textContent.trim() : "Daily Verse";
+./android-studio-app/app/src/main/assets/app.js:5067:        if (indicatorEl) indicatorEl.textContent = `🔊 Daily Verse: ${refText}`;
+./android-studio-app/app/src/main/assets/app.js:6248:  document.getElementById("share-card-text").textContent = `"${selectedVerseMeta.text}"`;
+./android-studio-app/app/src/main/assets/app.js:6249:  document.getElementById("share-card-source").textContent = `${selectedVerseMeta.ref} • ${state.translation === 'eng' ? 'NLT' : 'MARVBSI'}`;
+./android-studio-app/app/src/main/assets/app.js:6258:  const canvas = document.getElementById("share-card-canvas");
+./android-studio-app/app/src/main/assets/app.js:6259:  canvas.className = "verse-card-canvas";
+./android-studio-app/app/src/main/assets/app.js:6260:  canvas.classList.add(gradClass);
+./android-studio-app/app/src/main/assets/app.js:6268:  const canvas = document.createElement("canvas");
+./android-studio-app/app/src/main/assets/app.js:6269:  canvas.width = 600;
+./android-studio-app/app/src/main/assets/app.js:6270:  canvas.height = 600;
+./android-studio-app/app/src/main/assets/app.js:6271:  const ctx = canvas.getContext("2d");
+./android-studio-app/app/src/main/assets/app.js:6335:    const dataUrl = canvas.toDataURL("image/png");
+./android-studio-app/app/src/main/assets/app.js:6349:    document.getElementById("share-card-canvas").style.display = "none";
+./android-studio-app/app/src/main/assets/app.js:6350:    container.insertBefore(img, document.querySelector(".canvas-customization-tools"));
+./android-studio-app/app/src/main/assets/app.js:6382:  document.getElementById("share-card-canvas").style.display = "flex";
+./android-studio-app/app/src/main/assets/app.js:6396:  // WhatsApp App Invite Trigger
+./android-studio-app/app/src/main/assets/app.js:6397:  const homeWaInviteBtn = document.getElementById("btn-home-whatsapp-invite");
+./android-studio-app/app/src/main/assets/app.js:6403:      window.open(`https://api.whatsapp.com/send?text=${encodedMsg}`, "_blank");
+./android-studio-app/app/src/main/assets/app.js:6769:      playDailyVerseAudio();
+./android-studio-app/app/src/main/assets/app.js:6786:  // Daily Verse Card tabs interaction
+./android-studio-app/app/src/main/assets/app.js:6787:  const dailyVerseTabPills = document.querySelectorAll(".daily-verse-header-tabs .tab-pill");
+./android-studio-app/app/src/main/assets/app.js:6788:  dailyVerseTabPills.forEach((pill, idx) => {
+./android-studio-app/app/src/main/assets/app.js:7469:      const verse = document.getElementById("meeting-share-verse").value;
+./android-studio-app/app/src/main/assets/app.js:7857:    en: `Study Commentary for ${bookName} ${chapter}:${verse}: This passage invites us to reflect on God's word and His purpose in our daily lives. Take time to meditate on these words.`
+./android-studio-app/app/src/main/assets/app.js:8660:function sharePrayerWhatsApp() {
+./android-studio-app/app/src/main/assets/app.js:8675:  const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+./android-studio-app/app/src/main/assets/app.js:8697:window.sharePrayerWhatsApp = sharePrayerWhatsApp;
+./android-studio-app/app/src/main/assets/app.js:10698:  // Auto-dismiss splash screen after 3.5 seconds to allow comfortable reading of daily verse & logo design
+./android-studio-app/app/src/main/assets/app.js:10725:                    body: "Daily Bible Verse Notifications enabled! 🙏",
+./android-studio-app/app/src/main/assets/app.js:10731:                  body: "Daily Bible Verse Notifications enabled! 🙏",
+./android-studio-app/app/src/main/assets/app.js:11836:  // Bind WhatsApp Share button
+./android-studio-app/app/src/main/assets/app.js:11837:  const waBtn = document.getElementById("btn-details-whatsapp-share");
+./android-studio-app/app/src/main/assets/app.js:11840:      shareMeetingToWhatsApp(m);
+./android-studio-app/app/src/main/assets/app.js:11852:// Share meeting invitation via WhatsApp
+./android-studio-app/app/src/main/assets/app.js:11853:function shareMeetingToWhatsApp(meeting) {
+./android-studio-app/app/src/main/assets/app.js:11860:  window.open(`https://api.whatsapp.com/send?text=${encodedText}`, "_blank");
+./android-studio-app/app/src/main/assets/app.js:11871:      showToast("Invitation Copied to Clipboard! Share to WhatsApp/Email.");
+./android-studio-app/app/src/main/assets/app.js:11873:      if (navigator.share) {
+./android-studio-app/app/src/main/assets/app.js:11874:        navigator.share({
+./android-studio-app/app/src/main/assets/app.js:12102:      // 1. Check if meeting has an external link (Google Meet, Zoom, WhatsApp)
+./android-studio-app/app/src/main/assets/app.js:12106:         meeting.customUrl.includes("whatsapp.com") || 
+./android-studio-app/app/src/main/assets/app.js:13008:    syncSharedBiblePassage(bookVal, chapVal, verseVal, transVal);
+./android-studio-app/app/src/main/assets/app.js:13236:function syncSharedBiblePassage(book, chapter, verse, translation) {
+./android-studio-app/app/src/main/assets/app.js:14606:window.dailyVersesImageList = [
+./android-studio-app/app/src/main/assets/app.js:14613:  if (!imgName) return 'assets/daily_verses/stars.png';
+./android-studio-app/app/src/main/assets/app.js:14614:  if (imgName.includes('.')) return `assets/daily_verses/${imgName}`;
+./android-studio-app/app/src/main/assets/app.js:14615:  return `assets/daily_verses/${imgName}.png`;
+./android-studio-app/app/src/main/assets/app.js:14618:window.loadDailyVersesManifest = async function() {
+./android-studio-app/app/src/main/assets/app.js:14620:    const res = await fetch('assets/daily_verses/manifest.json?t=' + Date.now());
+./android-studio-app/app/src/main/assets/app.js:14624:        window.dailyVersesImageList = data.images;
+./android-studio-app/app/src/main/assets/app.js:14625:        console.log(`[Daily Verses] Loaded ${data.images.length} wallpaper images from assets/daily_verses/`);
+./android-studio-app/app/src/main/assets/app.js:14629:    console.log('[Daily Verses] Using default wallpaper image list');
+./android-studio-app/app/src/main/assets/app.js:14655:  if (!window.dailyVersesImageList || window.dailyVersesImageList.length === 0) return;
+./android-studio-app/app/src/main/assets/app.js:14656:  window.currentVodImageIndex = (window.currentVodImageIndex + 1) % window.dailyVersesImageList.length;
+./android-studio-app/app/src/main/assets/app.js:14657:  const nextImg = window.dailyVersesImageList[window.currentVodImageIndex];
+./android-studio-app/app/src/main/assets/app.js:14683:  if (typeof window.loadDailyVersesManifest === "function") {
+./android-studio-app/app/src/main/assets/app.js:14684:    window.loadDailyVersesManifest();
+./android-studio-app/app/src/main/assets/app.js:16100:          <button onclick="sharePrayerMeetingWhatsApp('${m.title || 'Prayer Meeting'}', '${timeStr}', '${m.id}')" class="btn-secondary-mini" style="flex: 1; padding: 11px 14px; border-radius: 12px; font-size: 12.5px; font-weight: 700; border: 1.5px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+./android-studio-app/app/src/main/assets/app.js:16334:window.sharePrayerMeetingWhatsApp = function(title, time, roomCode) {
+./android-studio-app/app/src/main/assets/app.js:16337:  const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+./android-studio-app/app/src/main/assets/app.js:16534:   DAILY BIBLE VERSE IMAGE STUDIO, GALLERY SAVING & WHATSAPP SHARING
+./android-studio-app/app/src/main/assets/app.js:16707:  const images = (window.dailyVersesImageList && window.dailyVersesImageList.length > 0) ? window.dailyVersesImageList : [
+./android-studio-app/app/src/main/assets/app.js:16718:  const imgUrl = (typeof getVodImageUrl === "function") ? getVodImageUrl(dailyImg) : (dailyImg.includes('.') ? `assets/daily_verses/${dailyImg}` : `assets/daily_verses/${dailyImg}.png`);
+./android-studio-app/app/src/main/assets/app.js:16755:  const images = (window.dailyVersesImageList && window.dailyVersesImageList.length > 0) ? window.dailyVersesImageList : [
+./android-studio-app/app/src/main/assets/app.js:16765:  const imgUrl = (typeof getVodImageUrl === "function") ? getVodImageUrl(dailyImg) : (dailyImg.includes('.') ? `assets/daily_verses/${dailyImg}` : `assets/daily_verses/${dailyImg}.png`);
+./android-studio-app/app/src/main/assets/app.js:16767:  const bgHome = document.getElementById("card-daily-verse-home");
+./android-studio-app/app/src/main/assets/app.js:16802:    const images = (window.dailyVersesImageList && window.dailyVersesImageList.length > 0) ? window.dailyVersesImageList : [
+./android-studio-app/app/src/main/assets/app.js:16807:    const imgUrl = (typeof getVodImageUrl === "function") ? getVodImageUrl(dailyImg) : (dailyImg.includes('.') ? `assets/daily_verses/${dailyImg}` : `assets/daily_verses/${dailyImg}.png`);
+./android-studio-app/app/src/main/assets/app.js:16825:    const canvas = document.createElement("canvas");
+./android-studio-app/app/src/main/assets/app.js:16826:    canvas.width = 1080;
+./android-studio-app/app/src/main/assets/app.js:16827:    canvas.height = 1920; // 9:16 WhatsApp Status, Story & Fullscreen Mobile Wallpapers
+./android-studio-app/app/src/main/assets/app.js:16828:    const ctx = canvas.getContext("2d");
+./android-studio-app/app/src/main/assets/app.js:16848:      const bgGrad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+./android-studio-app/app/src/main/assets/app.js:16853:      ctx.fillRect(0, 0, canvas.width, canvas.height);
+./android-studio-app/app/src/main/assets/app.js:16859:        const scale = Math.max(canvas.width / bgImg.width, canvas.height / bgImg.height);
+./android-studio-app/app/src/main/assets/app.js:16860:        const x = (canvas.width - bgImg.width * scale) / 2;
+./android-studio-app/app/src/main/assets/app.js:16861:        const y = (canvas.height - bgImg.height * scale) / 2;
+./android-studio-app/app/src/main/assets/app.js:16871:    const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+./android-studio-app/app/src/main/assets/app.js:16878:    ctx.fillRect(0, 0, canvas.width, canvas.height);
+./android-studio-app/app/src/main/assets/app.js:16881:    const centerX = canvas.width / 2;
+./android-studio-app/app/src/main/assets/app.js:16917:    let startY = Math.round((canvas.height - totalContentHeight) / 2) - 40;
+./android-studio-app/app/src/main/assets/app.js:16986:    // 4. Centered Premium Watermark Pill at Bottom (Safe from WhatsApp reply bar & system gestures)
+./android-studio-app/app/src/main/assets/app.js:16989:    const badgeX = (canvas.width - badgeW) / 2;
+./android-studio-app/app/src/main/assets/app.js:16990:    const badgeY = canvas.height - badgeH - 96;
+./android-studio-app/app/src/main/assets/app.js:17024:    const filename = `River_of_Life_Daily_Verse_${displayRef.replace(/[: ]/g, "_")}.png`;
+./android-studio-app/app/src/main/assets/app.js:17025:    const dataUrl = canvas.toDataURL("image/png");
+./android-studio-app/app/src/main/assets/app.js:17027:    canvas.toBlob((blob) => {
+./android-studio-app/app/src/main/assets/app.js:17037:window.saveExactDailyVerseImage = async function() {
+./android-studio-app/app/src/main/assets/app.js:17059:        await navigator.share({
+./android-studio-app/app/src/main/assets/app.js:17060:          title: `River of Life - Daily Verse`,
+./android-studio-app/app/src/main/assets/app.js:17128:  shareDailyVerseToWhatsApp();
+./android-studio-app/app/src/main/assets/app.js:17131:window.shareDailyVerseToWhatsApp = async function() {
+./android-studio-app/app/src/main/assets/app.js:17137:    const shareText = `📖 आजचे दैनिक वचन (Verse of the Day)\n\n"${displayText}"\n— ${displayRef} (${state.translation === 'eng' ? 'NLT' : 'MARVBSI'})\n\nजीवन नदी बायबल ॲपवरून सामायिक केले 🙏✨\nhttps://gauravsalve236-lgtm.github.io/River-of-life/`;
+./android-studio-app/app/src/main/assets/app.js:17143:    // 1. Try Native Web Share API with File (Direct WhatsApp share on mobile)
+./android-studio-app/app/src/main/assets/app.js:17146:      await navigator.share({
+./android-studio-app/app/src/main/assets/app.js:17155:    // 2. Fallback: Automatically download image and open WhatsApp with pre-filled text
+./android-studio-app/app/src/main/assets/app.js:17163:    const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
+./android-studio-app/app/src/main/assets/app.js:17164:    window.open(whatsappUrl, "_blank");
+./android-studio-app/app/src/main/assets/app.js:17168:    console.error("WhatsApp share error:", err);
+./android-studio-app/app/src/main/assets/app.js:17169:    // Direct WhatsApp text share fallback
+./android-studio-app/app/src/main/assets/app.js:17174:    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`, "_blank");
+./android-studio-app/app/src/main/assets/app.js:17178:window.copyDailyVerseText = function() {
+./android-studio-app/app/src/main/assets/app.js:17195:   DAILY VERSE NOTIFICATION REMINDERS SYSTEM
+./android-studio-app/app/src/main/assets/app.js:17275:  const title = (lang === "eng") ? `📖 Daily Verse - ${vod.engRef}` : `📖 आजचे दैनिक वचन - ${vod.ref}`;
+./android-studio-app/app/src/main/assets/app.js:17422:  const feedUrl = `${window.location.origin}${window.location.pathname.replace('index.html', '')}api/daily_verse.json`;
+./android-studio-app/app/src/main/assets/app.js:18687:  if (navigator.share) {
+./android-studio-app/app/src/main/assets/app.js:18688:    navigator.share({ title: `Word of the Day: ${word.term}`, text: text }).catch(() => {});
+./android-studio-app/app/src/main/assets/app.js:18690:    const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+./android-studio-app/app/src/main/assets/app.js:18697:  const canvas = document.createElement('canvas');
+./android-studio-app/app/src/main/assets/app.js:18698:  canvas.width = 1080;
+./android-studio-app/app/src/main/assets/app.js:18699:  canvas.height = 1080;
+./android-studio-app/app/src/main/assets/app.js:18700:  const ctx = canvas.getContext('2d');
+./android-studio-app/app/src/main/assets/app.js:18783:  link.href = canvas.toDataURL('image/png');
+./android-studio-app/app/src/main/assets/app.js:18935:    const vodEl = document.getElementById("card-daily-verse-home");
+./android-studio-app/app/src/main/assets/app.js:20404:      const vodRes = await fetch(`${window.ROL_API_BASE}/daily-verses/today`).then(r => r.json());
+./android-studio-app/app/src/main/assets/app.js:20531:async function shareVerseOfTheDay() {
+./android-studio-app/app/src/main/assets/app.js:20536:  if (navigator.share) {
+./android-studio-app/app/src/main/assets/app.js:20538:      await navigator.share({
+./android-studio-app/app/src/main/assets/app.js:20554:window.shareVerseOfTheDay = shareVerseOfTheDay;
+./android-studio-app/app/src/main/assets/app.js:20609:    image: "assets/daily_verses/misty_mountains.jpg"
+./android-studio-app/app/src/main/assets/app.js:20617:    image: "assets/daily_verses/freedom_field.jpg"
+./android-studio-app/app/src/main/assets/app.js:20625:    image: "assets/daily_verses/joy_rain.jpg"
+./android-studio-app/app/src/main/assets/app.js:20633:    image: "assets/daily_verses/ocean.png"
+./android-studio-app/app/src/main/assets/app.js:20641:    image: "assets/daily_verses/calm_waters.png"
+./android-studio-app/app/src/main/assets/app.js:20649:    image: "assets/daily_verses/mount_zion.png"
+./android-studio-app/app/src/main/assets/app.js:20657:    image: "assets/daily_verses/wisdom_guidance.png"
+./android-studio-app/app/src/main/assets/app.js:20665:    image: "assets/daily_verses/joy_rain.jpg"
+./android-studio-app/app/src/main/assets/app.js:20673:    image: "assets/daily_verses/forest.png"
+./android-studio-app/app/src/main/assets/app.js:20681:    image: "assets/daily_verses/peaceful_pastures.png"
+./android-studio-app/app/src/main/assets/app.js:20689:    image: "assets/daily_verses/candlelight.png"
+./android-studio-app/app/src/main/assets/app.js:20697:    image: "assets/daily_verses/stars.png"
+./android-studio-app/app/src/main/assets/app.js:20705:    image: "assets/daily_verses/river_of_life.png"
+./android-studio-app/app/src/main/assets/app.js:20713:    image: "assets/daily_verses/freedom_field.jpg"
+./android-studio-app/app/src/main/assets/app.js:20721:    image: "assets/daily_verses/misty_mountains.jpg"
+./android-studio-app/app/src/main/assets/app.js:21431:  const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+./android-studio-app/app/src/main/assets/app.js:21762:    triggerMorningDailyVerseNotification();
+./android-studio-app/app/src/main/assets/app.js:21767:function triggerMorningDailyVerseNotification() {
+./android-studio-app/app/src/main/assets/app.js:21776:    const title = isEng ? "🌅 River of Life • Daily Morning Verse" : "🌅 जीवन नदी • आजचे सकाळचे वचन";
+./android-studio-app/app/src/main/assets/app.js:21796:    console.log("[Notification Scheduler] 7:00 AM Daily verse notification delivered successfully.");
+./index.html:265:              <!-- 2. Daily Verse Card: Prominent card with inline action buttons (Read, Listen, Save, Share) -->
+./index.html:266:              <div class="home-vod-card" id="card-daily-verse-home" onclick="openFullscreenVOD()" title="Open Daily Verse Studio & Gallery / दैनिक वचन स्टुडिओ उघडा" style="background-image: url('assets/daily_verses/sunrise.png');">
+./index.html:285:                  <button class="home-vod-btn" id="home-vod-btn-save-img" onclick="saveExactDailyVerseImage(); event.stopPropagation();" title="Save Image to Gallery / फोटो सेव्ह करा" aria-label="Save to Gallery">
+./index.html:288:                  <button class="home-vod-btn" id="home-vod-btn-share" onclick="shareDailyVerseToWhatsApp(); event.stopPropagation();" title="Share Verse / शेअर करा" aria-label="Share Verse">
+./index.html:2290:                    <p style="margin: 2px 0 0 0; font-size: 12px; color: var(--text-muted);">Override and publish today's daily Bible verse displayed across all devices.</p>
+./index.html:2353:                        <span style="font-size: 11px; font-weight: 800; color: #fca5a5; letter-spacing: 0.5px;">✉ DAILY BIBLE VERSE</span>
+./index.html:2365:                    💾 Save & Publish Daily Verse / वचन परकाशित करा
+./index.html:3855:              <button onclick="saveExactDailyVerseImage(); toggleVodOptionsMenu();" style="display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; background: transparent; border: none; color: #fff; font-size: 13px; font-weight: 600; text-align: left; border-radius: 10px; cursor: pointer;">
+./index.html:3861:              <button onclick="shareDailyVerseToWhatsApp(); toggleVodOptionsMenu();" style="display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; background: transparent; border: none; color: #4ade80; font-size: 13px; font-weight: 600; text-align: left; border-radius: 10px; cursor: pointer;">
+./index.html:3862:                <span>💬</span> <span>WhatsApp Share / शेअर करा</span>
+./index.html:3864:              <button onclick="copyDailyVerseText(); toggleVodOptionsMenu();" style="display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; background: transparent; border: none; color: #fff; font-size: 13px; font-weight: 600; text-align: left; border-radius: 10px; cursor: pointer;">
+./index.html:3914:          <!-- Left Floating Action Controls (Like, Read, Save Image, Card Studio, Theme, WhatsApp) -->
+./index.html:3929:            <button id="btn-vod-fs-save" onclick="saveExactDailyVerseImage();" title="Save Image / गॅलरीमधये सेवह करा" style="background: transparent; border: none; color: #fff; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; padding: 4px;">
+./index.html:3946:            <!-- WhatsApp Share Button -->
+./index.html:3947:            <button id="btn-vod-fs-whatsapp" onclick="shareDailyVerseToWhatsApp();" title="WhatsApp Status / वहॉटसॲप सटेटस" style="background: rgba(34, 197, 94, 0.25); border: 1px solid #22c55e; color: #4ade80; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 12px rgba(34,197,94,0.3);">
+./index.html:3954:            <img id="vod-thumbnail-preview" src="assets/daily_verses/sunrise.png" alt="Wallpaper" style="width: 100%; height: 100%; object-fit: cover;" />
+./index.html:3980:          <img id="vod-preview-rendered-img" src="" alt="Daily Verse Image" style="width: 100%; max-height: 52vh; object-fit: contain; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.15);" />
+./index.html:3996:            <span>💬 WhatsApp Share</span>
+./index.html:4015:              <span style="font-size: 11.5px; color: var(--text-muted);">Daily verse, prayers & fellowship updates</span>
+./index.html:4024:          <!-- Item 1: Daily Scripture Verse -->
+./index.html:4089:    <!-- 2. DAILY BIBLE VERSE NOTIFICATIONS MODAL -->
+./index.html:4098:              <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #1F2937;">Daily Verse Reminder / दैनिक वचन सूचना</h3>
+./index.html:4200:          <!-- Live Interactive Widget Preview Canvas -->
+./index.html:4204:                 ROL DAILY VERSE
+./index.html:4243:                <li><strong>KWGT / Web Widget:</strong> खालील Daily Verse JSON Feed लिंक कॉपी करा व KWGT विजेटमधये सेट करा.</li>
+./index.html:4251:            <span>📋 Copy Daily Verse Live JSON Feed URL</span>
+./index.html:4283:          <div id="share-card-canvas" class="verse-card-canvas gradient-1">
+./index.html:4289:          <div class="canvas-customization-tools">
+./index.html:4555:            <!-- WhatsApp Share Button (Clean SVG, No Emoji) -->
+./index.html:4556:            <button class="prayer-action-btn secondary" id="btn-prayer-share-whatsapp" onclick="sharePrayerWhatsApp()">
+./index.html:5067:            <button id="btn-details-whatsapp-share" class="btn-secondary-mini" style="flex: 1; padding: 12px; border-radius: 12px; font-size: 13.5px; display: flex; align-items: center; justify-content: center; gap: 8px; min-width: 130px; background: rgba(37, 211, 102, 0.12); border-color: rgba(37, 211, 102, 0.3); color: #25d366 !important;">
+./index.html:5069:              <span>WhatsApp</span>
+./index.html:5463:              <select id="meeting-share-verse" class="dropdown-selector" style="width: 100%; background: #1e293b; color: #fff; border-color: #334155; padding: 10px;">
+./index.html:5895:            <button id="btn-drawer-whatsapp-share" onclick="try { if (window.shareAppViaWhatsApp) window.shareAppViaWhatsApp(); else showToast('App link copied to clipboard!'); } catch(e){}" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background: rgba(37, 211, 102, 0.1); border: 1px solid rgba(37, 211, 102, 0.3); color: #25d366; font-size: 13.5px; font-weight: 700; cursor: pointer; text-align: left;">
+./index.html:5899:                <div style="font-size: 11px; color: var(--text-muted); font-weight: 500;">Share River of Life Bible app on WhatsApp</div>
+./index.html:6269:            <span>WhatsApp</span>
+./server/src/controllers/notificationController.js:46:    const { dailyVerse, prayerReminders, meetingAlerts, language, theme } = req.body;
+./server/src/controllers/notificationController.js:49:      INSERT INTO user_preferences (user_id, notification_daily_verse, notification_prayer_reminders, notification_meeting_alerts, language, theme)
+./server/src/controllers/notificationController.js:52:        notification_daily_verse = COALESCE(EXCLUDED.notification_daily_verse, notification_daily_verse),
+./server/src/controllers/notificationController.js:60:      dailyVerse !== undefined ? (dailyVerse ? 1 : 0) : 1,
+./server/src/db/connection.js:168:        notification_daily_verse INTEGER DEFAULT 1,
+./server/src/db/connection.js:635:          ['sec_hero_01', 'welcome_banner', 'Welcome & Verse of the Day', 'Daily Scripture Meditation', 'Hero', 1, 1],
+./app.js:749:  vodDayOffset: 0          // Daily verse day navigation offset (0 for today, up to -6)
+./app.js:944:  // Load local scripture indexes and daily verses manifest
+./app.js:946:    await Promise.all([loadBooksIndexEng(), loadBooksIndexMr(), loadDailyVersesManifest()]);
+./app.js:1503:    "vod_share_title": "Share to WhatsApp",
+./app.js:2938:window.toggleDailyVerseBookmark = function() {
+./app.js:2964:  if (typeof updateDailyVerseBookmarkUI === 'function') updateDailyVerseBookmarkUI();
+./app.js:2967:window.updateDailyVerseBookmarkUI = function() {
+./app.js:3061:    if (window.NativeWidgetBridge && typeof window.NativeWidgetBridge.updateDailyVerse === "function") {
+./app.js:3062:      window.NativeWidgetBridge.updateDailyVerse(displayText, displayRef);
+./app.js:3066:  if (typeof updateDailyVerseBookmarkUI === "function") {
+./app.js:3067:    updateDailyVerseBookmarkUI();
+./app.js:3076:  // Expanded Luminous Rotating Scenic Wallpapers from assets/daily_verses/
+./app.js:3077:  const images = (window.dailyVersesImageList && window.dailyVersesImageList.length > 0) ? window.dailyVersesImageList : [
+./app.js:3083:  const imgUrl = (typeof getVodImageUrl === "function") ? getVodImageUrl(dailyImg) : (dailyImg.includes('.') ? `assets/daily_verses/${dailyImg}` : `assets/daily_verses/${dailyImg}.png`);
+./app.js:3085:  const bgEl = document.getElementById("vod-dynamic-bg") || document.querySelector(".youversion-vod-bg") || document.querySelector(".daily-verse-card-bg");
+./app.js:3088:  const heroCard = document.getElementById("card-daily-verse-home");
+./app.js:3162:  const homeTabPills = document.querySelectorAll(".daily-verse-card .tab-pill");
+./app.js:3165:  let offsetLabelEn = "DAILY BIBLE VERSE";
+./app.js:3571:function playDailyVerseAudio() { console.log("playDailyVerseAudio disabled per user configuration - Bible reading audio only"); return;
+./app.js:3762:window.playDailyVerseAudio = playDailyVerseAudio;
+./app.js:5023:function playDailyVerseAudio() { console.log("playDailyVerseAudio disabled per user configuration - Bible reading audio only"); return;
+./app.js:5029:  const refText = vodRefEl ? vodRefEl.textContent.trim() : "Daily Verse";
+./app.js:5067:        if (indicatorEl) indicatorEl.textContent = `🔊 Daily Verse: ${refText}`;
+./app.js:6248:  document.getElementById("share-card-text").textContent = `"${selectedVerseMeta.text}"`;
+./app.js:6249:  document.getElementById("share-card-source").textContent = `${selectedVerseMeta.ref} • ${state.translation === 'eng' ? 'NLT' : 'MARVBSI'}`;
+./app.js:6258:  const canvas = document.getElementById("share-card-canvas");
+./app.js:6259:  canvas.className = "verse-card-canvas";
+./app.js:6260:  canvas.classList.add(gradClass);
+./app.js:6268:  const canvas = document.createElement("canvas");
+./app.js:6269:  canvas.width = 600;
+./app.js:6270:  canvas.height = 600;
+./app.js:6271:  const ctx = canvas.getContext("2d");
+./app.js:6335:    const dataUrl = canvas.toDataURL("image/png");
+./app.js:6349:    document.getElementById("share-card-canvas").style.display = "none";
+./app.js:6350:    container.insertBefore(img, document.querySelector(".canvas-customization-tools"));
+./app.js:6382:  document.getElementById("share-card-canvas").style.display = "flex";
+./app.js:6396:  // WhatsApp App Invite Trigger
+./app.js:6397:  const homeWaInviteBtn = document.getElementById("btn-home-whatsapp-invite");
+./app.js:6403:      window.open(`https://api.whatsapp.com/send?text=${encodedMsg}`, "_blank");
+./app.js:6769:      playDailyVerseAudio();
+./app.js:6786:  // Daily Verse Card tabs interaction
+./app.js:6787:  const dailyVerseTabPills = document.querySelectorAll(".daily-verse-header-tabs .tab-pill");
+./app.js:6788:  dailyVerseTabPills.forEach((pill, idx) => {
+./app.js:7469:      const verse = document.getElementById("meeting-share-verse").value;
+./app.js:7857:    en: `Study Commentary for ${bookName} ${chapter}:${verse}: This passage invites us to reflect on God's word and His purpose in our daily lives. Take time to meditate on these words.`
+./app.js:8660:function sharePrayerWhatsApp() {
+./app.js:8675:  const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+./app.js:8697:window.sharePrayerWhatsApp = sharePrayerWhatsApp;
+./app.js:10698:  // Auto-dismiss splash screen after 3.5 seconds to allow comfortable reading of daily verse & logo design
+./app.js:10725:                    body: "Daily Bible Verse Notifications enabled! 🙏",
+./app.js:10731:                  body: "Daily Bible Verse Notifications enabled! 🙏",
+./app.js:11836:  // Bind WhatsApp Share button
+./app.js:11837:  const waBtn = document.getElementById("btn-details-whatsapp-share");
+./app.js:11840:      shareMeetingToWhatsApp(m);
+./app.js:11852:// Share meeting invitation via WhatsApp
+./app.js:11853:function shareMeetingToWhatsApp(meeting) {
+./app.js:11860:  window.open(`https://api.whatsapp.com/send?text=${encodedText}`, "_blank");
+./app.js:11871:      showToast("Invitation Copied to Clipboard! Share to WhatsApp/Email.");
+./app.js:11873:      if (navigator.share) {
+./app.js:11874:        navigator.share({
+./app.js:12102:      // 1. Check if meeting has an external link (Google Meet, Zoom, WhatsApp)
+./app.js:12106:         meeting.customUrl.includes("whatsapp.com") || 
+./app.js:13010:    syncSharedBiblePassage(bookVal, chapVal, verseVal, transVal);
+./app.js:13238:function syncSharedBiblePassage(book, chapter, verse, translation) {
+./app.js:14608:window.dailyVersesImageList = [
+./app.js:14615:  if (!imgName) return 'assets/daily_verses/stars.png';
+./app.js:14616:  if (imgName.includes('.')) return `assets/daily_verses/${imgName}`;
+./app.js:14617:  return `assets/daily_verses/${imgName}.png`;
+./app.js:14620:window.loadDailyVersesManifest = async function() {
+./app.js:14622:    const res = await fetch('assets/daily_verses/manifest.json?t=' + Date.now());
+./app.js:14626:        window.dailyVersesImageList = data.images;
+./app.js:14627:        console.log(`[Daily Verses] Loaded ${data.images.length} wallpaper images from assets/daily_verses/`);
+./app.js:14631:    console.log('[Daily Verses] Using default wallpaper image list');
+./app.js:14657:  if (!window.dailyVersesImageList || window.dailyVersesImageList.length === 0) return;
+./app.js:14658:  window.currentVodImageIndex = (window.currentVodImageIndex + 1) % window.dailyVersesImageList.length;
+./app.js:14659:  const nextImg = window.dailyVersesImageList[window.currentVodImageIndex];
+./app.js:14685:  if (typeof window.loadDailyVersesManifest === "function") {
+./app.js:14686:    window.loadDailyVersesManifest();
+./app.js:16102:          <button onclick="sharePrayerMeetingWhatsApp('${m.title || 'Prayer Meeting'}', '${timeStr}', '${m.id}')" class="btn-secondary-mini" style="flex: 1; padding: 11px 14px; border-radius: 12px; font-size: 12.5px; font-weight: 700; border: 1.5px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+./app.js:16336:window.sharePrayerMeetingWhatsApp = function(title, time, roomCode) {
+./app.js:16339:  const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+./app.js:16536:   DAILY BIBLE VERSE IMAGE STUDIO, GALLERY SAVING & WHATSAPP SHARING
+./app.js:16709:  const images = (window.dailyVersesImageList && window.dailyVersesImageList.length > 0) ? window.dailyVersesImageList : [
+./app.js:16720:  const imgUrl = (typeof getVodImageUrl === "function") ? getVodImageUrl(dailyImg) : (dailyImg.includes('.') ? `assets/daily_verses/${dailyImg}` : `assets/daily_verses/${dailyImg}.png`);
+./app.js:16757:  const images = (window.dailyVersesImageList && window.dailyVersesImageList.length > 0) ? window.dailyVersesImageList : [
+./app.js:16767:  const imgUrl = (typeof getVodImageUrl === "function") ? getVodImageUrl(dailyImg) : (dailyImg.includes('.') ? `assets/daily_verses/${dailyImg}` : `assets/daily_verses/${dailyImg}.png`);
+./app.js:16769:  const bgHome = document.getElementById("card-daily-verse-home");
+./app.js:16804:    const images = (window.dailyVersesImageList && window.dailyVersesImageList.length > 0) ? window.dailyVersesImageList : [
+./app.js:16809:    const imgUrl = (typeof getVodImageUrl === "function") ? getVodImageUrl(dailyImg) : (dailyImg.includes('.') ? `assets/daily_verses/${dailyImg}` : `assets/daily_verses/${dailyImg}.png`);
+./app.js:16827:    const canvas = document.createElement("canvas");
