@@ -12222,11 +12222,6 @@ function launchLiveMeetingRoom(meeting, stream) {
                   height: { ideal: 720, max: 1080 },
                   width: { ideal: 1280, max: 1920 },
                   frameRate: { ideal: 30, max: 30 }
-                },
-                audio: {
-                  autoGainControl: true,
-                  echoCancellation: true,
-                  noiseSuppression: true
                 }
               },
               channelLastN: -1,
@@ -12240,7 +12235,6 @@ function launchLiveMeetingRoom(meeting, stream) {
               },
               disableEchoCancellation: false,
               noiseSuppression: true,
-              autoGainControl: true,
               audioQuality: {
                 stereo: false,
                 opusMaxAverageBitrate: 96000
@@ -12263,14 +12257,15 @@ function launchLiveMeetingRoom(meeting, stream) {
 
           // Intercept createElement for the iframe to guarantee WebKit permissions policy delegation (iPhone Safari)
           const origCreateElement = document.createElement.bind(document);
+          const allowPolicy = "camera; microphone; speaker-selection; display-capture; autoplay; fullscreen; picture-in-picture; clipboard-write; camera *; microphone *;";
           document.createElement = function(tagName, opts) {
             const el = origCreateElement(tagName, opts);
             if (tagName && typeof tagName === "string" && tagName.toLowerCase() === "iframe") {
-              el.setAttribute("allow", "camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; clipboard-write *;");
+              el.setAttribute("allow", allowPolicy);
               el.setAttribute("allowusermedia", "true");
               el.setAttribute("playsinline", "true");
               el.setAttribute("webkit-playsinline", "true");
-              el.allow = "camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; clipboard-write *;";
+              el.allow = allowPolicy;
             }
             return el;
           };
@@ -12321,7 +12316,7 @@ function launchLiveMeetingRoom(meeting, stream) {
             createdIframe.style.border = "none";
             createdIframe.style.borderRadius = "14px";
             createdIframe.style.background = "#090d16";
-            createdIframe.setAttribute("allow", "camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; clipboard-write *;");
+            createdIframe.setAttribute("allow", allowPolicy);
             createdIframe.setAttribute("allowusermedia", "true");
             createdIframe.setAttribute("playsinline", "true");
             createdIframe.setAttribute("webkit-playsinline", "true");
@@ -12464,6 +12459,20 @@ function switchToJitsiAndReload() {
 
 window.saveAndLaunchInlineDaily = saveAndLaunchInlineDaily;
 window.switchToJitsiAndReload = switchToJitsiAndReload;
+
+function openCurrentMeetingInExternalBrowser() {
+  const meetingId = (activeMeetingSession && activeMeetingSession.meetingId) ? activeMeetingSession.meetingId : "default";
+  const meetingIdSlug = meetingId.toString().replace(/[^a-zA-Z0-9]/g, '_');
+  const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
+  const loggedIn = (state && state.currentUser) ? state.currentUser.username : "Member";
+  const jitsiServerDomain = (localStorage.getItem("rol_jitsi_server") || "jitsi.riot.im")
+    .replace(/^https?:\/\//, '')
+    .replace(/\/+$/, "");
+  const extUrl = `https://${jitsiServerDomain}/${roomSlug}#config.disableDeepLinking=true&config.startWithAudioMuted=false&config.prejoinPageEnabled=false&userInfo.displayName=${encodeURIComponent(loggedIn)}`;
+  window.open(extUrl, "_blank");
+  showToast("Opening Live Sanctuary in browser tab 🙏");
+}
+window.openCurrentMeetingInExternalBrowser = openCurrentMeetingInExternalBrowser;
 
 
 // ═══════════════════════════════════════════════════════════════
