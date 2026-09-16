@@ -4103,7 +4103,7 @@ function getBsiUsfmCode(bookInput) {
   return BSI_USFM_MAP[str] || "GEN";
 }
 
-let bsiCloudFrontToken = 'Key-Pair-Id=KCC7HS8KPVISV&Signature=tR1o6g1lk9JtKH071s4pTydm-yEp1wLpwdDCW3P69kXFUCPCcus~9Nm2vLw4VI4xxVxeepkdRJZ4TN3BrLD6e-Gj07bR90kxKnDBleNXSvCFYuNMCDe7h3EOZa5nkTcrPnjWfI0qi4mBSrzcNn2o0ygsvjwvZSZN6P1u0A9-s8eW6NmemtBKOmb2i4hco~hYPj6Ltiz9Qzj4NyCD58QMkMG1EVAQoH8kDEcjpoocXEz~dgGX5~8zececaVk6X7lMqmShTtNWnj5dznOkeCsvp6fcCF4E8Mn0rBt~iHwz1~t71ZThH7azqx3ipA6neFUfD7eG-eSokzspaBLC7aRsEA__&Expires=1789463254&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9kMWhrcHV6Mm81YTJ4dy5jbG91ZGZyb250Lm5ldC9zb3VyY2UvNTU1NDc2YzIzOTBjMTAyZC0wNC8qIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzg5NDYzMjU0fX19XX0_';
+let bsiCloudFrontToken = 'Key-Pair-Id=KCC7HS8KPVISV&Signature=BU48XgzpcLtO1TjgFo4uakR26Cym-jSXdgFSS1oQyrbRydw2vib6D0iFEPXTSwrZD6pvopfKPRmKSbTGMqb6mtTzppf2U1bnWEtg-eGMPN5P3qXbt6kIrg4O8rLaqvnJ6kKBZ8cEKzGg6OC1ctM8gPbJdgjfNADWOuGyZXtp1jA6vvndXj1ecpR1ym~Mx0cZsFxcYIh-lE-Y4SgAv8VFIW~stpfEwR6qAlgHe5-w0lgQG4JrFfFNHNko2WsGkZEKjktUqhgPZohziaaVosWk3tGc5tNvgWn~6CZgppAI79D8hBY4G0RgsP5slNvC85MjCBgBdkjQg-dlT-QOzbd8Yg__&Expires=1789575432&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9kMWhrcHV6Mm81YTJ4dy5jbG91ZGZyb250Lm5ldC9zb3VyY2UvNTU1NDc2YzIzOTBjMTAyZC0wNC8qIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzg5NTc1NDMyfX19XX0_';
 
 function isBsiTokenValid(token) {
   if (!token || typeof token !== 'string') return false;
@@ -16866,10 +16866,9 @@ window.generateExactVerseImageBlob = function() {
 
     // Helper to asynchronously preload images safely without CORS taint on Safari
     const loadImage = (src) => new Promise((res) => {
+      if (!src) return res(null);
       const img = new Image();
-      if (src && (src.startsWith("http://") || src.startsWith("https://")) && !src.startsWith(window.location.origin)) {
-        img.crossOrigin = "anonymous";
-      }
+      img.crossOrigin = "anonymous";
       img.onload = () => res(img);
       img.onerror = () => res(null);
       img.src = src;
@@ -16916,7 +16915,7 @@ window.generateExactVerseImageBlob = function() {
 
     // 3. Multi-Line Text Layout with Safe Margins & Perfect Centering
     const centerX = canvas.width / 2;
-    const textMaxWidth = 760; // 160px safe padding on each side for mobile screen balance
+    const textMaxWidth = 720; // 180px safe padding on each side for mobile screen balance
 
     // Dynamic font sizing for long / short scriptures
     let fontSize = 36;
@@ -16925,7 +16924,10 @@ window.generateExactVerseImageBlob = function() {
     else if (displayText.length <= 240) fontSize = 32;
     else fontSize = 28;
 
-    const fontFamily = theme.fontFamily || "'Noto Serif Devanagari', 'Poppins', Georgia, serif";
+    const isMarathi = state.translation !== "eng";
+    const fontFamily = isMarathi
+      ? "'Noto Serif Devanagari', 'Poppins', sans-serif"
+      : (theme.fontFamily || "'Lora', Georgia, serif");
     ctx.font = `${theme.fontWeight || '700'} ${fontSize}px ${fontFamily}`;
 
     const words = displayText.split(/\s+/);
@@ -16935,13 +16937,13 @@ window.generateExactVerseImageBlob = function() {
       const testLine = currentLine ? `${currentLine} ${words[n]}` : words[n];
       const metrics = ctx.measureText(testLine);
       if (metrics.width > textMaxWidth && currentLine) {
-        lines.push(currentLine);
+        lines.push(currentLine.trim());
         currentLine = words[n];
       } else {
         currentLine = testLine;
       }
     }
-    if (currentLine) lines.push(currentLine);
+    if (currentLine) lines.push(currentLine.trim());
 
     const lineHeight = Math.round(fontSize * 1.75);
     const textBlockHeight = lines.length * lineHeight;
@@ -16982,11 +16984,13 @@ window.generateExactVerseImageBlob = function() {
     ctx.shadowBlur = 24;
     ctx.shadowOffsetX = 0;
     ctx.shadowOffsetY = 4;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
 
     for (let i = 0; i < lines.length; i++) {
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText(lines[i], centerX, startY + (i * lineHeight));
+      ctx.fillText(lines[i].trim(), centerX, startY + (i * lineHeight));
     }
     startY += textBlockHeight + 24;
 
@@ -22210,21 +22214,7 @@ setTimeout(() => {
 
 
 
-/* RoL centered Daily Verse share patch */
-(function(){
-  function meta(){return {text:(document.getElementById('home-vod-text')||{}).textContent?.replace(/[“”]/g,'').trim()||'',ref:(document.getElementById('home-vod-ref')||{}).textContent?.trim()||'River of Life'};}
-  async function makeImage(){
-    const m=meta(), c=document.createElement('canvas'); c.width=c.height=1080; const x=c.getContext('2d');
-    const card=document.getElementById('card-daily-verse-home'); let bg='';
-    if(card){const z=getComputedStyle(card).backgroundImage.match(/url\(["']?(.*?)["']?\)/); if(z) bg=z[1];}
-    try{if(bg){const i=await new Promise((ok,no)=>{const q=new Image();q.onload=()=>ok(q);q.onerror=no;q.src=new URL(bg,location.href).href});const sc=Math.max(1080/i.width,1080/i.height),w=i.width*sc,h=i.height*sc;x.drawImage(i,(1080-w)/2,(1080-h)/2,w,h)}else throw 0}catch(e){x.fillStyle='#18243a';x.fillRect(0,0,1080,1080)}
-    x.fillStyle='rgba(0,0,0,.42)';x.fillRect(0,0,1080,1080);x.fillStyle='#fff';x.textAlign='center';x.textBaseline='middle';x.font='700 34px Georgia,serif';
-    const words=m.text.split(/\s+/),lines=[],max=820,lh=54;let line='';words.forEach(w=>{const t=line?line+' '+w:w;if(x.measureText(t).width>max&&line){lines.push(line);line=w}else line=t});if(line)lines.push(line);
-    const y=500-(lines.length-1)*lh/2;lines.forEach((l,i)=>x.fillText(l,540,y+i*lh));x.font='700 25px Arial,sans-serif';x.fillStyle='rgba(255,255,255,.92)';x.fillText(m.ref,540,Math.min(900,y+lines.length*lh+70));return {canvas:c,data:c.toDataURL('image/png'),meta:m};
-  }
-  window.saveExactDailyVerseImage=async function(){try{const r=await makeImage(),a=document.createElement('a');a.href=r.data;a.download='river-of-life-daily-verse.png';document.body.appendChild(a);a.click();a.remove()}catch(e){if(window.showToast)showToast('Unable to create verse image')}};
-  window.shareDailyVerseToWhatsApp=async function(){try{const r=await makeImage(),b=await new Promise(ok=>r.canvas.toBlob(ok,'image/png')),f=new File([b],'river-of-life-daily-verse.png',{type:'image/png'});if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[f]})))await navigator.share({files:[f],text:r.meta.text+'\n\n'+r.meta.ref});else window.open('https://wa.me/?text='+encodeURIComponent(r.meta.text+'\n\n'+r.meta.ref),'_blank')}catch(e){if(e?.name!=='AbortError'&&window.showToast)showToast('Sharing cancelled or unavailable')}};
-})();
+
 
 
 /* RoL: iOS stays inside the app; no Safari choice. */
