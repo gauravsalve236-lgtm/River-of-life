@@ -3666,7 +3666,7 @@ async function requestOnboardingMediaPermissions() {
   if (btnLabel) btnLabel.textContent = "Checking Access...";
   if (btn) btn.disabled = true;
 
-  const withTimeout = (p, ms = 1800) => {
+  const withTimeout = (p, ms = 30000) => {
     return Promise.race([
       p,
       new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), ms))
@@ -3678,7 +3678,7 @@ async function requestOnboardingMediaPermissions() {
       let granted = false;
       try {
         // Attempt joint audio + video prompt first
-        const stream = await withTimeout(navigator.mediaDevices.getUserMedia({ audio: true, video: true }), 1800);
+        const stream = await withTimeout(navigator.mediaDevices.getUserMedia({ audio: true, video: true }), 30000);
         if (stream) {
           granted = true;
           if (statusAudio) {
@@ -3696,7 +3696,7 @@ async function requestOnboardingMediaPermissions() {
       } catch (jointErr) {
         // Fallback: try audio only
         try {
-          const audioStream = await withTimeout(navigator.mediaDevices.getUserMedia({ audio: true }), 1200);
+          const audioStream = await withTimeout(navigator.mediaDevices.getUserMedia({ audio: true }), 30000);
           if (audioStream) {
             granted = true;
             if (statusAudio) {
@@ -12051,6 +12051,34 @@ function continueMeetingWithoutMic() {
   }
 }
 window.continueMeetingWithoutMic = continueMeetingWithoutMic;
+
+window.testAndEnableMicrophone = async function() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    showToast("⚠️ या ब्राउझरवर मायक्रोफोन उपलब्ध नाही (Microphone not supported).");
+    return;
+  }
+  showToast("🎙️ मायक्रोफोन तपासत आहे... (Checking Microphone)");
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: { echoCancellation: true, noiseSuppression: true }
+    });
+    if (stream) {
+      const tracks = stream.getAudioTracks();
+      if (tracks && tracks.length > 0) {
+        showToast("✓ मायक्रोफोन यशस्वीरीत्या चालू झाला! (Microphone Allowed & Working)");
+      }
+      tracks.forEach(t => t.stop());
+    }
+  } catch (err) {
+    console.warn("Microphone test error:", err);
+    if (err && (err.name === "NotAllowedError" || err.name === "PermissionDeniedError")) {
+      showMicrophonePermissionHelpModal(_pendingMeetingToJoin || { title: "Live Sanctuary" });
+    } else {
+      showToast("⚠️ मायक्रोफोन परवानगी आवश्यक आहे. Settings तपासा.");
+      showMicrophonePermissionHelpModal(_pendingMeetingToJoin || { title: "Live Sanctuary" });
+    }
+  }
+};
 
 
 // Fullscreen Live Meeting Room Entry — Ultra Clean 3-Button Experience (Mic, Camera, Hangup)
