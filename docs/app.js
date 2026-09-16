@@ -11948,7 +11948,7 @@ function proceedJoinMeetingSafari() {
   const jitsiServerDomain = (localStorage.getItem("rol_jitsi_server") || "jitsi.riot.im")
     .replace(/^https?:\/\//, '')
     .replace(/\/+$/, "");
-  const extUrl = `https://${jitsiServerDomain}/${roomSlug}#config.disableDeepLinking=true&config.startWithAudioMuted=false&config.prejoinPageEnabled=false&userInfo.displayName=${encodeURIComponent(loggedIn)}`;
+  const extUrl = `https://${jitsiServerDomain}/${roomSlug}#config.disableDeepLinking=true&config.startWithAudioMuted=false&config.startAudioMuted=9999&config.prejoinPageEnabled=false&userInfo.displayName=${encodeURIComponent(loggedIn)}`;
   window.open(extUrl, "_blank");
   showToast("Opening Live Fellowship in Safari 🙏");
 }
@@ -11956,10 +11956,7 @@ window.proceedJoinMeetingSafari = proceedJoinMeetingSafari;
 
 function proceedJoinMeetingInApp() {
   if (typeof closeModal === "function") closeModal("modal-ios-meeting-choice");
-  else {
-    const el = document.getElementById("modal-ios-meeting-choice");
-    if (el) el.style.display = "none";
-  }
+  else { const el = document.getElementById("modal-ios-meeting-choice"); if (el) el.style.display = "none"; }
   const m = _pendingMeetingToJoin || { id: "default", title: "Live Fellowship" };
   showToast("Joining Live Sanctuary 🙏");
   launchLiveMeetingRoom(m, null);
@@ -12222,6 +12219,7 @@ function launchLiveMeetingRoom(meeting, stream) {
             userInfo: { displayName: loggedIn },
             configOverwrite: {
               startWithAudioMuted: false,
+              startAudioMuted: 9999,
               startWithVideoMuted: false,
               startSilent: false,
               startAudioOnly: false,
@@ -12310,6 +12308,23 @@ function launchLiveMeetingRoom(meeting, stream) {
 
           // Unmute microphone on joining to bypass iOS mobile mute defaults
           api.on("videoConferenceJoined", function() {
+  try {
+    const jf = api.getIFrame && api.getIFrame();
+    if (jf) {
+      jf.setAttribute("allow", "camera; microphone; autoplay; fullscreen; display-capture");
+      jf.setAttribute("allowfullscreen", "true");
+    }
+    const ensureMicOn = function() {
+      api.isAudioMuted().then(function(muted) {
+        if (muted) api.executeCommand("toggleAudio");
+      }).catch(function() {});
+    };
+    ensureMicOn();
+    setTimeout(ensureMicOn, 350);
+    setTimeout(ensureMicOn, 1000);
+    setTimeout(ensureMicOn, 2000);
+  } catch (e) { console.warn("RoL microphone startup:", e); }
+});
             logAudioDebug("Jitsi conference joined. Verifying active microphone...");
             setTimeout(() => {
               try {
@@ -12363,6 +12378,7 @@ function launchLiveMeetingRoom(meeting, stream) {
             "config.enableClosePage=false",
             "config.disableThirdPartyRequests=true",
             "config.startWithAudioMuted=false",
+            "config.startAudioMuted=9999",
             "config.startWithVideoMuted=false",
             "config.startSilent=false",
             "config.startAudioOnly=false",
@@ -22200,3 +22216,53 @@ setTimeout(() => {
 
 
 
+
+/* RoL centered Daily Verse share patch */
+(function(){
+  function meta(){return {text:(document.getElementById('home-vod-text')||{}).textContent?.replace(/[“”]/g,'').trim()||'',ref:(document.getElementById('home-vod-ref')||{}).textContent?.trim()||'River of Life'};}
+  async function makeImage(){
+    const m=meta(), c=document.createElement('canvas'); c.width=c.height=1080; const x=c.getContext('2d');
+    const card=document.getElementById('card-daily-verse-home'); let bg='';
+    if(card){const z=getComputedStyle(card).backgroundImage.match(/url\(["']?(.*?)["']?\)/); if(z) bg=z[1];}
+    try{if(bg){const i=await new Promise((ok,no)=>{const q=new Image();q.onload=()=>ok(q);q.onerror=no;q.src=new URL(bg,location.href).href});const sc=Math.max(1080/i.width,1080/i.height),w=i.width*sc,h=i.height*sc;x.drawImage(i,(1080-w)/2,(1080-h)/2,w,h)}else throw 0}catch(e){x.fillStyle='#18243a';x.fillRect(0,0,1080,1080)}
+    x.fillStyle='rgba(0,0,0,.42)';x.fillRect(0,0,1080,1080);x.fillStyle='#fff';x.textAlign='center';x.textBaseline='middle';x.font='700 34px Georgia,serif';
+    const words=m.text.split(/\s+/),lines=[],max=820,lh=54;let line='';words.forEach(w=>{const t=line?line+' '+w:w;if(x.measureText(t).width>max&&line){lines.push(line);line=w}else line=t});if(line)lines.push(line);
+    const y=500-(lines.length-1)*lh/2;lines.forEach((l,i)=>x.fillText(l,540,y+i*lh));x.font='700 25px Arial,sans-serif';x.fillStyle='rgba(255,255,255,.92)';x.fillText(m.ref,540,Math.min(900,y+lines.length*lh+70));return {canvas:c,data:c.toDataURL('image/png'),meta:m};
+  }
+  window.saveExactDailyVerseImage=async function(){try{const r=await makeImage(),a=document.createElement('a');a.href=r.data;a.download='river-of-life-daily-verse.png';document.body.appendChild(a);a.click();a.remove()}catch(e){if(window.showToast)showToast('Unable to create verse image')}};
+  window.shareDailyVerseToWhatsApp=async function(){try{const r=await makeImage(),b=await new Promise(ok=>r.canvas.toBlob(ok,'image/png')),f=new File([b],'river-of-life-daily-verse.png',{type:'image/png'});if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[f]})))await navigator.share({files:[f],text:r.meta.text+'\n\n'+r.meta.ref});else window.open('https://wa.me/?text='+encodeURIComponent(r.meta.text+'\n\n'+r.meta.ref),'_blank')}catch(e){if(e?.name!=='AbortError'&&window.showToast)showToast('Sharing cancelled or unavailable')}};
+})();
+
+
+/* RoL: iOS stays inside the app; no Safari choice. */
+(function(){
+  const ios=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  if(!ios||window.__rolInAppMeetingPatch)return; window.__rolInAppMeetingPatch=true;
+  const original=window.triggerJoinMeetingFlow;
+  if(typeof original==='function')window.triggerJoinMeetingFlow=function(id){original(id);setTimeout(()=>{try{proceedJoinMeetingInApp()}catch(e){}},0)};
+  const hide=()=>{const e=document.getElementById('modal-ios-meeting-choice');if(e)e.style.display='none'};hide();new MutationObserver(hide).observe(document.documentElement,{childList:true,subtree:true});
+})();
+(function(){
+  if(window.__rolJitsiMicPatch)return;window.__rolJitsiMicPatch=true;
+  const allow=()=>document.querySelectorAll('iframe').forEach(f=>{if(/jitsi/i.test(f.src||'')){f.setAttribute('allow','camera; microphone; autoplay; fullscreen; display-capture');f.setAttribute('allowfullscreen','true')}});
+  allow();new MutationObserver(allow).observe(document.documentElement,{childList:true,subtree:true});
+})();
+
+(function(){
+  if(window.__rolJitsiMicPermissionPatch)return;window.__rolJitsiMicPermissionPatch=true;
+  const allow=()=>document.querySelectorAll('iframe').forEach(f=>{if(/jitsi/i.test(f.src||'')){f.setAttribute('allow','camera; microphone; autoplay; fullscreen; display-capture');f.setAttribute('allowfullscreen','true')}});
+  allow();new MutationObserver(allow).observe(document.documentElement,{childList:true,subtree:true});
+})();
+
+(function(){
+  if(window.__rolJitsiAudioStartupPatch||typeof window.JitsiMeetExternalAPI!=='function')return;
+  window.__rolJitsiAudioStartupPatch=true;
+  const Original=window.JitsiMeetExternalAPI;
+  window.JitsiMeetExternalAPI=function(){
+    const api=Reflect.construct(Original,Array.from(arguments),window.JitsiMeetExternalAPI);
+    const ensure=function(){try{api.isAudioMuted().then(function(muted){if(muted)api.executeCommand('toggleAudio')}).catch(function(){})}catch(e){}};
+    try{api.addListener('videoConferenceJoined',function(){const f=api.getIFrame&&api.getIFrame();if(f)f.setAttribute('allow','camera; microphone; autoplay; fullscreen; display-capture');ensure();setTimeout(ensure,350);setTimeout(ensure,1000);setTimeout(ensure,2000)})}catch(e){}
+    return api;
+  };
+  window.JitsiMeetExternalAPI.prototype=Original.prototype;
+})();
