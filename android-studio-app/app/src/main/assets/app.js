@@ -11935,68 +11935,57 @@ window.unlockMobileSpeakerAudio = unlockMobileSpeakerAudio;
 
 let _pendingMeetingToJoin = null;
 
-// Trigger Joining Flow — Authorizes BOTH Camera & Microphone simultaneously on user gesture for iOS Safari & Android
+function proceedJoinMeetingSafari() {
+  if (typeof closeModal === "function") closeModal("modal-ios-meeting-choice");
+  else {
+    const el = document.getElementById("modal-ios-meeting-choice");
+    if (el) el.style.display = "none";
+  }
+  const m = _pendingMeetingToJoin || { id: "default", title: "Live Fellowship" };
+  const meetingIdSlug = (m && m.id) ? m.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
+  const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
+  const loggedIn = (state && state.currentUser) ? state.currentUser.username : "Member";
+  const jitsiServerDomain = (localStorage.getItem("rol_jitsi_server") || "jitsi.riot.im")
+    .replace(/^https?:\/\//, '')
+    .replace(/\/+$/, "");
+  const extUrl = `https://${jitsiServerDomain}/${roomSlug}#config.disableDeepLinking=true&config.startWithAudioMuted=false&config.prejoinPageEnabled=false&userInfo.displayName=${encodeURIComponent(loggedIn)}`;
+  window.open(extUrl, "_blank");
+  showToast("Opening Live Fellowship in Safari 🙏");
+}
+window.proceedJoinMeetingSafari = proceedJoinMeetingSafari;
+
+function proceedJoinMeetingInApp() {
+  if (typeof closeModal === "function") closeModal("modal-ios-meeting-choice");
+  else {
+    const el = document.getElementById("modal-ios-meeting-choice");
+    if (el) el.style.display = "none";
+  }
+  const m = _pendingMeetingToJoin || { id: "default", title: "Live Fellowship" };
+  showToast("Joining Live Sanctuary 🙏");
+  launchLiveMeetingRoom(m, null);
+}
+window.proceedJoinMeetingInApp = proceedJoinMeetingInApp;
+
+// Trigger Joining Flow — Handles iPhone WebKit restrictions and launches room
 function triggerJoinMeetingFlow(meetingId) {
   const meetings = getMeetingsFromStorage();
   const m = meetings.find(x => x.id === meetingId) || { id: meetingId, title: "Live Fellowship", host: "Pastor" };
   _pendingMeetingToJoin = m;
 
-  // 1. Unlock phone speaker output via user gesture
-  unlockMobileSpeakerAudio();
-
-  // 2. Request BOTH audio AND video simultaneously in a single getUserMedia call.
-  // This ensures iOS Safari displays a unified "Camera and Microphone" prompt rather than asking only for camera!
-  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-    navigator.mediaDevices.getUserMedia({ audio: true, video: true })
-      .then(tempStream => {
-        // Stop temporary tracks immediately so devices are cleanly released for the conference room
-        if (tempStream && tempStream.getTracks) {
-          tempStream.getTracks().forEach(t => t.stop());
-        }
-        showToast("Joining Live Sanctuary 🙏");
-        launchLiveMeetingRoom(m, null);
-      })
-      .catch(err => {
-        console.warn("Parent getUserMedia joint prompt result:", err);
-
-        // Check if error is due to user denial or permission block
-        if (err && (err.name === "NotAllowedError" || err.name === "PermissionDeniedError")) {
-          // Check if audio alone fails (meaning Microphone is blocked in iPhone / Safari Settings):
-          navigator.mediaDevices.getUserMedia({ audio: true })
-            .then(audioStream => {
-              if (audioStream && audioStream.getTracks) audioStream.getTracks().forEach(t => t.stop());
-              // Audio is allowed! Video was the one denied. Launch room.
-              showToast("Joining Live Sanctuary 🙏");
-              launchLiveMeetingRoom(m, null);
-            })
-            .catch(micErr => {
-              // Microphone is explicitly blocked in iOS Safari Website Settings!
-              console.warn("Microphone access is blocked in iOS Safari website settings:", micErr);
-              showMicrophonePermissionHelpModal(m);
-            });
-          return;
-        }
-
-        // For constraint errors (e.g. mobile camera constraint issue), fallback to audio-only check
-        navigator.mediaDevices.getUserMedia({ audio: true })
-          .then(audioStream => {
-            if (audioStream && audioStream.getTracks) audioStream.getTracks().forEach(t => t.stop());
-            showToast("Joining Live Sanctuary 🙏");
-            launchLiveMeetingRoom(m, null);
-          })
-          .catch(fallbackErr => {
-            if (fallbackErr && (fallbackErr.name === "NotAllowedError" || fallbackErr.name === "PermissionDeniedError")) {
-              showMicrophonePermissionHelpModal(m);
-            } else {
-              showToast("Joining Live Sanctuary 🙏");
-              launchLiveMeetingRoom(m, null);
-            }
-          });
-      });
-  } else {
-    showToast("Joining Live Sanctuary 🙏");
-    launchLiveMeetingRoom(m, null);
+  // Detect iOS (iPhone/iPad) or iOS Standalone PWA
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  
+  if (isIOS) {
+    const modalChoice = document.getElementById("modal-ios-meeting-choice");
+    if (modalChoice) {
+      modalChoice.style.display = "flex";
+      modalChoice.classList.add("active");
+      return;
+    }
   }
+
+  showToast("Joining Live Sanctuary 🙏");
+  launchLiveMeetingRoom(m, null);
 }
 window.triggerJoinMeetingFlow = triggerJoinMeetingFlow;
 
@@ -12208,6 +12197,7 @@ function launchLiveMeetingRoom(meeting, stream) {
               startWithVideoMuted: false,
               startSilent: false,
               startAudioOnly: false,
+              disableAutoGainControl: true,
               p2p: { enabled: false }, // Disables P2P so mobile Safari WebKit routes via SFU and doesn't freeze/mute mic
               prejoinConfig: { enabled: false },
               prejoinPageEnabled: false,
@@ -12218,11 +12208,18 @@ function launchLiveMeetingRoom(meeting, stream) {
               disableThirdPartyRequests: true,
               resolution: 720,
               constraints: {
+                audio: {
+                  echoCancellation: true,
+                  noiseSuppression: true
+                },
                 video: {
                   height: { ideal: 720, max: 1080 },
                   width: { ideal: 1280, max: 1920 },
                   frameRate: { ideal: 30, max: 30 }
                 }
+              },
+              testing: {
+                noAutoGainControl: true
               },
               channelLastN: -1,
               adaptiveLastN: false,
@@ -12257,7 +12254,7 @@ function launchLiveMeetingRoom(meeting, stream) {
 
           // Intercept createElement for the iframe to guarantee WebKit permissions policy delegation (iPhone Safari)
           const origCreateElement = document.createElement.bind(document);
-          const allowPolicy = "camera; microphone; speaker-selection; display-capture; autoplay; fullscreen; picture-in-picture; clipboard-write; camera *; microphone *;";
+          const allowPolicy = "camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; clipboard-write *;";
           document.createElement = function(tagName, opts) {
             const el = origCreateElement(tagName, opts);
             if (tagName && typeof tagName === "string" && tagName.toLowerCase() === "iframe") {
@@ -16830,10 +16827,12 @@ window.generateExactVerseImageBlob = function() {
     canvas.height = 1920; // 9:16 WhatsApp Status, Story & Fullscreen Mobile Wallpapers
     const ctx = canvas.getContext("2d");
 
-    // Helper to asynchronously preload images
+    // Helper to asynchronously preload images safely without CORS taint on Safari
     const loadImage = (src) => new Promise((res) => {
       const img = new Image();
-      img.crossOrigin = "anonymous";
+      if (src && (src.startsWith("http://") || src.startsWith("https://")) && !src.startsWith(window.location.origin)) {
+        img.crossOrigin = "anonymous";
+      }
       img.onload = () => res(img);
       img.onerror = () => res(null);
       img.src = src;
@@ -17071,6 +17070,26 @@ window.saveExactDailyVerseImage = async function() {
     console.error("Save image error:", err);
     showToast("Image generation complete.");
   }
+};
+
+window.forceHardRefreshApp = async function() {
+  if (typeof showToast === "function") showToast("⏳ ॲप अपडेट होत आहे... कृपया थांबा");
+  try {
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      for (let r of regs) await r.unregister();
+    }
+    if ('caches' in window) {
+      const keys = await caches.keys();
+      for (let k of keys) await caches.delete(k);
+    }
+    localStorage.removeItem("rol_app_ver");
+    sessionStorage.clear();
+  } catch (e) {
+    console.error("Force refresh error:", e);
+  }
+  const target = window.location.origin + window.location.pathname + '?reload=' + Date.now();
+  window.location.replace(target);
 };
 
 window.openImagePreviewModal = function(dataUrl, filename, blob) {
