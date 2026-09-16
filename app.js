@@ -11933,7 +11933,7 @@ function unlockMobileSpeakerAudio() {
 }
 window.unlockMobileSpeakerAudio = unlockMobileSpeakerAudio;
 
-// Trigger Joining Flow — Clean, direct entry without hardware device locking
+// Trigger Joining Flow — Authorizes microphone on user gesture for iOS Safari & Android, then launches meeting
 function triggerJoinMeetingFlow(meetingId) {
   const meetings = getMeetingsFromStorage();
   const m = meetings.find(x => x.id === meetingId);
@@ -11942,9 +11942,26 @@ function triggerJoinMeetingFlow(meetingId) {
   // 1. Unlock phone speaker output via user gesture
   unlockMobileSpeakerAudio();
 
-  // 2. Launch Live Meeting Room directly so the in-app WebRTC engine has sole hardware access
-  showToast("Joining Live Sanctuary 🙏");
-  launchLiveMeetingRoom(m, null);
+  // 2. On iOS Safari and mobile browsers, request mic permission once in parent to authorize WebKit
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(tempStream => {
+        // Stop the temp track immediately so device is ready for conference
+        if (tempStream && tempStream.getTracks) {
+          tempStream.getTracks().forEach(t => t.stop());
+        }
+        showToast("Joining Live Sanctuary 🙏");
+        launchLiveMeetingRoom(m, null);
+      })
+      .catch(err => {
+        console.warn("Parent getUserMedia prompt result:", err);
+        showToast("Joining Live Sanctuary 🙏");
+        launchLiveMeetingRoom(m, null);
+      });
+  } else {
+    showToast("Joining Live Sanctuary 🙏");
+    launchLiveMeetingRoom(m, null);
+  }
 }
 
 // Fullscreen Live Meeting Room Entry — Ultra Clean 3-Button Experience (Mic, Camera, Hangup)
@@ -12067,78 +12084,197 @@ function launchLiveMeetingRoom(meeting, stream) {
         
         // Essential conference toolbar: Mic, Camera, Screen Share, Chat, Raise Hand, Grid View, Hangup
         const toolbarButtons = ["microphone", "camera", "desktop", "chat", "raisehand", "tileview", "hangup"];
-        const buttonsParam = encodeURIComponent(JSON.stringify(toolbarButtons));
-        const emptyArrayParam = encodeURIComponent(JSON.stringify([]));
 
-        // High-definition audio & video constraints with hardware acoustic echo cancellation
-        const jitsiConfig = [
-          "config.prejoinPageEnabled=false",
-          "config.prejoinConfig.enabled=false",
-          "config.requireDisplayName=false",
-          "config.disableDeepLinking=true",
-          "config.enableWelcomePage=false",
-          "config.enableClosePage=false",
-          "config.disableThirdPartyRequests=true",
-          "config.startWithAudioMuted=false",
-          "config.startWithVideoMuted=false",
-          "config.startSilent=false",
-          "config.startAudioOnly=false",
-          // Ultra HD 1080p Camera Video Constraints
-          "config.resolution=1080",
-          "config.constraints.video.height.ideal=1080",
-          "config.constraints.video.height.max=1080",
-          "config.constraints.video.width.ideal=1920",
-          "config.constraints.video.width.max=1920",
-          "config.constraints.video.frameRate.ideal=30",
-          "config.constraints.video.frameRate.max=30",
-          "config.channelLastN=-1",
-          "config.adaptiveLastN=false",
-          "config.videoQuality.maxBitratesVideo.low=350000",
-          "config.videoQuality.maxBitratesVideo.standard=1000000",
-          "config.videoQuality.maxBitratesVideo.high=4000000",
-          // Acoustic Echo Cancellation & HD 96kbps Audio Quality (Zero Voice Echo)
-          "config.disableEchoCancellation=false",
-          "config.noiseSuppression=true",
-          "config.autoGainControl=true",
-          "config.stereo=false",
-          "config.audioQuality.stereo=false",
-          "config.audioQuality.opusMaxAverageBitrate=96000",
-          "config.disableAudioLevels=false",
-          // Screen Sharing (desktop) options for host content presentation
-          "config.desktopSharingFrameRate.min=15",
-          "config.desktopSharingFrameRate.max=30",
-          // Toolbar & UI Clean Mobile Rules
-          `config.toolbarButtons=${buttonsParam}`,
-          `interfaceConfig.TOOLBAR_BUTTONS=${buttonsParam}`,
-          `interfaceConfig.SETTINGS_SECTIONS=${emptyArrayParam}`,
-          "interfaceConfig.SHOW_JITSI_WATERMARK=false",
-          "interfaceConfig.SHOW_WATERMARK_FOR_GUESTS=false",
-          "interfaceConfig.SHOW_BRAND_WATERMARK=false",
-          "interfaceConfig.SHOW_POWERED_BY=false",
-          "interfaceConfig.MOBILE_APP_PROMO=false",
-          "interfaceConfig.HIDE_DEEP_LINKING_LOGO=true",
-          `userInfo.displayName=${encodeURIComponent(loggedIn)}`
-        ].join("&");
+        // Clean up any existing Jitsi instance
+        if (window._jitsiApi) {
+          try { window._jitsiApi.dispose(); } catch(e) {}
+          window._jitsiApi = null;
+        }
+        jitsiCont.innerHTML = "";
 
-        const jitsiServer = (localStorage.getItem("rol_jitsi_server") || "https://jitsi.riot.im").replace(/\/+$/, "");
-        const roomUrl = `${jitsiServer}/${roomSlug}#${jitsiConfig}`;
+        const jitsiServerDomain = (localStorage.getItem("rol_jitsi_server") || "jitsi.riot.im")
+          .replace(/^https?:\/\//, '')
+          .replace(/\/+$/, "");
 
-        jitsiCont.innerHTML = `
-          <iframe 
-            id="webrtc-room-iframe"
-            src="${roomUrl}" 
-            width="100%" 
-            height="100%" 
-            allow="camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; clipboard-write *; camera; microphone; autoplay; display-capture; fullscreen; speaker-selection;" 
-            allowusermedia="true"
-            playsinline="true"
-            webkit-playsinline="true"
-            style="border: none; width: 100%; height: 100%; border-radius: 14px; background: #090d16;">
-          </iframe>
-        `;
+        if (typeof JitsiMeetExternalAPI !== "undefined") {
+          const options = {
+            roomName: roomSlug,
+            width: '100%',
+            height: '100%',
+            parentNode: jitsiCont,
+            userInfo: { displayName: loggedIn },
+            configOverwrite: {
+              startWithAudioMuted: false,
+              startWithVideoMuted: false,
+              startSilent: false,
+              startAudioOnly: false,
+              p2p: { enabled: false }, // Disables P2P so mobile Safari WebKit routes via SFU and doesn't freeze/mute mic
+              prejoinConfig: { enabled: false },
+              prejoinPageEnabled: false,
+              requireDisplayName: false,
+              disableDeepLinking: true,
+              enableWelcomePage: false,
+              enableClosePage: false,
+              disableThirdPartyRequests: true,
+              resolution: 1080,
+              constraints: {
+                video: {
+                  height: { ideal: 1080, max: 1080 },
+                  width: { ideal: 1920, max: 1920 },
+                  frameRate: { ideal: 30, max: 30 }
+                }
+              },
+              channelLastN: -1,
+              adaptiveLastN: false,
+              videoQuality: {
+                maxBitratesVideo: {
+                  low: 350000,
+                  standard: 1000000,
+                  high: 4000000
+                }
+              },
+              disableEchoCancellation: false,
+              noiseSuppression: true,
+              autoGainControl: true,
+              audioQuality: {
+                stereo: false,
+                opusMaxAverageBitrate: 96000
+              },
+              disableAudioLevels: false,
+              desktopSharingFrameRate: { min: 15, max: 30 },
+              toolbarButtons: toolbarButtons
+            },
+            interfaceConfigOverwrite: {
+              TOOLBAR_BUTTONS: toolbarButtons,
+              SETTINGS_SECTIONS: [],
+              SHOW_JITSI_WATERMARK: false,
+              SHOW_WATERMARK_FOR_GUESTS: false,
+              SHOW_BRAND_WATERMARK: false,
+              SHOW_POWERED_BY: false,
+              MOBILE_APP_PROMO: false,
+              HIDE_DEEP_LINKING_LOGO: true
+            }
+          };
 
-        logAudioDebug("River of Life LiveMeet mounted successfully with 1080p HD and 96kbps audio.", { roomUrl });
-        showToast("Joined River of Life LiveMeet 🙏");
+          const api = new JitsiMeetExternalAPI(jitsiServerDomain, options);
+          window._jitsiApi = api;
+
+          // Keep native top-bar quick mic button synchronized
+          api.on("audioMuteStatusChanged", function(e) {
+            updateQuickMeetingMicUI(e && e.muted);
+          });
+
+          // Unmute microphone on joining to bypass iOS mobile mute defaults
+          api.on("videoConferenceJoined", function() {
+            logAudioDebug("Jitsi conference joined. Verifying active microphone...");
+            setTimeout(() => {
+              try {
+                if (api.isAudioMuted) {
+                  api.isAudioMuted().then(muted => {
+                    logAudioDebug("Live mic mute status:", muted);
+                    if (muted) {
+                      logAudioDebug("Mobile mic detected muted, calling toggleAudio to unmute...");
+                      api.executeCommand("toggleAudio");
+                    }
+                  });
+                }
+              } catch(e) {
+                logAudioDebug("Auto-unmute check exception:", e);
+              }
+            }, 800);
+          });
+
+          api.on("readyToClose", function() {
+            exitLiveMeetingRoom();
+          });
+
+          // Style the generated iframe
+          const createdIframe = jitsiCont.querySelector("iframe");
+          if (createdIframe) {
+            createdIframe.id = "webrtc-room-iframe";
+            createdIframe.style.width = "100%";
+            createdIframe.style.height = "100%";
+            createdIframe.style.border = "none";
+            createdIframe.style.borderRadius = "14px";
+            createdIframe.style.background = "#090d16";
+            createdIframe.setAttribute("allow", "camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; clipboard-write *;");
+            createdIframe.setAttribute("allowusermedia", "true");
+            createdIframe.setAttribute("playsinline", "true");
+            createdIframe.setAttribute("webkit-playsinline", "true");
+          }
+
+          logAudioDebug("River of Life LiveMeet mounted via JitsiMeetExternalAPI with 1080p HD and 96kbps audio.", { roomSlug });
+          showToast("Joined River of Life LiveMeet 🙏");
+        } else {
+          // Fallback iframe
+          const buttonsParam = encodeURIComponent(JSON.stringify(toolbarButtons));
+          const emptyArrayParam = encodeURIComponent(JSON.stringify([]));
+
+          const jitsiConfig = [
+            "config.prejoinPageEnabled=false",
+            "config.prejoinConfig.enabled=false",
+            "config.requireDisplayName=false",
+            "config.disableDeepLinking=true",
+            "config.enableWelcomePage=false",
+            "config.enableClosePage=false",
+            "config.disableThirdPartyRequests=true",
+            "config.startWithAudioMuted=false",
+            "config.startWithVideoMuted=false",
+            "config.startSilent=false",
+            "config.startAudioOnly=false",
+            "config.p2p.enabled=false",
+            "config.resolution=1080",
+            "config.constraints.video.height.ideal=1080",
+            "config.constraints.video.height.max=1080",
+            "config.constraints.video.width.ideal=1920",
+            "config.constraints.video.width.max=1920",
+            "config.constraints.video.frameRate.ideal=30",
+            "config.constraints.video.frameRate.max=30",
+            "config.channelLastN=-1",
+            "config.adaptiveLastN=false",
+            "config.videoQuality.maxBitratesVideo.low=350000",
+            "config.videoQuality.maxBitratesVideo.standard=1000000",
+            "config.videoQuality.maxBitratesVideo.high=4000000",
+            "config.disableEchoCancellation=false",
+            "config.noiseSuppression=true",
+            "config.autoGainControl=true",
+            "config.stereo=false",
+            "config.audioQuality.stereo=false",
+            "config.audioQuality.opusMaxAverageBitrate=96000",
+            "config.disableAudioLevels=false",
+            "config.desktopSharingFrameRate.min=15",
+            "config.desktopSharingFrameRate.max=30",
+            `config.toolbarButtons=${buttonsParam}`,
+            `interfaceConfig.TOOLBAR_BUTTONS=${buttonsParam}`,
+            `interfaceConfig.SETTINGS_SECTIONS=${emptyArrayParam}`,
+            "interfaceConfig.SHOW_JITSI_WATERMARK=false",
+            "interfaceConfig.SHOW_WATERMARK_FOR_GUESTS=false",
+            "interfaceConfig.SHOW_BRAND_WATERMARK=false",
+            "interfaceConfig.SHOW_POWERED_BY=false",
+            "interfaceConfig.MOBILE_APP_PROMO=false",
+            "interfaceConfig.HIDE_DEEP_LINKING_LOGO=true",
+            `userInfo.displayName=${encodeURIComponent(loggedIn)}`
+          ].join("&");
+
+          const roomUrl = `https://${jitsiServerDomain}/${roomSlug}#${jitsiConfig}`;
+
+          jitsiCont.innerHTML = `
+            <iframe 
+              id="webrtc-room-iframe"
+              src="${roomUrl}" 
+              width="100%" 
+              height="100%" 
+              allow="camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; clipboard-write *; camera; microphone; autoplay; display-capture; fullscreen; speaker-selection;" 
+              allowusermedia="true"
+              playsinline="true"
+              webkit-playsinline="true"
+              style="border: none; width: 100%; height: 100%; border-radius: 14px; background: #090d16;">
+            </iframe>
+          `;
+
+          logAudioDebug("River of Life LiveMeet mounted fallback iframe with 1080p HD and 96kbps audio.", { roomUrl });
+          showToast("Joined River of Life LiveMeet 🙏");
+        }
       }
     }
 
@@ -12336,8 +12472,41 @@ window.toggleMeetCtrlCam = toggleMeetCtrlCam;
 window.toggleMeetEmojiPanel = toggleMeetEmojiPanel;
 window.sendMeetReaction = sendMeetReaction;
 
+// Quick Mic Controls for Top Bar in Meeting Room
+function toggleQuickMeetingMic() {
+  if (window._jitsiApi) {
+    try {
+      window._jitsiApi.executeCommand("toggleAudio");
+      return;
+    } catch(e) {
+      console.warn("toggleAudio command error:", e);
+    }
+  }
+  showToast("Microphone toggled 🙏");
+}
+window.toggleQuickMeetingMic = toggleQuickMeetingMic;
 
-
+function updateQuickMeetingMicUI(isMuted) {
+  const btn = document.getElementById("btn-meeting-quick-mic");
+  const icon = document.getElementById("quick-mic-icon");
+  if (!btn) return;
+  if (isMuted) {
+    btn.style.background = "rgba(239, 68, 68, 0.3)";
+    btn.style.border = "1px solid rgba(239, 68, 68, 0.7)";
+    btn.style.color = "#fca5a5";
+    if (icon) icon.textContent = "🔇";
+    const textSpan = btn.querySelector("span:last-child");
+    if (textSpan) textSpan.textContent = "Unmute";
+  } else {
+    btn.style.background = "rgba(37,99,235,0.3)";
+    btn.style.border = "1px solid rgba(59,130,246,0.6)";
+    btn.style.color = "#93c5fd";
+    if (icon) icon.textContent = "🎙️";
+    const textSpan = btn.querySelector("span:last-child");
+    if (textSpan) textSpan.textContent = "Mic";
+  }
+}
+window.updateQuickMeetingMicUI = updateQuickMeetingMicUI;
 
 function exitLiveMeetingRoom() {
   try {
@@ -12355,12 +12524,23 @@ function exitLiveMeetingRoom() {
       document.body.classList.remove("meeting-modal-open");
     }
 
+    // Cleanly terminate Jitsi External API instance
+    if (window._jitsiApi) {
+      try {
+        window._jitsiApi.dispose();
+      } catch(e) {}
+      window._jitsiApi = null;
+    }
+
     // Cleanly terminate Video Room Iframe
     const jitsiCont = document.getElementById("meeting-jitsi-container");
     if (jitsiCont) {
       jitsiCont.innerHTML = "";
       jitsiCont.style.display = "none";
     }
+
+    // Reset quick mic button UI
+    updateQuickMeetingMicUI(false);
 
     // Clean up Daily.co message listener
     if (window._dailyMessageListener) {
