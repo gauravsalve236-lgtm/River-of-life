@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v156_MIC_AND_CAM_UNIFIED_PROMPT';
+const CACHE_NAME = 'river-of-life-cache-v157_CLEAN_TOPBAR_IOS_MIC_FIX';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
