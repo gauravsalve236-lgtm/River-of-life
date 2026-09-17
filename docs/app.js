@@ -6349,7 +6349,8 @@ function downloadShareCard() {
   ctx.fillText("†", 480, 480);
   
   ctx.fillStyle = "#ffffff";
-  ctx.textAlign = "left";
+  ctx.direction = "ltr";
+  ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.font = "700 24px 'Noto Serif Devanagari', 'Lora', Georgia, serif";
   
@@ -6377,16 +6378,13 @@ function downloadShareCard() {
   
   let startY = y - ((lines.length - 1) * lineHeight) / 2;
   for (let i = 0; i < lines.length; i++) {
-    const lineW = ctx.measureText(lines[i]).width;
-    const lineX = (canvas.width - lineW) / 2;
-    ctx.fillText(lines[i], lineX, startY + (i * lineHeight));
+    ctx.fillText(lines[i], canvas.width / 2, startY + (i * lineHeight));
   }
   
   ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
   ctx.font = "800 18px 'Outfit', sans-serif";
   const refText = `${selectedVerseMeta.ref} • ${state.translation === 'eng' ? 'NLT' : 'MARVBSI'}`;
-  const refW = ctx.measureText(refText).width;
-  ctx.fillText(refText, (canvas.width - refW) / 2, 480);
+  ctx.fillText(refText, canvas.width / 2, 480);
   
   try {
     const dataUrl = canvas.toDataURL("image/png");
@@ -17004,9 +17002,10 @@ window.generateExactVerseImageBlob = function(customRatio) {
     const fontFamily = isMarathi
       ? "'Noto Serif Devanagari', 'Mangal', 'Nirmala UI', 'Poppins', sans-serif"
       : (theme.fontFamily || "'Lora', Georgia, serif");
-    ctx.font = `${theme.fontWeight || '700'} ${fontSize}px ${fontFamily}`;
-    ctx.textAlign = "left";
+    ctx.direction = "ltr";
+    ctx.textAlign = "center";
     ctx.textBaseline = "middle";
+    ctx.font = `${theme.fontWeight || '700'} ${fontSize}px ${fontFamily}`;
 
     const words = displayText.split(/\s+/);
     let currentLine = "";
@@ -17035,7 +17034,8 @@ window.generateExactVerseImageBlob = function(customRatio) {
     let startY = Math.round((canvas.height - totalContentHeight) / 2) - (ratio === 'story' ? 40 : 15);
 
     // 3a. Top Tag (Strictly Centered)
-    ctx.textAlign = "left";
+    ctx.direction = "ltr";
+    ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.font = (ratio === 'story') ? "800 24px 'Outfit', sans-serif" : "800 20px 'Outfit', sans-serif";
     ctx.fillStyle = theme.accentColor || "#fbbf24";
@@ -17044,22 +17044,24 @@ window.generateExactVerseImageBlob = function(customRatio) {
     ctx.shadowOffsetX = 0;
     ctx.shadowOffsetY = 2;
     const tagText = theme.tag || "✦ VERSE OF THE DAY ✦";
-    const tagW = ctx.measureText(tagText).width;
-    ctx.fillText(tagText, Math.round((canvas.width - tagW) / 2), startY);
+    ctx.fillText(tagText, centerX, startY);
     startY += tagHeight;
 
     // 3b. Quotation Mark (Strictly Centered)
-    ctx.textAlign = "left";
+    ctx.direction = "ltr";
+    ctx.textAlign = "center";
     ctx.font = (ratio === 'story') ? "700 84px Georgia, serif" : "700 76px Georgia, serif";
     ctx.fillStyle = theme.quoteColor || theme.accentColor || "#fbbf24";
     ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
     ctx.shadowBlur = 18;
     const quoteChar = "“";
-    const quoteW = ctx.measureText(quoteChar).width;
-    ctx.fillText(quoteChar, Math.round((canvas.width - quoteW) / 2), startY + (ratio === 'story' ? 10 : 8));
+    ctx.fillText(quoteChar, centerX, startY + (ratio === 'story' ? 10 : 8));
     startY += quoteHeight;
 
-    // 3c. Verse Body (Strictly Centered: (canvas.width - lineW) / 2 on EVERY line with explicit textAlign='left')
+    // 3c. Verse Body (Strictly Centered at centerX with native ctx.textAlign = 'center')
+    ctx.direction = "ltr";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
     ctx.fillStyle = theme.textColor || "#ffffff";
     ctx.font = `${theme.fontWeight || '700'} ${fontSize}px ${fontFamily}`;
     ctx.shadowColor = "rgba(0, 0, 0, 0.98)";
@@ -17068,37 +17070,34 @@ window.generateExactVerseImageBlob = function(customRatio) {
     ctx.shadowOffsetY = 4;
 
     for (let i = 0; i < lines.length; i++) {
-      ctx.textAlign = "left";
-      ctx.textBaseline = "middle";
-      const lineW = ctx.measureText(lines[i].trim()).width;
-      const lineX = Math.round((canvas.width - lineW) / 2);
-      ctx.fillText(lines[i].trim(), lineX, startY + (i * lineHeight));
+      ctx.fillText(lines[i].trim(), centerX, startY + (i * lineHeight));
     }
     startY += textBlockHeight + (ratio === 'story' ? 36 : 30);
 
     // 3d. Scripture Reference with Symmetrical Accent Lines (Strictly Centered)
-    ctx.textAlign = "left";
+    ctx.direction = "ltr";
+    ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     const refText = `${displayRef} • ${state.translation === 'eng' ? 'NLT' : 'MARVBSI'}`;
     ctx.font = (ratio === 'story') ? "800 32px 'Outfit', sans-serif" : "800 28px 'Outfit', 'Noto Serif Devanagari', sans-serif";
     const refW = ctx.measureText(refText).width;
-    const refX = Math.round((canvas.width - refW) / 2);
+    const halfRef = Math.round(refW / 2);
     const gap = 18;
     const lineLen = (ratio === 'story') ? 56 : 50;
 
     ctx.strokeStyle = theme.accentColor || "#fbbf24";
     ctx.lineWidth = 2.5;
     ctx.beginPath();
-    ctx.moveTo(refX - gap - lineLen, startY);
-    ctx.lineTo(refX - gap, startY);
-    ctx.moveTo(refX + refW + gap, startY);
-    ctx.lineTo(refX + refW + gap + lineLen, startY);
+    ctx.moveTo(centerX - halfRef - gap - lineLen, startY);
+    ctx.lineTo(centerX - halfRef - gap, startY);
+    ctx.moveTo(centerX + halfRef + gap, startY);
+    ctx.lineTo(centerX + halfRef + gap + lineLen, startY);
     ctx.stroke();
 
     ctx.fillStyle = theme.accentColor || "#fbbf24";
     ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
     ctx.shadowBlur = 14;
-    ctx.fillText(refText, refX, startY);
+    ctx.fillText(refText, centerX, startY);
 
     // Reset shadows
     ctx.shadowColor = "transparent";
