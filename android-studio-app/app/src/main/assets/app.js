@@ -16830,7 +16830,7 @@ window.navigateVOD = function(dir) {
 // Global state for last rendered verse image
 window._currentRenderedVodImage = null;
 
-window.generateExactVerseImageBlob = function() {
+window.generateExactVerseImageBlob = function(customRatio) {
   return new Promise(async (resolve) => {
     const { vod, dayOfYear, offset } = getCurrentVOD();
     const displayRef = (state.translation === "eng") ? vod.engRef : vod.ref;
@@ -16859,10 +16859,22 @@ window.generateExactVerseImageBlob = function() {
       } catch (e) {}
     }
 
+    const ratio = customRatio || window.currentVodAspectRatio || 'square';
+    let canvasW = 1080;
+    let canvasH = 1080; // 1:1 Square Post Card by default (Ideal for phone sharing & WhatsApp chats)
+    if (ratio === 'portrait') {
+      canvasW = 1080;
+      canvasH = 1350; // 4:5 Portrait Mobile Card
+    } else if (ratio === 'story' || ratio === 'wallpaper') {
+      canvasW = 1080;
+      canvasH = 1920; // 9:16 Fullscreen Wallpaper
+    }
+
     const canvas = document.createElement("canvas");
-    canvas.width = 1080;
-    canvas.height = 1920; // 9:16 WhatsApp Status, Story & Fullscreen Mobile Wallpapers
+    canvas.width = canvasW;
+    canvas.height = canvasH;
     const ctx = canvas.getContext("2d");
+    const centerX = canvas.width / 2;
 
     // Helper to asynchronously preload images safely without CORS taint on Safari
     const loadImage = (src) => new Promise((res) => {
@@ -16905,27 +16917,35 @@ window.generateExactVerseImageBlob = function() {
 
     // 2. Artistic Vignette & Gradient Overlay (Protects legibility across all backgrounds)
     const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    grad.addColorStop(0, 'rgba(0, 0, 0, 0.60)');
-    grad.addColorStop(0.25, 'rgba(0, 0, 0, 0.38)');
-    grad.addColorStop(0.5, 'rgba(0, 0, 0, 0.48)');
-    grad.addColorStop(0.75, 'rgba(0, 0, 0, 0.65)');
-    grad.addColorStop(1, 'rgba(0, 0, 0, 0.92)');
+    grad.addColorStop(0, 'rgba(10, 15, 25, 0.65)');
+    grad.addColorStop(0.25, 'rgba(10, 15, 25, 0.45)');
+    grad.addColorStop(0.5, 'rgba(10, 15, 25, 0.58)');
+    grad.addColorStop(0.75, 'rgba(10, 15, 25, 0.72)');
+    grad.addColorStop(1, 'rgba(8, 12, 20, 0.92)');
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // 3. Multi-Line Text Layout with Safe Margins & Mathematically Guaranteed Horizontal Centering
-    const textMaxWidth = 880; // Safe 100px margins on left and right for 1080x1920 canvas
+    const textMaxWidth = (ratio === 'story') ? 880 : 900;
 
-    // Prominent, readable font sizing for 1080x1920 poster canvas
-    let fontSize = 48;
-    if (displayText.length <= 80) fontSize = 56;
-    else if (displayText.length <= 140) fontSize = 48;
-    else if (displayText.length <= 220) fontSize = 42;
-    else fontSize = 36;
+    // Prominent, readable font sizing tailored for cards & phone sharing
+    let fontSize = 42;
+    if (ratio === 'story') {
+      if (displayText.length <= 80) fontSize = 56;
+      else if (displayText.length <= 140) fontSize = 48;
+      else if (displayText.length <= 220) fontSize = 42;
+      else fontSize = 36;
+    } else {
+      // 1:1 Square Card (1080x1080) and 4:5 Portrait Card (1080x1350)
+      if (displayText.length <= 70) fontSize = 52;
+      else if (displayText.length <= 130) fontSize = 46;
+      else if (displayText.length <= 200) fontSize = 40;
+      else fontSize = 34;
+    }
 
     const isMarathi = state.translation !== "eng";
     const fontFamily = isMarathi
-      ? "'Noto Serif Devanagari', 'Poppins', sans-serif"
+      ? "'Noto Serif Devanagari', 'Mangal', 'Nirmala UI', 'Poppins', sans-serif"
       : (theme.fontFamily || "'Lora', Georgia, serif");
     ctx.font = `${theme.fontWeight || '700'} ${fontSize}px ${fontFamily}`;
     ctx.textAlign = "left";
@@ -16946,18 +16966,19 @@ window.generateExactVerseImageBlob = function() {
     }
     if (currentLine) lines.push(currentLine.trim());
 
-    const lineHeight = Math.round(fontSize * 1.6);
+    const lineHeight = Math.round(fontSize * (ratio === 'story' ? 1.6 : 1.55));
     const textBlockHeight = lines.length * lineHeight;
-    const tagHeight = 44;
-    const quoteHeight = 64;
-    const refHeight = 56;
-    const totalContentHeight = tagHeight + quoteHeight + textBlockHeight + refHeight + 50;
+    const tagHeight = (ratio === 'story') ? 44 : 36;
+    const quoteHeight = (ratio === 'story') ? 64 : 54;
+    const refHeight = (ratio === 'story') ? 56 : 48;
+    const spacing = (ratio === 'story') ? 50 : 32;
+    const totalContentHeight = tagHeight + quoteHeight + textBlockHeight + refHeight + spacing;
 
-    // Center in visual golden zone (upper-middle)
-    let startY = Math.round((canvas.height - totalContentHeight) / 2) - 40;
+    // Center in visual zone
+    let startY = Math.round((canvas.height - totalContentHeight) / 2) - (ratio === 'story' ? 40 : 15);
 
     // 3a. Top Tag (Strictly Centered)
-    ctx.font = "800 24px 'Outfit', sans-serif";
+    ctx.font = (ratio === 'story') ? "800 24px 'Outfit', sans-serif" : "800 20px 'Outfit', sans-serif";
     ctx.fillStyle = theme.accentColor || "#fbbf24";
     ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
     ctx.shadowBlur = 14;
@@ -16969,13 +16990,13 @@ window.generateExactVerseImageBlob = function() {
     startY += tagHeight;
 
     // 3b. Quotation Mark (Strictly Centered)
-    ctx.font = "700 84px Georgia, serif";
+    ctx.font = (ratio === 'story') ? "700 84px Georgia, serif" : "700 76px Georgia, serif";
     ctx.fillStyle = theme.quoteColor || theme.accentColor || "#fbbf24";
     ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
     ctx.shadowBlur = 18;
     const quoteChar = "“";
     const quoteW = ctx.measureText(quoteChar).width;
-    ctx.fillText(quoteChar, (canvas.width - quoteW) / 2, startY + 10);
+    ctx.fillText(quoteChar, (canvas.width - quoteW) / 2, startY + (ratio === 'story' ? 10 : 8));
     startY += quoteHeight;
 
     // 3c. Verse Body (Strictly Centered: (canvas.width - lineW) / 2 on EVERY line)
@@ -16991,15 +17012,15 @@ window.generateExactVerseImageBlob = function() {
       const lineX = (canvas.width - lineW) / 2;
       ctx.fillText(lines[i].trim(), lineX, startY + (i * lineHeight));
     }
-    startY += textBlockHeight + 36;
+    startY += textBlockHeight + (ratio === 'story' ? 36 : 30);
 
     // 3d. Scripture Reference with Symmetrical Accent Lines (Strictly Centered)
     const refText = `${displayRef} • ${state.translation === 'eng' ? 'NLT' : 'MARVBSI'}`;
-    ctx.font = "800 32px 'Outfit', sans-serif";
+    ctx.font = (ratio === 'story') ? "800 32px 'Outfit', sans-serif" : "800 28px 'Outfit', 'Noto Serif Devanagari', sans-serif";
     const refW = ctx.measureText(refText).width;
     const refX = (canvas.width - refW) / 2;
-    const gap = 20;
-    const lineLen = 56;
+    const gap = 18;
+    const lineLen = (ratio === 'story') ? 56 : 50;
 
     ctx.strokeStyle = theme.accentColor || "#fbbf24";
     ctx.lineWidth = 2.5;
@@ -17021,21 +17042,20 @@ window.generateExactVerseImageBlob = function() {
     ctx.shadowOffsetX = 0;
     ctx.shadowOffsetY = 0;
 
-
-    // 4. Centered Premium Watermark Pill at Bottom (Safe from WhatsApp reply bar & system gestures)
-    const badgeW = 400;
-    const badgeH = 76;
+    // 4. Centered Premium Watermark Pill at Bottom
+    const badgeW = (ratio === 'story') ? 400 : 380;
+    const badgeH = (ratio === 'story') ? 76 : 58;
     const badgeX = (canvas.width - badgeW) / 2;
-    const badgeY = canvas.height - badgeH - 96;
+    const badgeY = canvas.height - badgeH - (ratio === 'story' ? 96 : 24);
 
     ctx.save();
-    ctx.fillStyle = "rgba(15, 23, 42, 0.82)";
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.22)";
+    ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
+    ctx.strokeStyle = "rgba(251, 191, 36, 0.35)";
     ctx.lineWidth = 1.5;
 
     ctx.beginPath();
     if (typeof ctx.roundRect === 'function') {
-      ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 20);
+      ctx.roundRect(badgeX, badgeY, badgeW, badgeH, (ratio === 'story' ? 20 : 16));
     } else {
       ctx.rect(badgeX, badgeY, badgeW, badgeH);
     }
@@ -17043,24 +17063,24 @@ window.generateExactVerseImageBlob = function() {
     ctx.stroke();
 
     if (logoImg) {
-      const logoSize = 48;
+      const logoSize = (ratio === 'story') ? 48 : 36;
       ctx.shadowColor = "rgba(0, 0, 0, 0.4)";
       ctx.shadowBlur = 8;
-      ctx.drawImage(logoImg, badgeX + 18, badgeY + (badgeH - logoSize) / 2, logoSize, logoSize);
+      ctx.drawImage(logoImg, badgeX + (ratio === 'story' ? 18 : 14), badgeY + (badgeH - logoSize) / 2, logoSize, logoSize);
     }
 
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillStyle = "#ffffff";
-    ctx.font = "800 18px 'Outfit', sans-serif";
-    ctx.fillText("River of Life Bible", centerX + (logoImg ? 16 : 0), badgeY + 24);
+    ctx.font = (ratio === 'story') ? "800 18px 'Outfit', sans-serif" : "800 15px 'Outfit', sans-serif";
+    ctx.fillText("River of Life Bible", centerX + (logoImg ? 16 : 0), badgeY + (ratio === 'story' ? 24 : 18));
 
     ctx.fillStyle = "rgba(251, 191, 36, 0.95)";
-    ctx.font = "700 14px 'Noto Serif Devanagari', sans-serif";
-    ctx.fillText("जीवन नदी बायबल ॲप • दैनिक वचन", centerX + (logoImg ? 16 : 0), badgeY + 50);
+    ctx.font = (ratio === 'story') ? "700 14px 'Noto Serif Devanagari', sans-serif" : "700 12px 'Noto Serif Devanagari', sans-serif";
+    ctx.fillText("जीवन नदी बायबल ॲप • दैनिक वचन", centerX + (logoImg ? 16 : 0), badgeY + (ratio === 'story' ? 50 : 38));
     ctx.restore();
 
-    const filename = `River_of_Life_Daily_Verse_${displayRef.replace(/[: ]/g, "_")}.png`;
+    const filename = `River_of_Life_Verse_Card_${displayRef.replace(/[: ]/g, "_")}.png`;
     const dataUrl = canvas.toDataURL("image/png");
 
     canvas.toBlob((blob) => {
@@ -17129,11 +17149,47 @@ window.forceHardRefreshApp = async function() {
   window.location.replace(target);
 };
 
+window.currentVodAspectRatio = 'square';
+
+window.switchVodAspectRatio = async function(newRatio) {
+  window.currentVodAspectRatio = newRatio;
+  
+  document.querySelectorAll('.btn-vod-ratio-tab').forEach(btn => {
+    const isThis = btn.dataset.ratio === newRatio;
+    btn.classList.toggle('active', isThis);
+    btn.style.background = isThis ? 'linear-gradient(135deg, #fbbf24, #d97706)' : 'rgba(255,255,255,0.08)';
+    btn.style.color = isThis ? '#0f172a' : '#ffffff';
+    btn.style.borderColor = isThis ? '#fbbf24' : 'rgba(255,255,255,0.2)';
+    btn.style.fontWeight = isThis ? '800' : '600';
+  });
+
+  try {
+    const result = await generateExactVerseImageBlob(newRatio);
+    window._currentRenderedVodImage = result;
+    const img = document.getElementById("vod-preview-rendered-img");
+    if (img) img.src = result.dataUrl;
+  } catch(e) {
+    console.error("Ratio switch error:", e);
+  }
+};
+
 window.openImagePreviewModal = function(dataUrl, filename, blob) {
   const modal = document.getElementById("modal-image-preview-save");
   const img = document.getElementById("vod-preview-rendered-img");
   if (modal && img) {
     img.src = dataUrl;
+    
+    // Sync ratio tab styling
+    const cur = window.currentVodAspectRatio || 'square';
+    document.querySelectorAll('.btn-vod-ratio-tab').forEach(btn => {
+      const isThis = btn.dataset.ratio === cur;
+      btn.classList.toggle('active', isThis);
+      btn.style.background = isThis ? 'linear-gradient(135deg, #fbbf24, #d97706)' : 'rgba(255,255,255,0.08)';
+      btn.style.color = isThis ? '#0f172a' : '#ffffff';
+      btn.style.borderColor = isThis ? '#fbbf24' : 'rgba(255,255,255,0.2)';
+      btn.style.fontWeight = isThis ? '800' : '600';
+    });
+
     modal.classList.add("active");
     modal.style.display = "flex";
   }
