@@ -262,13 +262,13 @@
               </div>
 
               <!-- LIVE CHURCH ANNOUNCEMENTS BROADCAST (If Active) -->
-              <!-- 2. Daily Verse Card: Prominent card with inline action buttons (Download, Share) -->
-              <div class="home-vod-card" id="card-daily-verse-home" onclick="openFullscreenVOD()" title="Open Daily Verse Studio & Gallery / दैनिक वचन स्टुडिओ उघडा" style="background-image: url('assets/daily_verses/sunrise.png');">
+              <!-- 2. Daily Verse Card: Prominent card with inline action buttons (Like, text Share, Save) -->
+              <div class="home-vod-card" id="card-daily-verse-home" onclick="readVODChapter()" title="Read Chapter / अध्याय वाचा" style="background-image: url('assets/daily_verses/sunrise.png');">
                 <div class="home-vod-overlay"></div>
                 <div class="home-vod-badge-row" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                   <span class="home-vod-badge" data-i18n="vod_label">VERSE OF THE DAY</span>
-                  <span class="home-vod-gallery-pill">
-                    <span>🎨 Studio & Gallery</span> &rarr;
+                  <span class="home-vod-read-pill" onclick="readVODChapter(); event.stopPropagation();" style="font-size: 11px; font-weight: 700; color: #ffffff; display: inline-flex; align-items: center; gap: 5px; background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.35); cursor: pointer;">
+                    <span>📖 Read Chapter</span> &rarr;
                   </span>
                 </div>
                 <blockquote class="home-vod-quote" id="home-vod-text">
@@ -277,13 +277,16 @@
                 <div class="home-vod-ref-row">
                   <span class="home-vod-ref" id="home-vod-ref">Psalm 23:1-2 MARVBSI</span>
                 </div>
-                <!-- Clean Inline Action Buttons (Simple Icons Only: Download, Share) -->
+                <!-- Clean Inline Action Buttons: Like, text Share, and Save -->
                 <div class="home-vod-actions-row">
-                  <button class="home-vod-btn" id="home-vod-btn-save-img" onclick="saveExactDailyVerseImage(); event.stopPropagation();" title="Save Image to Gallery / फोटो सेव्ह करा" aria-label="Save to Gallery">
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                  <button class="home-vod-btn" id="home-vod-btn-like" onclick="toggleDailyVerseLike(event);" title="Like Verse / आवडले" aria-label="Like Verse">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" class="vod-heart-icon"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                   </button>
-                  <button class="home-vod-btn" id="home-vod-btn-share" onclick="shareDailyVerseToWhatsApp(); event.stopPropagation();" title="Share Verse / शेअर करा" aria-label="Share Verse">
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                  <button class="home-vod-btn" id="home-vod-btn-share" onclick="shareDailyVerseTextOnly(event);" title="Share Verse Text / वचन शेअर करा" aria-label="Share Verse Text">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                  </button>
+                  <button class="home-vod-btn" id="home-vod-btn-save" onclick="saveDailyVerseBookmark(event);" title="Save to Bookmarks / वचन सेव्ह करा" aria-label="Save to Bookmarks">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" class="vod-bookmark-icon"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
                   </button>
                 </div>
               </div>
@@ -6119,7 +6122,7 @@
   <script src="sarvam-tts.js?v=132_MARVBSI_FULL_CHURCH_BIBLE"></script>
   <script src="bible-study.js?v=138_MUSEUM_STUDY_HUB"></script>
   <script src="https://jitsi.riot.im/external_api.js"></script>
-  <script src="app.js?v=172_VOD_ALIGNMENT_FIX"></script>
+  <script src="app.js?v=173_VOD_TEXT_SHARE_AND_BUTTONS"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 4.5s no matter what

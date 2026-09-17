@@ -12031,6 +12031,28 @@ body:has(#view-reader.active) .mobile-bottom-tabs {
   transform: scale(0.92);
 }
 
+.home-vod-btn.liked {
+  background: rgba(239, 68, 68, 0.35) !important;
+  border-color: #ef4444 !important;
+  color: #f87171 !important;
+}
+.home-vod-btn.liked svg,
+.home-vod-btn.liked svg path {
+  fill: #ef4444 !important;
+  stroke: #ef4444 !important;
+}
+
+.home-vod-btn.saved {
+  background: rgba(251, 191, 36, 0.35) !important;
+  border-color: #fbbf24 !important;
+  color: #fbbf24 !important;
+}
+.home-vod-btn.saved svg,
+.home-vod-btn.saved svg path {
+  fill: #fbbf24 !important;
+  stroke: #fbbf24 !important;
+}
+
 /* ==========================================================================
    UNIFIED FIGMA HOME MODULE TILES (Soft-Bordered Tile Style)
    ========================================================================== */

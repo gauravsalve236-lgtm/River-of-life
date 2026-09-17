@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v172_ALIGNMENT_FIX';
+const CACHE_NAME = 'river-of-life-cache-v173_TEXT_SHARE_ACTIONS';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

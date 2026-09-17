@@ -2964,32 +2964,86 @@ window.toggleDailyVerseBookmark = function() {
   if (typeof updateDailyVerseBookmarkUI === 'function') updateDailyVerseBookmarkUI();
 };
 
+window.saveDailyVerseBookmark = function(event) {
+  if (event) event.stopPropagation();
+  window.toggleDailyVerseBookmark();
+};
+
+window.toggleDailyVerseLike = function(event) {
+  if (event) event.stopPropagation();
+  const { vod } = (typeof getCurrentVOD === 'function') ? getCurrentVOD() : { vod: null };
+  if (!vod) return;
+  const refKey = vod.ref || vod.engRef || 'daily_verse';
+  const isLiked = localStorage.getItem('rol_vod_like_' + refKey) === 'true';
+  const btn = document.getElementById('home-vod-btn-like');
+
+  if (!isLiked) {
+    localStorage.setItem('rol_vod_like_' + refKey, 'true');
+    if (btn) btn.classList.add('liked');
+    if (typeof showToast === 'function') showToast('❤️ वचन आवडले! • Added to Liked Verses');
+  } else {
+    localStorage.setItem('rol_vod_like_' + refKey, 'false');
+    if (btn) btn.classList.remove('liked');
+    if (typeof showToast === 'function') showToast('Like removed');
+  }
+};
+
+window.shareDailyVerseTextOnly = async function(event) {
+  if (event) event.stopPropagation();
+  const { vod } = (typeof getCurrentVOD === 'function') ? getCurrentVOD() : { vod: null };
+  if (!vod) return;
+
+  const isEng = (state && state.translation === 'eng');
+  const displayRef = isEng ? (vod.engRef || vod.ref) : (vod.ref || vod.engRef);
+  const displayText = isEng ? vod.engText : vod.text;
+  const transCode = isEng ? 'NLT' : 'MARVBSI';
+
+  const shareText = `📖 आजचे दैनिक वचन (Verse of the Day)\n\n"${displayText}"\n— ${displayRef} (${transCode})\n\nRiver of Life Bible • जीवन देणारी नदी बायबल ॲप`;
+
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: `Daily Verse: ${displayRef}`,
+        text: shareText
+      });
+      if (typeof showToast === 'function') showToast('✨ वचन शेअर केले!');
+      return;
+    } catch (err) {
+      if (err && (err.name === 'AbortError' || err.message?.includes('abort') || err.message?.includes('cancel'))) {
+        return;
+      }
+    }
+  }
+
+  // WhatsApp & Clipboard Fallback
+  if (navigator.clipboard) {
+    try {
+      await navigator.clipboard.writeText(shareText);
+      if (typeof showToast === 'function') showToast('📋 वचन कॉपी झाले! व्हॉट्सॲपवर पेस्ट करा (Copied to Clipboard)');
+      return;
+    } catch (e) {}
+  }
+  if (typeof showToast === 'function') showToast('📖 ' + displayRef);
+};
+
 window.updateDailyVerseBookmarkUI = function() {
   const { vod } = (typeof getCurrentVOD === 'function') ? getCurrentVOD() : { vod: null };
   if (!vod) return;
   const isBookmarked = state.bookmarks && state.bookmarks.some(b => b.ref === vod.ref || b.ref === vod.engRef);
-  const btn = document.getElementById('home-vod-btn-bookmark');
-  const icon = document.getElementById('home-vod-bookmark-icon');
-  if (!btn) return;
-  
-  if (isBookmarked) {
-    btn.classList.add('active-bookmarked');
-    btn.setAttribute('title', 'Bookmarked / बुकमार्क केले आहे');
-    btn.setAttribute('aria-label', 'Remove Bookmark');
-    if (icon) {
-      icon.setAttribute('fill', '#f59e0b');
-      icon.setAttribute('stroke', '#f59e0b');
-    }
-  } else {
-    btn.classList.remove('active-bookmarked');
-    btn.setAttribute('title', 'Bookmark Verse / बुकमार्क करा');
-    btn.setAttribute('aria-label', 'Bookmark Verse');
-    if (icon) {
-      icon.setAttribute('fill', 'none');
-      icon.setAttribute('stroke', 'currentColor');
-    }
+  const btn = document.getElementById('home-vod-btn-save') || document.getElementById('home-vod-btn-bookmark');
+  if (btn) {
+    btn.classList.toggle('saved', !!isBookmarked);
+    btn.classList.toggle('active', !!isBookmarked);
+    btn.setAttribute('title', isBookmarked ? 'Bookmarked / सेव्ह केले आहे' : 'Save to Bookmarks / सेव्ह करा');
   }
-  
+
+  const refKey = vod.ref || vod.engRef || 'daily_verse';
+  const isLiked = localStorage.getItem('rol_vod_like_' + refKey) === 'true';
+  const btnLike = document.getElementById('home-vod-btn-like');
+  if (btnLike) {
+    btnLike.classList.toggle('liked', isLiked);
+  }
+
   const savedEl = document.getElementById('home-journey-saved');
   if (savedEl) savedEl.textContent = state.bookmarks ? state.bookmarks.length : 0;
 };
