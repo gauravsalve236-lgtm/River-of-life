@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v175_STUDIO_RESTORED';
+const CACHE_NAME = 'river-of-life-cache-v176_STUDIO_LIVE';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
@@ -10,9 +10,16 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         cacheNames.map((cache) => caches.delete(cache))
       );
+    }).then(() => self.clients.claim()).then(() => {
+      return self.clients.matchAll({ type: 'window' }).then((clientList) => {
+        for (const client of clientList) {
+          if (client.url && 'navigate' in client) {
+            client.navigate(client.url);
+          }
+        }
+      });
     })
   );
-  self.clients.claim();
 });
 
 self.addEventListener('notificationclick', (event) => {
