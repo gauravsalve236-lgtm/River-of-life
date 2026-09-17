@@ -17173,27 +17173,22 @@ window.shareDailyVerseToWhatsApp = async function() {
   try {
     const { vod } = getCurrentVOD();
     const displayRef = (state.translation === "eng") ? vod.engRef : vod.ref;
-    const displayText = (state.translation === "eng") ? vod.engText : vod.text;
-    
-    const shareText = `📖 आजचे दैनिक वचन (Verse of the Day)\n\n"${displayText}"\n— ${displayRef} (${state.translation === 'eng' ? 'NLT' : 'MARVBSI'})\n\nजीवन नदी बायबल ॲपवरून सामायिक केले 🙏✨\nhttps://gauravsalve236-lgtm.github.io/River-of-life/`;
 
     showToast("⏳ व्हॉट्सॲपसाठी फोटो तयार होत आहे...");
     const { blob, filename, dataUrl } = await generateExactVerseImageBlob();
     window._currentRenderedVodImage = { blob, filename, dataUrl };
 
-    // 1. Try Native Web Share API with File (Direct WhatsApp share on mobile)
-    if (navigator.canShare && navigator.canShare({ files: [new File([blob], filename, { type: "image/png" })] })) {
-      const file = new File([blob], filename, { type: "image/png" });
+    // 1. Try Native Web Share API with ONLY the image file (Pure clean image without duplicate side-text)
+    const file = new File([blob], filename, { type: "image/png" });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
       await navigator.share({
-        title: `दैनिक वचन - ${displayRef}`,
-        text: shareText,
         files: [file]
       });
       showToast("✨ व्हॉट्सॲपवर यशस्वीरीत्या शेअर केले!");
       return;
     }
 
-    // 2. Fallback: Automatically download image and open WhatsApp with pre-filled text
+    // 2. Fallback for Desktop: Automatically download the clean image file
     const link = document.createElement("a");
     link.href = dataUrl;
     link.download = filename;
@@ -17201,18 +17196,21 @@ window.shareDailyVerseToWhatsApp = async function() {
     link.click();
     document.body.removeChild(link);
 
-    const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
-    window.open(whatsappUrl, "_blank");
-    showToast("💬 फोटो सेव्ह झाला आणि व्हॉट्सॲप उघडले!");
+    // Open WhatsApp cleanly without dumping duplicate verse text
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (isMobile) {
+      try { window.open("whatsapp://send", "_blank"); } catch(e) {}
+    } else {
+      try { window.open("https://web.whatsapp.com/", "_blank"); } catch(e) {}
+    }
+    showToast("💬 सुंदर फोटो सेव्ह झाला! व्हॉट्सॲप उघडले 📸");
 
   } catch (err) {
+    if (err && (err.name === 'AbortError' || err.message?.includes('abort') || err.message?.includes('cancel'))) {
+      return; // User cancelled share sheet
+    }
     console.error("WhatsApp share error:", err);
-    // Direct WhatsApp text share fallback
-    const { vod } = getCurrentVOD();
-    const displayRef = (state.translation === "eng") ? vod.engRef : vod.ref;
-    const displayText = (state.translation === "eng") ? vod.engText : vod.text;
-    const shareText = `📖 "${displayText}" — ${displayRef} 🙏✨\nhttps://gauravsalve236-lgtm.github.io/River-of-life/`;
-    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`, "_blank");
+    showToast("⚠️ फोटो शेअर करताना त्रुटी आली");
   }
 };
 
