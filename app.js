@@ -4157,7 +4157,7 @@ function getBsiUsfmCode(bookInput) {
   return BSI_USFM_MAP[str] || "GEN";
 }
 
-let bsiCloudFrontToken = 'Key-Pair-Id=KCC7HS8KPVISV&Signature=WFDqMlN44vCGau-jdZgi37161qDeJGLGNLd10xonXZLKFBAjiGVcwU21z8jlNzMCvON8hsCcwjxU8cChY0KhiSs9xoIdxjpXpDRliRaji9hed7DD8DGuXE62pBtL5BoL1892dlH21FGJo5UaDeva3gpFysIDgL~Apnqty4LjoH75aEoJAo0ZB76czDK3S8C2839crb7y7t~9Qq8T4EEFQCkPrDasmLqa9FfYOZoY-GnOH1qHNZsZvyu86JeCBCWgGdq8bn0R4Vw-0o2sv4QbE-4rwyG3~qxwRkKKWpgnL--o~Mli0dHsGSK-Irmwq6hngKvgF9LOW~30r3VoN3l9DA__&Expires=1789643225&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9kMWhrcHV6Mm81YTJ4dy5jbG91ZGZyb250Lm5ldC9zb3VyY2UvNTU1NDc2YzIzOTBjMTAyZC0wNC8qIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzg5NjQzMjI1fX19XX0_';
+let bsiCloudFrontToken = 'Key-Pair-Id=KCC7HS8KPVISV&Signature=htjluDK356U3a~bF0mKAJ1hG-DFVP7oVdWDkGlfvxN-RZpDDCZs2qLF1NiOZJ-iw0BKxvw7ZJ6JdF5huwGYQKhEA5bGr3-lnvEu3LHb6Zg41rVm9DMIFJILJtUMiHJqxpINp2vNiqR5Hw8f1rZrTl9HORnToRel1ODromTP~46mpb8JarQHrJM8wsHbpTFQbZwtt2BOBFmVSDZzFoVvPQWyyLPVsPNHlZ7sUsyVQq3GF3LFVHjuzj39vd0isBIwZkHoW-3YuotuLVpOFYVquO9fhz8--g9mcx~gNc1F2~fvIwdQ~mIZdIs6yM9lEGa7cSUIP1E2VE5Wxr7vB4jBx2A__&Expires=1789672790&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9kMWhrcHV6Mm81YTJ4dy5jbG91ZGZyb250Lm5ldC9zb3VyY2UvNTU1NDc2YzIzOTBjMTAyZC0wNC8qIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzg5NjcyNzkwfX19XX0_';
 
 function isBsiTokenValid(token) {
   if (!token || typeof token !== 'string') return false;
@@ -4169,8 +4169,21 @@ function isBsiTokenValid(token) {
   return now < (exp - 120);
 }
 
+function checkAndPreemptivelyRefreshToken() {
+  if (!bsiCloudFrontToken) return;
+  const m = bsiCloudFrontToken.match(/Expires=(\d+)/);
+  if (!m) return;
+  const exp = parseInt(m[1], 10);
+  const now = Math.floor(Date.now() / 1000);
+  // If less than 15 minutes remaining, refresh in background
+  if (exp - now < 900) {
+    getBsiCloudFrontToken(true).catch(function() {});
+  }
+}
+
 async function getBsiCloudFrontToken(forceRefresh = false) {
   if (!forceRefresh && isBsiTokenValid(bsiCloudFrontToken)) {
+    checkAndPreemptivelyRefreshToken();
     return bsiCloudFrontToken;
   }
 
@@ -4180,6 +4193,7 @@ async function getBsiCloudFrontToken(forceRefresh = false) {
       const stored = localStorage.getItem("rol_bsi_token");
       if (stored && isBsiTokenValid(stored)) {
         bsiCloudFrontToken = stored;
+        checkAndPreemptivelyRefreshToken();
         return bsiCloudFrontToken;
       }
     } catch(e) {}
@@ -4216,7 +4230,7 @@ async function getBsiCloudFrontToken(forceRefresh = false) {
   }
 
   // 3. Try raw.githubusercontent.com live branch fallback (develop & main)
-  for (const branch of ['develop', 'main']) {
+  for (const branch of ['main', 'develop']) {
     try {
       const rawRes = await fetch(`https://raw.githubusercontent.com/gauravsalve236-lgtm/River-of-life/${branch}/assets/bsi_token.json?t=${Date.now()}`, { cache: 'no-store' });
       if (rawRes.ok) {
@@ -4232,17 +4246,24 @@ async function getBsiCloudFrontToken(forceRefresh = false) {
     }
   }
 
-  // 4. Dynamic client-side CORS scraping fallback via public proxies
+  // 4. Dynamic client-side CORS scraping fallback via public proxies (generous 10s timeout)
   try {
+    const targetUrl = 'https://www.indian.bible/bible/MARVBSI/GEN.1';
     const corsEndpoints = [
-      `https://api.allorigins.win/raw?url=${encodeURIComponent('https://www.indian.bible/bible/MARVBSI/GEN.1')}`,
-      `https://corsproxy.io/?url=${encodeURIComponent('https://www.indian.bible/bible/MARVBSI/GEN.1')}`
+      `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`,
+      `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`
     ];
     for (const proxyUrl of corsEndpoints) {
       try {
-        const pRes = await fetch(proxyUrl, { signal: AbortSignal.timeout ? AbortSignal.timeout(4500) : undefined });
+        const pRes = await fetch(proxyUrl, { signal: AbortSignal.timeout ? AbortSignal.timeout(10000) : undefined });
         if (pRes.ok) {
-          const html = await pRes.text();
+          let html = "";
+          if (proxyUrl.includes('/get?')) {
+            const json = await pRes.json();
+            html = (json && json.contents) ? json.contents : "";
+          } else {
+            html = await pRes.text();
+          }
           const match = html.match(/https:\/\/d1hkpuz2o5a2xw\.cloudfront\.net\/source\/555476c2390c102d-04\/[^\s"'<>]+\?([^\s"'<>]+)/);
           if (match && match[1]) {
             const rawTok = match[1].replace(/&amp;/g, '&').replace(/["']/g, '');
@@ -4457,7 +4478,31 @@ async function playBsiDramatizedAudio(bookKey, chapterNum, resumeTime = null) {
   bibleChapterAudioPlayer.onerror = async function(e) {
     console.warn("[Audio Engine] Player error on URL:", bibleChapterAudioPlayer.src, e);
     
-    // Direct Seamless Fallback to Authentic Human Marathi Voice (WordProject 28)
+    // 1. If playback failed on a CloudFront URL, the token may have expired. Try instant force refresh!
+    if (bibleChapterAudioPlayer.src && bibleChapterAudioPlayer.src.includes('cloudfront.net') && !bibleChapterAudioPlayer._retriedFreshToken) {
+      bibleChapterAudioPlayer._retriedFreshToken = true;
+      console.log("[Audio Engine] BSI CloudFront token expired or rejected. Attempting instant token refresh...");
+      try {
+        const freshToken = await getBsiCloudFrontToken(true);
+        if (freshToken) {
+          const freshUrl = `https://d1hkpuz2o5a2xw.cloudfront.net/source/555476c2390c102d-04/${usfm}_${chStr}.mp3?${freshToken}`;
+          console.log("[Audio Engine] Retrying BSI audio with refreshed token...");
+          bibleChapterAudioPlayer.src = freshUrl;
+          if (targetTime > 0) {
+            bibleChapterAudioPlayer.currentTime = targetTime;
+          }
+          await bibleChapterAudioPlayer.play();
+          audioState.isPlaying = true;
+          isBibleChapterPlaying = true;
+          updateReaderPlayState(true);
+          return;
+        }
+      } catch (retryErr) {
+        console.warn("[Audio Engine] Live token refresh retry error:", retryErr);
+      }
+    }
+
+    // 2. Direct Seamless Fallback to Authentic Human Marathi Voice (WordProject 28)
     if (!bibleChapterAudioPlayer._wpFallback && bibleChapterAudioPlayer.src !== wpUrl) {
       bibleChapterAudioPlayer._wpFallback = true;
       try {
@@ -12007,32 +12052,37 @@ function proceedJoinMeetingSafari() {
   window.open(extUrl, "_blank");
   showToast("Opening Live Fellowship in Safari 🙏");
 }
-window.proceedJoinMeetingSafari = proceedJoinMeetingSafari;
-
-function proceedJoinMeetingInApp() {
+async function proceedJoinMeetingInApp() {
   if (typeof closeModal === "function") closeModal("modal-ios-meeting-choice");
   else { const el = document.getElementById("modal-ios-meeting-choice"); if (el) el.style.display = "none"; }
   const m = _pendingMeetingToJoin || { id: "default", title: "Live Fellowship" };
+  
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      if (stream && stream.getTracks) stream.getTracks().forEach(t => t.stop());
+    } catch(e) {
+      console.warn("Microphone priming notice:", e);
+    }
+  }
+
   showToast("Joining Live Sanctuary 🙏");
   launchLiveMeetingRoom(m, null);
 }
 window.proceedJoinMeetingInApp = proceedJoinMeetingInApp;
 
 // Trigger Joining Flow — Handles iPhone WebKit restrictions and launches room
-function triggerJoinMeetingFlow(meetingId) {
+async function triggerJoinMeetingFlow(meetingId) {
   const meetings = getMeetingsFromStorage();
   const m = meetings.find(x => x.id === meetingId) || { id: meetingId, title: "Live Fellowship", host: "Pastor" };
   _pendingMeetingToJoin = m;
 
-  // Detect iOS (iPhone/iPad) or iOS Standalone PWA
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  
-  if (isIOS) {
-    const modalChoice = document.getElementById("modal-ios-meeting-choice");
-    if (modalChoice) {
-      modalChoice.style.display = "flex";
-      modalChoice.classList.add("active");
-      return;
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      if (stream && stream.getTracks) stream.getTracks().forEach(t => t.stop());
+    } catch(e) {
+      console.warn("Microphone priming notice:", e);
     }
   }
 
@@ -12278,7 +12328,6 @@ function launchLiveMeetingRoom(meeting, stream) {
               startWithVideoMuted: false,
               startSilent: false,
               startAudioOnly: false,
-              disableAutoGainControl: true,
               p2p: { enabled: false }, // Disables P2P so mobile Safari WebKit routes via SFU and doesn't freeze/mute mic
               prejoinConfig: { enabled: false },
               prejoinPageEnabled: false,
@@ -12288,37 +12337,9 @@ function launchLiveMeetingRoom(meeting, stream) {
               enableClosePage: false,
               disableThirdPartyRequests: true,
               resolution: 720,
-              constraints: {
-                audio: {
-                  echoCancellation: true,
-                  noiseSuppression: true
-                },
-                video: {
-                  height: { ideal: 720, max: 1080 },
-                  width: { ideal: 1280, max: 1920 },
-                  frameRate: { ideal: 30, max: 30 }
-                }
-              },
-              testing: {
-                noAutoGainControl: true
-              },
-              channelLastN: -1,
-              adaptiveLastN: false,
-              videoQuality: {
-                maxBitratesVideo: {
-                  low: 350000,
-                  standard: 1000000,
-                  high: 4000000
-                }
-              },
-              disableEchoCancellation: false,
-              noiseSuppression: true,
-              audioQuality: {
-                stereo: false,
-                opusMaxAverageBitrate: 96000
-              },
+              enableNoAudioDetection: false,
+              enableNoisyMicDetection: false,
               disableAudioLevels: false,
-              desktopSharingFrameRate: { min: 15, max: 30 },
               toolbarButtons: toolbarButtons
             },
             interfaceConfigOverwrite: {
@@ -22434,25 +22455,50 @@ setTimeout(() => {
 })();
 (function(){
   if(window.__rolJitsiMicPatch)return;window.__rolJitsiMicPatch=true;
-  const allow=()=>document.querySelectorAll('iframe').forEach(f=>{if(/jitsi/i.test(f.src||'')){f.setAttribute('allow','camera; microphone; autoplay; fullscreen; display-capture');f.setAttribute('allowfullscreen','true')}});
-  allow();new MutationObserver(allow).observe(document.documentElement,{childList:true,subtree:true});
+  const allowPolicy = "camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; clipboard-write *;";
+  const allow = () => document.querySelectorAll('iframe').forEach(f => {
+    if (/jitsi/i.test(f.src || '') || (f.id === 'webrtc-room-iframe')) {
+      f.setAttribute('allow', allowPolicy);
+      f.allow = allowPolicy;
+      f.setAttribute('allowusermedia', 'true');
+      f.setAttribute('playsinline', 'true');
+      f.setAttribute('webkit-playsinline', 'true');
+      f.setAttribute('allowfullscreen', 'true');
+    }
+  });
+  allow();
+  new MutationObserver(allow).observe(document.documentElement, { childList: true, subtree: true });
 })();
 
 (function(){
-  if(window.__rolJitsiMicPermissionPatch)return;window.__rolJitsiMicPermissionPatch=true;
-  const allow=()=>document.querySelectorAll('iframe').forEach(f=>{if(/jitsi/i.test(f.src||'')){f.setAttribute('allow','camera; microphone; autoplay; fullscreen; display-capture');f.setAttribute('allowfullscreen','true')}});
-  allow();new MutationObserver(allow).observe(document.documentElement,{childList:true,subtree:true});
-})();
-
-(function(){
-  if(window.__rolJitsiAudioStartupPatch||typeof window.JitsiMeetExternalAPI!=='function')return;
-  window.__rolJitsiAudioStartupPatch=true;
-  const Original=window.JitsiMeetExternalAPI;
-  window.JitsiMeetExternalAPI=function(){
-    const api=Reflect.construct(Original,Array.from(arguments),window.JitsiMeetExternalAPI);
-    const ensure=function(){try{api.isAudioMuted().then(function(muted){if(muted)api.executeCommand('toggleAudio')}).catch(function(){})}catch(e){}};
-    try{api.addListener('videoConferenceJoined',function(){const f=api.getIFrame&&api.getIFrame();if(f)f.setAttribute('allow','camera; microphone; autoplay; fullscreen; display-capture');ensure();setTimeout(ensure,350);setTimeout(ensure,1000);setTimeout(ensure,2000)})}catch(e){}
+  if(window.__rolJitsiAudioStartupPatch || typeof window.JitsiMeetExternalAPI !== 'function') return;
+  window.__rolJitsiAudioStartupPatch = true;
+  const Original = window.JitsiMeetExternalAPI;
+  window.JitsiMeetExternalAPI = function(){
+    const api = Reflect.construct(Original, Array.from(arguments), window.JitsiMeetExternalAPI);
+    try {
+      api.addListener('videoConferenceJoined', function(){
+        const f = api.getIFrame && api.getIFrame();
+        if (f) {
+          const p = "camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; clipboard-write *;";
+          f.setAttribute('allow', p);
+          f.allow = p;
+          f.setAttribute('allowusermedia', 'true');
+          f.setAttribute('playsinline', 'true');
+          f.setAttribute('webkit-playsinline', 'true');
+          f.setAttribute('allowfullscreen', 'true');
+        }
+        if (typeof api.isAudioMuted === 'function') {
+          api.isAudioMuted().then(function(muted){
+            if (muted) {
+              console.log("[Jitsi Audio Patch] Conference joined, unmuting microphone...");
+              api.executeCommand('toggleAudio');
+            }
+          }).catch(function(){});
+        }
+      });
+    } catch(e) {}
     return api;
   };
-  window.JitsiMeetExternalAPI.prototype=Original.prototype;
+  window.JitsiMeetExternalAPI.prototype = Original.prototype;
 })();

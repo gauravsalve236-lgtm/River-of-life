@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v179_WATERMARK';
+const CACHE_NAME = 'river-of-life-cache-v180_PERMANENT_AUDIO';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
