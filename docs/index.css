@@ -11960,10 +11960,23 @@ body:has(#view-reader.active) .mobile-bottom-tabs {
   line-height: 1.58;
   letter-spacing: 0.2px;
   margin: 16px 0 12px 0;
+  padding: 0;
   color: #ffffff;
+  text-align: left;
+  width: 100%;
+  max-width: 100%;
   text-shadow: 
     0 2px 12px rgba(0, 0, 0, 0.75),
     0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.home-vod-ref-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: left;
+  width: 100%;
+  margin: 0;
 }
 
 .home-vod-ref {
@@ -11972,6 +11985,8 @@ body:has(#view-reader.active) .mobile-bottom-tabs {
   letter-spacing: 0.3px;
   color: rgba(255, 255, 255, 0.96);
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
+  text-align: left;
+  margin: 0;
 }
 
 .home-vod-actions-row {
@@ -13604,10 +13619,23 @@ body:has(#view-reader.active) .mobile-bottom-tabs {
   line-height: 1.58;
   letter-spacing: 0.2px;
   margin: 16px 0 12px 0;
+  padding: 0;
   color: #ffffff;
+  text-align: left;
+  width: 100%;
+  max-width: 100%;
   text-shadow: 
     0 2px 12px rgba(0, 0, 0, 0.75),
     0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.home-vod-ref-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: left;
+  width: 100%;
+  margin: 0;
 }
 
 .home-vod-ref {
@@ -13616,6 +13644,8 @@ body:has(#view-reader.active) .mobile-bottom-tabs {
   letter-spacing: 0.3px;
   color: rgba(255, 255, 255, 0.96);
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
+  text-align: left;
+  margin: 0;
 }
 
 .home-vod-actions-row {
@@ -16849,5 +16879,134 @@ body:has(#view-reader.active) .mobile-bottom-tabs {
   border-color: rgba(254, 205, 211, 0.45);
   box-shadow: 0 3px 10px rgba(136, 19, 55, 0.35);
 }
+
+/* ==============================================================================
+   DAILY VERSE COMPONENT & STUDIO GENERATOR BULLETPROOF ALIGNMENT SAFEGUARDS
+   ============================================================================== */
+.home-vod-card,
+#card-daily-verse-home {
+  text-align: left !important;
+  align-items: stretch !important;
+  justify-content: space-between !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  width: 100% !important;
+}
+
+.home-vod-quote,
+#home-vod-text {
+  text-align: left !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  margin-top: 16px !important;
+  margin-bottom: 12px !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  align-self: flex-start !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.home-vod-ref-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  text-align: left !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  width: 100% !important;
+}
+
+.home-vod-ref,
+#home-vod-ref {
+  text-align: left !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* Fullscreen Studio Generator Center Alignment */
+.fullscreen-vod-text-overlay,
+#fs-vod-card-container {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  margin: 0 auto !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: min(90vw, 760px) !important;
+}
+
+#fs-vod-top-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  margin: 0 auto 8px auto !important;
+}
+
+#fs-vod-badge-pill {
+  text-align: center !important;
+  margin: 0 auto !important;
+}
+
+#fs-vod-quote-mark {
+  text-align: center !important;
+  margin: 0 auto 12px auto !important;
+}
+
+#fs-vod-text {
+  text-align: center !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  margin-top: 0 !important;
+  margin-bottom: 22px !important;
+  padding: 0 !important;
+  width: 100% !important;
+  max-width: 740px !important;
+  align-self: center !important;
+}
+
+#fs-vod-ref-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  margin: 0 auto !important;
+  width: 100% !important;
+  align-self: center !important;
+}
+
+#fs-vod-ref-badge {
+  text-align: center !important;
+}
+
+/* Verse Card Creator Studio Modal */
+.verse-card-canvas,
+#share-card-canvas {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  margin: 0 auto !important;
+}
+
+.card-quote-text,
+#share-card-text {
+  text-align: center !important;
+  margin: 0 auto 16px auto !important;
+  width: 100% !important;
+  align-self: center !important;
+}
+
+.card-quote-source,
+#share-card-source {
+  text-align: center !important;
+  margin: 0 auto !important;
+  align-self: center !important;
+}
+
 
 

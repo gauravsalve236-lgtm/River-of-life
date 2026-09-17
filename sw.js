@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v171_SQUARE_CARD_SHARE';
+const CACHE_NAME = 'river-of-life-cache-v172_ALIGNMENT_FIX';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
