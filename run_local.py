@@ -58,13 +58,50 @@ def is_token_expired(token):
         return time.time() >= (exp - 300)
     return False
 
-def refresh_token():
+def refresh_token(force=False):
     global CURRENT_TOKEN
     with REFRESH_LOCK:
-        if not is_token_expired(CURRENT_TOKEN):
+        if not force and not is_token_expired(CURRENT_TOKEN):
             return True
+        print("[BSI Audio] Refreshing live CloudFront token from indian.bible...")
+
+        # Fast HTTP Scraping with CloudFront verification
+        urls = [
+            "https://www.indian.bible/bible/MARVBSI/GEN.1",
+            "https://www.indian.bible/bible/MARVBSI/MAT.1",
+            "https://www.indian.bible/bible/MARVBSI/PSA.23"
+        ]
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/124.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+        }
+        pattern = r'https://d1hkpuz2o5a2xw\.cloudfront\.net/source/555476c2390c102d-04/[^\s"\'<>]+\?([^\s"\'<>]+)'
+
+        for u in urls:
+            try:
+                req = urllib.request.Request(u, headers=headers)
+                with urllib.request.urlopen(req, timeout=12) as resp:
+                    html = resp.read().decode('utf-8', errors='ignore')
+                    matches = re.findall(pattern, html)
+                    for raw in matches:
+                        tok = raw.lstrip('?').replace('&amp;', '&').rstrip('"\'')
+                        if "Key-Pair-Id=" in tok and "Signature=" in tok and "Expires=" in tok:
+                            test_url = f"https://d1hkpuz2o5a2xw.cloudfront.net/source/555476c2390c102d-04/GEN_001.mp3?{tok}"
+                            head_req = urllib.request.Request(test_url, headers=headers, method="HEAD")
+                            try:
+                                with urllib.request.urlopen(head_req, timeout=10) as head_resp:
+                                    if head_resp.status == 200:
+                                        CURRENT_TOKEN = tok
+                                        _save_token(CURRENT_TOKEN)
+                                        print("[BSI Audio] Successfully refreshed live CloudFront token via fast HTTP!")
+                                        return True
+                            except Exception:
+                                pass
+            except Exception as e:
+                print(f"[BSI Audio] Fast scrape error on {u}: {e}")
+
+        # Fallback to Playwright if available
         try:
-            print("[BSI Audio] Refreshing live CloudFront token from indian.bible...")
             from playwright.sync_api import sync_playwright
             with sync_playwright() as p:
                 browser = p.chromium.launch(headless=True)
@@ -74,23 +111,34 @@ def refresh_token():
                 browser.close()
                 if "?" in audio_src:
                     CURRENT_TOKEN = audio_src.split("?", 1)[1]
-                    try:
-                        with open(TOKEN_FILE, 'w', encoding='utf-8') as f:
-                            json.dump({"token": CURRENT_TOKEN, "savedAt": time.time()}, f)
-                        token_payload = {"token": CURRENT_TOKEN, "updatedAt": int(time.time())}
-                        for bsi_path in [os.path.join(DIRECTORY, 'assets', 'bsi_token.json'), os.path.join(DIRECTORY, 'docs', 'assets', 'bsi_token.json')]:
-                            try:
-                                with open(bsi_path, 'w', encoding='utf-8') as f_out:
-                                    json.dump(token_payload, f_out, indent=2)
-                            except Exception:
-                                pass
-                    except Exception:
-                        pass
-                    print("[BSI Audio] Successfully refreshed live CloudFront token!")
+                    _save_token(CURRENT_TOKEN)
+                    print("[BSI Audio] Successfully refreshed live CloudFront token via Playwright!")
                     return True
         except Exception as e:
-            print("[BSI Audio] Token refresh failed:", e)
+            print("[BSI Audio] Playwright token refresh failed:", e)
+
         return False
+
+def _save_token(token):
+    now = int(time.time())
+    try:
+        with open(TOKEN_FILE, 'w', encoding='utf-8') as f:
+            json.dump({"token": token, "savedAt": now}, f)
+        token_payload = {"token": token, "updatedAt": now}
+        target_dirs = [
+            os.path.join(DIRECTORY, 'assets', 'bsi_token.json'),
+            os.path.join(DIRECTORY, 'docs', 'assets', 'bsi_token.json'),
+            os.path.join(DIRECTORY, 'android-studio-app', 'app', 'src', 'main', 'assets', 'assets', 'bsi_token.json')
+        ]
+        for bsi_path in target_dirs:
+            try:
+                os.makedirs(os.path.dirname(bsi_path), exist_ok=True)
+                with open(bsi_path, 'w', encoding='utf-8') as f_out:
+                    json.dump(token_payload, f_out, indent=2)
+            except Exception:
+                pass
+    except Exception:
+        pass
 
 def get_valid_token():
     if is_token_expired(CURRENT_TOKEN):
@@ -153,6 +201,19 @@ class LocalAppHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)
 
+        if parsed.path == '/api/refresh-bsi-token':
+            success = refresh_token(force=True)
+            self.send_response(200 if success else 500)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(json.dumps({
+                "success": success,
+                "token": CURRENT_TOKEN,
+                "updatedAt": int(time.time())
+            }).encode('utf-8'))
+            return
+
         # 1. API endpoint to return dynamic BSI audio URL
         if parsed.path == '/api/bsi-audio-url':
             qs = urllib.parse.parse_qs(parsed.query)
@@ -190,6 +251,42 @@ class LocalAppHandler(http.server.SimpleHTTPRequestHandler):
 
             usfm = USFM_MAP.get(book_key, "GEN")
             fname = f"{usfm}_{chapter:03d}.mp3"
+
+            # Check local offline storage first
+            local_path = os.path.join(DIRECTORY, "assets", "audio", "bsi", fname)
+            if os.path.exists(local_path) and os.path.getsize(local_path) > 50000:
+                file_size = os.path.getsize(local_path)
+                range_header = self.headers.get('Range')
+                if range_header:
+                    m = re.match(r'bytes=(\d+)-(\d*)', range_header)
+                    if m:
+                        start = int(m.group(1))
+                        end = int(m.group(2)) if m.group(2) else file_size - 1
+                        end = min(end, file_size - 1)
+                        length = end - start + 1
+                        self.send_response(206)
+                        self.send_header('Content-Type', 'audio/mpeg')
+                        self.send_header('Content-Range', f'bytes {start}-{end}/{file_size}')
+                        self.send_header('Content-Length', str(length))
+                        self.send_header('Accept-Ranges', 'bytes')
+                        self.send_header('Access-Control-Allow-Origin', '*')
+                        self.send_header('X-Audio-Source', 'local-offline-storage')
+                        self.end_headers()
+                        with open(local_path, 'rb') as f:
+                            f.seek(start)
+                            self.wfile.write(f.read(length))
+                        return
+                self.send_response(200)
+                self.send_header('Content-Type', 'audio/mpeg')
+                self.send_header('Content-Length', str(file_size))
+                self.send_header('Accept-Ranges', 'bytes')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.send_header('X-Audio-Source', 'local-offline-storage')
+                self.end_headers()
+                with open(local_path, 'rb') as f:
+                    self.wfile.write(f.read())
+                return
+
             token = get_valid_token()
             audio_url = f"https://d1hkpuz2o5a2xw.cloudfront.net/source/555476c2390c102d-04/{fname}?{token}"
 

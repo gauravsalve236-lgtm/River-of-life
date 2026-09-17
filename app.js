@@ -4103,7 +4103,7 @@ function getBsiUsfmCode(bookInput) {
   return BSI_USFM_MAP[str] || "GEN";
 }
 
-let bsiCloudFrontToken = 'Key-Pair-Id=KCC7HS8KPVISV&Signature=BU48XgzpcLtO1TjgFo4uakR26Cym-jSXdgFSS1oQyrbRydw2vib6D0iFEPXTSwrZD6pvopfKPRmKSbTGMqb6mtTzppf2U1bnWEtg-eGMPN5P3qXbt6kIrg4O8rLaqvnJ6kKBZ8cEKzGg6OC1ctM8gPbJdgjfNADWOuGyZXtp1jA6vvndXj1ecpR1ym~Mx0cZsFxcYIh-lE-Y4SgAv8VFIW~stpfEwR6qAlgHe5-w0lgQG4JrFfFNHNko2WsGkZEKjktUqhgPZohziaaVosWk3tGc5tNvgWn~6CZgppAI79D8hBY4G0RgsP5slNvC85MjCBgBdkjQg-dlT-QOzbd8Yg__&Expires=1789575432&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9kMWhrcHV6Mm81YTJ4dy5jbG91ZGZyb250Lm5ldC9zb3VyY2UvNTU1NDc2YzIzOTBjMTAyZC0wNC8qIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzg5NTc1NDMyfX19XX0_';
+let bsiCloudFrontToken = 'Key-Pair-Id=KCC7HS8KPVISV&Signature=lpLsnuriagoBuCs-wN4A9qtRe7uXj4S5oC2tDmhk8-0FMreglJ-eRdVYK-7cON6~Hcmvzry3TT1scZblwa6AQVQuR-KEvt2JJHhLKzFCTsLVbcLhjAn4z8jYzFKkT5h1IsS2HGmSCfFE1QZ4Ikl0EajekoSXjR~Cikkl98A-YQQ1wdv4uhx28lBc7UnyDsdaKRXFaNoQGxcNc2hT~hJ6KWYBPQL3JVuX7LEonOe1W-yDLroqT4ihkK5AD~4AHDbwVTVauRHVPBn01JCi4EnkFLSb6I6YD4WhW3HCoL5y2xzSoahJ1rEhIQWgf9sh3-KUqf1ncp1IpeB9JsbJ~~IrgQ__&Expires=1789622464&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9kMWhrcHV6Mm81YTJ4dy5jbG91ZGZyb250Lm5ldC9zb3VyY2UvNTU1NDc2YzIzOTBjMTAyZC0wNC8qIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzg5NjIyNDY0fX19XX0_';
 
 function isBsiTokenValid(token) {
   if (!token || typeof token !== 'string') return false;
@@ -4270,9 +4270,14 @@ async function playBsiDramatizedAudio(bookKey, chapterNum, resumeTime = null) {
   let audioLabel = "";
   let isUsingWordProject = false;
 
-  // Zero-Failure Decision: If user chose WordProject or BSI token is unavailable/expired,
-  // directly and synchronously route to authentic human Marathi audio
-  if (userEnginePref === 'wordproject' || !token) {
+  const isLocalDevHost = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+  // Zero-Failure Decision:
+  // 1. If running locally and BSI is chosen, use the local proxy which serves directly from downloaded assets/audio/bsi/
+  if (isLocalDevHost && userEnginePref !== 'wordproject') {
+    audioUrl = `/api/bsi-audio-stream?book=${cleanBook}&chapter=${chNum}`;
+    audioLabel = `🎭 BSI नाट्यमय ऑडिओ (स्थानिक) • ${cleanBook} ${chNum}`;
+  } else if (userEnginePref === 'wordproject' || !token) {
     audioUrl = wpUrl;
     audioLabel = `🎙️ अस्सल मराठी ऑडिओ • ${cleanBook} ${chNum}`;
     isUsingWordProject = true;
@@ -4283,11 +4288,6 @@ async function playBsiDramatizedAudio(bookKey, chapterNum, resumeTime = null) {
   } else {
     audioUrl = `https://d1hkpuz2o5a2xw.cloudfront.net/source/555476c2390c102d-04/${usfm}_${chStr}.mp3?${token}`;
     audioLabel = `🎭 BSI नाट्यमय ऑडिओ • ${cleanBook} ${chNum}`;
-  }
-
-  // If local server streaming proxy is explicitly enabled, use it
-  if (window.USE_LOCAL_BSI_PROXY && !isUsingWordProject && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
-    audioUrl = `/api/bsi-audio-stream?book=${cleanBook}&chapter=${chNum}`;
   }
 
   // Check if player is already loaded with the same track and was paused

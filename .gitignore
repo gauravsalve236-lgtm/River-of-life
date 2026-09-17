@@ -10,3 +10,7 @@ verified_*.png
 test_*.py
 .bsi_token.json
 *.db
+assets/audio/bsi/*.mp3
+assets/audio/bsi/*.part
+docs/assets/audio/bsi/*.mp3
+docs/assets/audio/bsi/*.part
