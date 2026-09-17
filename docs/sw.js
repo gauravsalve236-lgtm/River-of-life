@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v174_CANVAS_CENTER_ALIGN';
+const CACHE_NAME = 'river-of-life-cache-v175_STUDIO_RESTORED';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
