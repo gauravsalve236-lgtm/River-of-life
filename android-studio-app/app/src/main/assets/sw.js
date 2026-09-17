@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v178_IPHONE_CENTER';
+const CACHE_NAME = 'river-of-life-cache-v179_WATERMARK';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

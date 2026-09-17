@@ -16981,21 +16981,21 @@ window.generateExactVerseImageBlob = function(customRatio) {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // 3. Multi-Line Text Layout with Safe Margins & Mathematically Guaranteed Horizontal Centering
-    const textMaxWidth = (ratio === 'story') ? 880 : 900;
+    const textMaxWidth = (ratio === 'story') ? 880 : 920;
 
-    // Prominent, readable font sizing tailored for cards & phone sharing
-    let fontSize = 42;
+    // Prominent, highly readable font sizing tailored for phones & social sharing
+    let fontSize = 46;
     if (ratio === 'story') {
-      if (displayText.length <= 80) fontSize = 56;
-      else if (displayText.length <= 140) fontSize = 48;
-      else if (displayText.length <= 220) fontSize = 42;
-      else fontSize = 36;
+      if (displayText.length <= 80) fontSize = 64;
+      else if (displayText.length <= 140) fontSize = 56;
+      else if (displayText.length <= 220) fontSize = 48;
+      else fontSize = 42;
     } else {
       // 1:1 Square Card (1080x1080) and 4:5 Portrait Card (1080x1350)
-      if (displayText.length <= 70) fontSize = 52;
-      else if (displayText.length <= 130) fontSize = 46;
-      else if (displayText.length <= 200) fontSize = 40;
-      else fontSize = 34;
+      if (displayText.length <= 70) fontSize = 58;
+      else if (displayText.length <= 130) fontSize = 50;
+      else if (displayText.length <= 200) fontSize = 45;
+      else fontSize = 38;
     }
 
     const isMarathi = state.translation !== "eng";
@@ -17022,22 +17022,22 @@ window.generateExactVerseImageBlob = function(customRatio) {
     }
     if (currentLine) lines.push(currentLine.trim());
 
-    const lineHeight = Math.round(fontSize * (ratio === 'story' ? 1.6 : 1.55));
+    const lineHeight = Math.round(fontSize * (ratio === 'story' ? 1.55 : 1.5));
     const textBlockHeight = lines.length * lineHeight;
-    const tagHeight = (ratio === 'story') ? 44 : 36;
-    const quoteHeight = (ratio === 'story') ? 64 : 54;
-    const refHeight = (ratio === 'story') ? 56 : 48;
-    const spacing = (ratio === 'story') ? 50 : 32;
+    const tagHeight = (ratio === 'story') ? 48 : 40;
+    const quoteHeight = (ratio === 'story') ? 68 : 58;
+    const refHeight = (ratio === 'story') ? 58 : 50;
+    const spacing = (ratio === 'story') ? 46 : 28;
     const totalContentHeight = tagHeight + quoteHeight + textBlockHeight + refHeight + spacing;
 
     // Center in visual zone
-    let startY = Math.round((canvas.height - totalContentHeight) / 2) - (ratio === 'story' ? 40 : 15);
+    let startY = Math.round((canvas.height - totalContentHeight) / 2) - (ratio === 'story' ? 45 : 20);
 
     // 3a. Top Tag (Mathematically Guaranteed Centering)
     ctx.direction = "ltr";
     ctx.textAlign = "left";
     ctx.textBaseline = "middle";
-    ctx.font = (ratio === 'story') ? "800 24px 'Outfit', -apple-system, sans-serif" : "800 20px 'Outfit', -apple-system, sans-serif";
+    ctx.font = (ratio === 'story') ? "800 24px 'Outfit', -apple-system, sans-serif" : "800 21px 'Outfit', -apple-system, sans-serif";
     ctx.fillStyle = theme.accentColor || "#fbbf24";
     ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
     ctx.shadowBlur = 14;
@@ -17051,7 +17051,7 @@ window.generateExactVerseImageBlob = function(customRatio) {
     // 3b. Quotation Mark (Mathematically Guaranteed Centering)
     ctx.direction = "ltr";
     ctx.textAlign = "left";
-    ctx.font = (ratio === 'story') ? "700 84px Georgia, serif" : "700 76px Georgia, serif";
+    ctx.font = (ratio === 'story') ? "700 90px Georgia, serif" : "700 82px Georgia, serif";
     ctx.fillStyle = theme.quoteColor || theme.accentColor || "#fbbf24";
     ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
     ctx.shadowBlur = 18;
@@ -17084,7 +17084,7 @@ window.generateExactVerseImageBlob = function(customRatio) {
     ctx.textAlign = "left";
     ctx.textBaseline = "middle";
     const refText = `${displayRef} • ${state.translation === 'eng' ? 'NLT' : 'MARVBSI'}`;
-    ctx.font = (ratio === 'story') ? "800 32px 'Outfit', -apple-system, sans-serif" : "800 28px 'Outfit', -apple-system, 'Noto Serif Devanagari', sans-serif";
+    ctx.font = (ratio === 'story') ? "800 34px 'Outfit', -apple-system, sans-serif" : "800 29px 'Outfit', -apple-system, 'Noto Serif Devanagari', sans-serif";
     const refW = ctx.measureText(refText).width;
     const refX = Math.round((canvas.width - refW) / 2);
     const gap = 18;
@@ -17110,42 +17110,73 @@ window.generateExactVerseImageBlob = function(customRatio) {
     ctx.shadowOffsetX = 0;
     ctx.shadowOffsetY = 0;
 
-    // 4. Centered Premium Watermark Pill at Bottom
-    const badgeW = (ratio === 'story') ? 400 : 380;
-    const badgeH = (ratio === 'story') ? 76 : 58;
-    const badgeX = (canvas.width - badgeW) / 2;
-    const badgeY = canvas.height - badgeH - (ratio === 'story' ? 96 : 24);
-
+    // 4. Centered Premium Watermark & Copyright Pill at Bottom
     ctx.save();
-    ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
-    ctx.strokeStyle = "rgba(251, 191, 36, 0.35)";
-    ctx.lineWidth = 1.5;
+    const titleStr = "River of Life Bible";
+    const subStr = "जीवन नदी बायबल ॲप • © River of Life";
+
+    const titleFont = (ratio === 'story') ? "800 28px 'Outfit', -apple-system, sans-serif" : "800 24px 'Outfit', -apple-system, sans-serif";
+    const subFont = (ratio === 'story') ? "700 17px 'Noto Serif Devanagari', -apple-system, sans-serif" : "700 15px 'Noto Serif Devanagari', -apple-system, sans-serif";
+
+    ctx.font = titleFont;
+    const titleMetrics = ctx.measureText(titleStr);
+    ctx.font = subFont;
+    const subMetrics = ctx.measureText(subStr);
+    const maxTextW = Math.max(titleMetrics.width, subMetrics.width);
+
+    const logoSize = (ratio === 'story') ? 58 : 50;
+    const padX = (ratio === 'story') ? 24 : 20;
+    const gapLogo = (ratio === 'story') ? 18 : 15;
+    const badgeW = Math.round((logoImg ? (logoSize + gapLogo) : 0) + maxTextW + (padX * 2) + 6);
+    const badgeH = (ratio === 'story') ? 94 : 80;
+    const badgeX = Math.round((canvas.width - badgeW) / 2);
+    const badgeY = canvas.height - badgeH - (ratio === 'story' ? 110 : 34);
+
+    ctx.fillStyle = "rgba(10, 16, 30, 0.88)";
+    ctx.strokeStyle = "rgba(251, 191, 36, 0.45)";
+    ctx.lineWidth = 2;
 
     ctx.beginPath();
     if (typeof ctx.roundRect === 'function') {
-      ctx.roundRect(badgeX, badgeY, badgeW, badgeH, (ratio === 'story' ? 20 : 16));
+      ctx.roundRect(badgeX, badgeY, badgeW, badgeH, (ratio === 'story' ? 22 : 18));
     } else {
       ctx.rect(badgeX, badgeY, badgeW, badgeH);
     }
     ctx.fill();
     ctx.stroke();
 
+    const logoX = badgeX + padX;
+    const logoY = badgeY + Math.round((badgeH - logoSize) / 2);
+
     if (logoImg) {
-      const logoSize = (ratio === 'story') ? 48 : 36;
-      ctx.shadowColor = "rgba(0, 0, 0, 0.4)";
+      ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
       ctx.shadowBlur = 8;
-      ctx.drawImage(logoImg, badgeX + (ratio === 'story' ? 18 : 14), badgeY + (badgeH - logoSize) / 2, logoSize, logoSize);
+      ctx.drawImage(logoImg, logoX, logoY, logoSize, logoSize);
     }
 
-    ctx.textAlign = "center";
+    ctx.direction = "ltr";
+    ctx.textAlign = "left";
     ctx.textBaseline = "middle";
-    ctx.fillStyle = "#ffffff";
-    ctx.font = (ratio === 'story') ? "800 18px 'Outfit', sans-serif" : "800 15px 'Outfit', sans-serif";
-    ctx.fillText("River of Life Bible", centerX + (logoImg ? 16 : 0), badgeY + (ratio === 'story' ? 24 : 18));
 
-    ctx.fillStyle = "rgba(251, 191, 36, 0.95)";
-    ctx.font = (ratio === 'story') ? "700 14px 'Noto Serif Devanagari', sans-serif" : "700 12px 'Noto Serif Devanagari', sans-serif";
-    ctx.fillText("जीवन नदी बायबल ॲप • दैनिक वचन", centerX + (logoImg ? 16 : 0), badgeY + (ratio === 'story' ? 50 : 38));
+    if (logoImg) {
+      const textX = logoX + logoSize + gapLogo;
+      
+      ctx.fillStyle = "#ffffff";
+      ctx.font = titleFont;
+      ctx.fillText(titleStr, textX, badgeY + (ratio === 'story' ? 32 : 27));
+
+      ctx.fillStyle = "rgba(251, 191, 36, 0.95)";
+      ctx.font = subFont;
+      ctx.fillText(subStr, textX, badgeY + (ratio === 'story' ? 62 : 51));
+    } else {
+      ctx.font = titleFont;
+      ctx.fillStyle = "#ffffff";
+      ctx.fillText(titleStr, Math.round((canvas.width - titleMetrics.width) / 2), badgeY + (ratio === 'story' ? 32 : 27));
+
+      ctx.font = subFont;
+      ctx.fillStyle = "rgba(251, 191, 36, 0.95)";
+      ctx.fillText(subStr, Math.round((canvas.width - subMetrics.width) / 2), badgeY + (ratio === 'story' ? 62 : 51));
+    }
     ctx.restore();
 
     const safeRefCode = ((vod && vod.engRef) ? vod.engRef : 'Daily_Verse').replace(/[^a-zA-Z0-9]/g, "_");
