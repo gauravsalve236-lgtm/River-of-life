@@ -16913,22 +16913,23 @@ window.generateExactVerseImageBlob = function() {
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // 3. Multi-Line Text Layout with Safe Margins & Perfect Centering
-    const centerX = canvas.width / 2;
-    const textMaxWidth = 720; // 180px safe padding on each side for mobile screen balance
+    // 3. Multi-Line Text Layout with Safe Margins & Mathematically Guaranteed Horizontal Centering
+    const textMaxWidth = 880; // Safe 100px margins on left and right for 1080x1920 canvas
 
-    // Dynamic font sizing for long / short scriptures
-    let fontSize = 36;
-    if (displayText.length <= 90) fontSize = 40;
-    else if (displayText.length <= 160) fontSize = 36;
-    else if (displayText.length <= 240) fontSize = 32;
-    else fontSize = 28;
+    // Prominent, readable font sizing for 1080x1920 poster canvas
+    let fontSize = 48;
+    if (displayText.length <= 80) fontSize = 56;
+    else if (displayText.length <= 140) fontSize = 48;
+    else if (displayText.length <= 220) fontSize = 42;
+    else fontSize = 36;
 
     const isMarathi = state.translation !== "eng";
     const fontFamily = isMarathi
       ? "'Noto Serif Devanagari', 'Poppins', sans-serif"
       : (theme.fontFamily || "'Lora', Georgia, serif");
     ctx.font = `${theme.fontWeight || '700'} ${fontSize}px ${fontFamily}`;
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
 
     const words = displayText.split(/\s+/);
     let currentLine = "";
@@ -16945,84 +16946,81 @@ window.generateExactVerseImageBlob = function() {
     }
     if (currentLine) lines.push(currentLine.trim());
 
-    const lineHeight = Math.round(fontSize * 1.75);
+    const lineHeight = Math.round(fontSize * 1.6);
     const textBlockHeight = lines.length * lineHeight;
-    const tagHeight = 40;
-    const quoteHeight = 52;
-    const refHeight = 48;
-    const totalContentHeight = tagHeight + quoteHeight + textBlockHeight + refHeight + 40;
+    const tagHeight = 44;
+    const quoteHeight = 64;
+    const refHeight = 56;
+    const totalContentHeight = tagHeight + quoteHeight + textBlockHeight + refHeight + 50;
 
     // Center in visual golden zone (upper-middle)
     let startY = Math.round((canvas.height - totalContentHeight) / 2) - 40;
 
-    // 3a. Top Tag
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
+    // 3a. Top Tag (Strictly Centered)
+    ctx.font = "800 24px 'Outfit', sans-serif";
     ctx.fillStyle = theme.accentColor || "#fbbf24";
-    ctx.font = "800 20px 'Outfit', sans-serif";
     ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
     ctx.shadowBlur = 14;
     ctx.shadowOffsetX = 0;
     ctx.shadowOffsetY = 2;
-    ctx.fillText(theme.tag || "✦ VERSE OF THE DAY ✦", centerX, startY);
+    const tagText = theme.tag || "✦ VERSE OF THE DAY ✦";
+    const tagW = ctx.measureText(tagText).width;
+    ctx.fillText(tagText, (canvas.width - tagW) / 2, startY);
     startY += tagHeight;
 
-    // 3b. Quotation Mark
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
+    // 3b. Quotation Mark (Strictly Centered)
+    ctx.font = "700 84px Georgia, serif";
     ctx.fillStyle = theme.quoteColor || theme.accentColor || "#fbbf24";
-    ctx.font = "700 64px Georgia, serif";
     ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
     ctx.shadowBlur = 18;
-    ctx.fillText("“", centerX, startY + 8);
+    const quoteChar = "“";
+    const quoteW = ctx.measureText(quoteChar).width;
+    ctx.fillText(quoteChar, (canvas.width - quoteW) / 2, startY + 10);
     startY += quoteHeight;
 
-    // 3c. Verse Body (Explicitly enforce textAlign="center" and textBaseline="middle" on each line)
+    // 3c. Verse Body (Strictly Centered: (canvas.width - lineW) / 2 on EVERY line)
     ctx.fillStyle = theme.textColor || "#ffffff";
     ctx.font = `${theme.fontWeight || '700'} ${fontSize}px ${fontFamily}`;
     ctx.shadowColor = "rgba(0, 0, 0, 0.98)";
     ctx.shadowBlur = 24;
     ctx.shadowOffsetX = 0;
     ctx.shadowOffsetY = 4;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
 
     for (let i = 0; i < lines.length; i++) {
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(lines[i].trim(), centerX, startY + (i * lineHeight));
+      const lineW = ctx.measureText(lines[i].trim()).width;
+      const lineX = (canvas.width - lineW) / 2;
+      ctx.fillText(lines[i].trim(), lineX, startY + (i * lineHeight));
     }
-    startY += textBlockHeight + 24;
+    startY += textBlockHeight + 36;
 
-    // 3d. Scripture Reference with Accent Lines
-    const refText = `${displayRef} ${state.translation === 'eng' ? 'NLT' : 'MARVBSI'}`;
-    ctx.font = "800 26px 'Outfit', sans-serif";
-    const refWidth = ctx.measureText(refText).width;
+    // 3d. Scripture Reference with Symmetrical Accent Lines (Strictly Centered)
+    const refText = `${displayRef} • ${state.translation === 'eng' ? 'NLT' : 'MARVBSI'}`;
+    ctx.font = "800 32px 'Outfit', sans-serif";
+    const refW = ctx.measureText(refText).width;
+    const refX = (canvas.width - refW) / 2;
+    const gap = 20;
+    const lineLen = 56;
 
     ctx.strokeStyle = theme.accentColor || "#fbbf24";
     ctx.lineWidth = 2.5;
-    const lineLen = 48;
-    const gap = 16;
-
     ctx.beginPath();
-    ctx.moveTo(centerX - (refWidth / 2) - gap - lineLen, startY);
-    ctx.lineTo(centerX - (refWidth / 2) - gap, startY);
-    ctx.moveTo(centerX + (refWidth / 2) + gap, startY);
-    ctx.lineTo(centerX + (refWidth / 2) + gap + lineLen, startY);
+    ctx.moveTo(refX - gap - lineLen, startY);
+    ctx.lineTo(refX - gap, startY);
+    ctx.moveTo(refX + refW + gap, startY);
+    ctx.lineTo(refX + refW + gap + lineLen, startY);
     ctx.stroke();
 
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
     ctx.fillStyle = theme.accentColor || "#fbbf24";
     ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
     ctx.shadowBlur = 14;
-    ctx.fillText(refText, centerX, startY);
+    ctx.fillText(refText, refX, startY);
 
     // Reset shadows
     ctx.shadowColor = "transparent";
     ctx.shadowBlur = 0;
     ctx.shadowOffsetX = 0;
     ctx.shadowOffsetY = 0;
+
 
     // 4. Centered Premium Watermark Pill at Bottom (Safe from WhatsApp reply bar & system gestures)
     const badgeW = 400;
@@ -17098,8 +17096,6 @@ window.saveExactDailyVerseImage = async function() {
       const file = new File([result.blob], result.filename, { type: "image/png" });
       try {
         await navigator.share({
-          title: `River of Life - Daily Verse`,
-          text: `📖 ${result.filename}`,
           files: [file]
         });
       } catch (shareErr) {
