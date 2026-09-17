@@ -17033,34 +17033,36 @@ window.generateExactVerseImageBlob = function(customRatio) {
     // Center in visual zone
     let startY = Math.round((canvas.height - totalContentHeight) / 2) - (ratio === 'story' ? 40 : 15);
 
-    // 3a. Top Tag (Strictly Centered)
+    // 3a. Top Tag (Mathematically Guaranteed Centering)
     ctx.direction = "ltr";
-    ctx.textAlign = "center";
+    ctx.textAlign = "left";
     ctx.textBaseline = "middle";
-    ctx.font = (ratio === 'story') ? "800 24px 'Outfit', sans-serif" : "800 20px 'Outfit', sans-serif";
+    ctx.font = (ratio === 'story') ? "800 24px 'Outfit', -apple-system, sans-serif" : "800 20px 'Outfit', -apple-system, sans-serif";
     ctx.fillStyle = theme.accentColor || "#fbbf24";
     ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
     ctx.shadowBlur = 14;
     ctx.shadowOffsetX = 0;
     ctx.shadowOffsetY = 2;
     const tagText = theme.tag || "✦ VERSE OF THE DAY ✦";
-    ctx.fillText(tagText, centerX, startY);
+    const tagW = ctx.measureText(tagText).width;
+    ctx.fillText(tagText, Math.round((canvas.width - tagW) / 2), startY);
     startY += tagHeight;
 
-    // 3b. Quotation Mark (Strictly Centered)
+    // 3b. Quotation Mark (Mathematically Guaranteed Centering)
     ctx.direction = "ltr";
-    ctx.textAlign = "center";
+    ctx.textAlign = "left";
     ctx.font = (ratio === 'story') ? "700 84px Georgia, serif" : "700 76px Georgia, serif";
     ctx.fillStyle = theme.quoteColor || theme.accentColor || "#fbbf24";
     ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
     ctx.shadowBlur = 18;
     const quoteChar = "“";
-    ctx.fillText(quoteChar, centerX, startY + (ratio === 'story' ? 10 : 8));
+    const quoteW = ctx.measureText(quoteChar).width;
+    ctx.fillText(quoteChar, Math.round((canvas.width - quoteW) / 2), startY + (ratio === 'story' ? 10 : 8));
     startY += quoteHeight;
 
-    // 3c. Verse Body (Strictly Centered at centerX with native ctx.textAlign = 'center')
+    // 3c. Verse Body (Mathematically Guaranteed Centering for every line)
     ctx.direction = "ltr";
-    ctx.textAlign = "center";
+    ctx.textAlign = "left";
     ctx.textBaseline = "middle";
     ctx.fillStyle = theme.textColor || "#ffffff";
     ctx.font = `${theme.fontWeight || '700'} ${fontSize}px ${fontFamily}`;
@@ -17070,34 +17072,37 @@ window.generateExactVerseImageBlob = function(customRatio) {
     ctx.shadowOffsetY = 4;
 
     for (let i = 0; i < lines.length; i++) {
-      ctx.fillText(lines[i].trim(), centerX, startY + (i * lineHeight));
+      const lineStr = lines[i].trim();
+      const lineW = ctx.measureText(lineStr).width;
+      const lineX = Math.round((canvas.width - lineW) / 2);
+      ctx.fillText(lineStr, lineX, startY + (i * lineHeight));
     }
     startY += textBlockHeight + (ratio === 'story' ? 36 : 30);
 
-    // 3d. Scripture Reference with Symmetrical Accent Lines (Strictly Centered)
+    // 3d. Scripture Reference with Symmetrical Accent Lines (Mathematically Guaranteed Centering)
     ctx.direction = "ltr";
-    ctx.textAlign = "center";
+    ctx.textAlign = "left";
     ctx.textBaseline = "middle";
     const refText = `${displayRef} • ${state.translation === 'eng' ? 'NLT' : 'MARVBSI'}`;
-    ctx.font = (ratio === 'story') ? "800 32px 'Outfit', sans-serif" : "800 28px 'Outfit', 'Noto Serif Devanagari', sans-serif";
+    ctx.font = (ratio === 'story') ? "800 32px 'Outfit', -apple-system, sans-serif" : "800 28px 'Outfit', -apple-system, 'Noto Serif Devanagari', sans-serif";
     const refW = ctx.measureText(refText).width;
-    const halfRef = Math.round(refW / 2);
+    const refX = Math.round((canvas.width - refW) / 2);
     const gap = 18;
     const lineLen = (ratio === 'story') ? 56 : 50;
 
     ctx.strokeStyle = theme.accentColor || "#fbbf24";
     ctx.lineWidth = 2.5;
     ctx.beginPath();
-    ctx.moveTo(centerX - halfRef - gap - lineLen, startY);
-    ctx.lineTo(centerX - halfRef - gap, startY);
-    ctx.moveTo(centerX + halfRef + gap, startY);
-    ctx.lineTo(centerX + halfRef + gap + lineLen, startY);
+    ctx.moveTo(refX - gap - lineLen, startY);
+    ctx.lineTo(refX - gap, startY);
+    ctx.moveTo(refX + refW + gap, startY);
+    ctx.lineTo(refX + refW + gap + lineLen, startY);
     ctx.stroke();
 
     ctx.fillStyle = theme.accentColor || "#fbbf24";
     ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
     ctx.shadowBlur = 14;
-    ctx.fillText(refText, centerX, startY);
+    ctx.fillText(refText, refX, startY);
 
     // Reset shadows
     ctx.shadowColor = "transparent";

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v177_IOS_SHARE';
+const CACHE_NAME = 'river-of-life-cache-v178_IPHONE_CENTER';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
