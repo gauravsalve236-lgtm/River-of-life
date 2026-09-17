@@ -17143,7 +17143,8 @@ window.generateExactVerseImageBlob = function(customRatio) {
     ctx.fillText("जीवन नदी बायबल ॲप • दैनिक वचन", centerX + (logoImg ? 16 : 0), badgeY + (ratio === 'story' ? 50 : 38));
     ctx.restore();
 
-    const filename = `River_of_Life_Verse_Card_${displayRef.replace(/[: ]/g, "_")}.png`;
+    const safeRefCode = ((vod && vod.engRef) ? vod.engRef : 'Daily_Verse').replace(/[^a-zA-Z0-9]/g, "_");
+    const filename = `River_of_Life_Verse_Card_${safeRefCode}.png`;
     const dataUrl = canvas.toDataURL("image/png");
 
     canvas.toBlob((blob) => {
@@ -17162,7 +17163,26 @@ window.saveExactDailyVerseImage = async function() {
     const result = await generateExactVerseImageBlob();
     window._currentRenderedVodImage = result;
 
-    // 1. Direct Anchor Download Trigger
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const file = new File([result.blob], result.filename, { type: "image/png", lastModified: Date.now() });
+
+    // 1. Try Native Web Share on Mobile (Allows direct 'Save Image' to Apple Photos on iPhone)
+    if (isMobile && navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({
+          files: [file],
+          title: "River of Life - Daily Verse"
+        });
+        showToast("✨ फोटो गॅलरीमध्ये सेव्ह / शेअर केला!");
+        return;
+      } catch (shareErr) {
+        if (shareErr && (shareErr.name === 'AbortError' || shareErr.message?.includes('abort') || shareErr.message?.includes('cancel'))) {
+          return;
+        }
+      }
+    }
+
+    // 2. Direct Anchor Download Trigger (Desktop & Android)
     const link = document.createElement("a");
     link.href = result.dataUrl;
     link.download = result.filename;
@@ -17170,21 +17190,9 @@ window.saveExactDailyVerseImage = async function() {
     link.click();
     document.body.removeChild(link);
 
-    // 2. Open Preview & Direct Save Modal
+    // 3. Open Preview & Direct Save Modal (User can long-press image to save directly to camera roll)
     openImagePreviewModal(result.dataUrl, result.filename, result.blob);
-    showToast("📥 फोटो गॅलरीमध्ये सेव्ह झाला! (Saved to Gallery)");
-
-    // 3. Try Native Web Share API with File (on supported mobile devices)
-    if (navigator.canShare && navigator.canShare({ files: [new File([result.blob], result.filename, { type: "image/png" })] })) {
-      const file = new File([result.blob], result.filename, { type: "image/png" });
-      try {
-        await navigator.share({
-          files: [file]
-        });
-      } catch (shareErr) {
-        // User dismissed share dialog
-      }
-    }
+    showToast("📥 फोटो तयार झाला! (Saved to Gallery)");
 
   } catch (err) {
     console.error("Save image error:", err);
@@ -17266,9 +17274,26 @@ window.closeImagePreviewModal = function() {
   }
 };
 
-window.downloadRenderedVodImage = function() {
+window.downloadRenderedVodImage = async function() {
   if (window._currentRenderedVodImage) {
-    const { dataUrl, filename } = window._currentRenderedVodImage;
+    const { dataUrl, filename, blob } = window._currentRenderedVodImage;
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const file = new File([blob || new Blob([])], filename, { type: "image/png", lastModified: Date.now() });
+
+    // iOS Safari / Mobile: Use native share sheet so iPhone saves to Camera Roll
+    if (isMobile && navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({
+          files: [file],
+          title: "River of Life - Daily Verse"
+        });
+        showToast("✨ फोटो सेव्ह / शेअर झाला!");
+        return;
+      } catch(e) {
+        if (e && (e.name === 'AbortError' || e.message?.includes('abort'))) return;
+      }
+    }
+
     const link = document.createElement("a");
     link.href = dataUrl;
     link.download = filename;
@@ -17287,23 +17312,55 @@ window.shareRenderedVodImage = function() {
 window.shareDailyVerseToWhatsApp = async function() {
   try {
     const { vod } = getCurrentVOD();
-    const displayRef = (state.translation === "eng") ? vod.engRef : vod.ref;
-
     showToast("⏳ व्हॉट्सॲपसाठी फोटो तयार होत आहे...");
     const { blob, filename, dataUrl } = await generateExactVerseImageBlob();
     window._currentRenderedVodImage = { blob, filename, dataUrl };
 
+    // Standard clean ASCII filename guaranteed safe on iOS Safari & Android
+    const file = new File([blob], filename, { 
+      type: "image/png",
+      lastModified: Date.now()
+    });
+
     // 1. Try Native Web Share API with ONLY the image file (Pure clean image without duplicate side-text)
-    const file = new File([blob], filename, { type: "image/png" });
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       await navigator.share({
-        files: [file]
+        files: [file],
+        title: "River of Life - Daily Verse"
       });
       showToast("✨ व्हॉट्सॲपवर यशस्वीरीत्या शेअर केले!");
       return;
     }
 
-    // 2. Fallback for Desktop: Automatically download the clean image file
+    // 2. Direct Web Share API attempt without canShare check (supported on some iOS versions)
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          files: [file],
+          title: "River of Life - Daily Verse"
+        });
+        showToast("✨ व्हॉट्सॲपवर यशस्वीरीत्या शेअर केले!");
+        return;
+      } catch (shareErr) {
+        if (shareErr && (shareErr.name === 'AbortError' || shareErr.message?.includes('abort') || shareErr.message?.includes('cancel'))) {
+          return; // User cancelled share sheet
+        }
+      }
+    }
+
+    // 3. Fallback: Copy Image to Clipboard if supported (iOS 13.4+ Safari supports copying image blobs!)
+    if (navigator.clipboard && window.ClipboardItem) {
+      try {
+        await navigator.clipboard.write([
+          new ClipboardItem({ 'image/png': blob })
+        ]);
+        openImagePreviewModal(dataUrl, filename, blob);
+        showToast("📋 फोटो कॉपी झाला! व्हॉट्सॲपवर पेस्ट करा (Photo Copied)");
+        return;
+      } catch (clipErr) {}
+    }
+
+    // 4. Fallback for Desktop & browsers: Download image file & open preview modal
     const link = document.createElement("a");
     link.href = dataUrl;
     link.download = filename;
@@ -17311,14 +17368,15 @@ window.shareDailyVerseToWhatsApp = async function() {
     link.click();
     document.body.removeChild(link);
 
-    // Open WhatsApp cleanly without dumping duplicate verse text
+    openImagePreviewModal(dataUrl, filename, blob);
+
     const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     if (isMobile) {
-      try { window.open("whatsapp://send", "_blank"); } catch(e) {}
+      showToast("💬 फोटो तयार झाला! सेव्ह करण्यासाठी फोटोवर दाबून धरा 📸");
     } else {
       try { window.open("https://web.whatsapp.com/", "_blank"); } catch(e) {}
+      showToast("💬 सुंदर फोटो सेव्ह झाला! व्हॉट्सॲप उघडले 📸");
     }
-    showToast("💬 सुंदर फोटो सेव्ह झाला! व्हॉट्सॲप उघडले 📸");
 
   } catch (err) {
     if (err && (err.name === 'AbortError' || err.message?.includes('abort') || err.message?.includes('cancel'))) {
