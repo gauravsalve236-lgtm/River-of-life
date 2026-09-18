@@ -12052,6 +12052,16 @@ window.unlockMobileSpeakerAudio = unlockMobileSpeakerAudio;
 
 let _pendingMeetingToJoin = null;
 
+function getJitsiServerDomain() {
+  let domain = localStorage.getItem("rol_jitsi_server");
+  if (!domain || domain === "jitsi.riot.im" || domain === "meet.jit.si") {
+    domain = "meet.darmstadt.social";
+    localStorage.setItem("rol_jitsi_server", domain);
+  }
+  return domain.replace(/^https?:\/\//, '').replace(/\/+$/, '');
+}
+window.getJitsiServerDomain = getJitsiServerDomain;
+
 function proceedJoinMeetingSafari() {
   if (typeof closeModal === "function") closeModal("modal-ios-meeting-choice");
   else {
@@ -12062,10 +12072,8 @@ function proceedJoinMeetingSafari() {
   const meetingIdSlug = (m && m.id) ? m.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
   const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
   const loggedIn = (state && state.currentUser) ? state.currentUser.username : "Member";
-  const jitsiServerDomain = (localStorage.getItem("rol_jitsi_server") || "jitsi.riot.im")
-    .replace(/^https?:\/\//, '')
-    .replace(/\/+$/, "");
-  const extUrl = `https://${jitsiServerDomain}/${roomSlug}#config.disableDeepLinking=true&config.startWithAudioMuted=false&config.startAudioMuted=9999&config.prejoinPageEnabled=false&userInfo.displayName=${encodeURIComponent(loggedIn)}`;
+  const jitsiServerDomain = getJitsiServerDomain();
+  const extUrl = `https://${jitsiServerDomain}/${roomSlug}#config.enableUserMediaForMobile=true&config.disableDeepLinking=true&config.startWithAudioMuted=false&config.prejoinPageEnabled=false&userInfo.displayName=${encodeURIComponent(loggedIn)}`;
   window.open(extUrl, "_blank");
   showToast("Opening Live Fellowship in Safari 🙏");
 }
@@ -12073,36 +12081,16 @@ async function proceedJoinMeetingInApp() {
   if (typeof closeModal === "function") closeModal("modal-ios-meeting-choice");
   else { const el = document.getElementById("modal-ios-meeting-choice"); if (el) el.style.display = "none"; }
   const m = _pendingMeetingToJoin || { id: "default", title: "Live Fellowship" };
-  
-  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      if (stream && stream.getTracks) stream.getTracks().forEach(t => t.stop());
-    } catch(e) {
-      console.warn("Microphone priming notice:", e);
-    }
-  }
-
   showToast("Joining Live Sanctuary 🙏");
   launchLiveMeetingRoom(m, null);
 }
 window.proceedJoinMeetingInApp = proceedJoinMeetingInApp;
 
-// Trigger Joining Flow — Handles iPhone WebKit restrictions and launches room
+// Trigger Joining Flow — Launches room cleanly with full media permissions
 async function triggerJoinMeetingFlow(meetingId) {
   const meetings = getMeetingsFromStorage();
   const m = meetings.find(x => x.id === meetingId) || { id: meetingId, title: "Live Fellowship", host: "Pastor" };
   _pendingMeetingToJoin = m;
-
-  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      if (stream && stream.getTracks) stream.getTracks().forEach(t => t.stop());
-    } catch(e) {
-      console.warn("Microphone priming notice:", e);
-    }
-  }
-
   showToast("Joining Live Sanctuary 🙏");
   launchLiveMeetingRoom(m, null);
 }
@@ -12328,9 +12316,7 @@ function launchLiveMeetingRoom(meeting, stream) {
         }
         jitsiCont.innerHTML = "";
 
-        const jitsiServerDomain = (localStorage.getItem("rol_jitsi_server") || "jitsi.riot.im")
-          .replace(/^https?:\/\//, '')
-          .replace(/\/+$/, "");
+        const jitsiServerDomain = getJitsiServerDomain();
 
         if (typeof JitsiMeetExternalAPI !== "undefined") {
           const options = {
@@ -12340,8 +12326,9 @@ function launchLiveMeetingRoom(meeting, stream) {
             parentNode: jitsiCont,
             userInfo: { displayName: loggedIn },
             configOverwrite: {
+              enableUserMediaForMobile: true,
+              disableDeepLinking: true,
               startWithAudioMuted: false,
-              startAudioMuted: 9999,
               startWithVideoMuted: false,
               startSilent: false,
               startAudioOnly: false,
@@ -12349,7 +12336,6 @@ function launchLiveMeetingRoom(meeting, stream) {
               prejoinConfig: { enabled: false },
               prejoinPageEnabled: false,
               requireDisplayName: false,
-              disableDeepLinking: true,
               enableWelcomePage: false,
               enableClosePage: false,
               disableThirdPartyRequests: true,
@@ -12405,25 +12391,24 @@ function launchLiveMeetingRoom(meeting, stream) {
             try {
               const jf = api.getIFrame && api.getIFrame();
               if (jf) {
-                jf.setAttribute("allow", "camera; microphone; autoplay; fullscreen; display-capture");
+                jf.setAttribute("allow", allowPolicy);
                 jf.setAttribute("allowfullscreen", "true");
               }
-              const ensureMicOn = function() {
+              let unmutedOnce = false;
+              const checkAndUnmute = function() {
+                if (unmutedOnce) return;
                 if (typeof api.isAudioMuted === "function") {
                   api.isAudioMuted().then(function(muted) {
                     logAudioDebug("Live mic mute status:", muted);
-                    if (muted) {
+                    if (muted && !unmutedOnce) {
+                      unmutedOnce = true;
                       logAudioDebug("Mobile mic detected muted, calling toggleAudio to unmute...");
                       api.executeCommand("toggleAudio");
                     }
                   }).catch(function(e) { console.warn("isAudioMuted error:", e); });
                 }
               };
-              ensureMicOn();
-              setTimeout(ensureMicOn, 350);
-              setTimeout(ensureMicOn, 600);
-              setTimeout(ensureMicOn, 1000);
-              setTimeout(ensureMicOn, 2000);
+              setTimeout(checkAndUnmute, 800);
             } catch (e) {
               console.warn("RoL microphone startup:", e);
             }
@@ -12456,15 +12441,15 @@ function launchLiveMeetingRoom(meeting, stream) {
           const emptyArrayParam = encodeURIComponent(JSON.stringify([]));
 
           const jitsiConfig = [
+            "config.enableUserMediaForMobile=true",
+            "config.disableDeepLinking=true",
             "config.prejoinPageEnabled=false",
             "config.prejoinConfig.enabled=false",
             "config.requireDisplayName=false",
-            "config.disableDeepLinking=true",
             "config.enableWelcomePage=false",
             "config.enableClosePage=false",
             "config.disableThirdPartyRequests=true",
             "config.startWithAudioMuted=false",
-            "config.startAudioMuted=9999",
             "config.startWithVideoMuted=false",
             "config.startSilent=false",
             "config.startAudioOnly=false",
@@ -23401,19 +23386,23 @@ setTimeout(() => {
 
 
 
-/* RoL: iOS stays inside the app; no Safari choice. */
+/* RoL: Hide legacy modal-ios-meeting-choice */
 (function(){
-  const ios=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
-  if(!ios||window.__rolInAppMeetingPatch)return; window.__rolInAppMeetingPatch=true;
-  const original=window.triggerJoinMeetingFlow;
-  if(typeof original==='function')window.triggerJoinMeetingFlow=function(id){original(id);setTimeout(()=>{try{proceedJoinMeetingInApp()}catch(e){}},0)};
-  const hide=()=>{const e=document.getElementById('modal-ios-meeting-choice');if(e)e.style.display='none'};hide();new MutationObserver(hide).observe(document.documentElement,{childList:true,subtree:true});
+  const hide = () => {
+    const e = document.getElementById('modal-ios-meeting-choice');
+    if (e) e.style.display = 'none';
+  };
+  hide();
+  new MutationObserver(hide).observe(document.documentElement, { childList: true, subtree: true });
 })();
+
+/* RoL: Ensure all conference iframes retain full permissions policy */
 (function(){
-  if(window.__rolJitsiMicPatch)return;window.__rolJitsiMicPatch=true;
+  if (window.__rolJitsiMicPatch) return;
+  window.__rolJitsiMicPatch = true;
   const allowPolicy = "camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; clipboard-write *;";
   const allow = () => document.querySelectorAll('iframe').forEach(f => {
-    if (/jitsi/i.test(f.src || '') || (f.id === 'webrtc-room-iframe')) {
+    if (/jitsi|darmstadt|meet/i.test(f.src || '') || (f.id === 'webrtc-room-iframe')) {
       f.setAttribute('allow', allowPolicy);
       f.allow = allowPolicy;
       f.setAttribute('allowusermedia', 'true');
@@ -23424,37 +23413,4 @@ setTimeout(() => {
   });
   allow();
   new MutationObserver(allow).observe(document.documentElement, { childList: true, subtree: true });
-})();
-
-(function(){
-  if(window.__rolJitsiAudioStartupPatch || typeof window.JitsiMeetExternalAPI !== 'function') return;
-  window.__rolJitsiAudioStartupPatch = true;
-  const Original = window.JitsiMeetExternalAPI;
-  window.JitsiMeetExternalAPI = function(){
-    const api = Reflect.construct(Original, Array.from(arguments), window.JitsiMeetExternalAPI);
-    try {
-      api.addListener('videoConferenceJoined', function(){
-        const f = api.getIFrame && api.getIFrame();
-        if (f) {
-          const p = "camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; clipboard-write *;";
-          f.setAttribute('allow', p);
-          f.allow = p;
-          f.setAttribute('allowusermedia', 'true');
-          f.setAttribute('playsinline', 'true');
-          f.setAttribute('webkit-playsinline', 'true');
-          f.setAttribute('allowfullscreen', 'true');
-        }
-        if (typeof api.isAudioMuted === 'function') {
-          api.isAudioMuted().then(function(muted){
-            if (muted) {
-              console.log("[Jitsi Audio Patch] Conference joined, unmuting microphone...");
-              api.executeCommand('toggleAudio');
-            }
-          }).catch(function(){});
-        }
-      });
-    } catch(e) {}
-    return api;
-  };
-  window.JitsiMeetExternalAPI.prototype = Original.prototype;
 })();

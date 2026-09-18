@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v2356_PERMANENT_BSI_CDN_AUDIO';
+const CACHE_NAME = 'river-of-life-cache-v2357_MOBILE_MIC_FIX';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
