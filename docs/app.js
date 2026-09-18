@@ -8634,8 +8634,7 @@ function openImmersivePrayerModal(topicId) {
   if (amenEl) amenEl.textContent = `Amen (${data.amenCount})`;
   
   // Reset audio button
-  const audioBtn = document.getElementById("prayer-audio-label");
-  if (audioBtn) audioBtn.textContent = (activePrayerLang === "en") ? "Listen / ऐका" : "ऐका / Listen";
+  resetPrayerAudioUI();
   isPrayerAudioPlaying = false;
   
   modal.style.display = "flex";
@@ -8656,6 +8655,7 @@ function closeImmersivePrayerModal() {
     window.speechSynthesis.cancel();
   }
   isPrayerAudioPlaying = false;
+  resetPrayerAudioUI();
 }
 
 function openPrayerChapter() {
@@ -8704,14 +8704,57 @@ function switchPrayerLang(lang) {
   }
   
   if (isPrayerAudioPlaying) {
-    togglePrayerAudio(); // restart in new lang
-    togglePrayerAudio();
+    if (window.activePrayerAudioElement) {
+      window.activePrayerAudioElement.pause();
+      window.activePrayerAudioElement = null;
+    }
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+    isPrayerAudioPlaying = false;
+    resetPrayerAudioUI();
+    togglePrayerAudio(); // restart smoothly in new lang
+  } else {
+    resetPrayerAudioUI();
+  }
+}
+
+function resetPrayerAudioUI() {
+  window.isPrayerAudioPlaying = false;
+  const labelEl = document.getElementById("prayer-audio-label");
+  const playIcon = document.getElementById("prayer-audio-play-icon");
+  const pauseIcon = document.getElementById("prayer-audio-pause-icon");
+  const btnEl = document.getElementById("btn-prayer-audio-play");
+
+  if (labelEl) labelEl.textContent = (activePrayerLang === "en") ? "Listen / ऐका" : "ऐका / Listen";
+  if (playIcon) playIcon.style.display = "block";
+  if (pauseIcon) pauseIcon.style.display = "none";
+  if (btnEl) btnEl.classList.remove("playing");
+}
+
+function updatePrayerAudioUIPlaying(isPlaying) {
+  window.isPrayerAudioPlaying = isPlaying;
+  const labelEl = document.getElementById("prayer-audio-label");
+  const playIcon = document.getElementById("prayer-audio-play-icon");
+  const pauseIcon = document.getElementById("prayer-audio-pause-icon");
+  const btnEl = document.getElementById("btn-prayer-audio-play");
+
+  if (labelEl) {
+    if (isPlaying) {
+      labelEl.textContent = (activePrayerLang === "en") ? "Pause / थांबवा" : "थांबवा / Pause";
+    } else {
+      labelEl.textContent = (activePrayerLang === "en") ? "Listen / ऐका" : "ऐका / Listen";
+    }
+  }
+  if (playIcon) playIcon.style.display = isPlaying ? "none" : "block";
+  if (pauseIcon) pauseIcon.style.display = isPlaying ? "block" : "none";
+  if (btnEl) {
+    if (isPlaying) btnEl.classList.add("playing");
+    else btnEl.classList.remove("playing");
   }
 }
 
 async function togglePrayerAudio() {
-  const labelEl = document.getElementById("prayer-audio-label");
-  
   if (isPrayerAudioPlaying) {
     if (window.activePrayerAudioElement) {
       window.activePrayerAudioElement.pause();
@@ -8721,18 +8764,55 @@ async function togglePrayerAudio() {
       window.speechSynthesis.cancel();
     }
     isPrayerAudioPlaying = false;
-    if (labelEl) labelEl.textContent = "ऐका / Listen";
+    updatePrayerAudioUIPlaying(false);
     return;
   }
   
   const data = PRAYER_TOPICS_DATA[activePrayerTopicId];
   if (!data) return;
   
-  const prayerText = (activePrayerLang === "en") ? data.prayerEn : data.prayerMr;
-  const langCode = (activePrayerLang === "en") ? "en-IN" : "mr-IN";
+  const currentLang = (activePrayerLang === "en") ? "en" : "mr";
+  const audioFile = `assets/audio/prayers/${data.id}_${currentLang}.mp3`;
+
+  // 1. Primary: Natural BSI-style studio audio file (instant playback, 0ms latency)
+  try {
+    const audio = new Audio(audioFile);
+    window.activePrayerAudioElement = audio;
+
+    audio.onplay = () => {
+      isPrayerAudioPlaying = true;
+      updatePrayerAudioUIPlaying(true);
+    };
+
+    audio.onended = () => {
+      isPrayerAudioPlaying = false;
+      window.activePrayerAudioElement = null;
+      updatePrayerAudioUIPlaying(false);
+    };
+
+    audio.onerror = (e) => {
+      console.warn(`[Prayer Audio] File ${audioFile} not loaded, falling back to TTS:`, e);
+      window.activePrayerAudioElement = null;
+      fallbackPrayerTTS(data, currentLang);
+    };
+
+    await audio.play();
+    return;
+  } catch (err) {
+    console.warn("[Prayer Audio] Pre-recorded audio play failed, falling back to TTS:", err);
+  }
+
+  // 2. Fallback to TTS if audio file is somehow unavailable
+  fallbackPrayerTTS(data, currentLang);
+}
+
+async function fallbackPrayerTTS(data, lang) {
+  const labelEl = document.getElementById("prayer-audio-label");
+  const prayerText = (lang === "en") ? data.prayerEn : data.prayerMr;
+  const langCode = (lang === "en") ? "en-IN" : "mr-IN";
   const speaker = (state && state.sarvamVoice) ? state.sarvamVoice : "google_natural_mr";
 
-  // Try Sarvam AI Audio synthesis first
+  // Try Sarvam TTS if available
   if (window.SarvamTTS && window.SarvamTTS.speakText) {
     try {
       if (labelEl) labelEl.textContent = "तयार करत आहे...";
@@ -8746,15 +8826,17 @@ async function togglePrayerAudio() {
         window.activePrayerAudioElement = audio;
         audio.onended = () => {
           isPrayerAudioPlaying = false;
-          if (labelEl) labelEl.textContent = "ऐका / Listen";
+          window.activePrayerAudioElement = null;
+          updatePrayerAudioUIPlaying(false);
         };
         audio.onerror = () => {
           isPrayerAudioPlaying = false;
-          if (labelEl) labelEl.textContent = "ऐका / Listen";
+          window.activePrayerAudioElement = null;
+          updatePrayerAudioUIPlaying(false);
         };
         await audio.play();
         isPrayerAudioPlaying = true;
-        if (labelEl) labelEl.textContent = "थांबवा / Pause";
+        updatePrayerAudioUIPlaying(true);
         return;
       }
     } catch (e) {
@@ -8769,11 +8851,11 @@ async function togglePrayerAudio() {
       ? window.SarvamTTS.optimizer.optimizeForNarration(prayerText, langCode)
       : prayerText;
     prayerUtterance = new SpeechSynthesisUtterance(cleanPrayer);
-    prayerUtterance.rate = (activePrayerLang === "en") ? 0.90 : 0.86;
+    prayerUtterance.rate = (lang === "en") ? 0.90 : 0.86;
     prayerUtterance.pitch = 0.88;
     
     const voices = (window.speechSynthesis.getVoices && window.speechSynthesis.getVoices()) || [];
-    if (activePrayerLang === "mr") {
+    if (lang === "mr") {
       const mrVoice = voices.find(v => (v.lang.startsWith('mr') || v.lang.startsWith('hi')) && (v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('madhav') || v.name.toLowerCase().includes('hemant') || v.name.toLowerCase().includes('manohar') || v.name.toLowerCase().includes('mohan') || v.name.toLowerCase().includes('natural') || v.name.toLowerCase().includes('google'))) ||
                       voices.find(v => v.lang.includes('mr')) ||
                       voices.find(v => v.lang.includes('hi'));
@@ -8789,17 +8871,17 @@ async function togglePrayerAudio() {
     
     prayerUtterance.onend = () => {
       isPrayerAudioPlaying = false;
-      if (labelEl) labelEl.textContent = "ऐका / Listen";
+      updatePrayerAudioUIPlaying(false);
     };
     
     prayerUtterance.onerror = () => {
       isPrayerAudioPlaying = false;
-      if (labelEl) labelEl.textContent = "ऐका / Listen";
+      updatePrayerAudioUIPlaying(false);
     };
     
     window.speechSynthesis.speak(prayerUtterance);
     isPrayerAudioPlaying = true;
-    if (labelEl) labelEl.textContent = "थांबवा / Pause";
+    updatePrayerAudioUIPlaying(true);
   }
 }
 
