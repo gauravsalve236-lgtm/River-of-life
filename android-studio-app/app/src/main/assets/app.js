@@ -4370,17 +4370,16 @@ async function playBsiDramatizedAudio(bookKey, chapterNum, resumeTime = null) {
   if (isLocalDevHost && userEnginePref !== 'wordproject') {
     audioUrl = `/api/bsi-audio-stream?book=${cleanBook}&chapter=${chNum}`;
     audioLabel = `🎭 BSI नाट्यमय ऑडिओ (स्थानिक) • ${cleanBook} ${chNum}`;
-  } else if (userEnginePref === 'wordproject' || !token) {
+  } else if (userEnginePref === 'wordproject') {
     audioUrl = wpUrl;
     audioLabel = `🎙️ अस्सल मराठी ऑडिओ • ${cleanBook} ${chNum}`;
     isUsingWordProject = true;
     console.log("[Audio Engine] Routing directly to Permanent Authentic Marathi Human Audio:", audioUrl);
-    if (!token && userEnginePref !== 'wordproject') {
-      showToast("🎙️ अस्सल मराठी मानवी ऑडिओ सुरू केला आहे (कायमस्वरूपी) 🙏");
-    }
   } else {
-    audioUrl = `https://d1hkpuz2o5a2xw.cloudfront.net/source/555476c2390c102d-04/${usfm}_${chStr}.mp3?${token}`;
+    // Permanent Zero-Token CDN Stream from our dedicated bsi-audio-store branch
+    audioUrl = `https://raw.githubusercontent.com/gauravsalve236-lgtm/River-of-life/bsi-audio-store/assets/audio/bsi/${usfm}_${chStr}.mp3`;
     audioLabel = `🎭 BSI नाट्यमय ऑडिओ • ${cleanBook} ${chNum}`;
+    console.log("[Audio Engine] Routing to Permanent GitHub CDN BSI Dramatic Audio:", audioUrl);
   }
 
   // Check if player is already loaded with the same track and was paused
