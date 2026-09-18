@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v180_PERMANENT_AUDIO';
+const CACHE_NAME = 'river-of-life-cache-v2354_PINTEREST_DAILY_VERSE_DESIGNS';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

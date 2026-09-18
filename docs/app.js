@@ -16648,9 +16648,149 @@ window.readTenCommandmentsAloud = function(btnElement) {
    ========================================================================== */
 window.VOD_TYPOGRAPHY_STYLES = [
   {
+    id: "pinterest-alpine",
+    icon: "🏔️",
+    name: "अल्पाइन शिखर (Alpine Swash)",
+    shortName: "Alpine Swash",
+    tag: "✦ WITH GOD • देवाच्या सामर्थ्याने ✦",
+    bgImage: "pinterest_alpine_mountain.jpg",
+    layoutMode: "flourish-swash",
+    fontFamily: "'Playfair Display', 'Noto Serif Devanagari', Georgia, serif",
+    fontWeight: "700",
+    textColor: "#ffffff",
+    accentColor: "#fbbf24",
+    quoteColor: "#fbbf24",
+    lineHeight: "1.6",
+    letterSpacing: "0.2px",
+    textShadow: "0 3px 24px rgba(0,0,0,0.98), 0 1px 6px rgba(0,0,0,0.95)"
+  },
+  {
+    id: "pinterest-watercolor",
+    icon: "🌊",
+    name: "जलचित्र तांबडा समुद्र (Red Sea Art)",
+    shortName: "Red Sea Art",
+    tag: "🕊️ FOR WITH GOD • कारण परमेश्वरासाठी",
+    bgImage: "pinterest_watercolor_red_sea.jpg",
+    layoutMode: "watercolor-pill",
+    fontFamily: "'Lora', 'Noto Serif Devanagari', Georgia, serif",
+    fontWeight: "700",
+    textColor: "#0f172a",
+    accentColor: "#0e7490",
+    quoteColor: "#0e7490",
+    lineHeight: "1.55",
+    letterSpacing: "0px",
+    textShadow: "none"
+  },
+  {
+    id: "pinterest-editorial-sunset",
+    icon: "🌲",
+    name: "वन प्रभात (Forest Editorial)",
+    shortName: "Editorial Sunset",
+    tag: "✨ GOD'S PLAN • देवाचा संकल्प",
+    bgImage: "pinterest_forest_sunset.jpg",
+    layoutMode: "editorial-vertical",
+    fontFamily: "'Outfit', 'Noto Serif Devanagari', sans-serif",
+    fontWeight: "800",
+    textColor: "#ffffff",
+    accentColor: "#fde68a",
+    quoteColor: "#fbbf24",
+    lineHeight: "1.58",
+    letterSpacing: "0.3px",
+    textShadow: "0 3px 22px rgba(0,0,0,0.95)"
+  },
+  {
+    id: "pinterest-golden-path",
+    icon: "🌅",
+    name: "सुवर्ण मार्ग (Golden Path)",
+    shortName: "Golden Path",
+    tag: "✝️ WAY, TRUTH & LIFE • मार्ग, सत्य आणि जीवन",
+    bgImage: "pinterest_golden_path.jpg",
+    layoutMode: "flourish-path",
+    fontFamily: "'Rozha One', 'Noto Serif Devanagari', serif",
+    fontWeight: "700",
+    textColor: "#fef3c7",
+    accentColor: "#f59e0b",
+    quoteColor: "#fbbf24",
+    lineHeight: "1.6",
+    letterSpacing: "0.3px",
+    textShadow: "0 3px 24px rgba(0,0,0,0.98)"
+  },
+  {
+    id: "pinterest-heavenly-light",
+    icon: "☀️",
+    name: "जगाचा प्रकाश (Light of World)",
+    shortName: "Light of World",
+    tag: "🕊️ LIGHT OF THE WORLD • जगाचा प्रकाश",
+    bgImage: "pinterest_light_of_world.jpg",
+    layoutMode: "heavenly-beam",
+    fontFamily: "'Cinzel', 'Noto Serif Devanagari', serif",
+    fontWeight: "700",
+    textColor: "#ffffff",
+    accentColor: "#fef08a",
+    quoteColor: "#fef08a",
+    lineHeight: "1.6",
+    letterSpacing: "0.5px",
+    textShadow: "0 3px 24px rgba(0,0,0,0.98)"
+  },
+  {
+    id: "pinterest-good-shepherd",
+    icon: "🐑",
+    name: "चांगला मेंढपाळ (Good Shepherd)",
+    shortName: "Good Shepherd",
+    tag: "🌿 WHERE HE LEADS • तो जिथे नेईल",
+    bgImage: "pinterest_good_shepherd.jpg",
+    layoutMode: "shepherd-diagonal",
+    fontFamily: "'Outfit', 'Noto Sans Devanagari', sans-serif",
+    fontWeight: "800",
+    textColor: "#ffffff",
+    accentColor: "#bbf7d0",
+    quoteColor: "#ffffff",
+    lineHeight: "1.55",
+    letterSpacing: "0px",
+    textShadow: "0 3px 20px rgba(0,0,0,0.9)"
+  },
+  {
+    id: "pinterest-jesus-road",
+    icon: "🛣️",
+    name: "कृपेचा मार्ग (Highway Grace)",
+    shortName: "Highway Grace",
+    tag: "🚶‍♂️ WALK WITH ME • माझ्याबरोबर चाला",
+    bgImage: "pinterest_jesus_road.jpg",
+    layoutMode: "highway-bold",
+    fontFamily: "'Poppins', 'Noto Sans Devanagari', sans-serif",
+    fontWeight: "800",
+    textColor: "#ffffff",
+    accentColor: "#facc15",
+    quoteColor: "#facc15",
+    lineHeight: "1.55",
+    letterSpacing: "0.2px",
+    textShadow: "0 3px 24px rgba(0,0,0,0.98)"
+  },
+  {
+    id: "pinterest-boarding-pass",
+    icon: "🎫",
+    name: "स्वर्गीय तिकीट (Boarding Pass)",
+    shortName: "Boarding Pass",
+    tag: "✈️ ETERNAL AIRWAYS • सार्वकालिक जीवन",
+    bgImage: "pinterest_boarding_pass.jpg",
+    layoutMode: "boarding-pass",
+    fontFamily: "'Outfit', 'Noto Sans Devanagari', sans-serif",
+    fontWeight: "700",
+    textColor: "#0f172a",
+    accentColor: "#0f172a",
+    quoteColor: "#334155",
+    lineHeight: "1.5",
+    letterSpacing: "0.5px",
+    textShadow: "none"
+  },
+  {
     id: "golden-grace",
-    name: "सुवर्ण तेज (Gold)",
+    icon: "✨",
+    name: "सुवर्ण तेज (Classic Gold)",
+    shortName: "Classic Gold",
     tag: "✦ VERSE OF THE DAY ✦",
+    bgImage: null,
+    layoutMode: "centered-card",
     fontFamily: "'Noto Serif Devanagari', 'Lora', Georgia, serif",
     fontWeight: "700",
     textColor: "#ffffff",
@@ -16658,12 +16798,16 @@ window.VOD_TYPOGRAPHY_STYLES = [
     quoteColor: "#fbbf24",
     lineHeight: "1.62",
     letterSpacing: "0.2px",
-    textShadow: "0 3px 24px rgba(0,0,0,0.98), 0 1px 6px rgba(0,0,0,0.95), 0 0 40px rgba(0,0,0,0.6)"
+    textShadow: "0 3px 24px rgba(0,0,0,0.98), 0 1px 6px rgba(0,0,0,0.95)"
   },
   {
     id: "celestial-cyan",
-    name: "आकाशी आभा (Cyan)",
+    icon: "💎",
+    name: "आकाशी आभा (Classic Cyan)",
+    shortName: "Classic Cyan",
     tag: "✨ जीवन नदी • दैनिक वचन",
+    bgImage: null,
+    layoutMode: "centered-card",
     fontFamily: "'Poppins', 'Outfit', sans-serif",
     fontWeight: "800",
     textColor: "#ffffff",
@@ -16671,63 +16815,75 @@ window.VOD_TYPOGRAPHY_STYLES = [
     quoteColor: "#38bdf8",
     lineHeight: "1.58",
     letterSpacing: "-0.2px",
-    textShadow: "0 3px 24px rgba(0,0,0,0.98), 0 0 25px rgba(56,189,248,0.5), 0 1px 6px rgba(0,0,0,0.95)"
-  },
-  {
-    id: "royal-velvet",
-    name: "राजेशाही प्रीती (Rose)",
-    tag: "🕊️ सार्वकालिक प्रीती",
-    fontFamily: "'Rozha One', 'Noto Serif Devanagari', serif",
-    fontWeight: "700",
-    textColor: "#fff1f2",
-    accentColor: "#f472b6",
-    quoteColor: "#fb7185",
-    lineHeight: "1.65",
-    letterSpacing: "0.3px",
-    textShadow: "0 3px 24px rgba(0,0,0,0.98), 0 0 25px rgba(244,114,182,0.4), 0 1px 6px rgba(0,0,0,0.95)"
-  },
-  {
-    id: "emerald-peace",
-    name: "हरित शांती (Emerald)",
-    tag: "🌿 दैनिक शांती व आशीर्वाद",
-    fontFamily: "'Poppins', 'Noto Sans Devanagari', sans-serif",
-    fontWeight: "700",
-    textColor: "#f0fdf4",
-    accentColor: "#34d399",
-    quoteColor: "#34d399",
-    lineHeight: "1.6",
-    letterSpacing: "0px",
-    textShadow: "0 3px 24px rgba(0,0,0,0.98), 0 0 25px rgba(52,211,153,0.4), 0 1px 6px rgba(0,0,0,0.95)"
-  },
-  {
-    id: "sunset-ember",
-    name: "अग्नि ज्वाला (Sunset)",
-    tag: "🌅 प्रभूचे सामर्थ्य व प्रकाश",
-    fontFamily: "'Noto Serif Devanagari', 'Lora', serif",
-    fontWeight: "800",
-    textColor: "#fffbeb",
-    accentColor: "#fb923c",
-    quoteColor: "#f97316",
-    lineHeight: "1.62",
-    letterSpacing: "0.2px",
-    textShadow: "0 3px 24px rgba(0,0,0,0.98), 0 0 25px rgba(251,146,60,0.45), 0 1px 6px rgba(0,0,0,0.95)"
-  },
-  {
-    id: "pure-pearl",
-    name: "शुभ्र प्रकाश (Minimal)",
-    tag: "✦ HOLY SCRIPTURE ✦",
-    fontFamily: "'Cinzel', 'Outfit', sans-serif",
-    fontWeight: "700",
-    textColor: "#ffffff",
-    accentColor: "#e2e8f0",
-    quoteColor: "#ffffff",
-    lineHeight: "1.6",
-    letterSpacing: "0.5px",
-    textShadow: "0 3px 24px rgba(0,0,0,0.98), 0 1px 6px rgba(0,0,0,0.95)"
+    textShadow: "0 3px 24px rgba(0,0,0,0.98), 0 0 25px rgba(56,189,248,0.5)"
   }
 ];
 
 window.currentVodTypographyIndex = 0;
+
+window.renderVodPinterestStrips = function() {
+  const strips = [
+    document.getElementById("fs-vod-pinterest-strip"),
+    document.getElementById("modal-save-pinterest-strip")
+  ];
+  const curIdx = window.currentVodTypographyIndex || 0;
+  
+  strips.forEach(strip => {
+    if (!strip) return;
+    strip.innerHTML = "";
+    window.VOD_TYPOGRAPHY_STYLES.forEach((theme, idx) => {
+      const isThis = idx === curIdx;
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = `btn-pinterest-chip ${isThis ? 'active' : ''}`;
+      btn.style.cssText = `
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 11.5px;
+        font-weight: 800;
+        white-space: nowrap;
+        cursor: pointer;
+        flex-shrink: 0;
+        transition: all 0.2s ease;
+        border: ${isThis ? '1.5px solid #fbbf24' : '1px solid rgba(255,255,255,0.22)'};
+        background: ${isThis ? 'linear-gradient(135deg, rgba(251,191,36,0.35), rgba(217,119,6,0.45))' : 'rgba(15,23,42,0.65)'};
+        color: ${isThis ? '#fbbf24' : '#ffffff'};
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        box-shadow: ${isThis ? '0 0 14px rgba(251,191,36,0.45)' : 'none'};
+      `;
+      btn.innerHTML = `<span>${theme.icon || '🎨'}</span> <span>${theme.shortName || theme.name}</span>`;
+      btn.onclick = (e) => {
+        e.stopPropagation();
+        window.selectVodTypographyTheme(idx);
+      };
+      strip.appendChild(btn);
+    });
+  });
+};
+
+window.selectVodTypographyTheme = async function(idx) {
+  window.currentVodTypographyIndex = idx % window.VOD_TYPOGRAPHY_STYLES.length;
+  window.applyVodTypographyTheme(window.currentVodTypographyIndex);
+  window.renderVodPinterestStrips();
+  
+  // If Save / Preview Modal is open, automatically regenerate preview
+  const modal = document.getElementById("modal-image-preview-save");
+  if (modal && modal.style.display === "flex") {
+    try {
+      const curRatio = window.currentVodAspectRatio || 'square';
+      const result = await generateExactVerseImageBlob(curRatio);
+      window._currentRenderedVodImage = result;
+      const img = document.getElementById("vod-preview-rendered-img");
+      if (img) img.src = result.dataUrl;
+    } catch(e) {
+      console.error("Preview re-render error:", e);
+    }
+  }
+};
 
 window.applyVodTypographyTheme = function(themeIdx) {
   if (typeof themeIdx === "number") {
@@ -16738,12 +16894,41 @@ window.applyVodTypographyTheme = function(themeIdx) {
 
   const cardContainer = document.getElementById("fs-vod-card-container");
   if (cardContainer) {
-    // Keep transparent - no box or card
     cardContainer.style.background = "transparent";
     cardContainer.style.border = "none";
     cardContainer.style.boxShadow = "none";
     cardContainer.style.backdropFilter = "none";
     cardContainer.style.webkitBackdropFilter = "none";
+
+    // Adaptive vertical centering based on Pinterest theme visual zones
+    if (theme.layoutMode === "watercolor-pill") {
+      cardContainer.style.top = "38%";
+      cardContainer.style.left = "50%";
+    } else if (theme.layoutMode === "flourish-swash" || theme.layoutMode === "flourish-path") {
+      cardContainer.style.top = "60%";
+      cardContainer.style.left = "50%";
+    } else if (theme.layoutMode === "heavenly-beam") {
+      cardContainer.style.top = "42%";
+      cardContainer.style.left = "54%";
+    } else if (theme.layoutMode === "shepherd-diagonal") {
+      cardContainer.style.top = "54%";
+      cardContainer.style.left = "50%";
+    } else if (theme.layoutMode === "boarding-pass") {
+      cardContainer.style.top = "48%";
+      cardContainer.style.left = "55%";
+    } else {
+      cardContainer.style.top = "48%";
+      cardContainer.style.left = "50%";
+    }
+  }
+
+  // Update background image if theme has dedicated wallpaper
+  if (theme.bgImage) {
+    const imgUrl = `assets/daily_verses/${theme.bgImage}`;
+    const fsBgEl = document.getElementById("fs-vod-capsule-bg");
+    if (fsBgEl) fsBgEl.style.backgroundImage = `url('${imgUrl}')`;
+    const thumbImg = document.getElementById("vod-thumbnail-preview");
+    if (thumbImg) thumbImg.src = imgUrl;
   }
 
   const textEl = document.getElementById("fs-vod-text");
@@ -16751,7 +16936,7 @@ window.applyVodTypographyTheme = function(themeIdx) {
     textEl.style.fontFamily = theme.fontFamily;
     textEl.style.fontWeight = theme.fontWeight;
     textEl.style.color = theme.textColor;
-    textEl.style.textShadow = theme.textShadow;
+    textEl.style.textShadow = theme.textShadow || "none";
     textEl.style.lineHeight = theme.lineHeight || "1.62";
     textEl.style.letterSpacing = theme.letterSpacing || "normal";
   }
@@ -16763,7 +16948,19 @@ window.applyVodTypographyTheme = function(themeIdx) {
 
   const refBadge = document.getElementById("fs-vod-ref-badge");
   if (refBadge) {
-    refBadge.style.color = theme.accentColor;
+    if (theme.layoutMode === "watercolor-pill") {
+      refBadge.style.color = "#ffffff";
+      refBadge.style.background = "#0e7490";
+      refBadge.style.padding = "5px 16px";
+      refBadge.style.borderRadius = "20px";
+      refBadge.style.boxShadow = "0 3px 12px rgba(14,116,144,0.4)";
+    } else {
+      refBadge.style.color = theme.accentColor;
+      refBadge.style.background = "transparent";
+      refBadge.style.padding = "0";
+      refBadge.style.borderRadius = "0";
+      refBadge.style.boxShadow = "none";
+    }
   }
 
   const badgePill = document.getElementById("fs-vod-badge-pill");
@@ -16782,6 +16979,8 @@ window.applyVodTypographyTheme = function(themeIdx) {
   if (themeNameLabel) {
     themeNameLabel.textContent = theme.name;
   }
+
+  window.renderVodPinterestStrips();
 };
 
 window.cycleVodTypographyTheme = function(showFeedback = true) {
@@ -16818,17 +17017,14 @@ window.openFullscreenVOD = function() {
   if (fsRefBadge) fsRefBadge.textContent = `${displayRef} ${state.translation === "eng" ? "NLT" : "MARVBSI"}`;
 
   const images = (window.dailyVersesImageList && window.dailyVersesImageList.length > 0) ? window.dailyVersesImageList : [
-    'sunrise.png', 'forest.png', 'mountains.png', 'ocean.png', 'path.png', 'stars.png', 'mist.png'
+    'pinterest_alpine_mountain.jpg', 'pinterest_watercolor_red_sea.jpg', 'pinterest_forest_sunset.jpg',
+    'pinterest_golden_path.jpg', 'pinterest_light_of_world.jpg', 'pinterest_good_shepherd.jpg',
+    'sunrise.png', 'forest.png', 'mountains.png'
   ];
   
-  // Deterministic 1 image per day unless user manually chose a wallpaper
-  if (typeof window.currentVodImageIndex !== 'number') {
-    const imgIdx = ((dayOfYear + offset) % images.length + images.length) % images.length;
-    window.currentVodImageIndex = imgIdx;
-  }
-  
-  const dailyImg = images[window.currentVodImageIndex];
-  const imgUrl = (typeof getVodImageUrl === "function") ? getVodImageUrl(dailyImg) : (dailyImg.includes('.') ? `assets/daily_verses/${dailyImg}` : `assets/daily_verses/${dailyImg}.png`);
+  const curTheme = window.VOD_TYPOGRAPHY_STYLES[window.currentVodTypographyIndex || 0];
+  const activeBg = curTheme?.bgImage || images[((dayOfYear + offset) % images.length + images.length) % images.length];
+  const imgUrl = (typeof getVodImageUrl === "function") ? getVodImageUrl(activeBg) : `assets/daily_verses/${activeBg}`;
 
   const fsBgEl = document.getElementById("fs-vod-capsule-bg");
   if (fsBgEl) fsBgEl.style.backgroundImage = `url('${imgUrl}')`;
@@ -16839,7 +17035,7 @@ window.openFullscreenVOD = function() {
   const menu = document.getElementById("vod-more-options-menu");
   if (menu) menu.style.display = "none";
 
-  // Apply typography styling
+  // Render Pinterest Chips and apply current theme
   applyVodTypographyTheme();
 };
 
@@ -16866,7 +17062,9 @@ window.toggleVodOptionsMenu = function() {
 
 window.cycleVodWallpaper = function() {
   const images = (window.dailyVersesImageList && window.dailyVersesImageList.length > 0) ? window.dailyVersesImageList : [
-    'sunrise.png', 'forest.png', 'mountains.png', 'ocean.png', 'path.png', 'stars.png', 'mist.png'
+    'pinterest_alpine_mountain.jpg', 'pinterest_watercolor_red_sea.jpg', 'pinterest_forest_sunset.jpg',
+    'pinterest_golden_path.jpg', 'pinterest_light_of_world.jpg', 'pinterest_good_shepherd.jpg',
+    'pinterest_jesus_road.jpg', 'pinterest_boarding_pass.jpg', 'sunrise.png'
   ];
   if (typeof window.currentVodImageIndex !== 'number') {
     const { dayOfYear, offset } = getCurrentVOD();
@@ -16875,7 +17073,7 @@ window.cycleVodWallpaper = function() {
   window.currentVodImageIndex = (window.currentVodImageIndex + 1) % images.length;
   
   const dailyImg = images[window.currentVodImageIndex];
-  const imgUrl = (typeof getVodImageUrl === "function") ? getVodImageUrl(dailyImg) : (dailyImg.includes('.') ? `assets/daily_verses/${dailyImg}` : `assets/daily_verses/${dailyImg}.png`);
+  const imgUrl = (typeof getVodImageUrl === "function") ? getVodImageUrl(dailyImg) : `assets/daily_verses/${dailyImg}`;
 
   const bgHome = document.getElementById("card-daily-verse-home");
   if (bgHome) bgHome.style.backgroundImage = `url('${imgUrl}')`;
@@ -16886,10 +17084,8 @@ window.cycleVodWallpaper = function() {
   const thumbImg = document.getElementById("vod-thumbnail-preview");
   if (thumbImg) thumbImg.src = imgUrl;
 
-  // Change font, design, bold weight, and color palette automatically when changing image
   cycleVodTypographyTheme(false);
   const activeTheme = window.VOD_TYPOGRAPHY_STYLES[window.currentVodTypographyIndex || 0];
-
   showToast(`🖼️ वॉलपेपर व डिझाईन: ${activeTheme.name}`);
 };
 
@@ -16906,29 +17102,57 @@ window.navigateVOD = function(dir) {
 // Global state for last rendered verse image
 window._currentRenderedVodImage = null;
 
+// Calligraphic flourish swash helper
+function drawCalligraphicFlourish(ctx, x, y, width, color) {
+  ctx.save();
+  ctx.strokeStyle = color || "#fbbf24";
+  ctx.lineWidth = 3.5;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.shadowColor = "rgba(0, 0, 0, 0.85)";
+  ctx.shadowBlur = 12;
+
+  const startX = x - 20;
+  const startY = y + 8;
+  const endX = x + width + 28;
+
+  ctx.beginPath();
+  ctx.moveTo(startX, startY);
+  ctx.bezierCurveTo(startX + width * 0.28, startY + 24, startX + width * 0.72, startY - 14, endX, startY + 6);
+  ctx.stroke();
+
+  // Spiral flourish curl ball on left
+  ctx.beginPath();
+  ctx.arc(startX - 6, startY - 3, 5, 0, Math.PI * 2);
+  ctx.fillStyle = color || "#fbbf24";
+  ctx.fill();
+
+  // Accent terminal droplet on right
+  ctx.beginPath();
+  ctx.arc(endX + 6, startY + 6, 3.5, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.restore();
+}
+
 window.generateExactVerseImageBlob = function(customRatio) {
   return new Promise(async (resolve) => {
     const { vod, dayOfYear, offset } = getCurrentVOD();
-    const displayRef = (state.translation === "eng") ? vod.engRef : vod.ref;
-    const displayText = (state.translation === "eng") ? vod.engText : vod.text;
+    const isMarathi = state.translation !== "eng";
+    const displayRef = isMarathi ? (vod.ref || vod.engRef) : (vod.engRef || vod.ref);
+    const displayText = isMarathi ? vod.text : vod.engText;
 
-    const images = (window.dailyVersesImageList && window.dailyVersesImageList.length > 0) ? window.dailyVersesImageList : [
-      'sunrise.png', 'forest.png', 'mountains.png', 'ocean.png', 'path.png', 'stars.png', 'mist.png'
-    ];
-    const imgIdx = (typeof window.currentVodImageIndex === 'number') ? window.currentVodImageIndex : (((dayOfYear + offset) % images.length + images.length) % images.length);
-    const dailyImg = images[imgIdx];
-    const imgUrl = (typeof getVodImageUrl === "function") ? getVodImageUrl(dailyImg) : (dailyImg.includes('.') ? `assets/daily_verses/${dailyImg}` : `assets/daily_verses/${dailyImg}.png`);
+    const theme = (window.VOD_TYPOGRAPHY_STYLES && window.VOD_TYPOGRAPHY_STYLES[window.currentVodTypographyIndex || 0]) ? window.VOD_TYPOGRAPHY_STYLES[window.currentVodTypographyIndex || 0] : window.VOD_TYPOGRAPHY_STYLES[0];
 
-    const theme = (window.VOD_TYPOGRAPHY_STYLES && window.VOD_TYPOGRAPHY_STYLES[window.currentVodTypographyIndex || 0]) ? window.VOD_TYPOGRAPHY_STYLES[window.currentVodTypographyIndex || 0] : {
-      name: "Gold",
-      tag: "✦ VERSE OF THE DAY ✦",
-      textColor: "#ffffff",
-      accentColor: "#fbbf24",
-      quoteColor: "#fbbf24",
-      fontWeight: "700"
-    };
+    // Priority: theme's dedicated background image or current wallpaper
+    let imgFileName = theme.bgImage;
+    if (!imgFileName) {
+      const images = (window.dailyVersesImageList && window.dailyVersesImageList.length > 0) ? window.dailyVersesImageList : ['pinterest_alpine_mountain.jpg', 'sunrise.png'];
+      const imgIdx = (typeof window.currentVodImageIndex === 'number') ? window.currentVodImageIndex : (((dayOfYear + offset) % images.length + images.length) % images.length);
+      imgFileName = images[imgIdx];
+    }
+    const imgUrl = (typeof getVodImageUrl === "function") ? getVodImageUrl(imgFileName) : `assets/daily_verses/${imgFileName}`;
 
-    // Ensure web fonts are completely ready before measuring text
     if (document.fonts && document.fonts.ready) {
       try {
         await document.fonts.ready;
@@ -16937,10 +17161,10 @@ window.generateExactVerseImageBlob = function(customRatio) {
 
     const ratio = customRatio || window.currentVodAspectRatio || 'square';
     let canvasW = 1080;
-    let canvasH = 1080; // 1:1 Square Post Card by default (Ideal for phone sharing & WhatsApp chats)
+    let canvasH = 1080; // 1:1 Square Card
     if (ratio === 'portrait') {
       canvasW = 1080;
-      canvasH = 1350; // 4:5 Portrait Mobile Card
+      canvasH = 1350; // 4:5 Feed Card
     } else if (ratio === 'story' || ratio === 'wallpaper') {
       canvasW = 1080;
       canvasH = 1920; // 9:16 Fullscreen Wallpaper
@@ -16950,9 +17174,7 @@ window.generateExactVerseImageBlob = function(customRatio) {
     canvas.width = canvasW;
     canvas.height = canvasH;
     const ctx = canvas.getContext("2d");
-    const centerX = canvas.width / 2;
 
-    // Helper to asynchronously preload images safely without CORS taint on Safari
     const loadImage = (src) => new Promise((res) => {
       if (!src) return res(null);
       const img = new Image();
@@ -16960,7 +17182,7 @@ window.generateExactVerseImageBlob = function(customRatio) {
       img.onload = () => res(img);
       img.onerror = () => res(null);
       img.src = src;
-      setTimeout(() => res(null), 2500);
+      setTimeout(() => res(null), 3000);
     });
 
     const [bgImg, logoImg] = await Promise.all([
@@ -16977,7 +17199,7 @@ window.generateExactVerseImageBlob = function(customRatio) {
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
-    // 1. Draw Background Image
+    // 1. Render Background Image
     if (bgImg) {
       try {
         const scale = Math.max(canvas.width / bgImg.width, canvas.height / bgImg.height);
@@ -16991,153 +17213,519 @@ window.generateExactVerseImageBlob = function(customRatio) {
       drawCelestialFallback();
     }
 
-    // 2. Artistic Vignette & Gradient Overlay (Protects legibility across all backgrounds)
-    const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    grad.addColorStop(0, 'rgba(10, 15, 25, 0.65)');
-    grad.addColorStop(0.25, 'rgba(10, 15, 25, 0.45)');
-    grad.addColorStop(0.5, 'rgba(10, 15, 25, 0.58)');
-    grad.addColorStop(0.75, 'rgba(10, 15, 25, 0.72)');
-    grad.addColorStop(1, 'rgba(8, 12, 20, 0.92)');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // 3. Multi-Line Text Layout with Safe Margins & Mathematically Guaranteed Horizontal Centering
-    const textMaxWidth = (ratio === 'story') ? 880 : 920;
-
-    // Prominent, highly readable font sizing tailored for phones & social sharing
-    let fontSize = 46;
-    if (ratio === 'story') {
-      if (displayText.length <= 80) fontSize = 64;
-      else if (displayText.length <= 140) fontSize = 56;
-      else if (displayText.length <= 220) fontSize = 48;
-      else fontSize = 42;
-    } else {
-      // 1:1 Square Card (1080x1080) and 4:5 Portrait Card (1080x1350)
-      if (displayText.length <= 70) fontSize = 58;
-      else if (displayText.length <= 130) fontSize = 50;
-      else if (displayText.length <= 200) fontSize = 45;
-      else fontSize = 38;
-    }
-
-    const isMarathi = state.translation !== "eng";
-    const fontFamily = isMarathi
-      ? "'Noto Serif Devanagari', 'Mangal', 'Nirmala UI', 'Poppins', sans-serif"
-      : (theme.fontFamily || "'Lora', Georgia, serif");
-    ctx.direction = "ltr";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.font = `${theme.fontWeight || '700'} ${fontSize}px ${fontFamily}`;
-
-    const words = displayText.split(/\s+/);
-    let currentLine = "";
-    const lines = [];
-    for (let n = 0; n < words.length; n++) {
-      const testLine = currentLine ? `${currentLine} ${words[n]}` : words[n];
-      const metrics = ctx.measureText(testLine);
-      if (metrics.width > textMaxWidth && currentLine) {
-        lines.push(currentLine.trim());
-        currentLine = words[n];
-      } else {
-        currentLine = testLine;
+    // 2. Wrap Text Utility
+    function wrapText(text, maxW, font) {
+      ctx.font = font;
+      const words = text.split(/\s+/);
+      const lines = [];
+      let cur = "";
+      for (let w of words) {
+        let test = cur ? `${cur} ${w}` : w;
+        if (ctx.measureText(test).width > maxW && cur) {
+          lines.push(cur.trim());
+          cur = w;
+        } else {
+          cur = test;
+        }
       }
+      if (cur) lines.push(cur.trim());
+      return lines;
     }
-    if (currentLine) lines.push(currentLine.trim());
 
-    const lineHeight = Math.round(fontSize * (ratio === 'story' ? 1.55 : 1.5));
-    const textBlockHeight = lines.length * lineHeight;
-    const tagHeight = (ratio === 'story') ? 48 : 40;
-    const quoteHeight = (ratio === 'story') ? 68 : 58;
-    const refHeight = (ratio === 'story') ? 58 : 50;
-    const spacing = (ratio === 'story') ? 46 : 28;
-    const totalContentHeight = tagHeight + quoteHeight + textBlockHeight + refHeight + spacing;
+    const layoutMode = theme.layoutMode || "centered-card";
 
-    // Center in visual zone
-    let startY = Math.round((canvas.height - totalContentHeight) / 2) - (ratio === 'story' ? 45 : 20);
+    /* ==========================================================================
+       STYLE 1: FLOURISH SWASH (Alpine Mountain Peak & Cross)
+       ========================================================================== */
+    if (layoutMode === "flourish-swash") {
+      // Bottom half dark atmospheric gradient overlay to guarantee 100% legibility
+      const grad = ctx.createLinearGradient(0, canvas.height * 0.42, 0, canvas.height);
+      grad.addColorStop(0, 'rgba(10, 15, 25, 0.0)');
+      grad.addColorStop(0.28, 'rgba(10, 15, 25, 0.55)');
+      grad.addColorStop(0.6, 'rgba(8, 12, 20, 0.82)');
+      grad.addColorStop(1, 'rgba(6, 9, 16, 0.94)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, canvas.height * 0.42, canvas.width, canvas.height * 0.58);
 
-    // 3a. Top Tag (Mathematically Guaranteed Centering)
-    ctx.direction = "ltr";
-    ctx.textAlign = "left";
-    ctx.textBaseline = "middle";
-    ctx.font = (ratio === 'story') ? "800 24px 'Outfit', -apple-system, sans-serif" : "800 21px 'Outfit', -apple-system, sans-serif";
-    ctx.fillStyle = theme.accentColor || "#fbbf24";
-    ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
-    ctx.shadowBlur = 14;
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 2;
-    const tagText = theme.tag || "✦ VERSE OF THE DAY ✦";
-    const tagW = ctx.measureText(tagText).width;
-    ctx.fillText(tagText, Math.round((canvas.width - tagW) / 2), startY);
-    startY += tagHeight;
+      const maxW = (ratio === 'story') ? 880 : 920;
+      let fontSize = (ratio === 'story') ? (displayText.length > 120 ? 46 : 56) : (displayText.length > 120 ? 42 : 50);
+      const font = `700 ${fontSize}px ${isMarathi ? "'Noto Serif Devanagari', serif" : "'Playfair Display', Georgia, serif"}`;
+      const lines = wrapText(displayText, maxW, font);
+      const lineH = Math.round(fontSize * 1.55);
 
-    // 3b. Quotation Mark (Mathematically Guaranteed Centering)
-    ctx.direction = "ltr";
-    ctx.textAlign = "left";
-    ctx.font = (ratio === 'story') ? "700 90px Georgia, serif" : "700 82px Georgia, serif";
-    ctx.fillStyle = theme.quoteColor || theme.accentColor || "#fbbf24";
-    ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
-    ctx.shadowBlur = 18;
-    const quoteChar = "“";
-    const quoteW = ctx.measureText(quoteChar).width;
-    ctx.fillText(quoteChar, Math.round((canvas.width - quoteW) / 2), startY + (ratio === 'story' ? 10 : 8));
-    startY += quoteHeight;
+      let startY = Math.round(canvas.height * (ratio === 'story' ? 0.62 : 0.55));
 
-    // 3c. Verse Body (Mathematically Guaranteed Centering for every line)
-    ctx.direction = "ltr";
-    ctx.textAlign = "left";
-    ctx.textBaseline = "middle";
-    ctx.fillStyle = theme.textColor || "#ffffff";
-    ctx.font = `${theme.fontWeight || '700'} ${fontSize}px ${fontFamily}`;
-    ctx.shadowColor = "rgba(0, 0, 0, 0.98)";
-    ctx.shadowBlur = 24;
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 4;
+      // Top Tag
+      ctx.direction = "ltr";
+      ctx.font = "800 21px 'Outfit', sans-serif";
+      ctx.fillStyle = "#fbbf24";
+      ctx.shadowColor = "rgba(0,0,0,0.95)";
+      ctx.shadowBlur = 12;
+      const tagText = isMarathi ? "✦ दैनिक वचन • DAILY PROMISE ✦" : "✦ WITH GOD, ALL THINGS ARE POSSIBLE ✦";
+      const tagW = ctx.measureText(tagText).width;
+      ctx.fillText(tagText, Math.round((canvas.width - tagW) / 2), startY);
+      startY += 52;
 
-    for (let i = 0; i < lines.length; i++) {
-      const lineStr = lines[i].trim();
-      const lineW = ctx.measureText(lineStr).width;
-      const lineX = Math.round((canvas.width - lineW) / 2);
-      ctx.fillText(lineStr, lineX, startY + (i * lineHeight));
+      // Verse Body
+      ctx.font = font;
+      ctx.fillStyle = "#ffffff";
+      ctx.shadowColor = "rgba(0,0,0,0.98)";
+      ctx.shadowBlur = 20;
+      for (let i = 0; i < lines.length; i++) {
+        const lineStr = lines[i];
+        const lineW = ctx.measureText(lineStr).width;
+        const lineX = Math.round((canvas.width - lineW) / 2);
+        const curLineY = startY + (i * lineH);
+        ctx.fillText(lineStr, lineX, curLineY);
+
+        // Calligraphic flourish swash under the last line
+        if (i === lines.length - 1) {
+          drawCalligraphicFlourish(ctx, lineX, curLineY + Math.round(fontSize * 0.5), lineW, "#fbbf24");
+        }
+      }
+      startY += (lines.length * lineH) + 36;
+
+      // Scripture Reference
+      ctx.font = "800 29px 'Outfit', -apple-system, sans-serif";
+      ctx.fillStyle = "#fbbf24";
+      const refStr = `${displayRef} • ${isMarathi ? 'MARVBSI' : 'NLT'}`;
+      const refW = ctx.measureText(refStr).width;
+      ctx.fillText(refStr, Math.round((canvas.width - refW) / 2), startY);
+
+    /* ==========================================================================
+       STYLE 2: WATERCOLOR FINE ART & SOLID PILL (Moses Red Sea Watercolor)
+       ========================================================================== */
+    } else if (layoutMode === "watercolor-pill") {
+      // Clean cream paper on top, Moses parting Red Sea at bottom
+      const maxW = (ratio === 'story') ? 860 : 900;
+      let fontSize = (ratio === 'story') ? (displayText.length > 120 ? 44 : 52) : (displayText.length > 120 ? 40 : 46);
+      const font = `700 ${fontSize}px ${isMarathi ? "'Noto Serif Devanagari', 'Rozha One', serif" : "'Lora', Georgia, serif"}`;
+      const lines = wrapText(displayText, maxW, font);
+      const lineH = Math.round(fontSize * 1.55);
+
+      let startY = Math.round(canvas.height * (ratio === 'story' ? 0.16 : 0.12));
+
+      // Header Serif Intro
+      ctx.direction = "ltr";
+      ctx.font = "italic 600 26px 'Lora', 'Noto Serif Devanagari', Georgia, serif";
+      ctx.fillStyle = "#334155";
+      ctx.shadowBlur = 0;
+      const introStr = isMarathi ? "कारण परमेश्वरासाठी" : "For with God";
+      const introW = ctx.measureText(introStr).width;
+      ctx.fillText(introStr, Math.round((canvas.width - introW) / 2), startY);
+      startY += 52;
+
+      // Verse Body in Deep Slate Navy
+      ctx.font = font;
+      ctx.fillStyle = "#0f172a";
+      for (let i = 0; i < lines.length; i++) {
+        const lineStr = lines[i];
+        const lineW = ctx.measureText(lineStr).width;
+        ctx.fillText(lineStr, Math.round((canvas.width - lineW) / 2), startY + (i * lineH));
+      }
+      startY += (lines.length * lineH) + 38;
+
+      // Solid Teal/Navy Pill Reference Badge
+      const refStr = `${displayRef} • ${isMarathi ? 'MARVBSI' : 'NLT'}`;
+      ctx.font = "800 24px 'Outfit', sans-serif";
+      const pillTextW = ctx.measureText(refStr).width;
+      const pillW = pillTextW + 48;
+      const pillH = 50;
+      const pillX = Math.round((canvas.width - pillW) / 2);
+      const pillY = startY;
+
+      ctx.save();
+      ctx.fillStyle = "#0e7490";
+      ctx.shadowColor = "rgba(14, 116, 144, 0.35)";
+      ctx.shadowBlur = 14;
+      ctx.beginPath();
+      if (typeof ctx.roundRect === 'function') ctx.roundRect(pillX, pillY, pillW, pillH, 25);
+      else ctx.rect(pillX, pillY, pillW, pillH);
+      ctx.fill();
+
+      ctx.fillStyle = "#ffffff";
+      ctx.shadowBlur = 0;
+      ctx.fillText(refStr, pillX + 24, pillY + 34);
+      ctx.restore();
+
+    /* ==========================================================================
+       STYLE 3: EDITORIAL VERTICAL POSTER (Forest Sunset)
+       ========================================================================== */
+    } else if (layoutMode === "editorial-vertical") {
+      // Soft vignette on right
+      const grad = ctx.createLinearGradient(0, 0, canvas.width, 0);
+      grad.addColorStop(0, 'rgba(10, 15, 25, 0.4)');
+      grad.addColorStop(0.35, 'rgba(10, 15, 25, 0.2)');
+      grad.addColorStop(1, 'rgba(8, 12, 20, 0.7)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // 3a. Giant Vertical Editorial Title rotated 90 degrees along left
+      ctx.save();
+      const vertTitle = isMarathi ? "देवाचा संकल्प." : "GOD'S PLAN.";
+      ctx.font = "900 86px 'Outfit', 'Playfair Display', serif";
+      ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
+      ctx.shadowColor = "rgba(0,0,0,0.9)";
+      ctx.shadowBlur = 18;
+      ctx.translate(140, Math.round(canvas.height * (ratio === 'story' ? 0.78 : 0.82)));
+      ctx.rotate(-Math.PI / 2);
+      ctx.fillText(vertTitle, 0, 0);
+
+      // Cursive Script Accent Overlay across the vertical title
+      ctx.font = "600 48px 'Great Vibes', cursive";
+      ctx.fillStyle = "rgba(253, 230, 138, 0.95)";
+      ctx.fillText(isMarathi ? "प्रभू येशू राजा" : "Jesus is King", 40, 24);
+      ctx.restore();
+
+      // 3b. Lower Right Scripture Content Block
+      const rightX = (ratio === 'story') ? 340 : 320;
+      const rightW = canvas.width - rightX - 60;
+      const font = `700 42px ${isMarathi ? "'Noto Serif Devanagari', serif" : "'Lora', Georgia, serif"}`;
+      const lines = wrapText(displayText, rightW, font);
+      const lineH = 62;
+
+      let startY = Math.round(canvas.height * (ratio === 'story' ? 0.60 : 0.52));
+
+      // Scripture Reference
+      ctx.direction = "ltr";
+      ctx.font = "800 32px 'Outfit', sans-serif";
+      ctx.fillStyle = "#fbbf24";
+      ctx.shadowColor = "rgba(0,0,0,0.95)";
+      ctx.shadowBlur = 16;
+      ctx.fillText(`${displayRef} • ${isMarathi ? 'MARVBSI' : 'NLT'}`, rightX, startY);
+      startY += 48;
+
+      // Verse Body
+      ctx.font = font;
+      ctx.fillStyle = "#ffffff";
+      for (let i = 0; i < lines.length; i++) {
+        ctx.fillText(lines[i], rightX, startY + (i * lineH));
+      }
+
+    /* ==========================================================================
+       STYLE 4: WINDING GOLDEN PATH & ORNATE SWASHES
+       ========================================================================== */
+    } else if (layoutMode === "flourish-path") {
+      // Lower 48% dark teal forest area
+      const grad = ctx.createLinearGradient(0, canvas.height * 0.48, 0, canvas.height);
+      grad.addColorStop(0, 'rgba(10, 24, 30, 0)');
+      grad.addColorStop(0.35, 'rgba(10, 24, 30, 0.88)');
+      grad.addColorStop(1, 'rgba(6, 16, 20, 0.97)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, canvas.height * 0.48, canvas.width, canvas.height * 0.52);
+
+      let startY = Math.round(canvas.height * (ratio === 'story' ? 0.62 : 0.56));
+
+      ctx.direction = "ltr";
+      ctx.font = "italic 600 32px 'Great Vibes', cursive";
+      ctx.fillStyle = "#fde047";
+      ctx.shadowColor = "rgba(0,0,0,0.95)";
+      ctx.shadowBlur = 14;
+      const subtitleStr = isMarathi ? "प्रकाश आणि मार्गदर्शन" : "Light to my path";
+      const subtitleW = ctx.measureText(subtitleStr).width;
+      ctx.fillText(subtitleStr, Math.round((canvas.width - subtitleW) / 2), startY);
+      startY += 52;
+
+      const maxW = (ratio === 'story') ? 880 : 920;
+      const font = `700 44px ${isMarathi ? "'Noto Serif Devanagari', serif" : "'Playfair Display', Georgia, serif"}`;
+      const lines = wrapText(displayText, maxW, font);
+      const lineH = 64;
+
+      ctx.font = font;
+      ctx.fillStyle = "#ffffff";
+      ctx.shadowBlur = 22;
+      for (let i = 0; i < lines.length; i++) {
+        const lineW = ctx.measureText(lines[i]).width;
+        const curLineX = Math.round((canvas.width - lineW) / 2);
+        const curLineY = startY + (i * lineH);
+        ctx.fillText(lines[i], curLineX, curLineY);
+
+        if (i === lines.length - 1) {
+          drawCalligraphicFlourish(ctx, curLineX, curLineY + 22, lineW, "#facc15");
+        }
+      }
+      startY += (lines.length * lineH) + 38;
+
+      ctx.font = "800 30px 'Outfit', sans-serif";
+      ctx.fillStyle = "#facc15";
+      const refStr = `${displayRef} • ${isMarathi ? 'MARVBSI' : 'NLT'}`;
+      const refW = ctx.measureText(refStr).width;
+      ctx.fillText(refStr, Math.round((canvas.width - refW) / 2), startY);
+
+    /* ==========================================================================
+       STYLE 5: MAJESTIC SUNBEAM & TOP CATHEDRAL ARCH (Light of the World)
+       ========================================================================== */
+    } else if (layoutMode === "cathedral-light") {
+      // Arch frame border on top
+      ctx.strokeStyle = "rgba(253, 230, 138, 0.4)";
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      const archX = 80;
+      const archY = Math.round(canvas.height * (ratio === 'story' ? 0.08 : 0.06));
+      const archW = canvas.width - 160;
+      const archH = Math.round(canvas.height * (ratio === 'story' ? 0.38 : 0.44));
+      if (typeof ctx.roundRect === 'function') ctx.roundRect(archX, archY, archW, archH, [120, 120, 20, 20]);
+      else ctx.rect(archX, archY, archW, archH);
+      ctx.stroke();
+
+      let startY = archY + 70;
+
+      ctx.direction = "ltr";
+      ctx.font = "800 22px 'Outfit', sans-serif";
+      ctx.fillStyle = "#fef08a";
+      ctx.shadowColor = "rgba(0,0,0,0.95)";
+      ctx.shadowBlur = 15;
+      const tagStr = isMarathi ? "✦ जगाचा प्रकाश • LIGHT OF THE WORLD ✦" : "✦ THE LIGHT SHINES IN THE DARKNESS ✦";
+      const tagW = ctx.measureText(tagStr).width;
+      ctx.fillText(tagStr, Math.round((canvas.width - tagW) / 2), startY);
+      startY += 54;
+
+      const maxW = archW - 60;
+      const font = `700 42px ${isMarathi ? "'Noto Serif Devanagari', serif" : "'Playfair Display', serif"}`;
+      const lines = wrapText(displayText, maxW, font);
+      const lineH = 62;
+
+      ctx.font = font;
+      ctx.fillStyle = "#ffffff";
+      ctx.shadowBlur = 24;
+      for (let i = 0; i < lines.length; i++) {
+        const lineW = ctx.measureText(lines[i]).width;
+        ctx.fillText(lines[i], Math.round((canvas.width - lineW) / 2), startY + (i * lineH));
+      }
+      startY += (lines.length * lineH) + 32;
+
+      ctx.font = "800 28px 'Outfit', sans-serif";
+      ctx.fillStyle = "#fef08a";
+      const refStr = `${displayRef} • ${isMarathi ? 'MARVBSI' : 'NLT'}`;
+      const refW = ctx.measureText(refStr).width;
+      ctx.fillText(refStr, Math.round((canvas.width - refW) / 2), startY);
+
+    /* ==========================================================================
+       STYLE 6: GREEN PASTURE GLASS EMBED (Good Shepherd)
+       ========================================================================== */
+    } else if (layoutMode === "pasture-glass") {
+      const cardW = canvas.width - 140;
+      const cardX = 70;
+      let cardY = Math.round(canvas.height * (ratio === 'story' ? 0.44 : 0.38));
+
+      const maxW = cardW - 70;
+      const font = `700 42px ${isMarathi ? "'Noto Sans Devanagari', sans-serif" : "'Lora', Georgia, serif"}`;
+      const lines = wrapText(displayText, maxW, font);
+      const lineH = 60;
+      const cardH = (lines.length * lineH) + 160;
+
+      // Frosted Dark Glass Container
+      ctx.save();
+      ctx.fillStyle = "rgba(10, 25, 18, 0.72)";
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.22)";
+      ctx.lineWidth = 2;
+      ctx.shadowColor = "rgba(0, 0, 0, 0.6)";
+      ctx.shadowBlur = 28;
+      ctx.beginPath();
+      if (typeof ctx.roundRect === 'function') ctx.roundRect(cardX, cardY, cardW, cardH, 28);
+      else ctx.rect(cardX, cardY, cardW, cardH);
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+
+      let startY = cardY + 60;
+
+      ctx.direction = "ltr";
+      ctx.font = "800 20px 'Outfit', sans-serif";
+      ctx.fillStyle = "#86efac";
+      ctx.shadowBlur = 0;
+      const tagStr = isMarathi ? "परमेश्वर माझा मेंढपाळ आहे • THE LORD IS MY SHEPHERD" : "THE LORD IS MY SHEPHERD • PSALM 23";
+      const tagW = ctx.measureText(tagStr).width;
+      ctx.fillText(tagStr, Math.round((canvas.width - tagW) / 2), startY);
+      startY += 52;
+
+      ctx.font = font;
+      ctx.fillStyle = "#ffffff";
+      ctx.shadowColor = "rgba(0,0,0,0.95)";
+      ctx.shadowBlur = 22;
+      for (let i = 0; i < lines.length; i++) {
+        const lineW = ctx.measureText(lines[i]).width;
+        ctx.fillText(lines[i], Math.round((canvas.width - lineW) / 2), startY + (i * lineH));
+      }
+      startY += (lines.length * lineH) + 26;
+
+      ctx.font = "800 26px 'Outfit', sans-serif";
+      ctx.fillStyle = "#86efac";
+      const refStr = `${displayRef} • ${isMarathi ? 'MARVBSI' : 'NLT'}`;
+      const refW = ctx.measureText(refStr).width;
+      ctx.fillText(refStr, Math.round((canvas.width - refW) / 2), startY);
+
+    /* ==========================================================================
+       STYLE 7: HIGHWAY OF GRACE (Pine Forest Road & Centerline)
+       ========================================================================== */
+    } else if (layoutMode === "highway-bold") {
+      let startY = Math.round(canvas.height * (ratio === 'story' ? 0.52 : 0.44));
+
+      ctx.direction = "ltr";
+      ctx.font = "900 68px 'Poppins', sans-serif";
+      ctx.fillStyle = "#ffffff";
+      ctx.shadowColor = "rgba(0,0,0,0.95)";
+      ctx.shadowBlur = 20;
+      const titleStr = isMarathi ? "माझ्याबरोबर चाला" : "WALK WITH ME";
+      const titleW = ctx.measureText(titleStr).width;
+      ctx.fillText(titleStr, Math.round((canvas.width - titleW) / 2), startY);
+      startY += 30;
+
+      // Twin yellow highway centerline bar
+      ctx.fillStyle = "#facc15";
+      const barW = 180;
+      ctx.fillRect(Math.round((canvas.width - barW) / 2), startY, barW, 5);
+      startY += 48;
+
+      const maxW = 900;
+      const font = `700 42px ${isMarathi ? "'Noto Sans Devanagari'" : "'Poppins', sans-serif"}`;
+      const lines = wrapText(displayText, maxW, font);
+      ctx.font = font;
+      ctx.fillStyle = "#ffffff";
+      for (let i = 0; i < lines.length; i++) {
+        const lineW = ctx.measureText(lines[i]).width;
+        ctx.fillText(lines[i], Math.round((canvas.width - lineW) / 2), startY + (i * 62));
+      }
+      startY += (lines.length * 62) + 26;
+
+      ctx.font = "800 30px 'Poppins', sans-serif";
+      ctx.fillStyle = "#facc15";
+      const refStr = `${displayRef} • ${isMarathi ? 'MARVBSI' : 'NLT'}`;
+      const refW = ctx.measureText(refStr).width;
+      ctx.fillText(refStr, Math.round((canvas.width - refW) / 2), startY);
+
+    /* ==========================================================================
+       STYLE 8: ETERNAL BOARDING PASS TICKET
+       ========================================================================== */
+    } else if (layoutMode === "boarding-pass") {
+      // Left offset 270px to leave authentic barcode and perforated tear line unobstructed
+      const startX = 270;
+      const availW = canvas.width - startX - 70;
+
+      let startY = Math.round(canvas.height * (ratio === 'story' ? 0.22 : 0.16));
+
+      ctx.direction = "ltr";
+      ctx.shadowBlur = 0;
+      ctx.font = "800 20px 'Outfit', sans-serif";
+      ctx.fillStyle = "#475569";
+      ctx.fillText("ETERNAL AIRWAYS • सार्वकालिक जीवन", startX, startY);
+      startY += 32;
+
+      ctx.font = "900 68px 'Outfit', sans-serif";
+      ctx.fillStyle = "#0f172a";
+      ctx.fillText(isMarathi ? "येशू ख्रिस्त" : "JESUS", startX, startY + 44);
+      startY += 78;
+
+      ctx.font = "800 19px 'Outfit', monospace";
+      ctx.fillStyle = "#0f172a";
+      ctx.fillText("FINAL DESTINATION: HOME / अंतिम मुक्काम", startX, startY);
+      startY += 30;
+
+      // Divider line
+      ctx.strokeStyle = "rgba(15, 23, 42, 0.25)";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(startX, startY);
+      ctx.lineTo(startX + availW, startY);
+      ctx.stroke();
+      startY += 26;
+
+      // Grid: GATE: JOHN | TIME: 3:16 | ROW: GRACE | SEAT: MERCY
+      ctx.font = "800 15px 'Outfit', sans-serif";
+      ctx.fillStyle = "#64748b";
+      ctx.fillText("GATE", startX, startY);
+      ctx.fillText("TIME", startX + 160, startY);
+      ctx.fillText("ROW", startX + 320, startY);
+      ctx.fillText("SEAT", startX + 480, startY);
+      startY += 24;
+
+      ctx.font = "900 24px 'Outfit', sans-serif";
+      ctx.fillStyle = "#0f172a";
+      ctx.fillText("JOHN", startX, startY);
+      ctx.fillText("3:16", startX + 160, startY);
+      ctx.fillText("GRACE", startX + 320, startY);
+      ctx.fillText("MERCY", startX + 480, startY);
+      startY += 40;
+
+      // Scripture Box Itinerary
+      const font = `700 36px ${isMarathi ? "'Noto Sans Devanagari', 'Poppins'" : "'Outfit', sans-serif"}`;
+      const lines = wrapText(displayText, availW - 30, font);
+      const boxH = (lines.length * 52) + 80;
+
+      ctx.fillStyle = "rgba(15, 23, 42, 0.04)";
+      ctx.strokeStyle = "rgba(15, 23, 42, 0.18)";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      if (typeof ctx.roundRect === 'function') ctx.roundRect(startX, startY, availW, boxH, 16);
+      else ctx.rect(startX, startY, availW, boxH);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.font = font;
+      ctx.fillStyle = "#0f172a";
+      for (let i = 0; i < lines.length; i++) {
+        ctx.fillText(lines[i], startX + 16, startY + 44 + (i * 52));
+      }
+
+      ctx.font = "800 22px 'Outfit', sans-serif";
+      ctx.fillStyle = "#0369a1";
+      ctx.fillText(`${displayRef} • ${isMarathi ? 'MARVBSI' : 'NLT'}`, startX + 16, startY + boxH - 24);
+
+    /* ==========================================================================
+       DEFAULT: CENTERED PREMIUM CARD
+       ========================================================================== */
+    } else {
+      const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      grad.addColorStop(0, 'rgba(10, 15, 25, 0.65)');
+      grad.addColorStop(0.5, 'rgba(10, 15, 25, 0.58)');
+      grad.addColorStop(1, 'rgba(8, 12, 20, 0.92)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const maxW = (ratio === 'story') ? 880 : 920;
+      let fontSize = (ratio === 'story') ? (displayText.length > 120 ? 46 : 56) : (displayText.length > 120 ? 42 : 50);
+      const font = `${theme.fontWeight || '700'} ${fontSize}px ${isMarathi ? "'Noto Serif Devanagari', serif" : (theme.fontFamily || "'Lora', Georgia, serif")}`;
+      const lines = wrapText(displayText, maxW, font);
+      const lineH = Math.round(fontSize * 1.52);
+
+      let startY = Math.round((canvas.height - (lines.length * lineH + 180)) / 2);
+
+      // Top Tag
+      ctx.direction = "ltr";
+      ctx.font = "800 22px 'Outfit', sans-serif";
+      ctx.fillStyle = theme.accentColor || "#fbbf24";
+      ctx.shadowColor = "rgba(0,0,0,0.95)";
+      ctx.shadowBlur = 14;
+      const tagText = theme.tag || "✦ VERSE OF THE DAY ✦";
+      const tagW = ctx.measureText(tagText).width;
+      ctx.fillText(tagText, Math.round((canvas.width - tagW) / 2), startY);
+      startY += 54;
+
+      // Verse Body
+      ctx.font = font;
+      ctx.fillStyle = theme.textColor || "#ffffff";
+      for (let i = 0; i < lines.length; i++) {
+        const lineW = ctx.measureText(lines[i]).width;
+        ctx.fillText(lines[i], Math.round((canvas.width - lineW) / 2), startY + (i * lineH));
+      }
+      startY += (lines.length * lineH) + 38;
+
+      // Reference
+      ctx.font = "800 30px 'Outfit', sans-serif";
+      ctx.fillStyle = theme.accentColor || "#fbbf24";
+      const refStr = `${displayRef} • ${isMarathi ? 'MARVBSI' : 'NLT'}`;
+      const refW = ctx.measureText(refStr).width;
+      ctx.fillText(refStr, Math.round((canvas.width - refW) / 2), startY);
     }
-    startY += textBlockHeight + (ratio === 'story' ? 36 : 30);
 
-    // 3d. Scripture Reference with Symmetrical Accent Lines (Mathematically Guaranteed Centering)
-    ctx.direction = "ltr";
-    ctx.textAlign = "left";
-    ctx.textBaseline = "middle";
-    const refText = `${displayRef} • ${state.translation === 'eng' ? 'NLT' : 'MARVBSI'}`;
-    ctx.font = (ratio === 'story') ? "800 34px 'Outfit', -apple-system, sans-serif" : "800 29px 'Outfit', -apple-system, 'Noto Serif Devanagari', sans-serif";
-    const refW = ctx.measureText(refText).width;
-    const refX = Math.round((canvas.width - refW) / 2);
-    const gap = 18;
-    const lineLen = (ratio === 'story') ? 56 : 50;
-
-    ctx.strokeStyle = theme.accentColor || "#fbbf24";
-    ctx.lineWidth = 2.5;
-    ctx.beginPath();
-    ctx.moveTo(refX - gap - lineLen, startY);
-    ctx.lineTo(refX - gap, startY);
-    ctx.moveTo(refX + refW + gap, startY);
-    ctx.lineTo(refX + refW + gap + lineLen, startY);
-    ctx.stroke();
-
-    ctx.fillStyle = theme.accentColor || "#fbbf24";
-    ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
-    ctx.shadowBlur = 14;
-    ctx.fillText(refText, refX, startY);
-
-    // Reset shadows
-    ctx.shadowColor = "transparent";
-    ctx.shadowBlur = 0;
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 0;
-
-    // 4. Centered Premium Watermark & Copyright Pill at Bottom
+    // 4. Centered River of Life Watermark Badge at Bottom
     ctx.save();
+    const isLightBg = (layoutMode === "watercolor-pill" || layoutMode === "boarding-pass");
     const titleStr = "River of Life Bible";
     const subStr = "जीवन नदी बायबल ॲप • © River of Life";
 
-    const titleFont = (ratio === 'story') ? "800 28px 'Outfit', -apple-system, sans-serif" : "800 24px 'Outfit', -apple-system, sans-serif";
-    const subFont = (ratio === 'story') ? "700 17px 'Noto Serif Devanagari', -apple-system, sans-serif" : "700 15px 'Noto Serif Devanagari', -apple-system, sans-serif";
+    const titleFont = (ratio === 'story') ? "800 26px 'Outfit', sans-serif" : "800 22px 'Outfit', sans-serif";
+    const subFont = (ratio === 'story') ? "700 16px 'Noto Serif Devanagari', sans-serif" : "700 14px 'Noto Serif Devanagari', sans-serif";
 
     ctx.font = titleFont;
     const titleMetrics = ctx.measureText(titleStr);
@@ -17145,16 +17733,16 @@ window.generateExactVerseImageBlob = function(customRatio) {
     const subMetrics = ctx.measureText(subStr);
     const maxTextW = Math.max(titleMetrics.width, subMetrics.width);
 
-    const logoSize = (ratio === 'story') ? 58 : 50;
-    const padX = (ratio === 'story') ? 24 : 20;
-    const gapLogo = (ratio === 'story') ? 18 : 15;
+    const logoSize = (ratio === 'story') ? 54 : 46;
+    const padX = (ratio === 'story') ? 22 : 18;
+    const gapLogo = (ratio === 'story') ? 16 : 14;
     const badgeW = Math.round((logoImg ? (logoSize + gapLogo) : 0) + maxTextW + (padX * 2) + 6);
-    const badgeH = (ratio === 'story') ? 94 : 80;
+    const badgeH = (ratio === 'story') ? 90 : 76;
     const badgeX = Math.round((canvas.width - badgeW) / 2);
-    const badgeY = canvas.height - badgeH - (ratio === 'story' ? 110 : 34);
+    const badgeY = canvas.height - badgeH - (ratio === 'story' ? 100 : 30);
 
-    ctx.fillStyle = "rgba(10, 16, 30, 0.88)";
-    ctx.strokeStyle = "rgba(251, 191, 36, 0.45)";
+    ctx.fillStyle = isLightBg ? "rgba(255, 255, 255, 0.92)" : "rgba(10, 16, 30, 0.88)";
+    ctx.strokeStyle = isLightBg ? "rgba(14, 116, 144, 0.35)" : "rgba(251, 191, 36, 0.45)";
     ctx.lineWidth = 2;
 
     ctx.beginPath();
@@ -17170,8 +17758,6 @@ window.generateExactVerseImageBlob = function(customRatio) {
     const logoY = badgeY + Math.round((badgeH - logoSize) / 2);
 
     if (logoImg) {
-      ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
-      ctx.shadowBlur = 8;
       ctx.drawImage(logoImg, logoX, logoY, logoSize, logoSize);
     }
 
@@ -17179,29 +17765,18 @@ window.generateExactVerseImageBlob = function(customRatio) {
     ctx.textAlign = "left";
     ctx.textBaseline = "middle";
 
-    if (logoImg) {
-      const textX = logoX + logoSize + gapLogo;
-      
-      ctx.fillStyle = "#ffffff";
-      ctx.font = titleFont;
-      ctx.fillText(titleStr, textX, badgeY + (ratio === 'story' ? 32 : 27));
+    const textX = (logoImg ? (logoX + logoSize + gapLogo) : Math.round((canvas.width - titleMetrics.width) / 2));
+    ctx.fillStyle = isLightBg ? "#0f172a" : "#ffffff";
+    ctx.font = titleFont;
+    ctx.fillText(titleStr, textX, badgeY + (ratio === 'story' ? 30 : 25));
 
-      ctx.fillStyle = "rgba(251, 191, 36, 0.95)";
-      ctx.font = subFont;
-      ctx.fillText(subStr, textX, badgeY + (ratio === 'story' ? 62 : 51));
-    } else {
-      ctx.font = titleFont;
-      ctx.fillStyle = "#ffffff";
-      ctx.fillText(titleStr, Math.round((canvas.width - titleMetrics.width) / 2), badgeY + (ratio === 'story' ? 32 : 27));
-
-      ctx.font = subFont;
-      ctx.fillStyle = "rgba(251, 191, 36, 0.95)";
-      ctx.fillText(subStr, Math.round((canvas.width - subMetrics.width) / 2), badgeY + (ratio === 'story' ? 62 : 51));
-    }
+    ctx.fillStyle = isLightBg ? "#0e7490" : "rgba(251, 191, 36, 0.95)";
+    ctx.font = subFont;
+    ctx.fillText(subStr, textX, badgeY + (ratio === 'story' ? 60 : 50));
     ctx.restore();
 
     const safeRefCode = ((vod && vod.engRef) ? vod.engRef : 'Daily_Verse').replace(/[^a-zA-Z0-9]/g, "_");
-    const filename = `River_of_Life_Verse_Card_${safeRefCode}.png`;
+    const filename = `River_of_Life_Verse_${theme.id || 'Pinterest'}_${safeRefCode}.png`;
     const dataUrl = canvas.toDataURL("image/png");
 
     canvas.toBlob((blob) => {
@@ -17317,6 +17892,10 @@ window.openImagePreviewModal = function(dataUrl, filename, blob) {
       btn.style.borderColor = isThis ? '#fbbf24' : 'rgba(255,255,255,0.2)';
       btn.style.fontWeight = isThis ? '800' : '600';
     });
+
+    if (typeof window.renderVodPinterestStrips === "function") {
+      window.renderVodPinterestStrips();
+    }
 
     modal.classList.add("active");
     modal.style.display = "flex";
