@@ -2508,6 +2508,9 @@ async function openReader(bookKey, chapterNum) {
   if (activeStudyVerse && activeStudyVerse.bookKey === bookKey && activeStudyVerse.chapter === chapterNum) {
     openStudySplitPane(bookKey, chapterNum, activeStudyVerse.verse);
   }
+
+  // Pre-warm audio for instant playback
+  preloadChapterAudio(bookKey, chapterNum);
 }
 
 function populateQuickSelectors(currentMetadata, chapterNum, totalVerses) {
@@ -4338,6 +4341,36 @@ window.setBibleAudioEngine = function(engine) {
   }
 };
 
+function getBsiAudioStreamUrl(bookKey, chapterNum) {
+  const cleanBook = (bookKey || state.activeBook || "genesis").toLowerCase().replace(".json", "");
+  const chNum = parseInt(chapterNum || state.activeChapter || 1, 10);
+  const usfm = getBsiUsfmCode(cleanBook);
+  const chStr = String(chNum).padStart(3, '0');
+  const isLocalDevHost = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+  if (isLocalDevHost) {
+    return `/api/bsi-audio-stream?book=${cleanBook}&chapter=${chNum}`;
+  }
+  return `https://raw.githubusercontent.com/gauravsalve236-lgtm/River-of-life/bsi-audio-store/assets/audio/bsi/${usfm}_${chStr}.mp3`;
+}
+window.getBsiAudioStreamUrl = getBsiAudioStreamUrl;
+
+function preloadChapterAudio(bookKey, chapterNum) {
+  try {
+    const audioUrl = getBsiAudioStreamUrl(bookKey, chapterNum);
+    if (!bibleChapterAudioPlayer) {
+      bibleChapterAudioPlayer = new Audio();
+    }
+    // Only pre-assign if player is idle (not currently playing)
+    if (bibleChapterAudioPlayer.paused && (!bibleChapterAudioPlayer.currentTime || bibleChapterAudioPlayer.currentTime === 0)) {
+      if (bibleChapterAudioPlayer.src !== audioUrl) {
+        bibleChapterAudioPlayer.preload = "auto";
+        bibleChapterAudioPlayer.src = audioUrl;
+      }
+    }
+  } catch(e) {}
+}
+window.preloadChapterAudio = preloadChapterAudio;
+
 async function playBsiDramatizedAudio(bookKey, chapterNum, resumeTime = null) {
   closeModal("modal-audio-settings");
 
@@ -4354,19 +4387,13 @@ async function playBsiDramatizedAudio(bookKey, chapterNum, resumeTime = null) {
     userEnginePref = localStorage.getItem("rol_audio_engine") || "auto";
   } catch(e) {}
 
-  let token = null;
-  if (userEnginePref !== 'wordproject') {
-    token = await getBsiCloudFrontToken();
-  }
-
   let audioUrl = "";
   let audioLabel = "";
   let isUsingWordProject = false;
 
   const isLocalDevHost = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 
-  // Zero-Failure Decision:
-  // 1. If running locally and BSI is chosen, use the local proxy which serves directly from downloaded assets/audio/bsi/
+  // Zero-Failure Instant Decision (No network delay waiting for CloudFront tokens):
   if (isLocalDevHost && userEnginePref !== 'wordproject') {
     audioUrl = `/api/bsi-audio-stream?book=${cleanBook}&chapter=${chNum}`;
     audioLabel = `🎭 BSI नाट्यमय ऑडिओ (स्थानिक) • ${cleanBook} ${chNum}`;
@@ -4376,10 +4403,9 @@ async function playBsiDramatizedAudio(bookKey, chapterNum, resumeTime = null) {
     isUsingWordProject = true;
     console.log("[Audio Engine] Routing directly to Permanent Authentic Marathi Human Audio:", audioUrl);
   } else {
-    // Permanent Zero-Token CDN Stream from our dedicated bsi-audio-store branch
+    // Instant CDN Stream from our dedicated bsi-audio-store branch
     audioUrl = `https://raw.githubusercontent.com/gauravsalve236-lgtm/River-of-life/bsi-audio-store/assets/audio/bsi/${usfm}_${chStr}.mp3`;
     audioLabel = `🎭 BSI नाट्यमय ऑडिओ • ${cleanBook} ${chNum}`;
-    console.log("[Audio Engine] Routing to Permanent GitHub CDN BSI Dramatic Audio:", audioUrl);
   }
 
   // Check if player is already loaded with the same track and was paused
@@ -4426,7 +4452,10 @@ async function playBsiDramatizedAudio(bookKey, chapterNum, resumeTime = null) {
 
   bibleChapterAudioPlayer._retried = false;
   bibleChapterAudioPlayer._wpFallback = isUsingWordProject;
-  bibleChapterAudioPlayer.src = audioUrl;
+  bibleChapterAudioPlayer.preload = "auto";
+  if (bibleChapterAudioPlayer.src !== audioUrl) {
+    bibleChapterAudioPlayer.src = audioUrl;
+  }
   bibleChapterAudioPlayer.playbackRate = audioState.speed || 1.0;
 
   if (targetTime > 0) {
