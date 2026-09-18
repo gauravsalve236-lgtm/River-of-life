@@ -3972,8 +3972,26 @@ window.submitPrayerRequest = function() {
 };
 
 window.readVODChapter = function() {
-  const { vod } = getCurrentVOD();
-  openReaderAndNavigate(vod.book, vod.chapter, vod.verse);
+  if (typeof closeFullscreenVOD === 'function') closeFullscreenVOD();
+  const { vod } = (typeof getCurrentVOD === 'function') ? getCurrentVOD() : { vod: null };
+  if (!vod) {
+    if (typeof switchTab === 'function') switchTab('reader');
+    return;
+  }
+  let book = vod.book || vod.bookKey || "john";
+  let ch = parseInt(vod.chapter, 10) || 1;
+  let v = parseInt(vod.verse, 10) || 1;
+
+  if (typeof openReaderAndNavigate === 'function') {
+    openReaderAndNavigate(book, ch, v);
+  } else if (typeof openReader === 'function') {
+    if (typeof switchTab === 'function') switchTab('reader');
+    openReader(book, ch);
+  }
+  if (typeof showToast === 'function') {
+    const isMarathi = (window.currentVodLanguage ? window.currentVodLanguage === 'mr' : state.translation !== "eng");
+    showToast(isMarathi ? `📖 अध्याय उघडत आहे: ${vod.ref || 'बायबल'}` : `📖 Opening Chapter: ${vod.engRef || vod.ref || 'Bible'}`);
+  }
 };
 
 function fallbackToDirectPlay(mp3Url) {
@@ -16784,6 +16802,74 @@ window.VOD_TYPOGRAPHY_STYLES = [
     textShadow: "none"
   },
   {
+    id: "pinterest-lake-cross",
+    icon: "✝️",
+    name: "सरोवर व क्रॉस (Lake Cross)",
+    shortName: "Lake Cross",
+    tag: "✝️ BE STRONG & COURAGEOUS • यहोशू १:९",
+    bgImage: "pinterest_lake_cross.jpg",
+    layoutMode: "lake-cross",
+    fontFamily: "'Outfit', 'Noto Sans Devanagari', sans-serif",
+    fontWeight: "800",
+    textColor: "#ffffff",
+    accentColor: "#ffffff",
+    quoteColor: "#ffffff",
+    lineHeight: "1.5",
+    letterSpacing: "0.2px",
+    textShadow: "0 3px 24px rgba(0,0,0,0.98)"
+  },
+  {
+    id: "pinterest-illuminated-tree",
+    icon: "🌳",
+    name: "तेजोमय वृक्ष (Emerald Tree)",
+    shortName: "Emerald Tree",
+    tag: "🌿 GOD'S LOVE • रोमन्स ५:८",
+    bgImage: "pinterest_illuminated_tree.jpg",
+    layoutMode: "illuminated-tree-glass",
+    fontFamily: "'Lora', 'Noto Serif Devanagari', serif",
+    fontWeight: "700",
+    textColor: "#ffffff",
+    accentColor: "#86efac",
+    quoteColor: "#86efac",
+    lineHeight: "1.58",
+    letterSpacing: "0.5px",
+    textShadow: "none"
+  },
+  {
+    id: "pinterest-lion-split",
+    icon: "🦁",
+    name: "यहूदाचा सिंह (Lion Split)",
+    shortName: "Lion Split",
+    tag: "🦁 LION OF JUDAH • सिंहासारखे धैर्य",
+    bgImage: "pinterest_lion_split.jpg",
+    layoutMode: "lion-split",
+    fontFamily: "'Outfit', 'Noto Sans Devanagari', sans-serif",
+    fontWeight: "900",
+    textColor: "#0f172a",
+    accentColor: "#f59e0b",
+    quoteColor: "#f59e0b",
+    lineHeight: "1.45",
+    letterSpacing: "0.3px",
+    textShadow: "none"
+  },
+  {
+    id: "pinterest-david-goliath",
+    icon: "🪨",
+    name: "दावीद व गल्याथ (David & Goliath)",
+    shortName: "David & Goliath",
+    tag: "⚔️ THE BATTLE IS THE LORD'S • १ शमुवेल १७:४७",
+    bgImage: "pinterest_david_goliath.jpg",
+    layoutMode: "slingshot-battle",
+    fontFamily: "'Lora', 'Noto Serif Devanagari', Georgia, serif",
+    fontWeight: "700",
+    textColor: "#ffffff",
+    accentColor: "#fde047",
+    quoteColor: "#fde047",
+    lineHeight: "1.55",
+    letterSpacing: "0.5px",
+    textShadow: "0 3px 24px rgba(0,0,0,0.98)"
+  },
+  {
     id: "golden-grace",
     icon: "✨",
     name: "सुवर्ण तेज (Classic Gold)",
@@ -16888,6 +16974,14 @@ window.selectVodTypographyTheme = async function(idx) {
 window.applyVodTypographyTheme = function(themeIdx) {
   if (typeof themeIdx === "number") {
     window.currentVodTypographyIndex = themeIdx % window.VOD_TYPOGRAPHY_STYLES.length;
+  } else if (typeof themeIdx === "string") {
+    const foundIdx = window.VOD_TYPOGRAPHY_STYLES.findIndex(t => 
+      t.id === themeIdx || 
+      t.layoutMode === themeIdx || 
+      t.id === `pinterest-${themeIdx}` ||
+      (t.shortName && t.shortName.toLowerCase() === themeIdx.toLowerCase())
+    );
+    if (foundIdx !== -1) window.currentVodTypographyIndex = foundIdx;
   }
   const theme = window.VOD_TYPOGRAPHY_STYLES[window.currentVodTypographyIndex || 0];
   if (!theme) return;
@@ -16980,7 +17074,46 @@ window.applyVodTypographyTheme = function(themeIdx) {
     themeNameLabel.textContent = theme.name;
   }
 
+  // Update language toggle button label in fullscreen modal
+  const langLabel = document.getElementById("fs-vod-lang-label");
+  const isMarathi = (window.currentVodLanguage ? window.currentVodLanguage === 'mr' : state.translation !== "eng");
+  if (langLabel) {
+    langLabel.textContent = isMarathi ? "मराठी MARVBSI" : "English NLT";
+  }
+
+  // Dynamic live high-res poster render into fullscreen modal
+  const liveImg = document.getElementById("fs-vod-live-poster-img");
+  if (liveImg && typeof generateExactVerseImageBlob === "function") {
+    generateExactVerseImageBlob('story').then((res) => {
+      if (res && res.dataUrl) {
+        liveImg.src = res.dataUrl;
+        liveImg.style.opacity = "1";
+        if (cardContainer) {
+          cardContainer.style.setProperty("display", "none", "important");
+        }
+      }
+    }).catch((e) => {
+      console.warn("Live poster render fallback:", e);
+      if (cardContainer) {
+        cardContainer.style.setProperty("display", "flex", "important");
+      }
+    });
+  }
+
   window.renderVodPinterestStrips();
+};
+
+window.toggleVodLanguage = function() {
+  const isMarathi = (window.currentVodLanguage ? window.currentVodLanguage === 'mr' : state.translation !== "eng");
+  window.currentVodLanguage = isMarathi ? 'en' : 'mr';
+  if (typeof showToast === "function") {
+    showToast(window.currentVodLanguage === 'en' ? "Language: English (NLT)" : "भाषा: मराठी (MARVBSI)");
+  }
+  const langLabel = document.getElementById("fs-vod-lang-label");
+  if (langLabel) {
+    langLabel.textContent = (window.currentVodLanguage === 'en') ? "English NLT" : "मराठी MARVBSI";
+  }
+  window.applyVodTypographyTheme();
 };
 
 window.cycleVodTypographyTheme = function(showFeedback = true) {
@@ -17138,9 +17271,9 @@ function drawCalligraphicFlourish(ctx, x, y, width, color) {
 window.generateExactVerseImageBlob = function(customRatio) {
   return new Promise(async (resolve) => {
     const { vod, dayOfYear, offset } = getCurrentVOD();
-    const isMarathi = state.translation !== "eng";
+    const isMarathi = (window.currentVodLanguage ? window.currentVodLanguage === 'mr' : state.translation !== "eng");
     const displayRef = isMarathi ? (vod.ref || vod.engRef) : (vod.engRef || vod.ref);
-    const displayText = isMarathi ? vod.text : vod.engText;
+    const displayText = isMarathi ? vod.text : (vod.engText || vod.text);
 
     const theme = (window.VOD_TYPOGRAPHY_STYLES && window.VOD_TYPOGRAPHY_STYLES[window.currentVodTypographyIndex || 0]) ? window.VOD_TYPOGRAPHY_STYLES[window.currentVodTypographyIndex || 0] : window.VOD_TYPOGRAPHY_STYLES[0];
 
@@ -17670,6 +17803,251 @@ window.generateExactVerseImageBlob = function(customRatio) {
       ctx.font = "800 22px 'Outfit', sans-serif";
       ctx.fillStyle = "#0369a1";
       ctx.fillText(`${displayRef} • ${isMarathi ? 'MARVBSI' : 'NLT'}`, startX + 16, startY + boxH - 24);
+
+    /* ==========================================================================
+       STYLE 9: EMERALD MOUNTAIN LAKE & CROSS (Joshua 1:9 Aesthetic)
+       ========================================================================== */
+    } else if (layoutMode === "lake-cross") {
+      // Vignette over water reflection to make text pop
+      const grad = ctx.createLinearGradient(0, canvas.height * 0.15, 0, canvas.height);
+      grad.addColorStop(0, 'rgba(6, 20, 24, 0)');
+      grad.addColorStop(0.3, 'rgba(6, 20, 24, 0.3)');
+      grad.addColorStop(0.65, 'rgba(4, 16, 20, 0.65)');
+      grad.addColorStop(1, 'rgba(2, 10, 14, 0.82)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, canvas.height * 0.15, canvas.width, canvas.height * 0.85);
+
+      let startY = Math.round(canvas.height * (ratio === 'story' ? 0.15 : 0.09));
+
+      // Draw Ornate White Latin Cross
+      const crossCenterX = Math.round(canvas.width / 2);
+      const crossW = 92;
+      const crossH = 144;
+      const barThick = 18;
+      const horizY = startY + Math.round(crossH * 0.35);
+
+      ctx.save();
+      ctx.shadowColor = "rgba(0,0,0,0.85)";
+      ctx.shadowBlur = 18;
+      ctx.fillStyle = "#ffffff";
+      ctx.strokeStyle = "rgba(0,0,0,0.4)";
+      ctx.lineWidth = 2;
+
+      // Vertical beam
+      ctx.fillRect(crossCenterX - Math.round(barThick / 2), startY, barThick, crossH);
+      ctx.strokeRect(crossCenterX - Math.round(barThick / 2), startY, barThick, crossH);
+      // Horizontal beam
+      ctx.fillRect(crossCenterX - Math.round(crossW / 2), horizY - Math.round(barThick / 2), crossW, barThick);
+      ctx.strokeRect(crossCenterX - Math.round(crossW / 2), horizY - Math.round(barThick / 2), crossW, barThick);
+      ctx.restore();
+
+      startY += crossH + 32;
+
+      // Scripture Reference Header in Bold Sans-Serif
+      ctx.direction = "ltr";
+      ctx.font = "800 36px 'Outfit', sans-serif";
+      ctx.fillStyle = "#ffffff";
+      ctx.shadowColor = "rgba(0,0,0,0.95)";
+      ctx.shadowBlur = 16;
+      const refStr = `${displayRef} • ${isMarathi ? 'MARVBSI' : 'NLT'}`;
+      const refW = ctx.measureText(refStr).width;
+      ctx.fillText(refStr, Math.round((canvas.width - refW) / 2), startY);
+      startY += 54;
+
+      // Verse Body in Bold Modern Sans
+      const maxW = (ratio === 'story') ? 880 : 920;
+      let fontSize = (ratio === 'story') ? (displayText.length > 120 ? 40 : 48) : (displayText.length > 120 ? 36 : 44);
+      const font = `800 ${fontSize}px ${isMarathi ? "'Noto Sans Devanagari', 'Poppins'" : "'Outfit', 'Poppins', sans-serif"}`;
+      const lines = wrapText(`"${displayText}"`, maxW, font);
+      const lineH = Math.round(fontSize * 1.5);
+
+      ctx.font = font;
+      ctx.fillStyle = "#ffffff";
+      ctx.shadowColor = "rgba(0,0,0,0.95)";
+      ctx.shadowBlur = 22;
+      for (let i = 0; i < lines.length; i++) {
+        const lineW = ctx.measureText(lines[i]).width;
+        ctx.fillText(lines[i], Math.round((canvas.width - lineW) / 2), startY + (i * lineH));
+      }
+
+    /* ==========================================================================
+       STYLE 10: ILLUMINATED TREE & FROSTED EMERALD GLASS CARD (Romans 5:8 Aesthetic)
+       ========================================================================== */
+    } else if (layoutMode === "illuminated-tree-glass") {
+      const cardW = canvas.width - 160;
+      const cardX = 80;
+
+      const maxW = cardW - 70;
+      let fontSize = (ratio === 'story') ? (displayText.length > 120 ? 36 : 42) : (displayText.length > 120 ? 32 : 38);
+      const font = `700 ${fontSize}px ${isMarathi ? "'Noto Serif Devanagari', serif" : "'Lora', Georgia, serif"}`;
+      const lines = wrapText(displayText, maxW, font);
+      const lineH = Math.round(fontSize * 1.54);
+      const cardH = (lines.length * lineH) + 170;
+      const cardY = Math.round(canvas.height * (ratio === 'story' ? 0.52 : 0.44));
+
+      // Frosted Emerald Dark Glass Card Container
+      ctx.save();
+      ctx.fillStyle = "rgba(12, 38, 22, 0.76)";
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.22)";
+      ctx.lineWidth = 1.8;
+      ctx.shadowColor = "rgba(0, 0, 0, 0.75)";
+      ctx.shadowBlur = 32;
+      ctx.beginPath();
+      if (typeof ctx.roundRect === 'function') ctx.roundRect(cardX, cardY, cardW, cardH, 26);
+      else ctx.rect(cardX, cardY, cardW, cardH);
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+
+      let startY = cardY + 54;
+
+      // Card Header: Reference
+      ctx.direction = "ltr";
+      ctx.font = "700 36px 'Lora', 'Playfair Display', Georgia, serif";
+      ctx.fillStyle = "#ffffff";
+      ctx.shadowColor = "rgba(0,0,0,0.6)";
+      ctx.shadowBlur = 10;
+      const refStr = `${displayRef} • ${isMarathi ? 'MARVBSI' : 'NLT'}`;
+      const refW = ctx.measureText(refStr).width;
+      ctx.fillText(refStr, Math.round((canvas.width - refW) / 2), startY);
+      startY += 36;
+
+      // Divider Line inside card
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.25)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(cardX + 28, startY);
+      ctx.lineTo(cardX + cardW - 28, startY);
+      ctx.stroke();
+      startY += 48;
+
+      // Verse Body in Card
+      ctx.font = font;
+      ctx.fillStyle = "rgba(255, 255, 255, 0.96)";
+      ctx.shadowBlur = 12;
+      for (let i = 0; i < lines.length; i++) {
+        const lineW = ctx.measureText(lines[i]).width;
+        ctx.fillText(lines[i], Math.round((canvas.width - lineW) / 2), startY + (i * lineH));
+      }
+
+    /* ==========================================================================
+       STYLE 11: LION OF JUDAH SPLIT-SCREEN (Psalm 82:6 Aesthetic)
+       ========================================================================== */
+    } else if (layoutMode === "lion-split") {
+      const splitX = Math.round(canvas.width * 0.52);
+
+      // White right canvas
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(splitX, 0, canvas.width - splitX, canvas.height);
+
+      // Redraw lion cleanly only on the left side
+      if (bgImg) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(0, 0, splitX, canvas.height);
+        ctx.clip();
+        const scale = Math.max(canvas.width / bgImg.width, canvas.height / bgImg.height);
+        const bx = (canvas.width - bgImg.width * scale) / 2;
+        const by = (canvas.height - bgImg.height * scale) / 2;
+        ctx.drawImage(bgImg, bx, by, bgImg.width * scale, bgImg.height * scale);
+        ctx.restore();
+      }
+
+      // Vertical Seam
+      ctx.strokeStyle = "rgba(0,0,0,0.12)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(splitX, 0);
+      ctx.lineTo(splitX, canvas.height);
+      ctx.stroke();
+
+      // Right-side High-Impact Typography
+      const rightX = splitX + 36;
+      const rightW = canvas.width - rightX - 36;
+
+      let startY = Math.round(canvas.height * (ratio === 'story' ? 0.22 : 0.18));
+
+      // Huge Impact Headline
+      ctx.direction = "ltr";
+      ctx.font = "900 84px 'Outfit', sans-serif";
+      ctx.fillStyle = "#0f172a";
+      ctx.shadowBlur = 0;
+      const leadWord = isMarathi ? "धैर्यवान." : "BE BOLD.";
+      ctx.fillText(leadWord, rightX, startY);
+      startY += 78;
+
+      ctx.font = "800 24px 'Outfit', sans-serif";
+      ctx.fillStyle = "#d97706";
+      ctx.fillText(isMarathi ? "✦ सिंहासारखे ख्रिस्तामध्ये ✦" : "✦ AS BOLD AS A LION ✦", rightX, startY);
+      startY += 40;
+
+      // Divider line
+      ctx.strokeStyle = "rgba(15, 23, 42, 0.18)";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(rightX, startY);
+      ctx.lineTo(rightX + rightW, startY);
+      ctx.stroke();
+      startY += 40;
+
+      // Verse Body on white right
+      const font = `700 36px ${isMarathi ? "'Noto Sans Devanagari', 'Poppins'" : "'Outfit', sans-serif"}`;
+      const lines = wrapText(displayText, rightW, font);
+      const lineH = 54;
+      ctx.font = font;
+      ctx.fillStyle = "#1e293b";
+      for (let i = 0; i < lines.length; i++) {
+        ctx.fillText(lines[i], rightX, startY + (i * lineH));
+      }
+      startY += (lines.length * lineH) + 32;
+
+      // Reference on Lion side bottom-left
+      ctx.font = "800 28px 'Outfit', sans-serif";
+      ctx.fillStyle = "#ffffff";
+      ctx.shadowColor = "rgba(0,0,0,0.95)";
+      ctx.shadowBlur = 16;
+      ctx.fillText(`${displayRef} • ${isMarathi ? 'MARVBSI' : 'NLT'}`, 48, canvas.height - (ratio === 'story' ? 240 : 160));
+
+    /* ==========================================================================
+       STYLE 12: DAVID & GOLIATH CINEMATIC SLINGSHOT (1 Samuel 17:47 Aesthetic)
+       ========================================================================== */
+    } else if (layoutMode === "slingshot-battle") {
+      let startY = Math.round(canvas.height * (ratio === 'story' ? 0.44 : 0.38));
+
+      ctx.direction = "ltr";
+      // Cinematic Key Phrase above sling cords
+      ctx.font = "700 50px 'Lora', 'Playfair Display', Georgia, serif";
+      ctx.fillStyle = "#ffffff";
+      ctx.shadowColor = "rgba(0,0,0,0.95)";
+      ctx.shadowBlur = 24;
+      const keyPhrase = isMarathi ? "लढाई परमेश्वराची आहे." : "The battle is the Lord's.";
+      const phraseW = ctx.measureText(keyPhrase).width;
+      ctx.fillText(keyPhrase, Math.round((canvas.width - phraseW) / 2), startY);
+      startY += 48;
+
+      // Scripture Verse Body
+      const maxW = 900;
+      let fontSize = (ratio === 'story') ? 40 : 36;
+      const font = `700 ${fontSize}px ${isMarathi ? "'Noto Serif Devanagari', serif" : "'Lora', Georgia, serif"}`;
+      const lines = wrapText(displayText, maxW, font);
+      const lineH = Math.round(fontSize * 1.54);
+
+      ctx.font = font;
+      ctx.fillStyle = "#f8fafc";
+      ctx.shadowBlur = 26;
+      for (let i = 0; i < lines.length; i++) {
+        const lineW = ctx.measureText(lines[i]).width;
+        ctx.fillText(lines[i], Math.round((canvas.width - lineW) / 2), startY + (i * lineH));
+      }
+      startY += (lines.length * lineH) + 32;
+
+      // Reference in Glowing Amber Gold
+      ctx.font = "800 30px 'Outfit', sans-serif";
+      ctx.fillStyle = "#fde047";
+      ctx.shadowBlur = 18;
+      const refStr = `${displayRef} • ${isMarathi ? 'MARVBSI' : 'NLT'}`;
+      const refW = ctx.measureText(refStr).width;
+      ctx.fillText(refStr, Math.round((canvas.width - refW) / 2), startY);
 
     /* ==========================================================================
        DEFAULT: CENTERED PREMIUM CARD

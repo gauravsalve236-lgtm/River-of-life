@@ -16949,7 +16949,7 @@ body:has(#view-reader.active) .mobile-bottom-tabs {
 /* Fullscreen Studio Generator Center Alignment */
 .fullscreen-vod-text-overlay,
 #fs-vod-card-container {
-  display: flex !important;
+  display: flex;
   flex-direction: column !important;
   align-items: center !important;
   justify-content: center !important;
