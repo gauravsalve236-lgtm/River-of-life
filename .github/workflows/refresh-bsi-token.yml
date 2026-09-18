@@ -31,5 +31,5 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add assets/bsi_token.json docs/assets/bsi_token.json app.js docs/app.js .bsi_token.json android-studio-app/app/src/main/assets/assets/bsi_token.json android-studio-app/app/src/main/assets/app.js
+          git add assets/bsi_token.json docs/assets/bsi_token.json app.js docs/app.js android-studio-app/app/src/main/assets/assets/bsi_token.json android-studio-app/app/src/main/assets/app.js
           git diff --staged --quiet || (git commit -m "chore(audio): auto-refresh BSI CloudFront token [skip ci]" && git push origin main)

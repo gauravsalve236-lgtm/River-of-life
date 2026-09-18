@@ -4336,33 +4336,30 @@ async function playBsiDramatizedAudio(bookKey, chapterNum, resumeTime = null) {
     userEnginePref = localStorage.getItem("rol_audio_engine") || "auto";
   } catch(e) {}
 
+  // BSI audio is now local/static-first. This avoids the expiring CloudFront token
+  // for downloaded assets and also removes the dependency on the non-existent
+  // /api/bsi-audio-stream local endpoint.
   let token = null;
-  if (userEnginePref !== 'wordproject') {
-    token = await getBsiCloudFrontToken();
-  }
-
   let audioUrl = "";
   let audioLabel = "";
   let isUsingWordProject = false;
+  let isUsingLocalBsi = false;
 
-  const isLocalDevHost = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+  const bsiStaticBase = String(window.BSI_AUDIO_BASE || "assets/audio/bsi").replace(/\\/+$/, "");
+  const localBsiUrl = `${bsiStaticBase}/${usfm}_${chStr}.mp3`;
 
-  // Zero-Failure Decision:
-  // 1. If running locally and BSI is chosen, use the local proxy which serves directly from downloaded assets/audio/bsi/
-  if (isLocalDevHost && userEnginePref !== 'wordproject') {
-    audioUrl = `/api/bsi-audio-stream?book=${cleanBook}&chapter=${chNum}`;
-    audioLabel = `🎭 BSI नाट्यमय ऑडिओ (स्थानिक) • ${cleanBook} ${chNum}`;
-  } else if (userEnginePref === 'wordproject' || !token) {
+  if (userEnginePref === 'wordproject') {
     audioUrl = wpUrl;
     audioLabel = `🎙️ अस्सल मराठी ऑडिओ • ${cleanBook} ${chNum}`;
     isUsingWordProject = true;
-    console.log("[Audio Engine] Routing directly to Permanent Authentic Marathi Human Audio:", audioUrl);
-    if (!token && userEnginePref !== 'wordproject') {
-      showToast("🎙️ अस्सल मराठी मानवी ऑडिओ सुरू केला आहे (कायमस्वरूपी) 🙏");
-    }
+    console.log("[Audio Engine] Using WordProject Marathi audio:", audioUrl);
   } else {
-    audioUrl = `https://d1hkpuz2o5a2xw.cloudfront.net/source/555476c2390c102d-04/${usfm}_${chStr}.mp3?${token}`;
+    // Try the bundled/static BSI MP3 first. If it is unavailable, the error handler
+    // below will fall back to CloudFront with a fresh token, then WordProject.
+    audioUrl = localBsiUrl;
     audioLabel = `🎭 BSI नाट्यमय ऑडिओ • ${cleanBook} ${chNum}`;
+    isUsingLocalBsi = true;
+    console.log("[Audio Engine] Using static/local BSI audio:", audioUrl);
   }
 
   // Check if player is already loaded with the same track and was paused
@@ -4408,6 +4405,8 @@ async function playBsiDramatizedAudio(bookKey, chapterNum, resumeTime = null) {
   window.audioPlaybackState.isPaused = false;
 
   bibleChapterAudioPlayer._retried = false;
+  bibleChapterAudioPlayer._retriedLocalBsi = false;
+  bibleChapterAudioPlayer._retriedFreshToken = false;
   bibleChapterAudioPlayer._wpFallback = isUsingWordProject;
   bibleChapterAudioPlayer.src = audioUrl;
   bibleChapterAudioPlayer.playbackRate = audioState.speed || 1.0;
@@ -4477,8 +4476,33 @@ async function playBsiDramatizedAudio(bookKey, chapterNum, resumeTime = null) {
 
   bibleChapterAudioPlayer.onerror = async function(e) {
     console.warn("[Audio Engine] Player error on URL:", bibleChapterAudioPlayer.src, e);
+
+    // 1. If the static/local BSI file is unavailable, fall back to live CloudFront BSI.
+    if (isUsingLocalBsi && !bibleChapterAudioPlayer._retriedLocalBsi) {
+      bibleChapterAudioPlayer._retriedLocalBsi = true;
+      console.log("[Audio Engine] Static BSI file unavailable. Falling back to live CloudFront BSI...");
+      try {
+        const liveToken = await getBsiCloudFrontToken(true);
+        if (liveToken) {
+          const liveUrl = `https://d1hkpuz2o5a2xw.cloudfront.net/source/555476c2390c102d-04/${usfm}_${chStr}.mp3?${liveToken}`;
+          isUsingLocalBsi = false;
+          bibleChapterAudioPlayer._retriedFreshToken = true;
+          bibleChapterAudioPlayer.src = liveUrl;
+          if (targetTime > 0) {
+            bibleChapterAudioPlayer.currentTime = targetTime;
+          }
+          await bibleChapterAudioPlayer.play();
+          audioState.isPlaying = true;
+          isBibleChapterPlaying = true;
+          updateReaderPlayState(true);
+          return;
+        }
+      } catch (localFallbackErr) {
+        console.warn("[Audio Engine] Live BSI fallback after static audio failure:", localFallbackErr);
+      }
+    }
     
-    // 1. If playback failed on a CloudFront URL, the token may have expired. Try instant force refresh!
+    // 2. If playback failed on a CloudFront URL, the token may have expired. Try instant force refresh!
     if (bibleChapterAudioPlayer.src && bibleChapterAudioPlayer.src.includes('cloudfront.net') && !bibleChapterAudioPlayer._retriedFreshToken) {
       bibleChapterAudioPlayer._retriedFreshToken = true;
       console.log("[Audio Engine] BSI CloudFront token expired or rejected. Attempting instant token refresh...");
@@ -4528,6 +4552,29 @@ async function playBsiDramatizedAudio(bookKey, chapterNum, resumeTime = null) {
     await bibleChapterAudioPlayer.play();
   } catch(err) {
     console.warn("[Audio Engine] Initial play warning:", err);
+
+    // If the static/local BSI asset could not start, try live BSI once before
+    // falling back to the permanent WordProject Marathi recording.
+    if (isUsingLocalBsi && !bibleChapterAudioPlayer._retriedLocalBsi) {
+      bibleChapterAudioPlayer._retriedLocalBsi = true;
+      try {
+        const liveToken = await getBsiCloudFrontToken(true);
+        if (liveToken) {
+          const liveUrl = `https://d1hkpuz2o5a2xw.cloudfront.net/source/555476c2390c102d-04/${usfm}_${chStr}.mp3?${liveToken}`;
+          isUsingLocalBsi = false;
+          bibleChapterAudioPlayer._retriedFreshToken = true;
+          bibleChapterAudioPlayer.src = liveUrl;
+          if (targetTime > 0) {
+            bibleChapterAudioPlayer.currentTime = targetTime;
+          }
+          await bibleChapterAudioPlayer.play();
+          return;
+        }
+      } catch (localStartErr) {
+        console.warn("[Audio Engine] Live BSI fallback after local start failure:", localStartErr);
+      }
+    }
+
     // If browser threw autoplay error or URL was rejected, attempt instant WordProject fallback
     if (!bibleChapterAudioPlayer._wpFallback && bibleChapterAudioPlayer.src !== wpUrl) {
       bibleChapterAudioPlayer._wpFallback = true;
