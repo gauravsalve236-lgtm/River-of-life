@@ -18729,6 +18729,10 @@ window.openWidgetGuideModal = function() {
     }
   }
   updateWidgetLivePreview();
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if (typeof switchWidgetGuideOS === "function") {
+    switchWidgetGuideOS(isIOS ? "ios" : "android");
+  }
 };
 
 window.closeWidgetGuideModal = function() {
@@ -18853,6 +18857,12 @@ window.pinDailyVerseWidget = function() {
     } catch (e) {
       console.warn("Failed to pin widget natively:", e);
     }
+  }
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if (isIOS) {
+    if (typeof switchWidgetGuideOS === 'function') switchWidgetGuideOS('ios');
+    showToast("🍎 iPhone वर: होम स्क्रीनवर २ सेकंद दाबून धरा आणि '+' चिन्हावर टॅप करून River of Life विजेट जोडा!");
+    return;
   }
   // Fallback for browsers / web: Guide user
   showToast("📌 होम स्क्रीनवर रिकाम्या जागी २ सेकंद दाबून धरा आणि 'Widgets' मधून 'River of Life Daily Verse' निवडा!");
