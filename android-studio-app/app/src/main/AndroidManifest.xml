@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.riveroflife.bible">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- Hardware Permissions for WebRTC Video Meetings & Audio -->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -9,6 +8,12 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+
+    <!-- Notification & Alarm Permissions -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <!-- Hardware Features -->
     <uses-feature android:name="android.hardware.camera" android:required="false" />
@@ -46,6 +51,21 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/verse_widget_info" />
+        </receiver>
+
+        <!-- Daily 7:00 AM Morning Bible Verse Notification Receiver -->
+        <receiver
+            android:name=".DailyVerseNotificationReceiver"
+            android:exported="false" />
+
+        <!-- Auto-reschedule alarm on device reboot -->
+        <receiver
+            android:name=".BootReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+            </intent-filter>
         </receiver>
 
     </application>

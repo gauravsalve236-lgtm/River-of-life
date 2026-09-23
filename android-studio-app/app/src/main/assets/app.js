@@ -1685,9 +1685,13 @@ function applyStylesFromState() {
     // Greeting
     const greetingEl = document.getElementById("home-greeting-user");
     if (greetingEl) {
-      const userName = (state && state.userName) ? state.userName : "Gaurav";
+      const currentUserObj = (typeof state !== 'undefined' && state) ? (state.currentUser || state.user) : null;
+      let userName = (typeof state !== 'undefined' && state && state.userName) ? state.userName : (currentUserObj?.displayName || currentUserObj?.username || currentUserObj?.fullName || "");
+      if (!userName) {
+        userName = localStorage.getItem("rol_user_name") || localStorage.getItem("river_of_life_username") || "";
+      }
       const greetingWord = dict[getGreetingTimeKey()] || (currentLang === "en" ? "Good afternoon" : "शुभ दुपार");
-      greetingEl.textContent = `${greetingWord}, ${userName}`;
+      greetingEl.textContent = userName ? `${greetingWord}, ${userName} 👋` : `${greetingWord} 👋`;
     }
     
     // Search Bar
@@ -3080,13 +3084,13 @@ function renderDailyDevotion() {
   if (!userName) {
     const savedName = localStorage.getItem("rol_user_name") || localStorage.getItem("river_of_life_username");
     if (savedName) userName = savedName;
-    else userName = "Gaurav";
+    else userName = "";
   }
   
   const userEl = document.getElementById("home-greeting-user");
   const userSubEl = document.getElementById("home-greeting-subtext");
   if (userEl) {
-    userEl.textContent = `${greetingTimeEn}, ${userName} 👋`;
+    userEl.textContent = userName ? `${greetingTimeEn}, ${userName} 👋` : `${greetingTimeEn} 👋`;
   }
   if (userSubEl) {
     userSubEl.textContent = isEng ? "Take a moment with God today." : "आज देवाच्या सान्निध्यात थोडा वेळ घालवा.";
@@ -3099,7 +3103,7 @@ function renderDailyDevotion() {
   
   const homeVodRefEl = document.getElementById("home-vod-ref");
   if (homeVodRefEl) {
-    homeVodRefEl.textContent = `${displayRef} ${isEng ? "NLT" : "MARVBSI"}`;
+    homeVodRefEl.textContent = displayRef;
   }
   const homeVodRefEnEl = document.getElementById("home-vod-ref-en");
   const homeVodRefMrEl = document.getElementById("home-vod-ref-mr");
@@ -3125,10 +3129,12 @@ function renderDailyDevotion() {
   }
   
   const fsVodRefEl = document.getElementById("fs-vod-ref");
-  if (fsVodRefEl) fsVodRefEl.textContent = `${displayRef} ${state.translation === "eng" ? "NLT" : "MARVBSI"}`;
+  if (fsVodRefEl) fsVodRefEl.textContent = displayRef;
+  const fsRefBadge = document.getElementById("fs-vod-ref-badge");
+  if (fsRefBadge) fsRefBadge.textContent = displayRef;
   
   const fsVodTextEl = document.getElementById("fs-vod-text");
-  if (fsVodTextEl) fsVodTextEl.textContent = `"${displayText}"`;
+  if (fsVodTextEl) fsVodTextEl.textContent = displayText;
   
   // Expanded Luminous Rotating Scenic Wallpapers from assets/daily_verses/
   const images = (window.dailyVersesImageList && window.dailyVersesImageList.length > 0) ? window.dailyVersesImageList : [
@@ -6105,7 +6111,7 @@ function renderYouProfile() {
   
   const profileNameEl = document.getElementById("profile-user-name");
   if (profileNameEl) {
-    profileNameEl.textContent = state.currentUser.fullName || state.currentUser.username || "Gaurav Salve";
+    profileNameEl.textContent = state.currentUser.fullName || state.currentUser.username || "Guest User";
   }
   
   const pastorBadge = document.getElementById("profile-pastor-badge");
@@ -10826,7 +10832,7 @@ function updateAuthUI() {
     if (loggedOutCont) loggedOutCont.style.display = "none";
     if (loggedInCont) loggedInCont.style.display = "block";
     const pName = document.getElementById("profile-user-name");
-    if (pName) pName.textContent = state.currentUser.fullName || state.currentUser.username || "Gaurav Salve";
+    if (pName) pName.textContent = state.currentUser.fullName || state.currentUser.username || "Guest User";
   } else {
     // Logged Out State
     if (headerIconLoggedOut) headerIconLoggedOut.style.display = "block";
@@ -10869,11 +10875,11 @@ function updateAuthUI() {
   if (!userName) {
     const savedName = localStorage.getItem("rol_user_name") || localStorage.getItem("river_of_life_username");
     if (savedName) userName = savedName;
-    else userName = "Gaurav";
+    else userName = "";
   }
   const userEl = document.getElementById("home-greeting-user");
   if (userEl) {
-    userEl.textContent = `${greetingTimeEn}, ${userName}`;
+    userEl.textContent = userName ? `${greetingTimeEn}, ${userName} 👋` : `${greetingTimeEn} 👋`;
   }
 
   // Synchronize all top-right header and drawer avatars including photo
@@ -14830,7 +14836,14 @@ window.submitPastoralPrayerRequest = function(e) {
    ========================================================================== */
 
 window.dailyVersesImageList = [
-  'sunrise.png', 'forest.png', 'mountains.png', 'ocean.png', 'path.png', 'stars.png', 'mist.png'
+  'pinterest_alpine_mountain.jpg', 'peaceful_pastures.png', 'golden_dawn.png', 'pinterest_lake_cross.jpg',
+  'pinterest_golden_path.jpg', 'misty_mountains.jpg', 'calm_waters.png', 'pinterest_forest_sunset.jpg',
+  'pinterest_good_shepherd.jpg', 'freedom_field.jpg', 'pinterest_light_of_world.jpg', 'mount_zion.png',
+  'joy_rain.jpg', 'pinterest_illuminated_tree.jpg', 'river_of_life.png', 'sunrise.png',
+  'pinterest_jesus_road.jpg', 'healing_light.png', 'mountains.png', 'pinterest_david_goliath.jpg',
+  'ocean.png', 'wisdom_guidance.png', 'stars.png', 'forest.png', 'family_blessing.png',
+  'path.png', 'peace_anxiety.png', 'mist.png', 'candlelight.png', 'pinterest_watercolor_red_sea.jpg',
+  'pinterest_lion_split.jpg', 'pinterest_boarding_pass.jpg'
 ];
 window.currentVodImageIndex = 0;
 let vodAutoRotateTimer = null;
@@ -17083,31 +17096,18 @@ window.applyVodTypographyTheme = function(themeIdx) {
 
   const cardContainer = document.getElementById("fs-vod-card-container");
   if (cardContainer) {
+    cardContainer.style.setProperty("display", "flex", "important");
     cardContainer.style.background = "transparent";
     cardContainer.style.border = "none";
     cardContainer.style.boxShadow = "none";
     cardContainer.style.backdropFilter = "none";
     cardContainer.style.webkitBackdropFilter = "none";
 
-    // Adaptive vertical centering based on Pinterest theme visual zones
+    // Dynamic optical centering based on theme visual composition
     if (theme.layoutMode === "watercolor-pill") {
-      cardContainer.style.top = "38%";
-      cardContainer.style.left = "50%";
-    } else if (theme.layoutMode === "flourish-swash" || theme.layoutMode === "flourish-path") {
-      cardContainer.style.top = "60%";
-      cardContainer.style.left = "50%";
-    } else if (theme.layoutMode === "heavenly-beam") {
-      cardContainer.style.top = "42%";
-      cardContainer.style.left = "54%";
-    } else if (theme.layoutMode === "shepherd-diagonal") {
-      cardContainer.style.top = "54%";
-      cardContainer.style.left = "50%";
-    } else if (theme.layoutMode === "boarding-pass") {
-      cardContainer.style.top = "48%";
-      cardContainer.style.left = "55%";
+      cardContainer.style.top = "calc(45% - 20px)";
     } else {
-      cardContainer.style.top = "48%";
-      cardContainer.style.left = "50%";
+      cardContainer.style.top = "calc(50% - 25px)";
     }
   }
 
@@ -17120,6 +17120,16 @@ window.applyVodTypographyTheme = function(themeIdx) {
     if (thumbImg) thumbImg.src = imgUrl;
   }
 
+  // Atmospheric contrast gradient overlay
+  const gradEl = document.getElementById("fs-vod-overlay-gradient");
+  if (gradEl) {
+    if (theme.layoutMode === "watercolor-pill") {
+      gradEl.style.background = "linear-gradient(180deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.06) 35%, rgba(15,23,42,0.48) 75%, rgba(15,23,42,0.92) 100%)";
+    } else {
+      gradEl.style.background = "linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.18) 30%, rgba(0,0,0,0.45) 65%, rgba(0,0,0,0.92) 100%)";
+    }
+  }
+
   const textEl = document.getElementById("fs-vod-text");
   if (textEl) {
     textEl.style.fontFamily = theme.fontFamily;
@@ -17130,39 +17140,67 @@ window.applyVodTypographyTheme = function(themeIdx) {
     textEl.style.letterSpacing = theme.letterSpacing || "normal";
   }
 
+  // Quote mark styling & visibility
   const quoteEl = document.getElementById("fs-vod-quote-mark");
   if (quoteEl) {
-    quoteEl.style.color = theme.quoteColor;
+    if (theme.layoutMode === "watercolor-pill" || theme.layoutMode === "flourish-swash" || theme.layoutMode === "flourish-path") {
+      quoteEl.style.display = "none";
+    } else {
+      quoteEl.style.display = "block";
+      quoteEl.style.color = theme.quoteColor || theme.accentColor || "#fbbf24";
+    }
+  }
+
+  // Calligraphic flourish swash under verse body
+  const swashEl = document.getElementById("fs-vod-flourish-swash");
+  if (swashEl) {
+    if (theme.layoutMode === "flourish-swash" || theme.layoutMode === "flourish-path") {
+      swashEl.style.display = "block";
+      swashEl.style.color = theme.accentColor || "#fbbf24";
+      const paths = swashEl.querySelectorAll("path, circle");
+      paths.forEach(p => {
+        if (p.tagName.toLowerCase() === 'path') p.setAttribute("stroke", theme.accentColor || "#fbbf24");
+        if (p.tagName.toLowerCase() === 'circle') p.setAttribute("fill", theme.accentColor || "#fbbf24");
+      });
+    } else {
+      swashEl.style.display = "none";
+    }
   }
 
   const refBadge = document.getElementById("fs-vod-ref-badge");
+  const lineLeft = document.getElementById("fs-vod-accent-line-left");
+  const lineRight = document.getElementById("fs-vod-accent-line-right");
   if (refBadge) {
     if (theme.layoutMode === "watercolor-pill") {
       refBadge.style.color = "#ffffff";
       refBadge.style.background = "#0e7490";
-      refBadge.style.padding = "5px 16px";
+      refBadge.style.padding = "6px 18px";
       refBadge.style.borderRadius = "20px";
-      refBadge.style.boxShadow = "0 3px 12px rgba(14,116,144,0.4)";
+      refBadge.style.boxShadow = "0 3px 14px rgba(14,116,144,0.45)";
+      if (lineLeft) lineLeft.style.display = "none";
+      if (lineRight) lineRight.style.display = "none";
     } else {
-      refBadge.style.color = theme.accentColor;
+      refBadge.style.color = theme.accentColor || "#fbbf24";
       refBadge.style.background = "transparent";
       refBadge.style.padding = "0";
       refBadge.style.borderRadius = "0";
       refBadge.style.boxShadow = "none";
+      if (lineLeft) {
+        lineLeft.style.display = "block";
+        lineLeft.style.background = theme.accentColor || "#fbbf24";
+      }
+      if (lineRight) {
+        lineRight.style.display = "block";
+        lineRight.style.background = theme.accentColor || "#fbbf24";
+      }
     }
   }
 
   const badgePill = document.getElementById("fs-vod-badge-pill");
   if (badgePill) {
-    badgePill.style.color = theme.accentColor;
+    badgePill.style.color = theme.accentColor || "#fbbf24";
     if (theme.tag) badgePill.textContent = theme.tag;
   }
-
-  const lineLeft = document.getElementById("fs-vod-accent-line-left");
-  if (lineLeft) lineLeft.style.background = theme.accentColor;
-
-  const lineRight = document.getElementById("fs-vod-accent-line-right");
-  if (lineRight) lineRight.style.background = theme.accentColor;
 
   const themeNameLabel = document.getElementById("fs-vod-theme-name");
   if (themeNameLabel) {
@@ -17176,23 +17214,15 @@ window.applyVodTypographyTheme = function(themeIdx) {
     langLabel.textContent = isMarathi ? "मराठी MARVBSI" : "English NLT";
   }
 
-  // Dynamic live high-res poster render into fullscreen modal
+  // Hide live poster container if still lingering
   const liveImg = document.getElementById("fs-vod-live-poster-img");
-  if (liveImg && typeof generateExactVerseImageBlob === "function") {
-    generateExactVerseImageBlob('story').then((res) => {
-      if (res && res.dataUrl) {
-        liveImg.src = res.dataUrl;
-        liveImg.style.opacity = "1";
-        if (cardContainer) {
-          cardContainer.style.setProperty("display", "none", "important");
-        }
-      }
-    }).catch((e) => {
-      console.warn("Live poster render fallback:", e);
-      if (cardContainer) {
-        cardContainer.style.setProperty("display", "flex", "important");
-      }
-    });
+  if (liveImg) {
+    liveImg.src = "";
+    liveImg.style.display = "none";
+  }
+  const liveContainer = document.getElementById("fs-vod-live-poster-container");
+  if (liveContainer) {
+    liveContainer.style.display = "none";
   }
 
   window.renderVodPinterestStrips();
@@ -17208,6 +17238,19 @@ window.toggleVodLanguage = function() {
   if (langLabel) {
     langLabel.textContent = (window.currentVodLanguage === 'en') ? "English NLT" : "मराठी MARVBSI";
   }
+
+  // Refresh current VOD text & reference in the live overlay
+  const { vod } = getCurrentVOD();
+  const isNowMarathi = (window.currentVodLanguage === 'mr');
+  const displayRef = isNowMarathi ? (vod.ref || vod.engRef) : (vod.engRef || vod.ref);
+  const displayText = isNowMarathi ? vod.text : (vod.engText || vod.text);
+
+  const fsTextEl = document.getElementById("fs-vod-text");
+  if (fsTextEl) fsTextEl.textContent = displayText;
+
+  const fsRefBadge = document.getElementById("fs-vod-ref-badge");
+  if (fsRefBadge) fsRefBadge.textContent = displayRef;
+
   window.applyVodTypographyTheme();
 };
 
@@ -17232,17 +17275,18 @@ window.openFullscreenVOD = function() {
   
   // Refresh current VOD text & image
   const { vod, dayOfYear, offset } = getCurrentVOD();
-  const displayRef = (state.translation === "eng") ? vod.engRef : vod.ref;
-  const displayText = (state.translation === "eng") ? vod.engText : vod.text;
+  const isMarathi = (window.currentVodLanguage ? window.currentVodLanguage === 'mr' : state.translation !== "eng");
+  const displayRef = isMarathi ? (vod.ref || vod.engRef) : (vod.engRef || vod.ref);
+  const displayText = isMarathi ? vod.text : (vod.engText || vod.text);
 
   const fsTextEl = document.getElementById("fs-vod-text");
   if (fsTextEl) fsTextEl.textContent = displayText;
 
   const fsRefEl = document.getElementById("fs-vod-ref");
-  if (fsRefEl) fsRefEl.textContent = `${displayRef} ${state.translation === "eng" ? "NLT" : "MARVBSI"}`;
+  if (fsRefEl) fsRefEl.textContent = displayRef;
 
   const fsRefBadge = document.getElementById("fs-vod-ref-badge");
-  if (fsRefBadge) fsRefBadge.textContent = `${displayRef} ${state.translation === "eng" ? "NLT" : "MARVBSI"}`;
+  if (fsRefBadge) fsRefBadge.textContent = displayRef;
 
   const images = (window.dailyVersesImageList && window.dailyVersesImageList.length > 0) ? window.dailyVersesImageList : [
     'pinterest_alpine_mountain.jpg', 'pinterest_watercolor_red_sea.jpg', 'pinterest_forest_sunset.jpg',
@@ -17516,7 +17560,7 @@ window.generateExactVerseImageBlob = function(customRatio) {
       // Scripture Reference
       ctx.font = "800 29px 'Outfit', -apple-system, sans-serif";
       ctx.fillStyle = "#fbbf24";
-      const refStr = `${displayRef} • ${isMarathi ? 'MARVBSI' : 'NLT'}`;
+      const refStr = displayRef;
       const refW = ctx.measureText(refStr).width;
       ctx.fillText(refStr, Math.round((canvas.width - refW) / 2), startY);
 
@@ -17554,7 +17598,7 @@ window.generateExactVerseImageBlob = function(customRatio) {
       startY += (lines.length * lineH) + 38;
 
       // Solid Teal/Navy Pill Reference Badge
-      const refStr = `${displayRef} • ${isMarathi ? 'MARVBSI' : 'NLT'}`;
+      const refStr = displayRef;
       ctx.font = "800 24px 'Outfit', sans-serif";
       const pillTextW = ctx.measureText(refStr).width;
       const pillW = pillTextW + 48;
@@ -17620,7 +17664,7 @@ window.generateExactVerseImageBlob = function(customRatio) {
       ctx.fillStyle = "#fbbf24";
       ctx.shadowColor = "rgba(0,0,0,0.95)";
       ctx.shadowBlur = 16;
-      ctx.fillText(`${displayRef} • ${isMarathi ? 'MARVBSI' : 'NLT'}`, rightX, startY);
+      ctx.fillText(displayRef, rightX, startY);
       startY += 48;
 
       // Verse Body
@@ -17676,7 +17720,7 @@ window.generateExactVerseImageBlob = function(customRatio) {
 
       ctx.font = "800 30px 'Outfit', sans-serif";
       ctx.fillStyle = "#facc15";
-      const refStr = `${displayRef} • ${isMarathi ? 'MARVBSI' : 'NLT'}`;
+      const refStr = displayRef;
       const refW = ctx.measureText(refStr).width;
       ctx.fillText(refStr, Math.round((canvas.width - refW) / 2), startY);
 
@@ -17724,7 +17768,7 @@ window.generateExactVerseImageBlob = function(customRatio) {
 
       ctx.font = "800 28px 'Outfit', sans-serif";
       ctx.fillStyle = "#fef08a";
-      const refStr = `${displayRef} • ${isMarathi ? 'MARVBSI' : 'NLT'}`;
+      const refStr = displayRef;
       const refW = ctx.measureText(refStr).width;
       ctx.fillText(refStr, Math.round((canvas.width - refW) / 2), startY);
 
@@ -17779,7 +17823,7 @@ window.generateExactVerseImageBlob = function(customRatio) {
 
       ctx.font = "800 26px 'Outfit', sans-serif";
       ctx.fillStyle = "#86efac";
-      const refStr = `${displayRef} • ${isMarathi ? 'MARVBSI' : 'NLT'}`;
+      const refStr = displayRef;
       const refW = ctx.measureText(refStr).width;
       ctx.fillText(refStr, Math.round((canvas.width - refW) / 2), startY);
 
@@ -17818,7 +17862,7 @@ window.generateExactVerseImageBlob = function(customRatio) {
 
       ctx.font = "800 30px 'Poppins', sans-serif";
       ctx.fillStyle = "#facc15";
-      const refStr = `${displayRef} • ${isMarathi ? 'MARVBSI' : 'NLT'}`;
+      const refStr = displayRef;
       const refW = ctx.measureText(refStr).width;
       ctx.fillText(refStr, Math.round((canvas.width - refW) / 2), startY);
 
@@ -17897,7 +17941,7 @@ window.generateExactVerseImageBlob = function(customRatio) {
 
       ctx.font = "800 22px 'Outfit', sans-serif";
       ctx.fillStyle = "#0369a1";
-      ctx.fillText(`${displayRef} • ${isMarathi ? 'MARVBSI' : 'NLT'}`, startX + 16, startY + boxH - 24);
+      ctx.fillText(displayRef, startX + 16, startY + boxH - 24);
 
     /* ==========================================================================
        STYLE 9: EMERALD MOUNTAIN LAKE & CROSS (Joshua 1:9 Aesthetic)
@@ -17944,7 +17988,7 @@ window.generateExactVerseImageBlob = function(customRatio) {
       ctx.fillStyle = "#ffffff";
       ctx.shadowColor = "rgba(0,0,0,0.95)";
       ctx.shadowBlur = 16;
-      const refStr = `${displayRef} • ${isMarathi ? 'MARVBSI' : 'NLT'}`;
+      const refStr = displayRef;
       const refW = ctx.measureText(refStr).width;
       ctx.fillText(refStr, Math.round((canvas.width - refW) / 2), startY);
       startY += 54;
@@ -18002,7 +18046,7 @@ window.generateExactVerseImageBlob = function(customRatio) {
       ctx.fillStyle = "#ffffff";
       ctx.shadowColor = "rgba(0,0,0,0.6)";
       ctx.shadowBlur = 10;
-      const refStr = `${displayRef} • ${isMarathi ? 'MARVBSI' : 'NLT'}`;
+      const refStr = displayRef;
       const refW = ctx.measureText(refStr).width;
       ctx.fillText(refStr, Math.round((canvas.width - refW) / 2), startY);
       startY += 36;
@@ -18101,7 +18145,7 @@ window.generateExactVerseImageBlob = function(customRatio) {
       ctx.fillStyle = "#ffffff";
       ctx.shadowColor = "rgba(0,0,0,0.95)";
       ctx.shadowBlur = 16;
-      ctx.fillText(`${displayRef} • ${isMarathi ? 'MARVBSI' : 'NLT'}`, 48, canvas.height - (ratio === 'story' ? 240 : 160));
+      ctx.fillText(displayRef, 48, canvas.height - (ratio === 'story' ? 240 : 160));
 
     /* ==========================================================================
        STYLE 12: DAVID & GOLIATH CINEMATIC SLINGSHOT (1 Samuel 17:47 Aesthetic)
@@ -18140,7 +18184,7 @@ window.generateExactVerseImageBlob = function(customRatio) {
       ctx.font = "800 30px 'Outfit', sans-serif";
       ctx.fillStyle = "#fde047";
       ctx.shadowBlur = 18;
-      const refStr = `${displayRef} • ${isMarathi ? 'MARVBSI' : 'NLT'}`;
+      const refStr = displayRef;
       const refW = ctx.measureText(refStr).width;
       ctx.fillText(refStr, Math.round((canvas.width - refW) / 2), startY);
 
@@ -18186,7 +18230,7 @@ window.generateExactVerseImageBlob = function(customRatio) {
       // Reference
       ctx.font = "800 30px 'Outfit', sans-serif";
       ctx.fillStyle = theme.accentColor || "#fbbf24";
-      const refStr = `${displayRef} • ${isMarathi ? 'MARVBSI' : 'NLT'}`;
+      const refStr = displayRef;
       const refW = ctx.measureText(refStr).width;
       ctx.fillText(refStr, Math.round((canvas.width - refW) / 2), startY);
     }
@@ -18413,7 +18457,42 @@ window.downloadRenderedVodImage = async function() {
   }
 };
 
-window.shareRenderedVodImage = function() {
+window.openShareAndSaveModal = async function() {
+  try {
+    if (typeof showToast === "function") {
+      showToast("⏳ फोटो तयार होत आहे...");
+    }
+    const ratio = window.currentVodAspectRatio || 'square';
+    const result = await generateExactVerseImageBlob(ratio);
+    window._currentRenderedVodImage = result;
+    openImagePreviewModal(result.dataUrl, result.filename, result.blob);
+  } catch (err) {
+    console.error("openShareAndSaveModal error:", err);
+    if (typeof showToast === "function") {
+      showToast("फोटो तयार करण्यात अडचण आली.");
+    }
+  }
+};
+
+window.shareRenderedVodImage = async function() {
+  if (window._currentRenderedVodImage) {
+    const { blob, filename } = window._currentRenderedVodImage;
+    if (blob) {
+      const file = new File([blob], filename, { type: "image/png", lastModified: Date.now() });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            files: [file],
+            title: "River of Life - Daily Bible Verse",
+            text: "आजचे दैनिक वचन (Daily Bible Verse)"
+          });
+          return;
+        } catch(e) {
+          if (e && (e.name === 'AbortError' || e.message?.includes('abort'))) return;
+        }
+      }
+    }
+  }
   closeImagePreviewModal();
   shareDailyVerseToWhatsApp();
 };
@@ -18575,6 +18654,17 @@ window.saveNotificationSettings = async function() {
   localStorage.setItem("rol_notif_time", time);
   localStorage.setItem("rol_notif_lang", lang);
 
+  if (window.NativeWidgetBridge && typeof window.NativeWidgetBridge.scheduleDailyNotification === "function") {
+    const parts = time.split(":");
+    const hour = parseInt(parts[0], 10) || 7;
+    const minute = parseInt(parts[1], 10) || 0;
+    try {
+      window.NativeWidgetBridge.scheduleDailyNotification(hour, minute, enabled);
+    } catch(err) {
+      console.warn("Native notification schedule notice:", err);
+    }
+  }
+
   if (enabled && "Notification" in window) {
     if (Notification.permission !== "granted") {
       try {
@@ -18583,6 +18673,10 @@ window.saveNotificationSettings = async function() {
         console.error("Notification permission error:", e);
       }
     }
+  }
+
+  if (typeof scheduleDailyMorningNotification === 'function') {
+    scheduleDailyMorningNotification();
   }
 
   closeNotificationSettingsModal();
@@ -18700,7 +18794,7 @@ window.updateWidgetLivePreview = function() {
   const verseRef = document.getElementById("widget-preview-verse-ref");
   if (verseText && verseRef) {
     verseText.textContent = `"${(state.translation === 'eng') ? vod.engText : vod.text}"`;
-    verseRef.textContent = `${(state.translation === 'eng') ? vod.engRef : vod.ref} ${state.translation === 'eng' ? 'NLT' : 'MARVBSI'}`;
+    verseRef.textContent = (state.translation === 'eng') ? vod.engRef : vod.ref;
   }
 };
 
@@ -18748,6 +18842,20 @@ window.copyWidgetFeedUrl = function() {
   } else {
     showToast(`Feed URL: ${feedUrl}`);
   }
+};
+
+window.pinDailyVerseWidget = function() {
+  if (window.NativeWidgetBridge && typeof window.NativeWidgetBridge.pinWidgetToHomeScreen === "function") {
+    try {
+      window.NativeWidgetBridge.pinWidgetToHomeScreen();
+      showToast("📱 विजेट पिन करण्याची विनंती पाठवली आहे. कृपया होम स्क्रीनवर तपासा!");
+      return;
+    } catch (e) {
+      console.warn("Failed to pin widget natively:", e);
+    }
+  }
+  // Fallback for browsers / web: Guide user
+  showToast("📌 होम स्क्रीनवर रिकाम्या जागी २ सेकंद दाबून धरा आणि 'Widgets' मधून 'River of Life Daily Verse' निवडा!");
 };
 
 

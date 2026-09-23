@@ -16957,18 +16957,31 @@ body:has(#view-reader.active) .mobile-bottom-tabs {
   margin-right: 0 !important;
 }
 
-/* Fullscreen Studio Generator Center Alignment */
+/* Fullscreen Studio Generator Center Alignment & Universal Device Adaptability */
 .fullscreen-vod-text-overlay,
 #fs-vod-card-container {
-  display: flex;
+  display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
   justify-content: center !important;
   text-align: center !important;
-  margin: 0 auto !important;
+  margin: 0 !important;
+  position: absolute !important;
   left: 50% !important;
+  top: calc(50% - 25px) !important;
   transform: translate(-50%, -50%) !important;
-  width: min(90vw, 760px) !important;
+  width: min(85vw, 880px) !important;
+  max-height: calc(100dvh - 210px) !important;
+  overflow-y: auto !important;
+  scrollbar-width: none !important;
+  -webkit-overflow-scrolling: touch !important;
+  padding: 0 16px !important;
+  box-sizing: border-box !important;
+  z-index: 15 !important;
+}
+
+#fs-vod-card-container::-webkit-scrollbar {
+  display: none !important;
 }
 
 #fs-vod-top-row {
@@ -16977,6 +16990,7 @@ body:has(#view-reader.active) .mobile-bottom-tabs {
   justify-content: center !important;
   text-align: center !important;
   margin: 0 auto 8px auto !important;
+  width: 100% !important;
 }
 
 #fs-vod-badge-pill {
@@ -16986,19 +17000,21 @@ body:has(#view-reader.active) .mobile-bottom-tabs {
 
 #fs-vod-quote-mark {
   text-align: center !important;
-  margin: 0 auto 12px auto !important;
+  margin: 0 auto 10px auto !important;
 }
 
 #fs-vod-text {
   text-align: center !important;
-  margin-left: auto !important;
-  margin-right: auto !important;
-  margin-top: 0 !important;
-  margin-bottom: 22px !important;
+  margin: 0 0 16px 0 !important;
   padding: 0 !important;
   width: 100% !important;
-  max-width: 740px !important;
   align-self: center !important;
+  text-wrap: balance !important;
+  word-break: break-word !important;
+}
+
+#fs-vod-flourish-swash {
+  margin: -4px auto 14px auto !important;
 }
 
 #fs-vod-ref-row {
@@ -17013,6 +17029,114 @@ body:has(#view-reader.active) .mobile-bottom-tabs {
 
 #fs-vod-ref-badge {
   text-align: center !important;
+}
+
+/* Mobile Screens (< 600px) */
+@media (max-width: 600px) {
+  #fs-vod-card-container {
+    width: calc(100% - 28px) !important;
+    max-width: 480px !important;
+    padding: 0 6px !important;
+  }
+  #fs-vod-badge-pill {
+    font-size: 11px !important;
+    letter-spacing: 1.8px !important;
+  }
+  #fs-vod-quote-mark {
+    font-size: 40px !important;
+    margin-bottom: 4px !important;
+  }
+  #fs-vod-text {
+    font-size: clamp(19px, 5.2vw, 25px) !important;
+    line-height: 1.55 !important;
+    margin-bottom: 12px !important;
+  }
+  #fs-vod-flourish-swash {
+    width: min(85%, 240px) !important;
+    height: 16px !important;
+    margin: -4px auto 10px auto !important;
+  }
+  #fs-vod-ref-badge {
+    font-size: 15px !important;
+  }
+  .fs-vod-top-header {
+    width: calc(100% - 20px) !important;
+    gap: 4px !important;
+  }
+  .fs-vod-center-controls {
+    gap: 4px !important;
+  }
+  .fs-vod-day-switcher {
+    padding: 3px 6px !important;
+  }
+  .fs-vod-day-switcher button {
+    font-size: 10px !important;
+    padding: 2px 4px !important;
+  }
+  #btn-fs-vod-lang-toggle {
+    padding: 4px 8px !important;
+    font-size: 10px !important;
+  }
+  #btn-fs-vod-read-prominent {
+    padding: 4px 10px !important;
+    font-size: 10.5px !important;
+  }
+}
+
+/* Tablets (601px - 1024px) */
+@media (min-width: 601px) and (max-width: 1024px) {
+  #fs-vod-card-container {
+    width: min(86vw, 680px) !important;
+  }
+  #fs-vod-text {
+    font-size: clamp(23px, 3.6vw, 32px) !important;
+    line-height: 1.6 !important;
+    margin-bottom: 16px !important;
+  }
+  #fs-vod-ref-badge {
+    font-size: 18px !important;
+  }
+}
+
+/* Desktop & Ultra-wide (>= 1025px) */
+@media (min-width: 1025px) {
+  #fs-vod-card-container {
+    width: min(80vw, 880px) !important;
+  }
+  #fs-vod-text {
+    font-size: clamp(28px, 2.5vw, 38px) !important;
+    line-height: 1.65 !important;
+    margin-bottom: 20px !important;
+  }
+  #fs-vod-ref-badge {
+    font-size: 19.5px !important;
+  }
+  #fs-vod-pinterest-strip {
+    justify-content: center !important;
+  }
+}
+
+/* Landscape / Short viewports (< 550px height) */
+@media (max-height: 550px) {
+  #fs-vod-card-container {
+    top: calc(50% - 15px) !important;
+    max-height: calc(100dvh - 150px) !important;
+  }
+  #fs-vod-top-row {
+    margin-bottom: 2px !important;
+  }
+  #fs-vod-quote-mark {
+    display: none !important;
+  }
+  #fs-vod-text {
+    font-size: clamp(15px, 3.8vh, 22px) !important;
+    line-height: 1.4 !important;
+    margin-bottom: 8px !important;
+  }
+  #fs-vod-flourish-swash {
+    height: 14px !important;
+    margin: -2px auto 8px auto !important;
+  }
 }
 
 /* Verse Card Creator Studio Modal */

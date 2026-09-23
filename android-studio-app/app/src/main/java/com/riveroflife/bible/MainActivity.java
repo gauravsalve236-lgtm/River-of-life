@@ -45,12 +45,49 @@ public class MainActivity extends AppCompatActivity {
         // Enable Hardware Acceleration
         webView.setLayerType(WebView.LAYER_TYPE_HARDWARE, null);
 
-        // Native Widget Bridge for Verse of the Day
+        // Native Widget & Notification Bridge for Verse of the Day
         webView.addJavascriptInterface(new Object() {
             @android.webkit.JavascriptInterface
             public void updateDailyVerse(String verseText, String verseRef) {
                 runOnUiThread(() -> {
                     VerseWidgetProvider.updateWidgetData(MainActivity.this, verseText, verseRef);
+                });
+            }
+
+            @android.webkit.JavascriptInterface
+            public boolean isPinWidgetSupported() {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    android.appwidget.AppWidgetManager appWidgetManager = getSystemService(android.appwidget.AppWidgetManager.class);
+                    return appWidgetManager != null && appWidgetManager.isRequestPinAppWidgetSupported();
+                }
+                return false;
+            }
+
+            @android.webkit.JavascriptInterface
+            public void pinWidgetToHomeScreen() {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    runOnUiThread(() -> {
+                        try {
+                            android.appwidget.AppWidgetManager appWidgetManager = getSystemService(android.appwidget.AppWidgetManager.class);
+                            if (appWidgetManager != null && appWidgetManager.isRequestPinAppWidgetSupported()) {
+                                android.content.ComponentName myProvider = new android.content.ComponentName(MainActivity.this, VerseWidgetProvider.class);
+                                appWidgetManager.requestPinAppWidget(myProvider, null, null);
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    });
+                }
+            }
+
+            @android.webkit.JavascriptInterface
+            public void scheduleDailyNotification(int hour, int minute, boolean enabled) {
+                runOnUiThread(() -> {
+                    try {
+                        DailyVerseNotificationReceiver.scheduleDailyMorningAlarm(MainActivity.this, hour, minute, enabled);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 });
             }
         }, "NativeWidgetBridge");

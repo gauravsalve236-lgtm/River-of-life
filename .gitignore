@@ -14,3 +14,13 @@ assets/audio/bsi/*.mp3
 assets/audio/bsi/*.part
 docs/assets/audio/bsi/*.mp3
 docs/assets/audio/bsi/*.part
+
+# Android build outputs & gradle cache
+android-studio-app/app/build/
+android-studio-app/build/
+android-studio-app/.gradle/
+
+# Test screenshots & backup directories
+/*.png
+backup_*/
+restored_*/
