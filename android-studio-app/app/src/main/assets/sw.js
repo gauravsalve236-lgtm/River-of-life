@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v2374_CLEAN_HOME_VOD_CARD';
+const CACHE_NAME = 'river-of-life-cache-v2375_FIX_DAILY_VERSE_WALLPAPER';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

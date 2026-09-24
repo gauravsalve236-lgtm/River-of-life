@@ -3141,9 +3141,9 @@ function renderDailyDevotion() {
     'sunrise.png', 'forest.png', 'mountains.png', 'ocean.png', 'path.png', 'stars.png', 'mist.png'
   ];
   const imgIdx = ((dayOfYear + offset) % images.length + images.length) % images.length;
-  window.currentVodImageIndex = imgIdx;
   const savedWp = localStorage.getItem('rol_selected_wallpaper');
   const dailyImg = (savedWp && images.includes(savedWp)) ? savedWp : images[imgIdx];
+  window.currentVodImageIndex = images.indexOf(dailyImg) !== -1 ? images.indexOf(dailyImg) : imgIdx;
   const imgUrl = (typeof getVodImageUrl === "function") ? getVodImageUrl(dailyImg) : (dailyImg.includes('.') ? `assets/daily_verses/${dailyImg}` : `assets/daily_verses/${dailyImg}.png`);
   
   const bgEl = document.getElementById("vod-dynamic-bg") || document.querySelector(".youversion-vod-bg") || document.querySelector(".daily-verse-card-bg");
@@ -17253,8 +17253,9 @@ window.applyVodTypographyTheme = function(themeIdx) {
     }
   }
 
-  // Update background image if theme has dedicated wallpaper
-  if (theme.bgImage) {
+  // Update background image if theme has dedicated wallpaper and no custom wallpaper was chosen
+  const userSavedWp = localStorage.getItem("rol_selected_wallpaper");
+  if (theme.bgImage && !userSavedWp) {
     const imgUrl = `assets/daily_verses/${theme.bgImage}`;
     const fsBgEl = document.getElementById("fs-vod-capsule-bg");
     if (fsBgEl) fsBgEl.style.backgroundImage = `url('${imgUrl}')`;
@@ -17436,8 +17437,10 @@ window.openFullscreenVOD = function() {
     'sunrise.png', 'forest.png', 'mountains.png'
   ];
   
-  const curTheme = window.VOD_TYPOGRAPHY_STYLES[window.currentVodTypographyIndex || 0];
-  const activeBg = curTheme?.bgImage || images[((dayOfYear + offset) % images.length + images.length) % images.length];
+  const savedWp = localStorage.getItem("rol_selected_wallpaper");
+  const activeBg = (savedWp && images.includes(savedWp)) 
+    ? savedWp 
+    : images[((dayOfYear + offset) % images.length + images.length) % images.length];
   const imgUrl = (typeof getVodImageUrl === "function") ? getVodImageUrl(activeBg) : `assets/daily_verses/${activeBg}`;
 
   const fsBgEl = document.getElementById("fs-vod-capsule-bg");
@@ -17961,14 +17964,19 @@ function renderWallpaperGalleryGrid(filterCategory) {
 
 // Select Wallpaper from Gallery
 window.selectWallpaperFromGallery = function(file, name, nameMr) {
+  if (!file) return;
   const imgUrl = (typeof getVodImageUrl === 'function') ? getVodImageUrl(file) : ('assets/daily_verses/' + file);
 
-  const idx = window.dailyVersesImageList.indexOf(file);
-  if (idx !== -1) {
-    window.currentVodImageIndex = idx;
+  if (window.dailyVersesImageList && Array.isArray(window.dailyVersesImageList)) {
+    const idx = window.dailyVersesImageList.indexOf(file);
+    if (idx !== -1) {
+      window.currentVodImageIndex = idx;
+    }
   }
 
-  localStorage.setItem("rol_selected_wallpaper", file);
+  try {
+    localStorage.setItem("rol_selected_wallpaper", file);
+  } catch(e) {}
 
   // Update Home Card
   const heroCard = document.getElementById("card-daily-verse-home");
@@ -17976,7 +17984,7 @@ window.selectWallpaperFromGallery = function(file, name, nameMr) {
     heroCard.style.backgroundImage = `url('${imgUrl}')`;
   }
 
-  // Update Studio Capsule
+  // Update Studio / Fullscreen Capsule
   const fsBgEl = document.getElementById("fs-vod-capsule-bg");
   if (fsBgEl) {
     fsBgEl.style.backgroundImage = `url('${imgUrl}')`;
@@ -17984,6 +17992,10 @@ window.selectWallpaperFromGallery = function(file, name, nameMr) {
   const fsCapsule = document.querySelector(".fullscreen-vod-capsule");
   if (fsCapsule) {
     fsCapsule.style.backgroundImage = `url('${imgUrl}')`;
+  }
+  const bgDynamic = document.getElementById("vod-dynamic-bg");
+  if (bgDynamic) {
+    bgDynamic.style.backgroundImage = `url('${imgUrl}')`;
   }
 
   // Update thumbnail preview
@@ -17998,41 +18010,69 @@ window.selectWallpaperFromGallery = function(file, name, nameMr) {
   }
 
   if (typeof showToast === "function") {
-    showToast(`🖼️ वॉलपेपर सेट केले: ${nameMr || name}`);
+    showToast(`🖼️ वॉलपेपर सेट केले: ${nameMr || name || file}`);
   }
 };
 
-// Cycle through all 70 wallpapers sequentially
+// Cycle through all wallpapers sequentially
 window.cycleVodWallpaper = function() {
   const images = (window.dailyVersesImageList && window.dailyVersesImageList.length > 0) 
     ? window.dailyVersesImageList 
-    : window.WALLPAPER_CATALOG.map(w => w.file);
+    : (Array.isArray(window.WALLPAPER_CATALOG) && window.WALLPAPER_CATALOG.length > 0 
+        ? window.WALLPAPER_CATALOG.map(w => w.file) 
+        : ['sunrise.png', 'forest.png', 'mountains.png', 'ocean.png', 'path.png', 'stars.png', 'mist.png']);
 
-  if (typeof window.currentVodImageIndex !== 'number') {
-    const { dayOfYear, offset } = (typeof getCurrentVOD === 'function') ? getCurrentVOD() : { dayOfYear: 1, offset: 0 };
-    window.currentVodImageIndex = ((dayOfYear + offset) % images.length + images.length) % images.length;
+  if (!images || images.length === 0) return;
+
+  const savedWp = localStorage.getItem("rol_selected_wallpaper");
+  if (typeof window.currentVodImageIndex !== 'number' || window.currentVodImageIndex < 0) {
+    if (savedWp && images.indexOf(savedWp) !== -1) {
+      window.currentVodImageIndex = images.indexOf(savedWp);
+    } else {
+      const { dayOfYear, offset } = (typeof getCurrentVOD === 'function') ? getCurrentVOD() : { dayOfYear: 1, offset: 0 };
+      window.currentVodImageIndex = ((dayOfYear + (offset || 0)) % images.length + images.length) % images.length;
+    }
+  } else if (savedWp && images[window.currentVodImageIndex] !== savedWp && images.indexOf(savedWp) !== -1) {
+    window.currentVodImageIndex = images.indexOf(savedWp);
   }
   
   window.currentVodImageIndex = (window.currentVodImageIndex + 1) % images.length;
   const dailyImg = images[window.currentVodImageIndex];
   const imgUrl = (typeof getVodImageUrl === "function") ? getVodImageUrl(dailyImg) : `assets/daily_verses/${dailyImg}`;
 
-  localStorage.setItem("rol_selected_wallpaper", dailyImg);
+  try {
+    localStorage.setItem("rol_selected_wallpaper", dailyImg);
+  } catch(e) {}
 
+  // 1. Update Home Verse Card background
   const bgHome = document.getElementById("card-daily-verse-home");
   if (bgHome) bgHome.style.backgroundImage = `url('${imgUrl}')`;
 
+  // 2. Update Fullscreen VOD background
   const fsBgEl = document.getElementById("fs-vod-capsule-bg");
   if (fsBgEl) fsBgEl.style.backgroundImage = `url('${imgUrl}')`;
 
+  const fsCapsule = document.querySelector(".fullscreen-vod-capsule");
+  if (fsCapsule) fsCapsule.style.backgroundImage = `url('${imgUrl}')`;
+
+  const bgDynamic = document.getElementById("vod-dynamic-bg");
+  if (bgDynamic) bgDynamic.style.backgroundImage = `url('${imgUrl}')`;
+
+  // 3. Update preview thumbnail
   const thumbImg = document.getElementById("vod-thumbnail-preview");
   if (thumbImg) thumbImg.src = imgUrl;
 
-  const catalogEntry = window.WALLPAPER_CATALOG.find(w => w.file === dailyImg);
-  const title = catalogEntry ? (catalogEntry.nameMr + ' • ' + catalogEntry.name) : dailyImg;
+  // 4. Resolve friendly name for toast notification
+  let title = dailyImg;
+  if (Array.isArray(window.WALLPAPER_CATALOG)) {
+    const catalogEntry = window.WALLPAPER_CATALOG.find(w => w && w.file === dailyImg);
+    if (catalogEntry) {
+      title = (catalogEntry.nameMr ? catalogEntry.nameMr + ' • ' : '') + catalogEntry.name;
+    }
+  }
 
   if (typeof showToast === "function") {
-    showToast(`🖼️ वॉलपेपर: ${title}`);
+    showToast(`🖼️ वॉलपेपर बदलले: ${title}`);
   }
 };
 
@@ -18091,8 +18131,12 @@ window.generateExactVerseImageBlob = function(customRatio) {
 
     const theme = (window.VOD_TYPOGRAPHY_STYLES && window.VOD_TYPOGRAPHY_STYLES[window.currentVodTypographyIndex || 0]) ? window.VOD_TYPOGRAPHY_STYLES[window.currentVodTypographyIndex || 0] : window.VOD_TYPOGRAPHY_STYLES[0];
 
-    // Priority: theme's dedicated background image or current wallpaper
-    let imgFileName = theme.bgImage;
+    // Priority: user's chosen wallpaper, then theme image, then daily wallpaper
+    const savedWp = localStorage.getItem("rol_selected_wallpaper");
+    let imgFileName = savedWp;
+    if (!imgFileName) {
+      imgFileName = theme.bgImage;
+    }
     if (!imgFileName) {
       const images = (window.dailyVersesImageList && window.dailyVersesImageList.length > 0) ? window.dailyVersesImageList : ['pinterest_alpine_mountain.jpg', 'sunrise.png'];
       const imgIdx = (typeof window.currentVodImageIndex === 'number') ? window.currentVodImageIndex : (((dayOfYear + offset) % images.length + images.length) % images.length);

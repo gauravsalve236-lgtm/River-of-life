@@ -12,7 +12,7 @@
   <script>
     // Force immediate hard purge of all stale Service Workers and CacheStorage
     (function() {
-      const CURRENT_VER = "v2374_CLEAN_HOME_VOD_CARD";
+      const CURRENT_VER = "v2375_FIX_DAILY_VERSE_WALLPAPER";
       if (localStorage.getItem("rol_app_ver") !== CURRENT_VER) {
         localStorage.setItem("rol_app_ver", CURRENT_VER);
         if ('serviceWorker' in navigator) {
@@ -40,6 +40,50 @@
         });
       }
     })();
+
+    // Robust early wallpaper switcher: simply updates wallpaper in background immediately
+    window.cycleVodWallpaper = function() {
+      var defaultImgs = [
+        "autumn_golden_forest.jpg", "blooming_spring_valley.jpg", "calm_pasture_river.jpg",
+        "calm_waters.png", "candlelight.png", "celestial_galaxy_night.jpg", "coastal_cliffs_twilight.jpg",
+        "dawn_valley_genesis.jpg", "desert_oasis_sunset.jpg", "divine_healing_art.jpg",
+        "emerald_lake_reflection.jpg", "forest.png", "freedom_field.jpg", "glory_cloud_sunrise.jpg",
+        "golden_dawn.png", "golden_wheat_harvest.jpg", "healing_light.png", "heavenly_sunbeams.jpg",
+        "joy_rain.jpg", "living_water_falls.jpg", "mist.png", "misty_mountains.jpg",
+        "misty_pine_canopy.jpg", "morning_grace_art.jpg", "moses_mount_sinai_art.jpg",
+        "mount_zion.png", "mountains.png", "ocean.png", "olive_grove_garden.jpg",
+        "path.png", "peace_anxiety.png", "peace_anxiety_art.jpg", "peaceful_pastures.png",
+        "pinterest_alpine_mountain.jpg", "pinterest_boarding_pass.jpg", "pinterest_david_goliath.jpg",
+        "pinterest_forest_sunset.jpg", "pinterest_golden_path.jpg", "pinterest_good_shepherd.jpg",
+        "pinterest_illuminated_tree.jpg", "pinterest_jesus_road.jpg", "pinterest_lake_cross.jpg",
+        "pinterest_light_of_world.jpg", "pinterest_lion_split.jpg", "pinterest_watercolor_red_sea.jpg",
+        "river_of_life.png", "serene_sky_prayer.jpg", "snow_mountain_majesty.jpg",
+        "stars.png", "sunrise.png", "sunset_lavender_field.jpg", "tropical_sunset_beach.jpg",
+        "wedding_cana_miracle.jpg", "winding_path_journey.jpg", "wisdom_guidance.png"
+      ];
+      var imgs = (window.dailyVersesImageList && window.dailyVersesImageList.length > 0) ? window.dailyVersesImageList : defaultImgs;
+      var curWp = localStorage.getItem("rol_selected_wallpaper");
+      var idx = (typeof window.currentVodImageIndex === 'number' && window.currentVodImageIndex >= 0) ? window.currentVodImageIndex : (curWp ? imgs.indexOf(curWp) : 0);
+      if (idx === -1) idx = 0;
+      idx = (idx + 1) % imgs.length;
+      window.currentVodImageIndex = idx;
+      var nextImg = imgs[idx];
+      try { localStorage.setItem("rol_selected_wallpaper", nextImg); } catch(e) {}
+      var url = "assets/daily_verses/" + nextImg;
+      var homeCard = document.getElementById("card-daily-verse-home");
+      if (homeCard) homeCard.style.backgroundImage = "url('" + url + "')";
+      var fsBg = document.getElementById("fs-vod-capsule-bg");
+      if (fsBg) fsBg.style.backgroundImage = "url('" + url + "')";
+      var fsCap = document.querySelector(".fullscreen-vod-capsule");
+      if (fsCap) fsCap.style.backgroundImage = "url('" + url + "')";
+      var dynBg = document.getElementById("vod-dynamic-bg");
+      if (dynBg) dynBg.style.backgroundImage = "url('" + url + "')";
+      var thumb = document.getElementById("vod-thumbnail-preview");
+      if (thumb) thumb.src = url;
+      if (typeof showToast === "function") {
+        showToast("🖼️ वॉलपेपर बदलले!");
+      }
+    };
   </script>
   
   <!-- Web App Capabilities & Icons -->
@@ -61,7 +105,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Great+Vibes&family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Noto+Serif+Devanagari:wght@500;600;700;800;900&family=Outfit:wght@500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600;1,700&family=Poppins:wght@600;700;800;900&family=Rozha+One&display=swap" rel="stylesheet">
   
   <!-- Main Stylesheet (Cache-Busted for Authentic Male Audio V27) -->
-  <link rel="stylesheet" href="index.css?v=2370_NATIVE_VIDEO_CALL_AND_VOD_FIX">
+  <link rel="stylesheet" href="index.css?v=2375_FIX_DAILY_VERSE_WALLPAPER">
 
   <!-- Official LiveKit WebRTC Client SDK -->
   <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.0.8/dist/livekit-client.umd.min.js"></script>
@@ -3946,7 +3990,7 @@
         </div>
         
         <!-- Right Wallpaper Switcher Thumbnail Button (Cycles Scenic Photos) -->
-        <div id="btn-vod-fs-wallpaper" onclick="openWallpaperGalleryDrawer(); event.stopPropagation();" title="Browse Wallpapers / वॉलपेपर निवडा" style="position: absolute; bottom: max(env(safe-area-inset-bottom, 24px), 24px); right: 20px; z-index: 26; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; transition: transform 0.2s ease;">
+        <div id="btn-vod-fs-wallpaper" onclick="cycleVodWallpaper(); event.stopPropagation();" title="Change Wallpaper / वॉलपेपर बदला" style="position: absolute; bottom: max(env(safe-area-inset-bottom, 24px), 24px); right: 20px; z-index: 26; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; transition: transform 0.2s ease;">
           <div style="width: 44px; height: 54px; border-radius: 12px; border: 2px solid #ffffff; overflow: hidden; box-shadow: 0 6px 20px rgba(0,0,0,0.65); background: #111; transform: rotate(2deg); transition: transform 0.2s ease;">
             <img id="vod-thumbnail-preview" src="assets/daily_verses/sunrise.png" alt="Wallpaper" style="width: 100%; height: 100%; object-fit: cover;" />
           </div>
@@ -6210,7 +6254,7 @@
   <script src="sarvam-tts.js?v=132_MARVBSI_FULL_CHURCH_BIBLE"></script>
   <script src="bible-study.js?v=138_MUSEUM_STUDY_HUB"></script>
   <script src="peerjs.min.js"></script>
-  <script src="app.js?v=2370_NATIVE_VIDEO_CALL_AND_VOD_FIX"></script>
+  <script src="app.js?v=2375_FIX_DAILY_VERSE_WALLPAPER"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 4.5s no matter what
