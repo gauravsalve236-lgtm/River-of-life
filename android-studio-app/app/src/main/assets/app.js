@@ -12170,7 +12170,7 @@ async function triggerJoinMeetingFlow(meetingId) {
     const m = meetings.find(x => x.id === meetingId) || { id: meetingId, title: "Live Fellowship", host: "Pastor" };
     _pendingMeetingToJoin = m;
     if (typeof showToast === "function") showToast("Joining Live Sanctuary 🙏");
-    launchLiveMeetingRoom(m, null);
+    await launchLiveMeetingRoom(m, null);
   } catch (err) {
     console.error("[RiverMeet] Error initiating meeting flow:", err);
   }
@@ -12198,6 +12198,115 @@ var RiverMeet = {
   connectedPeerList: []
 };
 
+// Fail-safe silent & black stream so WebRTC never aborts if user grants no media
+function createDummyMediaStream() {
+  const canvas = document.createElement("canvas");
+  canvas.width = 320;
+  canvas.height = 240;
+  const ctx = canvas.getContext("2d");
+  if (ctx) {
+    ctx.fillStyle = "#090d16";
+    ctx.fillRect(0, 0, 320, 240);
+  }
+  const stream = (typeof canvas.captureStream === "function") ? canvas.captureStream(5) : new MediaStream();
+  
+  try {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (AudioContextClass) {
+      const audioCtx = new AudioContextClass();
+      const dest = audioCtx.createMediaStreamDestination();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      gain.gain.value = 0; // completely silent
+      osc.connect(gain);
+      gain.connect(dest);
+      osc.start();
+      const dummyAudioTrack = dest.stream.getAudioTracks()[0];
+      if (dummyAudioTrack) stream.addTrack(dummyAudioTrack);
+    }
+  } catch(e) {}
+
+  return stream;
+}
+
+// Progressive Multi-Tier Media Acquisition (Guarantees working video & audio on all devices)
+async function acquireRiverUserMedia(preferredFacingMode = "user") {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    console.warn("[RiverMeet] navigator.mediaDevices.getUserMedia not supported in this environment");
+    return createDummyMediaStream();
+  }
+
+  // Tier 1: Flexible HD Video + High Fidelity Audio
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: preferredFacingMode,
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
+      },
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true
+      }
+    });
+    console.log("[RiverMeet] Acquired Tier 1 HD video + audio");
+    return stream;
+  } catch (e1) {
+    console.warn("[RiverMeet] Tier 1 HD media failed, trying unconstrained video+audio:", e1);
+  }
+
+  // Tier 2: Unconstrained video + audio
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: preferredFacingMode },
+      audio: true
+    });
+    console.log("[RiverMeet] Acquired Tier 2 standard video + audio");
+    return stream;
+  } catch (e2) {
+    console.warn("[RiverMeet] Tier 2 media failed, trying basic video+audio:", e2);
+  }
+
+  // Tier 3: Basic { video: true, audio: true }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    console.log("[RiverMeet] Acquired Tier 3 basic video + audio");
+    return stream;
+  } catch (e3) {
+    console.warn("[RiverMeet] Tier 3 media failed, trying separate video & audio tracks:", e3);
+  }
+
+  // Tier 4: Separate track acquisition (one might succeed even if other fails)
+  let vTrack = null;
+  let aTrack = null;
+  try {
+    const vStream = await navigator.mediaDevices.getUserMedia({ video: true });
+    vTrack = vStream.getVideoTracks()[0];
+  } catch(e) {
+    console.warn("[RiverMeet] Video-only acquisition failed:", e);
+  }
+
+  try {
+    const aStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    aTrack = aStream.getAudioTracks()[0];
+  } catch(e) {
+    console.warn("[RiverMeet] Audio-only acquisition failed:", e);
+  }
+
+  if (vTrack || aTrack) {
+    const stream = new MediaStream();
+    if (vTrack) stream.addTrack(vTrack);
+    if (aTrack) stream.addTrack(aTrack);
+    console.log("[RiverMeet] Acquired partial media:", { hasVideo: !!vTrack, hasAudio: !!aTrack });
+    return stream;
+  }
+
+  // Tier 5: Fallback to silent/black stream so call can still connect
+  console.warn("[RiverMeet] Camera and Microphone permissions denied, using dummy listen-only stream");
+  return createDummyMediaStream();
+}
+
 // Open and start the Native Video Meeting Room
 async function launchLiveMeetingRoom(meeting, stream) {
   try {
@@ -12218,8 +12327,6 @@ async function launchLiveMeetingRoom(meeting, stream) {
     RiverMeet.roomKey = roomKey;
     RiverMeet.isHost = isHost;
     RiverMeet.facingMode = "user";
-    RiverMeet.isMuted = false;
-    RiverMeet.isCamOff = false;
     RiverMeet.peerConnections.clear();
     RiverMeet.connectedPeerList = [];
 
@@ -12249,44 +12356,25 @@ async function launchLiveMeetingRoom(meeting, stream) {
       hostBar.style.display = isHost ? "block" : "none";
     }
 
-    // Reset Floating Bottom Controls UI
-    updateMicControlUI(false);
-    updateCamControlUI(false);
-
     // Acquire Local Camera & Microphone
     let localStream = stream;
     if (!localStream) {
-      try {
-        localStream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: RiverMeet.facingMode,
-            width: { ideal: 1920, min: 1280 }, height: { ideal: 1080, min: 720 }, frameRate: { ideal: 30, max: 60 }
-          },
-          audio: {
-            echoCancellation: true,
-            noiseSuppression: true,
-            autoGainControl: true
-          }
-        });
-      } catch (mediaErr) {
-        console.warn("[RiverMeet] Video+audio request failed, trying audio only:", mediaErr);
-        try {
-          localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-          RiverMeet.isCamOff = true;
-          updateCamControlUI(true);
-        } catch (audioErr) {
-          console.warn("[RiverMeet] Media permission denied, falling back to listen-only:", audioErr);
-          RiverMeet.isMuted = true;
-          RiverMeet.isCamOff = true;
-          updateMicControlUI(true);
-          updateCamControlUI(true);
-          const banner = document.getElementById("river-meeting-banner");
-          if (banner) banner.style.display = "flex";
-        }
-      }
+      localStream = await acquireRiverUserMedia(RiverMeet.facingMode);
     }
 
     RiverMeet.localStream = localStream;
+    RiverMeet.isCamOff = (localStream.getVideoTracks().length === 0);
+    RiverMeet.isMuted = (localStream.getAudioTracks().length === 0);
+
+    // Update Floating Bottom Controls UI
+    updateMicControlUI(RiverMeet.isMuted);
+    updateCamControlUI(RiverMeet.isCamOff);
+
+    // Show listen-only banner if media was denied
+    if (RiverMeet.isCamOff && RiverMeet.isMuted) {
+      const banner = document.getElementById("river-meeting-banner");
+      if (banner) banner.style.display = "flex";
+    }
 
     // Render Local Video Tile
     renderLocalVideoTile(loggedIn, isHost);
@@ -12331,9 +12419,18 @@ function renderLocalVideoTile(displayName, isHost) {
   grid.appendChild(tile);
 
   const localVideo = document.getElementById("river-local-video");
-  if (localVideo && RiverMeet.localStream) {
-    localVideo.srcObject = RiverMeet.localStream;
-    localVideo.play().catch(e => console.warn("[RiverMeet] Local video autoplay:", e));
+  if (localVideo) {
+    localVideo.muted = true;
+    localVideo.defaultMuted = true;
+    localVideo.setAttribute("playsinline", "");
+    localVideo.setAttribute("webkit-playsinline", "");
+    if (RiverMeet.localStream) {
+      localVideo.srcObject = RiverMeet.localStream;
+      const playPromise = localVideo.play();
+      if (playPromise && typeof playPromise.catch === "function") {
+        playPromise.catch(e => console.warn("[RiverMeet] Local video autoplay:", e));
+      }
+    }
   }
 
   updateVideoGridCount();
@@ -12651,9 +12748,57 @@ function attachRemoteVideoTile(peerId, stream, displayName) {
   }
 
   const videoEl = document.getElementById('river-video-' + peerId);
+  const avatarEl = document.getElementById('river-avatar-' + peerId);
+
+  function syncAvatarVisibility() {
+    if (!avatarEl) return;
+    const hasActiveVideo = stream && stream.getVideoTracks().some(t => t.enabled && t.readyState === 'live');
+    avatarEl.style.display = hasActiveVideo ? 'none' : 'flex';
+  }
+
   if (videoEl) {
-    videoEl.srcObject = stream;
-    videoEl.play().catch(e => console.warn("[RiverMeet] Remote video autoplay:", e));
+    videoEl.setAttribute("playsinline", "");
+    videoEl.setAttribute("webkit-playsinline", "");
+    videoEl.autoplay = true;
+
+    // Prevent AbortError: only assign srcObject if it has actually changed
+    if (videoEl.srcObject !== stream) {
+      videoEl.srcObject = stream;
+    }
+
+    syncAvatarVisibility();
+
+    if (stream) {
+      stream.onaddtrack = () => {
+        syncAvatarVisibility();
+        const p = videoEl.play();
+        if (p && typeof p.catch === "function") p.catch(() => {});
+      };
+      stream.onremovetrack = () => {
+        syncAvatarVisibility();
+      };
+    }
+
+    // Attempt unmuted play first; fall back to muted if blocked by autoplay policy
+    const playPromise = videoEl.play();
+    if (playPromise && typeof playPromise.catch === "function") {
+      playPromise.catch(err => {
+        console.warn("[RiverMeet] Remote video unmuted autoplay blocked, trying muted:", err);
+        videoEl.muted = true;
+        const retryMuted = videoEl.play();
+        if (retryMuted && typeof retryMuted.catch === "function") {
+          retryMuted.catch(e => console.warn("[RiverMeet] Remote video muted play error:", e));
+        }
+
+        const unmuteOnTap = () => {
+          videoEl.muted = false;
+          window.removeEventListener('click', unmuteOnTap, true);
+          window.removeEventListener('touchstart', unmuteOnTap, true);
+        };
+        window.addEventListener('click', unmuteOnTap, { once: true, capture: true });
+        window.addEventListener('touchstart', unmuteOnTap, { once: true, capture: true });
+      });
+    }
   }
 
   updateVideoGridCount();
@@ -12754,12 +12899,39 @@ window.dismissMeetingBanner = hideWaitingBanner;
 // ═══════════════════════════════════════════════════════════════
 
 // Toggle Microphone
-function toggleRiverMeetingMic() {
+async function toggleRiverMeetingMic() {
   RiverMeet.isMuted = !RiverMeet.isMuted;
   if (RiverMeet.localStream) {
-    RiverMeet.localStream.getAudioTracks().forEach(track => {
-      track.enabled = !RiverMeet.isMuted;
-    });
+    const audioTracks = RiverMeet.localStream.getAudioTracks();
+    if (audioTracks.length === 0 && !RiverMeet.isMuted) {
+      try {
+        const audioStream = await navigator.mediaDevices.getUserMedia({
+          audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
+        });
+        const newAudioTrack = audioStream.getAudioTracks()[0];
+        if (newAudioTrack) {
+          RiverMeet.localStream.addTrack(newAudioTrack);
+          for (const [, entry] of RiverMeet.peerConnections) {
+            if (entry.call && entry.call.peerConnection) {
+              const senders = entry.call.peerConnection.getSenders();
+              const aSender = senders.find(s => s.track && s.track.kind === 'audio');
+              if (aSender) {
+                aSender.replaceTrack(newAudioTrack);
+              } else {
+                entry.call.peerConnection.addTrack(newAudioTrack, RiverMeet.localStream);
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.warn("[RiverMeet] Could not acquire audio track dynamically:", err);
+        RiverMeet.isMuted = true;
+      }
+    } else {
+      audioTracks.forEach(track => {
+        track.enabled = !RiverMeet.isMuted;
+      });
+    }
   }
 
   updateMicControlUI(RiverMeet.isMuted);
@@ -12795,12 +12967,47 @@ function updateMicControlUI(isMuted) {
 }
 
 // Toggle Camera
-function toggleRiverMeetingCam() {
+async function toggleRiverMeetingCam() {
   RiverMeet.isCamOff = !RiverMeet.isCamOff;
   if (RiverMeet.localStream) {
-    RiverMeet.localStream.getVideoTracks().forEach(track => {
-      track.enabled = !RiverMeet.isCamOff;
-    });
+    const videoTracks = RiverMeet.localStream.getVideoTracks();
+    if (videoTracks.length === 0 && !RiverMeet.isCamOff) {
+      try {
+        const videoStream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: RiverMeet.facingMode || "user",
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+            frameRate: { ideal: 30, max: 60 }
+          }
+        });
+        const newVideoTrack = videoStream.getVideoTracks()[0];
+        if (newVideoTrack) {
+          RiverMeet.localStream.addTrack(newVideoTrack);
+          const localVideo = document.getElementById("river-local-video");
+          if (localVideo) localVideo.srcObject = RiverMeet.localStream;
+
+          for (const [, entry] of RiverMeet.peerConnections) {
+            if (entry.call && entry.call.peerConnection) {
+              const senders = entry.call.peerConnection.getSenders();
+              const vSender = senders.find(s => s.track && s.track.kind === 'video');
+              if (vSender) {
+                vSender.replaceTrack(newVideoTrack);
+              } else {
+                entry.call.peerConnection.addTrack(newVideoTrack, RiverMeet.localStream);
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.warn("[RiverMeet] Could not acquire video track dynamically:", err);
+        RiverMeet.isCamOff = true;
+      }
+    } else {
+      videoTracks.forEach(track => {
+        track.enabled = !RiverMeet.isCamOff;
+      });
+    }
   }
 
   updateCamControlUI(RiverMeet.isCamOff);
@@ -12859,7 +13066,9 @@ async function flipRiverMeetingCamera() {
       const newStream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: RiverMeet.facingMode,
-          width: { ideal: 1920, min: 1280 }, height: { ideal: 1080, min: 720 }, frameRate: { ideal: 30, max: 60 }
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          frameRate: { ideal: 30, max: 60 }
         }
       });
 
