@@ -12147,738 +12147,786 @@ function generateICSFile(meeting) {
   showToast("Calendar File (.ics) downloaded!");
 }
 
-// Trigger Joining Flow (Camera preview checks)
-function unlockMobileSpeakerAudio() {
-  try {
-    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-    if (AudioContextClass) {
-      if (!window.webrtcAudioCtx) window.webrtcAudioCtx = new AudioContextClass();
-      if (window.webrtcAudioCtx.state === 'suspended') window.webrtcAudioCtx.resume();
-      // Warm up mobile speaker output pipeline
-      const buffer = window.webrtcAudioCtx.createBuffer(1, 1, 22050);
-      const source = window.webrtcAudioCtx.createBufferSource();
-      source.buffer = buffer;
-      source.connect(window.webrtcAudioCtx.destination);
-      source.start(0);
-    }
-  } catch(e) {
-    console.warn("Audio unlock notice:", e);
-  }
-}
-window.unlockMobileSpeakerAudio = unlockMobileSpeakerAudio;
+// Native Top-Level In-App WebRTC Meeting Engine for River of Life
 
+activeMeetingSession = null;
 let _pendingMeetingToJoin = null;
+let currentFacingMode = "user";
 
-function getJitsiServerDomain() {
-  let domain = localStorage.getItem("rol_jitsi_server");
-  if (!domain || domain === "jitsi.riot.im" || domain === "meet.jit.si") {
-    domain = "meet.darmstadt.social";
-    localStorage.setItem("rol_jitsi_server", domain);
-  }
-  return domain.replace(/^https?:\/\//, '').replace(/\/+$/, '');
-}
-window.getJitsiServerDomain = getJitsiServerDomain;
-
-function proceedJoinMeetingSafari() {
-  const m = _pendingMeetingToJoin || { id: "default", title: "Live Fellowship" };
-  showToast("Joining Live Sanctuary 🙏");
-  launchLiveMeetingRoom(m, null);
-}
-window.proceedJoinMeetingSafari = proceedJoinMeetingSafari;
-
-function proceedJoinMeetingApp() {
-  const m = _pendingMeetingToJoin || { id: "default", title: "Live Fellowship" };
-  showToast("Joining Live Sanctuary 🙏");
-  launchLiveMeetingRoom(m, null);
-}
-window.proceedJoinMeetingApp = proceedJoinMeetingApp;
-
-async function proceedJoinMeetingInApp() {
-  const m = _pendingMeetingToJoin || { id: "default", title: "Live Fellowship" };
-  showToast("Joining Live Sanctuary 🙏");
-  launchLiveMeetingRoom(m, null);
-}
-window.proceedJoinMeetingInApp = proceedJoinMeetingInApp;
-
-// Trigger Joining Flow — Launches pure in-app video room immediately (Zero browser redirection)
+// Trigger Join Meeting Flow
 async function triggerJoinMeetingFlow(meetingId) {
-  const meetings = getMeetingsFromStorage();
-  const m = meetings.find(x => x.id === meetingId) || { id: meetingId, title: "Live Fellowship", host: "Pastor" };
-  _pendingMeetingToJoin = m;
-  showToast("Joining Live Sanctuary 🙏");
-  launchLiveMeetingRoom(m, null);
-}
-window.triggerJoinMeetingFlow = triggerJoinMeetingFlow;
-
-function showMicrophonePermissionHelpModal(meeting) {
-  // Pure in-app meeting: browser redirection modals disabled
-}
-window.showMicrophonePermissionHelpModal = showMicrophonePermissionHelpModal;
-window.showMicrophonePermissionHelpModal = showMicrophonePermissionHelpModal;
-
-function retryEnableMicrophone() {
-  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-    navigator.mediaDevices.getUserMedia({ audio: true, video: true })
-      .then(stream => {
-        if (stream && stream.getTracks) stream.getTracks().forEach(t => t.stop());
-        if (typeof closeModal === "function") {
-          closeModal("modal-mic-permission-help");
-        } else {
-          const modal = document.getElementById("modal-mic-permission-help");
-          if (modal) {
-            modal.classList.remove("active");
-            modal.style.display = "none";
-          }
-        }
-        showToast("Microphone & Camera Enabled! 🙏");
-        if (_pendingMeetingToJoin) {
-          launchLiveMeetingRoom(_pendingMeetingToJoin, null);
-        }
-      })
-      .catch(err => {
-        if (err && (err.name === "NotAllowedError" || err.name === "PermissionDeniedError")) {
-          showToast("⚠️ Still blocked: In Safari, tap 'aA' -> Website Settings -> Microphone -> Allow");
-        } else {
-          continueMeetingWithoutMic();
-        }
-      });
-  } else {
-    continueMeetingWithoutMic();
-  }
-}
-window.retryEnableMicrophone = retryEnableMicrophone;
-
-function continueMeetingWithoutMic() {
-  if (typeof closeModal === "function") {
-    closeModal("modal-mic-permission-help");
-  } else {
-    const modal = document.getElementById("modal-mic-permission-help");
-    if (modal) {
-      modal.classList.remove("active");
-      modal.style.display = "none";
-    }
-  }
-  if (_pendingMeetingToJoin) {
-    showToast("Joining Live Sanctuary (Listen Only) 🙏");
-    launchLiveMeetingRoom(_pendingMeetingToJoin, null);
-  }
-}
-window.continueMeetingWithoutMic = continueMeetingWithoutMic;
-
-window.testAndEnableMicrophone = async function() {
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    showToast("⚠️ या ब्राउझरवर मायक्रोफोन उपलब्ध नाही (Microphone not supported).");
-    return;
-  }
-  showToast("🎙️ मायक्रोफोन तपासत आहे... (Checking Microphone)");
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      audio: { echoCancellation: true, noiseSuppression: true }
-    });
-    if (stream) {
-      const tracks = stream.getAudioTracks();
-      if (tracks && tracks.length > 0) {
-        showToast("✓ मायक्रोफोन यशस्वीरीत्या चालू झाला! (Microphone Allowed & Working)");
-      }
-      tracks.forEach(t => t.stop());
-    }
+    const meetings = (typeof getMeetingsFromStorage === "function") ? getMeetingsFromStorage() : [];
+    const m = meetings.find(x => x.id === meetingId) || { id: meetingId, title: "Live Fellowship", host: "Pastor" };
+    _pendingMeetingToJoin = m;
+    if (typeof showToast === "function") showToast("Joining Live Sanctuary 🙏");
+    await launchLiveMeetingRoom(m, null);
   } catch (err) {
-    console.warn("Microphone test error:", err);
-    if (err && (err.name === "NotAllowedError" || err.name === "PermissionDeniedError")) {
-      showMicrophonePermissionHelpModal(_pendingMeetingToJoin || { title: "Live Sanctuary" });
-    } else {
-      showToast("⚠️ मायक्रोफोन परवानगी आवश्यक आहे. Settings तपासा.");
-      showMicrophonePermissionHelpModal(_pendingMeetingToJoin || { title: "Live Sanctuary" });
-    }
+    console.error("[RiverMeet] Error initiating meeting flow:", err);
   }
-};
+}
 
-
-// Fullscreen Live Meeting Room Entry — Ultra Clean 3-Button Experience (Mic, Camera, Hangup)
-function launchLiveMeetingRoom(meeting, stream) {
+// Fullscreen Live Meeting Room Entry — 100% Native In-App WebRTC
+async function launchLiveMeetingRoom(meeting, existingStream) {
   try {
-    const loggedIn = (state && state.currentUser) ? state.currentUser.username : "Member";
+    const loggedIn = (typeof state !== "undefined" && state && state.currentUser) ? state.currentUser.username : "Member";
     const isHost = meeting ? (meeting.host === loggedIn) : false;
+    const meetingTitle = (meeting && meeting.title) ? meeting.title : "River of Life Meeting";
+    const meetingId = (meeting && meeting.id) ? meeting.id : "Sanctuary_LiveRoom";
 
-    logAudioDebug("Publishing microphone track & entering meeting room...", {
-      meetingId: meeting ? meeting.id : "default",
-      isHost: isHost,
-      participant: loggedIn
-    });
-    
-    // Lock screen view overlay
+    console.log("[RiverMeet] Entering native meeting room:", { meetingId, loggedIn, isHost });
+
+    // Open Modal Overlay
     const roomModal = document.getElementById("modal-live-meeting");
     if (roomModal) {
       roomModal.classList.add("active");
       document.body.classList.add("meeting-modal-open");
     }
-    
-    // Setup room title
+
+    // Set Room Title
     const titleEl = document.getElementById("meeting-room-title-display");
-    if (titleEl && meeting && meeting.title) {
-      titleEl.textContent = meeting.title;
+    if (titleEl) titleEl.textContent = meetingTitle;
+
+    // Reset Stage & Grid
+    const videoGrid = document.getElementById("river-video-grid");
+    if (videoGrid) {
+      videoGrid.innerHTML = "";
+      videoGrid.setAttribute("data-count", "1");
     }
-    const legacyTitle = document.getElementById("meeting-room-title");
-    if (legacyTitle && meeting && meeting.title) {
-      legacyTitle.textContent = meeting.title;
+
+    // Dismiss any previous banner
+    const banner = document.getElementById("river-meeting-banner");
+    if (banner) banner.style.display = "none";
+
+    // Stop any existing session
+    if (activeMeetingSession && activeMeetingSession.localStream) {
+      try { activeMeetingSession.localStream.getTracks().forEach(t => t.stop()); } catch(e) {}
     }
-  
-    if (meeting && meeting.id) {
-      try { subscribeToMeetingEvents(meeting.id); } catch(e) {}
+    if (activeMeetingSession && activeMeetingSession.peer) {
+      try { activeMeetingSession.peer.destroy(); } catch(e) {}
     }
-    
+    if (activeMeetingSession && activeMeetingSession.mqttClient) {
+      try { activeMeetingSession.mqttClient.end(true); } catch(e) {}
+    }
+
     activeMeetingSession = {
-      meetingId: meeting ? meeting.id : "default",
-      localStream: stream,
+      meetingId: meetingId,
+      title: meetingTitle,
+      userName: loggedIn,
+      isHost: isHost,
+      localStream: null,
       isMuted: false,
       isCamOff: false,
-      isHost: isHost
+      peer: null,
+      myPeerId: null,
+      peerCalls: new Map(), // peerId -> call
+      remoteStreams: new Map(), // peerId -> stream
+      remoteNames: new Map(), // peerId -> name
+      mqttClient: null,
+      topic: `riveroflife/meet/${meetingId.toString().replace(/[^a-zA-Z0-9]/g, '_')}`
     };
 
-    // Video Conference Mounting: Daily.co (Primary), External Link, or Jitsi Meet (Fallback)
-    const jitsiCont = document.getElementById("meeting-jitsi-container");
-    if (jitsiCont) {
-      jitsiCont.style.display = "block";
-      
-      // 1. Check if meeting has an external link (Google Meet, Zoom, WhatsApp)
-      const hasCustomExtUrl = meeting && meeting.customUrl && 
-        (meeting.customUrl.includes("meet.google.com") || 
-         meeting.customUrl.includes("zoom.us") || 
-         meeting.customUrl.includes("whatsapp.com") || 
-         meeting.customUrl.includes("wa.me"));
-
-      if (hasCustomExtUrl) {
-        const extUrl = meeting.customUrl.trim();
-        jitsiCont.innerHTML = `
-          <div style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #090d16; padding: 20px; box-sizing: border-box;">
-            <div style="max-width: 320px; width: 100%; text-align: center; padding: 24px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); border-radius: 20px; color: #fff; box-shadow: 0 8px 32px rgba(0,0,0,0.4);">
-              <div style="font-size: 44px; margin-bottom: 12px;">🔗</div>
-              <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 800; color: #fff;">External Fellowship Call</h3>
-              <p style="font-size: 13px; color: #9ca3af; margin: 0 0 20px 0; line-height: 1.5;">This prayer meeting is hosted on an external platform.</p>
-              <a href="${extUrl}" target="_blank" rel="noopener noreferrer" style="display: block; padding: 14px 20px; background: linear-gradient(135deg, #2563eb, #3b82f6); color: #fff; font-weight: 800; border-radius: 12px; text-decoration: none; font-size: 14px; box-shadow: 0 4px 14px rgba(37,99,235,0.4);">
-                🚀 Open Meeting / सभेत सामील व्हा
-              </a>
-              <button onclick="exitLiveMeetingRoom()" style="margin-top: 14px; background: transparent; border: none; color: #9ca3af; font-size: 13px; cursor: pointer;">
-                Cancel / मागे जा
-              </button>
-            </div>
-          </div>
-        `;
-        logAudioDebug("External meeting card rendered.", { extUrl });
-        showToast("Opening External Meeting 🙏");
-        return;
-      }
-
-      // 2. Check configured video provider: 'jitsi' (Default, 100% Free, HD In-App, Screen Share, No Card) vs 'daily'
-      const provider = localStorage.getItem("rol_video_provider") || "jitsi";
-
-      if (provider === "daily") {
-        const dailyBaseUrl = getDailyRoomUrl(meeting);
-        const sep = dailyBaseUrl.includes("?") ? "&" : "?";
-        const dailyEmbedUrl = `${dailyBaseUrl}${sep}userName=${encodeURIComponent(loggedIn)}&showLeaveButton=true`;
-
-        jitsiCont.innerHTML = `
-          <iframe 
-            id="webrtc-room-iframe"
-            src="${dailyEmbedUrl}" 
-            width="100%" 
-            height="100%" 
-            allow="camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *;" 
-            allowusermedia="true"
-            style="border: none; width: 100%; height: 100%; border-radius: 14px; background: #090d16;">
-          </iframe>
-        `;
-
-        // Listen for Daily.co leave event to auto-close modal cleanly
-        if (window._dailyMessageListener) {
-          window.removeEventListener("message", window._dailyMessageListener);
-        }
-        window._dailyMessageListener = function(e) {
-          if (e && e.data) {
-            const act = e.data.action || e.data.event;
-            if (act === 'left-meeting' || act === 'meeting-session-ended') {
-              console.log("[Daily.co] Participant left meeting, exiting modal.");
-              exitLiveMeetingRoom();
-            }
+    // 1. Acquire Local Media Stream directly at Top-Level Window (No iframes = Zero WebKit Permission Bugs)
+    let localStream = existingStream;
+    if (!localStream && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      try {
+        localStream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true
+          },
+          video: {
+            facingMode: currentFacingMode,
+            width: { ideal: 640, max: 1280 },
+            height: { ideal: 480, max: 720 },
+            frameRate: { ideal: 30, max: 30 }
           }
-        };
-        window.addEventListener("message", window._dailyMessageListener);
-
-        logAudioDebug("Daily.co clean conference mounted successfully.", { dailyEmbedUrl });
-        showToast("Joined Online Fellowship (Daily.co) 🙏");
-      } else {
-        // Optimized 100% Free In-App WebRTC Conference (River of Life LiveMeet)
-        // HD Audio & Video, Acoustic Echo Cancellation, Noise Suppression, Screen Sharing & Zero App Nags
-        const meetingIdSlug = (meeting && meeting.id) ? meeting.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
-        const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
-        
-        // Essential conference toolbar: Mic, Camera, Screen Share, Chat, Raise Hand, Grid View, Hangup
-        const toolbarButtons = ["microphone", "camera", "desktop", "chat", "raisehand", "tileview", "hangup"];
-
-        // Clean up any existing Jitsi instance
-        if (window._jitsiApi) {
-          try { window._jitsiApi.dispose(); } catch(e) {}
-          window._jitsiApi = null;
-        }
-        jitsiCont.innerHTML = "";
-
-        const jitsiServerDomain = getJitsiServerDomain();
-
-        if (typeof JitsiMeetExternalAPI !== "undefined") {
-          const options = {
-            roomName: roomSlug,
-            width: '100%',
-            height: '100%',
-            parentNode: jitsiCont,
-            userInfo: { displayName: loggedIn },
-            configOverwrite: {
-              enableUserMediaForMobile: true,
-              disableDeepLinking: true,
-              startWithAudioMuted: true,
-              startWithVideoMuted: true,
-              startSilent: false,
-              startAudioOnly: false,
-              p2p: { enabled: false }, // Disables P2P so mobile Safari WebKit routes via SFU and doesn't freeze/mute mic
-              prejoinConfig: { enabled: false },
-              prejoinPageEnabled: false,
-              requireDisplayName: false,
-              enableWelcomePage: false,
-              enableClosePage: false,
-              disableThirdPartyRequests: true,
-              resolution: 720,
-              enableNoAudioDetection: false,
-              enableNoisyMicDetection: false,
-              disableAudioLevels: true, // Prevents iOS Safari AudioContext analyzer crash
-              toolbarButtons: toolbarButtons
+        });
+      } catch (camErr) {
+        console.warn("[RiverMeet] Camera+Mic capture error, trying audio only:", camErr);
+        try {
+          localStream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+              echoCancellation: true,
+              noiseSuppression: true,
+              autoGainControl: true
             },
-            interfaceConfigOverwrite: {
-              TOOLBAR_BUTTONS: toolbarButtons,
-              SETTINGS_SECTIONS: [],
-              SHOW_JITSI_WATERMARK: false,
-              SHOW_WATERMARK_FOR_GUESTS: false,
-              SHOW_BRAND_WATERMARK: false,
-              SHOW_POWERED_BY: false,
-              MOBILE_APP_PROMO: false,
-              HIDE_DEEP_LINKING_LOGO: true
-            }
-          };
-
-          // Intercept createElement for the iframe to guarantee WebKit permissions policy delegation (iPhone Safari)
-          const origCreateElement = document.createElement.bind(document);
-          const allowPolicy = "camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; clipboard-write *; camera; microphone; autoplay; display-capture; fullscreen; speaker-selection;";
-          document.createElement = function(tagName, opts) {
-            const el = origCreateElement(tagName, opts);
-            if (tagName && typeof tagName === "string" && tagName.toLowerCase() === "iframe") {
-              el.setAttribute("allow", allowPolicy);
-              el.setAttribute("allowusermedia", "true");
-              el.setAttribute("playsinline", "true");
-              el.setAttribute("webkit-playsinline", "true");
-              el.allow = allowPolicy;
-            }
-            return el;
-          };
-
-          let api = null;
-          try {
-            api = new JitsiMeetExternalAPI(jitsiServerDomain, options);
-          } finally {
-            document.createElement = origCreateElement;
+            video: false
+          });
+          activeMeetingSession.isCamOff = true;
+        } catch (micErr) {
+          console.warn("[RiverMeet] Audio capture blocked:", micErr);
+          // Show Listen-Only notice banner
+          if (banner) {
+            const bText = document.getElementById("river-meeting-banner-text");
+            if (bText) bText.textContent = "🎙️ माइक परवानगी नाकारली गेली आहे. तुम्ही 'Listen-Only' मोडमध्ये ऐकू शकता.";
+            banner.style.display = "flex";
           }
-          window._jitsiApi = api;
-
-          // Listen for mobile mic/camera permission errors
-          api.on("micError", function(e) {
-            console.warn("[Jitsi] Mic access notice:", e);
-          });
-          api.on("cameraError", function(e) {
-            console.warn("[Jitsi] Camera access error:", e);
-          });
-
-          // Keep audio state debugged
-          api.on("audioMuteStatusChanged", function(e) {
-            logAudioDebug("Conference audio mute status changed:", e && e.muted);
-          });
-
-          // Mobile-friendly conference join handler (keeps mic muted until user explicitly toggles it)
-          api.on("videoConferenceJoined", function() {
-            logAudioDebug("Jitsi conference joined successfully.");
-            try {
-              const jf = api.getIFrame && api.getIFrame();
-              if (jf) {
-                jf.setAttribute("allow", allowPolicy);
-                jf.setAttribute("allowfullscreen", "true");
-              }
-            } catch (e) {
-              console.warn("RoL iframe setup notice:", e);
-            }
-          });
-
-          api.on("readyToClose", function() {
-            exitLiveMeetingRoom();
-          });
-
-          // Style the generated iframe
-          const createdIframe = jitsiCont.querySelector("iframe");
-          if (createdIframe) {
-            createdIframe.id = "webrtc-room-iframe";
-            createdIframe.style.width = "100%";
-            createdIframe.style.height = "100%";
-            createdIframe.style.border = "none";
-            createdIframe.style.borderRadius = "14px";
-            createdIframe.style.background = "#090d16";
-            createdIframe.setAttribute("allow", allowPolicy);
-            createdIframe.setAttribute("allowusermedia", "true");
-            createdIframe.setAttribute("playsinline", "true");
-            createdIframe.setAttribute("webkit-playsinline", "true");
-          }
-
-          logAudioDebug("River of Life LiveMeet mounted via JitsiMeetExternalAPI with HD audio/video.", { roomSlug });
-          showToast("Joined River of Life LiveMeet 🙏");
-        } else {
-          // Fallback iframe
-          const buttonsParam = encodeURIComponent(JSON.stringify(toolbarButtons));
-          const emptyArrayParam = encodeURIComponent(JSON.stringify([]));
-
-          const jitsiConfig = [
-            "config.enableUserMediaForMobile=true",
-            "config.disableDeepLinking=true",
-            "config.prejoinPageEnabled=false",
-            "config.prejoinConfig.enabled=false",
-            "config.requireDisplayName=false",
-            "config.enableWelcomePage=false",
-            "config.enableClosePage=false",
-            "config.disableThirdPartyRequests=true",
-            "config.startWithAudioMuted=true",
-            "config.startWithVideoMuted=true",
-            "config.startSilent=false",
-            "config.startAudioOnly=false",
-            "config.p2p.enabled=false",
-            "config.resolution=720",
-            "config.constraints.video.height.ideal=720",
-            "config.constraints.video.height.max=1080",
-            "config.constraints.video.width.ideal=1280",
-            "config.constraints.video.width.max=1920",
-            "config.constraints.video.frameRate.ideal=30",
-            "config.constraints.video.frameRate.max=30",
-            "config.constraints.audio.autoGainControl=true",
-            "config.constraints.audio.echoCancellation=true",
-            "config.constraints.audio.noiseSuppression=true",
-            "config.channelLastN=-1",
-            "config.adaptiveLastN=false",
-            "config.videoQuality.maxBitratesVideo.low=350000",
-            "config.videoQuality.maxBitratesVideo.standard=1000000",
-            "config.videoQuality.maxBitratesVideo.high=4000000",
-            "config.disableEchoCancellation=false",
-            "config.noiseSuppression=true",
-            "config.autoGainControl=true",
-            "config.stereo=false",
-            "config.audioQuality.stereo=false",
-            "config.audioQuality.opusMaxAverageBitrate=96000",
-            "config.disableAudioLevels=false",
-            "config.desktopSharingFrameRate.min=15",
-            "config.desktopSharingFrameRate.max=30",
-            `config.toolbarButtons=${buttonsParam}`,
-            `interfaceConfig.TOOLBAR_BUTTONS=${buttonsParam}`,
-            `interfaceConfig.SETTINGS_SECTIONS=${emptyArrayParam}`,
-            "interfaceConfig.SHOW_JITSI_WATERMARK=false",
-            "interfaceConfig.SHOW_WATERMARK_FOR_GUESTS=false",
-            "interfaceConfig.SHOW_BRAND_WATERMARK=false",
-            "interfaceConfig.SHOW_POWERED_BY=false",
-            "interfaceConfig.MOBILE_APP_PROMO=false",
-            "interfaceConfig.HIDE_DEEP_LINKING_LOGO=true",
-            `userInfo.displayName=${encodeURIComponent(loggedIn)}`
-          ].join("&");
-
-          const roomUrl = `https://${jitsiServerDomain}/${roomSlug}#${jitsiConfig}`;
-
-          jitsiCont.innerHTML = `
-            <iframe 
-              id="webrtc-room-iframe"
-              src="${roomUrl}" 
-              width="100%" 
-              height="100%" 
-              allow="camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; clipboard-write *; camera; microphone; autoplay; display-capture; fullscreen; speaker-selection;" 
-              allowusermedia="true"
-              playsinline="true"
-              webkit-playsinline="true"
-              style="border: none; width: 100%; height: 100%; border-radius: 14px; background: #090d16;">
-            </iframe>
-          `;
-
-          logAudioDebug("River of Life LiveMeet mounted fallback iframe with HD audio/video.", { roomUrl });
-          showToast("Joined River of Life LiveMeet 🙏");
         }
       }
     }
 
-    // Auto-enumerate devices for settings drawer
-    enumerateAndPopulateAudioDevices();
+    activeMeetingSession.localStream = localStream;
+
+    // 2. Render Local Video Tile
+    renderLocalVideoTile(localStream, loggedIn);
+
+    // 3. Update Control Buttons UI
+    updateRiverMeetingControlsUI();
+
+    // 4. Update Participant Counter & Drawer
+    updateRiverParticipantUI();
+
+    // 5. Initialize WebRTC Mesh Signaling (PeerJS + MQTT)
+    initRiverWebRTCMesh(activeMeetingSession);
+
+    if (typeof showToast === "function") showToast("Connected to Sanctuary Video 🙏");
 
   } catch (err) {
-    logAudioDebug("launchLiveMeetingRoom notice:", err);
+    console.error("[RiverMeet] launchLiveMeetingRoom error:", err);
   }
 }
 
-const OFFICIAL_DAILY_ROOM_URL = "https://riveroflife.daily.co/River_Of_Life";
+// Render Local Video Tile into #river-video-grid
+function renderLocalVideoTile(stream, userName) {
+  const videoGrid = document.getElementById("river-video-grid");
+  if (!videoGrid) return;
 
-function getDailyRoomUrl(meeting) {
-  // 1. If meeting has a custom Daily.co link
-  if (meeting && meeting.customUrl && meeting.customUrl.includes("daily.co")) {
-    return meeting.customUrl.trim();
+  const existingLocal = document.getElementById("river-tile-local");
+  if (existingLocal) existingLocal.remove();
+
+  const tile = document.createElement("div");
+  tile.id = "river-tile-local";
+  tile.className = "river-video-tile is-local mirror-active";
+
+  const video = document.createElement("video");
+  video.id = "river-video-local";
+  video.setAttribute("playsinline", "true");
+  video.setAttribute("webkit-playsinline", "true");
+  video.setAttribute("autoplay", "true");
+  video.muted = true; // Always mute local video to prevent acoustic echo
+  if (stream) {
+    video.srcObject = stream;
+    video.play().catch(e => console.warn("[RiverMeet] Local video play notice:", e));
   }
-  // 2. If church admin/user configured a custom Daily room URL in settings
-  const customConfigured = localStorage.getItem("rol_daily_room_url");
-  if (customConfigured && customConfigured.includes("daily.co")) {
-    return customConfigured.trim();
+
+  const avatar = document.createElement("div");
+  avatar.id = "river-avatar-local";
+  avatar.className = "river-tile-avatar";
+  avatar.style.display = (activeMeetingSession && activeMeetingSession.isCamOff) ? "flex" : "none";
+  const initial = userName ? userName.trim().charAt(0).toUpperCase() : "M";
+  avatar.innerHTML = `<div class="river-avatar-circle">${initial}</div>`;
+
+  const overlay = document.createElement("div");
+  overlay.className = "river-tile-overlay";
+  overlay.innerHTML = `
+    <div class="river-tile-nametag">
+      <span class="river-tile-mic-icon" id="river-tile-mic-local">${(activeMeetingSession && activeMeetingSession.isMuted) ? "🔇" : "🎙️"}</span>
+      <span class="river-tile-name">${userName} (You / तुम्ही)</span>
+    </div>
+  `;
+
+  tile.appendChild(video);
+  tile.appendChild(avatar);
+  tile.appendChild(overlay);
+  videoGrid.appendChild(tile);
+
+  // Attach audio visualizer to detect when user speaks
+  if (stream && stream.getAudioTracks().length > 0) {
+    attachAudioVisualizer(stream, tile);
   }
-  // 3. Permanent official Daily.co sanctuary room
-  return OFFICIAL_DAILY_ROOM_URL;
+
+  recalculateVideoGridLayout();
 }
-window.getDailyRoomUrl = getDailyRoomUrl;
 
-function saveAndLaunchInlineDaily() {
-  const inp = document.getElementById("inline-daily-url-input");
-  const val = inp ? inp.value.trim() : "";
-  if (!val || !val.includes("daily.co")) {
-    showToast("Please enter a valid Daily.co URL (e.g. https://yourchurch.daily.co/room)");
+// Add Remote Video Tile
+function addRemoteVideoTile(peerId, remoteStream, peerName) {
+  const videoGrid = document.getElementById("river-video-grid");
+  if (!videoGrid) return;
+
+  const name = peerName || (activeMeetingSession && activeMeetingSession.remoteNames.get(peerId)) || "Participant";
+  if (activeMeetingSession) {
+    activeMeetingSession.remoteStreams.set(peerId, remoteStream);
+    activeMeetingSession.remoteNames.set(peerId, name);
+  }
+
+  let tile = document.getElementById(`river-tile-${peerId}`);
+  if (!tile) {
+    tile = document.createElement("div");
+    tile.id = `river-tile-${peerId}`;
+    tile.className = "river-video-tile is-remote";
+
+    const video = document.createElement("video");
+    video.id = `river-video-${peerId}`;
+    video.setAttribute("playsinline", "true");
+    video.setAttribute("webkit-playsinline", "true");
+    video.setAttribute("autoplay", "true");
+    video.srcObject = remoteStream;
+    video.play().catch(e => console.warn("[RiverMeet] Remote video play notice:", e));
+
+    const avatar = document.createElement("div");
+    avatar.id = `river-avatar-${peerId}`;
+    avatar.className = "river-tile-avatar";
+    avatar.style.display = "none";
+    const initial = name.trim().charAt(0).toUpperCase() || "P";
+    avatar.innerHTML = `<div class="river-avatar-circle">${initial}</div>`;
+
+    const overlay = document.createElement("div");
+    overlay.className = "river-tile-overlay";
+    overlay.innerHTML = `
+      <div class="river-tile-nametag">
+        <span class="river-tile-mic-icon" id="river-tile-mic-${peerId}">🎙️</span>
+        <span class="river-tile-name">${name}</span>
+      </div>
+    `;
+
+    tile.appendChild(video);
+    tile.appendChild(avatar);
+    tile.appendChild(overlay);
+    videoGrid.appendChild(tile);
+
+    if (remoteStream && remoteStream.getAudioTracks().length > 0) {
+      attachAudioVisualizer(remoteStream, tile);
+    }
+  } else {
+    const video = document.getElementById(`river-video-${peerId}`);
+    if (video) {
+      video.srcObject = remoteStream;
+      video.play().catch(e => console.warn("[RiverMeet] Remote video update play notice:", e));
+    }
+  }
+
+  recalculateVideoGridLayout();
+  updateRiverParticipantUI();
+}
+
+// Remove Remote Video Tile
+function removeRemoteVideoTile(peerId) {
+  const tile = document.getElementById(`river-tile-${peerId}`);
+  if (tile) tile.remove();
+
+  if (activeMeetingSession) {
+    activeMeetingSession.remoteStreams.delete(peerId);
+    activeMeetingSession.remoteNames.delete(peerId);
+    activeMeetingSession.peerCalls.delete(peerId);
+  }
+
+  recalculateVideoGridLayout();
+  updateRiverParticipantUI();
+}
+
+// Recalculate CSS Grid data-count attribute for responsive sizing
+function recalculateVideoGridLayout() {
+  const videoGrid = document.getElementById("river-video-grid");
+  if (!videoGrid) return;
+  const count = videoGrid.querySelectorAll(".river-video-tile").length || 1;
+  videoGrid.setAttribute("data-count", count.toString());
+}
+
+// Audio Activity Visualizer (Lights up border when speaking)
+function attachAudioVisualizer(stream, tileEl) {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    const src = ctx.createMediaStreamSource(stream);
+    const analyser = ctx.createAnalyser();
+    analyser.fftSize = 64;
+    src.connect(analyser);
+    const data = new Uint8Array(analyser.frequencyBinCount);
+
+    const interval = setInterval(() => {
+      if (!activeMeetingSession || !tileEl.isConnected) {
+        clearInterval(interval);
+        try { ctx.close(); } catch(e) {}
+        return;
+      }
+      analyser.getByteFrequencyData(data);
+      let sum = 0;
+      for (let i = 0; i < data.length; i++) sum += data[i];
+      const avg = sum / data.length;
+      if (avg > 18) {
+        tileEl.classList.add("is-speaking");
+      } else {
+        tileEl.classList.remove("is-speaking");
+      }
+    }, 150);
+  } catch (e) {
+    console.warn("[RiverMeet] Audio visualizer setup notice:", e);
+  }
+}
+
+// Toggle Local Microphone
+function toggleRiverMeetingMic() {
+  if (!activeMeetingSession) return;
+  if (!activeMeetingSession.localStream || activeMeetingSession.localStream.getAudioTracks().length === 0) {
+    if (typeof showToast === "function") showToast("मायक्रोफोन उपलब्ध नाही (No microphone available)");
     return;
   }
-  localStorage.setItem("rol_daily_room_url", val);
-  localStorage.setItem("rol_video_provider", "daily");
-  showToast("Daily.co Room Connected! 🙏");
-  if (activeMeetingSession && activeMeetingSession.meetingId) {
-    const meetings = getMeetingsFromStorage();
-    const curMeeting = meetings.find(m => m.id === activeMeetingSession.meetingId);
-    launchLiveMeetingRoom(curMeeting || { id: activeMeetingSession.meetingId }, null);
+
+  const audioTrack = activeMeetingSession.localStream.getAudioTracks()[0];
+  audioTrack.enabled = !audioTrack.enabled;
+  activeMeetingSession.isMuted = !audioTrack.enabled;
+
+  const micIcon = document.getElementById("river-tile-mic-local");
+  if (micIcon) micIcon.textContent = activeMeetingSession.isMuted ? "🔇" : "🎙️";
+
+  updateRiverMeetingControlsUI();
+  broadcastMeetingState();
+
+  if (typeof showToast === "function") {
+    showToast(activeMeetingSession.isMuted ? "🔇 Mic Muted (माइक बंद)" : "🎙️ Mic Active (माइक चालू)");
   }
 }
 
-function switchToJitsiAndReload() {
-  localStorage.setItem("rol_video_provider", "jitsi");
-  showToast("Switched to Instant Jitsi Room 🙏");
-  if (activeMeetingSession && activeMeetingSession.meetingId) {
-    const meetings = getMeetingsFromStorage();
-    const curMeeting = meetings.find(m => m.id === activeMeetingSession.meetingId);
-    launchLiveMeetingRoom(curMeeting || { id: activeMeetingSession.meetingId }, null);
+// Toggle Local Camera
+function toggleRiverMeetingCam() {
+  if (!activeMeetingSession) return;
+  if (!activeMeetingSession.localStream || activeMeetingSession.localStream.getVideoTracks().length === 0) {
+    if (typeof showToast === "function") showToast("कॅमेरा उपलब्ध नाही (No camera available)");
+    return;
+  }
+
+  const videoTrack = activeMeetingSession.localStream.getVideoTracks()[0];
+  videoTrack.enabled = !videoTrack.enabled;
+  activeMeetingSession.isCamOff = !videoTrack.enabled;
+
+  const avatar = document.getElementById("river-avatar-local");
+  if (avatar) avatar.style.display = activeMeetingSession.isCamOff ? "flex" : "none";
+
+  const video = document.getElementById("river-video-local");
+  if (video) video.style.opacity = activeMeetingSession.isCamOff ? "0" : "1";
+
+  updateRiverMeetingControlsUI();
+  broadcastMeetingState();
+
+  if (typeof showToast === "function") {
+    showToast(activeMeetingSession.isCamOff ? "📹 Camera Off (कॅमेरा बंद)" : "📹 Camera On (कॅमेरा चालू)");
   }
 }
 
-window.saveAndLaunchInlineDaily = saveAndLaunchInlineDaily;
-window.switchToJitsiAndReload = switchToJitsiAndReload;
-
-function openCurrentMeetingInExternalBrowser() {
-  const meetingId = (activeMeetingSession && activeMeetingSession.meetingId) ? activeMeetingSession.meetingId : "default";
-  const meetingIdSlug = meetingId.toString().replace(/[^a-zA-Z0-9]/g, '_');
-  const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
-  const loggedIn = (state && state.currentUser) ? state.currentUser.username : "Member";
-  const jitsiServerDomain = (localStorage.getItem("rol_jitsi_server") || "jitsi.riot.im")
-    .replace(/^https?:\/\//, '')
-    .replace(/\/+$/, "");
-  const extUrl = `https://${jitsiServerDomain}/${roomSlug}#config.disableDeepLinking=true&config.startWithAudioMuted=false&config.prejoinPageEnabled=false&userInfo.displayName=${encodeURIComponent(loggedIn)}`;
-  window.open(extUrl, "_blank");
-  showToast("Opening Live Sanctuary in browser tab 🙏");
-}
-window.openCurrentMeetingInExternalBrowser = openCurrentMeetingInExternalBrowser;
-
-
-// ═══════════════════════════════════════════════════════════════
-// CLEAN MOBILE MEETING CONTROLS — Mic, Camera, Reactions, End Call
-// ═══════════════════════════════════════════════════════════════
-
-function showMeetCustomControls() {
-  const blocker = document.getElementById("meet-mirotalk-controls-blocker");
-  const bar = document.getElementById("meet-custom-controls-bar");
-  if (blocker) blocker.style.display = "block";
-  if (bar) bar.style.display = "flex";
-  // Hide old top Audio Settings button — redundant on mobile
-  const audioSettingsBtn = document.getElementById("btn-meeting-audio-settings");
-  if (audioSettingsBtn) audioSettingsBtn.style.display = "none";
-}
-
-function hideMeetCustomControls() {
-  const blocker = document.getElementById("meet-mirotalk-controls-blocker");
-  const bar = document.getElementById("meet-custom-controls-bar");
-  const picker = document.getElementById("meet-emoji-picker-panel");
-  if (blocker) blocker.style.display = "none";
-  if (bar) bar.style.display = "none";
-  if (picker) picker.style.display = "none";
-  // Restore top Audio Settings button
-  const audioSettingsBtn = document.getElementById("btn-meeting-audio-settings");
-  if (audioSettingsBtn) audioSettingsBtn.style.display = "";
-}
-
-// Mic toggle — updates button icon, sends to MiroTalk via keyboard simulation
-let _meetCtrlMicMuted = false;
-function toggleMeetCtrlMic() {
-  _meetCtrlMicMuted = !_meetCtrlMicMuted;
-  const btn = document.getElementById("meet-ctrl-mic");
-  if (btn) {
-    btn.textContent = _meetCtrlMicMuted ? "🔇" : "🎙️";
-    btn.style.background = _meetCtrlMicMuted
-      ? "rgba(239, 68, 68, 0.35)"
-      : "rgba(255,255,255,0.1)";
-    btn.style.borderColor = _meetCtrlMicMuted
-      ? "#ef4444"
-      : "rgba(255,255,255,0.2)";
+// Flip Camera (Front vs Back camera on phones)
+async function flipRiverMeetingCamera() {
+  if (!activeMeetingSession || !activeMeetingSession.localStream) return;
+  const currentVideoTrack = activeMeetingSession.localStream.getVideoTracks()[0];
+  if (!currentVideoTrack) {
+    if (typeof showToast === "function") showToast("कॅमेरा उपलब्ध नाही");
+    return;
   }
-  // Simulate clicking mic button inside the iframe via keyboard shortcut (MiroTalk uses M key)
+
+  currentFacingMode = (currentFacingMode === "user") ? "environment" : "user";
+  if (typeof showToast === "function") showToast(currentFacingMode === "user" ? "Selfie Camera" : "Rear Camera");
+
+  const localTile = document.getElementById("river-tile-local");
+  if (localTile) {
+    if (currentFacingMode === "user") localTile.classList.add("mirror-active");
+    else localTile.classList.remove("mirror-active");
+  }
+
   try {
-    const iframe = document.getElementById("webrtc-room-iframe");
-    if (iframe && iframe.contentWindow) {
-      iframe.contentWindow.postMessage({ type: "toggleAudio" }, "*");
-    }
-  } catch(e) {}
-  showToast(_meetCtrlMicMuted ? "🔇 Mic Muted" : "🎙️ Mic Active");
-}
+    await currentVideoTrack.applyConstraints({ facingMode: currentFacingMode });
+  } catch (err) {
+    // Fallback: stop old track and re-acquire
+    try {
+      const newStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: currentFacingMode }
+      });
+      const newVideoTrack = newStream.getVideoTracks()[0];
+      activeMeetingSession.localStream.removeTrack(currentVideoTrack);
+      currentVideoTrack.stop();
+      activeMeetingSession.localStream.addTrack(newVideoTrack);
 
-// Camera toggle — updates button icon
-let _meetCtrlCamOff = false;
-function toggleMeetCtrlCam() {
-  _meetCtrlCamOff = !_meetCtrlCamOff;
-  const btn = document.getElementById("meet-ctrl-cam");
-  if (btn) {
-    btn.textContent = _meetCtrlCamOff ? "🚫" : "📹";
-    btn.style.background = _meetCtrlCamOff
-      ? "rgba(239, 68, 68, 0.35)"
-      : "rgba(255,255,255,0.1)";
-    btn.style.borderColor = _meetCtrlCamOff
-      ? "#ef4444"
-      : "rgba(255,255,255,0.2)";
-  }
-  // Try sending to iframe
-  try {
-    const iframe = document.getElementById("webrtc-room-iframe");
-    if (iframe && iframe.contentWindow) {
-      iframe.contentWindow.postMessage({ type: "toggleVideo" }, "*");
-    }
-  } catch(e) {}
-  showToast(_meetCtrlCamOff ? "📵 Camera Off" : "📹 Camera On");
-}
+      const localVid = document.getElementById("river-video-local");
+      if (localVid) localVid.srcObject = activeMeetingSession.localStream;
 
-// Emoji reactions picker toggle
-function toggleMeetEmojiPanel() {
-  const picker = document.getElementById("meet-emoji-picker-panel");
-  if (!picker) return;
-  const isOpen = picker.style.display === "flex";
-  picker.style.display = isOpen ? "none" : "flex";
-  const btn = document.getElementById("meet-ctrl-emoji");
-  if (btn) btn.style.background = isOpen ? "rgba(255,255,255,0.1)" : "rgba(212,175,55,0.3)";
-}
-
-// Send an emoji reaction — floats up on screen with animation
-function sendMeetReaction(emoji) {
-  // Close picker
-  const picker = document.getElementById("meet-emoji-picker-panel");
-  if (picker) picker.style.display = "none";
-  const btn = document.getElementById("meet-ctrl-emoji");
-  if (btn) btn.style.background = "rgba(255,255,255,0.1)";
-
-  // Show floating emoji bubble
-  const stage = document.getElementById("river-native-meeting-stage");
-  if (!stage) return;
-  const bubble = document.createElement("div");
-  bubble.textContent = emoji;
-  bubble.style.cssText = `
-    position: absolute;
-    font-size: 36px;
-    bottom: 100px;
-    left: ${30 + Math.random() * 40}%;
-    z-index: 50;
-    pointer-events: none;
-    animation: meetReactionFloat 2.8s ease-out forwards;
-  `;
-  stage.appendChild(bubble);
-  setTimeout(() => bubble.remove(), 3000);
-
-  // Inject animation keyframes once
-  if (!document.getElementById("meet-reaction-keyframes")) {
-    const style = document.createElement("style");
-    style.id = "meet-reaction-keyframes";
-    style.textContent = `
-      @keyframes meetReactionFloat {
-        0%   { opacity: 1; transform: translateY(0) scale(1); }
-        80%  { opacity: 0.8; transform: translateY(-180px) scale(1.2); }
-        100% { opacity: 0; transform: translateY(-240px) scale(0.8); }
+      // Replace track on all outgoing peer calls
+      if (activeMeetingSession.peerCalls) {
+        activeMeetingSession.peerCalls.forEach(call => {
+          if (call.peerConnection) {
+            const sender = call.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
+            if (sender) sender.replaceTrack(newVideoTrack);
+          }
+        });
       }
-    `;
-    document.head.appendChild(style);
-  }
-
-  showToast(`${emoji} Reaction Sent!`);
-}
-
-window.showMeetCustomControls = showMeetCustomControls;
-window.hideMeetCustomControls = hideMeetCustomControls;
-window.toggleMeetCtrlMic = toggleMeetCtrlMic;
-window.toggleMeetCtrlCam = toggleMeetCtrlCam;
-window.toggleMeetEmojiPanel = toggleMeetEmojiPanel;
-window.sendMeetReaction = sendMeetReaction;
-
-function toggleQuickMeetingMic() {
-  if (window._jitsiApi) {
-    try { window._jitsiApi.executeCommand("toggleAudio"); } catch(e) {}
+    } catch (fallbackErr) {
+      console.warn("[RiverMeet] Camera flip fallback error:", fallbackErr);
+    }
   }
 }
-window.toggleQuickMeetingMic = toggleQuickMeetingMic;
 
-function updateQuickMeetingMicUI(isMuted) {
-  // Top bar quick mic removed per user direction
+// Update Bottom Floating Control Bar UI Icons
+function updateRiverMeetingControlsUI() {
+  if (!activeMeetingSession) return;
+
+  const btnMic = document.getElementById("btn-river-toggle-mic");
+  const micOnIcon = document.getElementById("river-icon-mic-on");
+  const micOffIcon = document.getElementById("river-icon-mic-off");
+  const micLabel = document.getElementById("river-mic-label");
+
+  if (btnMic) {
+    btnMic.classList.toggle("is-muted", activeMeetingSession.isMuted);
+    if (micOnIcon) micOnIcon.style.display = activeMeetingSession.isMuted ? "none" : "block";
+    if (micOffIcon) micOffIcon.style.display = activeMeetingSession.isMuted ? "block" : "none";
+    if (micLabel) micLabel.textContent = activeMeetingSession.isMuted ? "Muted" : "Mic On";
+  }
+
+  const btnCam = document.getElementById("btn-river-toggle-cam");
+  const camOnIcon = document.getElementById("river-icon-cam-on");
+  const camOffIcon = document.getElementById("river-icon-cam-off");
+  const camLabel = document.getElementById("river-cam-label");
+
+  if (btnCam) {
+    btnCam.classList.toggle("is-cam-off", activeMeetingSession.isCamOff);
+    if (camOnIcon) camOnIcon.style.display = activeMeetingSession.isCamOff ? "none" : "block";
+    if (camOffIcon) camOffIcon.style.display = activeMeetingSession.isCamOff ? "block" : "none";
+    if (camLabel) camLabel.textContent = activeMeetingSession.isCamOff ? "Cam Off" : "Camera";
+  }
 }
-window.updateQuickMeetingMicUI = updateQuickMeetingMicUI;
 
+// Prayer Reaction Picker Toggle
+function toggleRiverReactionPicker() {
+  const picker = document.getElementById("river-reaction-picker");
+  if (!picker) return;
+  picker.style.display = (picker.style.display === "none" || !picker.style.display) ? "flex" : "none";
+}
+
+// Send Reaction
+function sendMeetingReaction(emoji) {
+  renderFloatingReaction(emoji);
+  const picker = document.getElementById("river-reaction-picker");
+  if (picker) picker.style.display = "none";
+
+  if (activeMeetingSession && activeMeetingSession.mqttClient) {
+    try {
+      activeMeetingSession.mqttClient.publish(
+        activeMeetingSession.topic,
+        JSON.stringify({
+          type: 'reaction',
+          emoji: emoji,
+          peerId: activeMeetingSession.myPeerId,
+          userName: activeMeetingSession.userName
+        })
+      );
+    } catch(e) {}
+  }
+}
+
+// Render Animated Floating Emoji Shower
+function renderFloatingReaction(emoji) {
+  const shower = document.getElementById("river-reaction-shower");
+  if (!shower) return;
+
+  const el = document.createElement("div");
+  el.className = "river-floating-emoji";
+  el.textContent = emoji;
+  el.style.left = `${Math.floor(Math.random() * 70) + 15}%`;
+  shower.appendChild(el);
+
+  setTimeout(() => el.remove(), 2500);
+}
+
+// Participants Drawer Toggle
+function toggleRiverParticipantsDrawer() {
+  const drawer = document.getElementById("river-participants-drawer");
+  if (!drawer) return;
+  const isHidden = (drawer.style.display === "none" || !drawer.style.display);
+  drawer.style.display = isHidden ? "flex" : "none";
+  if (isHidden) updateParticipantsDrawerList();
+}
+
+// Update Participant Counter and Drawer List
+function updateRiverParticipantUI() {
+  const counter = document.getElementById("river-participant-counter");
+  const remoteCount = (activeMeetingSession && activeMeetingSession.remoteStreams) ? activeMeetingSession.remoteStreams.size : 0;
+  const total = 1 + remoteCount;
+  if (counter) counter.textContent = `👥 ${total} Online`;
+  updateParticipantsDrawerList();
+}
+
+function updateParticipantsDrawerList() {
+  const list = document.getElementById("river-participants-list");
+  if (!list || !activeMeetingSession) return;
+
+  const user = activeMeetingSession.userName;
+  const initial = user ? user.charAt(0).toUpperCase() : "Y";
+
+  let html = `
+    <div class="river-participant-item">
+      <div class="river-p-info">
+        <div class="river-p-avatar">${initial}</div>
+        <div>
+          <div class="river-p-name">${user} (You / तुम्ही)</div>
+          <div class="river-p-role">${activeMeetingSession.isHost ? "Meeting Host" : "Member"}</div>
+        </div>
+      </div>
+      <div>${activeMeetingSession.isMuted ? "🔇" : "🎙️"}</div>
+    </div>
+  `;
+
+  if (activeMeetingSession.remoteNames) {
+    activeMeetingSession.remoteNames.forEach((name, peerId) => {
+      const pInit = name ? name.charAt(0).toUpperCase() : "P";
+      html += `
+        <div class="river-participant-item">
+          <div class="river-p-info">
+            <div class="river-p-avatar" style="background: #0d9488;">${pInit}</div>
+            <div>
+              <div class="river-p-name">${name}</div>
+              <div class="river-p-role">Member</div>
+            </div>
+          </div>
+          <div>🎙️</div>
+        </div>
+      `;
+    });
+  }
+
+  list.innerHTML = html;
+}
+
+function dismissMeetingBanner() {
+  const b = document.getElementById("river-meeting-banner");
+  if (b) b.style.display = "none";
+}
+
+// Broadcast Local Mic/Cam state to peers over MQTT
+function broadcastMeetingState() {
+  if (!activeMeetingSession || !activeMeetingSession.mqttClient) return;
+  try {
+    activeMeetingSession.mqttClient.publish(
+      activeMeetingSession.topic,
+      JSON.stringify({
+        type: 'peer-state',
+        peerId: activeMeetingSession.myPeerId,
+        isMuted: activeMeetingSession.isMuted,
+        isCamOff: activeMeetingSession.isCamOff
+      })
+    );
+  } catch(e) {}
+}
+
+// Initialize WebRTC Mesh with PeerJS & MQTT
+function initRiverWebRTCMesh(session) {
+  if (typeof Peer === "undefined") {
+    console.warn("[RiverMeet] PeerJS library not loaded, running in standalone mode.");
+    return;
+  }
+
+  try {
+    const randomSuffix = Math.random().toString(36).substring(2, 8);
+    const cleanMeetingId = session.meetingId.toString().replace(/[^a-zA-Z0-9]/g, '_');
+    const myPeerId = `rol_${cleanMeetingId}_${Date.now()}_${randomSuffix}`;
+    session.myPeerId = myPeerId;
+
+    const peer = new Peer(myPeerId, {
+      config: {
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'stun:stun1.l.google.com:19302' },
+          { urls: 'stun:stun2.l.google.com:19302' }
+        ]
+      }
+    });
+
+    session.peer = peer;
+
+    peer.on('open', (id) => {
+      console.log("[RiverMeet] PeerJS open with ID:", id);
+      connectSignalingMQTT(session);
+    });
+
+    // Handle incoming video calls from other peers in meeting
+    peer.on('call', (call) => {
+      console.log("[RiverMeet] Incoming call from peer:", call.peer);
+      call.answer(session.localStream);
+      session.peerCalls.set(call.peer, call);
+
+      call.on('stream', (remoteStream) => {
+        console.log("[RiverMeet] Received stream from peer:", call.peer);
+        const name = (call.metadata && call.metadata.name) ? call.metadata.name : "Member";
+        addRemoteVideoTile(call.peer, remoteStream, name);
+      });
+
+      call.on('close', () => {
+        removeRemoteVideoTile(call.peer);
+      });
+
+      call.on('error', (err) => {
+        console.warn("[RiverMeet] Peer call error:", err);
+      });
+    });
+
+    peer.on('error', (err) => {
+      console.warn("[RiverMeet] PeerJS error:", err);
+    });
+
+  } catch (err) {
+    console.warn("[RiverMeet] initRiverWebRTCMesh notice:", err);
+  }
+}
+
+// Connect to Public MQTT Signaling Broker for Room Discovery
+function connectSignalingMQTT(session) {
+  if (typeof mqtt === "undefined") {
+    console.warn("[RiverMeet] MQTT library not loaded, peer discovery will rely on direct calls.");
+    return;
+  }
+
+  try {
+    const brokerUrl = 'wss://broker.emqx.io:8084/mqtt';
+    const clientId = `rol_client_${session.myPeerId}`;
+
+    const client = mqtt.connect(brokerUrl, {
+      clientId: clientId,
+      clean: true,
+      connectTimeout: 5000,
+      reconnectPeriod: 3000
+    });
+
+    session.mqttClient = client;
+
+    client.on('connect', () => {
+      console.log("[RiverMeet] Connected to signaling broker on topic:", session.topic);
+      client.subscribe(session.topic);
+
+      // Announce arrival to room
+      client.publish(
+        session.topic,
+        JSON.stringify({
+          type: 'peer-join',
+          peerId: session.myPeerId,
+          userName: session.userName,
+          isMuted: session.isMuted,
+          isCamOff: session.isCamOff
+        })
+      );
+    });
+
+    client.on('message', (topic, payload) => {
+      try {
+        const msg = JSON.parse(payload.toString());
+        if (!msg || msg.peerId === session.myPeerId) return;
+
+        if (msg.type === 'peer-join') {
+          console.log("[RiverMeet] Peer joined room:", msg.peerId, msg.userName);
+          // Call newly joined peer if we have local media or empty stream
+          if (session.peer && session.localStream && !session.peerCalls.has(msg.peerId)) {
+            const call = session.peer.call(msg.peerId, session.localStream, {
+              metadata: { name: session.userName }
+            });
+            session.peerCalls.set(msg.peerId, call);
+
+            call.on('stream', (remoteStream) => {
+              addRemoteVideoTile(msg.peerId, remoteStream, msg.userName);
+            });
+
+            call.on('close', () => {
+              removeRemoteVideoTile(msg.peerId);
+            });
+          }
+        } else if (msg.type === 'peer-leave') {
+          removeRemoteVideoTile(msg.peerId);
+        } else if (msg.type === 'peer-state') {
+          const micIcon = document.getElementById(`river-tile-mic-${msg.peerId}`);
+          if (micIcon) micIcon.textContent = msg.isMuted ? "🔇" : "🎙️";
+          const avatar = document.getElementById(`river-avatar-${msg.peerId}`);
+          if (avatar) avatar.style.display = msg.isCamOff ? "flex" : "none";
+        } else if (msg.type === 'reaction') {
+          renderFloatingReaction(msg.emoji);
+        }
+      } catch (e) {
+        console.warn("[RiverMeet] MQTT message parse error:", e);
+      }
+    });
+
+    client.on('error', (err) => {
+      console.warn("[RiverMeet] MQTT client error:", err);
+    });
+
+  } catch (err) {
+    console.warn("[RiverMeet] connectSignalingMQTT error:", err);
+  }
+}
+
+// Cleanly Exit Meeting Room & Release Hardware Resources
 function exitLiveMeetingRoom() {
   try {
-    console.log("Exiting Live Fellowship Meeting Room...");
+    console.log("[RiverMeet] Exiting Meeting Room cleanly...");
 
-    // Hide custom mobile controls overlay
-    hideMeetCustomControls();
-    _meetCtrlMicMuted = false;
-    _meetCtrlCamOff = false;
-    
-    // Hide Modal Overlay & Restore Body Class
+    // Stop all microphone and camera media tracks to turn off recording indicator
+    if (activeMeetingSession && activeMeetingSession.localStream) {
+      try {
+        activeMeetingSession.localStream.getTracks().forEach(track => {
+          track.stop();
+          console.log("[RiverMeet] Stopped track:", track.kind, track.label);
+        });
+      } catch (e) {}
+    }
+
+    // Publish peer-leave message
+    if (activeMeetingSession && activeMeetingSession.mqttClient) {
+      try {
+        activeMeetingSession.mqttClient.publish(
+          activeMeetingSession.topic,
+          JSON.stringify({ type: 'peer-leave', peerId: activeMeetingSession.myPeerId })
+        );
+        activeMeetingSession.mqttClient.end(true);
+      } catch (e) {}
+    }
+
+    // Close all peer connections
+    if (activeMeetingSession && activeMeetingSession.peerCalls) {
+      activeMeetingSession.peerCalls.forEach(call => {
+        try { call.close(); } catch(e) {}
+      });
+      activeMeetingSession.peerCalls.clear();
+    }
+
+    // Destroy PeerJS instance
+    if (activeMeetingSession && activeMeetingSession.peer) {
+      try { activeMeetingSession.peer.destroy(); } catch(e) {}
+    }
+
+    // Clear video grid
+    const videoGrid = document.getElementById("river-video-grid");
+    if (videoGrid) videoGrid.innerHTML = "";
+
+    // Close participants drawer & reaction picker
+    const drawer = document.getElementById("river-participants-drawer");
+    if (drawer) drawer.style.display = "none";
+    const picker = document.getElementById("river-reaction-picker");
+    if (picker) picker.style.display = "none";
+
+    // Hide Modal Overlay
     const roomModal = document.getElementById("modal-live-meeting");
     if (roomModal) {
       roomModal.classList.remove("active");
       document.body.classList.remove("meeting-modal-open");
     }
 
-    // Cleanly terminate Jitsi External API instance
-    if (window._jitsiApi) {
-      try {
-        window._jitsiApi.dispose();
-      } catch(e) {}
-      window._jitsiApi = null;
-    }
-
-    // Cleanly terminate Video Room Iframe
-    const jitsiCont = document.getElementById("meeting-jitsi-container");
-    if (jitsiCont) {
-      jitsiCont.innerHTML = "";
-      jitsiCont.style.display = "none";
-    }
-
-    // Reset quick mic button UI
-    updateQuickMeetingMicUI(false);
-
-    // Clean up Daily.co message listener
-    if (window._dailyMessageListener) {
-      window.removeEventListener("message", window._dailyMessageListener);
-      window._dailyMessageListener = null;
-    }
-
-    // Stop all local camera and microphone media tracks
-    if (activeMeetingSession && activeMeetingSession.localStream) {
-      try {
-        activeMeetingSession.localStream.getTracks().forEach(track => track.stop());
-      } catch(e) {}
-    }
     activeMeetingSession = null;
+    if (typeof showToast === "function") showToast("Exited fellowship meeting / सभा सोडली 🙏");
 
-    showToast("Exited fellowship meeting room");
   } catch (err) {
-    console.warn("exitLiveMeetingRoom notice:", err);
+    console.warn("[RiverMeet] exitLiveMeetingRoom error:", err);
   }
 }
+
+// Export functions to window
+if (typeof window !== "undefined") {
+  window.triggerJoinMeetingFlow = triggerJoinMeetingFlow;
+  window.launchLiveMeetingRoom = launchLiveMeetingRoom;
+  window.exitLiveMeetingRoom = exitLiveMeetingRoom;
+  window.toggleRiverMeetingMic = toggleRiverMeetingMic;
+  window.toggleRiverMeetingCam = toggleRiverMeetingCam;
+  window.flipRiverMeetingCamera = flipRiverMeetingCamera;
+  window.sendMeetingReaction = sendMeetingReaction;
+  window.toggleRiverReactionPicker = toggleRiverReactionPicker;
+  window.toggleRiverParticipantsDrawer = toggleRiverParticipantsDrawer;
+  window.dismissMeetingBanner = dismissMeetingBanner;
+}
+
 
 // ═══════════════════════════════════════════════════════════════
 // VIDEO CALL PROVIDER SETTINGS (Daily.co & Jitsi Meet)

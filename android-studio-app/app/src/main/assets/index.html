@@ -12,7 +12,7 @@
   <script>
     // Force immediate hard purge of all stale Service Workers and CacheStorage
     (function() {
-      const CURRENT_VER = "v2366_PURE_IN_APP_MEETING";
+      const CURRENT_VER = "v2367_NATIVE_TOPLEVEL_MEETING";
       if (localStorage.getItem("rol_app_ver") !== CURRENT_VER) {
         localStorage.setItem("rol_app_ver", CURRENT_VER);
         if ('serviceWorker' in navigator) {
@@ -61,7 +61,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Great+Vibes&family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Noto+Serif+Devanagari:wght@500;600;700;800;900&family=Outfit:wght@500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600;1,700&family=Poppins:wght@600;700;800;900&family=Rozha+One&display=swap" rel="stylesheet">
   
   <!-- Main Stylesheet (Cache-Busted for Authentic Male Audio V27) -->
-  <link rel="stylesheet" href="index.css?v=2366_PURE_IN_APP_MEETING">
+  <link rel="stylesheet" href="index.css?v=2367_NATIVE_TOPLEVEL_MEETING">
 
   <!-- Official LiveKit WebRTC Client SDK -->
   <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.0.8/dist/livekit-client.umd.min.js"></script>
@@ -5111,46 +5111,155 @@
       </div>
     </div>
 
-    <!-- Fullscreen Live Meeting Room Modal -->
+        <!-- Fullscreen Live Meeting Room Modal — Pure Native In-App WebRTC Sanctuary -->
     <div id="modal-live-meeting" class="meeting-modal-overlay">
-      <div class="meeting-room-container" style="position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; box-sizing: border-box; background: #17181b;">
+      <div class="meeting-room-container" style="position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; box-sizing: border-box; background: #090d16;">
         
-        <!-- Clean Navigation Header -->
-        <div class="meeting-room-topbar" style="height: 48px; min-height: 48px; flex-shrink: 0; background: rgba(23, 24, 27, 0.95); border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: space-between; padding: 0 10px; z-index: 100; box-sizing: border-box;">
-          <div style="display: flex; align-items: center; gap: 6px; overflow: hidden; flex: 1;">
-            <span style="background: rgba(34, 197, 94, 0.2); border: 1px solid #22c55e; color: #4ade80; font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 12px; display: flex; align-items: center; gap: 4px; flex-shrink: 0;">
-              <span style="width: 6px; height: 6px; background: #22c55e; border-radius: 50%; display: inline-block;"></span> LIVE
+        <!-- Clean Sanctuary Top Bar -->
+        <div class="river-meeting-topbar">
+          <div class="river-meeting-header-left">
+            <span class="river-live-pill">
+              <span class="river-live-dot"></span> LIVE
             </span>
-            <h3 id="meeting-room-title-display" style="font-family: var(--font-ui); font-size: 13.5px; font-weight: 800; color: #fff; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">River of Life Meeting</h3>
+            <div class="river-meeting-title-box">
+              <h3 id="meeting-room-title-display" class="river-meeting-title">River of Life Sanctuary</h3>
+              <span id="river-participant-counter" class="river-participant-pill">👥 1 Online</span>
+            </div>
           </div>
-          <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
-            <button id="btn-meeting-provider-toggle" onclick="openMeetingProviderSettingsModal()" style="padding: 7px 11px; border-radius: 18px; font-size: 12px; font-weight: 700; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.18); color: #fff; cursor: pointer; display: flex; align-items: center; gap: 4px;" title="Video Provider Settings">
-              <span>⚙️</span>
-            </button>
-            <button id="btn-meeting-leave-top" onclick="exitLiveMeetingRoom()" style="padding: 7px 14px; border-radius: 18px; font-size: 12px; font-weight: 800; background: linear-gradient(135deg, #dc2626, #ef4444); border: none; color: #fff; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(239,68,68,0.4);" title="End Meeting">
-              <span>🚪 End Call / सभा सोडा</span>
+          <div class="river-meeting-header-right">
+            <button id="btn-meeting-leave-top" onclick="exitLiveMeetingRoom()" class="river-end-call-btn" title="End Call">
+              <span>🚪 End Call / सोडा</span>
             </button>
           </div>
         </div>
 
-        <!-- Native River of Life Video Conference Stage Container -->
-        <div id="river-native-meeting-stage" style="flex: 1; width: 100%; min-height: 0; position: relative; overflow: hidden; display: flex; flex-direction: column; background: #090d16; box-sizing: border-box;">
+        <!-- Video Conference Stage -->
+        <div id="river-native-meeting-stage" class="river-native-meeting-stage">
           
-          <!-- Native Video Tile Grid -->
-          <div id="river-video-grid" class="river-video-grid">
-            <!-- Dynamically populated with .river-video-tile elements -->
+          <!-- Dynamic Responsive Video Grid -->
+          <div id="river-video-grid" class="river-video-grid" data-count="1">
+            <!-- Tiles populated dynamically by app.js -->
           </div>
 
-          <!-- Embedded Clean Video Conference Container (Daily.co / Jitsi) -->
-          <div id="meeting-jitsi-container" style="display: none; width: 100%; height: 100%; position: absolute; inset: 0; z-index: 5;"></div>
+          <!-- Floating Prayer Emoji Reaction Shower Overlay -->
+          <div id="river-reaction-shower" class="river-reaction-shower"></div>
+
+          <!-- Listen Only / Microphone Notice Banner -->
+          <div id="river-meeting-banner" class="river-meeting-banner" style="display: none;">
+            <span id="river-meeting-banner-text">🎙️ माइक परवानगी नाकारली गेली आहे. तुम्ही 'Listen-Only' मोडमध्ये ऐकू शकता.</span>
+            <button onclick="dismissMeetingBanner()" class="river-banner-dismiss">&times;</button>
+          </div>
+
+          <!-- Quick Reaction Floating Popover -->
+          <div id="river-reaction-picker" class="river-reaction-picker" style="display: none;">
+            <button onclick="sendMeetingReaction('🙏')" class="river-reaction-btn" title="Amen">🙏</button>
+            <button onclick="sendMeetingReaction('❤️')" class="river-reaction-btn" title="Love">❤️</button>
+            <button onclick="sendMeetingReaction('🔥')" class="river-reaction-btn" title="Holy Spirit">🔥</button>
+            <button onclick="sendMeetingReaction('✝️')" class="river-reaction-btn" title="Cross">✝️</button>
+            <button onclick="sendMeetingReaction('🙌')" class="river-reaction-btn" title="Praise">🙌</button>
+            <button onclick="sendMeetingReaction('✨')" class="river-reaction-btn" title="Glory">✨</button>
+          </div>
+
+          <!-- Bottom Floating Control Bar -->
+          <div class="river-meeting-controls-wrapper">
+            <div class="river-meeting-controls-bar">
+              <!-- Mic Button -->
+              <button id="btn-river-toggle-mic" onclick="toggleRiverMeetingMic()" class="river-ctrl-btn" title="Toggle Microphone">
+                <div class="river-ctrl-icon-wrap" id="river-mic-icon-wrap">
+                  <svg id="river-icon-mic-on" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                    <line x1="12" y1="19" x2="12" y2="23"></line>
+                    <line x1="8" y1="23" x2="16" y2="23"></line>
+                  </svg>
+                  <svg id="river-icon-mic-off" style="display: none;" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                    <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V5a3 3 0 0 0-5.68-1.33"></path>
+                    <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"></path>
+                    <line x1="12" y1="19" x2="12" y2="23"></line>
+                    <line x1="8" y1="23" x2="16" y2="23"></line>
+                  </svg>
+                </div>
+                <span class="river-ctrl-label" id="river-mic-label">Mic On</span>
+              </button>
+
+              <!-- Camera Button -->
+              <button id="btn-river-toggle-cam" onclick="toggleRiverMeetingCam()" class="river-ctrl-btn" title="Toggle Camera">
+                <div class="river-ctrl-icon-wrap" id="river-cam-icon-wrap">
+                  <svg id="river-icon-cam-on" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="23 7 16 12 23 17 23 7"></polygon>
+                    <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+                  </svg>
+                  <svg id="river-icon-cam-off" style="display: none;" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                    <path d="M21 21l-3.34-3.34L16 16.5M16 12l7-5v10l-2.6-1.85"></path>
+                    <path d="M1 5h2m4 0h10a2 2 0 0 1 2 2v8.5M1 5v14a2 2 0 0 0 2 2h14"></path>
+                  </svg>
+                </div>
+                <span class="river-ctrl-label" id="river-cam-label">Camera</span>
+              </button>
+
+              <!-- Flip Camera Button (Front / Back switch on phones) -->
+              <button id="btn-river-flip-cam" onclick="flipRiverMeetingCamera()" class="river-ctrl-btn" title="Flip Camera">
+                <div class="river-ctrl-icon-wrap">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 10c0-4.418-3.582-8-8-8s-8 3.582-8 8c0 1.956.702 3.748 1.874 5.143L4 18h5v-5l-1.636 1.636C6.51 13.565 6 11.853 6 10c0-3.314 2.686-6 6-6s6 2.686 6 6c0 1.853-.51 3.565-1.364 4.636L15 13v5h5l-1.874-2.857C19.298 13.748 20 11.956 20 10Z"></path>
+                  </svg>
+                </div>
+                <span class="river-ctrl-label">Flip</span>
+              </button>
+
+              <!-- Amen / Reaction Button -->
+              <button id="btn-river-reactions" onclick="toggleRiverReactionPicker()" class="river-ctrl-btn" title="Prayer Reactions">
+                <div class="river-ctrl-icon-wrap">
+                  <span style="font-size: 20px;">🙏</span>
+                </div>
+                <span class="river-ctrl-label">Amen</span>
+              </button>
+
+              <!-- Participants Button -->
+              <button id="btn-river-participants" onclick="toggleRiverParticipantsDrawer()" class="river-ctrl-btn" title="Participants">
+                <div class="river-ctrl-icon-wrap">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                  </svg>
+                </div>
+                <span class="river-ctrl-label">People</span>
+              </button>
+
+              <!-- End Call Button -->
+              <button id="btn-river-hangup" onclick="exitLiveMeetingRoom()" class="river-ctrl-btn river-ctrl-hangup" title="Leave Meeting">
+                <div class="river-ctrl-icon-wrap hangup-icon">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                    <path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08a.996.996 0 0 1 0-1.41C3.28 8.77 7.42 7 12 7s8.72 1.77 11.71 4.67c.39.39.39 1.02 0 1.41l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/>
+                  </svg>
+                </div>
+                <span class="river-ctrl-label" style="color: #f87171;">End</span>
+              </button>
+
+            </div>
+          </div>
+
+          <!-- Participants Drawer -->
+          <div id="river-participants-drawer" class="river-participants-drawer" style="display: none;">
+            <div class="river-drawer-header">
+              <h4 style="margin: 0; font-size: 15px; font-weight: 800; color: #fff;">👥 Meeting Participants / सहभागी</h4>
+              <button onclick="toggleRiverParticipantsDrawer()" class="river-drawer-close">&times;</button>
+            </div>
+            <div id="river-participants-list" class="river-participants-list">
+              <!-- Dynamically populated list of members -->
+            </div>
+          </div>
 
         </div>
 
       </div>
     </div>
 
-    <!-- Video Meeting Provider Settings Modal -->
-    <div id="modal-meeting-provider-settings" class="drawer-overlay centered-align" style="z-index: 1000000 !important;">
+<div id="modal-meeting-provider-settings" class="drawer-overlay centered-align" style="z-index: 1000000 !important;">
       <div class="centered-modal-card" style="max-width: 380px; text-align: left; padding: 22px; border-radius: 20px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
           <h3 style="font-family: var(--font-ui); font-size: 16px; font-weight: 800; margin: 0; color: var(--text);">📹 Video Call Provider</h3>
@@ -6106,8 +6215,9 @@
   <!-- App Main Logic (Cache-Busted for 100% MARVBSI Church Bible) -->
   <script src="sarvam-tts.js?v=132_MARVBSI_FULL_CHURCH_BIBLE"></script>
   <script src="bible-study.js?v=138_MUSEUM_STUDY_HUB"></script>
-  <script src="https://meet.darmstadt.social/external_api.js"></script>
-  <script src="app.js?v=2366_PURE_IN_APP_MEETING"></script>
+  <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mqtt@5.3.5/dist/mqtt.min.js"></script>
+  <script src="app.js?v=2367_NATIVE_TOPLEVEL_MEETING"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 4.5s no matter what

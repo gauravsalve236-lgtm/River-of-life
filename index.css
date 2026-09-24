@@ -17167,3 +17167,528 @@ body:has(#view-reader.active) .mobile-bottom-tabs {
 
 
 
+
+
+/* ═══════════════════════════════════════════════════════════════
+   PURE NATIVE IN-APP VIDEO CALLING SUITE (RIVER OF LIFE)
+   ═══════════════════════════════════════════════════════════════ */
+
+.river-meeting-topbar {
+  height: 52px;
+  min-height: 52px;
+  flex-shrink: 0;
+  background: rgba(9, 13, 22, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  z-index: 100;
+  box-sizing: border-box;
+}
+
+.river-meeting-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+  flex: 1;
+}
+
+.river-live-pill {
+  background: rgba(239, 68, 68, 0.18);
+  border: 1px solid #ef4444;
+  color: #f87171;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  letter-spacing: 0.5px;
+}
+
+.river-live-dot {
+  width: 6px;
+  height: 6px;
+  background: #ef4444;
+  border-radius: 50%;
+  display: inline-block;
+  animation: pulseLiveDot 1.4s infinite ease-in-out;
+}
+
+@keyframes pulseLiveDot {
+  0% { transform: scale(0.9); opacity: 0.6; }
+  50% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 8px #ef4444; }
+  100% { transform: scale(0.9); opacity: 0.6; }
+}
+
+.river-meeting-title-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+}
+
+.river-meeting-title {
+  font-family: var(--font-ui, sans-serif);
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.river-participant-pill {
+  font-size: 10.5px;
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 2px 7px;
+  border-radius: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.river-end-call-btn {
+  padding: 7px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #dc2626, #ef4444);
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4);
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.river-end-call-btn:active {
+  transform: scale(0.95);
+  opacity: 0.9;
+}
+
+.river-native-meeting-stage {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: #090d16;
+  box-sizing: border-box;
+}
+
+/* Dynamic Responsive Video Grid */
+.river-video-grid {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  padding: 10px 10px 84px 10px;
+  box-sizing: border-box;
+  display: grid;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 1 Participant (Local Only or 1-on-1) */
+.river-video-grid:not([data-count]),
+.river-video-grid[data-count="1"] {
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+}
+
+/* 2 Participants: Split Screen */
+.river-video-grid[data-count="2"] {
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+@media (min-width: 640px) {
+  .river-video-grid[data-count="2"] {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr;
+  }
+}
+
+/* 3-4 Participants: 2x2 Grid */
+.river-video-grid[data-count="3"],
+.river-video-grid[data-count="4"] {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+
+/* 5+ Participants: Adaptive Grid */
+.river-video-grid[data-count="5"],
+.river-video-grid[data-count="6"],
+.river-video-grid[data-count="7"],
+.river-video-grid[data-count="8"],
+.river-video-grid[data-count="9"] {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-auto-rows: 180px;
+}
+
+/* Video Tile Card */
+.river-video-tile {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #121826;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  border: 2px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.river-video-tile.is-speaking {
+  border-color: #f59e0b;
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.45);
+}
+
+.river-video-tile video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  background: #090d16;
+}
+
+.river-video-tile.is-local.mirror-active video {
+  transform: scaleX(-1);
+  -webkit-transform: scaleX(-1);
+}
+
+/* Tile Avatar Placeholder (When camera is off) */
+.river-tile-avatar {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at center, #1e293b 0%, #090d16 100%);
+  z-index: 2;
+}
+
+.river-avatar-circle {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #d97706, #9e1622);
+  color: #ffffff;
+  font-size: 28px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 20px rgba(217, 119, 6, 0.35);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.river-tile-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 10px;
+  z-index: 3;
+}
+
+.river-tile-nametag {
+  align-self: flex-start;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11.5px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 85%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.river-tile-mic-icon {
+  font-size: 12px;
+}
+
+/* Floating Bottom Control Bar */
+.river-meeting-controls-wrapper {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-bottom: max(14px, env(safe-area-inset-bottom, 14px));
+  padding-top: 8px;
+  z-index: 20;
+  pointer-events: none;
+}
+
+.river-meeting-controls-bar {
+  pointer-events: auto;
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1.5px solid rgba(255, 255, 255, 0.18);
+  border-radius: 40px;
+  padding: 6px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+  max-width: 95vw;
+}
+
+.river-ctrl-btn {
+  background: transparent;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 12px;
+  color: #ffffff;
+  transition: transform 0.15s ease;
+  touch-action: manipulation;
+}
+
+.river-ctrl-btn:active {
+  transform: scale(0.92);
+}
+
+.river-ctrl-icon-wrap {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.river-ctrl-btn.is-muted .river-ctrl-icon-wrap,
+.river-ctrl-btn.is-cam-off .river-ctrl-icon-wrap {
+  background: rgba(239, 68, 68, 0.25);
+  border-color: #ef4444;
+  color: #f87171;
+}
+
+.river-ctrl-hangup .river-ctrl-icon-wrap {
+  background: linear-gradient(135deg, #dc2626, #ef4444);
+  border: none;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.45);
+}
+
+.river-ctrl-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.2px;
+}
+
+/* Prayer Reaction Floating Shower */
+.river-reaction-shower {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 15;
+}
+
+.river-floating-emoji {
+  position: absolute;
+  bottom: 80px;
+  font-size: 32px;
+  animation: floatUpAndFade 2.4s ease-out forwards;
+}
+
+@keyframes floatUpAndFade {
+  0% { transform: translateY(0) scale(0.5); opacity: 0; }
+  15% { transform: translateY(-40px) scale(1.3); opacity: 1; }
+  80% { opacity: 0.9; }
+  100% { transform: translateY(-380px) scale(1.1); opacity: 0; }
+}
+
+/* Reaction Popover */
+.river-reaction-picker {
+  position: absolute;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 28px;
+  padding: 8px 12px;
+  display: flex;
+  gap: 8px;
+  z-index: 30;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  animation: popInModal 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.river-reaction-btn {
+  background: transparent;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 8px;
+  transition: transform 0.15s ease;
+}
+
+.river-reaction-btn:active {
+  transform: scale(1.3);
+}
+
+/* Notice Banner */
+.river-meeting-banner {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  right: 12px;
+  background: rgba(245, 158, 11, 0.92);
+  color: #000;
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 25;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+}
+
+.river-banner-dismiss {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  font-weight: 800;
+  color: #000;
+}
+
+/* Participants Drawer */
+.river-participants-drawer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-height: 60vh;
+  background: rgba(15, 23, 42, 0.96);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1.5px solid rgba(255, 255, 255, 0.15);
+  border-radius: 24px 24px 0 0;
+  padding: 16px;
+  z-index: 50;
+  box-shadow: 0 -10px 40px rgba(0,0,0,0.7);
+  display: flex;
+  flex-direction: column;
+  animation: slideUpDrawer 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUpDrawer {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.river-drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 12px;
+}
+
+.river-drawer-close {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.river-participants-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  max-height: 45vh;
+}
+
+.river-participant-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.river-p-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.river-p-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #2563eb;
+  color: #fff;
+  font-weight: 800;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.river-p-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.river-p-role {
+  font-size: 10.5px;
+  color: #94a3b8;
+}
