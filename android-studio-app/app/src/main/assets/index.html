@@ -12,7 +12,7 @@
   <script>
     // Force immediate hard purge of all stale Service Workers and CacheStorage
     (function() {
-      const CURRENT_VER = "v2376_FIX_MEETING_AUDIO_VIDEO";
+      const CURRENT_VER = "v2377_CROSS_DEVICE_MEETINGS_SYNC";
       if (localStorage.getItem("rol_app_ver") !== CURRENT_VER) {
         localStorage.setItem("rol_app_ver", CURRENT_VER);
         if ('serviceWorker' in navigator) {
@@ -1755,6 +1755,26 @@
               <button onclick="testAndEnableMicrophone()" style="background: linear-gradient(135deg, #2563eb, #3b82f6); color: #fff; border: none; padding: 8px 16px; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer; box-shadow: 0 3px 10px rgba(37,99,235,0.3); display: flex; align-items: center; gap: 6px;">
                 <span>🎙️ Test & Allow Mic</span>
               </button>
+            <!-- Quick Meeting Join & Instant Call Bar -->
+            <div class="quick-meeting-join-card" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.08), rgba(59, 130, 246, 0.08)); border: 1.5px solid rgba(34, 197, 94, 0.35); border-radius: 18px; padding: 14px 18px; margin-bottom: 18px; box-shadow: var(--shadow-sm);">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="font-size: 22px;">🎥</span>
+                  <div>
+                    <h4 style="margin: 0; font-size: 15px; font-weight: 800; color: var(--text);">Join with Meeting Code / थेट सभेचा कोड टाका</h4>
+                    <p style="margin: 2px 0 0 0; font-size: 11.5px; color: var(--text-muted);">Enter any meeting name/code or start an instant call right now</p>
+                  </div>
+                </div>
+                <button onclick="startInstantMeeting()" class="btn-primary-mini" style="background: linear-gradient(135deg, #16a34a, #22c55e); color: #fff; border: none; padding: 8px 14px; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(34,197,94,0.35);">
+                  <span>⚡ Instant Meeting / त्वरित सभा</span>
+                </button>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <input type="text" id="input-quick-meeting-code" placeholder="Enter Meeting Name or Code (उदा. test, sunday, fellowship)..." style="flex: 1; padding: 10px 14px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--bg-content); color: var(--text); font-size: 13.5px; outline: none; font-weight: 600;" onkeydown="if(event.key==='Enter') joinQuickMeetingFromInput()">
+                <button onclick="joinQuickMeetingFromInput()" style="padding: 10px 18px; border-radius: 12px; border: none; background: linear-gradient(135deg, #16a34a, #22c55e); color: #fff; font-size: 13px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap;">
+                  <span>Join Call 🚀</span>
+                </button>
+              </div>
             </div>
 
             <div class="meetings-subnav-row">
@@ -5027,6 +5047,12 @@
                 <!-- List of members with checkboxes -->
               </div>
             </div>
+            <div class="form-input-group" style="display: flex; align-items: center; gap: 10px; margin-top: 6px; padding: 10px 14px; background: rgba(34, 197, 94, 0.1); border: 1.5px solid rgba(34, 197, 94, 0.35); border-radius: 12px;">
+              <input type="checkbox" id="meeting-go-live-now" style="width: 18px; height: 18px; accent-color: #22c55e; cursor: pointer;">
+              <label for="meeting-go-live-now" style="font-size: 13px; font-weight: 700; color: var(--text); cursor: pointer;">
+                Start meeting immediately as Live Call / आत्ताच थेट सभा सुरू करा (Live Now 🔴)
+              </label>
+            </div>
             <button type="submit" id="btn-create-meeting-submit" class="btn-primary-block" style="margin-top: 10px; padding: 12px;">
               <span>CREATE PRAYER MEETING / सभा आयोजित करा</span>
             </button>
@@ -6254,7 +6280,7 @@
   <script src="sarvam-tts.js?v=132_MARVBSI_FULL_CHURCH_BIBLE"></script>
   <script src="bible-study.js?v=138_MUSEUM_STUDY_HUB"></script>
   <script src="peerjs.min.js"></script>
-  <script src="app.js?v=2376_FIX_MEETING_AUDIO_VIDEO"></script>
+  <script src="app.js?v=2377_CROSS_DEVICE_MEETINGS_SYNC"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 4.5s no matter what

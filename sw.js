@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v2376_FIX_MEETING_AUDIO_VIDEO';
+const CACHE_NAME = 'river-of-life-cache-v2377_CROSS_DEVICE_MEETINGS_SYNC';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

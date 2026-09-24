@@ -977,8 +977,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     initOfflineManager();
     initChurchCompanion();
     initMeetings();
+    setTimeout(checkAndHandleMeetingDeepLinks, 600);
   } catch (e) {
     console.error("Features init error:", e);
+  }
+});
+
+window.addEventListener("hashchange", () => {
+  if (window.location.hash.includes("join=") || window.location.hash.includes("room=")) {
+    if (typeof checkAndHandleMeetingDeepLinks === "function") checkAndHandleMeetingDeepLinks();
   }
 });
 
@@ -11356,11 +11363,54 @@ const DEVOTIONAL_DB = {
 function getMeetingsFromStorage() {
   try {
     const raw = localStorage.getItem("river_of_life_meetings");
-    if (!raw) return [];
-    let meetings = JSON.parse(raw);
-    if (!Array.isArray(meetings)) return [];
-    // Purge mock meeting_1 or fasting-friday if left over from previous mock data
+    let meetings = [];
+    if (raw) {
+      try { meetings = JSON.parse(raw); } catch(e) {}
+    }
+    if (!Array.isArray(meetings)) meetings = [];
+
+    // Purge outdated mock meeting IDs
     meetings = meetings.filter(m => m && m.id !== "meeting_1" && m.id !== "fasting-friday" && m.id !== "sanctuary-dawn" && m.id !== "fellowship-evening" && m.id !== "sunday-worship");
+
+    // Seed default active church meetings if empty
+    if (meetings.length === 0) {
+      meetings = [
+        {
+          id: "rol_holy_communion",
+          title: "Sunday Holy Communion & Worship",
+          description: "रविवारची पवित्र प्रभू भोजन व उपासना सभा. सर्व विश्वासी एकत्र येऊन प्रार्थना व वचन सहभागिता करतील.",
+          host: "Pastor John",
+          date: new Date().toISOString().split('T')[0],
+          time: "10:00 AM",
+          duration: "60",
+          repeat: "weekly",
+          visibility: "public",
+          isSimulation: false,
+          status: "live",
+          participantsCount: 3,
+          invitedCount: 8,
+          createdAt: Date.now() - 3600000
+        },
+        {
+          id: "rol_daily_morning_prayer",
+          title: "Daily Morning Devotion & Prayer Call",
+          description: "दैनिक सकाळची कौटुंबिक प्रार्थना व बायबल अभ्यास.",
+          host: "Pastor Sunil",
+          date: new Date().toISOString().split('T')[0],
+          time: "07:00 AM",
+          duration: "45",
+          repeat: "daily",
+          visibility: "public",
+          isSimulation: false,
+          status: "scheduled",
+          participantsCount: 0,
+          invitedCount: 6,
+          createdAt: Date.now() - 7200000
+        }
+      ];
+      localStorage.setItem("river_of_life_meetings", JSON.stringify(meetings));
+    }
+
     return meetings;
   } catch (e) {
     console.error("Error loading meetings DB:", e);
@@ -11671,14 +11721,181 @@ const CHURCH_MEMBERS = [
   { username: "Ruth Shinde", isPastor: false }
 ];
 
-// Helper to save LocalStorage meetings
+// Cross-Device Meeting Cloud Sync (PubSub over ntfy.sh with CORS enabled)
+const ROL_CLOUD_SYNC_TOPIC = "https://ntfy.sh/river-of-life-meetings-sync-2026";
 
+async function syncMeetingToCloud(meeting) {
+  try {
+    await fetch(ROL_CLOUD_SYNC_TOPIC, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(meeting)
+    });
+    console.log("[RiverMeet] Synced meeting to cloud channel:", meeting.id);
+  } catch (e) {
+    console.warn("[RiverMeet] Cloud sync notice:", e.message);
+  }
+}
+window.syncMeetingToCloud = syncMeetingToCloud;
 
+async function fetchMeetingsFromCloud() {
+  try {
+    const res = await fetch(`${ROL_CLOUD_SYNC_TOPIC}/json?poll=1`, { method: "GET" });
+    if (!res.ok) return;
+    const text = await res.text();
+    if (!text || !text.trim()) return;
 
+    const lines = text.trim().split("\n");
+    let localMeetings = getMeetingsFromStorage();
+    let hasChanges = false;
+
+    lines.forEach(line => {
+      try {
+        const item = JSON.parse(line);
+        if (item.message) {
+          const m = JSON.parse(item.message);
+          if (m && m.id) {
+            const idx = localMeetings.findIndex(x => x.id === m.id);
+            if (idx === -1) {
+              localMeetings.unshift(m);
+              hasChanges = true;
+            } else {
+              if (localMeetings[idx].status !== m.status) {
+                localMeetings[idx].status = m.status;
+                hasChanges = true;
+              }
+            }
+          }
+        }
+      } catch(e) {}
+    });
+
+    if (hasChanges) {
+      localStorage.setItem("river_of_life_meetings", JSON.stringify(localMeetings));
+      if (typeof renderMeetingsDashboard === "function") {
+        renderMeetingsDashboard();
+      }
+      if (typeof renderScheduledPrayersTab === "function") {
+        renderScheduledPrayersTab();
+      }
+    }
+  } catch (e) {
+    console.warn("[RiverMeet] Cloud fetch notice:", e.message);
+  }
+}
+window.fetchMeetingsFromCloud = fetchMeetingsFromCloud;
 
 function saveMeetingsToStorage(meetings) {
   localStorage.setItem("river_of_life_meetings", JSON.stringify(meetings));
 }
+
+// Instant Meeting Generator
+function startInstantMeeting() {
+  const user = (typeof state !== "undefined" && state && state.currentUser && state.currentUser.username) ? state.currentUser.username : "Fellowship Host";
+  const randomSuffix = Math.random().toString(36).substring(2, 7);
+  const meetingId = "rol_live_" + randomSuffix;
+  const instantMeeting = {
+    id: meetingId,
+    title: "Live Instant Sanctuary (" + user + ")",
+    description: "Live prayer fellowship room • थेट प्रार्थना व सहभागिता दालन",
+    host: user,
+    date: new Date().toISOString().split('T')[0],
+    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    duration: "60",
+    repeat: "none",
+    visibility: "public",
+    status: "live",
+    participantsCount: 1,
+    invitedCount: 0,
+    createdAt: Date.now()
+  };
+
+  const meetings = getMeetingsFromStorage();
+  meetings.unshift(instantMeeting);
+  saveMeetingsToStorage(meetings);
+  syncMeetingToCloud(instantMeeting);
+
+  triggerJoinMeetingFlow(meetingId);
+}
+window.startInstantMeeting = startInstantMeeting;
+
+// Join Quick Meeting from Input Code
+function joinQuickMeetingFromInput() {
+  const input = document.getElementById("input-quick-meeting-code");
+  if (!input) return;
+  const rawCode = input.value.trim();
+  if (!rawCode) {
+    if (typeof showToast === "function") showToast("Please enter a meeting code or name / कृपया सभेचा कोड टाका");
+    return;
+  }
+  const cleanCode = rawCode.toLowerCase().replace(/[^a-z0-9_-]/g, "_");
+  const meetings = getMeetingsFromStorage();
+  let m = meetings.find(x => x.id === rawCode || x.id === cleanCode || (x.title && x.title.toLowerCase().includes(rawCode.toLowerCase())));
+  if (!m) {
+    m = {
+      id: cleanCode,
+      title: rawCode,
+      host: "Fellowship",
+      date: new Date().toISOString().split('T')[0],
+      time: "Now",
+      duration: "60",
+      visibility: "public",
+      status: "live",
+      createdAt: Date.now()
+    };
+    meetings.unshift(m);
+    saveMeetingsToStorage(meetings);
+    syncMeetingToCloud(m);
+  }
+
+  triggerJoinMeetingFlow(m.id);
+}
+window.joinQuickMeetingFromInput = joinQuickMeetingFromInput;
+
+// Check and handle meeting deep links (?join=... or ?room=...)
+function checkAndHandleMeetingDeepLinks() {
+  try {
+    let joinId = null;
+    if (window.location.search) {
+      const sp = new URLSearchParams(window.location.search);
+      joinId = sp.get("join") || sp.get("room") || sp.get("meeting");
+    }
+    if (!joinId && window.location.hash && window.location.hash.includes("?")) {
+      const q = window.location.hash.split("?")[1];
+      if (q) {
+        const hp = new URLSearchParams(q);
+        joinId = hp.get("join") || hp.get("room") || hp.get("meeting");
+      }
+    }
+
+    if (joinId) {
+      console.log("[RiverMeet] Deep link detected with meeting ID:", joinId);
+      const cleanId = joinId.trim();
+      const meetings = getMeetingsFromStorage();
+      let m = meetings.find(x => x.id === cleanId);
+      if (!m) {
+        m = {
+          id: cleanId,
+          title: "Sanctuary Fellowship (" + cleanId + ")",
+          host: "Fellowship Host",
+          date: new Date().toISOString().split('T')[0],
+          time: "Live Now",
+          status: "live",
+          createdAt: Date.now()
+        };
+        meetings.unshift(m);
+        saveMeetingsToStorage(meetings);
+      }
+      if (typeof switchTab === "function") switchTab("meetings");
+      setTimeout(() => {
+        triggerJoinMeetingFlow(m.id);
+      }, 700);
+    }
+  } catch(e) {
+    console.warn("[RiverMeet] Deep link check error:", e);
+  }
+}
+window.checkAndHandleMeetingDeepLinks = checkAndHandleMeetingDeepLinks;
 
 // Initialize Meetings Module
 function initMeetings() {
@@ -11732,8 +11949,10 @@ function initMeetings() {
   // Bind meeting toolbar clicks
   setupMeetingRoomControls();
 
-  // Initial dashboard load
+  // Initial dashboard load & cross-device cloud sync
   renderMeetingsDashboard();
+  fetchMeetingsFromCloud();
+  setTimeout(checkAndHandleMeetingDeepLinks, 500);
 }
 
 // Persistent User Registry Database for Profiles & Invitations
@@ -11819,6 +12038,7 @@ function populateScheduleHostsDropdown() {
 }
 
 // Create new meeting
+// Create new meeting
 function createNewMeeting() {
   const title = document.getElementById("meeting-title").value.trim();
   const desc = document.getElementById("meeting-description").value.trim();
@@ -11830,6 +12050,7 @@ function createNewMeeting() {
   const maxVal = document.getElementById("meeting-max-users").value;
   const host = document.getElementById("meeting-host").value;
   const customUrl = document.getElementById("meeting-custom-url").value.trim();
+  const goLiveNow = document.getElementById("meeting-go-live-now")?.checked;
 
   if (!title || !date || !time) {
     showToast("Please fill in required fields.");
@@ -11838,7 +12059,7 @@ function createNewMeeting() {
 
   // Collect invited members
   const inviteList = document.getElementById("meeting-invitees-list");
-  const checkedBoxes = inviteList.querySelectorAll("input[type='checkbox']:checked");
+  const checkedBoxes = inviteList ? inviteList.querySelectorAll("input[type='checkbox']:checked") : [];
   const invitedUsers = Array.from(checkedBoxes).map(cb => cb.value);
 
   const meetings = getMeetingsFromStorage();
@@ -11857,8 +12078,8 @@ function createNewMeeting() {
     isSimulation: (visibility !== "public"),
     customUrl: customUrl || "",
     maxParticipants: maxVal || "Unlimited",
-    status: "scheduled",
-    participantsCount: 0,
+    status: goLiveNow ? "live" : "scheduled",
+    participantsCount: goLiveNow ? 1 : 0,
     invitedCount: invitedUsers.length,
     invitedUsers: invitedUsers,
     createdAt: Date.now()
@@ -11866,22 +12087,33 @@ function createNewMeeting() {
 
   meetings.unshift(newMeeting);
   saveMeetingsToStorage(meetings);
+  syncMeetingToCloud(newMeeting);
 
-  showToast("Meeting Scheduled Successfully!");
+  showToast(goLiveNow ? "Meeting Created & Going Live! 🔴" : "Meeting Scheduled Successfully!");
   closeAllDrawers();
   
   // Reset form
   document.getElementById("schedule-meeting-form").reset();
 
-  // Switch to upcoming tab
-  document.querySelectorAll("[data-meetings-subtab]").forEach(b => {
-    b.classList.toggle("active", b.dataset.meetingsSubtab === "upcoming");
-  });
-  document.querySelectorAll(".meetings-subtab-panel").forEach(p => {
-    p.style.display = p.id === "meetings-subtab-upcoming" ? "block" : "none";
-  });
-  
-  renderMeetingsDashboard();
+  if (goLiveNow) {
+    document.querySelectorAll("[data-meetings-subtab]").forEach(b => {
+      b.classList.toggle("active", b.dataset.meetingsSubtab === "live");
+    });
+    document.querySelectorAll(".meetings-subtab-panel").forEach(p => {
+      p.style.display = p.id === "meetings-subtab-live" ? "block" : "none";
+    });
+    renderMeetingsDashboard();
+    triggerJoinMeetingFlow(newMeeting.id);
+  } else {
+    // Switch to upcoming tab
+    document.querySelectorAll("[data-meetings-subtab]").forEach(b => {
+      b.classList.toggle("active", b.dataset.meetingsSubtab === "upcoming");
+    });
+    document.querySelectorAll(".meetings-subtab-panel").forEach(p => {
+      p.style.display = p.id === "meetings-subtab-upcoming" ? "block" : "none";
+    });
+    renderMeetingsDashboard();
+  }
 
   // Send a simulated notification alert
   setTimeout(() => {
@@ -11913,28 +12145,71 @@ function renderMeetingsDashboard() {
 
   listEl.innerHTML = "";
 
+  // Update badge counters on all subtabs
+  const liveCount = meetings.filter(m => m.status === "live").length;
+  const upcomingCount = meetings.filter(m => m.status === "scheduled").length;
+  const myCount = meetings.filter(m => {
+    const username = (typeof state !== "undefined" && state.currentUser) ? state.currentUser.username : "Guest User";
+    return m.host === username || (m.invitedCount && m.invitedCount > 0);
+  }).length;
+  const pastCount = meetings.filter(m => m.status === "ended").length;
+
+  const btnLive = document.querySelector('[data-meetings-subtab="live"]');
+  if (btnLive) btnLive.textContent = `🔴 LIVE NOW (${liveCount})`;
+  const btnUpcoming = document.querySelector('[data-meetings-subtab="upcoming"]');
+  if (btnUpcoming) btnUpcoming.textContent = `UPCOMING (${upcomingCount})`;
+  const btnMy = document.querySelector('[data-meetings-subtab="my"]');
+  if (btnMy) btnMy.textContent = `MY MEETINGS (${myCount})`;
+  const btnPast = document.querySelector('[data-meetings-subtab="past"]');
+  if (btnPast) btnPast.textContent = `PAST (${pastCount})`;
+
   let filtered = [];
   if (currentSubtab === "live") {
     filtered = meetings.filter(m => m.status === "live");
   } else if (currentSubtab === "upcoming") {
     filtered = meetings.filter(m => m.status === "scheduled");
   } else if (currentSubtab === "my") {
-    const username = state.currentUser ? state.currentUser.username : "Guest User";
-    filtered = meetings.filter(m => m.host === username || m.invitedCount > 0);
+    const username = (typeof state !== "undefined" && state.currentUser) ? state.currentUser.username : "Guest User";
+    filtered = meetings.filter(m => m.host === username || (m.invitedCount && m.invitedCount > 0));
   } else if (currentSubtab === "past") {
     filtered = meetings.filter(m => m.status === "ended");
   }
 
-  if (filtered.length === 0) {
+  // If in LIVE subtab and no meetings are currently marked "live",
+  // show scheduled/upcoming meetings so users never see an empty screen!
+  let displayMeetings = filtered;
+  let isShowingScheduledFallback = false;
+  if (currentSubtab === "live" && filtered.length === 0 && upcomingCount > 0) {
+    displayMeetings = meetings.filter(m => m.status === "scheduled");
+    isShowingScheduledFallback = true;
+  }
+
+  if (displayMeetings.length === 0) {
     emptyEl.style.display = "block";
   } else {
     emptyEl.style.display = "none";
-    filtered.forEach(m => {
+
+    if (isShowingScheduledFallback) {
+      const notice = document.createElement("div");
+      notice.style.cssText = "padding: 12px 16px; background: rgba(59,130,246,0.08); border: 1.5px solid rgba(59,130,246,0.25); border-radius: 14px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;";
+      notice.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 18px;">📅</span>
+          <span style="font-size: 13px; color: var(--text); font-weight: 700;">No live stream active right now. Join any upcoming meeting below:</span>
+        </div>
+        <button onclick="startInstantMeeting()" style="background: linear-gradient(135deg, #16a34a, #22c55e); color: #fff; border: none; padding: 7px 12px; border-radius: 8px; font-size: 11.5px; font-weight: 800; cursor: pointer;">
+          ⚡ Go Live Now
+        </button>
+      `;
+      listEl.appendChild(notice);
+    }
+
+    displayMeetings.forEach(m => {
       const card = document.createElement("div");
       card.className = "meeting-card";
 
-      // Make entire LIVE card tappable to directly join
-      if (m.status === "live") {
+      const isLive = (m.status === "live");
+      if (isLive) {
         card.style.cursor = "pointer";
         card.style.borderColor = "#22c55e";
         card.style.boxShadow = "0 0 0 2px rgba(34,197,94,0.2)";
@@ -11942,15 +12217,15 @@ function renderMeetingsDashboard() {
       }
       
       let badgeHtml = "";
-      if (m.status === "live") {
+      if (isLive) {
         badgeHtml = `<span class="badge-live" style="background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:800;letter-spacing:0.5px;">🔴 LIVE NOW</span>`;
       } else if (m.status === "scheduled") {
-        badgeHtml = `<span class="badge-upcoming-pill">UPCOMING</span>`;
+        badgeHtml = `<span class="badge-upcoming-pill" style="background:rgba(59,130,246,0.15);color:#2563eb;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:800;">📅 UPCOMING</span>`;
       } else if (m.status === "ended") {
         badgeHtml = `<span class="badge-past-pill">PAST MEETING</span>`;
       }
 
-      const descSnippet = m.description ? `<p class="meeting-card-desc">${m.description}</p>` : "";
+      const descSnippet = m.description ? `<p class="meeting-card-desc" style="margin: 6px 0; font-size: 13px; color: var(--text-muted); line-height: 1.45;">${m.description}</p>` : "";
       
       let actionButtons = "";
       if (m.status === "ended") {
@@ -11959,42 +12234,41 @@ function renderMeetingsDashboard() {
         } else {
           actionButtons = `<span style="font-size: 11px; color: var(--text-muted);">No recording available</span>`;
         }
-      } else if (m.status === "live") {
-        // BIG full-width green Join Now button for LIVE meetings
+      } else if (isLive) {
         actionButtons = `
           <button class="btn-join-meet" data-id="${m.id}" style="
             width: 100%; background: linear-gradient(135deg, #16a34a, #22c55e);
-            color: #fff; border: none; border-radius: 14px; padding: 15px 20px;
-            font-size: 16px; font-weight: 800; cursor: pointer; letter-spacing: 0.5px;
-            box-shadow: 0 6px 20px rgba(34,197,94,0.5); margin-top: 8px;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
+            color: #fff; border: none; border-radius: 14px; padding: 14px 20px;
+            font-size: 15px; font-weight: 800; cursor: pointer; letter-spacing: 0.5px;
+            box-shadow: 0 6px 20px rgba(34,197,94,0.4); margin-top: 8px;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
           ">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
-            Join Now / सभेत सामील व्हा
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+            Join Live Now / थेट सामील व्हा
           </button>
         `;
       } else {
         actionButtons = `
-          <button class="btn-secondary-mini btn-view-meet-details" data-id="${m.id}">Details</button>
-          <button class="btn-primary-mini btn-join-meet" data-id="${m.id}">Join / सामील व्हा</button>
+          <button class="btn-secondary-mini btn-view-meet-details" data-id="${m.id}" style="padding: 9px 14px; border-radius: 10px; font-size: 12.5px; font-weight: 700;">Details</button>
+          <button class="btn-primary-mini btn-join-meet" data-id="${m.id}" style="padding: 9px 18px; border-radius: 10px; font-size: 12.5px; font-weight: 800; background: linear-gradient(135deg, #2563eb, #3b82f6); color: #fff; border: none; cursor: pointer;">🎥 Start / Join Call</button>
+          <button onclick="sharePrayerMeetingWhatsApp('${m.title}', '${m.date} ${m.time}', '${m.id}')" style="padding: 9px 12px; border-radius: 10px; font-size: 12px; font-weight: 700; background: rgba(37,211,102,0.12); color: #25d366; border: 1px solid rgba(37,211,102,0.3); cursor: pointer;">💬 Invite</button>
         `;
       }
 
       card.innerHTML = `
         <div class="meeting-card-info">
-          <div class="meeting-card-header">
+          <div class="meeting-card-header" style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
             ${badgeHtml}
-            <h4 class="meeting-card-title">${m.title}</h4>
+            <span style="font-size: 11px; color: var(--text-muted); font-weight: 700;">⏱️ ${m.duration || 60} mins</span>
           </div>
+          <h4 class="meeting-card-title" style="margin: 6px 0 2px 0; font-size: 16px; font-weight: 800; color: var(--text);">${m.title}</h4>
           ${descSnippet}
-          <div class="meeting-card-details">
-            <span>👤 Host: ${m.host}</span>
+          <div class="meeting-card-details" style="display: flex; flex-wrap: wrap; gap: 10px; font-size: 12px; color: var(--text-muted); margin-top: 6px;">
+            <span>👤 Host: <strong>${m.host}</strong></span>
             <span>📅 ${m.date} at ${m.time}</span>
-            <span>⏱️ ${m.duration} mins</span>
-            ${m.status === 'live' ? `<span>👥 ${m.participantsCount || m.attendees || 'Active Fellowship'}</span>` : ""}
           </div>
         </div>
-        <div class="meeting-card-actions">
+        <div class="meeting-card-actions" style="margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap;">
           ${actionButtons}
         </div>
       `;
@@ -12020,7 +12294,7 @@ function renderMeetingsDashboard() {
       if (recordBtn) {
         recordBtn.addEventListener("click", (e) => {
           e.stopPropagation();
-          showToast("Playing meeting recording: Weekly Revival (August 7)...");
+          showToast("Playing meeting recording...");
         });
       }
 
@@ -16922,8 +17196,9 @@ window.joinPrayerMeetingDirect = function(roomCode, title) {
 };
 
 window.sharePrayerMeetingWhatsApp = function(title, time, roomCode) {
-  const joinUrl = `https://meet.jit.si/RiverOfLife_${roomCode || 'Sanctuary'}`;
-  const text = `🕊️ *River of Life Church Prayer Meeting*\n\n🙏 *${title}*\n🕒 *Time:* ${time}\n\n🎥 *Join Live Video Room:*\n${joinUrl}\n\n_All are welcome to join in prayer and fellowship!_`;
+  const domain = window.location.origin + window.location.pathname;
+  const joinUrl = `${domain}?join=${encodeURIComponent(roomCode || 'Sanctuary')}`;
+  const text = `🕊️ *River of Life Church Prayer Meeting*\n\n🙏 *${title}*\n🕒 *Time:* ${time}\n\n🎥 *Join Live Video Call Directly / थेट कॉलमध्ये सामील व्हा:*\n${joinUrl}\n\n_All are welcome to join in prayer and fellowship!_`;
   const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
   window.open(waUrl, '_blank');
 };
