@@ -18032,7 +18032,7 @@ window.cycleVodWallpaper = function() {
   const title = catalogEntry ? (catalogEntry.nameMr + ' • ' + catalogEntry.name) : dailyImg;
 
   if (typeof showToast === "function") {
-    showToast(`🖼️ वॉलपेपर (${window.currentVodImageIndex + 1}/70): ${title}`);
+    showToast(`🖼️ वॉलपेपर: ${title}`);
   }
 };
 

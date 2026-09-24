@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v2373_FULL_HD_WEBRTC_AND_HOST_SYNC';
+const CACHE_NAME = 'river-of-life-cache-v2374_CLEAN_HOME_VOD_CARD';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
