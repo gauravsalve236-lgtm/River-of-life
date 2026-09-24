@@ -17843,3 +17843,23 @@ body:has(#view-reader.active) .mobile-bottom-tabs {
 .wallpaper-tile-card.is-active .wallpaper-tile-check {
   display: flex;
 }
+
+
+/* HIGH DEFINITION VIDEO RENDERING & SMOOTH CANVAS */
+.river-video-tile video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+  background: #090d16 !important;
+  image-rendering: -webkit-optimize-contrast !important;
+  image-rendering: crisp-edges !important;
+  transform: translateZ(0) !important;
+  -webkit-transform: translateZ(0) !important;
+  backface-visibility: hidden !important;
+}
+
+.river-video-tile.is-local.mirror-active video {
+  transform: scaleX(-1) translateZ(0) !important;
+  -webkit-transform: scaleX(-1) translateZ(0) !important;
+}

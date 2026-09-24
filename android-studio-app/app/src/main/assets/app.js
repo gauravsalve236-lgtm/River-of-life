@@ -12260,8 +12260,7 @@ async function launchLiveMeetingRoom(meeting, stream) {
         localStream = await navigator.mediaDevices.getUserMedia({
           video: {
             facingMode: RiverMeet.facingMode,
-            width: { ideal: 640 },
-            height: { ideal: 480 }
+            width: { ideal: 1920, min: 1280 }, height: { ideal: 1080, min: 720 }, frameRate: { ideal: 30, max: 60 }
           },
           audio: {
             echoCancellation: true,
@@ -12293,7 +12292,7 @@ async function launchLiveMeetingRoom(meeting, stream) {
     renderLocalVideoTile(loggedIn, isHost);
 
     // Initialize PeerJS WebRTC Connection
-    initPeerConnection(roomKey, loggedIn, isHost);
+    initPeerConnection(roomKey, loggedIn, true);
 
     if (typeof showToast === "function") {
       showToast(isHost ? "You are hosting the Sanctuary call 👑" : "Connected to Sanctuary call 🙏");
@@ -12342,10 +12341,10 @@ function renderLocalVideoTile(displayName, isHost) {
 }
 
 // Initialize PeerJS Connection with Resilient Discovery
-function initPeerConnection(roomKey, displayName, isHost) {
+function initPeerConnection(roomKey, displayName, tryAsHost) {
   if (typeof Peer === "undefined") {
     console.warn("[RiverMeet] PeerJS not yet loaded, waiting 500ms...");
-    setTimeout(() => initPeerConnection(roomKey, displayName, isHost), 500);
+    setTimeout(() => initPeerConnection(roomKey, displayName, tryAsHost), 500);
     return;
   }
 
@@ -12359,7 +12358,9 @@ function initPeerConnection(roomKey, displayName, isHost) {
   ];
 
   const hostPeerId = 'rol_' + roomKey + '_host';
-  const myPeerId = isHost ? hostPeerId : ('rol_' + roomKey + '_p_' + Math.random().toString(36).substring(2, 8));
+  // Attempt to claim room host slot if tryAsHost is true or undefined
+  const shouldTryHost = (tryAsHost !== false);
+  const myPeerId = shouldTryHost ? hostPeerId : ('rol_' + roomKey + '_p_' + Math.random().toString(36).substring(2, 8));
   RiverMeet.myPeerId = myPeerId;
 
   try {
@@ -12374,18 +12375,29 @@ function initPeerConnection(roomKey, displayName, isHost) {
     RiverMeet.peer = peer;
 
     peer.on('open', (id) => {
-      console.log("[RiverMeet] Peer connection open with ID:", id);
+      console.log("[RiverMeet] WebRTC Room online with ID:", id, "(isHost:", shouldTryHost, ")");
       RiverMeet.myPeerId = id;
+      hideWaitingBanner();
 
-      if (!isHost) {
-        // Participant: Call and connect to host
+      if (id === hostPeerId) {
+        // You are the Host / Room Leader!
+        RiverMeet.isHost = true;
+        const hostBar = document.getElementById("river-host-controls-bar");
+        if (hostBar) hostBar.style.display = "block";
+        
+        // Update local nametag to indicate Host
+        const nametag = document.querySelector("#river-tile-local .river-tile-nametag span:last-child");
+        if (nametag) nametag.textContent = displayName + " (You • Host 👑)";
+      } else {
+        // You are a Participant: Call and connect to room host immediately
+        RiverMeet.isHost = false;
         connectToHost(hostPeerId, displayName);
       }
     });
 
     peer.on('call', (incomingCall) => {
       console.log("[RiverMeet] Incoming call from peer:", incomingCall.peer);
-      // Answer with local stream
+      // Answer with Full HD local stream
       incomingCall.answer(RiverMeet.localStream);
       setupPeerCallEvents(incomingCall);
     });
@@ -12396,21 +12408,21 @@ function initPeerConnection(roomKey, displayName, isHost) {
     });
 
     peer.on('error', (err) => {
-      console.warn("[RiverMeet] Peer error:", err.type, err.message);
+      console.warn("[RiverMeet] Peer notification:", err.type, err.message);
       if (err.type === 'unavailable-id') {
-        // If Host ID was already occupied, join as participant!
-        console.log("[RiverMeet] Host slot occupied, joining as participant...");
-        RiverMeet.isHost = false;
+        // Host slot is already taken by active host! Connect as participant!
+        console.log("[RiverMeet] Host already present in room. Connecting as participant...");
+        try { peer.destroy(); } catch(e) {}
         initPeerConnection(roomKey, displayName, false);
       } else if (err.type === 'peer-unavailable') {
-        console.log("[RiverMeet] Host not yet in room, will retry connecting in 3s...");
-        showWaitingBanner("Waiting for Host to join Sanctuary... / खोलीत होस्ट येण्याची वाट पाहत आहे...");
+        console.log("[RiverMeet] Host connecting, retrying call in 2s...");
+        showWaitingBanner("Connecting to Sanctuary call... / जोडले जात आहे...");
         if (!RiverMeet.retryTimer) {
           RiverMeet.retryTimer = setInterval(() => {
             if (RiverMeet.peer && !RiverMeet.peer.destroyed && !RiverMeet.isHost) {
               connectToHost(hostPeerId, displayName);
             }
-          }, 3500);
+          }, 2500);
         }
       }
     });
@@ -12453,32 +12465,57 @@ function setupPeerCallEvents(call) {
   const peerId = call.peer;
   const peerName = (call.metadata && call.metadata.name) ? call.metadata.name : (peerId.includes('_host') ? 'Host' : 'Member');
 
+  function boostBitrate() {
+    try {
+      if (call.peerConnection && call.peerConnection.getSenders) {
+        const senders = call.peerConnection.getSenders();
+        senders.forEach(sender => {
+          if (sender.track && sender.track.kind === 'video') {
+            const params = sender.getParameters();
+            if (!params.encodings || params.encodings.length === 0) {
+              params.encodings = [{}];
+            }
+            params.encodings[0].maxBitrate = 3000000; // 3.0 Mbps 1080p Full HD
+            params.encodings[0].networkPriority = 'high';
+            params.encodings[0].maxFramerate = 30;
+            sender.setParameters(params).catch(e => {});
+          }
+        });
+      }
+    } catch(e) {}
+  }
+
   call.on('stream', (remoteStream) => {
-    console.log("[RiverMeet] Received remote stream from:", peerId);
+    console.log('[RiverMeet] Received remote stream from:', peerId);
     hideWaitingBanner();
     if (RiverMeet.retryTimer) {
       clearInterval(RiverMeet.retryTimer);
       RiverMeet.retryTimer = null;
     }
     attachRemoteVideoTile(peerId, remoteStream, peerName);
+    boostBitrate();
+    setTimeout(boostBitrate, 1000);
+    setTimeout(boostBitrate, 3000);
   });
 
   call.on('close', () => {
-    console.log("[RiverMeet] Call closed by peer:", peerId);
+    console.log('[RiverMeet] Call closed by peer:', peerId);
     removeRemoteVideoTile(peerId);
   });
 
   call.on('error', (err) => {
-    console.warn("[RiverMeet] Call error for peer:", peerId, err);
+    console.warn('[RiverMeet] Call error for peer:', peerId, err);
   });
 
   let entry = RiverMeet.peerConnections.get(peerId) || {};
   entry.call = call;
   entry.name = peerName;
   RiverMeet.peerConnections.set(peerId, entry);
+
+  // Boost bitrate when call is initiated
+  setTimeout(boostBitrate, 1000);
 }
 
-// Setup Data Connection Events
 function setupDataConnEvents(conn) {
   const peerId = conn.peer;
 
@@ -12822,8 +12859,7 @@ async function flipRiverMeetingCamera() {
       const newStream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: RiverMeet.facingMode,
-          width: { ideal: 640 },
-          height: { ideal: 480 }
+          width: { ideal: 1920, min: 1280 }, height: { ideal: 1080, min: 720 }, frameRate: { ideal: 30, max: 60 }
         }
       });
 
