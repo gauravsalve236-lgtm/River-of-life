@@ -61,13 +61,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Great+Vibes&family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Noto+Serif+Devanagari:wght@500;600;700;800;900&family=Outfit:wght@500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600;1,700&family=Poppins:wght@600;700;800;900&family=Rozha+One&display=swap" rel="stylesheet">
   
   <!-- Main Stylesheet (Cache-Busted for Authentic Male Audio V27) -->
-  <link rel="stylesheet" href="index.css?v=2361_DAILY_VERSE_WIDGET_CLEANUP">
+  <link rel="stylesheet" href="index.css?v=2363_IOS_MIC_SAFARI_PERM_FIX">
 
   <!-- Official LiveKit WebRTC Client SDK -->
   <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.0.8/dist/livekit-client.umd.min.js"></script>
   <!-- Google Identity Services (Native Android & Chrome One-Tap Account Chooser) -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
-<style id="rol-in-app-meeting-fix">#modal-ios-meeting-choice{display:none!important}</style></head>
+</head>
 <body>
   
   <!-- Splash Screen Overlay -->
@@ -5122,10 +5122,10 @@
         </p>
         <div style="display: flex; flex-direction: column; gap: 10px;">
           <button id="btn-ios-join-safari" onclick="proceedJoinMeetingSafari()" style="width: 100%; padding: 14px; border-radius: 14px; font-size: 14px; font-weight: 800; background: linear-gradient(135deg, #2563eb, #3b82f6); color: #ffffff; border: none; cursor: pointer; box-shadow: 0 4px 14px rgba(37,99,235,0.35); display: flex; align-items: center; justify-content: center; gap: 8px;">
-            <span>🌐 Open in Safari (Audio & Mic)</span>
+            <span>🌐 Open in Safari (Recommended / सर्वोत्तम पर्याय)</span>
           </button>
           <button id="btn-ios-join-inapp" onclick="proceedJoinMeetingInApp()" style="width: 100%; padding: 13px; border-radius: 14px; font-size: 13.5px; font-weight: 700; background: var(--surface, #f3f4f6); color: var(--text, #1f2937); border: 1.5px solid var(--border, rgba(0,0,0,0.1)); cursor: pointer;">
-            <span>📱 Join Inside App (ॲपमध्ये सामील व्हा)</span>
+            <span>📱 Join Inside App (ॲपमध्ये सामील व्हा - ऐकण्यासाठी)</span>
           </button>
           <button onclick="closeModal('modal-ios-meeting-choice')" style="background: transparent; border: none; color: var(--text-muted, #6b7280); font-size: 13px; font-weight: 700; cursor: pointer; padding: 6px;">
             Cancel / रद्द करा
@@ -5214,7 +5214,7 @@
 
     <!-- Microphone Permission Troubleshooting Helper Modal for Mobile (iOS Safari & Android) -->
     <div id="modal-mic-permission-help" class="drawer-overlay centered-align" style="z-index: 1000005 !important;">
-      <div class="centered-modal-card" style="max-width: 390px; text-align: left; padding: 22px; border-radius: 24px; background: #1e293b; color: #fff; box-shadow: 0 20px 40px rgba(0,0,0,0.6); border: 1.5px solid rgba(239,68,68,0.5);">
+      <div class="centered-modal-card" style="max-width: 400px; text-align: left; padding: 22px; border-radius: 24px; background: #1e293b; color: #fff; box-shadow: 0 20px 40px rgba(0,0,0,0.6); border: 1.5px solid rgba(239,68,68,0.5);">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
           <div style="display: flex; align-items: center; gap: 8px;">
             <div style="width: 36px; height: 36px; border-radius: 50%; background: rgba(239, 68, 68, 0.2); display: flex; align-items: center; justify-content: center; font-size: 20px;">
@@ -5226,34 +5226,46 @@
         </div>
 
         <p style="font-size: 13px; color: #cbd5e1; margin-bottom: 14px; line-height: 1.5;">
-          आयफोनवर मायक्रोफोन बंद असल्यामुळे आवाज जात नाहीये. कृपया खालीलप्रमाणे चालू करा:
+          आयफोनवर Apple WebKit सुरक्षेमुळे ॲपमध्ये मायक्रोफोन चालू होत नाही. कृपया थेट <strong>Safari</strong> मध्ये उघडा:
         </p>
+
+        <!-- Direct Instant Fix Button: Open in Safari -->
+        <div style="margin-bottom: 16px;">
+          <button id="btn-mic-help-safari-direct" onclick="proceedJoinMeetingSafari()" style="width: 100%; padding: 14px; border-radius: 14px; font-size: 14px; font-weight: 800; background: linear-gradient(135deg, #2563eb, #3b82f6); color: #ffffff; border: none; cursor: pointer; box-shadow: 0 4px 16px rgba(37,99,235,0.45); display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <span>🌐 Open in Safari Now (१००% माइक चालू होतो)</span>
+          </button>
+          <div style="font-size: 11.5px; color: #94a3b8; text-align: center; margin-top: 6px;">
+            (Safari मध्ये उघडल्यावर 'Allow' करा, तुमचा माइक आणि आवाज लगेच सुरू होईल)
+          </div>
+        </div>
 
         <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 14px; margin-bottom: 16px;">
           <div style="font-weight: 800; font-size: 13px; color: #38bdf8; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
-            <span>📱 How to Enable on iPhone (आयफोनवर कसे चालू करावे):</span>
+            <span>📱 How to Enable on iPhone (आयफोनवर सेटिंग कशी करावी):</span>
           </div>
           <div style="font-size: 12px; color: #f1f5f9; line-height: 1.6;">
-            <strong style="color: #fbbf24;">पर्याय १: iPhone Settings मधून (कायमस्वरूपी चालू):</strong>
+            <div style="background: rgba(234, 179, 8, 0.15); border-left: 3px solid #eab308; padding: 6px 10px; border-radius: 6px; margin-bottom: 8px; font-size: 11.5px; color: #fef08a;">
+              ℹ️ <strong>टीप:</strong> iPhone वर <em>Privacy & Security &rarr; Microphone</em> मध्ये <em>Safari</em> दिसत नाही, कारण Safari हे Apple चे इन-बिल्ट ॲप आहे. Safari ची सेटिंग खालीलप्रमाणे करा:
+            </div>
+            <strong style="color: #fbbf24;">पर्याय १: iPhone Settings मधून:</strong>
             <ol style="margin: 4px 0 10px 0; padding-left: 18px;">
-              <li>iPhone <strong>Settings</strong> उघडा &rarr; खाली <strong>Safari</strong> वर जा.</li>
-              <li>खाली स्क्रोल करून <strong>Microphone</strong> वर टॅप करा &rarr; <strong style="color: #4ade80;">"Allow"</strong> निवडा.</li>
-              <li>तसेच <strong>Settings &rarr; Privacy & Security &rarr; Microphone &rarr; Safari चालू करा</strong>.</li>
+              <li>iPhone <strong>Settings</strong> ॲप उघडा &rarr; खाली स्क्रोल करून <strong>Safari</strong> वर टॅप करा.</li>
+              <li>खाली स्क्रोल करून <strong>Microphone</strong> वर टॅप करा &rarr; <strong style="color: #4ade80;">"Allow"</strong> निवडा (किंवा "Ask").</li>
             </ol>
-            <strong style="color: #fbbf24;">पर्याय २: Safari ब्राऊझरमधून:</strong>
+            <strong style="color: #fbbf24;">पर्याय २: Safari ब्राऊझरमधून थेट:</strong>
             <ol style="margin: 4px 0 0 0; padding-left: 18px;">
-              <li>Safari ॲड्रेस बारमधील डाव्या बाजूच्या <strong>"aA"</strong> आयकॉनवर टॅप करा.</li>
+              <li>Safari ॲड्रेस बारमधील डाव्या बाजूच्या <strong>"aA"</strong> (किंवा ⚙️) आयकॉनवर टॅप करा.</li>
               <li><strong>Website Settings</strong> &rarr; <strong>Microphone</strong> वर टॅप करून <strong style="color: #4ade80;">"Allow"</strong> निवडा.</li>
             </ol>
           </div>
         </div>
 
         <div style="display: flex; flex-direction: column; gap: 10px;">
-          <button id="btn-mic-help-retry" onclick="retryEnableMicrophone()" style="width: 100%; padding: 13px 18px; border-radius: 14px; background: linear-gradient(135deg, #2563eb, #3b82f6); color: #fff; font-size: 14px; font-weight: 800; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 14px rgba(37,99,235,0.4);">
-            <span>🔄 I've Enabled It - Join Call</span>
+          <button id="btn-mic-help-retry" onclick="retryEnableMicrophone()" style="width: 100%; padding: 12px 18px; border-radius: 14px; background: rgba(255,255,255,0.12); color: #fff; font-size: 13.5px; font-weight: 700; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <span>🔄 Retry In-App Permission / पुन्हा प्रयत्न करा</span>
           </button>
           <button onclick="continueMeetingWithoutMic()" style="width: 100%; padding: 10px; border-radius: 12px; background: transparent; border: 1px solid rgba(255,255,255,0.15); color: #94a3b8; font-size: 12.5px; font-weight: 600; cursor: pointer;">
-            Join Call Without Mic (माइकशिवाय सामील व्हा)
+            Join Call Without Mic (माइकशिवाय फक्त ऐकण्यासाठी सामील व्हा)
           </button>
         </div>
       </div>
@@ -6131,7 +6143,7 @@
   <script src="sarvam-tts.js?v=132_MARVBSI_FULL_CHURCH_BIBLE"></script>
   <script src="bible-study.js?v=138_MUSEUM_STUDY_HUB"></script>
   <script src="https://meet.darmstadt.social/external_api.js"></script>
-  <script src="app.js?v=2361_DAILY_VERSE_WIDGET_CLEANUP"></script>
+  <script src="app.js?v=2363_IOS_MIC_SAFARI_PERM_FIX"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 4.5s no matter what

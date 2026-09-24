@@ -12180,19 +12180,53 @@ function getJitsiServerDomain() {
 window.getJitsiServerDomain = getJitsiServerDomain;
 
 function proceedJoinMeetingSafari() {
-  if (typeof closeModal === "function") closeModal("modal-ios-meeting-choice");
-  else {
+  if (typeof closeModal === "function") {
+    closeModal("modal-ios-meeting-choice");
+    closeModal("modal-mic-permission-help");
+  } else {
     const el = document.getElementById("modal-ios-meeting-choice");
     if (el) el.style.display = "none";
+    const elMic = document.getElementById("modal-mic-permission-help");
+    if (elMic) elMic.style.display = "none";
   }
-  const m = _pendingMeetingToJoin || { id: "default", title: "Live Fellowship" };
+
+  // If in-app meeting modal is currently open, exit cleanly to prevent duplicate connection/audio
+  try {
+    const liveMeetingModal = document.getElementById("modal-live-meeting");
+    if (liveMeetingModal && (liveMeetingModal.classList.contains("active") || liveMeetingModal.style.display === "flex")) {
+      exitLiveMeetingRoom();
+    }
+  } catch(e) {}
+
+  let m = _pendingMeetingToJoin;
+  if (!m && window.activeMeetingSession && window.activeMeetingSession.meetingId) {
+    m = { id: window.activeMeetingSession.meetingId, title: "Live Fellowship" };
+  }
+  if (!m) {
+    m = { id: "Sanctuary_LiveRoom", title: "Live Fellowship" };
+  }
   const meetingIdSlug = (m && m.id) ? m.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
   const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
   const loggedIn = (state && state.currentUser) ? state.currentUser.username : "Member";
   const jitsiServerDomain = getJitsiServerDomain();
   const extUrl = `https://${jitsiServerDomain}/${roomSlug}#config.enableUserMediaForMobile=true&config.disableDeepLinking=true&config.startWithAudioMuted=false&config.prejoinPageEnabled=false&userInfo.displayName=${encodeURIComponent(loggedIn)}`;
-  window.open(extUrl, "_blank");
+  
   showToast("Opening Live Fellowship in Safari 🙏");
+  
+  try {
+    const win = window.open(extUrl, "_blank");
+    if (!win || win.closed || typeof win.closed === "undefined") {
+      const a = document.createElement("a");
+      a.href = extUrl;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => a.remove(), 150);
+    }
+  } catch (err) {
+    window.location.href = extUrl;
+  }
 }
 window.proceedJoinMeetingSafari = proceedJoinMeetingSafari;
 async function proceedJoinMeetingInApp() {
@@ -12210,7 +12244,26 @@ async function triggerJoinMeetingFlow(meetingId) {
   const m = meetings.find(x => x.id === meetingId) || { id: meetingId, title: "Live Fellowship", host: "Pastor" };
   _pendingMeetingToJoin = m;
 
-  // 1. Proactively request Top-Level Mic Permission on user click gesture (Required for iOS Safari WebKit iframes)
+  // Detect iOS (iPhone, iPad, iPod)
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+  if (isIOS) {
+    // Apple WebKit on iOS strictly restricts cross-origin iframe microphone access.
+    // Present the iOS choice sheet so user can launch directly in Safari for 100% working mic & two-way audio!
+    if (typeof openModal === "function") {
+      openModal("modal-ios-meeting-choice");
+    } else {
+      const modal = document.getElementById("modal-ios-meeting-choice");
+      if (modal) {
+        modal.style.display = "flex";
+        modal.classList.add("active");
+      }
+    }
+    return;
+  }
+
+  // On Android and Desktop, verify microphone and proceed with high-definition in-app conference
   if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
     try {
       const testStream = await navigator.mediaDevices.getUserMedia({
@@ -23650,16 +23703,6 @@ setTimeout(() => {
 
 
 
-
-/* RoL: Hide legacy modal-ios-meeting-choice */
-(function(){
-  const hide = () => {
-    const e = document.getElementById('modal-ios-meeting-choice');
-    if (e) e.style.display = 'none';
-  };
-  hide();
-  new MutationObserver(hide).observe(document.documentElement, { childList: true, subtree: true });
-})();
 
 /* RoL: Ensure all conference iframes retain full permissions policy */
 (function(){
