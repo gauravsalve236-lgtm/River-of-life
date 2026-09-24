@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v2359_NATURAL_PRAYER_AUDIO';
+const CACHE_NAME = 'river-of-life-cache-v2361_DAILY_VERSE_WIDGET_CLEANUP';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
