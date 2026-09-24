@@ -1457,9 +1457,14 @@
               <div class="prayers-subtab-header" style="background: linear-gradient(135deg, #1e293b, #0f172a); border-radius: 18px; padding: 22px; margin-bottom: 20px; color: #ffffff; border: 1.5px solid rgba(255,255,255,0.1);">
                 <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 8px;">
                   <span style="background: rgba(34,197,94,0.2); border: 1px solid rgba(34,197,94,0.5); color: #86efac; font-size: 10.5px; font-weight: 800; padding: 3px 10px; border-radius: 20px;">OFFICIAL CHURCH SCHEDULE</span>
-                  <button id="btn-prayers-schedule-meeting" onclick="openDrawer('drawer-schedule-meeting'); if (typeof populateScheduleHostsDropdown==='function') populateScheduleHostsDropdown();" class="btn-primary-mini" style="background: #22c55e; color: #fff; border: none; padding: 6px 14px; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px;">
-                    <span>+ Schedule Meeting / सभा आयोजित करा</span>
-                  </button>
+                  <div style="display: flex; gap: 8px; align-items: center;">
+                    <button onclick="if(typeof fetchMeetingsFromCloud==='function')fetchMeetingsFromCloud(true); if(typeof syncAllLocalMeetingsToCloud==='function')syncAllLocalMeetingsToCloud();" class="btn-secondary-mini" style="background: rgba(255,255,255,0.18); color: #fff; border: 1px solid rgba(255,255,255,0.3); padding: 6px 12px; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                      <span>🔄 Sync / सिंक</span>
+                    </button>
+                    <button id="btn-prayers-schedule-meeting" onclick="openDrawer('drawer-schedule-meeting'); if (typeof populateScheduleHostsDropdown==='function') populateScheduleHostsDropdown();" class="btn-primary-mini" style="background: #22c55e; color: #fff; border: none; padding: 6px 14px; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                      <span>+ Schedule Meeting / सभा आयोजित करा</span>
+                    </button>
+                  </div>
                 </div>
                 <h3 style="font-size: 21px; font-weight: 800; margin: 0 0 6px 0; color: #ffffff;">Church Prayer Meetings (प्रार्थना सभा)</h3>
                 <p style="font-size: 13px; color: rgba(255,255,255,0.85); margin: 0; line-height: 1.45;">Join scheduled pastoral live prayer calls, fasting prayers, and fellowship sessions. Only official church-scheduled meetings appear here.</p>
@@ -1755,6 +1760,8 @@
               <button onclick="testAndEnableMicrophone()" style="background: linear-gradient(135deg, #2563eb, #3b82f6); color: #fff; border: none; padding: 8px 16px; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer; box-shadow: 0 3px 10px rgba(37,99,235,0.3); display: flex; align-items: center; gap: 6px;">
                 <span>🎙️ Test & Allow Mic</span>
               </button>
+            </div>
+
             <!-- Quick Meeting Join & Instant Call Bar -->
             <div class="quick-meeting-join-card" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.08), rgba(59, 130, 246, 0.08)); border: 1.5px solid rgba(34, 197, 94, 0.35); border-radius: 18px; padding: 14px 18px; margin-bottom: 18px; box-shadow: var(--shadow-sm);">
               <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
@@ -1765,9 +1772,14 @@
                     <p style="margin: 2px 0 0 0; font-size: 11.5px; color: var(--text-muted);">Enter any meeting name/code or start an instant call right now</p>
                   </div>
                 </div>
-                <button onclick="startInstantMeeting()" class="btn-primary-mini" style="background: linear-gradient(135deg, #16a34a, #22c55e); color: #fff; border: none; padding: 8px 14px; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(34,197,94,0.35);">
-                  <span>⚡ Instant Meeting / त्वरित सभा</span>
-                </button>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                  <button onclick="if(typeof fetchMeetingsFromCloud==='function')fetchMeetingsFromCloud(true); if(typeof syncAllLocalMeetingsToCloud==='function')syncAllLocalMeetingsToCloud();" style="background: rgba(37,99,235,0.1); border: 1px solid rgba(37,99,235,0.25); color: #2563eb; padding: 8px 12px; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                    <span>🔄 Sync</span>
+                  </button>
+                  <button onclick="startInstantMeeting()" class="btn-primary-mini" style="background: linear-gradient(135deg, #16a34a, #22c55e); color: #fff; border: none; padding: 8px 14px; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(34,197,94,0.35);">
+                    <span>⚡ Instant Meeting / त्वरित सभा</span>
+                  </button>
+                </div>
               </div>
               <div style="display: flex; gap: 8px;">
                 <input type="text" id="input-quick-meeting-code" placeholder="Enter Meeting Name or Code (उदा. test, sunday, fellowship)..." style="flex: 1; padding: 10px 14px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--bg-content); color: var(--text); font-size: 13.5px; outline: none; font-weight: 600;" onkeydown="if(event.key==='Enter') joinQuickMeetingFromInput()">
@@ -6280,7 +6292,7 @@
   <script src="sarvam-tts.js?v=132_MARVBSI_FULL_CHURCH_BIBLE"></script>
   <script src="bible-study.js?v=138_MUSEUM_STUDY_HUB"></script>
   <script src="peerjs.min.js"></script>
-  <script src="app.js?v=2377_CROSS_DEVICE_MEETINGS_SYNC"></script>
+  <script src="app.js?v=2378_LIVE_CLOUD_SYNC"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 4.5s no matter what

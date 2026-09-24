@@ -11726,6 +11726,7 @@ const ROL_CLOUD_SYNC_TOPIC = "https://ntfy.sh/river-of-life-meetings-sync-2026";
 
 async function syncMeetingToCloud(meeting) {
   try {
+    if (!meeting || !meeting.id) return;
     await fetch(ROL_CLOUD_SYNC_TOPIC, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -11738,12 +11739,35 @@ async function syncMeetingToCloud(meeting) {
 }
 window.syncMeetingToCloud = syncMeetingToCloud;
 
-async function fetchMeetingsFromCloud() {
+// Sync all local meetings to the cloud channel so existing meetings on any device are shared
+async function syncAllLocalMeetingsToCloud() {
   try {
-    const res = await fetch(`${ROL_CLOUD_SYNC_TOPIC}/json?poll=1`, { method: "GET" });
-    if (!res.ok) return;
+    const localMeetings = getMeetingsFromStorage();
+    if (!Array.isArray(localMeetings) || localMeetings.length === 0) return;
+    for (const m of localMeetings) {
+      if (m && m.id) {
+        await syncMeetingToCloud(m);
+      }
+    }
+    console.log("[RiverMeet] Broadcasted", localMeetings.length, "meetings to cloud.");
+  } catch (e) {
+    console.warn("[RiverMeet] syncAllLocalMeetingsToCloud notice:", e.message);
+  }
+}
+window.syncAllLocalMeetingsToCloud = syncAllLocalMeetingsToCloud;
+
+async function fetchMeetingsFromCloud(showToastFeedback = false) {
+  try {
+    const res = await fetch(`${ROL_CLOUD_SYNC_TOPIC}/json?poll=1&since=all`, { method: "GET", cache: "no-store" });
+    if (!res.ok) {
+      if (showToastFeedback && typeof showToast === "function") showToast("Sync offline / सिंक ऑफलाइन आहे");
+      return;
+    }
     const text = await res.text();
-    if (!text || !text.trim()) return;
+    if (!text || !text.trim()) {
+      if (showToastFeedback && typeof showToast === "function") showToast("All meetings are up to date! / सर्व सभा अपडेट आहेत.");
+      return;
+    }
 
     const lines = text.trim().split("\n");
     let localMeetings = getMeetingsFromStorage();
@@ -11755,7 +11779,7 @@ async function fetchMeetingsFromCloud() {
         if (item.message) {
           const m = JSON.parse(item.message);
           if (m && m.id) {
-            const idx = localMeetings.findIndex(x => x.id === m.id);
+            const idx = localMeetings.findIndex(x => x.id === m.id || (x.title && m.title && x.title === m.title && x.date === m.date && x.time === m.time));
             if (idx === -1) {
               localMeetings.unshift(m);
               hasChanges = true;
@@ -11778,9 +11802,19 @@ async function fetchMeetingsFromCloud() {
       if (typeof renderScheduledPrayersTab === "function") {
         renderScheduledPrayersTab();
       }
+      if (showToastFeedback && typeof showToast === "function") {
+        showToast("Meetings synced from cloud! / सभा सिंक झाल्या! 🔄");
+      }
+    } else {
+      if (showToastFeedback && typeof showToast === "function") {
+        showToast("All meetings are up to date! / सर्व सभा अपडेट आहेत. ✅");
+      }
     }
   } catch (e) {
     console.warn("[RiverMeet] Cloud fetch notice:", e.message);
+    if (showToastFeedback && typeof showToast === "function") {
+      showToast("Sync check completed / सिंक तपासणी पूर्ण झाली.");
+    }
   }
 }
 window.fetchMeetingsFromCloud = fetchMeetingsFromCloud;
@@ -11951,8 +11985,19 @@ function initMeetings() {
 
   // Initial dashboard load & cross-device cloud sync
   renderMeetingsDashboard();
+  if (typeof renderScheduledPrayersTab === "function") {
+    renderScheduledPrayersTab();
+  }
   fetchMeetingsFromCloud();
+  setTimeout(syncAllLocalMeetingsToCloud, 800);
   setTimeout(checkAndHandleMeetingDeepLinks, 500);
+
+  // Background cloud sync polling every 4 seconds
+  if (!window._rolMeetingSyncInterval) {
+    window._rolMeetingSyncInterval = setInterval(() => {
+      fetchMeetingsFromCloud();
+    }, 4000);
+  }
 }
 
 // Persistent User Registry Database for Profiles & Invitations
