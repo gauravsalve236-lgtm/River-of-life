@@ -11653,7 +11653,7 @@ function initChurchCompanion() {
    ========================================================================== */
 
 // Meeting globals
-let activeMeetingSession = null; // { meetingId, localStream, provider, isMuted, isCamOff }
+activeMeetingSession = null; // { meetingId, localStream, provider, isMuted, isCamOff }
 let meetingSandboxInterval = null;
 let activeJitsiAPIInstance = null;
 let isScreenSharingActive = false;
@@ -12147,34 +12147,47 @@ function generateICSFile(meeting) {
   showToast("Calendar File (.ics) downloaded!");
 }
 
-// Native Top-Level In-App WebRTC Meeting Engine for River of Life
+// Unified High-Compatibility In-App Video Conference Engine (River of Life)
+// Connects phone and host into the identical church room with HD audio/video and zero redirects
 
-activeMeetingSession = null;
+let activeMeetingSession = null;
 let _pendingMeetingToJoin = null;
-let currentFacingMode = "user";
 
-// Trigger Join Meeting Flow
+function getJitsiServerDomain() {
+  const configured = localStorage.getItem("rol_jitsi_server");
+  if (configured && configured.trim()) {
+    return configured.replace(/^https?:\/\//, '').replace(/\/+$/, '');
+  }
+  return "meet.darmstadt.social";
+}
+window.getJitsiServerDomain = getJitsiServerDomain;
+
+// Trigger Join Meeting Flow — 100% In-App (No redirects, no browser modals)
 async function triggerJoinMeetingFlow(meetingId) {
   try {
     const meetings = (typeof getMeetingsFromStorage === "function") ? getMeetingsFromStorage() : [];
     const m = meetings.find(x => x.id === meetingId) || { id: meetingId, title: "Live Fellowship", host: "Pastor" };
     _pendingMeetingToJoin = m;
     if (typeof showToast === "function") showToast("Joining Live Sanctuary 🙏");
-    await launchLiveMeetingRoom(m, null);
+    launchLiveMeetingRoom(m, null);
   } catch (err) {
     console.error("[RiverMeet] Error initiating meeting flow:", err);
   }
 }
+window.triggerJoinMeetingFlow = triggerJoinMeetingFlow;
 
-// Fullscreen Live Meeting Room Entry — 100% Native In-App WebRTC
-async function launchLiveMeetingRoom(meeting, existingStream) {
+// Fullscreen Live Meeting Room Entry
+function launchLiveMeetingRoom(meeting, stream) {
   try {
     const loggedIn = (typeof state !== "undefined" && state && state.currentUser) ? state.currentUser.username : "Member";
     const isHost = meeting ? (meeting.host === loggedIn) : false;
     const meetingTitle = (meeting && meeting.title) ? meeting.title : "River of Life Meeting";
     const meetingId = (meeting && meeting.id) ? meeting.id : "Sanctuary_LiveRoom";
 
-    console.log("[RiverMeet] Entering native meeting room:", { meetingId, loggedIn, isHost });
+    const meetingIdSlug = meetingId.toString().replace(/[^a-zA-Z0-9]/g, '_');
+    const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
+
+    console.log("[RiverMeet] Entering room:", { meetingId, roomSlug, loggedIn, isHost });
 
     // Open Modal Overlay
     const roomModal = document.getElementById("modal-live-meeting");
@@ -12187,718 +12200,172 @@ async function launchLiveMeetingRoom(meeting, existingStream) {
     const titleEl = document.getElementById("meeting-room-title-display");
     if (titleEl) titleEl.textContent = meetingTitle;
 
-    // Reset Stage & Grid
-    const videoGrid = document.getElementById("river-video-grid");
-    if (videoGrid) {
-      videoGrid.innerHTML = "";
-      videoGrid.setAttribute("data-count", "1");
+    // Clean up any existing Jitsi instance
+    if (window._jitsiApi) {
+      try { window._jitsiApi.dispose(); } catch(e) {}
+      window._jitsiApi = null;
     }
 
-    // Dismiss any previous banner
-    const banner = document.getElementById("river-meeting-banner");
-    if (banner) banner.style.display = "none";
-
-    // Stop any existing session
-    if (activeMeetingSession && activeMeetingSession.localStream) {
-      try { activeMeetingSession.localStream.getTracks().forEach(t => t.stop()); } catch(e) {}
-    }
-    if (activeMeetingSession && activeMeetingSession.peer) {
-      try { activeMeetingSession.peer.destroy(); } catch(e) {}
-    }
-    if (activeMeetingSession && activeMeetingSession.mqttClient) {
-      try { activeMeetingSession.mqttClient.end(true); } catch(e) {}
+    const jitsiCont = document.getElementById("meeting-jitsi-container");
+    if (jitsiCont) {
+      jitsiCont.style.display = "block";
+      jitsiCont.innerHTML = "";
     }
 
     activeMeetingSession = {
       meetingId: meetingId,
-      title: meetingTitle,
+      roomSlug: roomSlug,
       userName: loggedIn,
-      isHost: isHost,
-      localStream: null,
-      isMuted: false,
-      isCamOff: false,
-      peer: null,
-      myPeerId: null,
-      peerCalls: new Map(), // peerId -> call
-      remoteStreams: new Map(), // peerId -> stream
-      remoteNames: new Map(), // peerId -> name
-      mqttClient: null,
-      topic: `riveroflife/meet/${meetingId.toString().replace(/[^a-zA-Z0-9]/g, '_')}`
+      isHost: isHost
     };
 
-    // 1. Acquire Local Media Stream directly at Top-Level Window (No iframes = Zero WebKit Permission Bugs)
-    let localStream = existingStream;
-    if (!localStream && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      try {
-        localStream = await navigator.mediaDevices.getUserMedia({
-          audio: {
-            echoCancellation: true,
-            noiseSuppression: true,
-            autoGainControl: true
-          },
-          video: {
-            facingMode: currentFacingMode,
-            width: { ideal: 640, max: 1280 },
-            height: { ideal: 480, max: 720 },
-            frameRate: { ideal: 30, max: 30 }
-          }
-        });
-      } catch (camErr) {
-        console.warn("[RiverMeet] Camera+Mic capture error, trying audio only:", camErr);
-        try {
-          localStream = await navigator.mediaDevices.getUserMedia({
-            audio: {
-              echoCancellation: true,
-              noiseSuppression: true,
-              autoGainControl: true
-            },
-            video: false
-          });
-          activeMeetingSession.isCamOff = true;
-        } catch (micErr) {
-          console.warn("[RiverMeet] Audio capture blocked:", micErr);
-          // Show Listen-Only notice banner
-          if (banner) {
-            const bText = document.getElementById("river-meeting-banner-text");
-            if (bText) bText.textContent = "🎙️ माइक परवानगी नाकारली गेली आहे. तुम्ही 'Listen-Only' मोडमध्ये ऐकू शकता.";
-            banner.style.display = "flex";
-          }
+    const jitsiServerDomain = getJitsiServerDomain();
+    const toolbarButtons = ["microphone", "camera", "desktop", "chat", "raisehand", "tileview", "hangup"];
+    const allowPolicy = "camera; microphone; display-capture; autoplay; clipboard-write; fullscreen";
+
+    if (typeof JitsiMeetExternalAPI !== "undefined" && jitsiCont) {
+      const options = {
+        roomName: roomSlug,
+        width: '100%',
+        height: '100%',
+        parentNode: jitsiCont,
+        userInfo: { displayName: loggedIn },
+        configOverwrite: {
+          enableUserMediaForMobile: true,
+          disableDeepLinking: true,
+          startWithAudioMuted: false,
+          startWithVideoMuted: false,
+          prejoinPageEnabled: false,
+          prejoinConfig: { enabled: false },
+          requireDisplayName: false,
+          enableWelcomePage: false,
+          enableClosePage: false,
+          disableThirdPartyRequests: true,
+          resolution: 720,
+          p2p: { enabled: false }, // Route via SFU so mobile 4G/5G carrier NAT connects instantly to host
+          enableNoAudioDetection: false,
+          enableNoisyMicDetection: false,
+          toolbarButtons: toolbarButtons
+        },
+        interfaceConfigOverwrite: {
+          TOOLBAR_BUTTONS: toolbarButtons,
+          SETTINGS_SECTIONS: [],
+          SHOW_JITSI_WATERMARK: false,
+          SHOW_WATERMARK_FOR_GUESTS: false,
+          SHOW_BRAND_WATERMARK: false,
+          SHOW_POWERED_BY: false,
+          MOBILE_APP_PROMO: false,
+          HIDE_DEEP_LINKING_LOGO: true
         }
+      };
+
+      // Ensure iframe is created with clean standard WebKit permissions policy
+      const origCreateElement = document.createElement.bind(document);
+      document.createElement = function(tagName, opts) {
+        const el = origCreateElement(tagName, opts);
+        if (tagName && typeof tagName === "string" && tagName.toLowerCase() === "iframe") {
+          el.setAttribute("allow", allowPolicy);
+          el.setAttribute("allowusermedia", "true");
+          el.setAttribute("playsinline", "true");
+          el.setAttribute("webkit-playsinline", "true");
+          el.allow = allowPolicy;
+        }
+        return el;
+      };
+
+      let api = null;
+      try {
+        api = new JitsiMeetExternalAPI(jitsiServerDomain, options);
+      } finally {
+        document.createElement = origCreateElement;
       }
+      window._jitsiApi = api;
+
+      api.on("videoConferenceJoined", function() {
+        console.log("[RiverMeet] Successfully connected with host and participants in room:", roomSlug);
+      });
+
+      api.on("readyToClose", function() {
+        exitLiveMeetingRoom();
+      });
+
+      // Style created iframe
+      const createdIframe = jitsiCont.querySelector("iframe");
+      if (createdIframe) {
+        createdIframe.id = "webrtc-room-iframe";
+        createdIframe.style.width = "100%";
+        createdIframe.style.height = "100%";
+        createdIframe.style.border = "none";
+        createdIframe.style.background = "#090d16";
+        createdIframe.setAttribute("allow", allowPolicy);
+        createdIframe.setAttribute("allowusermedia", "true");
+        createdIframe.setAttribute("playsinline", "true");
+        createdIframe.setAttribute("webkit-playsinline", "true");
+      }
+
+      if (typeof showToast === "function") showToast("Connected to Fellowship Call 🙏");
+
+    } else if (jitsiCont) {
+      // Direct iframe fallback
+      const buttonsParam = encodeURIComponent(JSON.stringify(toolbarButtons));
+      const emptyArrayParam = encodeURIComponent(JSON.stringify([]));
+      const configParams = [
+        "config.enableUserMediaForMobile=true",
+        "config.disableDeepLinking=true",
+        "config.prejoinPageEnabled=false",
+        "config.prejoinConfig.enabled=false",
+        "config.requireDisplayName=false",
+        "config.startWithAudioMuted=false",
+        "config.startWithVideoMuted=false",
+        "config.p2p.enabled=false",
+        `config.toolbarButtons=${buttonsParam}`,
+        `interfaceConfig.TOOLBAR_BUTTONS=${buttonsParam}`,
+        `interfaceConfig.SETTINGS_SECTIONS=${emptyArrayParam}`,
+        "interfaceConfig.SHOW_JITSI_WATERMARK=false",
+        "interfaceConfig.MOBILE_APP_PROMO=false",
+        `userInfo.displayName=${encodeURIComponent(loggedIn)}`
+      ].join("&");
+
+      const roomUrl = `https://${jitsiServerDomain}/${roomSlug}#${configParams}`;
+      jitsiCont.innerHTML = `
+        <iframe 
+          id="webrtc-room-iframe"
+          src="${roomUrl}" 
+          width="100%" 
+          height="100%" 
+          allow="${allowPolicy}" 
+          allowusermedia="true"
+          playsinline="true"
+          webkit-playsinline="true"
+          style="border: none; width: 100%; height: 100%; background: #090d16;">
+        </iframe>
+      `;
+
+      if (typeof showToast === "function") showToast("Connected to Fellowship Call 🙏");
     }
-
-    activeMeetingSession.localStream = localStream;
-
-    // 2. Render Local Video Tile
-    renderLocalVideoTile(localStream, loggedIn);
-
-    // 3. Update Control Buttons UI
-    updateRiverMeetingControlsUI();
-
-    // 4. Update Participant Counter & Drawer
-    updateRiverParticipantUI();
-
-    // 5. Initialize WebRTC Mesh Signaling (PeerJS + MQTT)
-    initRiverWebRTCMesh(activeMeetingSession);
-
-    if (typeof showToast === "function") showToast("Connected to Sanctuary Video 🙏");
 
   } catch (err) {
     console.error("[RiverMeet] launchLiveMeetingRoom error:", err);
   }
 }
+window.launchLiveMeetingRoom = launchLiveMeetingRoom;
 
-// Render Local Video Tile into #river-video-grid
-function renderLocalVideoTile(stream, userName) {
-  const videoGrid = document.getElementById("river-video-grid");
-  if (!videoGrid) return;
-
-  const existingLocal = document.getElementById("river-tile-local");
-  if (existingLocal) existingLocal.remove();
-
-  const tile = document.createElement("div");
-  tile.id = "river-tile-local";
-  tile.className = "river-video-tile is-local mirror-active";
-
-  const video = document.createElement("video");
-  video.id = "river-video-local";
-  video.setAttribute("playsinline", "true");
-  video.setAttribute("webkit-playsinline", "true");
-  video.setAttribute("autoplay", "true");
-  video.muted = true; // Always mute local video to prevent acoustic echo
-  if (stream) {
-    video.srcObject = stream;
-    video.play().catch(e => console.warn("[RiverMeet] Local video play notice:", e));
-  }
-
-  const avatar = document.createElement("div");
-  avatar.id = "river-avatar-local";
-  avatar.className = "river-tile-avatar";
-  avatar.style.display = (activeMeetingSession && activeMeetingSession.isCamOff) ? "flex" : "none";
-  const initial = userName ? userName.trim().charAt(0).toUpperCase() : "M";
-  avatar.innerHTML = `<div class="river-avatar-circle">${initial}</div>`;
-
-  const overlay = document.createElement("div");
-  overlay.className = "river-tile-overlay";
-  overlay.innerHTML = `
-    <div class="river-tile-nametag">
-      <span class="river-tile-mic-icon" id="river-tile-mic-local">${(activeMeetingSession && activeMeetingSession.isMuted) ? "🔇" : "🎙️"}</span>
-      <span class="river-tile-name">${userName} (You / तुम्ही)</span>
-    </div>
-  `;
-
-  tile.appendChild(video);
-  tile.appendChild(avatar);
-  tile.appendChild(overlay);
-  videoGrid.appendChild(tile);
-
-  // Attach audio visualizer to detect when user speaks
-  if (stream && stream.getAudioTracks().length > 0) {
-    attachAudioVisualizer(stream, tile);
-  }
-
-  recalculateVideoGridLayout();
-}
-
-// Add Remote Video Tile
-function addRemoteVideoTile(peerId, remoteStream, peerName) {
-  const videoGrid = document.getElementById("river-video-grid");
-  if (!videoGrid) return;
-
-  const name = peerName || (activeMeetingSession && activeMeetingSession.remoteNames.get(peerId)) || "Participant";
-  if (activeMeetingSession) {
-    activeMeetingSession.remoteStreams.set(peerId, remoteStream);
-    activeMeetingSession.remoteNames.set(peerId, name);
-  }
-
-  let tile = document.getElementById(`river-tile-${peerId}`);
-  if (!tile) {
-    tile = document.createElement("div");
-    tile.id = `river-tile-${peerId}`;
-    tile.className = "river-video-tile is-remote";
-
-    const video = document.createElement("video");
-    video.id = `river-video-${peerId}`;
-    video.setAttribute("playsinline", "true");
-    video.setAttribute("webkit-playsinline", "true");
-    video.setAttribute("autoplay", "true");
-    video.srcObject = remoteStream;
-    video.play().catch(e => console.warn("[RiverMeet] Remote video play notice:", e));
-
-    const avatar = document.createElement("div");
-    avatar.id = `river-avatar-${peerId}`;
-    avatar.className = "river-tile-avatar";
-    avatar.style.display = "none";
-    const initial = name.trim().charAt(0).toUpperCase() || "P";
-    avatar.innerHTML = `<div class="river-avatar-circle">${initial}</div>`;
-
-    const overlay = document.createElement("div");
-    overlay.className = "river-tile-overlay";
-    overlay.innerHTML = `
-      <div class="river-tile-nametag">
-        <span class="river-tile-mic-icon" id="river-tile-mic-${peerId}">🎙️</span>
-        <span class="river-tile-name">${name}</span>
-      </div>
-    `;
-
-    tile.appendChild(video);
-    tile.appendChild(avatar);
-    tile.appendChild(overlay);
-    videoGrid.appendChild(tile);
-
-    if (remoteStream && remoteStream.getAudioTracks().length > 0) {
-      attachAudioVisualizer(remoteStream, tile);
-    }
-  } else {
-    const video = document.getElementById(`river-video-${peerId}`);
-    if (video) {
-      video.srcObject = remoteStream;
-      video.play().catch(e => console.warn("[RiverMeet] Remote video update play notice:", e));
-    }
-  }
-
-  recalculateVideoGridLayout();
-  updateRiverParticipantUI();
-}
-
-// Remove Remote Video Tile
-function removeRemoteVideoTile(peerId) {
-  const tile = document.getElementById(`river-tile-${peerId}`);
-  if (tile) tile.remove();
-
-  if (activeMeetingSession) {
-    activeMeetingSession.remoteStreams.delete(peerId);
-    activeMeetingSession.remoteNames.delete(peerId);
-    activeMeetingSession.peerCalls.delete(peerId);
-  }
-
-  recalculateVideoGridLayout();
-  updateRiverParticipantUI();
-}
-
-// Recalculate CSS Grid data-count attribute for responsive sizing
-function recalculateVideoGridLayout() {
-  const videoGrid = document.getElementById("river-video-grid");
-  if (!videoGrid) return;
-  const count = videoGrid.querySelectorAll(".river-video-tile").length || 1;
-  videoGrid.setAttribute("data-count", count.toString());
-}
-
-// Audio Activity Visualizer (Lights up border when speaking)
-function attachAudioVisualizer(stream, tileEl) {
-  try {
-    const AudioCtx = window.AudioContext || window.webkitAudioContext;
-    if (!AudioCtx) return;
-    const ctx = new AudioCtx();
-    const src = ctx.createMediaStreamSource(stream);
-    const analyser = ctx.createAnalyser();
-    analyser.fftSize = 64;
-    src.connect(analyser);
-    const data = new Uint8Array(analyser.frequencyBinCount);
-
-    const interval = setInterval(() => {
-      if (!activeMeetingSession || !tileEl.isConnected) {
-        clearInterval(interval);
-        try { ctx.close(); } catch(e) {}
-        return;
-      }
-      analyser.getByteFrequencyData(data);
-      let sum = 0;
-      for (let i = 0; i < data.length; i++) sum += data[i];
-      const avg = sum / data.length;
-      if (avg > 18) {
-        tileEl.classList.add("is-speaking");
-      } else {
-        tileEl.classList.remove("is-speaking");
-      }
-    }, 150);
-  } catch (e) {
-    console.warn("[RiverMeet] Audio visualizer setup notice:", e);
-  }
-}
-
-// Toggle Local Microphone
-function toggleRiverMeetingMic() {
-  if (!activeMeetingSession) return;
-  if (!activeMeetingSession.localStream || activeMeetingSession.localStream.getAudioTracks().length === 0) {
-    if (typeof showToast === "function") showToast("मायक्रोफोन उपलब्ध नाही (No microphone available)");
-    return;
-  }
-
-  const audioTrack = activeMeetingSession.localStream.getAudioTracks()[0];
-  audioTrack.enabled = !audioTrack.enabled;
-  activeMeetingSession.isMuted = !audioTrack.enabled;
-
-  const micIcon = document.getElementById("river-tile-mic-local");
-  if (micIcon) micIcon.textContent = activeMeetingSession.isMuted ? "🔇" : "🎙️";
-
-  updateRiverMeetingControlsUI();
-  broadcastMeetingState();
-
-  if (typeof showToast === "function") {
-    showToast(activeMeetingSession.isMuted ? "🔇 Mic Muted (माइक बंद)" : "🎙️ Mic Active (माइक चालू)");
-  }
-}
-
-// Toggle Local Camera
-function toggleRiverMeetingCam() {
-  if (!activeMeetingSession) return;
-  if (!activeMeetingSession.localStream || activeMeetingSession.localStream.getVideoTracks().length === 0) {
-    if (typeof showToast === "function") showToast("कॅमेरा उपलब्ध नाही (No camera available)");
-    return;
-  }
-
-  const videoTrack = activeMeetingSession.localStream.getVideoTracks()[0];
-  videoTrack.enabled = !videoTrack.enabled;
-  activeMeetingSession.isCamOff = !videoTrack.enabled;
-
-  const avatar = document.getElementById("river-avatar-local");
-  if (avatar) avatar.style.display = activeMeetingSession.isCamOff ? "flex" : "none";
-
-  const video = document.getElementById("river-video-local");
-  if (video) video.style.opacity = activeMeetingSession.isCamOff ? "0" : "1";
-
-  updateRiverMeetingControlsUI();
-  broadcastMeetingState();
-
-  if (typeof showToast === "function") {
-    showToast(activeMeetingSession.isCamOff ? "📹 Camera Off (कॅमेरा बंद)" : "📹 Camera On (कॅमेरा चालू)");
-  }
-}
-
-// Flip Camera (Front vs Back camera on phones)
-async function flipRiverMeetingCamera() {
-  if (!activeMeetingSession || !activeMeetingSession.localStream) return;
-  const currentVideoTrack = activeMeetingSession.localStream.getVideoTracks()[0];
-  if (!currentVideoTrack) {
-    if (typeof showToast === "function") showToast("कॅमेरा उपलब्ध नाही");
-    return;
-  }
-
-  currentFacingMode = (currentFacingMode === "user") ? "environment" : "user";
-  if (typeof showToast === "function") showToast(currentFacingMode === "user" ? "Selfie Camera" : "Rear Camera");
-
-  const localTile = document.getElementById("river-tile-local");
-  if (localTile) {
-    if (currentFacingMode === "user") localTile.classList.add("mirror-active");
-    else localTile.classList.remove("mirror-active");
-  }
-
-  try {
-    await currentVideoTrack.applyConstraints({ facingMode: currentFacingMode });
-  } catch (err) {
-    // Fallback: stop old track and re-acquire
-    try {
-      const newStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: currentFacingMode }
-      });
-      const newVideoTrack = newStream.getVideoTracks()[0];
-      activeMeetingSession.localStream.removeTrack(currentVideoTrack);
-      currentVideoTrack.stop();
-      activeMeetingSession.localStream.addTrack(newVideoTrack);
-
-      const localVid = document.getElementById("river-video-local");
-      if (localVid) localVid.srcObject = activeMeetingSession.localStream;
-
-      // Replace track on all outgoing peer calls
-      if (activeMeetingSession.peerCalls) {
-        activeMeetingSession.peerCalls.forEach(call => {
-          if (call.peerConnection) {
-            const sender = call.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
-            if (sender) sender.replaceTrack(newVideoTrack);
-          }
-        });
-      }
-    } catch (fallbackErr) {
-      console.warn("[RiverMeet] Camera flip fallback error:", fallbackErr);
-    }
-  }
-}
-
-// Update Bottom Floating Control Bar UI Icons
-function updateRiverMeetingControlsUI() {
-  if (!activeMeetingSession) return;
-
-  const btnMic = document.getElementById("btn-river-toggle-mic");
-  const micOnIcon = document.getElementById("river-icon-mic-on");
-  const micOffIcon = document.getElementById("river-icon-mic-off");
-  const micLabel = document.getElementById("river-mic-label");
-
-  if (btnMic) {
-    btnMic.classList.toggle("is-muted", activeMeetingSession.isMuted);
-    if (micOnIcon) micOnIcon.style.display = activeMeetingSession.isMuted ? "none" : "block";
-    if (micOffIcon) micOffIcon.style.display = activeMeetingSession.isMuted ? "block" : "none";
-    if (micLabel) micLabel.textContent = activeMeetingSession.isMuted ? "Muted" : "Mic On";
-  }
-
-  const btnCam = document.getElementById("btn-river-toggle-cam");
-  const camOnIcon = document.getElementById("river-icon-cam-on");
-  const camOffIcon = document.getElementById("river-icon-cam-off");
-  const camLabel = document.getElementById("river-cam-label");
-
-  if (btnCam) {
-    btnCam.classList.toggle("is-cam-off", activeMeetingSession.isCamOff);
-    if (camOnIcon) camOnIcon.style.display = activeMeetingSession.isCamOff ? "none" : "block";
-    if (camOffIcon) camOffIcon.style.display = activeMeetingSession.isCamOff ? "block" : "none";
-    if (camLabel) camLabel.textContent = activeMeetingSession.isCamOff ? "Cam Off" : "Camera";
-  }
-}
-
-// Prayer Reaction Picker Toggle
-function toggleRiverReactionPicker() {
-  const picker = document.getElementById("river-reaction-picker");
-  if (!picker) return;
-  picker.style.display = (picker.style.display === "none" || !picker.style.display) ? "flex" : "none";
-}
-
-// Send Reaction
-function sendMeetingReaction(emoji) {
-  renderFloatingReaction(emoji);
-  const picker = document.getElementById("river-reaction-picker");
-  if (picker) picker.style.display = "none";
-
-  if (activeMeetingSession && activeMeetingSession.mqttClient) {
-    try {
-      activeMeetingSession.mqttClient.publish(
-        activeMeetingSession.topic,
-        JSON.stringify({
-          type: 'reaction',
-          emoji: emoji,
-          peerId: activeMeetingSession.myPeerId,
-          userName: activeMeetingSession.userName
-        })
-      );
-    } catch(e) {}
-  }
-}
-
-// Render Animated Floating Emoji Shower
-function renderFloatingReaction(emoji) {
-  const shower = document.getElementById("river-reaction-shower");
-  if (!shower) return;
-
-  const el = document.createElement("div");
-  el.className = "river-floating-emoji";
-  el.textContent = emoji;
-  el.style.left = `${Math.floor(Math.random() * 70) + 15}%`;
-  shower.appendChild(el);
-
-  setTimeout(() => el.remove(), 2500);
-}
-
-// Participants Drawer Toggle
-function toggleRiverParticipantsDrawer() {
-  const drawer = document.getElementById("river-participants-drawer");
-  if (!drawer) return;
-  const isHidden = (drawer.style.display === "none" || !drawer.style.display);
-  drawer.style.display = isHidden ? "flex" : "none";
-  if (isHidden) updateParticipantsDrawerList();
-}
-
-// Update Participant Counter and Drawer List
-function updateRiverParticipantUI() {
-  const counter = document.getElementById("river-participant-counter");
-  const remoteCount = (activeMeetingSession && activeMeetingSession.remoteStreams) ? activeMeetingSession.remoteStreams.size : 0;
-  const total = 1 + remoteCount;
-  if (counter) counter.textContent = `👥 ${total} Online`;
-  updateParticipantsDrawerList();
-}
-
-function updateParticipantsDrawerList() {
-  const list = document.getElementById("river-participants-list");
-  if (!list || !activeMeetingSession) return;
-
-  const user = activeMeetingSession.userName;
-  const initial = user ? user.charAt(0).toUpperCase() : "Y";
-
-  let html = `
-    <div class="river-participant-item">
-      <div class="river-p-info">
-        <div class="river-p-avatar">${initial}</div>
-        <div>
-          <div class="river-p-name">${user} (You / तुम्ही)</div>
-          <div class="river-p-role">${activeMeetingSession.isHost ? "Meeting Host" : "Member"}</div>
-        </div>
-      </div>
-      <div>${activeMeetingSession.isMuted ? "🔇" : "🎙️"}</div>
-    </div>
-  `;
-
-  if (activeMeetingSession.remoteNames) {
-    activeMeetingSession.remoteNames.forEach((name, peerId) => {
-      const pInit = name ? name.charAt(0).toUpperCase() : "P";
-      html += `
-        <div class="river-participant-item">
-          <div class="river-p-info">
-            <div class="river-p-avatar" style="background: #0d9488;">${pInit}</div>
-            <div>
-              <div class="river-p-name">${name}</div>
-              <div class="river-p-role">Member</div>
-            </div>
-          </div>
-          <div>🎙️</div>
-        </div>
-      `;
-    });
-  }
-
-  list.innerHTML = html;
-}
-
-function dismissMeetingBanner() {
-  const b = document.getElementById("river-meeting-banner");
-  if (b) b.style.display = "none";
-}
-
-// Broadcast Local Mic/Cam state to peers over MQTT
-function broadcastMeetingState() {
-  if (!activeMeetingSession || !activeMeetingSession.mqttClient) return;
-  try {
-    activeMeetingSession.mqttClient.publish(
-      activeMeetingSession.topic,
-      JSON.stringify({
-        type: 'peer-state',
-        peerId: activeMeetingSession.myPeerId,
-        isMuted: activeMeetingSession.isMuted,
-        isCamOff: activeMeetingSession.isCamOff
-      })
-    );
-  } catch(e) {}
-}
-
-// Initialize WebRTC Mesh with PeerJS & MQTT
-function initRiverWebRTCMesh(session) {
-  if (typeof Peer === "undefined") {
-    console.warn("[RiverMeet] PeerJS library not loaded, running in standalone mode.");
-    return;
-  }
-
-  try {
-    const randomSuffix = Math.random().toString(36).substring(2, 8);
-    const cleanMeetingId = session.meetingId.toString().replace(/[^a-zA-Z0-9]/g, '_');
-    const myPeerId = `rol_${cleanMeetingId}_${Date.now()}_${randomSuffix}`;
-    session.myPeerId = myPeerId;
-
-    const peer = new Peer(myPeerId, {
-      config: {
-        iceServers: [
-          { urls: 'stun:stun.l.google.com:19302' },
-          { urls: 'stun:stun1.l.google.com:19302' },
-          { urls: 'stun:stun2.l.google.com:19302' }
-        ]
-      }
-    });
-
-    session.peer = peer;
-
-    peer.on('open', (id) => {
-      console.log("[RiverMeet] PeerJS open with ID:", id);
-      connectSignalingMQTT(session);
-    });
-
-    // Handle incoming video calls from other peers in meeting
-    peer.on('call', (call) => {
-      console.log("[RiverMeet] Incoming call from peer:", call.peer);
-      call.answer(session.localStream);
-      session.peerCalls.set(call.peer, call);
-
-      call.on('stream', (remoteStream) => {
-        console.log("[RiverMeet] Received stream from peer:", call.peer);
-        const name = (call.metadata && call.metadata.name) ? call.metadata.name : "Member";
-        addRemoteVideoTile(call.peer, remoteStream, name);
-      });
-
-      call.on('close', () => {
-        removeRemoteVideoTile(call.peer);
-      });
-
-      call.on('error', (err) => {
-        console.warn("[RiverMeet] Peer call error:", err);
-      });
-    });
-
-    peer.on('error', (err) => {
-      console.warn("[RiverMeet] PeerJS error:", err);
-    });
-
-  } catch (err) {
-    console.warn("[RiverMeet] initRiverWebRTCMesh notice:", err);
-  }
-}
-
-// Connect to Public MQTT Signaling Broker for Room Discovery
-function connectSignalingMQTT(session) {
-  if (typeof mqtt === "undefined") {
-    console.warn("[RiverMeet] MQTT library not loaded, peer discovery will rely on direct calls.");
-    return;
-  }
-
-  try {
-    const brokerUrl = 'wss://broker.emqx.io:8084/mqtt';
-    const clientId = `rol_client_${session.myPeerId}`;
-
-    const client = mqtt.connect(brokerUrl, {
-      clientId: clientId,
-      clean: true,
-      connectTimeout: 5000,
-      reconnectPeriod: 3000
-    });
-
-    session.mqttClient = client;
-
-    client.on('connect', () => {
-      console.log("[RiverMeet] Connected to signaling broker on topic:", session.topic);
-      client.subscribe(session.topic);
-
-      // Announce arrival to room
-      client.publish(
-        session.topic,
-        JSON.stringify({
-          type: 'peer-join',
-          peerId: session.myPeerId,
-          userName: session.userName,
-          isMuted: session.isMuted,
-          isCamOff: session.isCamOff
-        })
-      );
-    });
-
-    client.on('message', (topic, payload) => {
-      try {
-        const msg = JSON.parse(payload.toString());
-        if (!msg || msg.peerId === session.myPeerId) return;
-
-        if (msg.type === 'peer-join') {
-          console.log("[RiverMeet] Peer joined room:", msg.peerId, msg.userName);
-          // Call newly joined peer if we have local media or empty stream
-          if (session.peer && session.localStream && !session.peerCalls.has(msg.peerId)) {
-            const call = session.peer.call(msg.peerId, session.localStream, {
-              metadata: { name: session.userName }
-            });
-            session.peerCalls.set(msg.peerId, call);
-
-            call.on('stream', (remoteStream) => {
-              addRemoteVideoTile(msg.peerId, remoteStream, msg.userName);
-            });
-
-            call.on('close', () => {
-              removeRemoteVideoTile(msg.peerId);
-            });
-          }
-        } else if (msg.type === 'peer-leave') {
-          removeRemoteVideoTile(msg.peerId);
-        } else if (msg.type === 'peer-state') {
-          const micIcon = document.getElementById(`river-tile-mic-${msg.peerId}`);
-          if (micIcon) micIcon.textContent = msg.isMuted ? "🔇" : "🎙️";
-          const avatar = document.getElementById(`river-avatar-${msg.peerId}`);
-          if (avatar) avatar.style.display = msg.isCamOff ? "flex" : "none";
-        } else if (msg.type === 'reaction') {
-          renderFloatingReaction(msg.emoji);
-        }
-      } catch (e) {
-        console.warn("[RiverMeet] MQTT message parse error:", e);
-      }
-    });
-
-    client.on('error', (err) => {
-      console.warn("[RiverMeet] MQTT client error:", err);
-    });
-
-  } catch (err) {
-    console.warn("[RiverMeet] connectSignalingMQTT error:", err);
-  }
-}
-
-// Cleanly Exit Meeting Room & Release Hardware Resources
+// Cleanly Exit Meeting Room
 function exitLiveMeetingRoom() {
   try {
-    console.log("[RiverMeet] Exiting Meeting Room cleanly...");
+    console.log("[RiverMeet] Exiting Meeting Room...");
 
-    // Stop all microphone and camera media tracks to turn off recording indicator
-    if (activeMeetingSession && activeMeetingSession.localStream) {
-      try {
-        activeMeetingSession.localStream.getTracks().forEach(track => {
-          track.stop();
-          console.log("[RiverMeet] Stopped track:", track.kind, track.label);
-        });
-      } catch (e) {}
+    if (window._jitsiApi) {
+      try { window._jitsiApi.dispose(); } catch(e) {}
+      window._jitsiApi = null;
     }
 
-    // Publish peer-leave message
-    if (activeMeetingSession && activeMeetingSession.mqttClient) {
-      try {
-        activeMeetingSession.mqttClient.publish(
-          activeMeetingSession.topic,
-          JSON.stringify({ type: 'peer-leave', peerId: activeMeetingSession.myPeerId })
-        );
-        activeMeetingSession.mqttClient.end(true);
-      } catch (e) {}
+    const jitsiCont = document.getElementById("meeting-jitsi-container");
+    if (jitsiCont) {
+      jitsiCont.innerHTML = "";
+      jitsiCont.style.display = "none";
     }
 
-    // Close all peer connections
-    if (activeMeetingSession && activeMeetingSession.peerCalls) {
-      activeMeetingSession.peerCalls.forEach(call => {
-        try { call.close(); } catch(e) {}
-      });
-      activeMeetingSession.peerCalls.clear();
-    }
-
-    // Destroy PeerJS instance
-    if (activeMeetingSession && activeMeetingSession.peer) {
-      try { activeMeetingSession.peer.destroy(); } catch(e) {}
-    }
-
-    // Clear video grid
-    const videoGrid = document.getElementById("river-video-grid");
-    if (videoGrid) videoGrid.innerHTML = "";
-
-    // Close participants drawer & reaction picker
-    const drawer = document.getElementById("river-participants-drawer");
-    if (drawer) drawer.style.display = "none";
-    const picker = document.getElementById("river-reaction-picker");
-    if (picker) picker.style.display = "none";
-
-    // Hide Modal Overlay
     const roomModal = document.getElementById("modal-live-meeting");
     if (roomModal) {
       roomModal.classList.remove("active");
@@ -12907,25 +12374,14 @@ function exitLiveMeetingRoom() {
 
     activeMeetingSession = null;
     if (typeof showToast === "function") showToast("Exited fellowship meeting / सभा सोडली 🙏");
-
   } catch (err) {
     console.warn("[RiverMeet] exitLiveMeetingRoom error:", err);
   }
 }
+window.exitLiveMeetingRoom = exitLiveMeetingRoom;
 
-// Export functions to window
-if (typeof window !== "undefined") {
-  window.triggerJoinMeetingFlow = triggerJoinMeetingFlow;
-  window.launchLiveMeetingRoom = launchLiveMeetingRoom;
-  window.exitLiveMeetingRoom = exitLiveMeetingRoom;
-  window.toggleRiverMeetingMic = toggleRiverMeetingMic;
-  window.toggleRiverMeetingCam = toggleRiverMeetingCam;
-  window.flipRiverMeetingCamera = flipRiverMeetingCamera;
-  window.sendMeetingReaction = sendMeetingReaction;
-  window.toggleRiverReactionPicker = toggleRiverReactionPicker;
-  window.toggleRiverParticipantsDrawer = toggleRiverParticipantsDrawer;
-  window.dismissMeetingBanner = dismissMeetingBanner;
-}
+
+
 
 
 // ═══════════════════════════════════════════════════════════════

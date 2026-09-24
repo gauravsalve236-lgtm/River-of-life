@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v2367_NATIVE_TOPLEVEL_MEETING';
+const CACHE_NAME = 'river-of-life-cache-v2368_SYNCED_HOST_VIDEO_MEETING';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
