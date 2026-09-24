@@ -3142,7 +3142,8 @@ function renderDailyDevotion() {
   ];
   const imgIdx = ((dayOfYear + offset) % images.length + images.length) % images.length;
   window.currentVodImageIndex = imgIdx;
-  const dailyImg = images[imgIdx];
+  const savedWp = localStorage.getItem('rol_selected_wallpaper');
+  const dailyImg = (savedWp && images.includes(savedWp)) ? savedWp : images[imgIdx];
   const imgUrl = (typeof getVodImageUrl === "function") ? getVodImageUrl(dailyImg) : (dailyImg.includes('.') ? `assets/daily_verses/${dailyImg}` : `assets/daily_verses/${dailyImg}.png`);
   
   const bgEl = document.getElementById("vod-dynamic-bg") || document.querySelector(".youversion-vod-bg") || document.querySelector(".daily-verse-card-bg");
@@ -17437,20 +17438,550 @@ window.toggleVodOptionsMenu = function() {
   }
 };
 
+/* ═══════════════════════════════════════════════════════════════
+   70 HD WALLPAPERS COMPLETE ENGINE (RIVER OF LIFE)
+   ═══════════════════════════════════════════════════════════════ */
+
+window.WALLPAPER_CATALOG = [
+  {
+    "file": "autumn_golden_forest.jpg",
+    "name": "Autumn Canopy",
+    "nameMr": "सोनेरी शरद ऋतू",
+    "category": "forest"
+  },
+  {
+    "file": "blooming_spring_valley.jpg",
+    "name": "Spring Wildflowers",
+    "nameMr": "वसंत ऋतूतील रानफुले",
+    "category": "forest"
+  },
+  {
+    "file": "book_psalms_cover.png",
+    "name": "Songs of Praise",
+    "nameMr": "स्तोत्रांचे गायन",
+    "category": "art"
+  },
+  {
+    "file": "calm_pasture_river.jpg",
+    "name": "Gentle Meadow Brook",
+    "nameMr": "कुरणातील वाहता ओढा",
+    "category": "water"
+  },
+  {
+    "file": "calm_waters.png",
+    "name": "Still Waters (Psalm 23)",
+    "nameMr": "शांत पाण्याचे झरे",
+    "category": "water"
+  },
+  {
+    "file": "candlelight.png",
+    "name": "Light of the Sanctuary",
+    "nameMr": "मंदिराचा दीप",
+    "category": "art"
+  },
+  {
+    "file": "celestial_galaxy_night.jpg",
+    "name": "Milky Way Splendor",
+    "nameMr": "तेजोमय आकाशगंगा",
+    "category": "stars"
+  },
+  {
+    "file": "coastal_cliffs_twilight.jpg",
+    "name": "Coastal Cliffs at Twilight",
+    "nameMr": "समुद्रकिनारा व संध्याकाळ",
+    "category": "water"
+  },
+  {
+    "file": "dawn_valley_genesis.jpg",
+    "name": "Valley of Creation",
+    "nameMr": "निर्मितीची दरी",
+    "category": "art"
+  },
+  {
+    "file": "desert_oasis_sunset.jpg",
+    "name": "Sunset in the Wilderness",
+    "nameMr": "वाळवंटातील सूर्यास्त",
+    "category": "dawn"
+  },
+  {
+    "file": "divine_healing_art.jpg",
+    "name": "Touch of Healing",
+    "nameMr": "आरोग्याचा स्पर्श",
+    "category": "art"
+  },
+  {
+    "file": "emerald_lake_reflection.jpg",
+    "name": "Emerald Mountain Lake",
+    "nameMr": "पाचूचे तळे व पर्वत",
+    "category": "water"
+  },
+  {
+    "file": "family_blessing.png",
+    "name": "Valley of Blessing",
+    "nameMr": "आशीर्वादाची दरी",
+    "category": "art"
+  },
+  {
+    "file": "forest.png",
+    "name": "Emerald Forest",
+    "nameMr": "हिरवेगार अरण्य",
+    "category": "forest"
+  },
+  {
+    "file": "freedom_field.jpg",
+    "name": "Meadow of Peace",
+    "nameMr": "शांतीचे कुरण",
+    "category": "dawn"
+  },
+  {
+    "file": "glory_cloud_sunrise.jpg",
+    "name": "Praise the Morning",
+    "nameMr": "सकाळची स्तुती",
+    "category": "dawn"
+  },
+  {
+    "file": "golden_dawn.png",
+    "name": "Heavenly Dawn",
+    "nameMr": "दैवी प्रभात",
+    "category": "dawn"
+  },
+  {
+    "file": "golden_wheat_harvest.jpg",
+    "name": "Harvest of Faith",
+    "nameMr": "विश्वासाचे पीक",
+    "category": "dawn"
+  },
+  {
+    "file": "healing_light.png",
+    "name": "Rays of Grace",
+    "nameMr": "कृपेचे किरण",
+    "category": "dawn"
+  },
+  {
+    "file": "heavenly_sunbeams.jpg",
+    "name": "Heavenly Sunbeams",
+    "nameMr": "स्वर्गीय सूर्यकिरण",
+    "category": "dawn"
+  },
+  {
+    "file": "joy_rain.jpg",
+    "name": "Showers of Blessing",
+    "nameMr": "आशीर्वादाच्या धारा",
+    "category": "water"
+  },
+  {
+    "file": "living_water_falls.jpg",
+    "name": "Cascading Springs",
+    "nameMr": "निर्मळ पाण्याचे धबधबे",
+    "category": "water"
+  },
+  {
+    "file": "mist.png",
+    "name": "Misty Highlands",
+    "nameMr": "धुक्याची दरी",
+    "category": "mountains"
+  },
+  {
+    "file": "misty_mountains.jpg",
+    "name": "Atmospheric Range",
+    "nameMr": "धुक्याची शिखरे",
+    "category": "mountains"
+  },
+  {
+    "file": "misty_pine_canopy.jpg",
+    "name": "Misty Pine Forest",
+    "nameMr": "धुक्याचे पाइन अरण्य",
+    "category": "forest"
+  },
+  {
+    "file": "morning_grace_art.jpg",
+    "name": "Morning Grace",
+    "nameMr": "प्रभात कृपा",
+    "category": "art"
+  },
+  {
+    "file": "moses_mount_sinai_art.jpg",
+    "name": "Mount Sinai Revelation",
+    "nameMr": "सिनाय पर्वतावरील प्रकटीकरण",
+    "category": "art"
+  },
+  {
+    "file": "mount_zion.png",
+    "name": "Mount Zion Majesty",
+    "nameMr": "सीयोन पर्वत",
+    "category": "mountains"
+  },
+  {
+    "file": "mountains.png",
+    "name": "Majestic Peaks",
+    "nameMr": "भव्य पर्वतशिखरे",
+    "category": "mountains"
+  },
+  {
+    "file": "ocean.png",
+    "name": "Pacific Sunset",
+    "nameMr": "शांत समुद्रकिनारा",
+    "category": "water"
+  },
+  {
+    "file": "olive_grove_garden.jpg",
+    "name": "Garden of Olives",
+    "nameMr": "जैतुनाची बाग",
+    "category": "forest"
+  },
+  {
+    "file": "path.png",
+    "name": "Sunlit Path",
+    "nameMr": "प्रकाशाची वाट",
+    "category": "forest"
+  },
+  {
+    "file": "peace_anxiety.png",
+    "name": "Peace at Eventide",
+    "nameMr": "संध्याकाळची शांती",
+    "category": "dawn"
+  },
+  {
+    "file": "peace_anxiety_art.jpg",
+    "name": "Peace beyond Understanding",
+    "nameMr": "सर्व बुद्धीपलीकडची शांती",
+    "category": "art"
+  },
+  {
+    "file": "peaceful_pastures.png",
+    "name": "Green Pastures",
+    "nameMr": "हिरवी कुरणे",
+    "category": "forest"
+  },
+  {
+    "file": "pexels-akshansh-singh-2197107-16142865.jpg",
+    "name": "Himalayan Ridge Dawn",
+    "nameMr": "हिमालयीन प्रभात",
+    "category": "mountains"
+  },
+  {
+    "file": "pexels-clive-kim-2523249-6307488.jpg",
+    "name": "Alpine Lake Woods",
+    "nameMr": "शांत तलाव व अरण्य",
+    "category": "water"
+  },
+  {
+    "file": "pexels-connorscottmcmanus-29146345.jpg",
+    "name": "Golden Shoreline",
+    "nameMr": "सोनेरी लाटा",
+    "category": "water"
+  },
+  {
+    "file": "pexels-evlivanburak-34120977.jpg",
+    "name": "Rolling Highlands",
+    "nameMr": "हिरवेगार डोंगर",
+    "category": "mountains"
+  },
+  {
+    "file": "pexels-friededia-30649280.jpg",
+    "name": "Dolomite Ridge",
+    "nameMr": "उंच कडा व ढग",
+    "category": "mountains"
+  },
+  {
+    "file": "pexels-hakantahmaz-6015200.jpg",
+    "name": "Sunburst Canyon",
+    "nameMr": "दरीतील किरणे",
+    "category": "dawn"
+  },
+  {
+    "file": "pexels-ian-panelo-38569111.jpg",
+    "name": "Pastel Sunrise Clouds",
+    "nameMr": "गुलाबी मेघमाला",
+    "category": "dawn"
+  },
+  {
+    "file": "pexels-kienvirak-4991338.jpg",
+    "name": "Rainforest Cascade",
+    "nameMr": "जंगलातील धबधबा",
+    "category": "water"
+  },
+  {
+    "file": "pexels-kienvirak-6335993.jpg",
+    "name": "Crystal Torrent",
+    "nameMr": "शुद्ध जलप्रवाह",
+    "category": "water"
+  },
+  {
+    "file": "pexels-lichtblick800-30299053.jpg",
+    "name": "Alpine Light",
+    "nameMr": "शिखरावरील प्रकाश",
+    "category": "mountains"
+  },
+  {
+    "file": "pexels-serjosoza-31933183.jpg",
+    "name": "Crimson Dunes",
+    "nameMr": "लालसर वाळूचे ढीग",
+    "category": "dawn"
+  },
+  {
+    "file": "pexels-unal-aslan-48172282-17693776.jpg",
+    "name": "High Pasture Sunrise",
+    "nameMr": "उंच कुरणातील सकाळ",
+    "category": "dawn"
+  },
+  {
+    "file": "pexels-willianjusten-16573043.jpg",
+    "name": "Horizon Twilight",
+    "nameMr": "क्षितिजावरील संध्याकाळ",
+    "category": "water"
+  },
+  {
+    "file": "pinterest_alpine_mountain.jpg",
+    "name": "Alpine Solitude",
+    "nameMr": "अल्पाइन शिखर",
+    "category": "mountains"
+  },
+  {
+    "file": "pinterest_boarding_pass.jpg",
+    "name": "Heavenly Journey",
+    "nameMr": "स्वर्गीय प्रवास",
+    "category": "art"
+  },
+  {
+    "file": "pinterest_david_goliath.jpg",
+    "name": "Valley of Elah",
+    "nameMr": "एलाहची दरी",
+    "category": "art"
+  },
+  {
+    "file": "pinterest_forest_sunset.jpg",
+    "name": "Twilight Pines",
+    "nameMr": "पाइन वनातील संध्याकाळ",
+    "category": "forest"
+  },
+  {
+    "file": "pinterest_golden_path.jpg",
+    "name": "Golden Highway",
+    "nameMr": "सुवर्ण मार्ग",
+    "category": "forest"
+  },
+  {
+    "file": "pinterest_good_shepherd.jpg",
+    "name": "The Good Shepherd",
+    "nameMr": "उत्तम मेंढपाळ",
+    "category": "art"
+  },
+  {
+    "file": "pinterest_illuminated_tree.jpg",
+    "name": "Tree by the Waters",
+    "nameMr": "पाण्याजवळचे झाड",
+    "category": "art"
+  },
+  {
+    "file": "pinterest_jesus_road.jpg",
+    "name": "Road to Emmaus",
+    "nameMr": "इम्माऊसची वाट",
+    "category": "art"
+  },
+  {
+    "file": "pinterest_lake_cross.jpg",
+    "name": "Lake Reflection & Cross",
+    "nameMr": "तळे व क्रूसाचे प्रतिबिंब",
+    "category": "art"
+  },
+  {
+    "file": "pinterest_light_of_world.jpg",
+    "name": "Beacon of Hope",
+    "nameMr": "आशेचा दीप",
+    "category": "art"
+  },
+  {
+    "file": "pinterest_lion_split.jpg",
+    "name": "Lion of Judah",
+    "nameMr": "यहूदा वंशाचा सिंह",
+    "category": "art"
+  },
+  {
+    "file": "pinterest_watercolor_red_sea.jpg",
+    "name": "Parting of the Waters",
+    "nameMr": "समुद्राची विभागणी",
+    "category": "art"
+  },
+  {
+    "file": "river_of_life.png",
+    "name": "Living Waters",
+    "nameMr": "जीवनाचे पाणी",
+    "category": "water"
+  },
+  {
+    "file": "serene_sky_prayer.jpg",
+    "name": "Prayer in Solitude",
+    "nameMr": "शांततेतील प्रार्थना",
+    "category": "art"
+  },
+  {
+    "file": "snow_mountain_majesty.jpg",
+    "name": "Snow Peak Majesty",
+    "nameMr": "हिमशिखर सौंदर्य",
+    "category": "mountains"
+  },
+  {
+    "file": "stars.png",
+    "name": "Celestial Night",
+    "nameMr": "तारकामय आकाश",
+    "category": "stars"
+  },
+  {
+    "file": "sunrise.png",
+    "name": "Golden Dawn & Meadow",
+    "nameMr": "सोनेरी प्रभात व कुरण",
+    "category": "dawn"
+  },
+  {
+    "file": "sunset_lavender_field.jpg",
+    "name": "Lavender Sunset",
+    "nameMr": "लॅव्हेंडर सूर्यास्त",
+    "category": "dawn"
+  },
+  {
+    "file": "tropical_sunset_beach.jpg",
+    "name": "Ocean Sunset Shore",
+    "nameMr": "सूर्यास्ताचा रम्य सागरतीर",
+    "category": "water"
+  },
+  {
+    "file": "wedding_cana_miracle.jpg",
+    "name": "The First Miracle",
+    "nameMr": "काना गावातील चमत्कार",
+    "category": "art"
+  },
+  {
+    "file": "winding_path_journey.jpg",
+    "name": "Walk of Faith",
+    "nameMr": "विश्वासाचा प्रवास",
+    "category": "art"
+  },
+  {
+    "file": "wisdom_guidance.png",
+    "name": "Light upon My Path",
+    "nameMr": "मार्गावर प्रकाश",
+    "category": "forest"
+  }
+];
+
+window.dailyVersesImageList = window.WALLPAPER_CATALOG.map(w => w.file);
+
+// Open Visual 70 Wallpapers Gallery Drawer
+window.openWallpaperGalleryDrawer = function() {
+  const drawer = document.getElementById("drawer-wallpaper-gallery");
+  if (!drawer) return;
+
+  renderWallpaperGalleryGrid('all');
+  if (typeof openDrawer === "function") {
+    openDrawer("drawer-wallpaper-gallery");
+  } else {
+    drawer.classList.add("active");
+  }
+};
+
+// Filter Gallery Grid by Category
+window.filterWallpaperGallery = function(category, btnEl) {
+  document.querySelectorAll(".wallpaper-filter-btn").forEach(b => b.classList.remove("active"));
+  if (btnEl) btnEl.classList.add("active");
+  renderWallpaperGalleryGrid(category);
+};
+
+// Render Wallpaper Gallery Cards
+function renderWallpaperGalleryGrid(filterCategory) {
+  const grid = document.getElementById("wallpaper-gallery-grid");
+  if (!grid || !Array.isArray(window.WALLPAPER_CATALOG)) return;
+
+  const currentFile = (typeof window.currentVodImageIndex === 'number' && window.dailyVersesImageList[window.currentVodImageIndex]) 
+    ? window.dailyVersesImageList[window.currentVodImageIndex] 
+    : (localStorage.getItem("rol_selected_wallpaper") || 'sunrise.png');
+
+  let filtered = window.WALLPAPER_CATALOG;
+  if (filterCategory && filterCategory !== 'all') {
+    filtered = window.WALLPAPER_CATALOG.filter(w => w.category === filterCategory);
+  }
+
+  let html = '';
+  filtered.forEach(w => {
+    const isCur = (w.file === currentFile);
+    const imgUrl = (typeof getVodImageUrl === 'function') ? getVodImageUrl(w.file) : ('assets/daily_verses/' + w.file);
+    html += `
+      <div class="wallpaper-tile-card ${isCur ? 'is-active' : ''}" 
+           style="background-image: url('${imgUrl}');"
+           onclick="selectWallpaperFromGallery('${w.file}', '${w.name}', '${w.nameMr}')"
+           title="${w.name} • ${w.nameMr}">
+        <div class="wallpaper-tile-check">✓</div>
+        <div class="wallpaper-tile-overlay"></div>
+        <div class="wallpaper-tile-info">
+          <span>${w.name}</span>
+          <span class="wallpaper-tile-info-mr">${w.nameMr}</span>
+        </div>
+      </div>
+    `;
+  });
+
+  grid.innerHTML = html;
+}
+
+// Select Wallpaper from Gallery
+window.selectWallpaperFromGallery = function(file, name, nameMr) {
+  const imgUrl = (typeof getVodImageUrl === 'function') ? getVodImageUrl(file) : ('assets/daily_verses/' + file);
+
+  const idx = window.dailyVersesImageList.indexOf(file);
+  if (idx !== -1) {
+    window.currentVodImageIndex = idx;
+  }
+
+  localStorage.setItem("rol_selected_wallpaper", file);
+
+  // Update Home Card
+  const heroCard = document.getElementById("card-daily-verse-home");
+  if (heroCard) {
+    heroCard.style.backgroundImage = `url('${imgUrl}')`;
+  }
+
+  // Update Studio Capsule
+  const fsBgEl = document.getElementById("fs-vod-capsule-bg");
+  if (fsBgEl) {
+    fsBgEl.style.backgroundImage = `url('${imgUrl}')`;
+  }
+  const fsCapsule = document.querySelector(".fullscreen-vod-capsule");
+  if (fsCapsule) {
+    fsCapsule.style.backgroundImage = `url('${imgUrl}')`;
+  }
+
+  // Update thumbnail preview
+  const thumbImg = document.getElementById("vod-thumbnail-preview");
+  if (thumbImg) thumbImg.src = imgUrl;
+
+  if (typeof closeDrawer === "function") {
+    closeDrawer("drawer-wallpaper-gallery");
+  } else {
+    const drawer = document.getElementById("drawer-wallpaper-gallery");
+    if (drawer) drawer.classList.remove("active");
+  }
+
+  if (typeof showToast === "function") {
+    showToast(`🖼️ वॉलपेपर सेट केले: ${nameMr || name}`);
+  }
+};
+
+// Cycle through all 70 wallpapers sequentially
 window.cycleVodWallpaper = function() {
-  const images = (window.dailyVersesImageList && window.dailyVersesImageList.length > 0) ? window.dailyVersesImageList : [
-    'pinterest_alpine_mountain.jpg', 'pinterest_watercolor_red_sea.jpg', 'pinterest_forest_sunset.jpg',
-    'pinterest_golden_path.jpg', 'pinterest_light_of_world.jpg', 'pinterest_good_shepherd.jpg',
-    'pinterest_jesus_road.jpg', 'pinterest_boarding_pass.jpg', 'sunrise.png'
-  ];
+  const images = (window.dailyVersesImageList && window.dailyVersesImageList.length > 0) 
+    ? window.dailyVersesImageList 
+    : window.WALLPAPER_CATALOG.map(w => w.file);
+
   if (typeof window.currentVodImageIndex !== 'number') {
-    const { dayOfYear, offset } = getCurrentVOD();
+    const { dayOfYear, offset } = (typeof getCurrentVOD === 'function') ? getCurrentVOD() : { dayOfYear: 1, offset: 0 };
     window.currentVodImageIndex = ((dayOfYear + offset) % images.length + images.length) % images.length;
   }
-  window.currentVodImageIndex = (window.currentVodImageIndex + 1) % images.length;
   
+  window.currentVodImageIndex = (window.currentVodImageIndex + 1) % images.length;
   const dailyImg = images[window.currentVodImageIndex];
   const imgUrl = (typeof getVodImageUrl === "function") ? getVodImageUrl(dailyImg) : `assets/daily_verses/${dailyImg}`;
+
+  localStorage.setItem("rol_selected_wallpaper", dailyImg);
 
   const bgHome = document.getElementById("card-daily-verse-home");
   if (bgHome) bgHome.style.backgroundImage = `url('${imgUrl}')`;
@@ -17461,9 +17992,12 @@ window.cycleVodWallpaper = function() {
   const thumbImg = document.getElementById("vod-thumbnail-preview");
   if (thumbImg) thumbImg.src = imgUrl;
 
-  cycleVodTypographyTheme(false);
-  const activeTheme = window.VOD_TYPOGRAPHY_STYLES[window.currentVodTypographyIndex || 0];
-  showToast(`🖼️ वॉलपेपर व डिझाईन: ${activeTheme.name}`);
+  const catalogEntry = window.WALLPAPER_CATALOG.find(w => w.file === dailyImg);
+  const title = catalogEntry ? (catalogEntry.nameMr + ' • ' + catalogEntry.name) : dailyImg;
+
+  if (typeof showToast === "function") {
+    showToast(`🖼️ वॉलपेपर (${window.currentVodImageIndex + 1}/70): ${title}`);
+  }
 };
 
 window.navigateVOD = function(dir) {

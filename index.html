@@ -12,7 +12,7 @@
   <script>
     // Force immediate hard purge of all stale Service Workers and CacheStorage
     (function() {
-      const CURRENT_VER = "v2371_DAILY_VERSE_WALLPAPER_RESTORED";
+      const CURRENT_VER = "v2372_70_HD_WALLPAPERS_GALLERY";
       if (localStorage.getItem("rol_app_ver") !== CURRENT_VER) {
         localStorage.setItem("rol_app_ver", CURRENT_VER);
         if ('serviceWorker' in navigator) {
@@ -276,8 +276,8 @@
                 <div class="home-vod-badge-row" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                   <span class="home-vod-badge" data-i18n="vod_label">VERSE OF THE DAY</span>
                   <div style="display: flex; gap: 6px; align-items: center;">
-                    <button class="home-vod-gallery-pill" onclick="cycleVodWallpaper(); event.stopPropagation();" title="Change Wallpaper / वॉलपेपर बदला" style="font-size: 11px; font-weight: 700; color: #ffffff; display: inline-flex; align-items: center; gap: 4px; background: rgba(0, 0, 0, 0.35); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); padding: 5px 10px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.35); cursor: pointer;">
-                      <span>🖼️ Wallpaper</span>
+                    <button class="home-vod-gallery-pill" onclick="openWallpaperGalleryDrawer(); event.stopPropagation();" title="Browse 70 Wallpapers / सर्व ७० वॉलपेपर पहा" style="font-size: 11px; font-weight: 700; color: #ffffff; display: inline-flex; align-items: center; gap: 4px; background: rgba(0, 0, 0, 0.35); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); padding: 5px 10px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.35); cursor: pointer;">
+                      <span>🖼️ 70 Wallpapers</span>
                     </button>
                     <button class="home-vod-gallery-pill" onclick="openFullscreenVOD(); event.stopPropagation();" style="font-size: 11px; font-weight: 700; color: #ffffff; display: inline-flex; align-items: center; gap: 4px; background: rgba(255, 255, 255, 0.22); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.35); cursor: pointer;">
                       <span>🎨 Studio</span> &rarr;
@@ -6444,6 +6444,40 @@
       </button>
     </div>
   </div>
+
+
+    <!-- 70 HD Wallpapers Visual Picker Drawer -->
+    <div id="drawer-wallpaper-gallery" class="drawer-overlay" style="z-index: 99999;">
+      <div class="ios-drawer-sheet" style="max-height: 85%; background: #0f172a; color: #ffffff; display: flex; flex-direction: column;">
+        <div class="drawer-header-row" style="border-bottom: 1px solid rgba(255,255,255,0.1); padding: 14px 18px; display: flex; justify-content: space-between; align-items: center;">
+          <div class="grabber-bar"></div>
+          <div style="display: flex; align-items: center; gap: 10px; text-align: left;">
+            <span style="font-size: 22px;">🖼️</span>
+            <div>
+              <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #ffffff;">70 HD Wallpapers • वॉलपेपर गॅलरी</h3>
+              <p style="margin: 2px 0 0 0; font-size: 11px; color: #94a3b8;">Choose any scenic wallpaper for Daily Verse</p>
+            </div>
+          </div>
+          <button class="close-drawer-btn" onclick="closeDrawer('drawer-wallpaper-gallery')" style="color: #ffffff; font-size: 24px; background: none; border: none; cursor: pointer;">&times;</button>
+        </div>
+
+        <!-- Filter Category Tabs -->
+        <div style="padding: 10px 14px; overflow-x: auto; white-space: nowrap; display: flex; gap: 6px; border-bottom: 1px solid rgba(255,255,255,0.08);" class="hide-scrollbar">
+          <button class="wallpaper-filter-btn active" onclick="filterWallpaperGallery('all', this)">All (70)</button>
+          <button class="wallpaper-filter-btn" onclick="filterWallpaperGallery('dawn', this)">🌅 Sunrise & Dawn</button>
+          <button class="wallpaper-filter-btn" onclick="filterWallpaperGallery('mountains', this)">🏔️ Mountains</button>
+          <button class="wallpaper-filter-btn" onclick="filterWallpaperGallery('water', this)">🌊 Waters & Lakes</button>
+          <button class="wallpaper-filter-btn" onclick="filterWallpaperGallery('forest', this)">🌲 Forests & Paths</button>
+          <button class="wallpaper-filter-btn" onclick="filterWallpaperGallery('stars', this)">✨ Night Sky & Stars</button>
+          <button class="wallpaper-filter-btn" onclick="filterWallpaperGallery('art', this)">🕊️ Spiritual Art</button>
+        </div>
+
+        <!-- Scrollable Wallpapers Grid -->
+        <div id="wallpaper-gallery-grid" style="flex: 1; overflow-y: auto; padding: 14px; display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; -webkit-overflow-scrolling: touch;">
+          <!-- Dynamically populated 70 wallpaper cards -->
+        </div>
+      </div>
+    </div>
 
 </body>
 </html>
