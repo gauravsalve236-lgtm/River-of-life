@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v2365_PHONE_MEETING_AUDIO_FIX';
+const CACHE_NAME = 'river-of-life-cache-v2366_PURE_IN_APP_MEETING';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

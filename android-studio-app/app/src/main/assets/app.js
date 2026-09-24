@@ -12180,164 +12180,40 @@ function getJitsiServerDomain() {
 window.getJitsiServerDomain = getJitsiServerDomain;
 
 function proceedJoinMeetingSafari() {
-  if (typeof closeModal === "function") {
-    closeModal("modal-ios-meeting-choice");
-    closeModal("modal-mic-permission-help");
-  } else {
-    const el = document.getElementById("modal-ios-meeting-choice");
-    if (el) el.style.display = "none";
-    const elMic = document.getElementById("modal-mic-permission-help");
-    if (elMic) elMic.style.display = "none";
-  }
-
-  // If in-app meeting modal is currently open, exit cleanly to prevent duplicate connection/audio
-  try {
-    const liveMeetingModal = document.getElementById("modal-live-meeting");
-    if (liveMeetingModal && (liveMeetingModal.classList.contains("active") || liveMeetingModal.style.display === "flex")) {
-      exitLiveMeetingRoom();
-    }
-  } catch(e) {}
-
-  let m = _pendingMeetingToJoin;
-  if (!m && window.activeMeetingSession && window.activeMeetingSession.meetingId) {
-    m = { id: window.activeMeetingSession.meetingId, title: "Live Fellowship" };
-  }
-  if (!m) {
-    m = { id: "Sanctuary_LiveRoom", title: "Live Fellowship" };
-  }
-  const meetingIdSlug = (m && m.id) ? m.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
-  const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
-  const loggedIn = (state && state.currentUser) ? state.currentUser.username : "Member";
-  const jitsiServerDomain = getJitsiServerDomain();
-  const extUrl = `https://${jitsiServerDomain}/${roomSlug}#config.enableUserMediaForMobile=true&config.prejoinPageEnabled=false&userInfo.displayName=${encodeURIComponent(loggedIn)}`;
-  
-  showToast("Opening Live Fellowship in Browser 🙏");
-  
-  try {
-    const win = window.open(extUrl, "_blank");
-    if (!win || win.closed || typeof win.closed === "undefined") {
-      const a = document.createElement("a");
-      a.href = extUrl;
-      a.target = "_blank";
-      a.rel = "noopener noreferrer";
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => a.remove(), 150);
-    }
-  } catch (err) {
-    window.location.href = extUrl;
-  }
+  const m = _pendingMeetingToJoin || { id: "default", title: "Live Fellowship" };
+  showToast("Joining Live Sanctuary 🙏");
+  launchLiveMeetingRoom(m, null);
 }
 window.proceedJoinMeetingSafari = proceedJoinMeetingSafari;
 
 function proceedJoinMeetingApp() {
-  if (typeof closeModal === "function") {
-    closeModal("modal-ios-meeting-choice");
-    closeModal("modal-mic-permission-help");
-  } else {
-    const el = document.getElementById("modal-ios-meeting-choice");
-    if (el) el.style.display = "none";
-    const elMic = document.getElementById("modal-mic-permission-help");
-    if (elMic) elMic.style.display = "none";
-  }
-  let m = _pendingMeetingToJoin;
-  if (!m && window.activeMeetingSession && window.activeMeetingSession.meetingId) {
-    m = { id: window.activeMeetingSession.meetingId, title: "Live Fellowship" };
-  }
-  if (!m) m = { id: "Sanctuary_LiveRoom", title: "Live Fellowship" };
-  const meetingIdSlug = (m && m.id) ? m.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
-  const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
-  const jitsiServerDomain = getJitsiServerDomain();
-  
-  const appScheme = `org.jitsi.meet://${jitsiServerDomain}/${roomSlug}`;
-  const browserUrl = `https://${jitsiServerDomain}/${roomSlug}`;
-  
-  showToast("Opening in Jitsi Meet App 🙏");
-  
-  const start = Date.now();
-  window.location.href = appScheme;
-  setTimeout(() => {
-    if (Date.now() - start < 1600) {
-      window.open(browserUrl, "_blank");
-    }
-  }, 1000);
+  const m = _pendingMeetingToJoin || { id: "default", title: "Live Fellowship" };
+  showToast("Joining Live Sanctuary 🙏");
+  launchLiveMeetingRoom(m, null);
 }
 window.proceedJoinMeetingApp = proceedJoinMeetingApp;
 
 async function proceedJoinMeetingInApp() {
-  if (typeof closeModal === "function") closeModal("modal-ios-meeting-choice");
-  else { const el = document.getElementById("modal-ios-meeting-choice"); if (el) el.style.display = "none"; }
   const m = _pendingMeetingToJoin || { id: "default", title: "Live Fellowship" };
-  showToast("Joining Live Sanctuary (Listen Mode) 🙏");
-  launchLiveMeetingRoom(m, null, { startMuted: true });
+  showToast("Joining Live Sanctuary 🙏");
+  launchLiveMeetingRoom(m, null);
 }
 window.proceedJoinMeetingInApp = proceedJoinMeetingInApp;
 
-// Trigger Joining Flow — Launches room cleanly with full media permissions
+// Trigger Joining Flow — Launches pure in-app video room immediately (Zero browser redirection)
 async function triggerJoinMeetingFlow(meetingId) {
   const meetings = getMeetingsFromStorage();
   const m = meetings.find(x => x.id === meetingId) || { id: meetingId, title: "Live Fellowship", host: "Pastor" };
   _pendingMeetingToJoin = m;
-
-  // Detect mobile device (phones and tablets)
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
-    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ||
-    (window.innerWidth <= 768);
-
-  if (isMobile) {
-    // Show phone-optimized bottom sheet with direct browser, app, and in-app listen options
-    if (typeof openModal === "function") {
-      openModal("modal-ios-meeting-choice");
-    } else {
-      const modal = document.getElementById("modal-ios-meeting-choice");
-      if (modal) {
-        modal.style.display = "flex";
-        modal.classList.add("active");
-      }
-    }
-    return;
-  }
-
-  // On Desktop, verify microphone and proceed with conference
-  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-    try {
-      const testStream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true
-        },
-        video: false
-      });
-      if (testStream) {
-        testStream.getTracks().forEach(t => t.stop());
-      }
-    } catch (err) {
-      console.warn("[Media Check] Desktop mic check blocked:", err);
-      if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
-        showMicrophonePermissionHelpModal(m);
-        return;
-      }
-    }
-  }
-
   showToast("Joining Live Sanctuary 🙏");
   launchLiveMeetingRoom(m, null);
 }
 window.triggerJoinMeetingFlow = triggerJoinMeetingFlow;
 
 function showMicrophonePermissionHelpModal(meeting) {
-  _pendingMeetingToJoin = meeting;
-  if (typeof openModal === "function") {
-    openModal("modal-mic-permission-help");
-  } else {
-    const modal = document.getElementById("modal-mic-permission-help");
-    if (modal) {
-      modal.style.display = "flex";
-      modal.classList.add("active");
-    }
-  }
+  // Pure in-app meeting: browser redirection modals disabled
 }
+window.showMicrophonePermissionHelpModal = showMicrophonePermissionHelpModal;
 window.showMicrophonePermissionHelpModal = showMicrophonePermissionHelpModal;
 
 function retryEnableMicrophone() {
@@ -12612,10 +12488,7 @@ function launchLiveMeetingRoom(meeting, stream) {
 
           // Listen for mobile mic/camera permission errors
           api.on("micError", function(e) {
-            console.warn("[Jitsi] Mic access error on mobile:", e);
-            showToast("⚠️ मायक्रोफोन एरर: वर उजवीकडील 'Open in Browser' वर क्लिक करा.");
-            const m = _pendingMeetingToJoin || { id: "default", title: "Live Sanctuary" };
-            showMicrophonePermissionHelpModal(m);
+            console.warn("[Jitsi] Mic access notice:", e);
           });
           api.on("cameraError", function(e) {
             console.warn("[Jitsi] Camera access error:", e);
@@ -12741,11 +12614,6 @@ function launchLiveMeetingRoom(meeting, stream) {
     // Auto-enumerate devices for settings drawer
     enumerateAndPopulateAudioDevices();
 
-    // Trigger audio autoplay unlock & mobile speaker warm-up
-    setTimeout(() => {
-      unlockMobileSpeakerAudio();
-      unlockAndPlayRemoteAudio();
-    }, 500);
   } catch (err) {
     logAudioDebug("launchLiveMeetingRoom notice:", err);
   }
