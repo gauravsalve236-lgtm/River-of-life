@@ -12194,6 +12194,7 @@ function proceedJoinMeetingSafari() {
   window.open(extUrl, "_blank");
   showToast("Opening Live Fellowship in Safari 🙏");
 }
+window.proceedJoinMeetingSafari = proceedJoinMeetingSafari;
 async function proceedJoinMeetingInApp() {
   if (typeof closeModal === "function") closeModal("modal-ios-meeting-choice");
   else { const el = document.getElementById("modal-ios-meeting-choice"); if (el) el.style.display = "none"; }
@@ -12208,6 +12209,30 @@ async function triggerJoinMeetingFlow(meetingId) {
   const meetings = getMeetingsFromStorage();
   const m = meetings.find(x => x.id === meetingId) || { id: meetingId, title: "Live Fellowship", host: "Pastor" };
   _pendingMeetingToJoin = m;
+
+  // 1. Proactively request Top-Level Mic Permission on user click gesture (Required for iOS Safari WebKit iframes)
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    try {
+      const testStream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        },
+        video: false
+      });
+      if (testStream) {
+        testStream.getTracks().forEach(t => t.stop()); // Immediately release hardware mic
+      }
+    } catch (err) {
+      console.warn("[Media Check] Top-level mic permission rejected or blocked:", err);
+      if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
+        showMicrophonePermissionHelpModal(m);
+        return;
+      }
+    }
+  }
+
   showToast("Joining Live Sanctuary 🙏");
   launchLiveMeetingRoom(m, null);
 }
@@ -12459,7 +12484,7 @@ function launchLiveMeetingRoom(meeting, stream) {
               resolution: 720,
               enableNoAudioDetection: false,
               enableNoisyMicDetection: false,
-              disableAudioLevels: false,
+              disableAudioLevels: true, // Prevents iOS Safari AudioContext analyzer crash
               toolbarButtons: toolbarButtons
             },
             interfaceConfigOverwrite: {
@@ -12476,7 +12501,7 @@ function launchLiveMeetingRoom(meeting, stream) {
 
           // Intercept createElement for the iframe to guarantee WebKit permissions policy delegation (iPhone Safari)
           const origCreateElement = document.createElement.bind(document);
-          const allowPolicy = "camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; clipboard-write *;";
+          const allowPolicy = "camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; clipboard-write *; camera; microphone; autoplay; display-capture; fullscreen; speaker-selection;";
           document.createElement = function(tagName, opts) {
             const el = origCreateElement(tagName, opts);
             if (tagName && typeof tagName === "string" && tagName.toLowerCase() === "iframe") {
@@ -12496,6 +12521,17 @@ function launchLiveMeetingRoom(meeting, stream) {
             document.createElement = origCreateElement;
           }
           window._jitsiApi = api;
+
+          // Listen for mobile mic/camera permission errors
+          api.on("micError", function(e) {
+            console.warn("[Jitsi] Mic access error on mobile:", e);
+            showToast("⚠️ मायक्रोफोन एरर: वर उजवीकडील 'Open in Browser' वर क्लिक करा.");
+            const m = _pendingMeetingToJoin || { id: "default", title: "Live Sanctuary" };
+            showMicrophonePermissionHelpModal(m);
+          });
+          api.on("cameraError", function(e) {
+            console.warn("[Jitsi] Camera access error:", e);
+          });
 
           // Keep audio state debugged
           api.on("audioMuteStatusChanged", function(e) {
