@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v2369_RESTORE_CLEAN_CLICKS_AND_VOD';
+const CACHE_NAME = 'river-of-life-cache-v2370_NATIVE_VIDEO_CALL_AND_VOD_FIX';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

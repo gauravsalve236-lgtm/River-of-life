@@ -12,7 +12,7 @@
   <script>
     // Force immediate hard purge of all stale Service Workers and CacheStorage
     (function() {
-      const CURRENT_VER = "v2369_RESTORE_CLEAN_CLICKS_AND_VOD";
+      const CURRENT_VER = "v2370_NATIVE_VIDEO_CALL_AND_VOD_FIX";
       if (localStorage.getItem("rol_app_ver") !== CURRENT_VER) {
         localStorage.setItem("rol_app_ver", CURRENT_VER);
         if ('serviceWorker' in navigator) {
@@ -61,7 +61,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Great+Vibes&family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Noto+Serif+Devanagari:wght@500;600;700;800;900&family=Outfit:wght@500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600;1,700&family=Poppins:wght@600;700;800;900&family=Rozha+One&display=swap" rel="stylesheet">
   
   <!-- Main Stylesheet (Cache-Busted for Authentic Male Audio V27) -->
-  <link rel="stylesheet" href="index.css?v=2369_RESTORE_CLEAN_CLICKS_AND_VOD">
+  <link rel="stylesheet" href="index.css?v=2370_NATIVE_VIDEO_CALL_AND_VOD_FIX">
 
   <!-- Official LiveKit WebRTC Client SDK -->
   <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.0.8/dist/livekit-client.umd.min.js"></script>
@@ -303,6 +303,7 @@
                     <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" class="vod-bookmark-icon"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
                   </button>
                 </div>
+              </div>
 
                 <!-- 3. Continue Reading Card (Clean Text-First Minimalist Module) -->
               <div class="minimal-reading-card" id="home-continue-reading-card" onclick="continueLastReadChapter()" title="Continue Reading / वाचन सुरू ठेवा" style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 16px; padding: 16px 18px; cursor: pointer; box-shadow: var(--shadow-sm); transition: transform 0.15s ease, box-shadow 0.15s ease;">
@@ -5122,7 +5123,7 @@
 
         <!-- Video Conference Stage -->
         <div id="river-native-meeting-stage" class="river-native-meeting-stage">
-          <div id="meeting-jitsi-container" style="width: 100%; height: 100%; position: absolute; inset: 0; z-index: 10; display: block; background: #090d16;"></div>
+          <!-- Native In-App WebRTC Video Stage -->
           
           <!-- Dynamic Responsive Video Grid -->
           <div id="river-video-grid" class="river-video-grid" data-count="1">
@@ -6203,8 +6204,8 @@
   <!-- App Main Logic (Cache-Busted for 100% MARVBSI Church Bible) -->
   <script src="sarvam-tts.js?v=132_MARVBSI_FULL_CHURCH_BIBLE"></script>
   <script src="bible-study.js?v=138_MUSEUM_STUDY_HUB"></script>
-  <script src="https://meet.darmstadt.social/external_api.js"></script>
-  <script src="app.js?v=2369_RESTORE_CLEAN_CLICKS_AND_VOD"></script>
+  <script src="peerjs.min.js"></script>
+  <script src="app.js?v=2370_NATIVE_VIDEO_CALL_AND_VOD_FIX"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 4.5s no matter what
