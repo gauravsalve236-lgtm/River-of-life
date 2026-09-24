@@ -12,7 +12,7 @@
   <script>
     // Force immediate hard purge of all stale Service Workers and CacheStorage
     (function() {
-      const CURRENT_VER = "v2370_NATIVE_VIDEO_CALL_AND_VOD_FIX";
+      const CURRENT_VER = "v2371_DAILY_VERSE_WALLPAPER_RESTORED";
       if (localStorage.getItem("rol_app_ver") !== CURRENT_VER) {
         localStorage.setItem("rol_app_ver", CURRENT_VER);
         if ('serviceWorker' in navigator) {
@@ -275,9 +275,14 @@
                 <div class="home-vod-overlay"></div>
                 <div class="home-vod-badge-row" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                   <span class="home-vod-badge" data-i18n="vod_label">VERSE OF THE DAY</span>
-                  <span class="home-vod-gallery-pill" onclick="openFullscreenVOD(); event.stopPropagation();" style="font-size: 11px; font-weight: 700; color: #ffffff; display: inline-flex; align-items: center; gap: 5px; background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.35); cursor: pointer;">
-                    <span>🎨 Studio & Status</span> &rarr;
-                  </span>
+                  <div style="display: flex; gap: 6px; align-items: center;">
+                    <button class="home-vod-gallery-pill" onclick="cycleVodWallpaper(); event.stopPropagation();" title="Change Wallpaper / वॉलपेपर बदला" style="font-size: 11px; font-weight: 700; color: #ffffff; display: inline-flex; align-items: center; gap: 4px; background: rgba(0, 0, 0, 0.35); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); padding: 5px 10px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.35); cursor: pointer;">
+                      <span>🖼️ Wallpaper</span>
+                    </button>
+                    <button class="home-vod-gallery-pill" onclick="openFullscreenVOD(); event.stopPropagation();" style="font-size: 11px; font-weight: 700; color: #ffffff; display: inline-flex; align-items: center; gap: 4px; background: rgba(255, 255, 255, 0.22); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.35); cursor: pointer;">
+                      <span>🎨 Studio</span> &rarr;
+                    </button>
+                  </div>
                 </div>
                 <blockquote class="home-vod-quote" id="home-vod-text">
                   “The Lord is my shepherd; I shall not want. He makes me lie down in green pastures. He leads me beside still waters.
@@ -285,10 +290,13 @@
                 <div class="home-vod-ref-row">
                   <span class="home-vod-ref" id="home-vod-ref">Psalm 23:1-2</span>
                 </div>
-                <!-- Clean Inline Action Buttons: Like, Save Image to Gallery, Share Image to WhatsApp, Bookmark -->
+                <!-- Clean Inline Action Buttons: Like, Change Wallpaper, Read Chapter, Save Image, Share, Bookmark -->
                 <div class="home-vod-actions-row">
                   <button class="home-vod-btn" id="home-vod-btn-like" onclick="toggleDailyVerseLike(event);" title="Like Verse / आवडले" aria-label="Like Verse">
                     <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" class="vod-heart-icon"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                  </button>
+                  <button class="home-vod-btn" id="home-vod-btn-wallpaper" onclick="cycleVodWallpaper(); event.stopPropagation();" title="Change Wallpaper / वॉलपेपर बदला" aria-label="Change Wallpaper">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
                   </button>
                   <button class="home-vod-btn" id="home-vod-btn-read-chapter" onclick="readVODChapter(); event.stopPropagation();" title="Read Chapter in Bible / बायबलमध्ये वाचा" aria-label="Read Chapter in Bible">
                     <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
