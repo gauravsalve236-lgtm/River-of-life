@@ -11653,7 +11653,7 @@ function initChurchCompanion() {
    ========================================================================== */
 
 // Meeting globals
-activeMeetingSession = null; // { meetingId, localStream, provider, isMuted, isCamOff }
+var activeMeetingSession = null; // { meetingId, localStream, provider, isMuted, isCamOff }
 let meetingSandboxInterval = null;
 let activeJitsiAPIInstance = null;
 let isScreenSharingActive = false;
@@ -12150,7 +12150,7 @@ function generateICSFile(meeting) {
 // Unified High-Compatibility In-App Video Conference Engine (River of Life)
 // Connects phone and host into the identical church room with HD audio/video and zero redirects
 
-let activeMeetingSession = null;
+activeMeetingSession = null;
 let _pendingMeetingToJoin = null;
 
 function getJitsiServerDomain() {
@@ -12192,6 +12192,7 @@ function launchLiveMeetingRoom(meeting, stream) {
     // Open Modal Overlay
     const roomModal = document.getElementById("modal-live-meeting");
     if (roomModal) {
+      roomModal.style.display = "flex";
       roomModal.classList.add("active");
       document.body.classList.add("meeting-modal-open");
     }
@@ -12368,6 +12369,7 @@ function exitLiveMeetingRoom() {
 
     const roomModal = document.getElementById("modal-live-meeting");
     if (roomModal) {
+      roomModal.style.display = "none";
       roomModal.classList.remove("active");
       document.body.classList.remove("meeting-modal-open");
     }
