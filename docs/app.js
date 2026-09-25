@@ -12591,8 +12591,9 @@ function unlockAudioContextForMeeting() {
       if (window.webrtcAudioCtx.state === 'suspended') {
         window.webrtcAudioCtx.resume();
       }
-      // Prime iOS audio hardware with 1-sample silent buffer to switch AudioSession to PlayAndRecord
-      const buffer = window.webrtcAudioCtx.createBuffer(1, 1, 22050);
+      // Prime iOS audio hardware using native sampleRate (prevents sample rate mismatch)
+      const sampleRate = window.webrtcAudioCtx.sampleRate || 48000;
+      const buffer = window.webrtcAudioCtx.createBuffer(1, 1, sampleRate);
       const source = window.webrtcAudioCtx.createBufferSource();
       source.buffer = buffer;
       source.connect(window.webrtcAudioCtx.destination);
@@ -12679,6 +12680,11 @@ function routeRemoteAudioToSpeaker(peerId, stream) {
 // Local Mic Activity Visualizer (animates mic icon and green pulse when speaking)
 function startLocalMicActivityMonitor(stream) {
   try {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (isIOS) {
+      // Skip createMediaStreamSource on iOS to avoid WebKit bug #179964 which silences WebRTC mic
+      return;
+    }
     if (!stream) return;
     const audioTracks = stream.getAudioTracks();
     if (audioTracks.length === 0) return;
@@ -12788,9 +12794,9 @@ async function acquireRiverUserMedia(preferredFacingMode = "user") {
 
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
-  // iOS Safari rejects autoGainControl with OverconstrainedError/TypeError; non-iOS benefits from AGC
+  // iOS Safari works most reliably with unconstrained audio: true to prevent VoiceProcessingIO hardware muting
   const safeAudioConstraints = isIOS 
-    ? { echoCancellation: true } 
+    ? true 
     : { echoCancellation: true, noiseSuppression: true, autoGainControl: true };
 
   // Tier 1: Smooth, Crisp HD Video (1280x720 ideal, 30fps) + Safe Audio (Guaranteed smooth on mobile & desktop)
@@ -13392,7 +13398,7 @@ function attachRemoteVideoTile(peerId, stream, displayName) {
     tile.className = "river-video-tile";
     tile.innerHTML = `
       <video id="river-video-${peerId}" playsinline webkit-playsinline autoplay></video>
-      <audio id="river-audio-${peerId}" autoplay playsinline webkit-playsinline style="display: none;"></audio>
+      <audio id="river-audio-${peerId}" autoplay playsinline webkit-playsinline style="position: absolute; width: 1px; height: 1px; opacity: 0.01; pointer-events: none;"></audio>
       <div class="river-tile-avatar" id="river-avatar-${peerId}" style="display: none;">
         <div class="river-avatar-circle">${(displayName || 'M').charAt(0).toUpperCase()}</div>
         <span style="margin-top: 8px; font-size: 13px; color: #cbd5e1; font-weight: 700;">${displayName}</span>
@@ -13450,6 +13456,9 @@ function attachRemoteVideoTile(peerId, stream, displayName) {
             showAutoplayUnlockBanner();
           });
         }
+        if (audioEl) {
+          audioEl.play().catch(() => {});
+        }
       };
       stream.onremovetrack = () => {
         syncAvatarVisibility();
@@ -13468,7 +13477,7 @@ function attachRemoteVideoTile(peerId, stream, displayName) {
     }
   }
 
-  // Backup audio element
+  // Dedicated active audio playback element
   if (audioEl && stream) {
     audioEl.muted = false;
     audioEl.defaultMuted = false;
@@ -13478,7 +13487,7 @@ function attachRemoteVideoTile(peerId, stream, displayName) {
     }
     const ap = audioEl.play();
     if (ap && typeof ap.catch === "function") {
-      ap.catch(() => {});
+      ap.catch(e => console.warn("[RiverMeet] audioEl autoplay:", e));
     }
   }
 

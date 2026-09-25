@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v2381_FIX_WEBRTC_AUDIO_PHONE_FREEZE';
+const CACHE_NAME = 'river-of-life-cache-v2382_FIX_IPHONE_MIC_UNMUTED_AUDIO';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
