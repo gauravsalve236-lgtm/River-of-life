@@ -12110,8 +12110,10 @@ function createNewMeeting() {
   const meetings = getMeetingsFromStorage();
 
   // Create new meeting object
+  const cleanRoomCode = (title || "").toLowerCase().replace(/[^a-z0-9]/g, '') || ("meet_" + Date.now());
   const newMeeting = {
     id: "meeting_" + Date.now(),
+    roomId: cleanRoomCode,
     title,
     description: desc,
     host,
@@ -12482,12 +12484,64 @@ function getJitsiServerDomain() {
 }
 window.getJitsiServerDomain = getJitsiServerDomain;
 
+function getCanonicalRoomKey(meeting) {
+  if (!meeting) return "sanctuary";
+  if (typeof meeting === "string") {
+    try {
+      const list = (typeof getMeetingsFromStorage === "function") ? getMeetingsFromStorage() : [];
+      const q = meeting.trim().toLowerCase();
+      const qClean = q.replace(/[^a-z0-9]/g, '');
+      const match = list.find(m => 
+        (m.id && m.id.toLowerCase() === q) ||
+        (m.roomId && m.roomId.toLowerCase() === q) ||
+        (m.title && m.title.trim().toLowerCase() === q) ||
+        (m.title && m.title.toLowerCase().replace(/[^a-z0-9]/g, '') === qClean) ||
+        (m.id && m.id.toLowerCase().replace(/[^a-z0-9]/g, '') === qClean)
+      );
+      if (match) return getCanonicalRoomKey(match);
+    } catch(e) {}
+    const clean = meeting.toLowerCase().replace(/[^a-z0-9]/g, '');
+    return clean || "sanctuary";
+  }
+
+  // Deterministic room key based on title or roomId so all devices always match
+  const titleClean = (meeting.title || "").toLowerCase().replace(/[^a-z0-9]/g, '');
+  if (titleClean && titleClean !== "livefellowship" && titleClean !== "riveroflifemeeting" && titleClean !== "sanctuary") {
+    return titleClean;
+  }
+
+  const roomIdClean = (meeting.roomId || "").toLowerCase().replace(/[^a-z0-9]/g, '');
+  if (roomIdClean) return roomIdClean;
+
+  const idClean = (meeting.id || "").toString().toLowerCase().replace(/[^a-z0-9]/g, '');
+  if (idClean) return idClean;
+
+  return "sanctuary";
+}
+window.getCanonicalRoomKey = getCanonicalRoomKey;
+
 // Trigger Join Meeting Flow — 100% In-App (No redirects, no browser modals)
-async function triggerJoinMeetingFlow(meetingId) {
+async function triggerJoinMeetingFlow(meetingIdentifier) {
   try {
     unlockAudioContextForMeeting();
     const meetings = (typeof getMeetingsFromStorage === "function") ? getMeetingsFromStorage() : [];
-    const m = meetings.find(x => x.id === meetingId) || { id: meetingId, title: "Live Fellowship", host: "Pastor" };
+    let m = null;
+    if (typeof meetingIdentifier === "object" && meetingIdentifier !== null) {
+      m = meetingIdentifier;
+    } else {
+      const q = String(meetingIdentifier || "").trim().toLowerCase();
+      const qClean = q.replace(/[^a-z0-9]/g, '');
+      m = meetings.find(x => 
+        (x.id && x.id.toLowerCase() === q) || 
+        (x.roomId && x.roomId.toLowerCase() === q) || 
+        (x.title && x.title.trim().toLowerCase() === q) ||
+        (x.title && x.title.toLowerCase().replace(/[^a-z0-9]/g, '') === qClean) ||
+        (x.id && x.id.toLowerCase().replace(/[^a-z0-9]/g, '') === qClean)
+      );
+      if (!m) {
+        m = { id: meetingIdentifier, title: meetingIdentifier, host: "Pastor", roomId: meetingIdentifier };
+      }
+    }
     _pendingMeetingToJoin = m;
     if (typeof showToast === "function") showToast("Joining Live Sanctuary 🙏");
     await launchLiveMeetingRoom(m, null);
@@ -12499,7 +12553,7 @@ window.triggerJoinMeetingFlow = triggerJoinMeetingFlow;
 
 /* ═══════════════════════════════════════════════════════════════
    RIVER OF LIFE 100% NATIVE IN-APP WEBRTC VIDEO CONFERENCING ENGINE
-   Zero External Iframes • Peer-to-Peer & Mesh WebRTC • Auto STUN
+   Zero External Iframes • Peer-to-Peer & Mesh WebRTC • Auto STUN/TURN
    ═══════════════════════════════════════════════════════════════ */
 
 var RiverMeet = {
@@ -12516,6 +12570,8 @@ var RiverMeet = {
   roomKey: "",
   myPeerId: "",
   retryTimer: null,
+  presenceTimer: null,
+  presenceTopic: "",
   micMonitorAnim: null,
   micSourceNode: null,
   connectedPeerList: []
@@ -12726,7 +12782,24 @@ async function acquireRiverUserMedia(preferredFacingMode = "user") {
     ? { echoCancellation: true } 
     : { echoCancellation: true, noiseSuppression: true, autoGainControl: true };
 
-  // Tier 1: Flexible HD Video + Safe Audio
+  // Tier 1: Crystal-Clear Full HD 1080p Video + Safe Audio
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: preferredFacingMode,
+        width: { ideal: 1920, min: 1280 },
+        height: { ideal: 1080, min: 720 },
+        frameRate: { ideal: 30, max: 60 }
+      },
+      audio: safeAudioConstraints
+    });
+    console.log("[RiverMeet] Acquired Tier 1 Full HD 1080p video + audio");
+    return stream;
+  } catch (e1) {
+    console.warn("[RiverMeet] Tier 1 Full HD media failed, trying 720p HD:", e1);
+  }
+
+  // Tier 2: 720p HD Video + Safe Audio
   try {
     const stream = await navigator.mediaDevices.getUserMedia({
       video: {
@@ -12736,31 +12809,31 @@ async function acquireRiverUserMedia(preferredFacingMode = "user") {
       },
       audio: safeAudioConstraints
     });
-    console.log("[RiverMeet] Acquired Tier 1 HD video + audio");
+    console.log("[RiverMeet] Acquired Tier 2 720p HD video + audio");
     return stream;
-  } catch (e1) {
-    console.warn("[RiverMeet] Tier 1 HD media failed, trying unconstrained video+audio:", e1);
+  } catch (e2) {
+    console.warn("[RiverMeet] Tier 2 HD media failed, trying standard video+audio:", e2);
   }
 
-  // Tier 2: Facing mode video + standard audio: true
+  // Tier 3: Facing mode video + standard audio: true
   try {
     const stream = await navigator.mediaDevices.getUserMedia({
       video: { facingMode: preferredFacingMode },
       audio: true
     });
-    console.log("[RiverMeet] Acquired Tier 2 standard video + audio");
-    return stream;
-  } catch (e2) {
-    console.warn("[RiverMeet] Tier 2 media failed, trying basic video+audio:", e2);
-  }
-
-  // Tier 3: Basic { video: true, audio: true }
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-    console.log("[RiverMeet] Acquired Tier 3 basic video + audio");
+    console.log("[RiverMeet] Acquired Tier 3 standard video + audio");
     return stream;
   } catch (e3) {
-    console.warn("[RiverMeet] Tier 3 media failed, trying separate track acquisition:", e3);
+    console.warn("[RiverMeet] Tier 3 media failed, trying basic video+audio:", e3);
+  }
+
+  // Tier 4: Basic { video: true, audio: true }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    console.log("[RiverMeet] Acquired Tier 4 basic video + audio");
+    return stream;
+  } catch (e4) {
+    console.warn("[RiverMeet] Tier 4 media failed, trying separate track acquisition:", e4);
   }
 
   // Tier 4: Separate track acquisition (Audio first, then Video)
@@ -12816,10 +12889,9 @@ async function launchLiveMeetingRoom(meeting, stream) {
     const meetingId = (meeting && meeting.id) ? meeting.id : "Sanctuary_LiveRoom";
     const isHost = meeting ? (meeting.host === loggedIn) : false;
 
-    const rawKey = meetingId.toString().toLowerCase().replace(/[^a-z0-9]/g, '');
-    const roomKey = rawKey || "sanctuary";
+    const roomKey = getCanonicalRoomKey(meeting);
 
-    console.log("[RiverMeet] Starting Native WebRTC Room:", { roomKey, loggedIn, isHost });
+    console.log("[RiverMeet] Starting Native WebRTC Room:", { roomKey, meetingTitle, loggedIn, isHost });
 
     // Clean up any existing meeting session
     cleanupRiverMeeting();
@@ -12953,6 +13025,76 @@ function renderLocalVideoTile(displayName, isHost) {
   updateParticipantsRoster();
 }
 
+// Start / Stop Cloud Presence Discovery (Fail-safe WebRTC discovery via ntfy)
+function startRoomPresence(roomKey, myPeerId, displayName) {
+  stopRoomPresence();
+  RiverMeet.presenceTopic = "rol_meet_" + roomKey;
+  
+  function announce() {
+    if (!RiverMeet.peer || RiverMeet.peer.destroyed) return;
+    try {
+      fetch(`https://ntfy.sh/${RiverMeet.presenceTopic}`, {
+        method: 'POST',
+        headers: { 'Title': 'RiverMeetPresence', 'Priority': '1' },
+        body: JSON.stringify({
+          action: 'announce',
+          peerId: myPeerId,
+          name: displayName,
+          t: Date.now()
+        })
+      }).catch(() => {});
+    } catch(e) {}
+  }
+
+  function poll() {
+    if (!RiverMeet.peer || RiverMeet.peer.destroyed) return;
+    try {
+      fetch(`https://ntfy.sh/${RiverMeet.presenceTopic}/json?poll=1&since=8s`)
+        .then(res => res.text())
+        .then(raw => {
+          if (!raw) return;
+          const lines = raw.trim().split('\n');
+          for (const line of lines) {
+            try {
+              const msg = JSON.parse(line);
+              if (!msg.message) continue;
+              const data = JSON.parse(msg.message);
+              if (data && data.peerId && data.peerId !== RiverMeet.myPeerId) {
+                if (!RiverMeet.peerConnections.has(data.peerId)) {
+                  if (RiverMeet.myPeerId < data.peerId) {
+                    console.log("[RiverMeet] Cloud presence discovered peer:", data.peerId, "Calling...");
+                    const call = RiverMeet.peer.call(data.peerId, RiverMeet.localStream, {
+                      metadata: { name: displayName, isHost: RiverMeet.isHost }
+                    });
+                    if (call) setupPeerCallEvents(call);
+                    const conn = RiverMeet.peer.connect(data.peerId, {
+                      metadata: { name: displayName, isHost: RiverMeet.isHost }
+                    });
+                    if (conn) setupDataConnEvents(conn);
+                  }
+                }
+              }
+            } catch(e) {}
+          }
+        })
+        .catch(() => {});
+    } catch(e) {}
+  }
+
+  announce();
+  RiverMeet.presenceTimer = setInterval(() => {
+    announce();
+    poll();
+  }, 3000);
+}
+
+function stopRoomPresence() {
+  if (RiverMeet.presenceTimer) {
+    clearInterval(RiverMeet.presenceTimer);
+    RiverMeet.presenceTimer = null;
+  }
+}
+
 // Initialize PeerJS Connection with Resilient Discovery
 function initPeerConnection(roomKey, displayName, tryAsHost) {
   if (typeof Peer === "undefined") {
@@ -12967,7 +13109,22 @@ function initPeerConnection(roomKey, displayName, tryAsHost) {
     { urls: 'stun:stun2.l.google.com:19302' },
     { urls: 'stun:stun3.l.google.com:19302' },
     { urls: 'stun:stun4.l.google.com:19302' },
-    { urls: 'stun:stun.cloudflare.com:3478' }
+    { urls: 'stun:stun.cloudflare.com:3478' },
+    {
+      urls: 'turn:openrelay.metered.ca:80',
+      username: 'openrelayproject',
+      credential: 'openrelayproject'
+    },
+    {
+      urls: 'turn:openrelay.metered.ca:443',
+      username: 'openrelayproject',
+      credential: 'openrelayproject'
+    },
+    {
+      urls: 'turn:openrelay.metered.ca:443?transport=tcp',
+      username: 'openrelayproject',
+      credential: 'openrelayproject'
+    }
   ];
 
   const hostPeerId = 'rol_' + roomKey + '_host';
@@ -13006,6 +13163,9 @@ function initPeerConnection(roomKey, displayName, tryAsHost) {
         RiverMeet.isHost = false;
         connectToHost(hostPeerId, displayName);
       }
+
+      // Start Cloud Presence fallback signaling so peers always find each other
+      startRoomPresence(roomKey, id, displayName);
     });
 
     peer.on('call', (incomingCall) => {
@@ -13023,12 +13183,14 @@ function initPeerConnection(roomKey, displayName, tryAsHost) {
     peer.on('error', (err) => {
       console.warn("[RiverMeet] Peer notification:", err.type, err.message);
       if (err.type === 'unavailable-id') {
-        // Host slot is already taken by active host! Connect as participant!
+        // Host slot is already taken by active host! Connect as participant with slight delay to ensure clean socket!
         console.log("[RiverMeet] Host already present in room. Connecting as participant...");
         try { peer.destroy(); } catch(e) {}
-        initPeerConnection(roomKey, displayName, false);
+        setTimeout(() => {
+          initPeerConnection(roomKey, displayName, false);
+        }, 350);
       } else if (err.type === 'peer-unavailable') {
-        console.log("[RiverMeet] Host connecting, retrying call in 2s...");
+        console.log("[RiverMeet] Host connecting, retrying call in 2.5s...");
         showWaitingBanner("Connecting to Sanctuary call... / जोडले जात आहे...");
         if (!RiverMeet.retryTimer) {
           RiverMeet.retryTimer = setInterval(() => {
@@ -13088,14 +13250,33 @@ function setupPeerCallEvents(call) {
             if (!params.encodings || params.encodings.length === 0) {
               params.encodings = [{}];
             }
-            params.encodings[0].maxBitrate = 3000000; // 3.0 Mbps 1080p Full HD
+            params.encodings[0].maxBitrate = 4000000; // 4.0 Mbps Full HD crystal clear
             params.encodings[0].networkPriority = 'high';
             params.encodings[0].maxFramerate = 30;
-            sender.setParameters(params).catch(e => {});
+            if (sender.setParameters) {
+              sender.setParameters(params).catch(e => {});
+            }
           }
         });
       }
     } catch(e) {}
+  }
+
+  // Native ontrack listener for instant video/audio rendering
+  if (call.peerConnection) {
+    call.peerConnection.ontrack = (evt) => {
+      console.log('[RiverMeet] Native ontrack for peer:', peerId, evt.streams);
+      hideWaitingBanner();
+      if (RiverMeet.retryTimer) {
+        clearInterval(RiverMeet.retryTimer);
+        RiverMeet.retryTimer = null;
+      }
+      if (evt.streams && evt.streams[0]) {
+        attachRemoteVideoTile(peerId, evt.streams[0], peerName);
+      }
+      boostBitrate();
+      setTimeout(boostBitrate, 1200);
+    };
   }
 
   call.on('stream', (remoteStream) => {
@@ -13771,6 +13952,8 @@ window.exitLiveMeetingRoom = exitLiveMeetingRoom;
 
 // Cleanup Meeting Resources
 function cleanupRiverMeeting() {
+  stopRoomPresence();
+
   if (RiverMeet.retryTimer) {
     clearInterval(RiverMeet.retryTimer);
     RiverMeet.retryTimer = null;
