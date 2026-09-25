@@ -12570,16 +12570,19 @@ var RiverMeet = {
   roomKey: "",
   myPeerId: "",
   retryTimer: null,
-  presenceTimer: null,
-  presenceTopic: "",
   micMonitorAnim: null,
   micSourceNode: null,
   connectedPeerList: []
 };
 
-// Synchronously unlock and activate Web Audio Session (critical for iOS Safari two-way VOIP mic & speaker)
+// Synchronously unlock and activate Web Audio Session & HTML5 Media playback (critical for iOS Safari two-way VOIP mic & speaker)
 function unlockAudioContextForMeeting() {
   try {
+    // Prime HTMLMediaElement autoplay permission
+    const primeAudio = new Audio();
+    primeAudio.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
+    primeAudio.play().catch(() => {});
+
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
     if (AudioCtx) {
       if (!window.webrtcAudioCtx || window.webrtcAudioCtx.state === 'closed') {
@@ -12754,6 +12757,13 @@ function hideAutoplayUnlockBanner() {
 
 function unlockAllMeetingAudio() {
   unlockAudioContextForMeeting();
+  document.querySelectorAll("[id^='river-video-']:not(#river-local-video)").forEach(el => {
+    try {
+      el.muted = false;
+      el.volume = 1.0;
+      el.play().catch(() => {});
+    } catch(e) {}
+  });
   document.querySelectorAll("[id^='river-audio-'], audio.remote-peer-audio").forEach(el => {
     try {
       el.muted = false;
@@ -12761,6 +12771,7 @@ function unlockAllMeetingAudio() {
       el.play().catch(() => {});
     } catch(e) {}
   });
+  document.querySelectorAll(".river-unmute-tile-btn").forEach(btn => btn.style.display = "none");
   hideAutoplayUnlockBanner();
 }
 window.unlockAllMeetingAudio = unlockAllMeetingAudio;
@@ -12782,37 +12793,37 @@ async function acquireRiverUserMedia(preferredFacingMode = "user") {
     ? { echoCancellation: true } 
     : { echoCancellation: true, noiseSuppression: true, autoGainControl: true };
 
-  // Tier 1: Crystal-Clear Full HD 1080p Video + Safe Audio
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: {
-        facingMode: preferredFacingMode,
-        width: { ideal: 1920, min: 1280 },
-        height: { ideal: 1080, min: 720 },
-        frameRate: { ideal: 30, max: 60 }
-      },
-      audio: safeAudioConstraints
-    });
-    console.log("[RiverMeet] Acquired Tier 1 Full HD 1080p video + audio");
-    return stream;
-  } catch (e1) {
-    console.warn("[RiverMeet] Tier 1 Full HD media failed, trying 720p HD:", e1);
-  }
-
-  // Tier 2: 720p HD Video + Safe Audio
+  // Tier 1: Smooth, Crisp HD Video (1280x720 ideal, 30fps) + Safe Audio (Guaranteed smooth on mobile & desktop)
   try {
     const stream = await navigator.mediaDevices.getUserMedia({
       video: {
         facingMode: preferredFacingMode,
         width: { ideal: 1280 },
-        height: { ideal: 720 }
+        height: { ideal: 720 },
+        frameRate: { ideal: 30 }
       },
       audio: safeAudioConstraints
     });
-    console.log("[RiverMeet] Acquired Tier 2 720p HD video + audio");
+    console.log("[RiverMeet] Acquired Tier 1 HD video + audio");
+    return stream;
+  } catch (e1) {
+    console.warn("[RiverMeet] Tier 1 HD media failed, trying standard video+audio:", e1);
+  }
+
+  // Tier 2: Flexible standard video + safe audio
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: preferredFacingMode,
+        width: { ideal: 640 },
+        height: { ideal: 480 }
+      },
+      audio: safeAudioConstraints
+    });
+    console.log("[RiverMeet] Acquired Tier 2 standard video + audio");
     return stream;
   } catch (e2) {
-    console.warn("[RiverMeet] Tier 2 HD media failed, trying standard video+audio:", e2);
+    console.warn("[RiverMeet] Tier 2 media failed, trying unconstrained video+audio:", e2);
   }
 
   // Tier 3: Facing mode video + standard audio: true
@@ -13025,76 +13036,6 @@ function renderLocalVideoTile(displayName, isHost) {
   updateParticipantsRoster();
 }
 
-// Start / Stop Cloud Presence Discovery (Fail-safe WebRTC discovery via ntfy)
-function startRoomPresence(roomKey, myPeerId, displayName) {
-  stopRoomPresence();
-  RiverMeet.presenceTopic = "rol_meet_" + roomKey;
-  
-  function announce() {
-    if (!RiverMeet.peer || RiverMeet.peer.destroyed) return;
-    try {
-      fetch(`https://ntfy.sh/${RiverMeet.presenceTopic}`, {
-        method: 'POST',
-        headers: { 'Title': 'RiverMeetPresence', 'Priority': '1' },
-        body: JSON.stringify({
-          action: 'announce',
-          peerId: myPeerId,
-          name: displayName,
-          t: Date.now()
-        })
-      }).catch(() => {});
-    } catch(e) {}
-  }
-
-  function poll() {
-    if (!RiverMeet.peer || RiverMeet.peer.destroyed) return;
-    try {
-      fetch(`https://ntfy.sh/${RiverMeet.presenceTopic}/json?poll=1&since=8s`)
-        .then(res => res.text())
-        .then(raw => {
-          if (!raw) return;
-          const lines = raw.trim().split('\n');
-          for (const line of lines) {
-            try {
-              const msg = JSON.parse(line);
-              if (!msg.message) continue;
-              const data = JSON.parse(msg.message);
-              if (data && data.peerId && data.peerId !== RiverMeet.myPeerId) {
-                if (!RiverMeet.peerConnections.has(data.peerId)) {
-                  if (RiverMeet.myPeerId < data.peerId) {
-                    console.log("[RiverMeet] Cloud presence discovered peer:", data.peerId, "Calling...");
-                    const call = RiverMeet.peer.call(data.peerId, RiverMeet.localStream, {
-                      metadata: { name: displayName, isHost: RiverMeet.isHost }
-                    });
-                    if (call) setupPeerCallEvents(call);
-                    const conn = RiverMeet.peer.connect(data.peerId, {
-                      metadata: { name: displayName, isHost: RiverMeet.isHost }
-                    });
-                    if (conn) setupDataConnEvents(conn);
-                  }
-                }
-              }
-            } catch(e) {}
-          }
-        })
-        .catch(() => {});
-    } catch(e) {}
-  }
-
-  announce();
-  RiverMeet.presenceTimer = setInterval(() => {
-    announce();
-    poll();
-  }, 3000);
-}
-
-function stopRoomPresence() {
-  if (RiverMeet.presenceTimer) {
-    clearInterval(RiverMeet.presenceTimer);
-    RiverMeet.presenceTimer = null;
-  }
-}
-
 // Initialize PeerJS Connection with Resilient Discovery
 function initPeerConnection(roomKey, displayName, tryAsHost) {
   if (typeof Peer === "undefined") {
@@ -13163,14 +13104,11 @@ function initPeerConnection(roomKey, displayName, tryAsHost) {
         RiverMeet.isHost = false;
         connectToHost(hostPeerId, displayName);
       }
-
-      // Start Cloud Presence fallback signaling so peers always find each other
-      startRoomPresence(roomKey, id, displayName);
     });
 
     peer.on('call', (incomingCall) => {
       console.log("[RiverMeet] Incoming call from peer:", incomingCall.peer);
-      // Answer with Full HD local stream
+      // Answer with local stream
       incomingCall.answer(RiverMeet.localStream);
       setupPeerCallEvents(incomingCall);
     });
@@ -13190,14 +13128,16 @@ function initPeerConnection(roomKey, displayName, tryAsHost) {
           initPeerConnection(roomKey, displayName, false);
         }, 350);
       } else if (err.type === 'peer-unavailable') {
-        console.log("[RiverMeet] Host connecting, retrying call in 2.5s...");
+        console.log("[RiverMeet] Host connecting, retrying call in 2s...");
         showWaitingBanner("Connecting to Sanctuary call... / जोडले जात आहे...");
+        RiverMeet.peerConnections.delete(hostPeerId);
         if (!RiverMeet.retryTimer) {
           RiverMeet.retryTimer = setInterval(() => {
             if (RiverMeet.peer && !RiverMeet.peer.destroyed && !RiverMeet.isHost) {
+              RiverMeet.peerConnections.delete(hostPeerId);
               connectToHost(hostPeerId, displayName);
             }
-          }, 2500);
+          }, 2000);
         }
       }
     });
@@ -13217,7 +13157,8 @@ function initPeerConnection(roomKey, displayName, tryAsHost) {
 // Connect to Host
 function connectToHost(hostPeerId, displayName) {
   if (!RiverMeet.peer || RiverMeet.peer.destroyed) return;
-  if (RiverMeet.peerConnections.has(hostPeerId)) return;
+  const existing = RiverMeet.peerConnections.get(hostPeerId);
+  if (existing && existing.call && existing.call.open) return;
 
   console.log("[RiverMeet] Calling host:", hostPeerId);
   try {
@@ -13250,7 +13191,7 @@ function setupPeerCallEvents(call) {
             if (!params.encodings || params.encodings.length === 0) {
               params.encodings = [{}];
             }
-            params.encodings[0].maxBitrate = 4000000; // 4.0 Mbps Full HD crystal clear
+            params.encodings[0].maxBitrate = 1500000; // 1.5 Mbps Smooth Crisp HD
             params.encodings[0].networkPriority = 'high';
             params.encodings[0].maxFramerate = 30;
             if (sender.setParameters) {
@@ -13418,6 +13359,27 @@ function broadcastDataToPeers(payload) {
   }
 }
 
+// Unmute specific remote peer
+function unmuteRiverPeer(peerId, evt) {
+  if (evt && evt.stopPropagation) evt.stopPropagation();
+  const v = document.getElementById('river-video-' + peerId);
+  if (v) {
+    v.muted = false;
+    v.volume = 1.0;
+    v.play().catch(() => {});
+  }
+  const a = document.getElementById('river-audio-' + peerId);
+  if (a) {
+    a.muted = false;
+    a.volume = 1.0;
+    a.play().catch(() => {});
+  }
+  const btn = document.getElementById('river-unmute-' + peerId);
+  if (btn) btn.style.display = 'none';
+  hideAutoplayUnlockBanner();
+}
+window.unmuteRiverPeer = unmuteRiverPeer;
+
 // Attach Remote Video Tile & Audio in Responsive Grid
 function attachRemoteVideoTile(peerId, stream, displayName) {
   const grid = document.getElementById("river-video-grid");
@@ -13429,8 +13391,8 @@ function attachRemoteVideoTile(peerId, stream, displayName) {
     tile.id = 'river-tile-' + peerId;
     tile.className = "river-video-tile";
     tile.innerHTML = `
-      <video id="river-video-${peerId}" playsinline webkit-playsinline autoplay muted></video>
-      <audio id="river-audio-${peerId}" autoplay playsinline webkit-playsinline></audio>
+      <video id="river-video-${peerId}" playsinline webkit-playsinline autoplay></video>
+      <audio id="river-audio-${peerId}" autoplay playsinline webkit-playsinline style="display: none;"></audio>
       <div class="river-tile-avatar" id="river-avatar-${peerId}" style="display: none;">
         <div class="river-avatar-circle">${(displayName || 'M').charAt(0).toUpperCase()}</div>
         <span style="margin-top: 8px; font-size: 13px; color: #cbd5e1; font-weight: 700;">${displayName}</span>
@@ -13441,31 +13403,38 @@ function attachRemoteVideoTile(peerId, stream, displayName) {
           <span>${displayName}</span>
         </div>
       </div>
+      <button class="river-unmute-tile-btn" id="river-unmute-${peerId}" style="display: none;" onclick="unmuteRiverPeer('${peerId}', event)">
+        🔊 Tap to unmute / आवाज ऐका
+      </button>
     `;
+    tile.addEventListener('click', () => {
+      if (typeof unlockAllMeetingAudio === 'function') unlockAllMeetingAudio();
+    });
     grid.appendChild(tile);
   }
 
   const videoEl = document.getElementById('river-video-' + peerId);
   const audioEl = document.getElementById('river-audio-' + peerId);
   const avatarEl = document.getElementById('river-avatar-' + peerId);
+  const unmuteBtn = document.getElementById('river-unmute-' + peerId);
 
   function syncAvatarVisibility() {
     if (!avatarEl) return;
-    const hasActiveVideo = stream && stream.getVideoTracks().some(t => t.enabled && t.readyState === 'live');
+    const vTracks = stream ? stream.getVideoTracks() : [];
+    const hasActiveVideo = vTracks.length > 0 && vTracks.some(t => t.enabled && t.readyState === 'live');
     avatarEl.style.display = hasActiveVideo ? 'none' : 'flex';
   }
 
-  // Configure Remote Video (Muted to guarantee 100% instant autoplay on iOS & mobile)
-  if (videoEl) {
-    videoEl.muted = true;
-    videoEl.defaultMuted = true;
-    videoEl.setAttribute("playsinline", "");
-    videoEl.setAttribute("webkit-playsinline", "");
-    videoEl.autoplay = true;
-
+  // Play remote audio and video cleanly through video element with unmuted default
+  if (videoEl && stream) {
     if (videoEl.srcObject !== stream) {
       videoEl.srcObject = stream;
     }
+    videoEl.setAttribute("playsinline", "");
+    videoEl.setAttribute("webkit-playsinline", "");
+    videoEl.muted = false;
+    videoEl.defaultMuted = false;
+    videoEl.volume = 1.0;
 
     syncAvatarVisibility();
 
@@ -13473,10 +13442,13 @@ function attachRemoteVideoTile(peerId, stream, displayName) {
       stream.onaddtrack = () => {
         syncAvatarVisibility();
         const p = videoEl.play();
-        if (p && typeof p.catch === "function") p.catch(() => {});
-        if (audioEl) {
-          const ap = audioEl.play();
-          if (ap && typeof ap.catch === "function") ap.catch(() => {});
+        if (p && typeof p.catch === "function") {
+          p.catch(() => {
+            videoEl.muted = true;
+            videoEl.play().catch(() => {});
+            if (unmuteBtn) unmuteBtn.style.display = "inline-flex";
+            showAutoplayUnlockBanner();
+          });
         }
       };
       stream.onremovetrack = () => {
@@ -13486,33 +13458,28 @@ function attachRemoteVideoTile(peerId, stream, displayName) {
 
     const playPromise = videoEl.play();
     if (playPromise && typeof playPromise.catch === "function") {
-      playPromise.catch(e => console.warn("[RiverMeet] Remote video play notice:", e));
+      playPromise.catch(err => {
+        console.warn("[RiverMeet] Autoplay unmuted blocked, falling back to muted + tap button:", err);
+        videoEl.muted = true;
+        videoEl.play().catch(() => {});
+        if (unmuteBtn) unmuteBtn.style.display = "inline-flex";
+        showAutoplayUnlockBanner();
+      });
     }
   }
 
-  // Configure Remote Audio (Dedicated unmuted audio element + Web Audio loudspeaker route)
+  // Backup audio element
   if (audioEl && stream) {
     audioEl.muted = false;
     audioEl.defaultMuted = false;
     audioEl.volume = 1.0;
-    audioEl.setAttribute("playsinline", "");
-    audioEl.setAttribute("webkit-playsinline", "");
-    audioEl.autoplay = true;
-
     if (audioEl.srcObject !== stream) {
       audioEl.srcObject = stream;
     }
-
-    const audioPlayPromise = audioEl.play();
-    if (audioPlayPromise && typeof audioPlayPromise.catch === "function") {
-      audioPlayPromise.catch(err => {
-        console.warn("[RiverMeet] Remote audio unmuted autoplay blocked by browser:", err);
-        showAutoplayUnlockBanner();
-      });
+    const ap = audioEl.play();
+    if (ap && typeof ap.catch === "function") {
+      ap.catch(() => {});
     }
-
-    // Connect Web Audio API pipeline for iOS loudspeaker playback
-    routeRemoteAudioToSpeaker(peerId, stream);
   }
 
   updateVideoGridCount();
@@ -13952,8 +13919,6 @@ window.exitLiveMeetingRoom = exitLiveMeetingRoom;
 
 // Cleanup Meeting Resources
 function cleanupRiverMeeting() {
-  stopRoomPresence();
-
   if (RiverMeet.retryTimer) {
     clearInterval(RiverMeet.retryTimer);
     RiverMeet.retryTimer = null;

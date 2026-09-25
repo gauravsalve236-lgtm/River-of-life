@@ -17477,6 +17477,31 @@ body:has(#view-reader.active) .mobile-bottom-tabs {
   font-size: 12px;
 }
 
+.river-unmute-tile-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 10;
+  background: rgba(220, 38, 38, 0.92);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(220, 38, 38, 0.5);
+  animation: riverUnmutePulse 1.8s infinite ease-in-out;
+}
+
+@keyframes riverUnmutePulse {
+  0%, 100% { transform: scale(1); opacity: 0.95; }
+  50% { transform: scale(1.06); opacity: 1; }
+}
+
 /* Floating Bottom Control Bar */
 .river-meeting-controls-wrapper {
   position: absolute;

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v2380_FIX_CROSS_DEVICE_GRID_HD';
+const CACHE_NAME = 'river-of-life-cache-v2381_FIX_WEBRTC_AUDIO_PHONE_FREEZE';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
