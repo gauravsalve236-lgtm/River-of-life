@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v2386_FIX_IPHONE_MIC_AUDIOSESSION_PRE_AUTH';
+const CACHE_NAME = 'river-of-life-cache-v2387_FIX_IOS_SAFARI_TOPLEVEL_CALL';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

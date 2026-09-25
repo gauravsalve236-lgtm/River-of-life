@@ -12598,7 +12598,7 @@ function getCanonicalRoomKey(meeting) {
 }
 window.getCanonicalRoomKey = getCanonicalRoomKey;
 
-// Trigger Join Meeting Flow — 100% In-App (No redirects, no browser modals)
+// Trigger Join Meeting Flow — 100% In-App on Desktop/Android, Direct Safari on iOS
 async function triggerJoinMeetingFlow(meetingIdentifier) {
   try {
     unlockAudioContextForMeeting();
@@ -12621,6 +12621,18 @@ async function triggerJoinMeetingFlow(meetingIdentifier) {
       }
     }
     _pendingMeetingToJoin = m;
+
+    // Detect iOS (iPhone/iPad): Apple WebKit security sandboxes block cross-origin iframes
+    // from acquiring microphone capture and switching AVAudioSession to PlayAndRecord.
+    // Navigating directly top-level gives native WebRTC permissions, enabling mic & video without errors.
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (isIOS) {
+      const roomUrl = getMiroTalkRoomUrl(m);
+      if (typeof showToast === "function") showToast("Opening Sanctuary Call in Safari... 🎙️");
+      window.location.href = roomUrl;
+      return;
+    }
+
     if (typeof showToast === "function") showToast("Joining Live Sanctuary 🙏");
     await launchLiveMeetingRoom(m, null);
   } catch (err) {
@@ -12677,14 +12689,7 @@ function openMeetingInSafariDirectly() {
     : (RiverMeet.meeting || { id: 1 });
   const roomUrl = getMiroTalkRoomUrl(m);
   if (typeof showToast === "function") showToast("Opening Sanctuary call in Safari... 🎙️");
-  
-  const a = document.createElement("a");
-  a.href = roomUrl;
-  a.target = "_blank";
-  a.rel = "noopener noreferrer";
-  document.body.appendChild(a);
-  a.click();
-  setTimeout(() => { a.remove(); }, 500);
+  window.location.href = roomUrl;
 }
 window.openMeetingInSafariDirectly = openMeetingInSafariDirectly;
 
@@ -13136,8 +13141,18 @@ async function launchLiveMeetingRoom(meeting, stream) {
     // Set Sanctuary Engine Indicator
     updateMiroTalkIndicatorUI();
 
-    // Toggle iOS specific Safari direct access helper
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const roomUrl = getMiroTalkRoomUrl(meeting);
+
+    // Apple WebKit security sandboxes block cross-origin iframes from capturing microphone audio
+    // and setting AVAudioSession to PlayAndRecord. On iOS devices, open directly as top-level window.
+    if (isIOS) {
+      if (typeof showToast === "function") showToast("Opening Sanctuary call in Safari... 🎙️");
+      window.location.href = roomUrl;
+      return;
+    }
+
+    // Toggle iOS specific Safari direct access helper
     const iosHelper = document.getElementById("river-ios-mic-helper");
     if (iosHelper) {
       iosHelper.style.display = isIOS ? "flex" : "none";
@@ -13172,19 +13187,6 @@ async function launchLiveMeetingRoom(meeting, stream) {
         }
       });
     } catch(e) {}
-
-    // On iOS, pre-prime microphone access in the top window to transition system AVAudioSession to PlayAndRecord
-    if (isIOS && navigator.mediaDevices && typeof navigator.mediaDevices.getUserMedia === "function") {
-      try {
-        const primeStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        primeStream.getTracks().forEach(t => t.stop());
-        console.log("[RiverMeet] iOS top-window audio capture primed successfully");
-      } catch (iosPrimeErr) {
-        console.warn("[RiverMeet] iOS mic priming notice:", iosPrimeErr.message);
-      }
-    }
-
-    const roomUrl = getMiroTalkRoomUrl(meeting);
 
     const mirotalkCont = document.getElementById("meeting-mirotalk-container");
     if (mirotalkCont) {
