@@ -12552,9 +12552,54 @@ async function triggerJoinMeetingFlow(meetingIdentifier) {
 window.triggerJoinMeetingFlow = triggerJoinMeetingFlow;
 
 /* ═══════════════════════════════════════════════════════════════
-   RIVER OF LIFE 100% NATIVE LIVEKIT CLOUD SFU VIDEO ENGINE
-   Crystal-Clear HD • Low Battery/Zero Lag • Reliable Phone Mic Audio
+   RIVER OF LIFE MULTI-PARTY VIDEO MEETING ENGINE
+   MiroTalk SFU (50+ Users) & MiroTalk P2P with LiveKit Fallback
    ═══════════════════════════════════════════════════════════════ */
+
+let _currentMiroTalkEngine = localStorage.getItem("rol_mirotalk_engine") || "sfu"; // "sfu" (50+ users) or "p2p"
+
+function getMiroTalkRoomUrl(meeting) {
+  const loggedIn = (typeof state !== "undefined" && state && state.currentUser && state.currentUser.username) ? state.currentUser.username : "Member";
+  const meetingIdSlug = (meeting && meeting.id) ? meeting.id.toString().replace(/[^a-zA-Z0-9]/g, '_') : 'Sanctuary_LiveRoom';
+  const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
+
+  if (_currentMiroTalkEngine === "p2p") {
+    return `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&speaker=true&autojoin=true&p2p=true&codec=opus&layout=grid&grid=1&name=${encodeURIComponent(loggedIn)}&buttons=mic,cam,share,hand,chat,participants,leave&theme=dark`;
+  } else {
+    // MiroTalk SFU (Mediasoup backend - supports 50+ to 100+ participants)
+    return `https://sfu.mirotalk.com/join/${roomSlug}?name=${encodeURIComponent(loggedIn)}&audio=true&video=true&screen=true&chat=true&notify=true`;
+  }
+}
+window.getMiroTalkRoomUrl = getMiroTalkRoomUrl;
+
+function toggleMiroTalkMode() {
+  _currentMiroTalkEngine = (_currentMiroTalkEngine === "sfu") ? "p2p" : "sfu";
+  localStorage.setItem("rol_mirotalk_engine", _currentMiroTalkEngine);
+  updateMiroTalkIndicatorUI();
+  if (activeMeetingSession && activeMeetingSession.meeting) {
+    launchLiveMeetingRoom(activeMeetingSession.meeting, null);
+  }
+  if (typeof showToast === "function") {
+    showToast(_currentMiroTalkEngine === "sfu" ? "Switched to MiroTalk SFU (50+ Users) ⚡" : "Switched to MiroTalk P2P ⚡");
+  }
+}
+window.toggleMiroTalkMode = toggleMiroTalkMode;
+
+function updateMiroTalkIndicatorUI() {
+  const ind = document.getElementById("river-engine-indicator");
+  if (ind) {
+    ind.textContent = (_currentMiroTalkEngine === "sfu") ? "⚡ MiroTalk SFU (50+ Users) ▾" : "⚡ MiroTalk P2P ▾";
+  }
+}
+window.updateMiroTalkIndicatorUI = updateMiroTalkIndicatorUI;
+
+function openMeetingInSafariDirectly() {
+  const m = (activeMeetingSession && activeMeetingSession.meeting) ? activeMeetingSession.meeting : { id: 1 };
+  const roomUrl = getMiroTalkRoomUrl(m);
+  if (typeof showToast === "function") showToast("Opening in Browser / Safari... 🎙️");
+  window.open(roomUrl, "_blank");
+}
+window.openMeetingInSafariDirectly = openMeetingInSafariDirectly;
 
 const LIVEKIT_CONFIG = {
   url: "wss://riveroflife-7zls9lqu.livekit.cloud",
@@ -13007,30 +13052,35 @@ async function launchLiveMeetingRoom(meeting, stream) {
       hostBar.style.display = isHost ? "block" : "none";
     }
 
-    // Update Floating Bottom Controls UI
-    updateMicControlUI(RiverMeet.isMuted);
-    updateCamControlUI(RiverMeet.isCamOff);
+    // Set Sanctuary Engine Indicator
+    updateMiroTalkIndicatorUI();
 
-    // Prefer LiveKit Cloud SFU Engine
-    if (typeof LivekitClient !== "undefined" && LIVEKIT_CONFIG && LIVEKIT_CONFIG.url) {
-      await initLiveKitRoom(meeting, roomKey, loggedIn, isHost);
-    } else {
-      // Fallback: Local stream + PeerJS
-      let localStream = stream;
-      if (!localStream) {
-        localStream = await acquireRiverUserMedia(RiverMeet.facingMode);
-      }
-      RiverMeet.localStream = localStream;
-      RiverMeet.isCamOff = (localStream.getVideoTracks().length === 0);
-      const localAudioTracks = localStream.getAudioTracks();
-      const hasLiveAudio = localAudioTracks.length > 0 && localAudioTracks.some(t => t.readyState === 'live' && !t.label.includes('Oscillator'));
-      RiverMeet.isMuted = !hasLiveAudio;
-      localAudioTracks.forEach(t => { t.enabled = !RiverMeet.isMuted; });
-      startLocalMicActivityMonitor(localStream);
-      updateMicControlUI(RiverMeet.isMuted);
-      updateCamControlUI(RiverMeet.isCamOff);
-      renderLocalVideoTile(loggedIn, isHost);
-      initPeerConnection(roomKey, loggedIn, true);
+    // Hide custom bottom floating buttons so MiroTalk's full native buttons are interactive
+    const bottomControls = document.querySelector(".river-meeting-controls-wrapper");
+    if (bottomControls) bottomControls.style.display = "none";
+
+    const videoGrid = document.getElementById("river-video-grid");
+    if (videoGrid) videoGrid.style.display = "none";
+
+    const roomUrl = getMiroTalkRoomUrl(meeting);
+
+    const mirotalkCont = document.getElementById("meeting-mirotalk-container");
+    if (mirotalkCont) {
+      mirotalkCont.style.display = "block";
+      mirotalkCont.innerHTML = `
+        <iframe 
+          id="webrtc-room-iframe"
+          src="${roomUrl}" 
+          width="100%" 
+          height="100%" 
+          allow="camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; clipboard-write *; accelerometer; gyroscope;" 
+          allowusermedia="true"
+          playsinline="true"
+          webkit-playsinline="true"
+          allowfullscreen="true"
+          style="border: none; width: 100%; height: 100%; background: #090d16;">
+        </iframe>
+      `;
     }
 
     if (typeof showToast === "function") {
@@ -14365,6 +14415,11 @@ window.exitLiveMeetingRoom = exitLiveMeetingRoom;
 
 // Cleanup Meeting Resources
 function cleanupRiverMeeting() {
+  const mirotalkCont = document.getElementById("meeting-mirotalk-container");
+  if (mirotalkCont) {
+    mirotalkCont.innerHTML = "";
+  }
+
   if (RiverMeet.livekitRoom) {
     try {
       RiverMeet.livekitRoom.disconnect();

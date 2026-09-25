@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v2383_LIVEKIT_SFU_INTEGRATION';
+const CACHE_NAME = 'river-of-life-cache-v2384_MIROTALK_SFU_INTEGRATION';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

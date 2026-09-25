@@ -17961,3 +17961,23 @@ body:has(#view-reader.active) .mobile-bottom-tabs {
   -webkit-transform: scaleX(-1) translateZ(0) !important;
 }
 
+/* MIROTALK FULLSCREEN EMBED CONTAINER */
+#meeting-mirotalk-container {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  overflow: hidden;
+  background: #090d16;
+}
+
+#meeting-mirotalk-container iframe {
+  width: 100% !important;
+  height: 100% !important;
+  border: none !important;
+  display: block !important;
+  background: #090d16 !important;
+}
+
+
