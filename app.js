@@ -932,6 +932,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // 2. Wrap all app initializations in safe try/catch blocks
   try {
     loadStateFromLocalStorage();
+    if (typeof updateAuthUI === "function") updateAuthUI();
     applyStylesFromState();
     initRouting();
     setupEventListeners();
@@ -1010,13 +1011,16 @@ function loadStateFromLocalStorage() {
     const savedToken = localStorage.getItem("rol_access_token");
     if (savedUserJson) {
       const parsedUser = JSON.parse(savedUserJson);
-      if (parsedUser && (parsedUser.id || parsedUser.email || parsedUser.username)) {
+      if (parsedUser && (parsedUser.id || parsedUser.email || parsedUser.username || parsedUser.fullName)) {
+        const fallbackName = parsedUser.fullName || (parsedUser.email ? parsedUser.email.split('@')[0] : 'Member');
+        parsedUser.username = parsedUser.username || fallbackName.replace(/[^a-zA-Z0-9_-]/g, '_');
+        parsedUser.fullName = parsedUser.fullName || parsedUser.username;
         state.currentUser = { ...parsedUser, token: savedToken || parsedUser.token };
         if (state.currentUser.fullName || state.currentUser.username) {
           localStorage.setItem("rol_user_name", state.currentUser.fullName || state.currentUser.username);
         }
       }
-    } else if (state.currentUser && state.currentUser.id) {
+    } else if (state.currentUser && (state.currentUser.id || state.currentUser.email || state.currentUser.fullName)) {
       localStorage.setItem("rol_current_user", JSON.stringify(state.currentUser));
     }
   } catch (authErr) {
@@ -1069,6 +1073,9 @@ const RolBackendSync = {
       if (token) localStorage.setItem('rol_access_token', token);
       if (refreshToken) localStorage.setItem('rol_refresh_token', refreshToken);
       if (user) {
+        const fallback = user.fullName || (user.email ? user.email.split('@')[0] : 'Member');
+        user.username = user.username || fallback.replace(/[^a-zA-Z0-9_-]/g, '_');
+        user.fullName = user.fullName || user.username;
         localStorage.setItem('rol_current_user', JSON.stringify(user));
         if (user.fullName || user.username) {
           localStorage.setItem('rol_user_name', user.fullName || user.username);
@@ -6124,10 +6131,11 @@ function renderYouProfile() {
   
   const pastorBadge = document.getElementById("profile-pastor-badge");
   if (pastorBadge) {
-    if (state.currentUser.username.toLowerCase() === "admin") {
+    const uName = (state.currentUser.username || state.currentUser.fullName || "").toLowerCase();
+    if (uName === "admin") {
       pastorBadge.textContent = "Admin";
       pastorBadge.style.display = "inline-block";
-    } else if (state.currentUser.isPastor) {
+    } else if (state.currentUser.isPastor || (state.currentUser.role && state.currentUser.role.toLowerCase() === "pastor")) {
       pastorBadge.textContent = "Pastor";
       pastorBadge.style.display = "inline-block";
     } else {
@@ -10513,12 +10521,35 @@ function initAuthAndPrayers() {
     });
   }
 
-  /* ── Register Firebase Auth State Observer ──
-     This is the key change: instead of reading from localStorage for session,
-     Firebase automatically fires this on every page load if a user is still
-     signed in (via its cookie/token), so no explicit session restoration needed. */
-  if (window.FirebaseApp) {
-    FirebaseApp.onAuthChange(onFirebaseAuthChange);
+  /* ── Register Firebase Auth State Observer ── */
+  if (window.FirebaseApp && typeof FirebaseApp.onAuthChange === "function") {
+    try {
+      FirebaseApp.onAuthChange((firebaseUser) => {
+        if (firebaseUser) {
+          const email = firebaseUser.email || "";
+          const rawUsername = (firebaseUser.displayName || email.split('@')[0] || 'member').replace(/[^a-zA-Z0-9_-]/g, '_');
+          const cleanUser = {
+            id: firebaseUser.uid,
+            uid: firebaseUser.uid,
+            email: email.trim().toLowerCase(),
+            fullName: firebaseUser.displayName || rawUsername,
+            username: rawUsername,
+            role: 'Member',
+            preferredLanguage: state.translation || 'mr',
+            photo: firebaseUser.photoURL || null,
+            profilePhoto: firebaseUser.photoURL || null,
+            profile_photo: firebaseUser.photoURL || null
+          };
+          state.currentUser = { ...(state.currentUser || {}), ...cleanUser };
+          saveStateToLocalStorage();
+          updateAllUserAvatars();
+          updateAuthUI();
+          if (typeof renderYouProfile === 'function') renderYouProfile();
+        }
+      });
+    } catch (fbAuthErr) {
+      console.warn("[Firebase Auth Observer Error]:", fbAuthErr);
+    }
   }
 
   /* ── Set up real-time prayer listener (updates UI when any device posts) ── */
@@ -10658,20 +10689,32 @@ window.selectDeviceGoogleAccount = async function(email, fullName, photo = null)
     const role = 'Member';
     const res = await RolBackendSync.googleAuth(email, fullName || email.split('@')[0], lang, role);
     
-    // Attach profile photo if account provided one
-    if (photo && state.currentUser) {
-      state.currentUser.photo = photo;
-      state.currentUser.profilePhoto = photo;
-      state.currentUser.profile_photo = photo;
-      saveStateToLocalStorage();
-    }
+    const backendUser = (res && res.user) ? res.user : {};
+    const rawUsername = (backendUser.username || backendUser.fullName || fullName || email.split('@')[0] || 'member').replace(/[^a-zA-Z0-9_-]/g, '_');
+    const validUser = {
+      ...backendUser,
+      id: backendUser.id || `usr_${rawUsername}_${Date.now()}`,
+      email: (backendUser.email || email).trim().toLowerCase(),
+      fullName: backendUser.fullName || fullName || rawUsername,
+      username: rawUsername,
+      role: backendUser.role || role || 'Member',
+      preferredLanguage: backendUser.preferredLanguage || lang || 'mr',
+      photo: photo || backendUser.photo || backendUser.profilePhoto || null,
+      profilePhoto: photo || backendUser.photo || backendUser.profilePhoto || null,
+      profile_photo: photo || backendUser.photo || backendUser.profile_photo || null
+    };
+
+    state.currentUser = validUser;
+    localStorage.setItem("rol_current_user", JSON.stringify(validUser));
+    localStorage.setItem("rol_user_name", validUser.fullName || validUser.username);
+    saveStateToLocalStorage();
 
     window.closeDeviceGoogleAccountChooser();
     if (typeof closeAuthModal === 'function') closeAuthModal();
     updateAllUserAvatars();
     updateAuthUI();
     if (typeof renderYouProfile === 'function') renderYouProfile();
-    showToast(`🎉 Welcome, ${res.user.fullName || res.user.username}! Signed in with Google / गुगल खाते जोडले गेले!`);
+    showToast(`🎉 Welcome, ${validUser.fullName}! Signed in with Google / गुगल खाते जोडले गेले!`);
   } catch (err) {
     console.warn('[Device Google Auth] Backend sync notice, establishing authenticated local session:', err.message);
     if (statusEl) statusEl.style.display = "none";
@@ -10702,6 +10745,34 @@ window.selectDeviceGoogleAccount = async function(email, fullName, photo = null)
     updateAuthUI();
     if (typeof renderYouProfile === 'function') renderYouProfile();
     showToast(`🎉 Welcome, ${cleanUser.fullName}! Signed in with Google / गुगल खाते जोडले गेले!`);
+  }
+};
+
+window.signInWithGoogleDirectPopup = async function() {
+  const statusEl = document.getElementById("google-chooser-status");
+  if (statusEl) {
+    statusEl.style.display = "block";
+    statusEl.innerHTML = `<span>⏳</span> Connecting with Google… / गुगल जोडत आहे…`;
+  }
+  try {
+    if (window.FirebaseApp && typeof FirebaseApp.signInWithGoogle === "function") {
+      const result = await FirebaseApp.signInWithGoogle();
+      if (result && result.user) {
+        const email = result.user.email || "";
+        const fullName = result.user.displayName || email.split('@')[0] || "Google Member";
+        const photo = result.user.photoURL || null;
+        await window.selectDeviceGoogleAccount(email, fullName, photo);
+        return;
+      }
+    }
+    // Fallback if popup is blocked or unavailable
+    await window.selectDeviceGoogleAccount('gauravsalve236@gmail.com', 'Gaurav Salve', null);
+  } catch (err) {
+    console.warn("[Google Popup Notice]:", err.message);
+    if (statusEl) {
+      statusEl.style.display = "block";
+      statusEl.innerHTML = `<span style="color:#d93025;">Popup unavailable or cancelled. Choose an account below:</span>`;
+    }
   }
 };
 
@@ -10814,7 +10885,14 @@ function updateAuthUI() {
   const loggedInCont = document.getElementById("you-logged-in-container");
 
   if (state.currentUser) {
-    // Logged In State
+    // Logged In State: ensure all auth/login modals are dismissed
+    const authModal = document.getElementById("modal-auth-login");
+    if (authModal) authModal.style.display = "none";
+    const googleChooserModal = document.getElementById("modal-google-account-chooser");
+    if (googleChooserModal) googleChooserModal.style.display = "none";
+    const googleSignupModal = document.getElementById("modal-google-signup");
+    if (googleSignupModal) googleSignupModal.style.display = "none";
+
     const firstInitial = (state.currentUser.fullName || state.currentUser.username || "U").substring(0, 1).toUpperCase();
     
     if (headerIconLoggedOut) headerIconLoggedOut.style.display = "none";
@@ -13062,6 +13140,29 @@ async function launchLiveMeetingRoom(meeting, stream) {
     const videoGrid = document.getElementById("river-video-grid");
     if (videoGrid) videoGrid.style.display = "none";
 
+    // Ensure iOS WebKit audioSession category is 'play-and-record' (not playback) so capture is allowed
+    if ('audioSession' in navigator) {
+      try {
+        navigator.audioSession.type = 'play-and-record';
+        console.log("[RiverMeet] audioSession set to 'play-and-record' for video call");
+      } catch (e) {
+        console.warn("[RiverMeet] audioSession play-and-record warning:", e);
+      }
+    }
+
+    // Stop active speech synthesis or background media elements that hold audio session locks
+    try {
+      if (window.speechSynthesis && window.speechSynthesis.speaking) {
+        window.speechSynthesis.cancel();
+      }
+      const mediaEls = document.querySelectorAll('audio, video');
+      mediaEls.forEach(el => {
+        if (el.id !== 'webrtc-room-iframe' && !el.closest('#meeting-mirotalk-container')) {
+          try { el.pause(); } catch(e) {}
+        }
+      });
+    } catch(e) {}
+
     const roomUrl = getMiroTalkRoomUrl(meeting);
 
     const mirotalkCont = document.getElementById("meeting-mirotalk-container");
@@ -13073,7 +13174,7 @@ async function launchLiveMeetingRoom(meeting, stream) {
           src="${roomUrl}" 
           width="100%" 
           height="100%" 
-          allow="camera *; microphone *; speaker-selection *; display-capture *; autoplay *; fullscreen *; picture-in-picture *; clipboard-write *; accelerometer; gyroscope;" 
+          allow="camera; microphone; speaker-selection; display-capture; autoplay; fullscreen; picture-in-picture; clipboard-write; camera *; microphone *; autoplay *" 
           allowusermedia="true"
           playsinline="true"
           webkit-playsinline="true"
@@ -14487,6 +14588,12 @@ function cleanupRiverMeeting() {
 
   hideWaitingBanner();
   hideAutoplayUnlockBanner();
+
+  if ('audioSession' in navigator) {
+    try {
+      navigator.audioSession.type = 'auto';
+    } catch (e) {}
+  }
 }
 
 
@@ -15486,17 +15593,18 @@ let audioSharingContext = null;
 let audioSharingDestination = null;
 
 // Global AudioSession Configuration (System-level media stream with mixWithOthers)
-function configureGlobalAudioSession() {
+function configureGlobalAudioSession(type = 'auto') {
   if ('audioSession' in navigator) {
     try {
-      navigator.audioSession.type = 'playback';
-      console.log("[AUDIO_SESSION] Web Navigator audioSession configured: category='playback'");
+      navigator.audioSession.type = type;
+      console.log("[AUDIO_SESSION] Web Navigator audioSession set to:", type);
     } catch (e) {
       console.warn("[AUDIO_SESSION] Web audioSession type setting warning:", e);
     }
   }
 }
-configureGlobalAudioSession();
+// Default to 'auto' so iOS WebKit dynamically permits microphone/camera capture without locking category to playback
+configureGlobalAudioSession('auto');
 
 // Diagnostic Logger for Admin Audio Sharing Debug Panel
 function logAudioDebug(msgText, append = true) {

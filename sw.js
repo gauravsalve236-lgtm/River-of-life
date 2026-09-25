@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v2384_MIROTALK_SFU_INTEGRATION';
+const CACHE_NAME = 'river-of-life-cache-v2385_FIX_IPHONE_AUDIOSESSION_GOOGLE_AUTH_PERSISTENCE';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
