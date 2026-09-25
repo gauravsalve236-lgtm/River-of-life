@@ -12672,10 +12672,19 @@ function updateMiroTalkIndicatorUI() {
 window.updateMiroTalkIndicatorUI = updateMiroTalkIndicatorUI;
 
 function openMeetingInSafariDirectly() {
-  const m = (activeMeetingSession && activeMeetingSession.meeting) ? activeMeetingSession.meeting : { id: 1 };
+  const m = (activeMeetingSession && (activeMeetingSession.meeting || activeMeetingSession.meetingId)) 
+    ? (activeMeetingSession.meeting || { id: activeMeetingSession.meetingId }) 
+    : (RiverMeet.meeting || { id: 1 });
   const roomUrl = getMiroTalkRoomUrl(m);
-  if (typeof showToast === "function") showToast("Opening in Browser / Safari... 🎙️");
-  window.open(roomUrl, "_blank");
+  if (typeof showToast === "function") showToast("Opening Sanctuary call in Safari... 🎙️");
+  
+  const a = document.createElement("a");
+  a.href = roomUrl;
+  a.target = "_blank";
+  a.rel = "noopener noreferrer";
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { a.remove(); }, 500);
 }
 window.openMeetingInSafariDirectly = openMeetingInSafariDirectly;
 
@@ -12757,29 +12766,22 @@ var RiverMeet = {
   connectedPeerList: []
 };
 
-// Synchronously unlock and activate Web Audio Session & HTML5 Media playback (critical for iOS Safari two-way VOIP mic & speaker)
+// Synchronously configure audio session for meeting (allows two-way mic & speaker capture)
 function unlockAudioContextForMeeting() {
   try {
-    // Prime HTMLMediaElement autoplay permission
-    const primeAudio = new Audio();
-    primeAudio.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
-    primeAudio.play().catch(() => {});
-
-    const AudioCtx = window.AudioContext || window.webkitAudioContext;
-    if (AudioCtx) {
-      if (!window.webrtcAudioCtx || window.webrtcAudioCtx.state === 'closed') {
-        window.webrtcAudioCtx = new AudioCtx();
-      }
-      if (window.webrtcAudioCtx.state === 'suspended') {
-        window.webrtcAudioCtx.resume();
-      }
-      // Prime iOS audio hardware using native sampleRate (prevents sample rate mismatch)
-      const sampleRate = window.webrtcAudioCtx.sampleRate || 48000;
-      const buffer = window.webrtcAudioCtx.createBuffer(1, 1, sampleRate);
-      const source = window.webrtcAudioCtx.createBufferSource();
-      source.buffer = buffer;
-      source.connect(window.webrtcAudioCtx.destination);
-      source.start(0);
+    if ('audioSession' in navigator) {
+      try {
+        navigator.audioSession.type = 'play-and-record';
+        console.log("[RiverMeet] audioSession set to 'play-and-record'");
+      } catch (e) {}
+    }
+    // Release and close any output-only audio contexts so iOS WebKit doesn't lock to playback
+    if (window.webrtcAudioCtx && window.webrtcAudioCtx.state !== 'closed') {
+      try { window.webrtcAudioCtx.close(); } catch(e) {}
+      window.webrtcAudioCtx = null;
+    }
+    if (window.ambientAudioCtx && window.ambientAudioCtx.state !== 'closed') {
+      try { window.ambientAudioCtx.suspend(); } catch(e) {}
     }
   } catch (e) {
     console.warn("[RiverMeet] AudioContext unlock notice:", e);
@@ -13105,6 +13107,7 @@ async function launchLiveMeetingRoom(meeting, stream) {
     RiverMeet.connectedPeerList = [];
 
     activeMeetingSession = {
+      meeting: meeting,
       meetingId: meetingId,
       roomKey: roomKey,
       userName: loggedIn,
@@ -13132,6 +13135,13 @@ async function launchLiveMeetingRoom(meeting, stream) {
 
     // Set Sanctuary Engine Indicator
     updateMiroTalkIndicatorUI();
+
+    // Toggle iOS specific Safari direct access helper
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const iosHelper = document.getElementById("river-ios-mic-helper");
+    if (iosHelper) {
+      iosHelper.style.display = isIOS ? "flex" : "none";
+    }
 
     // Hide custom bottom floating buttons so MiroTalk's full native buttons are interactive
     const bottomControls = document.querySelector(".river-meeting-controls-wrapper");
@@ -13162,6 +13172,17 @@ async function launchLiveMeetingRoom(meeting, stream) {
         }
       });
     } catch(e) {}
+
+    // On iOS, pre-prime microphone access in the top window to transition system AVAudioSession to PlayAndRecord
+    if (isIOS && navigator.mediaDevices && typeof navigator.mediaDevices.getUserMedia === "function") {
+      try {
+        const primeStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        primeStream.getTracks().forEach(t => t.stop());
+        console.log("[RiverMeet] iOS top-window audio capture primed successfully");
+      } catch (iosPrimeErr) {
+        console.warn("[RiverMeet] iOS mic priming notice:", iosPrimeErr.message);
+      }
+    }
 
     const roomUrl = getMiroTalkRoomUrl(meeting);
 

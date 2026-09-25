@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v2385_FIX_IPHONE_AUDIOSESSION_GOOGLE_AUTH_PERSISTENCE';
+const CACHE_NAME = 'river-of-life-cache-v2386_FIX_IPHONE_MIC_AUDIOSESSION_PRE_AUTH';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
