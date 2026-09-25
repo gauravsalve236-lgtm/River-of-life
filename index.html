@@ -12,7 +12,7 @@
   <script>
     // Force immediate hard purge of all stale Service Workers and CacheStorage
     (function() {
-      const CURRENT_VER = "v2377_CROSS_DEVICE_MEETINGS_SYNC";
+      const CURRENT_VER = "v2379_FIX_IPHONE_MIC_AUDIO";
       if (localStorage.getItem("rol_app_ver") !== CURRENT_VER) {
         localStorage.setItem("rol_app_ver", CURRENT_VER);
         if ('serviceWorker' in navigator) {
@@ -5226,6 +5226,11 @@
             <button onclick="dismissMeetingBanner()" class="river-banner-dismiss">&times;</button>
           </div>
 
+          <!-- Mobile & iOS Audio Autoplay Unlock Floating Pill -->
+          <div id="river-audio-unlock-banner" onclick="unlockAllMeetingAudio()" style="display: none; position: absolute; top: 68px; left: 50%; transform: translateX(-50%); z-index: 1200; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; padding: 9px 18px; border-radius: 30px; font-size: 13px; font-weight: 800; box-shadow: 0 8px 24px rgba(0,0,0,0.5); cursor: pointer; align-items: center; gap: 8px; border: 1.5px solid rgba(255,255,255,0.3);">
+            <span>🔊 Tap to hear voice / आवाज ऐकण्यासाठी टॅप करा 🔊</span>
+          </div>
+
           <!-- Quick Reaction Floating Popover -->
           <div id="river-reaction-picker" class="river-reaction-picker" style="display: none;">
             <button onclick="sendMeetingReaction('🙏')" class="river-reaction-btn" title="Amen">🙏</button>
@@ -6292,7 +6297,7 @@
   <script src="sarvam-tts.js?v=132_MARVBSI_FULL_CHURCH_BIBLE"></script>
   <script src="bible-study.js?v=138_MUSEUM_STUDY_HUB"></script>
   <script src="peerjs.min.js"></script>
-  <script src="app.js?v=2378_LIVE_CLOUD_SYNC"></script>
+  <script src="app.js?v=2379_FIX_IPHONE_MIC_AUDIO"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 4.5s no matter what

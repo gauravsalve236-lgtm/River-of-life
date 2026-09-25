@@ -12485,6 +12485,7 @@ window.getJitsiServerDomain = getJitsiServerDomain;
 // Trigger Join Meeting Flow — 100% In-App (No redirects, no browser modals)
 async function triggerJoinMeetingFlow(meetingId) {
   try {
+    unlockAudioContextForMeeting();
     const meetings = (typeof getMeetingsFromStorage === "function") ? getMeetingsFromStorage() : [];
     const m = meetings.find(x => x.id === meetingId) || { id: meetingId, title: "Live Fellowship", host: "Pastor" };
     _pendingMeetingToJoin = m;
@@ -12506,6 +12507,7 @@ var RiverMeet = {
   localStream: null,
   peer: null,
   peerConnections: new Map(), // peerId -> { call, conn, name, isHost, isMuted, isCamOff }
+  audioSources: new Map(),    // peerId -> { source, gainNode }
   facingMode: "user",
   isMuted: false,
   isCamOff: false,
@@ -12514,8 +12516,53 @@ var RiverMeet = {
   roomKey: "",
   myPeerId: "",
   retryTimer: null,
+  micMonitorAnim: null,
+  micSourceNode: null,
   connectedPeerList: []
 };
+
+// Synchronously unlock and activate Web Audio Session (critical for iOS Safari two-way VOIP mic & speaker)
+function unlockAudioContextForMeeting() {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (AudioCtx) {
+      if (!window.webrtcAudioCtx || window.webrtcAudioCtx.state === 'closed') {
+        window.webrtcAudioCtx = new AudioCtx();
+      }
+      if (window.webrtcAudioCtx.state === 'suspended') {
+        window.webrtcAudioCtx.resume();
+      }
+      // Prime iOS audio hardware with 1-sample silent buffer to switch AudioSession to PlayAndRecord
+      const buffer = window.webrtcAudioCtx.createBuffer(1, 1, 22050);
+      const source = window.webrtcAudioCtx.createBufferSource();
+      source.buffer = buffer;
+      source.connect(window.webrtcAudioCtx.destination);
+      source.start(0);
+    }
+  } catch (e) {
+    console.warn("[RiverMeet] AudioContext unlock notice:", e);
+  }
+}
+window.unlockAudioContextForMeeting = unlockAudioContextForMeeting;
+
+// Fail-safe silent dummy audio track so WebRTC SDP always contains m=audio transceiver
+function createDummyAudioTrack() {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (AudioCtx) {
+      const audioCtx = new AudioCtx();
+      const dest = audioCtx.createMediaStreamDestination();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      gain.gain.value = 0; // completely silent
+      osc.connect(gain);
+      gain.connect(dest);
+      osc.start();
+      return dest.stream.getAudioTracks()[0] || null;
+    }
+  } catch(e) {}
+  return null;
+}
 
 // Fail-safe silent & black stream so WebRTC never aborts if user grants no media
 function createDummyMediaStream() {
@@ -12529,33 +12576,157 @@ function createDummyMediaStream() {
   }
   const stream = (typeof canvas.captureStream === "function") ? canvas.captureStream(5) : new MediaStream();
   
-  try {
-    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-    if (AudioContextClass) {
-      const audioCtx = new AudioContextClass();
-      const dest = audioCtx.createMediaStreamDestination();
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      gain.gain.value = 0; // completely silent
-      osc.connect(gain);
-      gain.connect(dest);
-      osc.start();
-      const dummyAudioTrack = dest.stream.getAudioTracks()[0];
-      if (dummyAudioTrack) stream.addTrack(dummyAudioTrack);
-    }
-  } catch(e) {}
+  const dummyTrack = createDummyAudioTrack();
+  if (dummyTrack) stream.addTrack(dummyTrack);
 
   return stream;
 }
 
-// Progressive Multi-Tier Media Acquisition (Guarantees working video & audio on all devices)
+// Route remote audio to device speaker via Web Audio API (ensures loud speakerphone output on iOS & phones)
+function routeRemoteAudioToSpeaker(peerId, stream) {
+  try {
+    if (!stream) return;
+    const audioTracks = stream.getAudioTracks();
+    if (audioTracks.length === 0) return;
+
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+
+    if (!window.webrtcAudioCtx || window.webrtcAudioCtx.state === 'closed') {
+      window.webrtcAudioCtx = new AudioCtx();
+    }
+    if (window.webrtcAudioCtx.state === 'suspended') {
+      window.webrtcAudioCtx.resume();
+    }
+
+    if (!RiverMeet.audioSources) RiverMeet.audioSources = new Map();
+
+    // Prevent duplicate source nodes for same peer
+    if (!RiverMeet.audioSources.has(peerId)) {
+      const audioStreamOnly = new MediaStream(audioTracks);
+      const source = window.webrtcAudioCtx.createMediaStreamSource(audioStreamOnly);
+      const gainNode = window.webrtcAudioCtx.createGain();
+      gainNode.gain.value = 1.0;
+      source.connect(gainNode);
+      gainNode.connect(window.webrtcAudioCtx.destination);
+      RiverMeet.audioSources.set(peerId, { source, gainNode });
+      console.log("[RiverMeet] Web Audio loudspeaker pipeline connected for peer:", peerId);
+    }
+  } catch(e) {
+    console.warn("[RiverMeet] Web Audio routing notice:", e);
+  }
+}
+
+// Local Mic Activity Visualizer (animates mic icon and green pulse when speaking)
+function startLocalMicActivityMonitor(stream) {
+  try {
+    if (!stream) return;
+    const audioTracks = stream.getAudioTracks();
+    if (audioTracks.length === 0) return;
+
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+
+    if (!window.webrtcAudioCtx || window.webrtcAudioCtx.state === 'closed') {
+      window.webrtcAudioCtx = new AudioCtx();
+    }
+    if (window.webrtcAudioCtx.state === 'suspended') {
+      window.webrtcAudioCtx.resume();
+    }
+
+    const source = window.webrtcAudioCtx.createMediaStreamSource(new MediaStream(audioTracks));
+    const analyser = window.webrtcAudioCtx.createAnalyser();
+    analyser.fftSize = 64;
+    source.connect(analyser);
+
+    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+    function checkLevel() {
+      if (!RiverMeet.localStream) {
+        try { source.disconnect(); } catch(e) {}
+        return;
+      }
+      analyser.getByteFrequencyData(dataArray);
+      let sum = 0;
+      for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
+      const avg = sum / dataArray.length;
+
+      const micIcon = document.getElementById("river-local-tile-mic");
+      const localTile = document.getElementById("river-tile-local");
+      if (micIcon) {
+        if (RiverMeet.isMuted) {
+          micIcon.textContent = "🔇";
+          if (localTile) localTile.classList.remove("is-speaking");
+        } else if (avg > 14) {
+          micIcon.textContent = "🎙️✨";
+          if (localTile) localTile.classList.add("is-speaking");
+        } else {
+          micIcon.textContent = "🎙️";
+          if (localTile) localTile.classList.remove("is-speaking");
+        }
+      }
+
+      RiverMeet.micMonitorAnim = requestAnimationFrame(checkLevel);
+    }
+
+    if (RiverMeet.micMonitorAnim) cancelAnimationFrame(RiverMeet.micMonitorAnim);
+    RiverMeet.micMonitorAnim = requestAnimationFrame(checkLevel);
+    RiverMeet.micSourceNode = source;
+  } catch(e) {
+    console.warn("[RiverMeet] Mic activity monitor error:", e);
+  }
+}
+
+// Autoplay Unlock Banner for Mobile Browsers
+function showAutoplayUnlockBanner() {
+  const banner = document.getElementById("river-audio-unlock-banner");
+  if (banner) banner.style.display = "flex";
+
+  const onFirstTap = () => {
+    unlockAllMeetingAudio();
+    window.removeEventListener('click', onFirstTap, true);
+    window.removeEventListener('touchstart', onFirstTap, true);
+  };
+  window.addEventListener('click', onFirstTap, { once: true, capture: true });
+  window.addEventListener('touchstart', onFirstTap, { once: true, capture: true });
+}
+
+function hideAutoplayUnlockBanner() {
+  const banner = document.getElementById("river-audio-unlock-banner");
+  if (banner) banner.style.display = "none";
+}
+
+function unlockAllMeetingAudio() {
+  unlockAudioContextForMeeting();
+  document.querySelectorAll("[id^='river-audio-'], audio.remote-peer-audio").forEach(el => {
+    try {
+      el.muted = false;
+      el.volume = 1.0;
+      el.play().catch(() => {});
+    } catch(e) {}
+  });
+  hideAutoplayUnlockBanner();
+}
+window.unlockAllMeetingAudio = unlockAllMeetingAudio;
+
+// Progressive Multi-Tier Media Acquisition (Guarantees working video & audio on all devices, specially iPhone)
 async function acquireRiverUserMedia(preferredFacingMode = "user") {
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
     console.warn("[RiverMeet] navigator.mediaDevices.getUserMedia not supported in this environment");
     return createDummyMediaStream();
   }
 
-  // Tier 1: Flexible HD Video + High Fidelity Audio
+  // Pre-unlock AudioContext during user action
+  unlockAudioContextForMeeting();
+
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+  // iOS Safari rejects autoGainControl with OverconstrainedError/TypeError; non-iOS benefits from AGC
+  const safeAudioConstraints = isIOS 
+    ? { echoCancellation: true } 
+    : { echoCancellation: true, noiseSuppression: true, autoGainControl: true };
+
+  // Tier 1: Flexible HD Video + Safe Audio
   try {
     const stream = await navigator.mediaDevices.getUserMedia({
       video: {
@@ -12563,11 +12734,7 @@ async function acquireRiverUserMedia(preferredFacingMode = "user") {
         width: { ideal: 1280 },
         height: { ideal: 720 }
       },
-      audio: {
-        echoCancellation: true,
-        noiseSuppression: true,
-        autoGainControl: true
-      }
+      audio: safeAudioConstraints
     });
     console.log("[RiverMeet] Acquired Tier 1 HD video + audio");
     return stream;
@@ -12575,7 +12742,7 @@ async function acquireRiverUserMedia(preferredFacingMode = "user") {
     console.warn("[RiverMeet] Tier 1 HD media failed, trying unconstrained video+audio:", e1);
   }
 
-  // Tier 2: Unconstrained video + audio
+  // Tier 2: Facing mode video + standard audio: true
   try {
     const stream = await navigator.mediaDevices.getUserMedia({
       video: { facingMode: preferredFacingMode },
@@ -12593,31 +12760,46 @@ async function acquireRiverUserMedia(preferredFacingMode = "user") {
     console.log("[RiverMeet] Acquired Tier 3 basic video + audio");
     return stream;
   } catch (e3) {
-    console.warn("[RiverMeet] Tier 3 media failed, trying separate video & audio tracks:", e3);
+    console.warn("[RiverMeet] Tier 3 media failed, trying separate track acquisition:", e3);
   }
 
-  // Tier 4: Separate track acquisition (one might succeed even if other fails)
-  let vTrack = null;
+  // Tier 4: Separate track acquisition (Audio first, then Video)
   let aTrack = null;
-  try {
-    const vStream = await navigator.mediaDevices.getUserMedia({ video: true });
-    vTrack = vStream.getVideoTracks()[0];
-  } catch(e) {
-    console.warn("[RiverMeet] Video-only acquisition failed:", e);
-  }
+  let vTrack = null;
 
   try {
     const aStream = await navigator.mediaDevices.getUserMedia({ audio: true });
     aTrack = aStream.getAudioTracks()[0];
+    console.log("[RiverMeet] Acquired isolated audio track:", aTrack ? aTrack.label : "none");
   } catch(e) {
     console.warn("[RiverMeet] Audio-only acquisition failed:", e);
+  }
+
+  try {
+    const vStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: preferredFacingMode }
+    });
+    vTrack = vStream.getVideoTracks()[0];
+  } catch(e) {
+    try {
+      const vStream2 = await navigator.mediaDevices.getUserMedia({ video: true });
+      vTrack = vStream2.getVideoTracks()[0];
+    } catch(e2) {
+      console.warn("[RiverMeet] Video-only acquisition failed:", e2);
+    }
   }
 
   if (vTrack || aTrack) {
     const stream = new MediaStream();
     if (vTrack) stream.addTrack(vTrack);
-    if (aTrack) stream.addTrack(aTrack);
-    console.log("[RiverMeet] Acquired partial media:", { hasVideo: !!vTrack, hasAudio: !!aTrack });
+    if (aTrack) {
+      stream.addTrack(aTrack);
+    } else {
+      // Add silent dummy audio track so WebRTC SDP has an m=audio transceiver negotiated!
+      const dummyAudio = createDummyAudioTrack();
+      if (dummyAudio) stream.addTrack(dummyAudio);
+    }
+    console.log("[RiverMeet] Acquired composite media stream:", { hasVideo: !!vTrack, hasAudio: !!aTrack });
     return stream;
   }
 
@@ -12683,16 +12865,31 @@ async function launchLiveMeetingRoom(meeting, stream) {
 
     RiverMeet.localStream = localStream;
     RiverMeet.isCamOff = (localStream.getVideoTracks().length === 0);
-    RiverMeet.isMuted = (localStream.getAudioTracks().length === 0);
+
+    // Verify if genuine live audio track exists
+    const localAudioTracks = localStream.getAudioTracks();
+    const hasLiveAudio = localAudioTracks.length > 0 && localAudioTracks.some(t => t.readyState === 'live' && !t.label.includes('Oscillator'));
+    RiverMeet.isMuted = !hasLiveAudio;
+
+    // Enable/disable audio track based on mute state
+    localAudioTracks.forEach(t => {
+      t.enabled = !RiverMeet.isMuted;
+    });
+
+    // Start local mic voice activity monitor
+    startLocalMicActivityMonitor(localStream);
 
     // Update Floating Bottom Controls UI
     updateMicControlUI(RiverMeet.isMuted);
     updateCamControlUI(RiverMeet.isCamOff);
 
-    // Show listen-only banner if media was denied
-    if (RiverMeet.isCamOff && RiverMeet.isMuted) {
+    // Show listen-only banner if microphone was denied
+    if (RiverMeet.isMuted) {
       const banner = document.getElementById("river-meeting-banner");
       if (banner) banner.style.display = "flex";
+    } else {
+      const banner = document.getElementById("river-meeting-banner");
+      if (banner) banner.style.display = "none";
     }
 
     // Render Local Video Tile
@@ -13040,7 +13237,7 @@ function broadcastDataToPeers(payload) {
   }
 }
 
-// Attach Remote Video Tile in Responsive Grid
+// Attach Remote Video Tile & Audio in Responsive Grid
 function attachRemoteVideoTile(peerId, stream, displayName) {
   const grid = document.getElementById("river-video-grid");
   if (!grid) return;
@@ -13051,7 +13248,8 @@ function attachRemoteVideoTile(peerId, stream, displayName) {
     tile.id = 'river-tile-' + peerId;
     tile.className = "river-video-tile";
     tile.innerHTML = `
-      <video id="river-video-${peerId}" playsinline webkit-playsinline autoplay></video>
+      <video id="river-video-${peerId}" playsinline webkit-playsinline autoplay muted></video>
+      <audio id="river-audio-${peerId}" autoplay playsinline webkit-playsinline></audio>
       <div class="river-tile-avatar" id="river-avatar-${peerId}" style="display: none;">
         <div class="river-avatar-circle">${(displayName || 'M').charAt(0).toUpperCase()}</div>
         <span style="margin-top: 8px; font-size: 13px; color: #cbd5e1; font-weight: 700;">${displayName}</span>
@@ -13067,6 +13265,7 @@ function attachRemoteVideoTile(peerId, stream, displayName) {
   }
 
   const videoEl = document.getElementById('river-video-' + peerId);
+  const audioEl = document.getElementById('river-audio-' + peerId);
   const avatarEl = document.getElementById('river-avatar-' + peerId);
 
   function syncAvatarVisibility() {
@@ -13075,12 +13274,14 @@ function attachRemoteVideoTile(peerId, stream, displayName) {
     avatarEl.style.display = hasActiveVideo ? 'none' : 'flex';
   }
 
+  // Configure Remote Video (Muted to guarantee 100% instant autoplay on iOS & mobile)
   if (videoEl) {
+    videoEl.muted = true;
+    videoEl.defaultMuted = true;
     videoEl.setAttribute("playsinline", "");
     videoEl.setAttribute("webkit-playsinline", "");
     videoEl.autoplay = true;
 
-    // Prevent AbortError: only assign srcObject if it has actually changed
     if (videoEl.srcObject !== stream) {
       videoEl.srcObject = stream;
     }
@@ -13092,32 +13293,45 @@ function attachRemoteVideoTile(peerId, stream, displayName) {
         syncAvatarVisibility();
         const p = videoEl.play();
         if (p && typeof p.catch === "function") p.catch(() => {});
+        if (audioEl) {
+          const ap = audioEl.play();
+          if (ap && typeof ap.catch === "function") ap.catch(() => {});
+        }
       };
       stream.onremovetrack = () => {
         syncAvatarVisibility();
       };
     }
 
-    // Attempt unmuted play first; fall back to muted if blocked by autoplay policy
     const playPromise = videoEl.play();
     if (playPromise && typeof playPromise.catch === "function") {
-      playPromise.catch(err => {
-        console.warn("[RiverMeet] Remote video unmuted autoplay blocked, trying muted:", err);
-        videoEl.muted = true;
-        const retryMuted = videoEl.play();
-        if (retryMuted && typeof retryMuted.catch === "function") {
-          retryMuted.catch(e => console.warn("[RiverMeet] Remote video muted play error:", e));
-        }
+      playPromise.catch(e => console.warn("[RiverMeet] Remote video play notice:", e));
+    }
+  }
 
-        const unmuteOnTap = () => {
-          videoEl.muted = false;
-          window.removeEventListener('click', unmuteOnTap, true);
-          window.removeEventListener('touchstart', unmuteOnTap, true);
-        };
-        window.addEventListener('click', unmuteOnTap, { once: true, capture: true });
-        window.addEventListener('touchstart', unmuteOnTap, { once: true, capture: true });
+  // Configure Remote Audio (Dedicated unmuted audio element + Web Audio loudspeaker route)
+  if (audioEl && stream) {
+    audioEl.muted = false;
+    audioEl.defaultMuted = false;
+    audioEl.volume = 1.0;
+    audioEl.setAttribute("playsinline", "");
+    audioEl.setAttribute("webkit-playsinline", "");
+    audioEl.autoplay = true;
+
+    if (audioEl.srcObject !== stream) {
+      audioEl.srcObject = stream;
+    }
+
+    const audioPlayPromise = audioEl.play();
+    if (audioPlayPromise && typeof audioPlayPromise.catch === "function") {
+      audioPlayPromise.catch(err => {
+        console.warn("[RiverMeet] Remote audio unmuted autoplay blocked by browser:", err);
+        showAutoplayUnlockBanner();
       });
     }
+
+    // Connect Web Audio API pipeline for iOS loudspeaker playback
+    routeRemoteAudioToSpeaker(peerId, stream);
   }
 
   updateVideoGridCount();
@@ -13129,6 +13343,18 @@ function attachRemoteVideoTile(peerId, stream, displayName) {
 function removeRemoteVideoTile(peerId) {
   const tile = document.getElementById('river-tile-' + peerId);
   if (tile) tile.remove();
+  const audioEl = document.getElementById('river-audio-' + peerId);
+  if (audioEl) audioEl.remove();
+
+  if (RiverMeet.audioSources && RiverMeet.audioSources.has(peerId)) {
+    try {
+      const item = RiverMeet.audioSources.get(peerId);
+      if (item.source) item.source.disconnect();
+      if (item.gainNode) item.gainNode.disconnect();
+    } catch(e) {}
+    RiverMeet.audioSources.delete(peerId);
+  }
+
   RiverMeet.peerConnections.delete(peerId);
   updateVideoGridCount();
   updateParticipantsRoster();
@@ -13220,16 +13446,30 @@ window.dismissMeetingBanner = hideWaitingBanner;
 // Toggle Microphone
 async function toggleRiverMeetingMic() {
   RiverMeet.isMuted = !RiverMeet.isMuted;
+  unlockAudioContextForMeeting();
+
   if (RiverMeet.localStream) {
     const audioTracks = RiverMeet.localStream.getAudioTracks();
-    if (audioTracks.length === 0 && !RiverMeet.isMuted) {
+    const hasLiveRealTrack = audioTracks.some(t => t.readyState === 'live' && !t.label.includes('Oscillator'));
+
+    if (!hasLiveRealTrack && !RiverMeet.isMuted) {
       try {
-        const audioStream = await navigator.mediaDevices.getUserMedia({
-          audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
-        });
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        const safeAudioConstraints = isIOS 
+          ? { echoCancellation: true } 
+          : { echoCancellation: true, noiseSuppression: true, autoGainControl: true };
+
+        const audioStream = await navigator.mediaDevices.getUserMedia({ audio: safeAudioConstraints });
         const newAudioTrack = audioStream.getAudioTracks()[0];
         if (newAudioTrack) {
+          // Remove old dummy tracks
+          audioTracks.forEach(t => {
+            try { t.stop(); RiverMeet.localStream.removeTrack(t); } catch(e) {}
+          });
+
           RiverMeet.localStream.addTrack(newAudioTrack);
+          newAudioTrack.enabled = true;
+
           for (const [, entry] of RiverMeet.peerConnections) {
             if (entry.call && entry.call.peerConnection) {
               const senders = entry.call.peerConnection.getSenders();
@@ -13237,14 +13477,17 @@ async function toggleRiverMeetingMic() {
               if (aSender) {
                 aSender.replaceTrack(newAudioTrack);
               } else {
-                entry.call.peerConnection.addTrack(newAudioTrack, RiverMeet.localStream);
+                try { entry.call.peerConnection.addTrack(newAudioTrack, RiverMeet.localStream); } catch(e) {}
               }
             }
           }
+
+          startLocalMicActivityMonitor(RiverMeet.localStream);
         }
       } catch (err) {
         console.warn("[RiverMeet] Could not acquire audio track dynamically:", err);
         RiverMeet.isMuted = true;
+        if (typeof showToast === "function") showToast("Microphone permission denied / माइक परवानगी नाकारली");
       }
     } else {
       audioTracks.forEach(track => {
@@ -13533,6 +13776,25 @@ function cleanupRiverMeeting() {
     RiverMeet.retryTimer = null;
   }
 
+  if (RiverMeet.micMonitorAnim) {
+    cancelAnimationFrame(RiverMeet.micMonitorAnim);
+    RiverMeet.micMonitorAnim = null;
+  }
+  if (RiverMeet.micSourceNode) {
+    try { RiverMeet.micSourceNode.disconnect(); } catch(e) {}
+    RiverMeet.micSourceNode = null;
+  }
+
+  if (RiverMeet.audioSources) {
+    for (const [, item] of RiverMeet.audioSources) {
+      try {
+        if (item.source) item.source.disconnect();
+        if (item.gainNode) item.gainNode.disconnect();
+      } catch(e) {}
+    }
+    RiverMeet.audioSources.clear();
+  }
+
   // Stop all media tracks
   if (RiverMeet.localStream) {
     try {
@@ -13565,6 +13827,7 @@ function cleanupRiverMeeting() {
   if (grid) grid.innerHTML = "";
 
   hideWaitingBanner();
+  hideAutoplayUnlockBanner();
 }
 
 
