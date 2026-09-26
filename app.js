@@ -787,7 +787,7 @@ const VOD_LIST = [
     book: "genesis",
     chapter: 1,
     verse: 3,
-    text: "देव बोलला, प्रकाश होवो; आणि प्रकाश झाला.",
+    text: "तेव्हा देव बोलला, “प्रकाश होवो,” आणि प्रकाश झाला.",
     engText: "And God said, “Let there be light,” and there was light."
   },
   { 
@@ -796,7 +796,7 @@ const VOD_LIST = [
     book: "isaiah", 
     chapter: 43, 
     verse: 2, 
-    text: "तू जलांतून चालशील तेव्हा मी तुझ्याबरोबर असेन; नद्यांतून जाशील तेव्हा त्या तुला बुडवणार नाहीत; अग्नीतून चालशील तेव्हा तू भाजणार नाहीस; ज्याला तुला पोळणार नाही.",
+    text: "तू जलांतून चालशील तेव्हा मी तुझ्याबरोबर असेन; नद्यांतून जाशील तेव्हा त्या तुला बुडवणार नाहीत; अग्नीतून चालशील तेव्हा तू भाजणार नाहीस; ज्वाला तुला पोळणार नाही.",
     engText: "When you go through deep waters, I will be with you. When you go through rivers of difficulty, you will not drown. When you walk through the fire of oppression, you will not be burned up; the flames will not consume you."
   },
   { 
@@ -805,8 +805,8 @@ const VOD_LIST = [
     book: "john", 
     chapter: 3, 
     verse: 16, 
-    text: "कारण देवाने जगावर एवढी प्रीती केली की त्याने आपला एकुलता एक मुलगा दिला, यासाठी की जो कोणी त्याच्यावर विश्वास ठेवतो त्याचा नाश होऊ नये, तर त्याला सार्वकालिक जीवन मिळावे.",
-    engText: "For this is how God loved the world: He gave his one and only Son, so that everyone who believes in him will not perish but have eternal life."
+    text: "देवाने जगावर एवढी प्रीती केली की, त्याने आपला एकुलता एक पुत्र दिला, अशासाठी की, जो कोणी त्याच्यावर विश्वास ठेवतो त्याचा नाश होऊ नये तर त्याला सार्वकालिक जीवन प्राप्त व्हावे.",
+    engText: "For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life."
   },
   { 
     ref: "स्तोत्रसंहिता २३:१", 
@@ -814,17 +814,17 @@ const VOD_LIST = [
     book: "psalms", 
     chapter: 23, 
     verse: 1, 
-    text: "परमेश्वर माझा मेंढपाळ आहे; मला काहीही कमी पडणार नाही.",
+    text: "परमेश्वर माझा मेंढपाळ आहे; मला काही उणे पडणार नाही.",
     engText: "The Lord is my shepherd; I have all that I need."
   },
   { 
-    ref: "फिलिप्पैकरांस ४:१३", 
+    ref: "फिलिप्पैकरांस पत्र ४:१३", 
     engRef: "Philippians 4:13",
     book: "philippians", 
     chapter: 4, 
     verse: 13, 
-    text: "मला सामर्थ्य देणाऱ्या ख्रिस्ताच्या साहाय्याने मी सर्व काही करू शकतो.",
-    engText: "For I can do everything through Christ, who gives me strength."
+    text: "मला जो सामर्थ्य देतो त्या ख्रिस्ताकडून मी सर्वकाही करण्यास शक्तिमान आहे.",
+    engText: "I can do all this through him who gives me strength."
   },
   { 
     ref: "नीतिसूत्रे ३:५-६", 
@@ -832,16 +832,16 @@ const VOD_LIST = [
     book: "proverbs", 
     chapter: 3, 
     verse: 5, 
-    text: "आपल्या संपूर्ण अंतःकरणाने परमेश्वरावर भाव ठेव आणि तुझ्या स्वतःच्या आकलनावर अवलंबून राहू नको. तुझ्या सर्व मार्गात त्याला मान दे म्हणजे तो तुझे मार्ग सरळ करील.",
+    text: "तू आपल्या अगदी मनापासून परमेश्वरावर भाव ठेव, आपल्याच बुद्धीवर अवलंबून राहू नकोस; तू आपल्या सर्व मार्गांत त्याचा आदर कर, म्हणजे तो तुझा मार्गदर्शक होईल.",
     engText: "Trust in the Lord with all your heart; do not depend on your own understanding. Seek his will in all you do, and he will show you which path to take."
   },
   {
-    ref: "रोमन्स ८:२८", 
+    ref: "रोमकरांस पत्र ८:२८", 
     engRef: "Romans 8:28",
     book: "romans", 
     chapter: 8, 
     verse: 28,
-    text: "आणि आपल्याला ठाऊक आहे की, जे देवावर प्रीती करतात, म्हणजे जे त्याच्या संकल्पानुसार बोलावलेले आहेत, त्यांच्या चांगल्यासाठी सर्व गोष्टी मिळून कार्य करतात.",
+    text: "परंतु आपल्याला ठाऊक आहे की, देवावर प्रीती करणार्‍यांना म्हणजे त्याच्या संकल्पाप्रमाणे बोलावलेल्यांना देवाच्या करणीने सर्व गोष्टी मिळून कल्याणकारक होतात.",
     engText: "And we know that in all things God works for the good of those who love him, who have been called according to his purpose."
   },
   {
@@ -850,25 +850,25 @@ const VOD_LIST = [
     book: "joshua",
     chapter: 1,
     verse: 9,
-    text: "मी तुला आज्ञा दिली नाही काय? धीर धर आणि हिंमतवान हो; भिऊ नको आणि थक्क होऊ नको, कारण तू जिथे कुठे जाशील तिथे तुझा देव परमेश्वर तुझ्याबरोबर आहे.",
+    text: "मी तुला आज्ञा केली आहे ना? खंबीर हो, हिम्मत धर, घाबरू नकोस, कचरू नकोस; कारण तू जाशील तिकडे तुझा देव परमेश्वर तुझ्याबरोबर असेल.",
     engText: "Have I not commanded you? Be strong and courageous. Do not be afraid; do not be discouraged, for the Lord your God will be with you wherever you go."
   },
   {
-    ref: "गलतीकरांस ५:२२",
-    engRef: "Galatians 5:22",
+    ref: "गलतीकरांस पत्र ५:२२-२३",
+    engRef: "Galatians 5:22-23",
     book: "galatians",
     chapter: 5,
     verse: 22,
-    text: "पण आत्म्याचे फळ म्हणजे प्रीती, आनंद, शांती, सहनशीलता, ममता, चांगुलपणा, विश्वासूपणा, सौम्यता, इंद्रियदमन हे आहे.",
+    text: "आत्म्याच्या द्वारे निष्पन्न होणारे फळ प्रीती, आनंद, शांती, सहनशीलता, ममता, चांगुलपणा, विश्वासूपणा, सौम्यता, इंद्रियदमन हे आहे.",
     engText: "But the fruit of the Spirit is love, joy, peace, forbearance, kindness, goodness, faithfulness, gentleness and self-control."
   },
   {
-    ref: "रोमन्स १२:२",
+    ref: "रोमकरांस पत्र १२:२",
     engRef: "Romans 12:2",
     book: "romans",
     chapter: 12,
     verse: 2,
-    text: "आणि या युगासारखे बनू नका, तर आपल्या मनाच्या नवनीकरणाने स्वतःमध्ये बदल घडवून आणा, यासाठी की देवाची उत्तम, स्वीकारणीय आणि परिपूर्ण इच्छा काय आहे हे तुम्ही अनुभवाने ओळखावे.",
+    text: "देवाची उत्तम, ग्रहणीय व परिपूर्ण इच्छा काय आहे हे तुम्ही समजून घ्यावे, म्हणून ह्या युगाबरोबर समरूप होऊ नका, तर आपल्या मनाच्या नवीकरणाने स्वतःचे रूपांतर होऊ द्या.",
     engText: "Do not conform to the pattern of this world, but be transformed by the renewing of your mind. Then you will be able to test and approve what God’s will is—his good, pleasing and perfect will."
   },
   {
@@ -877,7 +877,7 @@ const VOD_LIST = [
     book: "matthew",
     chapter: 6,
     verse: 33,
-    text: "तर तुम्ही पहिल्यांदा देवाचे राज्य आणि त्याचे नीतिमत्त्व मिळवण्याचा प्रयत्न करा, म्हणजे याही सर्व गोष्टी तुम्हाला मिळतील.",
+    text: "तर तुम्ही पहिल्याने देवाचे राज्य व त्याचे नीतिमत्त्व मिळवण्यास झटा, म्हणजे त्यांच्याबरोबर ह्याही सर्व गोष्टी तुम्हांला मिळतील.",
     engText: "But seek first his kingdom and his righteousness, and all these things will be given to you as well."
   },
   {
@@ -886,7 +886,7 @@ const VOD_LIST = [
     book: "psalms",
     chapter: 46,
     verse: 10,
-    text: "शांत व्हा आणि जाणा की मीच देव आहे; राष्ट्रांमध्ये माझा उगम होईल, पृथ्वीवर माझा उगम होईल.",
+    text: "“शांत व्हा आणि लक्षात ठेवा की मीच देव आहे, राष्ट्रांमध्ये माझा महिमा वाढेल, पृथ्वीभर माझा महिमा वाढेल.”",
     engText: "Be still, and know that I am God; I will be exalted among the nations, I will be exalted in the earth."
   },
   {
@@ -895,7 +895,7 @@ const VOD_LIST = [
     book: "jeremiah",
     chapter: 29,
     verse: 11,
-    text: "कारण जे संकल्प मी तुमच्याविषयी केले आहेत ते मी जाणतो, असे परमेश्वर म्हणतो; ते संकल्प शांतीचे आहेत, संकटाचे नाहीत, तुम्हाला आशादायक भविष्य देणारे आहेत.",
+    text: "परमेश्वर म्हणतो, “तुमच्याविषयी माझ्या मनात जे संकल्प आहेत ते मी जाणतो; ते संकल्प हिताचे आहेत, अनिष्टाचे नाहीत; ते तुम्हांला तुमच्या भावी सुस्थितीची आशा देणारे आहेत.”",
     engText: "For I know the plans I have for you, declares the Lord, plans to prosper you and not to harm you, plans to give you hope and a future."
   }
 ];
@@ -18666,16 +18666,20 @@ function formatMarathiVodTypography(text, isEng) {
     });
     return res;
   }
+  
+  // Safe single-pass regex for Marathi Devanagari text:
+  // 1. Sort by length descending so multi-word compounds match first
+  // 2. Use Devanagari unicode character class boundaries (?<![\u0900-\u097F]) and (?![\u0900-\u097F])
+  // This guarantees no matras or conjuncts are severed and no nested spans are created.
   const keywords = [
-    "संपूर्ण शस्त्रसामग्री", "शस्त्रसामग्री", "पवित्र आत्मा", "सार्वकालिक जीवन", "परमेश्वर", "देवाने", "देवाचा", "देवाचे", "देवाची", "देवाला", "देव", "ख्रिस्त", "येशू",
-    "धारण करा", "टिकाव धरा", "प्रकाश", "शांती", "सामर्थ्य", "विश्वास", "तारण", "कृपा"
+    "देवाची शस्त्रसामग्री", "संपूर्ण शस्त्रसामग्री", "शस्त्रसामग्री",
+    "सार्वकालिक जीवन", "पवित्र आत्मा", "परमेश्वर", "ख्रिस्त", "येशू",
+    "कल्याणकारक", "नीतिमत्त्व", "सहनशीलता", "चांगुलपणा", "विश्वासूपणा",
+    "मार्गदर्शक", "सामर्थ्य", "विश्वास", "शांती", "तारण", "कृपा", "प्रकाश"
   ];
-  let res = text;
-  keywords.forEach(kw => {
-    const reg = new RegExp(`(${kw})`, 'g');
-    res = res.replace(reg, `<span class="vod-golden-accent">$1</span>`);
-  });
-  return res;
+  keywords.sort((a, b) => b.length - a.length);
+  const devPattern = new RegExp(`(?<![\\u0900-\\u097F])(${keywords.join("|")})(?![\\u0900-\\u097F])`, 'g');
+  return text.replace(devPattern, '<span class="vod-golden-accent">$1</span>');
 }
 
 
@@ -19065,11 +19069,23 @@ window.applyVodTypographyTheme = function(themeIdx) {
     }
 
     if (textEl) {
-      textEl.style.fontFamily = theme.fontFamily;
+      let activeFont = theme.fontFamily;
+      let activeLineHeight = theme.lineHeight || "1.62";
+      if (isMarathi) {
+        if (theme.fontFamily.includes('Noto Sans') || theme.fontFamily.includes('Poppins')) {
+          activeFont = "'Noto Sans Devanagari', 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif";
+        } else if (theme.fontFamily.includes('Rozha One')) {
+          activeFont = "'Rozha One', 'Noto Serif Devanagari', serif";
+        } else {
+          activeFont = "'Noto Serif Devanagari', 'Noto Sans Devanagari', Georgia, serif";
+        }
+        activeLineHeight = "1.68";
+      }
+      textEl.style.fontFamily = activeFont;
       textEl.style.fontWeight = theme.fontWeight;
       textEl.style.color = theme.textColor;
       textEl.style.textShadow = theme.textShadow || "none";
-      textEl.style.lineHeight = theme.lineHeight || "1.62";
+      textEl.style.lineHeight = activeLineHeight;
       textEl.style.letterSpacing = theme.letterSpacing || "normal";
     }
 

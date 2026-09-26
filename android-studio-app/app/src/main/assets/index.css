@@ -5,6 +5,8 @@
   --font-ui: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-body: 'Lora', Georgia, Cambria, "Times New Roman", serif;
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-marathi: 'Noto Serif Devanagari', 'Noto Sans Devanagari', 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-marathi-sans: 'Noto Sans Devanagari', 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 
   /* Elevation & Shadows */
   --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
@@ -11967,7 +11969,7 @@ body:has(#view-reader.active) .mobile-bottom-tabs {
   font-family: var(--font-marathi, 'Noto Serif Devanagari', 'Playfair Display', Georgia, serif);
   font-size: 19px;
   font-weight: 700;
-  line-height: 1.58;
+  line-height: 1.68;
   letter-spacing: 0.2px;
   margin: 16px 0 12px 0;
   padding: 0;
@@ -11975,6 +11977,10 @@ body:has(#view-reader.active) .mobile-bottom-tabs {
   text-align: left;
   width: 100%;
   max-width: 100%;
+  font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
   text-shadow: 
     0 2px 12px rgba(0, 0, 0, 0.75),
     0 1px 3px rgba(0, 0, 0, 0.6);
@@ -17010,6 +17016,10 @@ body:has(#view-reader.active) .mobile-bottom-tabs {
   align-self: center !important;
   text-wrap: balance !important;
   word-break: break-word !important;
+  font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 #fs-vod-flourish-swash {
@@ -18130,8 +18140,10 @@ body:has(#view-reader.active) .mobile-bottom-tabs {
 /* ELEGANT EDITORIAL SCRIPTURE HIGHLIGHTS & ACCENTS */
 .vod-golden-accent,
 .vod-keyword-divine {
+  font-family: inherit !important;
   font-weight: 800 !important;
   color: #fde047 !important;
+  display: inline !important;
   text-shadow: 0 0 20px rgba(253, 224, 71, 0.5), 0 2px 10px rgba(0, 0, 0, 0.9) !important;
 }
 

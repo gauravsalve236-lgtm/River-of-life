@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v2391_EDITORIAL_RESPONSIVE_VOD_TYPOGRAPHY';
+const CACHE_NAME = 'river-of-life-cache-v2392_BSI_MARATHI_ORTHOGRAPHY_PERFECTED';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
