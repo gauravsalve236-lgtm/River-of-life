@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v2387_FIX_IOS_SAFARI_TOPLEVEL_CALL';
+const CACHE_NAME = 'river-of-life-cache-v2388_DISABLE_AUTO_CHAT_ON_MEETING_JOIN';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

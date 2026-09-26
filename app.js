@@ -12657,7 +12657,8 @@ function getMiroTalkRoomUrl(meeting) {
     return `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&speaker=true&autojoin=true&p2p=true&codec=opus&layout=grid&grid=1&name=${encodeURIComponent(loggedIn)}&buttons=mic,cam,share,hand,chat,participants,leave&theme=dark`;
   } else {
     // MiroTalk SFU (Mediasoup backend - supports 50+ to 100+ participants)
-    return `https://sfu.mirotalk.com/join/${roomSlug}?name=${encodeURIComponent(loggedIn)}&audio=true&video=true&screen=true&chat=true&notify=true`;
+    // chat=false ensures the public chat window does NOT auto-open on join (preventing it from obscuring the meeting on mobile/desktop)
+    return `https://sfu.mirotalk.com/join/${roomSlug}?name=${encodeURIComponent(loggedIn)}&audio=true&video=true&screen=true&chat=false&notify=true`;
   }
 }
 window.getMiroTalkRoomUrl = getMiroTalkRoomUrl;
