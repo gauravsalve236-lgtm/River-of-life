@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v2390_THEMATIC_CONTEXTUAL_VOD_TYPOGRAPHY';
+const CACHE_NAME = 'river-of-life-cache-v2391_EDITORIAL_RESPONSIVE_VOD_TYPOGRAPHY';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

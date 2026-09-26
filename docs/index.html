@@ -12,7 +12,7 @@
   <script>
     // Force immediate hard purge of all stale Service Workers and CacheStorage
     (function() {
-      const CURRENT_VER = "v2390_THEMATIC_CONTEXTUAL_VOD_TYPOGRAPHY";
+      const CURRENT_VER = "v2391_EDITORIAL_RESPONSIVE_VOD_TYPOGRAPHY";
       if (localStorage.getItem("rol_app_ver") !== CURRENT_VER) {
         localStorage.setItem("rol_app_ver", CURRENT_VER);
         if ('serviceWorker' in navigator) {
@@ -318,18 +318,18 @@
               <div class="home-vod-card" id="card-daily-verse-home" onclick="openFullscreenVOD()" title="Open Daily Verse Studio & Gallery / दैनिक वचन स्टुडिओ उघडा" style="background-image: url('assets/daily_verses/sunrise.png');">
                 <div class="home-vod-overlay"></div>
                 <div class="home-vod-badge-row" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                  <span class="home-vod-badge" data-i18n="vod_label">VERSE OF THE DAY</span>
+                  <span class="home-vod-badge" data-i18n="vod_label">दैनिक वचन</span>
                   <div style="display: flex; gap: 6px; align-items: center;">
                     <button class="home-vod-gallery-pill" onclick="openFullscreenVOD(); event.stopPropagation();" style="font-size: 11px; font-weight: 700; color: #ffffff; display: inline-flex; align-items: center; gap: 4px; background: rgba(255, 255, 255, 0.22); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.35); cursor: pointer;">
-                      <span>🎨 Studio</span> &rarr;
+                      <span>🎨 स्टुडिओ</span> &rarr;
                     </button>
                   </div>
                 </div>
                 <blockquote class="home-vod-quote" id="home-vod-text">
-                  “The Lord is my shepherd; I shall not want. He makes me lie down in green pastures. He leads me beside still waters.
+                  “सैतानाच्या डावपेचांपुढे तुम्हांला टिकाव धरता यावा म्हणून <span class="vod-golden-accent">देवाची संपूर्ण शस्त्रसामग्री</span> धारण करा.”
                 </blockquote>
                 <div class="home-vod-ref-row">
-                  <span class="home-vod-ref" id="home-vod-ref">Psalm 23:1-2</span>
+                  <span class="home-vod-ref" id="home-vod-ref">इफिसकरांस पत्र ६:११</span>
                 </div>
                 <!-- Clean Inline Action Buttons: Like, Change Wallpaper, Read Chapter, Save Image, Share, Bookmark -->
                 <div class="home-vod-actions-row">
@@ -3966,7 +3966,7 @@
           <!-- Top Tag & Decorative Ornament -->
           <div id="fs-vod-top-row" style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap;">
             <span id="fs-vod-badge-pill" style="font-size: 12.5px; font-weight: 800; letter-spacing: 2.2px; text-transform: uppercase; color: #fbbf24; text-shadow: 0 2px 12px rgba(0,0,0,0.95); font-family: var(--font-ui), sans-serif; transition: all 0.3s ease;">
-              ✦ VERSE OF THE DAY ✦
+              ✦ दैनिक वचन ✦
             </span>
           </div>
 
@@ -3977,7 +3977,7 @@
 
           <!-- Scripture Verse Body (Multi-line, Bold, Expressive, Balanced, Pure Text on Image) -->
           <blockquote id="fs-vod-text" style="font-family: 'Noto Serif Devanagari', 'Lora', Georgia, serif; font-size: clamp(20px, 3.6vw, 36px); line-height: 1.62; color: #ffffff; font-weight: 700; margin: 0 0 16px 0; text-shadow: 0 3px 22px rgba(0,0,0,0.98), 0 1px 6px rgba(0,0,0,0.95); text-wrap: balance; width: 100%; text-align: center; transition: all 0.3s ease;">
-            कारण देवाने जगावर एवढी प्रीती केली की त्याने आपला एकुलता एक मुलगा दिला, यासाठी की जो कोणी त्याच्यावर विश्वास ठेवतो त्याचा नाश होऊ नये, तर त्याला सार्वकालिक जीवन मिळावे.
+            सैतानाच्या डावपेचांपुढे तुम्हांला टिकाव धरता यावा म्हणून <span class="vod-golden-accent">देवाची संपूर्ण शस्त्रसामग्री</span> धारण करा.
           </blockquote>
 
           <!-- Calligraphic Flourish Swash for Alpine / Golden Path / Swash themes -->
@@ -3991,7 +3991,7 @@
           <div id="fs-vod-ref-row" style="display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap;">
             <div id="fs-vod-accent-line-left" style="height: 1.5px; width: 36px; background: #fbbf24; opacity: 0.85; box-shadow: 0 1px 6px rgba(0,0,0,0.9); transition: all 0.3s ease;"></div>
             <span id="fs-vod-ref-badge" style="font-family: var(--font-ui), sans-serif; font-size: 17.5px; font-weight: 800; color: #fbbf24; letter-spacing: 0.6px; text-shadow: 0 2px 12px rgba(0,0,0,0.98); transition: all 0.3s ease;">
-              योहान ३:१६
+              इफिसकरांस पत्र ६:११
             </span>
             <div id="fs-vod-accent-line-right" style="height: 1.5px; width: 36px; background: #fbbf24; opacity: 0.85; box-shadow: 0 1px 6px rgba(0,0,0,0.9); transition: all 0.3s ease;"></div>
           </div>
