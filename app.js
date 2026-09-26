@@ -772,6 +772,31 @@ let audioPlayerInstance = null;
 // Verse of the Day preset database
 // Verse of the Day preset database (Expanded to 12 distinct entries)
 const VOD_LIST = [
+  {
+    ref: "इफिसकरांस पत्र ६:११",
+    engRef: "Ephesians 6:11",
+    book: "ephesians",
+    chapter: 6,
+    verse: 11,
+    thematicLayout: "armor-interactive",
+    themeId: "thematic-armor",
+    text: "सैतानाच्या डावपेचांपुढे तुम्हांला टिकाव धरता यावा म्हणून देवाची शस्त्रसामग्री धारण करा.",
+    engText: "Put on the full armor of God, so that you can take your stand against the devil’s schemes."
+  },
+  {
+    ref: "उत्पत्ति १:३-४",
+    engRef: "Genesis 1:3-4",
+    book: "genesis",
+    chapter: 1,
+    verse: 3,
+    thematicLayout: "creation-dawn",
+    themeId: "thematic-genesis",
+    introText: "देव बोलला,",
+    highlightText: "प्रकाश होवो",
+    followText: "आणि प्रकाश झाला. देवाने प्रकाश पाहिला की तो चांगला आहे. देवाने अंधकारापासून प्रकाश वेगळा केला.",
+    text: "देव बोलला, प्रकाश होवो; आणि प्रकाश झाला. देवाने प्रकाश पाहिला की तो चांगला आहे; आणि देवाने अंधकारापासून प्रकाश वेगळा केला.",
+    engText: "And God said, “Let there be light,” and there was light. God saw that the light was good, and he separated the light from the darkness."
+  },
   { 
     ref: "यशया ४३:२", 
     engRef: "Isaiah 43:2",
@@ -2946,7 +2971,28 @@ function getCurrentVOD() {
         }
       }
     } catch(e) {}
+
+    const armorEntry = VOD_LIST.find(v => v.thematicLayout === "armor-interactive");
+    if (armorEntry) {
+      return {
+        vod: armorEntry,
+        dayOfYear: dayOfYear,
+        offset: 0
+      };
+    }
   }
+
+  if (offset === 1) {
+    const genesisEntry = VOD_LIST.find(v => v.thematicLayout === "creation-dawn");
+    if (genesisEntry) {
+      return {
+        vod: genesisEntry,
+        dayOfYear: dayOfYear,
+        offset: 1
+      };
+    }
+  }
+
   const len = VOD_LIST.length;
   const vodIdx = ((dayOfYear + offset) % len + len) % len;
   return {
@@ -3115,9 +3161,15 @@ function renderDailyDevotion() {
   const displayRef = vod.engRef || vod.ref;
   const displayText = isEng ? vod.engText : vod.text;
   
+  const isArmorVerse = (vod.thematicLayout === "armor-interactive" || (vod.ref && vod.ref.includes("इफिसकरांस") && vod.ref.includes("६:११")));
+  const isGenesisVerse = (vod.thematicLayout === "creation-dawn" || (vod.ref && vod.ref.includes("उत्पत्ति") && vod.ref.includes("१:३")));
+
   const homeVodRefEl = document.getElementById("home-vod-ref");
   if (homeVodRefEl) {
     homeVodRefEl.textContent = displayRef;
+    if (homeVodRefEl.parentElement) {
+      homeVodRefEl.parentElement.style.display = isArmorVerse ? "none" : "flex";
+    }
   }
   const homeVodRefEnEl = document.getElementById("home-vod-ref-en");
   const homeVodRefMrEl = document.getElementById("home-vod-ref-mr");
@@ -3128,7 +3180,23 @@ function renderDailyDevotion() {
 
   const homeVodTextEl = document.getElementById("home-vod-text");
   if (homeVodTextEl) {
-    homeVodTextEl.textContent = `“${displayText}”`;
+    if (isArmorVerse) {
+      homeVodTextEl.innerHTML = `<div class="vod-armor-card-wrap">${getArmorIllustrationSvg({ isMarathi: !isEng })}</div>`;
+      homeVodTextEl.style.padding = "0";
+      homeVodTextEl.style.margin = "0";
+      homeVodTextEl.style.background = "transparent";
+      homeVodTextEl.style.border = "none";
+    } else if (isGenesisVerse) {
+      homeVodTextEl.innerHTML = getGenesisDawnHtml(vod, isEng);
+      homeVodTextEl.style.padding = "0";
+      homeVodTextEl.style.margin = "0";
+      homeVodTextEl.style.background = "transparent";
+      homeVodTextEl.style.border = "none";
+    } else {
+      homeVodTextEl.innerHTML = `“${formatMarathiVodTypography(displayText)}”`;
+      homeVodTextEl.style.padding = "";
+      homeVodTextEl.style.margin = "";
+    }
   }
 
   // Native Widget sync for Android & iOS
@@ -3164,7 +3232,18 @@ function renderDailyDevotion() {
   if (bgEl) bgEl.style.backgroundImage = `url('${imgUrl}')`;
 
   const heroCard = document.getElementById("card-daily-verse-home");
-  if (heroCard) heroCard.style.backgroundImage = `url('${imgUrl}')`;
+  if (heroCard) {
+    if (isArmorVerse) {
+      heroCard.style.backgroundImage = "none";
+      heroCard.style.background = "radial-gradient(ellipse at center, #1e2638 0%, #0d121d 60%, #050811 100%)";
+    } else if (isGenesisVerse) {
+      heroCard.style.backgroundImage = "url('assets/daily_verses/golden_dawn.png'), url('assets/daily_verses/dawn_valley_genesis.jpg'), url('assets/daily_verses/sunrise.png')";
+      heroCard.style.backgroundSize = "cover";
+    } else {
+      heroCard.style.background = "";
+      heroCard.style.backgroundImage = `url('${imgUrl}')`;
+    }
+  }
 
   const fsCapsule = document.querySelector(".fullscreen-vod-capsule");
   if (fsCapsule) fsCapsule.style.backgroundImage = `url('${imgUrl}')`;
@@ -18604,10 +18683,312 @@ window.readTenCommandmentsAloud = function(btnElement) {
   playSingleVerseAudio(fullText, btnElement, directPath, { bookKey: "exodus", chapter: 20 });
 };
 
+/* ==============================================================================
+   CREATIVE CONTEXTUAL & THEMATIC TYPOGRAPHY ENGINE (MARATHI VERSE OF THE DAY)
+   ============================================================================== */
+
+function formatMarathiVodTypography(text) {
+  if (!text) return "";
+  const keywords = [
+    { word: "परमेश्वर", cls: "vod-keyword-divine" },
+    { word: "देवाने", cls: "vod-keyword-divine" },
+    { word: "देव", cls: "vod-keyword-divine" },
+    { word: "ख्रिस्त", cls: "vod-keyword-divine" },
+    { word: "येशू", cls: "vod-keyword-divine" },
+    { word: "पवित्र आत्मा", cls: "vod-keyword-divine" },
+    { word: "शस्त्रसामग्री", cls: "vod-keyword-divine" },
+    { word: "धारण करा", cls: "vod-keyword-action" },
+    { word: "प्रकाश होवो", cls: "vod-keyword-divine" },
+    { word: "प्रकाश", cls: "vod-keyword-divine" },
+    { word: "शांती", cls: "vod-keyword-divine" },
+    { word: "सामर्थ्य", cls: "vod-keyword-divine" },
+    { word: "विश्वास", cls: "vod-keyword-divine" },
+    { word: "सार्वकालिक जीवन", cls: "vod-keyword-divine" }
+  ];
+  let res = text;
+  keywords.forEach(k => {
+    const reg = new RegExp(`(${k.word})`, 'g');
+    res = res.replace(reg, `<span class="${k.cls}">$1</span>`);
+  });
+  return res;
+}
+
+function getGenesisDawnHtml(vod, isEng) {
+  if (isEng) {
+    return `
+      <div class="vod-genesis-container">
+        <div class="vod-genesis-intro">And God said,</div>
+        <div class="vod-genesis-hero">“LET THERE BE LIGHT”</div>
+        <div class="vod-genesis-follow">and there was light. God saw that the light was good, and he separated the light from the darkness.</div>
+        <div class="vod-genesis-ref-pill">🔖 GENESIS 1:3-4 • NLT</div>
+      </div>
+    `;
+  }
+  return `
+    <div class="vod-genesis-container">
+      <div class="vod-genesis-intro">देव बोलला,</div>
+      <div class="vod-genesis-hero">“प्रकाश होवो”</div>
+      <div class="vod-genesis-follow">आणि प्रकाश झाला. देवाने प्रकाश पाहिला की तो चांगला आहे. देवाने अंधकारापासून प्रकाश वेगळा केला.</div>
+      <div class="vod-genesis-ref-pill">🔖 उत्पत्ति १:३-४ • MARVBSI</div>
+    </div>
+  `;
+}
+
+function getArmorIllustrationSvg(options = {}) {
+  const isMarathi = options.isMarathi !== false;
+  
+  const callout1Mr = "धारण करा";
+  const callout1En = "PUT ON THE";
+  
+  const callout2Mr = "देवाची संपूर्ण शस्त्रसामग्री";
+  const callout2En = "FULL ARMOR OF GOD";
+  
+  const callout3Mr = "तुम्हांला टिकाव धरता यावा म्हणून";
+  const callout3En = "STAND AGAINST";
+  
+  const callout4Mr = "सैतानाच्या डावपेचांपुढे";
+  const callout4En = "DEVIL'S SCHEMES";
+  
+  const scriptureRef = isMarathi ? "इफिसकरांस पत्र ६:११ • MARVBSI" : "EPHESIANS 6:11 • NLT";
+
+  return `<svg class="vod-armor-svg" viewBox="0 0 600 780" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="max-height: 80vh; overflow: visible;">
+  <defs>
+    <radialGradient id="armorGlowCenter" cx="50%" cy="45%" r="60%">
+      <stop offset="0%" stop-color="#1e293b" stop-opacity="0.95"/>
+      <stop offset="55%" stop-color="#0f172a" stop-opacity="0.98"/>
+      <stop offset="100%" stop-color="#050811" stop-opacity="1"/>
+    </radialGradient>
+    <filter id="divineGoldGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <linearGradient id="plateSteelGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#cbd5e1"/>
+      <stop offset="30%" stop-color="#f8fafc"/>
+      <stop offset="50%" stop-color="#94a3b8"/>
+      <stop offset="70%" stop-color="#e2e8f0"/>
+      <stop offset="100%" stop-color="#64748b"/>
+    </linearGradient>
+    <linearGradient id="goldFiligree" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fde047"/>
+      <stop offset="50%" stop-color="#eab308"/>
+      <stop offset="100%" stop-color="#ca8a04"/>
+    </linearGradient>
+    <filter id="dotGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2.5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="600" height="780" rx="20" fill="url(#armorGlowCenter)"/>
+  <rect x="18" y="18" width="564" height="744" rx="14" fill="none" stroke="rgba(255, 255, 255, 0.08)" stroke-width="1.2"/>
+  <rect x="24" y="24" width="552" height="732" rx="10" fill="none" stroke="rgba(251, 191, 36, 0.2)" stroke-width="0.8" stroke-dasharray="6,4"/>
+
+  <g transform="translate(300, 52)">
+    <text text-anchor="middle" font-family="'Outfit', sans-serif" font-size="11.5" font-weight="800" letter-spacing="3" fill="#fbbf24" opacity="0.95">
+      ✦ आध्यात्मिक शस्त्रसामग्री • SPIRITUAL WARFARE ✦
+    </text>
+  </g>
+
+  <g id="knight-armor-figure" transform="translate(300, 385) scale(0.92)" style="filter: drop-shadow(0 12px 28px rgba(0,0,0,0.85));">
+    <circle cx="0" cy="-60" r="140" fill="rgba(251, 191, 36, 0.04)" filter="url(#divineGoldGlow)"/>
+
+    <!-- Helmet Plume / Crest -->
+    <path d="M-8,-260 C-6,-285 0,-295 0,-295 C0,-295 6,-285 8,-260 Z" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1.5"/>
+    <path d="M0,-295 C-15,-275 -18,-255 -15,-240 C-8,-245 8,-245 15,-240 C18,-255 15,-275 0,-295 Z" fill="url(#goldFiligree)" opacity="0.85"/>
+    
+    <!-- Helmet Dome -->
+    <path d="M-36,-205 C-42,-250 -25,-265 0,-265 C25,-265 42,-250 36,-205 C28,-185 24,-175 0,-175 C-24,-175 -28,-185 -36,-205 Z" fill="#1e293b" stroke="#e2e8f0" stroke-width="2.5"/>
+    <path d="M-3,-265 C-4,-240 -4,-210 -3,-180 L3,-180 C4,-210 4,-240 3,-265 Z" fill="url(#goldFiligree)" stroke="#ca8a04" stroke-width="1"/>
+
+    <!-- Visor Eye Slit -->
+    <path d="M-28,-220 L28,-220 L24,-210 L-24,-210 Z" fill="#090d16" stroke="#fbbf24" stroke-width="1.5"/>
+    <line x1="-18" y1="-215" x2="-4" y2="-215" stroke="#fde047" stroke-width="1.8"/>
+    <line x1="4" y1="-215" x2="18" y2="-215" stroke="#fde047" stroke-width="1.8"/>
+
+    <!-- Visor Breathe Holes -->
+    <circle cx="-14" cy="-198" r="1.5" fill="#94a3b8"/>
+    <circle cx="-7" cy="-198" r="1.5" fill="#94a3b8"/>
+    <circle cx="0" cy="-198" r="1.5" fill="#94a3b8"/>
+    <circle cx="7" cy="-198" r="1.5" fill="#94a3b8"/>
+    <circle cx="14" cy="-198" r="1.5" fill="#94a3b8"/>
+    <circle cx="-10" cy="-190" r="1.5" fill="#94a3b8"/>
+    <circle cx="0" cy="-190" r="1.5" fill="#94a3b8"/>
+    <circle cx="10" cy="-190" r="1.5" fill="#94a3b8"/>
+    <path d="M-30,-200 C-32,-175 -18,-160 0,-158 C18,-160 32,-175 30,-200" fill="none" stroke="#e2e8f0" stroke-width="2"/>
+
+    <!-- Gorget (Neck Armor) -->
+    <path d="M-34,-162 C-20,-150 20,-150 34,-162 L42,-142 C20,-134 -20,-134 -42,-142 Z" fill="#1e293b" stroke="#e2e8f0" stroke-width="2"/>
+    <path d="M-28,-152 C-14,-144 14,-144 28,-152" fill="none" stroke="url(#goldFiligree)" stroke-width="1.5"/>
+
+    <!-- Pauldrons (Shoulders) -->
+    <path d="M-42,-146 C-70,-155 -95,-130 -85,-95 C-65,-85 -45,-100 -36,-115 Z" fill="#1e293b" stroke="#e2e8f0" stroke-width="2.2"/>
+    <path d="M-82,-120 C-68,-105 -50,-102 -40,-110" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+    <path d="M-80,-105 C-65,-92 -48,-92 -38,-100" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+    <path d="M-55,-150 C-75,-140 -85,-115 -85,-115" fill="none" stroke="url(#goldFiligree)" stroke-width="2"/>
+
+    <path d="M42,-146 C70,-155 95,-130 85,-95 C65,-85 45,-100 36,-115 Z" fill="#1e293b" stroke="#e2e8f0" stroke-width="2.2"/>
+    <path d="M82,-120 C68,-105 50,-102 40,-110" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+    <path d="M80,-105 C65,-92 48,-92 38,-100" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+    <path d="M55,-150 C75,-140 85,-115 85,-115" fill="none" stroke="url(#goldFiligree)" stroke-width="2"/>
+
+    <!-- Breastplate / Cuirass -->
+    <path d="M-42,-142 C-45,-90 -55,-40 -38,10 C-22,18 22,18 38,10 C55,-40 45,-90 42,-142 C20,-136 -20,-136 -42,-142 Z" fill="#182234" stroke="#e2e8f0" stroke-width="2.5"/>
+    <line x1="0" y1="-140" x2="0" y2="12" stroke="#f8fafc" stroke-width="2.8"/>
+    <path d="M-36,-110 C-25,-90 -10,-85 0,-85 C10,-85 25,-90 36,-110" fill="none" stroke="#64748b" stroke-width="1.5"/>
+    <path d="M-32,-60 C-20,-45 -8,-40 0,-40 C8,-40 20,-45 32,-60" fill="none" stroke="#64748b" stroke-width="1.5"/>
+    <path d="M-4,-125 L4,-125 L4,-95 L-4,-95 Z" fill="url(#goldFiligree)"/>
+    <path d="M-15,-114 L15,-114 L15,-106 L-15,-106 Z" fill="url(#goldFiligree)"/>
+    <circle cx="0" cy="-110" r="3" fill="#ffffff"/>
+
+    <!-- Fauld & Tassets (Belt) -->
+    <rect x="-42" y="8" width="84" height="14" rx="3" fill="#0f172a" stroke="#fbbf24" stroke-width="1.8"/>
+    <circle cx="0" cy="15" r="4.5" fill="url(#goldFiligree)"/>
+    <circle cx="-25" cy="15" r="2.5" fill="#fde047"/>
+    <circle cx="25" cy="15" r="2.5" fill="#fde047"/>
+    <path d="M-44,22 C-25,28 25,28 44,22 L46,36 C25,44 -25,44 -46,36 Z" fill="#1e293b" stroke="#e2e8f0" stroke-width="1.8"/>
+    <path d="M-46,36 C-25,44 25,44 46,36 L48,50 C25,58 -25,58 -48,50 Z" fill="#182234" stroke="#e2e8f0" stroke-width="1.8"/>
+    <path d="M-45,52 L-10,52 L-12,95 L-40,90 Z" fill="#1e293b" stroke="#e2e8f0" stroke-width="1.8"/>
+    <line x1="-28" y1="52" x2="-26" y2="92" stroke="#64748b" stroke-width="1.2"/>
+    <path d="M10,52 L45,52 L40,90 L12,95 Z" fill="#1e293b" stroke="#e2e8f0" stroke-width="1.8"/>
+    <line x1="28" y1="52" x2="26" y2="92" stroke="#64748b" stroke-width="1.2"/>
+
+    <!-- Arms & Sword -->
+    <path d="M-45,-85 L-65,-30 L-50,-20 L-35,-65 Z" fill="#1e293b" stroke="#e2e8f0" stroke-width="1.8"/>
+    <path d="M45,-85 L65,-30 L50,-20 L35,-65 Z" fill="#1e293b" stroke="#e2e8f0" stroke-width="1.8"/>
+    <circle cx="0" cy="-28" r="6" fill="url(#goldFiligree)" stroke="#ca8a04" stroke-width="1"/>
+    <rect x="-3" y="-22" width="6" height="24" rx="2" fill="#475569" stroke="#94a3b8" stroke-width="1"/>
+    <path d="M-36,-2 C-15,3 15,3 36,-2 L32,6 C15,4 -15,4 -32,6 Z" fill="url(#goldFiligree)" stroke="#ca8a04" stroke-width="1.5"/>
+    <circle cx="-34" cy="2" r="3" fill="#fde047"/>
+    <circle cx="34" cy="2" r="3" fill="#fde047"/>
+    <path d="M-16,-10 C-18,5 -5,12 0,10 C5,12 18,5 16,-10 C10,-12 -10,-12 -16,-10 Z" fill="#334155" stroke="#e2e8f0" stroke-width="1.8"/>
+    <path d="M-6,8 L-4,215 L0,230 L4,215 L6,8 Z" fill="url(#plateSteelGrad)" stroke="#f8fafc" stroke-width="1.6"/>
+    <line x1="0" y1="12" x2="0" y2="185" stroke="#64748b" stroke-width="1.5"/>
+
+    <!-- Legs & Sabatons -->
+    <path d="M-38,92 L-14,96 L-16,160 L-36,158 Z" fill="#182234" stroke="#e2e8f0" stroke-width="1.8"/>
+    <path d="M14,96 L38,92 L36,158 L16,160 Z" fill="#182234" stroke="#e2e8f0" stroke-width="1.8"/>
+    <path d="M-40,160 C-42,172 -12,174 -14,160 C-12,152 -40,152 -40,160 Z" fill="#1e293b" stroke="#e2e8f0" stroke-width="1.8"/>
+    <circle cx="-27" cy="162" r="3" fill="#fbbf24"/>
+    <path d="M14,160 C12,174 42,172 40,160 C40,152 12,152 14,160 Z" fill="#1e293b" stroke="#e2e8f0" stroke-width="1.8"/>
+    <circle cx="27" cy="162" r="3" fill="#fbbf24"/>
+    <path d="M-35,174 L-15,176 L-18,255 L-33,252 Z" fill="#182234" stroke="#e2e8f0" stroke-width="2"/>
+    <line x1="-25" y1="176" x2="-25" y2="252" stroke="#64748b" stroke-width="1.2"/>
+    <path d="M15,176 L35,174 L33,252 L18,255 Z" fill="#182234" stroke="#e2e8f0" stroke-width="2"/>
+    <line x1="25" y1="176" x2="25" y2="252" stroke="#64748b" stroke-width="1.2"/>
+    <path d="M-34,254 C-46,268 -45,278 -20,278 C-12,278 -14,266 -16,256 Z" fill="#1e293b" stroke="#e2e8f0" stroke-width="2"/>
+    <path d="M16,256 C14,266 12,278 20,278 C45,278 46,268 34,254 Z" fill="#1e293b" stroke="#e2e8f0" stroke-width="2"/>
+    <ellipse cx="0" cy="284" rx="70" ry="12" fill="rgba(0,0,0,0.65)"/>
+  </g>
+
+  <!-- CALLOUT 1: TOP LEFT -> HELMET -->
+  <g class="vod-callout vod-callout-1">
+    <text x="210" y="170" text-anchor="end" font-family="'Noto Sans Devanagari', 'Poppins', sans-serif" font-size="19" font-weight="800" fill="#ffffff" filter="drop-shadow(0 2px 8px rgba(0,0,0,0.9))">
+      ${callout1Mr}
+    </text>
+    <text x="210" y="188" text-anchor="end" font-family="'Outfit', sans-serif" font-size="10.5" font-weight="700" letter-spacing="1.8" fill="#fbbf24" opacity="0.9">
+      ${callout1En}
+    </text>
+    <path d="M 218 174 L 246 174 L 274 195" fill="none" stroke="#fbbf24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+    <circle cx="274" cy="195" r="4" fill="#fbbf24" filter="url(#dotGlow)"/>
+    <circle cx="274" cy="195" r="2" fill="#ffffff"/>
+  </g>
+
+  <!-- CALLOUT 2: TOP RIGHT -> BREASTPLATE -->
+  <g class="vod-callout vod-callout-2">
+    <text x="390" y="278" text-anchor="start" font-family="'Noto Serif Devanagari', 'Rozha One', serif" font-size="21" font-weight="800" fill="#fef08a" filter="drop-shadow(0 2px 10px rgba(0,0,0,0.9))">
+      ${callout2Mr}
+    </text>
+    <text x="390" y="298" text-anchor="start" font-family="'Outfit', sans-serif" font-size="10.5" font-weight="700" letter-spacing="1.8" fill="#fbbf24" opacity="0.95">
+      ${callout2En}
+    </text>
+    <path d="M 382 284 L 350 284 L 324 305" fill="none" stroke="#fbbf24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+    <circle cx="324" cy="305" r="4" fill="#fbbf24" filter="url(#dotGlow)"/>
+    <circle cx="324" cy="305" r="2" fill="#ffffff"/>
+  </g>
+
+  <!-- CALLOUT 3: MID LEFT -> BELT & SWORD -->
+  <g class="vod-callout vod-callout-3">
+    <text x="220" y="424" text-anchor="end" font-family="'Noto Serif Devanagari', serif" font-size="16.5" font-weight="700" fill="#e2e8f0" filter="drop-shadow(0 2px 8px rgba(0,0,0,0.9))">
+      ${callout3Mr}
+    </text>
+    <text x="220" y="442" text-anchor="end" font-family="'Outfit', sans-serif" font-size="10" font-weight="700" letter-spacing="1.6" fill="#94a3b8">
+      ${callout3En}
+    </text>
+    <path d="M 228 428 L 255 428 L 272 418" fill="none" stroke="#e2e8f0" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+    <circle cx="272" cy="418" r="3.5" fill="#e2e8f0" filter="url(#dotGlow)"/>
+    <circle cx="272" cy="418" r="1.8" fill="#ffffff"/>
+  </g>
+
+  <!-- CALLOUT 4: BOTTOM RIGHT -> GREAVES & BOOTS -->
+  <g class="vod-callout vod-callout-4">
+    <text x="375" y="585" text-anchor="start" font-family="'Noto Serif Devanagari', serif" font-size="17" font-weight="700" fill="#fca5a5" filter="drop-shadow(0 2px 8px rgba(0,0,0,0.9))">
+      ${callout4Mr}
+    </text>
+    <text x="375" y="603" text-anchor="start" font-family="'Outfit', sans-serif" font-size="10" font-weight="700" letter-spacing="1.6" fill="#f87171" opacity="0.9">
+      ${callout4En}
+    </text>
+    <path d="M 368 590 L 344 590 L 328 605" fill="none" stroke="#f87171" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+    <circle cx="328" cy="605" r="3.5" fill="#f87171" filter="url(#dotGlow)"/>
+    <circle cx="328" cy="605" r="1.8" fill="#ffffff"/>
+  </g>
+
+  <!-- BOTTOM CITATION -->
+  <g transform="translate(300, 715)">
+    <line x1="-120" y1="-22" x2="-30" y2="-22" stroke="rgba(251,191,36,0.4)" stroke-width="1"/>
+    <circle cx="0" cy="-22" r="2.5" fill="#fbbf24"/>
+    <line x1="30" y1="-22" x2="120" y2="-22" stroke="rgba(251,191,36,0.4)" stroke-width="1"/>
+    <text text-anchor="middle" font-family="'Playfair Display', 'Cinzel', Georgia, serif" font-size="20" font-weight="800" letter-spacing="2.5" fill="#fbbf24" filter="drop-shadow(0 2px 10px rgba(0,0,0,0.95))">
+      ${scriptureRef}
+    </text>
+  </g>
+</svg>`;
+}
+
 /* ==========================================================================
    DAILY BIBLE VERSE IMAGE STUDIO, GALLERY SAVING & WHATSAPP SHARING
    ========================================================================== */
 window.VOD_TYPOGRAPHY_STYLES = [
+  {
+    id: "thematic-armor",
+    icon: "⚔️",
+    name: "शस्त्रसामग्री आकृती (Armor Diagram)",
+    shortName: "Armor Diagram",
+    tag: "⚔️ SPIRITUAL WARFARE • आध्यात्मिक शस्त्रसामग्री ⚔️",
+    bgImage: null,
+    layoutMode: "thematic-armor",
+    fontFamily: "'Noto Serif Devanagari', 'Playfair Display', serif",
+    fontWeight: "700",
+    textColor: "#ffffff",
+    accentColor: "#fbbf24",
+    quoteColor: "#fbbf24",
+    lineHeight: "1.6",
+    letterSpacing: "0.2px",
+    textShadow: "0 3px 24px rgba(0,0,0,0.98)"
+  },
+  {
+    id: "thematic-genesis",
+    icon: "🌅",
+    name: "प्रकाश निर्मिती (Creation Dawn)",
+    shortName: "Creation Dawn",
+    tag: "✨ LET THERE BE LIGHT • प्रकाश होवो ✨",
+    bgImage: "golden_dawn.png",
+    layoutMode: "thematic-genesis",
+    fontFamily: "'Rozha One', 'Noto Serif Devanagari', Georgia, serif",
+    fontWeight: "800",
+    textColor: "#ffffff",
+    accentColor: "#fbbf24",
+    quoteColor: "#fbbf24",
+    lineHeight: "1.2",
+    letterSpacing: "0.5px",
+    textShadow: "0 3px 24px rgba(0,0,0,0.98)"
+  },
   {
     id: "pinterest-alpine",
     icon: "🏔️",
@@ -18946,88 +19327,161 @@ window.applyVodTypographyTheme = function(themeIdx) {
     }
   }
 
-  // Update background image if theme has dedicated wallpaper and no custom wallpaper was chosen
-  const userSavedWp = localStorage.getItem("rol_selected_wallpaper");
-  if (theme.bgImage && !userSavedWp) {
-    const imgUrl = `assets/daily_verses/${theme.bgImage}`;
-    const fsBgEl = document.getElementById("fs-vod-capsule-bg");
-    if (fsBgEl) fsBgEl.style.backgroundImage = `url('${imgUrl}')`;
-    const thumbImg = document.getElementById("vod-thumbnail-preview");
-    if (thumbImg) thumbImg.src = imgUrl;
+  let thematicBox = document.getElementById("fs-vod-thematic-content");
+  if (!thematicBox && cardContainer) {
+    thematicBox = document.createElement("div");
+    thematicBox.id = "fs-vod-thematic-content";
+    thematicBox.className = "vod-contextual-stage";
+    cardContainer.appendChild(thematicBox);
   }
 
-  // Atmospheric contrast gradient overlay
-  const gradEl = document.getElementById("fs-vod-overlay-gradient");
-  if (gradEl) {
-    if (theme.layoutMode === "watercolor-pill") {
-      gradEl.style.background = "linear-gradient(180deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.06) 35%, rgba(15,23,42,0.48) 75%, rgba(15,23,42,0.92) 100%)";
-    } else {
-      gradEl.style.background = "linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.18) 30%, rgba(0,0,0,0.45) 65%, rgba(0,0,0,0.92) 100%)";
-    }
-  }
-
+  const topRow = document.getElementById("fs-vod-top-row");
+  const quoteMark = document.getElementById("fs-vod-quote-mark");
   const textEl = document.getElementById("fs-vod-text");
-  if (textEl) {
-    textEl.style.fontFamily = theme.fontFamily;
-    textEl.style.fontWeight = theme.fontWeight;
-    textEl.style.color = theme.textColor;
-    textEl.style.textShadow = theme.textShadow || "none";
-    textEl.style.lineHeight = theme.lineHeight || "1.62";
-    textEl.style.letterSpacing = theme.letterSpacing || "normal";
-  }
-
-  // Quote mark styling & visibility
-  const quoteEl = document.getElementById("fs-vod-quote-mark");
-  if (quoteEl) {
-    if (theme.layoutMode === "watercolor-pill" || theme.layoutMode === "flourish-swash" || theme.layoutMode === "flourish-path") {
-      quoteEl.style.display = "none";
-    } else {
-      quoteEl.style.display = "block";
-      quoteEl.style.color = theme.quoteColor || theme.accentColor || "#fbbf24";
-    }
-  }
-
-  // Calligraphic flourish swash under verse body
   const swashEl = document.getElementById("fs-vod-flourish-swash");
-  if (swashEl) {
-    if (theme.layoutMode === "flourish-swash" || theme.layoutMode === "flourish-path") {
-      swashEl.style.display = "block";
-      swashEl.style.color = theme.accentColor || "#fbbf24";
-      const paths = swashEl.querySelectorAll("path, circle");
-      paths.forEach(p => {
-        if (p.tagName.toLowerCase() === 'path') p.setAttribute("stroke", theme.accentColor || "#fbbf24");
-        if (p.tagName.toLowerCase() === 'circle') p.setAttribute("fill", theme.accentColor || "#fbbf24");
-      });
-    } else {
-      swashEl.style.display = "none";
-    }
-  }
+  const refRow = document.getElementById("fs-vod-ref-row");
 
-  const refBadge = document.getElementById("fs-vod-ref-badge");
-  const lineLeft = document.getElementById("fs-vod-accent-line-left");
-  const lineRight = document.getElementById("fs-vod-accent-line-right");
-  if (refBadge) {
-    if (theme.layoutMode === "watercolor-pill") {
-      refBadge.style.color = "#ffffff";
-      refBadge.style.background = "#0e7490";
-      refBadge.style.padding = "6px 18px";
-      refBadge.style.borderRadius = "20px";
-      refBadge.style.boxShadow = "0 3px 14px rgba(14,116,144,0.45)";
-      if (lineLeft) lineLeft.style.display = "none";
-      if (lineRight) lineRight.style.display = "none";
-    } else {
-      refBadge.style.color = theme.accentColor || "#fbbf24";
-      refBadge.style.background = "transparent";
-      refBadge.style.padding = "0";
-      refBadge.style.borderRadius = "0";
-      refBadge.style.boxShadow = "none";
-      if (lineLeft) {
-        lineLeft.style.display = "block";
-        lineLeft.style.background = theme.accentColor || "#fbbf24";
+  const { vod } = getCurrentVOD();
+  const isMarathi = (window.currentVodLanguage ? window.currentVodLanguage === 'mr' : state.translation !== "eng");
+  const isArmorTheme = (theme.layoutMode === "thematic-armor" || (vod && (vod.thematicLayout === "armor-interactive" || (vod.ref && vod.ref.includes("इफिसकरांस") && vod.ref.includes("६:११")))));
+  const isGenesisTheme = (theme.layoutMode === "thematic-genesis" || (vod && (vod.thematicLayout === "creation-dawn" || (vod.ref && vod.ref.includes("उत्पत्ति") && vod.ref.includes("१:३")))));
+
+  if (isArmorTheme) {
+    if (thematicBox) {
+      thematicBox.style.display = "flex";
+      thematicBox.innerHTML = `<div class="vod-armor-card-wrap">${getArmorIllustrationSvg({ isMarathi: isMarathi })}</div>`;
+    }
+    if (topRow) topRow.style.display = "none";
+    if (quoteMark) quoteMark.style.display = "none";
+    if (textEl) textEl.style.display = "none";
+    if (swashEl) swashEl.style.display = "none";
+    if (refRow) refRow.style.display = "none";
+
+    const fsBgEl = document.getElementById("fs-vod-capsule-bg");
+    if (fsBgEl) {
+      fsBgEl.style.backgroundImage = "none";
+      fsBgEl.style.background = "radial-gradient(ellipse at center, #1e2638 0%, #0d121d 60%, #050811 100%)";
+    }
+    const gradEl = document.getElementById("fs-vod-overlay-gradient");
+    if (gradEl) {
+      gradEl.style.background = "none";
+    }
+    if (cardContainer) cardContainer.style.top = "calc(50% - 20px)";
+  } else if (isGenesisTheme) {
+    if (thematicBox) {
+      thematicBox.style.display = "flex";
+      thematicBox.innerHTML = getGenesisDawnHtml(vod, !isMarathi);
+    }
+    if (topRow) topRow.style.display = "none";
+    if (quoteMark) quoteMark.style.display = "none";
+    if (textEl) textEl.style.display = "none";
+    if (swashEl) swashEl.style.display = "none";
+    if (refRow) refRow.style.display = "none";
+
+    const fsBgEl = document.getElementById("fs-vod-capsule-bg");
+    if (fsBgEl) {
+      fsBgEl.style.background = "";
+      fsBgEl.style.backgroundImage = "url('assets/daily_verses/golden_dawn.png'), url('assets/daily_verses/dawn_valley_genesis.jpg'), url('assets/daily_verses/sunrise.png')";
+      fsBgEl.style.backgroundSize = "cover";
+    }
+    const gradEl = document.getElementById("fs-vod-overlay-gradient");
+    if (gradEl) {
+      gradEl.style.background = "linear-gradient(180deg, rgba(15,23,42,0.4) 0%, rgba(180,83,9,0.15) 35%, rgba(15,23,42,0.6) 70%, rgba(10,15,26,0.92) 100%)";
+    }
+    if (cardContainer) cardContainer.style.top = "calc(50% - 20px)";
+  } else {
+    if (thematicBox) thematicBox.style.display = "none";
+    if (topRow) topRow.style.display = "flex";
+    if (textEl) {
+      textEl.style.display = "block";
+      const displayText = isMarathi ? vod.text : (vod.engText || vod.text);
+      textEl.innerHTML = formatMarathiVodTypography(displayText);
+    }
+    if (refRow) refRow.style.display = "flex";
+
+    // Update background image if theme has dedicated wallpaper and no custom wallpaper was chosen
+    const userSavedWp = localStorage.getItem("rol_selected_wallpaper");
+    if (theme.bgImage && !userSavedWp) {
+      const imgUrl = `assets/daily_verses/${theme.bgImage}`;
+      const fsBgEl = document.getElementById("fs-vod-capsule-bg");
+      if (fsBgEl) {
+        fsBgEl.style.background = "";
+        fsBgEl.style.backgroundImage = `url('${imgUrl}')`;
       }
-      if (lineRight) {
-        lineRight.style.display = "block";
-        lineRight.style.background = theme.accentColor || "#fbbf24";
+      const thumbImg = document.getElementById("vod-thumbnail-preview");
+      if (thumbImg) thumbImg.src = imgUrl;
+    }
+
+    // Atmospheric contrast gradient overlay
+    const gradEl = document.getElementById("fs-vod-overlay-gradient");
+    if (gradEl) {
+      if (theme.layoutMode === "watercolor-pill") {
+        gradEl.style.background = "linear-gradient(180deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.06) 35%, rgba(15,23,42,0.48) 75%, rgba(15,23,42,0.92) 100%)";
+      } else {
+        gradEl.style.background = "linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.18) 30%, rgba(0,0,0,0.45) 65%, rgba(0,0,0,0.92) 100%)";
+      }
+    }
+
+    if (textEl) {
+      textEl.style.fontFamily = theme.fontFamily;
+      textEl.style.fontWeight = theme.fontWeight;
+      textEl.style.color = theme.textColor;
+      textEl.style.textShadow = theme.textShadow || "none";
+      textEl.style.lineHeight = theme.lineHeight || "1.62";
+      textEl.style.letterSpacing = theme.letterSpacing || "normal";
+    }
+
+    // Quote mark styling & visibility
+    if (quoteEl) {
+      if (theme.layoutMode === "watercolor-pill" || theme.layoutMode === "flourish-swash" || theme.layoutMode === "flourish-path") {
+        quoteEl.style.display = "none";
+      } else {
+        quoteEl.style.display = "block";
+        quoteEl.style.color = theme.quoteColor || theme.accentColor || "#fbbf24";
+      }
+    }
+
+    // Calligraphic flourish swash under verse body
+    if (swashEl) {
+      if (theme.layoutMode === "flourish-swash" || theme.layoutMode === "flourish-path") {
+        swashEl.style.display = "block";
+        swashEl.style.color = theme.accentColor || "#fbbf24";
+        const paths = swashEl.querySelectorAll("path, circle");
+        paths.forEach(p => {
+          if (p.tagName.toLowerCase() === 'path') p.setAttribute("stroke", theme.accentColor || "#fbbf24");
+          if (p.tagName.toLowerCase() === 'circle') p.setAttribute("fill", theme.accentColor || "#fbbf24");
+        });
+      } else {
+        swashEl.style.display = "none";
+      }
+    }
+
+    const refBadge = document.getElementById("fs-vod-ref-badge");
+    const lineLeft = document.getElementById("fs-vod-accent-line-left");
+    const lineRight = document.getElementById("fs-vod-accent-line-right");
+    if (refBadge) {
+      if (theme.layoutMode === "watercolor-pill") {
+        refBadge.style.color = "#ffffff";
+        refBadge.style.background = "#0e7490";
+        refBadge.style.padding = "6px 18px";
+        refBadge.style.borderRadius = "20px";
+        refBadge.style.boxShadow = "0 3px 14px rgba(14,116,144,0.45)";
+        if (lineLeft) lineLeft.style.display = "none";
+        if (lineRight) lineRight.style.display = "none";
+      } else {
+        refBadge.style.color = theme.accentColor || "#fbbf24";
+        refBadge.style.background = "transparent";
+        refBadge.style.padding = "0";
+        refBadge.style.borderRadius = "0";
+        refBadge.style.boxShadow = "none";
+        if (lineLeft) {
+          lineLeft.style.display = "block";
+          lineLeft.style.background = theme.accentColor || "#fbbf24";
+        }
+        if (lineRight) {
+          lineRight.style.display = "block";
+          lineRight.style.background = theme.accentColor || "#fbbf24";
+        }
       }
     }
   }
@@ -19045,7 +19499,6 @@ window.applyVodTypographyTheme = function(themeIdx) {
 
   // Update language toggle button label in fullscreen modal
   const langLabel = document.getElementById("fs-vod-lang-label");
-  const isMarathi = (window.currentVodLanguage ? window.currentVodLanguage === 'mr' : state.translation !== "eng");
   if (langLabel) {
     langLabel.textContent = isMarathi ? "मराठी MARVBSI" : "English NLT";
   }
@@ -19143,9 +19596,15 @@ window.openFullscreenVOD = function() {
   if (thumbImg) thumbImg.src = imgUrl;
 
   const menu = document.getElementById("vod-more-options-menu");
-  if (menu) menu.style.display = "none";
-
   // Render Pinterest Chips and apply current theme
+  if (vod && (vod.thematicLayout === "armor-interactive" || (vod.ref && vod.ref.includes("इफिसकरांस") && vod.ref.includes("६:११")))) {
+    const armorThemeIdx = window.VOD_TYPOGRAPHY_STYLES.findIndex(t => t.id === "thematic-armor");
+    if (armorThemeIdx !== -1) window.currentVodTypographyIndex = armorThemeIdx;
+  } else if (vod && (vod.thematicLayout === "creation-dawn" || (vod.ref && vod.ref.includes("उत्पत्ति") && vod.ref.includes("१:३")))) {
+    const genesisThemeIdx = window.VOD_TYPOGRAPHY_STYLES.findIndex(t => t.id === "thematic-genesis");
+    if (genesisThemeIdx !== -1) window.currentVodTypographyIndex = genesisThemeIdx;
+  }
+
   applyVodTypographyTheme();
 };
 
@@ -19919,9 +20378,136 @@ window.generateExactVerseImageBlob = function(customRatio) {
     const layoutMode = theme.layoutMode || "centered-card";
 
     /* ==========================================================================
+       STYLE 0A: THEMATIC ARMOR OF GOD (Ephesians 6:11)
+       ========================================================================== */
+    if (layoutMode === "thematic-armor" || (vod && (vod.thematicLayout === "armor-interactive" || (vod.ref && vod.ref.includes("इफिसकरांस") && vod.ref.includes("६:११"))))) {
+      // Atmospheric dark charcoal/slate gradient background
+      const bgGrad = ctx.createRadialGradient(canvas.width / 2, canvas.height * 0.45, 40, canvas.width / 2, canvas.height * 0.45, canvas.width * 0.7);
+      bgGrad.addColorStop(0, '#1e293b');
+      bgGrad.addColorStop(0.55, '#0f172a');
+      bgGrad.addColorStop(1, '#050811');
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Frame
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(30, 30, canvas.width - 60, canvas.height - 60);
+      ctx.strokeStyle = "rgba(251, 191, 36, 0.25)";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(40, 40, canvas.width - 80, canvas.height - 80);
+
+      // Top title
+      ctx.direction = "ltr";
+      ctx.font = "800 21px 'Outfit', sans-serif";
+      ctx.fillStyle = "#fbbf24";
+      ctx.shadowColor = "rgba(0,0,0,0.95)";
+      ctx.shadowBlur = 12;
+      const titleTag = isMarathi ? "✦ आध्यात्मिक शस्त्रसामग्री • SPIRITUAL WARFARE ✦" : "✦ THE WHOLE ARMOR OF GOD ✦";
+      const titleW = ctx.measureText(titleTag).width;
+      ctx.fillText(titleTag, Math.round((canvas.width - titleW) / 2), (ratio === 'story' ? 140 : 85));
+
+      // Draw Armor SVG onto Canvas via data URL
+      const armorSvgCode = getArmorIllustrationSvg({ isMarathi: isMarathi });
+      const armorImg = await new Promise((res) => {
+        const img = new Image();
+        img.onload = () => res(img);
+        img.onerror = () => res(null);
+        img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(armorSvgCode);
+      });
+      if (armorImg) {
+        const targetW = (ratio === 'story') ? 920 : 840;
+        const targetH = Math.round(targetW * (780 / 600));
+        const drawX = Math.round((canvas.width - targetW) / 2);
+        const drawY = Math.round((canvas.height - targetH) / 2 - (ratio === 'story' ? 40 : 15));
+        ctx.drawImage(armorImg, drawX, drawY, targetW, targetH);
+      }
+
+    /* ==========================================================================
+       STYLE 0B: THEMATIC CREATION DAWN (Genesis 1:3)
+       ========================================================================== */
+    } else if (layoutMode === "thematic-genesis" || (vod && (vod.thematicLayout === "creation-dawn" || (vod.ref && vod.ref.includes("उत्पत्ति") && vod.ref.includes("१:३"))))) {
+      // Golden luminous sunbeams & dawn mist
+      const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      grad.addColorStop(0, 'rgba(15, 23, 42, 0.45)');
+      grad.addColorStop(0.35, 'rgba(180, 83, 9, 0.25)');
+      grad.addColorStop(0.7, 'rgba(15, 23, 42, 0.65)');
+      grad.addColorStop(1, 'rgba(10, 15, 26, 0.95)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      let startY = Math.round(canvas.height * (ratio === 'story' ? 0.32 : 0.24));
+
+      // 1. Intro phrase: "देव बोलला,"
+      ctx.direction = "ltr";
+      ctx.font = "italic 600 32px 'Noto Serif Devanagari', 'Lora', Georgia, serif";
+      ctx.fillStyle = "#f1f5f9";
+      ctx.shadowColor = "rgba(0,0,0,0.9)";
+      ctx.shadowBlur = 14;
+      const introStr = isMarathi ? "देव बोलला," : "And God said,";
+      const introW = ctx.measureText(introStr).width;
+      ctx.fillText(introStr, Math.round((canvas.width - introW) / 2), startY);
+      startY += 58;
+
+      // 2. Giant Golden Hero Callout: “प्रकाश होवो”
+      ctx.font = `italic 900 ${(ratio === 'story' ? 76 : 70)}px 'Rozha One', 'Noto Serif Devanagari', Georgia, serif`;
+      ctx.fillStyle = "#fbbf24";
+      ctx.shadowColor = "rgba(251, 191, 36, 0.75)";
+      ctx.shadowBlur = 32;
+      const heroStr = isMarathi ? "“प्रकाश होवो”" : "“LET THERE BE LIGHT”";
+      const heroW = ctx.measureText(heroStr).width;
+      ctx.fillText(heroStr, Math.round((canvas.width - heroW) / 2), startY);
+      startY += (ratio === 'story' ? 95 : 85);
+
+      // 3. Subtext resolution
+      ctx.shadowColor = "rgba(0,0,0,0.95)";
+      ctx.shadowBlur = 18;
+      const subMaxW = 860;
+      const subFont = `600 ${(ratio === 'story' ? 36 : 32)}px 'Noto Serif Devanagari', 'Lora', serif`;
+      const subText = isMarathi 
+        ? "आणि प्रकाश झाला. देवाने प्रकाश पाहिला की तो चांगला आहे. देवाने अंधकारापासून प्रकाश वेगळा केला."
+        : "and there was light. God saw that the light was good, and he separated the light from the darkness.";
+      const subLines = wrapText(subText, subMaxW, subFont);
+      const subLineH = Math.round((ratio === 'story' ? 36 : 32) * 1.6);
+
+      ctx.font = subFont;
+      ctx.fillStyle = "#ffffff";
+      for (let i = 0; i < subLines.length; i++) {
+        const lineW = ctx.measureText(subLines[i]).width;
+        ctx.fillText(subLines[i], Math.round((canvas.width - lineW) / 2), startY + (i * subLineH));
+      }
+      startY += (subLines.length * subLineH) + 40;
+
+      // 4. Reference Badge Pill
+      ctx.font = "800 24px 'Outfit', sans-serif";
+      const refStr = isMarathi ? "🔖 उत्पत्ति १:३-४ • MARVBSI" : "🔖 GENESIS 1:3-4 • NLT";
+      const refTextW = ctx.measureText(refStr).width;
+      const pillW = refTextW + 48;
+      const pillH = 50;
+      const pillX = Math.round((canvas.width - pillW) / 2);
+      const pillY = startY;
+
+      ctx.save();
+      ctx.fillStyle = "rgba(15, 23, 42, 0.75)";
+      ctx.strokeStyle = "rgba(251, 191, 36, 0.6)";
+      ctx.lineWidth = 1.8;
+      ctx.shadowColor = "rgba(0,0,0,0.7)";
+      ctx.shadowBlur = 14;
+      ctx.beginPath();
+      if (typeof ctx.roundRect === 'function') ctx.roundRect(pillX, pillY, pillW, pillH, 25);
+      else ctx.rect(pillX, pillY, pillW, pillH);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = "#fbbf24";
+      ctx.shadowBlur = 0;
+      ctx.fillText(refStr, pillX + 24, pillY + 34);
+      ctx.restore();
+
+    /* ==========================================================================
        STYLE 1: FLOURISH SWASH (Alpine Mountain Peak & Cross)
        ========================================================================== */
-    if (layoutMode === "flourish-swash") {
+    } else if (layoutMode === "flourish-swash") {
       // Bottom half dark atmospheric gradient overlay to guarantee 100% legibility
       const grad = ctx.createLinearGradient(0, canvas.height * 0.42, 0, canvas.height);
       grad.addColorStop(0, 'rgba(10, 15, 25, 0.0)');
