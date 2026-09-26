@@ -6735,6 +6735,16 @@ function setupEventListeners() {
     openReaderSearchDrawer();
   });
 
+  document.getElementById("btn-search-trigger")?.addEventListener("click", () => {
+    if (typeof switchTab === 'function') {
+      switchTab('discover');
+      setTimeout(() => {
+        const discoverInput = document.getElementById('discover-search-input');
+        if (discoverInput) discoverInput.focus();
+      }, 120);
+    }
+  });
+
   document.getElementById("btn-reader-more-options")?.addEventListener("click", () => {
     openReaderMoreOptionsDrawer();
   });
@@ -22630,116 +22640,341 @@ window.updateMicroLearningBookmarkUI = function() {
   }
 };
 
-window.shareMicroLearningWord = function() {
-  const word = (typeof getTodayBiblicalWord === "function") ? getTodayBiblicalWord() : null;
-  if (!word) return;
-  const isEng = (window.state && (window.state.translation === "eng" || window.state.language === "en"));
-  const text = `✨ Biblical Word of the Day: ${word.term}\n\n` +
-    `📍 Origin: ${word.origin} | Pronunciation: ${word.pronunciation}\n\n` +
-    `📖 Meaning:\n${isEng ? word.meaningEn : word.meaningMr}\n\n` +
-    `💡 Spiritual Insight:\n${(isEng && word.insightEn) ? word.insightEn : word.insightMr}\n\n` +
-    `📜 Scripture: ${isEng ? word.refEn : word.refMr}\n\n` +
-    `Read on River of Life Bible: ${window.location.origin}`;
+/* ==============================================================================
+   BIBLICAL WORD OF THE DAY (BWOD) SCENIC STUDIO & WHATSAPP ENGINE (v2393)
+   ============================================================================== */
+const BWOD_WALLPAPERS = [
+  "pinterest_golden_path.jpg",
+  "pinterest_alpine_mountain.jpg",
+  "pinterest_forest_sunset.jpg",
+  "pinterest_light_of_world.jpg",
+  "pinterest_watercolor_red_sea.jpg",
+  "morning_grace_art.jpg",
+  "living_water_falls.jpg",
+  "sunrise.png"
+];
+let currentBwodWpIndex = 0;
+
+window.cycleBwodWallpaper = function(event) {
+  if (event) event.stopPropagation();
+  currentBwodWpIndex = (currentBwodWpIndex + 1) % BWOD_WALLPAPERS.length;
+  const wp = BWOD_WALLPAPERS[currentBwodWpIndex];
+  localStorage.setItem("rol_selected_bwod_wallpaper", wp);
   
-  if (navigator.share) {
-    navigator.share({ title: `Word of the Day: ${word.term}`, text: text }).catch(() => {});
-  } else {
-    const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
-    window.open(waUrl, '_blank');
+  const card = document.getElementById("card-microlearning-word");
+  if (card) {
+    card.style.backgroundImage = `url('assets/daily_verses/${wp}')`;
+  }
+  const fsBg = document.getElementById("fs-bwod-capsule-bg");
+  if (fsBg) {
+    fsBg.style.backgroundImage = `url('assets/daily_verses/${wp}')`;
+  }
+  if (typeof showToast === 'function') {
+    showToast("🎨 वॉलपेपर बदलला • Scenic wallpaper updated!");
   }
 };
 
-window.downloadMicroLearningCard = function() {
-  const word = (typeof getTodayBiblicalWord === "function") ? getTodayBiblicalWord() : null;
-  const canvas = document.createElement('canvas');
+window.openFullscreenBWOD = function() {
+  const modal = document.getElementById("modal-fullscreen-bwod");
+  if (!modal) return;
+  modal.style.display = "block";
+  document.body.style.overflow = "hidden";
+  window.updateBwodStudioUI();
+};
+
+window.closeFullscreenBWOD = function() {
+  const modal = document.getElementById("modal-fullscreen-bwod");
+  if (!modal) return;
+  modal.style.display = "none";
+  document.body.style.overflow = "";
+};
+
+window.navigateBWOD = function(direction) {
+  if (!window.state) window.state = {};
+  if (typeof window.state.bwodDayOffset !== 'number') window.state.bwodDayOffset = 0;
+  if (direction === 'prev') {
+    window.state.bwodDayOffset -= 1;
+  } else if (direction === 'next') {
+    window.state.bwodDayOffset += 1;
+  }
+  renderBiblicalMicroLearning();
+  window.updateBwodStudioUI();
+};
+
+window.updateBwodStudioUI = function() {
+  const word = window.getTodayBiblicalWord();
+  if (!word) return;
+  const isEng = (window.state && (window.state.translation === "eng" || window.state.language === "en"));
+  
+  const savedWp = localStorage.getItem("rol_selected_bwod_wallpaper") || BWOD_WALLPAPERS[currentBwodWpIndex];
+  const fsBg = document.getElementById("fs-bwod-capsule-bg");
+  if (fsBg) fsBg.style.backgroundImage = `url('assets/daily_verses/${savedWp}')`;
+  
+  const fsOrigin = document.getElementById("fs-bwod-origin");
+  if (fsOrigin) fsOrigin.textContent = word.origin;
+  
+  const fsTerm = document.getElementById("fs-bwod-term");
+  if (fsTerm) fsTerm.textContent = word.term;
+  
+  const fsPron = document.getElementById("fs-bwod-pronounce");
+  if (fsPron) fsPron.textContent = isEng ? `Pronunciation: ${word.pronunciation}` : `उच्चार: ${word.pronunciation}`;
+  
+  const fsMeaning = document.getElementById("fs-bwod-meaning");
+  if (fsMeaning) fsMeaning.textContent = isEng ? word.meaningEn : word.meaningMr;
+  
+  const fsInsight = document.getElementById("fs-bwod-insight");
+  if (fsInsight) fsInsight.textContent = (isEng && word.insightEn) ? word.insightEn : word.insightMr;
+  
+  const fsRef = document.getElementById("fs-bwod-ref");
+  if (fsRef) fsRef.textContent = isEng ? word.refEn : word.refMr;
+  
+  const dayLabel = document.getElementById("fs-bwod-day-label");
+  if (dayLabel) dayLabel.textContent = `Day ${word.id}`;
+};
+
+window.generateExactBwodImageBlob = async function() {
+  const word = window.getTodayBiblicalWord();
+  const isEng = (window.state && (window.state.translation === "eng" || window.state.language === "en"));
+  const savedWp = localStorage.getItem("rol_selected_bwod_wallpaper") || BWOD_WALLPAPERS[currentBwodWpIndex];
+  
+  const canvas = document.createElement("canvas");
   canvas.width = 1080;
   canvas.height = 1080;
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext("2d");
   
-  // Dark cinematic gradient background
-  const grad = ctx.createLinearGradient(0, 0, 1080, 1080);
-  grad.addColorStop(0, '#0f141d');
-  grad.addColorStop(0.5, '#151b27');
-  grad.addColorStop(1, '#0b0e14');
-  ctx.fillStyle = grad;
+  // 1. Draw wallpaper image
+  const img = new Image();
+  img.crossOrigin = "anonymous";
+  img.src = `assets/daily_verses/${savedWp}`;
+  await new Promise((resolve) => {
+    img.onload = resolve;
+    img.onerror = resolve;
+  });
+  
+  if (img.complete && img.naturalWidth > 0) {
+    ctx.drawImage(img, 0, 0, 1080, 1080);
+  } else {
+    const fallbackGrad = ctx.createLinearGradient(0, 0, 1080, 1080);
+    fallbackGrad.addColorStop(0, "#1e1b4b");
+    fallbackGrad.addColorStop(1, "#0f172a");
+    ctx.fillStyle = fallbackGrad;
+    ctx.fillRect(0, 0, 1080, 1080);
+  }
+  
+  // 2. Cinematic dark gradient overlay
+  const scrim = ctx.createLinearGradient(0, 0, 0, 1080);
+  scrim.addColorStop(0, "rgba(15, 23, 42, 0.72)");
+  scrim.addColorStop(0.35, "rgba(15, 23, 42, 0.45)");
+  scrim.addColorStop(0.7, "rgba(15, 23, 42, 0.78)");
+  scrim.addColorStop(1, "rgba(10, 14, 26, 0.95)");
+  ctx.fillStyle = scrim;
   ctx.fillRect(0, 0, 1080, 1080);
   
-  // Outer glowing violet border
-  ctx.strokeStyle = 'rgba(139, 92, 246, 0.4)';
-  ctx.lineWidth = 4;
-  ctx.strokeRect(40, 40, 1000, 1000);
+  // 3. Outer glowing border
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.25)";
+  ctx.lineWidth = 3;
+  ctx.strokeRect(36, 36, 1008, 1008);
   
-  // Left violet accent bar
-  ctx.fillStyle = '#8b5cf6';
-  ctx.fillRect(40, 40, 16, 1000);
-  
-  // Header Tag
-  ctx.fillStyle = '#c084fc';
-  ctx.font = 'bold 26px -apple-system, BlinkMacSystemFont, sans-serif';
-  ctx.fillText('✨ BIBLICAL WORD OF THE DAY', 90, 120);
-  
-  // Term Title
-  ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 54px -apple-system, BlinkMacSystemFont, sans-serif';
-  ctx.fillText(word ? word.term : 'Word of the Day', 90, 200);
-  
-  // Origin & Pronunciation
-  ctx.fillStyle = '#e2e8f0';
-  ctx.font = '600 28px -apple-system, BlinkMacSystemFont, sans-serif';
-  ctx.fillText(`${word ? word.origin : ''}  •  उच्चार: ${word ? word.pronunciation : ''}`, 90, 260);
-  
-  // Meaning Box
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.06)';
-  ctx.fillRect(90, 320, 900, 180);
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
-  ctx.strokeRect(90, 320, 900, 180);
-  
-  ctx.fillStyle = '#a78bfa';
-  ctx.font = 'bold 22px -apple-system, BlinkMacSystemFont, sans-serif';
-  ctx.fillText('अर्थ (BIBLICAL MEANING)', 120, 370);
-  
-  ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 32px "Noto Serif Devanagari", Georgia, serif';
-  ctx.fillText(word ? word.meaningMr : '', 120, 430);
-  
-  // Spiritual Insight
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-  ctx.font = 'bold 22px -apple-system, BlinkMacSystemFont, sans-serif';
-  ctx.fillText('आत्मिक रहस्य व मनन (SPIRITUAL INSIGHT)', 90, 560);
-  
-  ctx.fillStyle = '#cbd5e1';
-  ctx.font = '28px "Noto Serif Devanagari", Georgia, serif';
-  const insight = word ? word.insightMr : '';
-  const wordsArr = insight.split(' ');
-  let curLine = '';
-  let startY = 620;
-  for (let n = 0; n < wordsArr.length; n++) {
-    const test = curLine + wordsArr[n] + ' ';
-    if (ctx.measureText(test).width > 890 && n > 0) {
-      ctx.fillText(curLine, 90, startY);
-      curLine = wordsArr[n] + ' ';
-      startY += 48;
-    } else {
-      curLine = test;
-    }
+  // 4. Header Badge Pill
+  ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+  ctx.beginPath();
+  if (typeof ctx.roundRect === 'function') {
+    ctx.roundRect(70, 70, 480, 48, 24);
+  } else {
+    ctx.rect(70, 70, 480, 48);
   }
-  ctx.fillText(curLine, 90, startY);
+  ctx.fill();
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.35)";
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
   
-  // Scripture Reference
-  ctx.fillStyle = '#c084fc';
-  ctx.font = 'bold 28px -apple-system, BlinkMacSystemFont, sans-serif';
-  ctx.fillText(word ? `📖 ${word.refMr}` : '', 90, 920);
+  ctx.fillStyle = "#fde047";
+  ctx.font = "bold 20px -apple-system, BlinkMacSystemFont, sans-serif";
+  ctx.fillText("✨ BIBLICAL WORD OF THE DAY", 92, 102);
   
-  // App Branding
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-  ctx.font = '22px -apple-system, BlinkMacSystemFont, sans-serif';
-  ctx.fillText('River of Life • Holy Bible', 90, 970);
+  // 5. Origin Badge Pill
+  ctx.fillStyle = "rgba(253, 224, 71, 0.2)";
+  ctx.beginPath();
+  if (typeof ctx.roundRect === 'function') {
+    ctx.roundRect(830, 70, 180, 48, 24);
+  } else {
+    ctx.rect(830, 70, 180, 48);
+  }
+  ctx.fill();
+  ctx.strokeStyle = "rgba(253, 224, 71, 0.5)";
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
   
-  const link = document.createElement('a');
-  link.download = `biblical_word_of_the_day_${Date.now()}.png`;
-  link.href = canvas.toDataURL('image/png');
-  link.click();
-  if (typeof showToast === 'function') showToast("कार्ड डाऊनलोड झाले • Card downloaded! 📸");
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "bold 20px -apple-system, BlinkMacSystemFont, sans-serif";
+  ctx.fillText(word ? word.origin : "Greek", 850, 102);
+  
+  // 6. Word Title
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "bold 56px 'Noto Serif Devanagari', 'Playfair Display', Georgia, serif";
+  ctx.shadowColor = "rgba(0, 0, 0, 0.9)";
+  ctx.shadowBlur = 18;
+  ctx.fillText(word ? word.term : "Word of the Day", 70, 195);
+  ctx.shadowBlur = 0;
+  
+  // 7. Pronunciation Subtitle
+  ctx.fillStyle = "#fde047";
+  ctx.font = "600 24px -apple-system, BlinkMacSystemFont, sans-serif";
+  const pronText = isEng ? `Pronunciation: ${word.pronunciation}` : `उच्चार: ${word.pronunciation} 🔊`;
+  ctx.fillText(pronText, 70, 240);
+  
+  // Helper for word wrapping on canvas
+  const drawWrappedText = (text, startX, startY, maxWidth, lineHeight) => {
+    if (!text) return startY;
+    const words = text.split(" ");
+    let curLine = "";
+    let curY = startY;
+    for (let n = 0; n < words.length; n++) {
+      const test = curLine + words[n] + " ";
+      if (ctx.measureText(test).width > maxWidth && n > 0) {
+        ctx.fillText(curLine, startX, curY);
+        curLine = words[n] + " ";
+        curY += lineHeight;
+      } else {
+        curLine = test;
+      }
+    }
+    ctx.fillText(curLine, startX, curY);
+    return curY;
+  };
+
+  // 8. Frosted Glass Meaning Container
+  ctx.fillStyle = "rgba(15, 23, 42, 0.72)";
+  ctx.beginPath();
+  if (typeof ctx.roundRect === 'function') {
+    ctx.roundRect(70, 275, 940, 210, 20);
+  } else {
+    ctx.rect(70, 275, 940, 210);
+  }
+  ctx.fill();
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  
+  ctx.fillStyle = "#fbbf24";
+  ctx.font = "bold 19px -apple-system, BlinkMacSystemFont, sans-serif";
+  ctx.fillText("📖 पवित्र अर्थ (BIBLICAL MEANING)", 96, 320);
+  
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "bold 28px 'Noto Serif Devanagari', Georgia, serif";
+  const meaningText = isEng ? word.meaningEn : word.meaningMr;
+  drawWrappedText(meaningText, 96, 370, 888, 38);
+  
+  // 9. Frosted Glass Insight Container
+  ctx.fillStyle = "rgba(15, 23, 42, 0.72)";
+  ctx.beginPath();
+  if (typeof ctx.roundRect === 'function') {
+    ctx.roundRect(70, 515, 940, 310, 20);
+  } else {
+    ctx.rect(70, 515, 940, 310);
+  }
+  ctx.fill();
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  
+  ctx.fillStyle = "#93c5fd";
+  ctx.font = "bold 19px -apple-system, BlinkMacSystemFont, sans-serif";
+  ctx.fillText("💡 आत्मिक रहस्य व मनन (SPIRITUAL INSIGHT)", 96, 560);
+  
+  ctx.fillStyle = "#f1f5f9";
+  ctx.font = "24px 'Noto Serif Devanagari', Georgia, serif";
+  const insightText = (isEng && word.insightEn) ? word.insightEn : word.insightMr;
+  drawWrappedText(insightText, 96, 610, 888, 36);
+  
+  // 10. Scripture Reference Footer
+  ctx.fillStyle = "#fbbf24";
+  ctx.font = "bold 24px 'Noto Serif Devanagari', Georgia, serif";
+  const refText = isEng ? `📜 Scripture: ${word.refEn}` : `📜 शास्त्र संदर्भ: ${word.refMr}`;
+  ctx.fillText(refText, 70, 875);
+  
+  // 11. App Branding Bar
+  ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+  ctx.font = "bold 20px -apple-system, BlinkMacSystemFont, sans-serif";
+  ctx.fillText("🌊 River of Life • Holy Bible (पवित्र बायबल)", 70, 990);
+  
+  ctx.fillStyle = "rgba(255, 255, 255, 0.45)";
+  ctx.font = "16px -apple-system, BlinkMacSystemFont, sans-serif";
+  ctx.fillText("Daily Biblical Word • आजचा पवित्र शब्द", 70, 1018);
+  
+  const blob = await new Promise((res) => canvas.toBlob(res, "image/png", 0.95));
+  const filename = `Biblical_Word_${(word.term || 'Word').replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}.png`;
+  const dataUrl = canvas.toDataURL("image/png");
+  return { blob, filename, dataUrl };
+};
+
+window.shareBwodToWhatsApp = async function() {
+  const word = window.getTodayBiblicalWord();
+  if (!word) return;
+  const isEng = (window.state && (window.state.translation === "eng" || window.state.language === "en"));
+  
+  const text = `✨ *आजचा पवित्र मूळ शब्द • BIBLICAL WORD OF THE DAY* ✨\n` +
+    `━━━━━━━━━━━━━━━━━━━━\n` +
+    `🔤 *${word.term}*\n` +
+    `📍 *मूळ:* ${word.origin} • *उच्चार:* ${word.pronunciation}\n\n` +
+    `📖 *पवित्र अर्थ (Biblical Meaning):*\n` +
+    `${isEng ? word.meaningEn : word.meaningMr}\n\n` +
+    `💡 *आत्मिक रहस्य व मनन (Spiritual Insight):*\n` +
+    `${(isEng && word.insightEn) ? word.insightEn : word.insightMr}\n\n` +
+    `📜 *पवित्र शास्त्र संदर्भ:*\n` +
+    `${isEng ? word.refEn : word.refMr}\n\n` +
+    `🔗 *रिव्हर ऑफ लाईफ बायबलवर हा अध्याय वाचा:*\n` +
+    `${window.location.origin}\n` +
+    `━━━━━━━━━━━━━━━━━━━━\n` +
+    `🕊️ *River of Life • पवित्र बायबल*`;
+
+  showToast("📸 WhatsApp साठी कार्ड तयार होत आहे...");
+
+  try {
+    const { blob, filename } = await generateExactBwodImageBlob();
+    const file = new File([blob], filename, { type: "image/png", lastModified: Date.now() });
+
+    // 1. Try Native Web Share API with image file
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({
+        files: [file],
+        title: `Word of the Day: ${word.term}`,
+        text: text
+      });
+      showToast("✅ WhatsApp वर शेअर केले!");
+      return;
+    }
+  } catch (err) {
+    console.warn("Native file share fallback:", err);
+  }
+
+  // 2. Fallback to WhatsApp URL + Auto-download image for status
+  try {
+    const { dataUrl, filename } = await generateExactBwodImageBlob();
+    const link = document.createElement("a");
+    link.download = filename;
+    link.href = dataUrl;
+    link.click();
+    showToast("📸 फोटो डाऊनलोड झाला! आता WhatsApp वर पाठवा.");
+  } catch (e) {}
+
+  const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+  window.open(waUrl, "_blank");
+};
+
+window.saveExactBwodImage = async function() {
+  showToast("📸 कार्ड तयार होत आहे...");
+  try {
+    const { dataUrl, filename } = await generateExactBwodImageBlob();
+    const link = document.createElement("a");
+    link.download = filename;
+    link.href = dataUrl;
+    link.click();
+    showToast("✅ कार्ड गॅलरीत सेव्ह झाले!");
+  } catch (err) {
+    console.error("Save image error:", err);
+    showToast("⚠️ फोटो सेव्ह करताना त्रुटी आली.");
+  }
 };
 
 window.renderBiblicalMicroLearning = function() {
@@ -22749,9 +22984,17 @@ window.renderBiblicalMicroLearning = function() {
   
   const isEng = (window.state && (window.state.translation === "eng" || window.state.language === "en"));
   
+  // Set card background image from saved preference or default
+  const savedWp = localStorage.getItem("rol_selected_bwod_wallpaper") || BWOD_WALLPAPERS[currentBwodWpIndex];
+  const card = document.getElementById("card-microlearning-word");
+  if (card) {
+    card.style.backgroundImage = `url('assets/daily_verses/${savedWp}')`;
+  }
+
   const termEl = document.getElementById("micro-word-term");
   const originEl = document.getElementById("micro-word-origin");
   const pronEl = document.getElementById("micro-word-pronunciation");
+  const pronTextEl = document.getElementById("micro-word-pronounce-text");
   const meaningEl = document.getElementById("micro-word-meaning");
   const insightEl = document.getElementById("micro-word-insight");
   const refEl = document.getElementById("micro-word-ref");
@@ -22769,21 +23012,15 @@ window.renderBiblicalMicroLearning = function() {
     }
   }
   if (originEl) originEl.textContent = word.origin;
-  if (pronEl) {
+  if (pronTextEl) {
+    pronTextEl.textContent = isEng ? `Pronunciation: ${word.pronunciation}` : `उच्चार: ${word.pronunciation}`;
+  } else if (pronEl) {
     pronEl.innerHTML = (isEng ? `Pronunciation: ${word.pronunciation}` : `उच्चार: ${word.pronunciation}`) + ` <span style="font-size: 11px; margin-left: 2px;">🔊</span>`;
-    pronEl.onclick = function() { if (typeof window.speakMicroLearningWord === "function") window.speakMicroLearningWord(); };
-    pronEl.title = isEng ? "Tap to listen" : "उच्चार ऐकण्यासाठी टॅप करा";
   }
   if (meaningEl) meaningEl.textContent = isEng ? word.meaningEn : word.meaningMr;
   if (insightEl) insightEl.textContent = (isEng && word.insightEn) ? word.insightEn : word.insightMr;
   if (refEl) refEl.textContent = isEng ? word.refEn : word.refMr;
   if (dayBadge) dayBadge.textContent = `Day ${word.id}`;
-
-  const navBtn = document.getElementById("micro-word-nav-btn");
-  if (navBtn) {
-    const span = navBtn.querySelector("span");
-    if (span) span.textContent = isEng ? "Read in Bible →" : "बायबलमध्ये वाचा →";
-  }
 };
 window.renderEducationalMicroLearning = window.renderBiblicalMicroLearning;
 
@@ -22813,6 +23050,68 @@ window.openMicroLearningBibleChapter = function() {
   if (word && word.bookKey) {
     openReaderAndNavigate(word.bookKey, word.chapter, word.verse);
   }
+};
+
+/* ==============================================================================
+   HOMEPAGE SCRIPTURE & TOPIC SEARCH CONTROLLER (v2393)
+   ============================================================================== */
+window.executeHomeQuickSearch = function(event) {
+  if (event) event.stopPropagation();
+  const input = document.getElementById("home-search-input");
+  const query = input ? input.value.trim() : "";
+  if (!query) {
+    if (input) input.focus();
+    return;
+  }
+  window.quickSearchTopic(query);
+};
+
+window.quickSearchTopic = function(topic) {
+  if (!topic) return;
+  if (typeof switchTab === 'function') {
+    switchTab('discover');
+    setTimeout(() => {
+      const discoverInput = document.getElementById('discover-search-input');
+      if (discoverInput) {
+        discoverInput.value = topic;
+        const clearBtn = document.getElementById('btn-discover-search-clear');
+        if (clearBtn) clearBtn.style.display = 'block';
+        if (typeof executeDiscoverSearch === 'function') {
+          executeDiscoverSearch();
+        }
+      }
+    }, 120);
+  }
+};
+
+window.handleHomeSearchKey = function(event) {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    window.executeHomeQuickSearch(event);
+  }
+};
+
+window.handleHomeSearchInput = function(event) {
+  const clearBtn = document.getElementById("home-search-clear-btn");
+  if (clearBtn) {
+    clearBtn.style.display = event.target.value.trim() ? "flex" : "none";
+  }
+};
+
+window.clearHomeSearchInput = function(event) {
+  if (event) event.stopPropagation();
+  const input = document.getElementById("home-search-input");
+  if (input) {
+    input.value = "";
+    input.focus();
+  }
+  const clearBtn = document.getElementById("home-search-clear-btn");
+  if (clearBtn) clearBtn.style.display = "none";
+};
+
+window.focusHomeSearchInput = function() {
+  const input = document.getElementById("home-search-input");
+  if (input) input.focus();
 };
 
 // 2. TIME-AWARE DAYPARTING ATMOSPHERE CONTROLLER

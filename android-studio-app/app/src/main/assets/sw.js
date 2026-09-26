@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v2392_BSI_MARATHI_ORTHOGRAPHY_PERFECTED';
+const CACHE_NAME = 'river-of-life-cache-v2393_BIBLICAL_WORD_STUDIO_AND_HOME_SEARCH';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
