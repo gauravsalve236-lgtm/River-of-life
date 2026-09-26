@@ -12654,7 +12654,7 @@ function getMiroTalkRoomUrl(meeting) {
   const roomSlug = `RiverOfLife_Sanctuary_${meetingIdSlug}`;
 
   if (_currentMiroTalkEngine === "p2p") {
-    return `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&speaker=true&autojoin=true&p2p=true&codec=opus&layout=grid&grid=1&name=${encodeURIComponent(loggedIn)}&buttons=mic,cam,share,hand,chat,participants,leave&theme=dark`;
+    return `https://p2p.mirotalk.com/join/${roomSlug}?audio=true&video=true&mic=true&cam=true&muted=false&sound=true&speaker=true&autojoin=true&p2p=true&codec=opus&layout=grid&grid=1&name=${encodeURIComponent(loggedIn)}&buttons=mic,cam,share,leave&theme=dark`;
   } else {
     // MiroTalk SFU (Mediasoup backend - supports 50+ to 100+ participants)
     // chat=false ensures the public chat window does NOT auto-open on join (preventing it from obscuring the meeting on mobile/desktop)
@@ -14363,6 +14363,116 @@ function updateCamControlUI(isCamOff) {
     wrap.style.borderColor = isCamOff ? "#ef4444" : "rgba(255, 255, 255, 0.18)";
   }
 }
+
+// Toggle Screen Sharing for Meeting
+async function toggleRiverMeetingScreenShare() {
+  try {
+    if (RiverMeet.isScreenSharing) {
+      await stopRiverMeetingScreenShare();
+      return;
+    }
+
+    if (!navigator.mediaDevices || typeof navigator.mediaDevices.getDisplayMedia !== "function") {
+      if (typeof showToast === "function") {
+        showToast("Screen sharing is not supported on this browser/device 📱");
+      }
+      return;
+    }
+
+    const screenStream = await navigator.mediaDevices.getDisplayMedia({
+      video: { cursor: "always" },
+      audio: true
+    });
+
+    RiverMeet.screenStream = screenStream;
+    RiverMeet.isScreenSharing = true;
+    updateScreenShareControlUI(true);
+
+    screenStream.getVideoTracks()[0].onended = () => {
+      stopRiverMeetingScreenShare();
+    };
+
+    // If LiveKit room is active, publish screen track
+    if (RiverMeet.livekitRoom && RiverMeet.livekitRoom.localParticipant) {
+      try {
+        const screenTrack = screenStream.getVideoTracks()[0];
+        await RiverMeet.livekitRoom.localParticipant.publishTrack(screenTrack, {
+          name: "screenshare",
+          source: LivekitClient.Track.Source.ScreenShare
+        });
+      } catch(pubErr) {
+        console.warn("[RiverMeet] LiveKit screen share publish error:", pubErr);
+      }
+    }
+
+    if (typeof showToast === "function") {
+      showToast("Screen sharing started 🖥️");
+    }
+  } catch (err) {
+    if (err.name !== "NotAllowedError" && err.name !== "AbortError") {
+      console.warn("[RiverMeet] Screen share error:", err);
+      if (typeof showToast === "function") {
+        showToast("Screen share notice: " + (err.message || err.name));
+      }
+    }
+    stopRiverMeetingScreenShare();
+  }
+}
+window.toggleRiverMeetingScreenShare = toggleRiverMeetingScreenShare;
+
+async function stopRiverMeetingScreenShare() {
+  RiverMeet.isScreenSharing = false;
+  updateScreenShareControlUI(false);
+
+  if (RiverMeet.screenStream) {
+    RiverMeet.screenStream.getTracks().forEach(t => {
+      try { t.stop(); } catch(e) {}
+    });
+    RiverMeet.screenStream = null;
+  }
+
+  if (RiverMeet.livekitRoom && RiverMeet.livekitRoom.localParticipant) {
+    try {
+      const pub = RiverMeet.livekitRoom.localParticipant.getTrackPublication(LivekitClient.Track.Source.ScreenShare);
+      if (pub && pub.track) {
+        await RiverMeet.livekitRoom.localParticipant.unpublishTrack(pub.track);
+      }
+    } catch(e) {}
+  }
+}
+window.stopRiverMeetingScreenShare = stopRiverMeetingScreenShare;
+
+function updateScreenShareControlUI(isSharing) {
+  const btn = document.getElementById("btn-river-share-screen");
+  const label = document.getElementById("river-screen-label");
+  const wrap = document.getElementById("river-screen-icon-wrap");
+
+  if (btn) {
+    if (isSharing) btn.classList.add("is-sharing");
+    else btn.classList.remove("is-sharing");
+  }
+  if (label) label.textContent = isSharing ? "Stop" : "Share";
+  if (wrap) {
+    wrap.style.background = isSharing ? "#22c55e" : "rgba(255, 255, 255, 0.12)";
+    wrap.style.borderColor = isSharing ? "#4ade80" : "rgba(255, 255, 255, 0.18)";
+  }
+}
+
+// In-Call Meeting Settings Sheet Toggle
+function toggleRiverMeetingSettings() {
+  const modal = document.getElementById("river-meeting-settings-modal");
+  if (!modal) return;
+  const isHidden = modal.style.display === "none" || !modal.style.display;
+  modal.style.display = isHidden ? "flex" : "none";
+
+  const engineDesc = document.getElementById("setting-engine-desc");
+  if (engineDesc) {
+    engineDesc.textContent = (_currentMiroTalkEngine === "sfu")
+      ? "Current: MiroTalk SFU (50+ users) ▾"
+      : "Current: MiroTalk P2P ▾";
+  }
+}
+window.toggleRiverMeetingSettings = toggleRiverMeetingSettings;
 
 // Flip Camera (Front / Back switch on phones)
 async function flipRiverMeetingCamera() {

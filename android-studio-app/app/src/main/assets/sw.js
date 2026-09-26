@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v2388_DISABLE_AUTO_CHAT_ON_MEETING_JOIN';
+const CACHE_NAME = 'river-of-life-cache-v2389_STREAMLINE_INCALL_MENUS_AND_SETTINGS';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

@@ -12,7 +12,7 @@
   <script>
     // Force immediate hard purge of all stale Service Workers and CacheStorage
     (function() {
-      const CURRENT_VER = "v2388_DISABLE_AUTO_CHAT_ON_MEETING_JOIN";
+      const CURRENT_VER = "v2389_STREAMLINE_INCALL_MENUS_AND_SETTINGS";
       if (localStorage.getItem("rol_app_ver") !== CURRENT_VER) {
         localStorage.setItem("rol_app_ver", CURRENT_VER);
         if ('serviceWorker' in navigator) {
@@ -5298,35 +5298,37 @@
                 <span class="river-ctrl-label" id="river-cam-label">Camera</span>
               </button>
 
-              <!-- Flip Camera Button (Front / Back switch on phones) -->
-              <button id="btn-river-flip-cam" onclick="flipRiverMeetingCamera()" class="river-ctrl-btn" title="Flip Camera">
-                <div class="river-ctrl-icon-wrap">
-                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M20 10c0-4.418-3.582-8-8-8s-8 3.582-8 8c0 1.956.702 3.748 1.874 5.143L4 18h5v-5l-1.636 1.636C6.51 13.565 6 11.853 6 10c0-3.314 2.686-6 6-6s6 2.686 6 6c0 1.853-.51 3.565-1.364 4.636L15 13v5h5l-1.874-2.857C19.298 13.748 20 11.956 20 10Z"></path>
+              <!-- Share Screen Button -->
+              <button id="btn-river-share-screen" onclick="toggleRiverMeetingScreenShare()" class="river-ctrl-btn" title="Share Screen">
+                <div class="river-ctrl-icon-wrap" id="river-screen-icon-wrap">
+                  <svg id="river-icon-screen-share" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                    <line x1="8" y1="21" x2="16" y2="21"></line>
+                    <line x1="12" y1="17" x2="12" y2="21"></line>
+                    <polyline points="16 8 12 4 8 8"></polyline>
+                    <line x1="12" y1="4" x2="12" y2="12"></line>
                   </svg>
                 </div>
-                <span class="river-ctrl-label">Flip</span>
+                <span class="river-ctrl-label" id="river-screen-label">Share</span>
               </button>
 
-              <!-- Amen / Reaction Button -->
-              <button id="btn-river-reactions" onclick="toggleRiverReactionPicker()" class="river-ctrl-btn" title="Prayer Reactions">
+              <!-- Amen / Reaction Button (Expressions) -->
+              <button id="btn-river-reactions" onclick="toggleRiverReactionPicker()" class="river-ctrl-btn" title="Expressions / Reactions">
                 <div class="river-ctrl-icon-wrap">
                   <span style="font-size: 20px;">🙏</span>
                 </div>
                 <span class="river-ctrl-label">Amen</span>
               </button>
 
-              <!-- Participants Button -->
-              <button id="btn-river-participants" onclick="toggleRiverParticipantsDrawer()" class="river-ctrl-btn" title="Participants">
+              <!-- Settings Button (Moves rest of options here) -->
+              <button id="btn-river-settings" onclick="toggleRiverMeetingSettings()" class="river-ctrl-btn" title="Meeting Settings">
                 <div class="river-ctrl-icon-wrap">
                   <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="9" cy="7" r="4"></circle>
-                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
                   </svg>
                 </div>
-                <span class="river-ctrl-label">People</span>
+                <span class="river-ctrl-label">Settings</span>
               </button>
 
               <!-- End Call Button -->
@@ -5339,6 +5341,88 @@
                 <span class="river-ctrl-label" style="color: #f87171;">End</span>
               </button>
 
+            </div>
+          </div>
+
+          <!-- Meeting In-Call Settings Sheet / Modal -->
+          <div id="river-meeting-settings-modal" class="river-meeting-settings-modal" style="display: none;">
+            <div class="river-meeting-settings-overlay" onclick="toggleRiverMeetingSettings()"></div>
+            <div class="river-meeting-settings-sheet">
+              <div class="river-meeting-settings-header">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="font-size: 18px;">⚙️</span>
+                  <h4 style="margin: 0; font-size: 15px; font-weight: 800; color: #fff;">Meeting Settings / कॉल सेटिंग्ज</h4>
+                </div>
+                <button onclick="toggleRiverMeetingSettings()" class="river-drawer-close" aria-label="Close Settings">&times;</button>
+              </div>
+              <div class="river-meeting-settings-body">
+                <!-- Option 1: Flip Camera -->
+                <button class="river-setting-item-btn" onclick="flipRiverMeetingCamera(); toggleRiverMeetingSettings();" title="Switch between Front and Back camera on mobile">
+                  <div class="river-setting-icon-wrap">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M20 10c0-4.418-3.582-8-8-8s-8 3.582-8 8c0 1.956.702 3.748 1.874 5.143L4 18h5v-5l-1.636 1.636C6.51 13.565 6 11.853 6 10c0-3.314 2.686-6 6-6s6 2.686 6 6c0 1.853-.51 3.565-1.364 4.636L15 13v5h5l-1.874-2.857C19.298 13.748 20 11.956 20 10Z"></path>
+                    </svg>
+                  </div>
+                  <div class="river-setting-info">
+                    <span class="river-setting-title">Flip Camera / कॅमेरा बदला</span>
+                    <span class="river-setting-desc">Switch front / back camera on phone</span>
+                  </div>
+                  <span class="river-setting-arrow">›</span>
+                </button>
+
+                <!-- Option 2: Participants List -->
+                <button class="river-setting-item-btn" onclick="toggleRiverMeetingSettings(); toggleRiverParticipantsDrawer();" title="View attendees in this call">
+                  <div class="river-setting-icon-wrap">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="9" cy="7" r="4"></circle>
+                      <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                  </div>
+                  <div class="river-setting-info">
+                    <span class="river-setting-title">Participants / सहभागी</span>
+                    <span class="river-setting-desc">See who is in this prayer meeting</span>
+                  </div>
+                  <span class="river-setting-arrow">›</span>
+                </button>
+
+                <!-- Option 3: Speaker / Audio Output -->
+                <button class="river-setting-item-btn" onclick="unlockAllMeetingAudio(); if(typeof showToast==='function') showToast('Loudspeaker / Audio unmuted 🔊'); toggleRiverMeetingSettings();" title="Unmute loudspeaker on phone">
+                  <div class="river-setting-icon-wrap">
+                    <span style="font-size: 18px;">🔊</span>
+                  </div>
+                  <div class="river-setting-info">
+                    <span class="river-setting-title">Loudspeaker / आवाज सुरू करा</span>
+                    <span class="river-setting-desc">Unlock phone audio to hear clearly</span>
+                  </div>
+                  <span class="river-setting-arrow">›</span>
+                </button>
+
+                <!-- Option 4: Switch Video Engine (MiroTalk SFU / MiroTalk P2P) -->
+                <button class="river-setting-item-btn" onclick="toggleMiroTalkMode(); toggleRiverMeetingSettings();" title="Switch engine mode">
+                  <div class="river-setting-icon-wrap">
+                    <span style="font-size: 18px;">⚡</span>
+                  </div>
+                  <div class="river-setting-info">
+                    <span class="river-setting-title">Meeting Server Mode / सर्व्हर मोड</span>
+                    <span class="river-setting-desc" id="setting-engine-desc">MiroTalk SFU (50+ users) / MiroTalk P2P</span>
+                  </div>
+                  <span class="river-setting-arrow">›</span>
+                </button>
+
+                <!-- Option 5: Open in Safari / Fullscreen Browser -->
+                <button class="river-setting-item-btn" onclick="openMeetingInSafariDirectly(); toggleRiverMeetingSettings();" title="Open in Safari">
+                  <div class="river-setting-icon-wrap">
+                    <span style="font-size: 18px;">🌐</span>
+                  </div>
+                  <div class="river-setting-info">
+                    <span class="river-setting-title">Open in Safari / Browser</span>
+                    <span class="river-setting-desc">Launch meeting directly in mobile browser</span>
+                  </div>
+                  <span class="river-setting-arrow">›</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -6334,7 +6418,7 @@
   <script src="sarvam-tts.js?v=132_MARVBSI_FULL_CHURCH_BIBLE"></script>
   <script src="bible-study.js?v=138_MUSEUM_STUDY_HUB"></script>
   <script src="peerjs.min.js"></script>
-  <script src="app.js?v=2388_DISABLE_AUTO_CHAT_ON_MEETING_JOIN"></script>
+  <script src="app.js?v=2389_STREAMLINE_INCALL_MENUS_AND_SETTINGS"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 4.5s no matter what
