@@ -22663,11 +22663,11 @@ window.updateBwodStudioUI = function() {
 window.generateExactBwodImageBlob = async function() {
   const word = window.getTodayBiblicalWord();
   const isEng = (window.state && (window.state.translation === "eng" || window.state.language === "en"));
-  const savedWp = localStorage.getItem("rol_selected_bwod_wallpaper") || BWOD_WALLPAPERS[currentBwodWpIndex];
+  const savedWp = localStorage.getItem("rol_selected_bwod_wallpaper") || "pinterest_golden_path.jpg";
   
   const canvas = document.createElement("canvas");
   canvas.width = 1080;
-  canvas.height = 1080;
+  canvas.height = 1920;
   const ctx = canvas.getContext("2d");
   
   // 1. Draw wallpaper image
@@ -22680,78 +22680,31 @@ window.generateExactBwodImageBlob = async function() {
   });
   
   if (img.complete && img.naturalWidth > 0) {
-    ctx.drawImage(img, 0, 0, 1080, 1080);
+    ctx.drawImage(img, 0, 0, 1080, 1920);
   } else {
-    const fallbackGrad = ctx.createLinearGradient(0, 0, 1080, 1080);
-    fallbackGrad.addColorStop(0, "#1e1b4b");
-    fallbackGrad.addColorStop(1, "#0f172a");
+    const fallbackGrad = ctx.createLinearGradient(0, 0, 1080, 1920);
+    fallbackGrad.addColorStop(0, "#0f172a");
+    fallbackGrad.addColorStop(0.5, "#1e1b4b");
+    fallbackGrad.addColorStop(1, "#090d16");
     ctx.fillStyle = fallbackGrad;
-    ctx.fillRect(0, 0, 1080, 1080);
+    ctx.fillRect(0, 0, 1080, 1920);
   }
   
-  // 2. Cinematic dark gradient overlay
-  const scrim = ctx.createLinearGradient(0, 0, 0, 1080);
-  scrim.addColorStop(0, "rgba(15, 23, 42, 0.72)");
-  scrim.addColorStop(0.35, "rgba(15, 23, 42, 0.45)");
-  scrim.addColorStop(0.7, "rgba(15, 23, 42, 0.78)");
-  scrim.addColorStop(1, "rgba(10, 14, 26, 0.95)");
+  // 2. Full-bleed dark gradient scrim for contrast & phone status readability
+  const scrim = ctx.createLinearGradient(0, 0, 0, 1920);
+  scrim.addColorStop(0, "rgba(8, 14, 26, 0.75)");
+  scrim.addColorStop(0.25, "rgba(8, 14, 26, 0.52)");
+  scrim.addColorStop(0.65, "rgba(6, 10, 20, 0.85)");
+  scrim.addColorStop(1, "rgba(4, 7, 14, 0.98)");
   ctx.fillStyle = scrim;
-  ctx.fillRect(0, 0, 1080, 1080);
+  ctx.fillRect(0, 0, 1080, 1920);
   
-  // 3. Outer glowing border
-  ctx.strokeStyle = "rgba(255, 255, 255, 0.25)";
-  ctx.lineWidth = 3;
-  ctx.strokeRect(36, 36, 1008, 1008);
+  // Outer decorative border
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.18)";
+  ctx.lineWidth = 2;
+  ctx.strokeRect(40, 40, 1000, 1840);
   
-  // 4. Header Badge Pill
-  ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-  ctx.beginPath();
-  if (typeof ctx.roundRect === 'function') {
-    ctx.roundRect(70, 70, 480, 48, 24);
-  } else {
-    ctx.rect(70, 70, 480, 48);
-  }
-  ctx.fill();
-  ctx.strokeStyle = "rgba(255, 255, 255, 0.35)";
-  ctx.lineWidth = 1.5;
-  ctx.stroke();
-  
-  ctx.fillStyle = "#fde047";
-  ctx.font = "bold 20px -apple-system, BlinkMacSystemFont, sans-serif";
-  ctx.fillText("✨ BIBLICAL WORD OF THE DAY", 92, 102);
-  
-  // 5. Origin Badge Pill
-  ctx.fillStyle = "rgba(253, 224, 71, 0.2)";
-  ctx.beginPath();
-  if (typeof ctx.roundRect === 'function') {
-    ctx.roundRect(830, 70, 180, 48, 24);
-  } else {
-    ctx.rect(830, 70, 180, 48);
-  }
-  ctx.fill();
-  ctx.strokeStyle = "rgba(253, 224, 71, 0.5)";
-  ctx.lineWidth = 1.5;
-  ctx.stroke();
-  
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "bold 20px -apple-system, BlinkMacSystemFont, sans-serif";
-  ctx.fillText(word ? word.origin : "Greek", 850, 102);
-  
-  // 6. Word Title
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "bold 56px 'Noto Serif Devanagari', 'Playfair Display', Georgia, serif";
-  ctx.shadowColor = "rgba(0, 0, 0, 0.9)";
-  ctx.shadowBlur = 18;
-  ctx.fillText(word ? word.term : "Word of the Day", 70, 195);
-  ctx.shadowBlur = 0;
-  
-  // 7. Pronunciation Subtitle
-  ctx.fillStyle = "#fde047";
-  ctx.font = "600 24px -apple-system, BlinkMacSystemFont, sans-serif";
-  const pronText = isEng ? `Pronunciation: ${word.pronunciation}` : `उच्चार: ${word.pronunciation} 🔊`;
-  ctx.fillText(pronText, 70, 240);
-  
-  // Helper for word wrapping on canvas
+  // Helper for word wrapping
   const drawWrappedText = (text, startX, startY, maxWidth, lineHeight) => {
     if (!text) return startY;
     const words = text.split(" ");
@@ -22760,78 +22713,182 @@ window.generateExactBwodImageBlob = async function() {
     for (let n = 0; n < words.length; n++) {
       const test = curLine + words[n] + " ";
       if (ctx.measureText(test).width > maxWidth && n > 0) {
-        ctx.fillText(curLine, startX, curY);
+        ctx.fillText(curLine.trim(), startX, curY);
         curLine = words[n] + " ";
         curY += lineHeight;
       } else {
         curLine = test;
       }
     }
-    ctx.fillText(curLine, startX, curY);
+    if (curLine.trim()) {
+      ctx.fillText(curLine.trim(), startX, curY);
+      curY += lineHeight;
+    }
     return curY;
   };
 
-  // 8. Frosted Glass Meaning Container
-  ctx.fillStyle = "rgba(15, 23, 42, 0.72)";
+  // Center vertical card container (WhatsApp status safe area)
+  const cardX = 80;
+  const cardY = 320;
+  const cardW = 920;
+  const cardH = 1280;
+  const cardRadius = 36;
+  
+  // Frosted Glass Card Base
+  ctx.save();
+  ctx.fillStyle = "rgba(10, 16, 28, 0.78)";
   ctx.beginPath();
   if (typeof ctx.roundRect === 'function') {
-    ctx.roundRect(70, 275, 940, 210, 20);
+    ctx.roundRect(cardX, cardY, cardW, cardH, cardRadius);
   } else {
-    ctx.rect(70, 275, 940, 210);
+    ctx.rect(cardX, cardY, cardW, cardH);
   }
   ctx.fill();
-  ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.22)";
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  ctx.restore();
+
+  // TOP: Word of the Day pill & Origin pill
+  const badgeY = cardY + 70;
+  
+  // Word of the Day Pill
+  const headerTitle = isEng ? "✦ WORD OF THE DAY ✦" : "✦ आजचा पवित्र शब्द ✦";
+  ctx.fillStyle = "rgba(0, 0, 0, 0.55)";
+  ctx.beginPath();
+  if (typeof ctx.roundRect === 'function') {
+    ctx.roundRect(cardX + 45, badgeY - 28, isEng ? 330 : 360, 44, 22);
+  } else {
+    ctx.rect(cardX + 45, badgeY - 28, isEng ? 330 : 360, 44);
+  }
+  ctx.fill();
+  ctx.strokeStyle = "rgba(251, 191, 36, 0.5)";
   ctx.lineWidth = 1.5;
   ctx.stroke();
   
   ctx.fillStyle = "#fbbf24";
-  ctx.font = "bold 19px -apple-system, BlinkMacSystemFont, sans-serif";
-  ctx.fillText("📖 पवित्र अर्थ (BIBLICAL MEANING)", 96, 320);
-  
+  ctx.font = "bold 18px -apple-system, BlinkMacSystemFont, sans-serif";
+  ctx.fillText(headerTitle, cardX + 65, badgeY);
+
+  // Origin Pill (Hebrew / Greek)
+  const cleanOrigin = isEng ? (word ? word.origin.replace(/\s*\(.*\)/, '').trim() : "Greek") : (word ? word.origin : "ग्रीक");
+  ctx.fillStyle = "rgba(255, 255, 255, 0.16)";
+  ctx.beginPath();
+  if (typeof ctx.roundRect === 'function') {
+    ctx.roundRect(cardX + cardW - 200, badgeY - 28, 155, 44, 22);
+  } else {
+    ctx.rect(cardX + cardW - 200, badgeY - 28, 155, 44);
+  }
+  ctx.fill();
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
   ctx.fillStyle = "#ffffff";
-  ctx.font = "bold 28px 'Noto Serif Devanagari', Georgia, serif";
-  const meaningText = isEng ? word.meaningEn : word.meaningMr;
-  drawWrappedText(meaningText, 96, 370, 888, 38);
+  ctx.font = "bold 18px -apple-system, BlinkMacSystemFont, sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText(cleanOrigin, cardX + cardW - 122, badgeY);
+  ctx.textAlign = "left";
+
+  // Parse word term: primary word + script
+  const rawTerm = word ? word.term : "Agape (ἀγάπη)";
+  const match = rawTerm.match(/^([^(]+)(?:\s*\(([^)]+)\))?/);
+  const primaryWord = match ? match[1].trim() : rawTerm;
+  const scriptWord = match && match[2] ? `(${match[2].trim()})` : "";
+
+  // WORD & SCRIPT
+  let currentY = cardY + 180;
   
-  // 9. Frosted Glass Insight Container
-  ctx.fillStyle = "rgba(15, 23, 42, 0.72)";
+  // Primary Word in large bold font
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "bold 68px 'Noto Serif Devanagari', 'Playfair Display', Georgia, serif";
+  ctx.shadowColor = "rgba(0, 0, 0, 0.9)";
+  ctx.shadowBlur = 20;
+  ctx.fillText(primaryWord, cardX + 45, currentY);
+  ctx.shadowBlur = 0;
+
+  // Highlighted Hebrew / Greek Script Badge
+  if (scriptWord) {
+    currentY += 80;
+    ctx.font = "bold 44px 'Times New Roman', 'Noto Serif Hebrew', Georgia, serif";
+    const scriptWidth = ctx.measureText(scriptWord).width;
+    
+    // Glowing golden pill for script
+    ctx.fillStyle = "rgba(251, 191, 36, 0.18)";
+    ctx.beginPath();
+    if (typeof ctx.roundRect === 'function') {
+      ctx.roundRect(cardX + 45, currentY - 44, scriptWidth + 36, 62, 16);
+    } else {
+      ctx.rect(cardX + 45, currentY - 44, scriptWidth + 36, 62);
+    }
+    ctx.fill();
+    ctx.strokeStyle = "rgba(251, 191, 36, 0.65)";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.fillStyle = "#fde047";
+    ctx.fillText(scriptWord, cardX + 63, currentY);
+  }
+
+  // Pronunciation
+  currentY += 60;
+  ctx.fillStyle = "rgba(255, 255, 255, 0.65)";
+  ctx.font = "600 24px -apple-system, BlinkMacSystemFont, sans-serif";
+  const pronText = isEng ? `Pronunciation: ${word ? word.pronunciation : ''}` : `उच्चार: ${word ? word.pronunciation : ''}`;
+  ctx.fillText(pronText, cardX + 45, currentY);
+
+  // Decorative Divider
+  currentY += 45;
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.18)";
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(cardX + 45, currentY);
+  ctx.lineTo(cardX + cardW - 45, currentY);
+  ctx.stroke();
+
+  // MEANING (Language Pure: English only if English, Marathi only if Marathi)
+  currentY += 55;
+  ctx.fillStyle = "#fbbf24";
+  ctx.font = "bold 20px -apple-system, BlinkMacSystemFont, sans-serif";
+  ctx.fillText(isEng ? "📖 MEANING" : "📖 पवित्र अर्थ", cardX + 45, currentY);
+
+  currentY += 55;
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "500 34px 'Noto Serif Devanagari', Georgia, serif";
+  const meaningText = isEng ? (word ? word.meaningEn : "") : (word ? word.meaningMr : "");
+  currentY = drawWrappedText(meaningText, cardX + 45, currentY, cardW - 90, 52);
+
+  // CHAPTER & VERSE DETAILS
+  currentY = Math.max(currentY + 40, cardY + cardH - 240);
+  
+  // Inner subtle pill for Scripture Reference
+  ctx.fillStyle = "rgba(251, 191, 36, 0.12)";
   ctx.beginPath();
   if (typeof ctx.roundRect === 'function') {
-    ctx.roundRect(70, 515, 940, 310, 20);
+    ctx.roundRect(cardX + 45, currentY - 32, cardW - 90, 72, 16);
   } else {
-    ctx.rect(70, 515, 940, 310);
+    ctx.rect(cardX + 45, currentY - 32, cardW - 90, 72);
   }
   ctx.fill();
-  ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
+  ctx.strokeStyle = "rgba(251, 191, 36, 0.35)";
   ctx.lineWidth = 1.5;
   ctx.stroke();
-  
-  ctx.fillStyle = "#93c5fd";
-  ctx.font = "bold 19px -apple-system, BlinkMacSystemFont, sans-serif";
-  ctx.fillText("💡 आत्मिक रहस्य व मनन (SPIRITUAL INSIGHT)", 96, 560);
-  
-  ctx.fillStyle = "#f1f5f9";
-  ctx.font = "24px 'Noto Serif Devanagari', Georgia, serif";
-  const insightText = (isEng && word.insightEn) ? word.insightEn : word.insightMr;
-  drawWrappedText(insightText, 96, 610, 888, 36);
-  
-  // 10. Scripture Reference Footer
-  ctx.fillStyle = "#fbbf24";
-  ctx.font = "bold 24px 'Noto Serif Devanagari', Georgia, serif";
-  const refText = isEng ? `📜 Scripture: ${word.refEn}` : `📜 शास्त्र संदर्भ: ${word.refMr}`;
-  ctx.fillText(refText, 70, 875);
-  
-  // 11. App Branding Bar
-  ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
-  ctx.font = "bold 20px -apple-system, BlinkMacSystemFont, sans-serif";
-  ctx.fillText("🌊 River of Life • Holy Bible (पवित्र बायबल)", 70, 990);
-  
-  ctx.fillStyle = "rgba(255, 255, 255, 0.45)";
-  ctx.font = "16px -apple-system, BlinkMacSystemFont, sans-serif";
-  ctx.fillText("Daily Biblical Word • आजचा पवित्र शब्द", 70, 1018);
-  
+
+  ctx.fillStyle = "#fde047";
+  ctx.font = "bold 28px 'Noto Serif Devanagari', Georgia, serif";
+  const refText = isEng ? `📜 Scripture: ${word ? word.refEn : ''}` : `📜 पवित्र शास्त्र: ${word ? word.refMr : ''}`;
+  ctx.fillText(refText, cardX + 70, currentY + 14);
+
+  // BOTTOM BRANDING
+  const brandY = cardY + cardH - 50;
+  ctx.fillStyle = "rgba(255, 255, 255, 0.65)";
+  ctx.font = "bold 22px -apple-system, BlinkMacSystemFont, sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("🕊️ River of Life • Holy Bible (पवित्र बायबल)", cardX + (cardW / 2), brandY);
+  ctx.textAlign = "left";
+
   const blob = await new Promise((res) => canvas.toBlob(res, "image/png", 0.95));
-  const filename = `Biblical_Word_${(word.term || 'Word').replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}.png`;
+  const filename = `Biblical_Word_${(primaryWord || 'Word').replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}.png`;
   const dataUrl = canvas.toDataURL("image/png");
   return { blob, filename, dataUrl };
 };
@@ -22841,22 +22898,33 @@ window.shareBwodToWhatsApp = async function() {
   if (!word) return;
   const isEng = (window.state && (window.state.translation === "eng" || window.state.language === "en"));
   
-  const text = `✨ *आजचा पवित्र मूळ शब्द • BIBLICAL WORD OF THE DAY* ✨\n` +
-    `━━━━━━━━━━━━━━━━━━━━\n` +
-    `🔤 *${word.term}*\n` +
-    `📍 *मूळ:* ${word.origin} • *उच्चार:* ${word.pronunciation}\n\n` +
-    `📖 *पवित्र अर्थ (Biblical Meaning):*\n` +
-    `${isEng ? word.meaningEn : word.meaningMr}\n\n` +
-    `💡 *आत्मिक रहस्य व मनन (Spiritual Insight):*\n` +
-    `${(isEng && word.insightEn) ? word.insightEn : word.insightMr}\n\n` +
-    `📜 *पवित्र शास्त्र संदर्भ:*\n` +
-    `${isEng ? word.refEn : word.refMr}\n\n` +
-    `🔗 *रिव्हर ऑफ लाईफ बायबलवर हा अध्याय वाचा:*\n` +
-    `${window.location.origin}\n` +
-    `━━━━━━━━━━━━━━━━━━━━\n` +
-    `🕊️ *River of Life • पवित्र बायबल*`;
+  const text = isEng
+    ? `✨ *WORD OF THE DAY* ✨\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `🔤 *${word.term}*\n` +
+      `📍 *Origin:* ${word.origin.replace(/\s*\(.*\)/, '').trim()} • *Pronunciation:* ${word.pronunciation}\n\n` +
+      `📖 *Meaning:*\n` +
+      `${word.meaningEn}\n\n` +
+      `📜 *Scripture Reference:*\n` +
+      `${word.refEn}\n\n` +
+      `🔗 *Read Chapter on River of Life Bible:*\n` +
+      `${window.location.origin}\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `🕊️ *River of Life • Holy Bible*`
+    : `✨ *आजचा पवित्र शब्द • WORD OF THE DAY* ✨\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `🔤 *${word.term}*\n` +
+      `📍 *मूळ:* ${word.origin} • *उच्चार:* ${word.pronunciation}\n\n` +
+      `📖 *पवित्र अर्थ:*\n` +
+      `${word.meaningMr}\n\n` +
+      `📜 *पवित्र शास्त्र संदर्भ:*\n` +
+      `${word.refMr}\n\n` +
+      `🔗 *रिव्हर ऑफ लाईफ बायबलवर हा अध्याय वाचा:*\n` +
+      `${window.location.origin}\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `🕊️ *River of Life • पवित्र बायबल*`;
 
-  showToast("📸 WhatsApp साठी कार्ड तयार होत आहे...");
+  showToast(isEng ? "📸 Generating card for WhatsApp..." : "📸 WhatsApp साठी कार्ड तयार होत आहे...");
 
   try {
     const { blob, filename } = await generateExactBwodImageBlob();
@@ -22869,7 +22937,7 @@ window.shareBwodToWhatsApp = async function() {
         title: `Word of the Day: ${word.term}`,
         text: text
       });
-      showToast("✅ WhatsApp वर शेअर केले!");
+      showToast(isEng ? "✅ Shared to WhatsApp!" : "✅ WhatsApp वर शेअर केले!");
       return;
     }
   } catch (err) {
@@ -22883,7 +22951,7 @@ window.shareBwodToWhatsApp = async function() {
     link.download = filename;
     link.href = dataUrl;
     link.click();
-    showToast("📸 फोटो डाऊनलोड झाला! आता WhatsApp वर पाठवा.");
+    showToast(isEng ? "📸 Card downloaded! Now sharing to WhatsApp." : "📸 फोटो डाऊनलोड झाला! आता WhatsApp वर पाठवा.");
   } catch (e) {}
 
   const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
@@ -22891,64 +22959,75 @@ window.shareBwodToWhatsApp = async function() {
 };
 
 window.saveExactBwodImage = async function() {
-  showToast("📸 कार्ड तयार होत आहे...");
+  const isEng = (window.state && (window.state.translation === "eng" || window.state.language === "en"));
+  showToast(isEng ? "📸 Preparing card..." : "📸 कार्ड तयार होत आहे...");
   try {
     const { dataUrl, filename } = await generateExactBwodImageBlob();
     const link = document.createElement("a");
     link.download = filename;
     link.href = dataUrl;
     link.click();
-    showToast("✅ कार्ड गॅलरीत सेव्ह झाले!");
+    showToast(isEng ? "✅ Card saved to device!" : "✅ कार्ड गॅलरीत सेव्ह झाले!");
   } catch (err) {
     console.error("Save image error:", err);
-    showToast("⚠️ फोटो सेव्ह करताना त्रुटी आली.");
+    showToast(isEng ? "⚠️ Error saving card." : "⚠️ फोटो सेव्ह करताना त्रुटी आली.");
   }
 };
 
 window.renderBiblicalMicroLearning = function() {
-  setTimeout(() => { if (typeof updateMicroLearningBookmarkUI === "function") updateMicroLearningBookmarkUI(); }, 50);
   const word = window.getTodayBiblicalWord();
   if (!word) return;
   
   const isEng = (window.state && (window.state.translation === "eng" || window.state.language === "en"));
   
-  // Set card background image from saved preference or default
-  const savedWp = localStorage.getItem("rol_selected_bwod_wallpaper") || BWOD_WALLPAPERS[currentBwodWpIndex];
+  // Set card background image - scenic golden path default for optimal status presentation
+  const savedWp = localStorage.getItem("rol_selected_bwod_wallpaper") || "pinterest_golden_path.jpg";
   const card = document.getElementById("card-microlearning-word");
   if (card) {
     card.style.backgroundImage = `url('assets/daily_verses/${savedWp}')`;
   }
 
-  const termEl = document.getElementById("micro-word-term");
+  const titleBadge = document.getElementById("micro-word-header-title");
+  if (titleBadge) {
+    titleBadge.textContent = isEng ? "✦ WORD OF THE DAY ✦" : "✦ आजचा पवित्र शब्द ✦";
+  }
+
   const originEl = document.getElementById("micro-word-origin");
-  const pronEl = document.getElementById("micro-word-pronunciation");
-  const pronTextEl = document.getElementById("micro-word-pronounce-text");
-  const meaningEl = document.getElementById("micro-word-meaning");
-  const insightEl = document.getElementById("micro-word-insight");
-  const refEl = document.getElementById("micro-word-ref");
-  const dayBadge = document.getElementById("microlearning-day-badge");
-  
+  if (originEl) {
+    originEl.textContent = isEng ? word.origin.replace(/\s*\(.*\)/, '').trim() : word.origin;
+  }
+
+  const termEl = document.getElementById("micro-word-term");
   if (termEl) {
     const rawTerm = word.term || '';
     const match = rawTerm.match(/^([^(]+)(?:\s*\(([^)]+)\))?/);
     if (match) {
       const primaryWord = match[1].trim();
       const scriptWord = match[2] ? `(${match[2].trim()})` : '';
-      termEl.innerHTML = `<span class="micro-word-highlighted">${primaryWord}</span> ${scriptWord ? `<span class="micro-word-original-script">${scriptWord}</span>` : ''}`;
+      termEl.innerHTML = `<span class="micro-word-highlighted">${primaryWord}</span> ${scriptWord ? `<span class="micro-word-original-script" id="micro-word-script-badge">${scriptWord}</span>` : ''}`;
     } else {
       termEl.innerHTML = `<span class="micro-word-highlighted">${rawTerm}</span>`;
     }
   }
-  if (originEl) originEl.textContent = word.origin;
-  if (pronTextEl) {
-    pronTextEl.textContent = isEng ? `Pronunciation: ${word.pronunciation}` : `उच्चार: ${word.pronunciation}`;
-  } else if (pronEl) {
-    pronEl.innerHTML = (isEng ? `Pronunciation: ${word.pronunciation}` : `उच्चार: ${word.pronunciation}`) + ` <span style="font-size: 11px; margin-left: 2px;">🔊</span>`;
+
+  const meaningEl = document.getElementById("micro-word-meaning");
+  if (meaningEl) {
+    meaningEl.textContent = isEng ? word.meaningEn : word.meaningMr;
   }
-  if (meaningEl) meaningEl.textContent = isEng ? word.meaningEn : word.meaningMr;
-  if (insightEl) insightEl.textContent = (isEng && word.insightEn) ? word.insightEn : word.insightMr;
-  if (refEl) refEl.textContent = isEng ? word.refEn : word.refMr;
-  if (dayBadge) dayBadge.textContent = `Day ${word.id}`;
+
+  const refEl = document.getElementById("micro-word-ref");
+  if (refEl) {
+    refEl.textContent = isEng ? word.refEn : word.refMr;
+  }
+
+  const btnSaveLabel = document.getElementById("bwod-btn-save-label");
+  if (btnSaveLabel) {
+    btnSaveLabel.textContent = isEng ? "Save Card" : "फोटो सेव्ह";
+  }
+  const btnShareLabel = document.getElementById("bwod-btn-share-label");
+  if (btnShareLabel) {
+    btnShareLabel.textContent = isEng ? "WhatsApp Share" : "व्हॉट्सॲप शेअर";
+  }
 };
 window.renderEducationalMicroLearning = window.renderBiblicalMicroLearning;
 
