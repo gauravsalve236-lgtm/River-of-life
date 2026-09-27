@@ -23100,19 +23100,17 @@ window.generateExactBwodImageBlob = async function() {
   const word = window.getTodayBiblicalWord();
   const isEng = (window.state && (window.state.translation === "eng" || window.state.language === "en"));
   const savedWp = (typeof window.getTodayBwodWallpaper === "function") ? window.getTodayBwodWallpaper() : "pinterest_golden_path.jpg";
-  
+
   const canvas = document.createElement("canvas");
-  canvas.width = 1080;
+  canvas.width  = 1080;
   canvas.height = 1920;
   const ctx = canvas.getContext("2d");
 
   if (document.fonts && document.fonts.ready) {
-    try {
-      await document.fonts.ready;
-    } catch (e) {}
+    try { await document.fonts.ready; } catch (e) {}
   }
-  
-  // 1. Draw wallpaper image edge-to-edge
+
+  // 1. Wallpaper background
   const img = new Image();
   img.crossOrigin = "anonymous";
   img.src = `assets/daily_verses/${savedWp}`;
@@ -23121,41 +23119,78 @@ window.generateExactBwodImageBlob = async function() {
     img.onerror = resolve;
     setTimeout(resolve, 3000);
   });
-  
+
   if (img.complete && img.naturalWidth > 0) {
     const scale = Math.max(canvas.width / img.naturalWidth, canvas.height / img.naturalHeight);
-    const x = (canvas.width - img.naturalWidth * scale) / 2;
-    const y = (canvas.height - img.naturalHeight * scale) / 2;
-    ctx.drawImage(img, x, y, img.naturalWidth * scale, img.naturalHeight * scale);
+    const dx = (canvas.width  - img.naturalWidth  * scale) / 2;
+    const dy = (canvas.height - img.naturalHeight * scale) / 2;
+    ctx.drawImage(img, dx, dy, img.naturalWidth * scale, img.naturalHeight * scale);
   } else {
     const fallbackGrad = ctx.createLinearGradient(0, 0, 1080, 1920);
-    fallbackGrad.addColorStop(0, "#0f172a");
+    fallbackGrad.addColorStop(0,   "#0f172a");
     fallbackGrad.addColorStop(0.5, "#1e1b4b");
-    fallbackGrad.addColorStop(1, "#090d16");
+    fallbackGrad.addColorStop(1,   "#090d16");
     ctx.fillStyle = fallbackGrad;
     ctx.fillRect(0, 0, 1080, 1920);
   }
-  
-  // 2. Full-bleed dark gradient scrim for contrast & phone status readability
+
+  // 2. Dark gradient scrim
   const scrim = ctx.createLinearGradient(0, 0, 0, 1920);
-  scrim.addColorStop(0, "rgba(8, 14, 26, 0.72)");
-  scrim.addColorStop(0.25, "rgba(8, 14, 26, 0.42)");
-  scrim.addColorStop(0.65, "rgba(6, 10, 20, 0.76)");
-  scrim.addColorStop(1, "rgba(4, 7, 14, 0.95)");
+  scrim.addColorStop(0,    "rgba(8,14,26,0.72)");
+  scrim.addColorStop(0.25, "rgba(8,14,26,0.42)");
+  scrim.addColorStop(0.65, "rgba(6,10,20,0.76)");
+  scrim.addColorStop(1,    "rgba(4,7,14,0.95)");
   ctx.fillStyle = scrim;
   ctx.fillRect(0, 0, 1080, 1920);
-  
-  // Center alignment utility with strict LTR direction and center anchor
-  const drawWrappedCenteredText = (text, centerY, maxWidth, lineHeight) => {
-    if (!text) return centerY;
+
+  // ── Centre-anchor helpers ──────────────────────────────────────────────
+  const CX = 540; // pixel-exact centre of the 1080-wide canvas
+
+  /**
+   * ltrFill: Pins ctx.direction="ltr", textAlign="center", textBaseline="middle"
+   * inside ctx.save/restore BEFORE every single fillText call.
+   *
+   * Why: On Android WebView / Chrome for Android, if any preceding draw
+   * contained a Hebrew or Greek glyph the canvas bidi algorithm can flip
+   * the "logical origin" from the left edge to the right edge, causing
+   * center-anchored text to appear right-aligned. Pinning inside save/restore
+   * guarantees the anchor is always (CX, y) regardless of glyph content.
+   */
+  const ltrFill = (text, y) => {
     ctx.save();
-    ctx.direction = "ltr";
-    ctx.textAlign = "center";
+    ctx.direction    = "ltr";
+    ctx.textAlign    = "center";
     ctx.textBaseline = "middle";
-    const words = text.split(" ");
+    ctx.fillText(text, CX, y);
+    ctx.restore();
+  };
+
+  /**
+   * toSafeLTR: Strips Unicode bidi-control / directional-marker characters
+   * from a string. The visible glyphs (Hebrew, Greek, Devanagari) are kept
+   * intact so they render correctly; only the invisible steering marks that
+   * can corrupt the canvas bidi state are removed.
+   */
+  const toSafeLTR = (str) => {
+    if (!str) return "";
+    // LRM, RLM, LRE, RLE, PDF, LRO, RLO, LRI, RLI, FSI, PDI, ZWNJ, BOM
+    return str.replace(/[\u200E\u200F\u202A-\u202E\u2066-\u2069\u200B\uFEFF]/g, "").trim();
+  };
+
+  /**
+   * drawWrappedCenteredText: Word-wraps `text` within `maxWidth` pixels and
+   * draws each line centred at CX. Re-pins ctx.direction before every
+   * measureText call because some Android engines reset it mid-loop.
+   * Returns the Y of the line after the last drawn line.
+   */
+  const drawWrappedCenteredText = (text, startY, maxWidth, lineHeight) => {
+    if (!text) return startY;
+    const safe = toSafeLTR(text);
+    const words = safe.split(" ");
     let curLine = "";
     const lines = [];
     for (let n = 0; n < words.length; n++) {
+      ctx.direction = "ltr"; // re-pin before measureText
       const test = curLine + words[n] + " ";
       if (ctx.measureText(test).width > maxWidth && n > 0) {
         lines.push(curLine.trim());
@@ -23164,179 +23199,160 @@ window.generateExactBwodImageBlob = async function() {
         curLine = test;
       }
     }
-    if (curLine.trim()) {
-      lines.push(curLine.trim());
-    }
-    let curY = centerY;
-    for (let i = 0; i < lines.length; i++) {
-      ctx.direction = "ltr";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(lines[i], 540, curY);
+    if (curLine.trim()) lines.push(curLine.trim());
+    let curY = startY;
+    for (const line of lines) {
+      ltrFill(line, curY);
       curY += lineHeight;
     }
-    ctx.restore();
     return curY;
   };
 
-  // Parse word term: primary word + script
-  const rawTerm = word ? word.term : "Agape (ἀγάπη)";
-  const match = rawTerm.match(/^([^(]+)(?:\s*\(([^)]+)\))?/);
-  const primaryWord = match ? match[1].trim() : rawTerm;
-  const scriptWord = match && match[2] ? `(${match[2].trim()})` : "";
-  const cleanOrigin = isEng ? (word ? word.origin.replace(/\s*\(.*\)/, '').trim() : "Greek") : (word ? word.origin : "ग्रीक");
+  // 3. Parse word data
+  const rawTerm = word ? word.term : "Agape";
+  const termMatch = rawTerm.match(/^([^(]+)(?:\s*\(([^)]+)\))?/);
+  const primaryWord = termMatch ? termMatch[1].trim() : rawTerm;
+  const scriptWord  = (termMatch && termMatch[2])
+    ? toSafeLTR("(" + termMatch[2].trim() + ")")
+    : "";
+  const cleanOrigin = isEng
+    ? (word ? word.origin.replace(/\s*\(.*\)/, "").trim() : "Greek")
+    : (word ? word.origin : "\u0917\u094D\u0930\u0940\u0915");
 
-  // TOP PILL: Word of the Day & Origin
+  // ── 4. TEXT LAYERS ───────────────────────────────────────────────────────
+
+  // TOP PILL
   let curY = 410;
-  ctx.direction = "ltr";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
+  const headerTitle = isEng
+    ? "\u2736 WORD OF THE DAY \u2022 " + cleanOrigin.toUpperCase() + " \u2736"
+    : "\u2736 \u0906\u091C\u091A\u093E \u092A\u0935\u093F\u0924\u094D\u0930 \u0936\u092C\u094D\u0926 \u2022 " + cleanOrigin + " \u2736";
 
-  const headerTitle = isEng ? `✦ WORD OF THE DAY • ${cleanOrigin.toUpperCase()} ✦` : `✦ आजचा पवित्र शब्द • ${cleanOrigin} ✦`;
+  ctx.direction = "ltr";
   ctx.font = "bold 22px -apple-system, BlinkMacSystemFont, sans-serif";
   const pillW = ctx.measureText(headerTitle).width + 50;
   const pillH = 50;
-  const pillX = 540 - (pillW / 2);
+  const pillX = CX - pillW / 2;
   const pillY = curY - 25;
 
-  ctx.fillStyle = "rgba(0, 0, 0, 0.55)";
+  ctx.fillStyle = "rgba(0,0,0,0.55)";
   ctx.beginPath();
-  if (typeof ctx.roundRect === 'function') {
+  if (typeof ctx.roundRect === "function") {
     ctx.roundRect(pillX, pillY, pillW, pillH, 25);
   } else {
     ctx.rect(pillX, pillY, pillW, pillH);
   }
   ctx.fill();
-  ctx.strokeStyle = "rgba(251, 191, 36, 0.65)";
+  ctx.strokeStyle = "rgba(251,191,36,0.65)";
   ctx.lineWidth = 1.5;
   ctx.stroke();
 
   ctx.fillStyle = "#fbbf24";
-  ctx.direction = "ltr";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText(headerTitle, 540, curY);
+  ltrFill(headerTitle, curY);
 
   // PRIMARY WORD
   curY += 160;
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "bold 82px 'Noto Serif Devanagari', 'Lora', Georgia, serif";
-  ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
-  ctx.shadowBlur = 24;
-  ctx.direction = "ltr";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText(primaryWord, 540, curY);
+  ctx.fillStyle   = "#ffffff";
+  ctx.font        = "bold 82px 'Noto Serif Devanagari','Lora',Georgia,serif";
+  ctx.shadowColor = "rgba(0,0,0,0.95)";
+  ctx.shadowBlur  = 24;
+  ltrFill(primaryWord, curY);
   ctx.shadowBlur = 0;
 
-  // SCRIPT & PRONUNCIATION
+  // SCRIPT GLYPH PILL (Hebrew/Greek letters inside a styled badge)
   if (scriptWord) {
     curY += 80;
-    ctx.font = "bold 44px 'Times New Roman', 'Noto Serif Hebrew', Georgia, serif";
     ctx.direction = "ltr";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    const scriptWidth = ctx.measureText(scriptWord).width;
-    const scriptPillW = scriptWidth + 44;
-    const scriptPillH = 60;
-    const scriptPillX = 540 - (scriptPillW / 2);
-    const scriptPillY = curY - 30;
+    ctx.font = "bold 44px 'Times New Roman','Noto Serif Hebrew',Georgia,serif";
+    const sW  = ctx.measureText(scriptWord).width;
+    const spW = sW + 44;
+    const spH = 60;
+    const spX = CX - spW / 2;
+    const spY = curY - 30;
 
-    ctx.fillStyle = "rgba(251, 191, 36, 0.22)";
+    ctx.fillStyle = "rgba(251,191,36,0.22)";
     ctx.beginPath();
-    if (typeof ctx.roundRect === 'function') {
-      ctx.roundRect(scriptPillX, scriptPillY, scriptPillW, scriptPillH, 22);
+    if (typeof ctx.roundRect === "function") {
+      ctx.roundRect(spX, spY, spW, spH, 22);
     } else {
-      ctx.rect(scriptPillX, scriptPillY, scriptPillW, scriptPillH);
+      ctx.rect(spX, spY, spW, spH);
     }
     ctx.fill();
-    ctx.strokeStyle = "rgba(251, 191, 36, 0.75)";
+    ctx.strokeStyle = "rgba(251,191,36,0.75)";
     ctx.lineWidth = 2;
     ctx.stroke();
 
     ctx.fillStyle = "#fde047";
-    ctx.direction = "ltr";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(scriptWord, 540, curY);
+    ltrFill(scriptWord, curY);
   }
 
-  // Pronunciation
+  // PRONUNCIATION
   curY += 60;
-  ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
+  ctx.fillStyle = "rgba(255,255,255,0.85)";
   ctx.font = "600 26px -apple-system, BlinkMacSystemFont, sans-serif";
-  const pronText = isEng ? `Pronunciation: ${word ? word.pronunciation : ''}` : `उच्चार: ${word ? word.pronunciation : ''}`;
-  ctx.direction = "ltr";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText(pronText, 540, curY);
+  const pronLabel = isEng ? "Pronunciation: " : "\u0909\u091A\u094D\u091A\u093E\u0930: ";
+  const pronText  = pronLabel + (word ? word.pronunciation : "");
+  ltrFill(pronText, curY);
 
-  // Decorative Golden Divider Line
+  // GOLDEN DIVIDER LINE
   curY += 60;
-  ctx.strokeStyle = "rgba(251, 191, 36, 0.7)";
+  ctx.strokeStyle = "rgba(251,191,36,0.7)";
   ctx.lineWidth = 2;
   ctx.beginPath();
   ctx.moveTo(380, curY);
   ctx.lineTo(700, curY);
   ctx.stroke();
 
-  // Quotation mark
+  // OPENING QUOTATION MARK
   curY += 65;
   ctx.fillStyle = "#fbbf24";
   ctx.font = "58px Georgia, serif";
-  ctx.direction = "ltr";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText("“", 540, curY);
+  ltrFill("\u201C", curY);
 
-  // MEANING (Language Pure: English only if English, Marathi only if Marathi)
+  // MEANING (word-wrapped, centred)
   curY += 45;
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "600 38px 'Noto Serif Devanagari', 'Lora', Georgia, serif";
-  ctx.shadowColor = "rgba(0, 0, 0, 0.98)";
-  ctx.shadowBlur = 20;
-  const meaningText = isEng ? (word ? word.meaningEn : "") : (word ? word.meaningMr : "");
+  ctx.fillStyle   = "#ffffff";
+  ctx.font        = "600 38px 'Noto Serif Devanagari','Lora',Georgia,serif";
+  ctx.shadowColor = "rgba(0,0,0,0.98)";
+  ctx.shadowBlur  = 20;
+  const meaningText = isEng
+    ? (word ? word.meaningEn : "")
+    : (word ? word.meaningMr : "");
   curY = drawWrappedCenteredText(meaningText, curY, 860, 58);
   ctx.shadowBlur = 0;
 
-  // SCRIPTURE REFERENCE (with left & right golden accent lines)
+  // SCRIPTURE REFERENCE + flanking golden accent lines
   curY = Math.max(curY + 70, 1340);
-  const refText = isEng ? (word ? word.refEn : '') : (word ? word.refMr : '');
-  ctx.font = "bold 32px var(--font-ui), -apple-system, BlinkMacSystemFont, sans-serif";
-  ctx.fillStyle = "#fbbf24";
+  const refText = isEng
+    ? (word ? word.refEn  : "")
+    : (word ? word.refMr : "");
   ctx.direction = "ltr";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
+  ctx.font      = "bold 32px -apple-system, BlinkMacSystemFont, sans-serif";
+  ctx.fillStyle = "#fbbf24";
   const refWidth = ctx.measureText(refText).width;
 
   ctx.strokeStyle = "#fbbf24";
   ctx.lineWidth = 2;
   ctx.beginPath();
-  ctx.moveTo(540 - (refWidth / 2) - 50, curY);
-  ctx.lineTo(540 - (refWidth / 2) - 15, curY);
-  ctx.moveTo(540 + (refWidth / 2) + 15, curY);
-  ctx.lineTo(540 + (refWidth / 2) + 50, curY);
+  ctx.moveTo(CX - refWidth / 2 - 50, curY);
+  ctx.lineTo(CX - refWidth / 2 - 15, curY);
+  ctx.moveTo(CX + refWidth / 2 + 15, curY);
+  ctx.lineTo(CX + refWidth / 2 + 50, curY);
   ctx.stroke();
 
-  ctx.direction = "ltr";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText(refText, 540, curY);
+  ltrFill(refText, curY);
 
-  // BOTTOM BRANDING BADGE
+  // BOTTOM BRANDING
   const brandY = 1760;
-  ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+  ctx.fillStyle = "rgba(255,255,255,0.8)";
   ctx.font = "bold 24px -apple-system, BlinkMacSystemFont, sans-serif";
-  ctx.direction = "ltr";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText("🕊️ River of Life • Holy Bible (पवित्र बायबल)", 540, brandY);
+  ltrFill("\uD83D\uDD4A\uFE0F River of Life \u2022 Holy Bible (\u092A\u0935\u093F\u0924\u094D\u0930 \u092C\u093E\u092F\u092C\u0932)", brandY);
 
   const blob = await new Promise((res) => canvas.toBlob(res, "image/png", 0.95));
-  const filename = `Biblical_Word_${(primaryWord || 'Word').replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}.png`;
+  const filename = "Biblical_Word_" + (primaryWord || "Word").replace(/[^a-zA-Z0-9]/g, "_") + "_" + Date.now() + ".png";
   const dataUrl = canvas.toDataURL("image/png");
   return { blob, filename, dataUrl };
 };
+
 
 window.shareBwodToWhatsApp = async function() {
   const word = window.getTodayBiblicalWord();
