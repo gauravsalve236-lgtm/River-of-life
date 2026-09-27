@@ -4037,12 +4037,8 @@
             सैतानाच्या डावपेचांपुढे तुम्हांला टिकाव धरता यावा म्हणून <span class="vod-golden-accent">देवाची संपूर्ण शस्त्रसामग्री</span> धारण करा.
           </blockquote>
 
-          <!-- Calligraphic Flourish Swash for Alpine / Golden Path / Swash themes -->
-          <svg id="fs-vod-flourish-swash" viewBox="0 0 320 24" fill="none" style="width: min(70%, 280px); height: 20px; margin: -6px auto 14px auto; display: none; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.9));">
-            <path d="M 15 12 C 60 22, 110 4, 160 12 C 210 20, 260 4, 305 12" stroke="#fbbf24" stroke-width="2.8" stroke-linecap="round"/>
-            <circle cx="12" cy="12" r="3.5" fill="#fbbf24"/>
-            <circle cx="308" cy="12" r="2.8" fill="#fbbf24"/>
-          </svg>
+          <!-- Calligraphic Flourish Swash for Alpine / Golden Path / Swash themes (Hidden per user request) -->
+          <svg id="fs-vod-flourish-swash" viewBox="0 0 320 24" fill="none" style="display: none !important;"></svg>
 
           <!-- Scripture Reference Row (Clean scripture reference without MARVBSI suffix) -->
           <div id="fs-vod-ref-row" style="display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap;">
@@ -4169,53 +4165,38 @@
     </div>
 
     <!-- 1. HIGH-RES VERSE IMAGE PREVIEW & DIRECT GALLERY SAVE MODAL -->
-    <div id="modal-image-preview-save" class="modal-overlay-fullscreen" onclick="if(event.target === this) closeImagePreviewModal();" style="display: none; position: fixed; inset: 0; background-color: rgba(0,0,0,0.92); z-index: 999999; backdrop-filter: blur(10px); justify-content: center; align-items: center; padding: 16px;">
-      <div style="width: 100%; max-width: 480px; max-height: 92vh; background: #181b22; border-radius: 24px; border: 1px solid rgba(255,255,255,0.15); display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 25px 50px rgba(0,0,0,0.8);">
+    <div id="modal-image-preview-save" class="modal-overlay-fullscreen" onclick="if(event.target === this) closeImagePreviewModal();" style="display: none; position: fixed; inset: 0; background-color: rgba(0,0,0,0.92); z-index: 999999; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); justify-content: center; align-items: center; padding: 16px;">
+      <div style="width: 100%; max-width: 460px; max-height: 92vh; background: #14171f; border-radius: 24px; border: 1.5px solid rgba(255,255,255,0.14); display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 25px 60px rgba(0,0,0,0.85);">
         
         <!-- Header -->
         <div style="padding: 14px 18px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center;">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 20px;">🖼</span>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(37, 211, 102, 0.15); display: flex; align-items: center; justify-content: center;">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#22c55e" stroke-width="2.2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+            </div>
             <div>
-              <h4 style="margin: 0; font-size: 15px; font-weight: 800; color: #ffffff;">Share & Save Verse / शेअर करा</h4>
-              <p style="margin: 2px 0 0; font-size: 11px; color: #94a3b8;">High-Resolution Verse Card (मोबाईलसाठी अनुकूल)</p>
+              <h4 style="margin: 0; font-size: 15px; font-weight: 800; color: #ffffff;">Share Verse / वचन शेअर करा</h4>
+              <p style="margin: 2px 0 0; font-size: 11px; color: #94a3b8;">High-Resolution Verse Card (HD)</p>
             </div>
           </div>
-          <button onclick="closeImagePreviewModal()" style="background: rgba(255,255,255,0.12); border: none; width: 32px; height: 32px; border-radius: 50%; color: #fff; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;">&times;</button>
+          <button onclick="closeImagePreviewModal()" aria-label="Close" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); width: 32px; height: 32px; border-radius: 50%; color: #fff; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">&times;</button>
         </div>
 
         <!-- Rendered Image Container -->
-        <div style="flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; background: #0f1117;">
-          <!-- Aspect Ratio Selector Row -->
-          <div style="display: flex; gap: 6px; width: 100%; justify-content: center; padding: 0 4px;">
-            <button type="button" class="btn-vod-ratio-tab active" data-ratio="square" onclick="switchVodAspectRatio('square')" style="flex: 1; padding: 8px 6px; border-radius: 10px; font-size: 11.5px; font-weight: 800; cursor: pointer; border: 1.5px solid #fbbf24; background: linear-gradient(135deg, #fbbf24, #d97706); color: #0f172a; transition: all 0.2s ease;">
-              🔳 1:1 Card (चौरस)
-            </button>
-            <button type="button" class="btn-vod-ratio-tab" data-ratio="portrait" onclick="switchVodAspectRatio('portrait')" style="flex: 1; padding: 8px 6px; border-radius: 10px; font-size: 11.5px; font-weight: 600; cursor: pointer; border: 1.5px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.08); color: #ffffff; transition: all 0.2s ease;">
-              📱 4:5 Feed (मोबाईल)
-            </button>
-            <button type="button" class="btn-vod-ratio-tab" data-ratio="story" onclick="switchVodAspectRatio('story')" style="flex: 1; padding: 8px 6px; border-radius: 10px; font-size: 11.5px; font-weight: 600; cursor: pointer; border: 1.5px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.08); color: #ffffff; transition: all 0.2s ease;">
-              🖼️ 9:16 Story (वॉलपेपर)
-            </button>
-          </div>
-
-          <img id="vod-preview-rendered-img" src="" alt="Daily Verse Image" style="width: 100%; max-height: 50vh; object-fit: contain; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.15);" />
-          
-          <div style="background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 12px; padding: 10px 14px; width: 100%; box-sizing: border-box; text-align: center;">
-            <p style="margin: 0; font-size: 12px; color: #fde68a; font-weight: 600; line-height: 1.4;">
-              💡 <strong>मोबाईल यरससाठी टीप:</strong> खालील "Download Image" बटण दाबा किंवा वरील फोटोवर २ सेकंद दाबून धरून <strong>"Save Image / फोटो सेव्ह करा"</strong> निवडा.
-            </p>
-          </div>
+        <div style="flex: 1; overflow-y: auto; padding: 18px 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0b0d13;">
+          <img id="vod-preview-rendered-img" src="" alt="Daily Verse Image" style="width: 100%; max-height: 56vh; object-fit: contain; border-radius: 18px; box-shadow: 0 12px 36px rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.15);" />
         </div>
 
-        <!-- Action Buttons Footer -->
-        <div style="padding: 14px 18px; border-top: 1px solid rgba(255,255,255,0.1); display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #181b22;">
-          <button id="btn-download-preview-file" onclick="downloadRenderedVodImage()" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; border: none; padding: 12px 14px; border-radius: 12px; font-size: 13.5px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 4px 12px rgba(37,99,235,0.4);">
-            <span>📥 Download Image</span>
+        <!-- Action Buttons Footer: Save to Device & WhatsApp Share -->
+        <div style="padding: 14px 18px; border-top: 1px solid rgba(255,255,255,0.1); display: grid; grid-template-columns: 1fr 1fr; gap: 12px; background: #14171f;">
+          <button id="btn-download-preview-file" onclick="downloadRenderedVodImage()" style="background: rgba(255,255,255,0.1); color: #ffffff; border: 1.5px solid rgba(255,255,255,0.22); padding: 13px 14px; border-radius: 14px; font-size: 13.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s ease;">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            <span>Save to Device</span>
           </button>
           
-          <button onclick="shareRenderedVodImage()" style="background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; border: none; padding: 12px 14px; border-radius: 12px; font-size: 13.5px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 4px 12px rgba(34,197,94,0.4);">
-            <span>💬 WhatsApp Share</span>
+          <button id="btn-share-preview-whatsapp" onclick="shareRenderedVodImage()" style="background: linear-gradient(135deg, #22c55e, #16a34a); color: #ffffff; border: none; padding: 13px 14px; border-radius: 14px; font-size: 13.5px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 14px rgba(34,197,94,0.4); transition: all 0.2s ease;">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+            <span>WhatsApp Share</span>
           </button>
         </div>
 

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v2393_BIBLICAL_WORD_STUDIO_AND_HOME_SEARCH';
+const CACHE_NAME = 'river-of-life-cache-v2394_CLEAN_VERSE_SHARE_STUDIO';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

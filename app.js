@@ -19109,19 +19109,9 @@ window.applyVodTypographyTheme = function(themeIdx) {
       }
     }
 
-    // Calligraphic flourish swash under verse body
+    // Calligraphic flourish swash under verse body (disabled per user request)
     if (swashEl) {
-      if (theme.layoutMode === "flourish-swash" || theme.layoutMode === "flourish-path") {
-        swashEl.style.display = "block";
-        swashEl.style.color = theme.accentColor || "#fbbf24";
-        const paths = swashEl.querySelectorAll("path, circle");
-        paths.forEach(p => {
-          if (p.tagName.toLowerCase() === 'path') p.setAttribute("stroke", theme.accentColor || "#fbbf24");
-          if (p.tagName.toLowerCase() === 'circle') p.setAttribute("fill", theme.accentColor || "#fbbf24");
-        });
-      } else {
-        swashEl.style.display = "none";
-      }
+      swashEl.style.display = "none";
     }
 
     const refBadge = document.getElementById("fs-vod-ref-badge");
@@ -19898,37 +19888,9 @@ window.navigateVOD = function(dir) {
 // Global state for last rendered verse image
 window._currentRenderedVodImage = null;
 
-// Calligraphic flourish swash helper
+// Calligraphic flourish swash helper (disabled per user request - no line drawn under verses)
 function drawCalligraphicFlourish(ctx, x, y, width, color) {
-  ctx.save();
-  ctx.strokeStyle = color || "#fbbf24";
-  ctx.lineWidth = 3.5;
-  ctx.lineCap = "round";
-  ctx.lineJoin = "round";
-  ctx.shadowColor = "rgba(0, 0, 0, 0.85)";
-  ctx.shadowBlur = 12;
-
-  const startX = x - 20;
-  const startY = y + 8;
-  const endX = x + width + 28;
-
-  ctx.beginPath();
-  ctx.moveTo(startX, startY);
-  ctx.bezierCurveTo(startX + width * 0.28, startY + 24, startX + width * 0.72, startY - 14, endX, startY + 6);
-  ctx.stroke();
-
-  // Spiral flourish curl ball on left
-  ctx.beginPath();
-  ctx.arc(startX - 6, startY - 3, 5, 0, Math.PI * 2);
-  ctx.fillStyle = color || "#fbbf24";
-  ctx.fill();
-
-  // Accent terminal droplet on right
-  ctx.beginPath();
-  ctx.arc(endX + 6, startY + 6, 3.5, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.restore();
+  // Empty: intentionally disabled so no decorative line is drawn under any verse
 }
 
 window.generateExactVerseImageBlob = function(customRatio) {
@@ -20077,11 +20039,6 @@ window.generateExactVerseImageBlob = function(customRatio) {
         const lineX = Math.round((canvas.width - lineW) / 2);
         const curLineY = startY + (i * lineH);
         ctx.fillText(lineStr, lineX, curLineY);
-
-        // Calligraphic flourish swash under the last line
-        if (i === lines.length - 1) {
-          drawCalligraphicFlourish(ctx, lineX, curLineY + Math.round(fontSize * 0.5), lineW, "#fbbf24");
-        }
       }
       startY += (lines.length * lineH) + 36;
 
@@ -20239,10 +20196,6 @@ window.generateExactVerseImageBlob = function(customRatio) {
         const curLineX = Math.round((canvas.width - lineW) / 2);
         const curLineY = startY + (i * lineH);
         ctx.fillText(lines[i], curLineX, curLineY);
-
-        if (i === lines.length - 1) {
-          drawCalligraphicFlourish(ctx, curLineX, curLineY + 22, lineW, "#facc15");
-        }
       }
       startY += (lines.length * lineH) + 38;
 
@@ -20926,22 +20879,6 @@ window.openImagePreviewModal = function(dataUrl, filename, blob) {
   const img = document.getElementById("vod-preview-rendered-img");
   if (modal && img) {
     img.src = dataUrl;
-    
-    // Sync ratio tab styling
-    const cur = window.currentVodAspectRatio || 'square';
-    document.querySelectorAll('.btn-vod-ratio-tab').forEach(btn => {
-      const isThis = btn.dataset.ratio === cur;
-      btn.classList.toggle('active', isThis);
-      btn.style.background = isThis ? 'linear-gradient(135deg, #fbbf24, #d97706)' : 'rgba(255,255,255,0.08)';
-      btn.style.color = isThis ? '#0f172a' : '#ffffff';
-      btn.style.borderColor = isThis ? '#fbbf24' : 'rgba(255,255,255,0.2)';
-      btn.style.fontWeight = isThis ? '800' : '600';
-    });
-
-    if (typeof window.renderVodPinterestStrips === "function") {
-      window.renderVodPinterestStrips();
-    }
-
     modal.classList.add("active");
     modal.style.display = "flex";
   }
@@ -20957,31 +20894,21 @@ window.closeImagePreviewModal = function() {
 
 window.downloadRenderedVodImage = async function() {
   if (window._currentRenderedVodImage) {
-    const { dataUrl, filename, blob } = window._currentRenderedVodImage;
-    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    const file = new File([blob || new Blob([])], filename, { type: "image/png", lastModified: Date.now() });
-
-    // iOS Safari / Mobile: Use native share sheet so iPhone saves to Camera Roll
-    if (isMobile && navigator.canShare && navigator.canShare({ files: [file] })) {
-      try {
-        await navigator.share({
-          files: [file],
-          title: "River of Life - Daily Verse"
-        });
-        showToast("✨ फोटो सेव्ह / शेअर झाला!");
-        return;
-      } catch(e) {
-        if (e && (e.name === 'AbortError' || e.message?.includes('abort'))) return;
-      }
+    const { dataUrl, filename } = window._currentRenderedVodImage;
+    try {
+      const link = document.createElement("a");
+      link.href = dataUrl;
+      link.download = filename || "daily_bible_verse.png";
+      document.body.appendChild(link);
+      link.click();
+      setTimeout(() => {
+        if (link.parentNode) link.parentNode.removeChild(link);
+      }, 300);
+      showToast("💾 फोटो डिव्हाइसमध्ये सेव्ह झाला! (Saved to Device)");
+    } catch (e) {
+      console.error("Direct save error:", e);
+      showToast("⚠️ फोटो सेव्ह करताना त्रुटी आली.");
     }
-
-    const link = document.createElement("a");
-    link.href = dataUrl;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    showToast("📥 फोटो डाउनलोड सुरू झाला!");
   }
 };
 
@@ -21006,17 +20933,18 @@ window.shareRenderedVodImage = async function() {
   if (window._currentRenderedVodImage) {
     const { blob, filename } = window._currentRenderedVodImage;
     if (blob) {
-      const file = new File([blob], filename, { type: "image/png", lastModified: Date.now() });
+      const file = new File([blob], filename || "daily_bible_verse.png", { type: "image/png", lastModified: Date.now() });
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         try {
           await navigator.share({
             files: [file],
             title: "River of Life - Daily Bible Verse",
-            text: "आजचे दैनिक वचन (Daily Bible Verse)"
+            text: "आजचे दैनिक वचन • River of Life Bible"
           });
+          showToast("✨ व्हॉट्सॲपवर शेअर केले!");
           return;
         } catch(e) {
-          if (e && (e.name === 'AbortError' || e.message?.includes('abort'))) return;
+          if (e && (e.name === 'AbortError' || e.message?.includes('abort') || e.message?.includes('cancel'))) return;
         }
       }
     }
