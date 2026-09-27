@@ -20939,27 +20939,8 @@ window.openShareAndSaveModal = async function() {
 };
 
 window.openBwodShareAndSaveModal = async function() {
-  try {
-    const isEng = (window.state && (window.state.translation === "eng" || window.state.language === "en"));
-    if (typeof showToast === "function") {
-      showToast(isEng ? "⏳ Preparing Word of the Day card..." : "⏳ आजचा शब्द कार्ड तयार होत आहे...");
-    }
-    const modalTitle = document.getElementById("image-preview-modal-title");
-    if (modalTitle) {
-      modalTitle.textContent = isEng ? "Word of the Day Card" : "आजचा पवित्र शब्द • कार्ड";
-    }
-    const modalSubtitle = document.getElementById("image-preview-modal-subtitle");
-    if (modalSubtitle) {
-      modalSubtitle.textContent = isEng ? "High-Resolution Card (HD)" : "हाय-डेफिनिशन कार्ड (HD)";
-    }
-    const result = await generateExactBwodImageBlob();
-    window._currentRenderedVodImage = { ...result, type: 'bwod' };
-    openImagePreviewModal(result.dataUrl, result.filename, result.blob);
-  } catch (err) {
-    console.error("openBwodShareAndSaveModal error:", err);
-    if (typeof showToast === "function") {
-      showToast("कार्ड तयार करताना अडचण आली.");
-    }
+  if (typeof window.openFullscreenBWOD === 'function') {
+    window.openFullscreenBWOD();
   }
 };
 
@@ -22636,15 +22617,9 @@ window.cycleBwodWallpaper = function(event) {
   if (fsBg) {
     fsBg.style.backgroundImage = `url('assets/daily_verses/${wp}')`;
   }
-
-  // If preview modal is open with BWOD, dynamically re-render preview image with new wallpaper
-  const modal = document.getElementById("modal-image-preview-save");
-  if (modal && modal.style.display === "flex" && window._currentRenderedVodImage?.type === 'bwod') {
-    generateExactBwodImageBlob().then(res => {
-      window._currentRenderedVodImage = { ...res, type: 'bwod' };
-      const img = document.getElementById("vod-preview-rendered-img");
-      if (img) img.src = res.dataUrl;
-    });
+  const thumb = document.getElementById("bwod-thumbnail-preview");
+  if (thumb) {
+    thumb.src = `assets/daily_verses/${wp}`;
   }
 
   if (typeof showToast === 'function') {
@@ -22656,7 +22631,10 @@ window.cycleBwodWallpaper = function(event) {
 window.openFullscreenBWOD = function() {
   const modal = document.getElementById("modal-fullscreen-bwod");
   if (!modal) return;
-  modal.style.display = "block";
+  modal.style.display = "flex";
+  modal.classList.add("active");
+  modal.style.opacity = "1";
+  modal.style.pointerEvents = "auto";
   document.body.style.overflow = "hidden";
   window.updateBwodStudioUI();
 };
@@ -22665,6 +22643,9 @@ window.closeFullscreenBWOD = function() {
   const modal = document.getElementById("modal-fullscreen-bwod");
   if (!modal) return;
   modal.style.display = "none";
+  modal.classList.remove("active");
+  modal.style.opacity = "0";
+  modal.style.pointerEvents = "none";
   document.body.style.overflow = "";
 };
 
@@ -22689,26 +22670,45 @@ window.updateBwodStudioUI = function() {
   const fsBg = document.getElementById("fs-bwod-capsule-bg");
   if (fsBg) fsBg.style.backgroundImage = `url('assets/daily_verses/${savedWp}')`;
   
+  const thumb = document.getElementById("bwod-thumbnail-preview");
+  if (thumb) thumb.src = `assets/daily_verses/${savedWp}`;
+
+  const badgePill = document.getElementById("fs-bwod-badge-pill");
+  if (badgePill) badgePill.textContent = isEng ? "✦ WORD OF THE DAY ✦" : "✦ आजचा पवित्र शब्द ✦";
+
+  const cleanOrigin = isEng ? word.origin.replace(/\s*\(.*\)/, '').trim() : word.origin;
   const fsOrigin = document.getElementById("fs-bwod-origin");
-  if (fsOrigin) fsOrigin.textContent = word.origin;
+  if (fsOrigin) fsOrigin.textContent = cleanOrigin;
+
+  const rawTerm = word.term || "";
+  const match = rawTerm.match(/^([^(]+)(?:\s*\(([^)]+)\))?/);
+  const primaryWord = match ? match[1].trim() : rawTerm;
+  const scriptWord = match && match[2] ? `(${match[2].trim()})` : "";
   
-  const fsTerm = document.getElementById("fs-bwod-term");
-  if (fsTerm) fsTerm.textContent = word.term;
+  const fsPrimary = document.getElementById("fs-bwod-primary-word");
+  if (fsPrimary) fsPrimary.textContent = primaryWord;
+
+  const fsScript = document.getElementById("fs-bwod-script-word");
+  if (fsScript) {
+    if (scriptWord) {
+      fsScript.textContent = scriptWord;
+      fsScript.style.display = "inline-block";
+    } else {
+      fsScript.style.display = "none";
+    }
+  }
   
   const fsPron = document.getElementById("fs-bwod-pronounce");
   if (fsPron) fsPron.textContent = isEng ? `Pronunciation: ${word.pronunciation}` : `उच्चार: ${word.pronunciation}`;
   
   const fsMeaning = document.getElementById("fs-bwod-meaning");
-  if (fsMeaning) fsMeaning.textContent = isEng ? word.meaningEn : word.meaningMr;
-  
-  const fsInsight = document.getElementById("fs-bwod-insight");
-  if (fsInsight) fsInsight.textContent = (isEng && word.insightEn) ? word.insightEn : word.insightMr;
+  if (fsMeaning) fsMeaning.textContent = isEng ? `“${word.meaningEn}”` : `“${word.meaningMr}”`;
   
   const fsRef = document.getElementById("fs-bwod-ref");
   if (fsRef) fsRef.textContent = isEng ? word.refEn : word.refMr;
   
   const dayLabel = document.getElementById("fs-bwod-day-label");
-  if (dayLabel) dayLabel.textContent = `Day ${word.id}`;
+  if (dayLabel) dayLabel.textContent = isEng ? `Day ${word.id}` : `आजचा शब्द`;
 };
 
 window.generateExactBwodImageBlob = async function() {
@@ -22720,18 +22720,28 @@ window.generateExactBwodImageBlob = async function() {
   canvas.width = 1080;
   canvas.height = 1920;
   const ctx = canvas.getContext("2d");
+
+  if (document.fonts && document.fonts.ready) {
+    try {
+      await document.fonts.ready;
+    } catch (e) {}
+  }
   
-  // 1. Draw wallpaper image
+  // 1. Draw wallpaper image edge-to-edge
   const img = new Image();
   img.crossOrigin = "anonymous";
   img.src = `assets/daily_verses/${savedWp}`;
   await new Promise((resolve) => {
     img.onload = resolve;
     img.onerror = resolve;
+    setTimeout(resolve, 3000);
   });
   
   if (img.complete && img.naturalWidth > 0) {
-    ctx.drawImage(img, 0, 0, 1080, 1920);
+    const scale = Math.max(canvas.width / img.naturalWidth, canvas.height / img.naturalHeight);
+    const x = (canvas.width - img.naturalWidth * scale) / 2;
+    const y = (canvas.height - img.naturalHeight * scale) / 2;
+    ctx.drawImage(img, x, y, img.naturalWidth * scale, img.naturalHeight * scale);
   } else {
     const fallbackGrad = ctx.createLinearGradient(0, 0, 1080, 1920);
     fallbackGrad.addColorStop(0, "#0f172a");
@@ -22743,200 +22753,162 @@ window.generateExactBwodImageBlob = async function() {
   
   // 2. Full-bleed dark gradient scrim for contrast & phone status readability
   const scrim = ctx.createLinearGradient(0, 0, 0, 1920);
-  scrim.addColorStop(0, "rgba(8, 14, 26, 0.75)");
-  scrim.addColorStop(0.25, "rgba(8, 14, 26, 0.52)");
-  scrim.addColorStop(0.65, "rgba(6, 10, 20, 0.85)");
-  scrim.addColorStop(1, "rgba(4, 7, 14, 0.98)");
+  scrim.addColorStop(0, "rgba(8, 14, 26, 0.72)");
+  scrim.addColorStop(0.25, "rgba(8, 14, 26, 0.42)");
+  scrim.addColorStop(0.65, "rgba(6, 10, 20, 0.76)");
+  scrim.addColorStop(1, "rgba(4, 7, 14, 0.95)");
   ctx.fillStyle = scrim;
   ctx.fillRect(0, 0, 1080, 1920);
   
-  // Outer decorative border
-  ctx.strokeStyle = "rgba(255, 255, 255, 0.18)";
-  ctx.lineWidth = 2;
-  ctx.strokeRect(40, 40, 1000, 1840);
-  
-  // Helper for word wrapping
-  const drawWrappedText = (text, startX, startY, maxWidth, lineHeight) => {
-    if (!text) return startY;
+  // Center alignment utility
+  const drawWrappedCenteredText = (text, centerY, maxWidth, lineHeight) => {
+    if (!text) return centerY;
     const words = text.split(" ");
     let curLine = "";
-    let curY = startY;
+    const lines = [];
     for (let n = 0; n < words.length; n++) {
       const test = curLine + words[n] + " ";
       if (ctx.measureText(test).width > maxWidth && n > 0) {
-        ctx.fillText(curLine.trim(), startX, curY);
+        lines.push(curLine.trim());
         curLine = words[n] + " ";
-        curY += lineHeight;
       } else {
         curLine = test;
       }
     }
     if (curLine.trim()) {
-      ctx.fillText(curLine.trim(), startX, curY);
+      lines.push(curLine.trim());
+    }
+    let curY = centerY;
+    for (let i = 0; i < lines.length; i++) {
+      ctx.fillText(lines[i], 540, curY);
       curY += lineHeight;
     }
     return curY;
   };
-
-  // Center vertical card container (WhatsApp status safe area)
-  const cardX = 80;
-  const cardY = 320;
-  const cardW = 920;
-  const cardH = 1280;
-  const cardRadius = 36;
-  
-  // Frosted Glass Card Base
-  ctx.save();
-  ctx.fillStyle = "rgba(10, 16, 28, 0.78)";
-  ctx.beginPath();
-  if (typeof ctx.roundRect === 'function') {
-    ctx.roundRect(cardX, cardY, cardW, cardH, cardRadius);
-  } else {
-    ctx.rect(cardX, cardY, cardW, cardH);
-  }
-  ctx.fill();
-  ctx.strokeStyle = "rgba(255, 255, 255, 0.22)";
-  ctx.lineWidth = 2;
-  ctx.stroke();
-  ctx.restore();
-
-  // TOP: Word of the Day pill & Origin pill
-  const badgeY = cardY + 70;
-  
-  // Word of the Day Pill
-  const headerTitle = isEng ? "✦ WORD OF THE DAY ✦" : "✦ आजचा पवित्र शब्द ✦";
-  ctx.fillStyle = "rgba(0, 0, 0, 0.55)";
-  ctx.beginPath();
-  if (typeof ctx.roundRect === 'function') {
-    ctx.roundRect(cardX + 45, badgeY - 28, isEng ? 330 : 360, 44, 22);
-  } else {
-    ctx.rect(cardX + 45, badgeY - 28, isEng ? 330 : 360, 44);
-  }
-  ctx.fill();
-  ctx.strokeStyle = "rgba(251, 191, 36, 0.5)";
-  ctx.lineWidth = 1.5;
-  ctx.stroke();
-  
-  ctx.fillStyle = "#fbbf24";
-  ctx.font = "bold 18px -apple-system, BlinkMacSystemFont, sans-serif";
-  ctx.fillText(headerTitle, cardX + 65, badgeY);
-
-  // Origin Pill (Hebrew / Greek)
-  const cleanOrigin = isEng ? (word ? word.origin.replace(/\s*\(.*\)/, '').trim() : "Greek") : (word ? word.origin : "ग्रीक");
-  ctx.fillStyle = "rgba(255, 255, 255, 0.16)";
-  ctx.beginPath();
-  if (typeof ctx.roundRect === 'function') {
-    ctx.roundRect(cardX + cardW - 200, badgeY - 28, 155, 44, 22);
-  } else {
-    ctx.rect(cardX + cardW - 200, badgeY - 28, 155, 44);
-  }
-  ctx.fill();
-  ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
-  ctx.lineWidth = 1.5;
-  ctx.stroke();
-
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "bold 18px -apple-system, BlinkMacSystemFont, sans-serif";
-  ctx.textAlign = "center";
-  ctx.fillText(cleanOrigin, cardX + cardW - 122, badgeY);
-  ctx.textAlign = "left";
 
   // Parse word term: primary word + script
   const rawTerm = word ? word.term : "Agape (ἀγάπη)";
   const match = rawTerm.match(/^([^(]+)(?:\s*\(([^)]+)\))?/);
   const primaryWord = match ? match[1].trim() : rawTerm;
   const scriptWord = match && match[2] ? `(${match[2].trim()})` : "";
+  const cleanOrigin = isEng ? (word ? word.origin.replace(/\s*\(.*\)/, '').trim() : "Greek") : (word ? word.origin : "ग्रीक");
 
-  // WORD & SCRIPT
-  let currentY = cardY + 180;
-  
-  // Primary Word in large bold font
+  // TOP PILL: Word of the Day & Origin
+  let curY = 410;
+  ctx.textAlign = "center";
+
+  const headerTitle = isEng ? `✦ WORD OF THE DAY • ${cleanOrigin.toUpperCase()} ✦` : `✦ आजचा पवित्र शब्द • ${cleanOrigin} ✦`;
+  ctx.font = "bold 22px -apple-system, BlinkMacSystemFont, sans-serif";
+  const pillW = ctx.measureText(headerTitle).width + 50;
+  const pillH = 50;
+  const pillX = 540 - (pillW / 2);
+  const pillY = curY - 34;
+
+  ctx.fillStyle = "rgba(0, 0, 0, 0.55)";
+  ctx.beginPath();
+  if (typeof ctx.roundRect === 'function') {
+    ctx.roundRect(pillX, pillY, pillW, pillH, 25);
+  } else {
+    ctx.rect(pillX, pillY, pillW, pillH);
+  }
+  ctx.fill();
+  ctx.strokeStyle = "rgba(251, 191, 36, 0.65)";
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  ctx.fillStyle = "#fbbf24";
+  ctx.fillText(headerTitle, 540, curY);
+
+  // PRIMARY WORD
+  curY += 160;
   ctx.fillStyle = "#ffffff";
-  ctx.font = "bold 68px 'Noto Serif Devanagari', 'Playfair Display', Georgia, serif";
-  ctx.shadowColor = "rgba(0, 0, 0, 0.9)";
-  ctx.shadowBlur = 20;
-  ctx.fillText(primaryWord, cardX + 45, currentY);
+  ctx.font = "bold 82px 'Noto Serif Devanagari', 'Lora', Georgia, serif";
+  ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
+  ctx.shadowBlur = 24;
+  ctx.fillText(primaryWord, 540, curY);
   ctx.shadowBlur = 0;
 
-  // Highlighted Hebrew / Greek Script Badge
+  // SCRIPT & PRONUNCIATION
   if (scriptWord) {
-    currentY += 80;
+    curY += 80;
     ctx.font = "bold 44px 'Times New Roman', 'Noto Serif Hebrew', Georgia, serif";
     const scriptWidth = ctx.measureText(scriptWord).width;
-    
-    // Glowing golden pill for script
-    ctx.fillStyle = "rgba(251, 191, 36, 0.18)";
+    const scriptPillW = scriptWidth + 44;
+    const scriptPillH = 60;
+    const scriptPillX = 540 - (scriptPillW / 2);
+    const scriptPillY = curY - 44;
+
+    ctx.fillStyle = "rgba(251, 191, 36, 0.22)";
     ctx.beginPath();
     if (typeof ctx.roundRect === 'function') {
-      ctx.roundRect(cardX + 45, currentY - 44, scriptWidth + 36, 62, 16);
+      ctx.roundRect(scriptPillX, scriptPillY, scriptPillW, scriptPillH, 22);
     } else {
-      ctx.rect(cardX + 45, currentY - 44, scriptWidth + 36, 62);
+      ctx.rect(scriptPillX, scriptPillY, scriptPillW, scriptPillH);
     }
     ctx.fill();
-    ctx.strokeStyle = "rgba(251, 191, 36, 0.65)";
+    ctx.strokeStyle = "rgba(251, 191, 36, 0.75)";
     ctx.lineWidth = 2;
     ctx.stroke();
 
     ctx.fillStyle = "#fde047";
-    ctx.fillText(scriptWord, cardX + 63, currentY);
+    ctx.fillText(scriptWord, 540, curY);
   }
 
   // Pronunciation
-  currentY += 60;
-  ctx.fillStyle = "rgba(255, 255, 255, 0.65)";
-  ctx.font = "600 24px -apple-system, BlinkMacSystemFont, sans-serif";
+  curY += 60;
+  ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
+  ctx.font = "600 26px -apple-system, BlinkMacSystemFont, sans-serif";
   const pronText = isEng ? `Pronunciation: ${word ? word.pronunciation : ''}` : `उच्चार: ${word ? word.pronunciation : ''}`;
-  ctx.fillText(pronText, cardX + 45, currentY);
+  ctx.fillText(pronText, 540, curY);
 
-  // Decorative Divider
-  currentY += 45;
-  ctx.strokeStyle = "rgba(255, 255, 255, 0.18)";
-  ctx.lineWidth = 1.5;
+  // Decorative Golden Divider Line
+  curY += 60;
+  ctx.strokeStyle = "rgba(251, 191, 36, 0.7)";
+  ctx.lineWidth = 2;
   ctx.beginPath();
-  ctx.moveTo(cardX + 45, currentY);
-  ctx.lineTo(cardX + cardW - 45, currentY);
+  ctx.moveTo(380, curY);
+  ctx.lineTo(700, curY);
   ctx.stroke();
+
+  // Quotation mark
+  curY += 65;
+  ctx.fillStyle = "#fbbf24";
+  ctx.font = "58px Georgia, serif";
+  ctx.fillText("“", 540, curY);
 
   // MEANING (Language Pure: English only if English, Marathi only if Marathi)
-  currentY += 55;
-  ctx.fillStyle = "#fbbf24";
-  ctx.font = "bold 20px -apple-system, BlinkMacSystemFont, sans-serif";
-  ctx.fillText(isEng ? "📖 MEANING" : "📖 पवित्र अर्थ", cardX + 45, currentY);
-
-  currentY += 55;
+  curY += 45;
   ctx.fillStyle = "#ffffff";
-  ctx.font = "500 34px 'Noto Serif Devanagari', Georgia, serif";
+  ctx.font = "600 38px 'Noto Serif Devanagari', 'Lora', Georgia, serif";
+  ctx.shadowColor = "rgba(0, 0, 0, 0.98)";
+  ctx.shadowBlur = 20;
   const meaningText = isEng ? (word ? word.meaningEn : "") : (word ? word.meaningMr : "");
-  currentY = drawWrappedText(meaningText, cardX + 45, currentY, cardW - 90, 52);
+  curY = drawWrappedCenteredText(meaningText, curY, 860, 58);
+  ctx.shadowBlur = 0;
 
-  // CHAPTER & VERSE DETAILS
-  currentY = Math.max(currentY + 40, cardY + cardH - 240);
-  
-  // Inner subtle pill for Scripture Reference
-  ctx.fillStyle = "rgba(251, 191, 36, 0.12)";
+  // SCRIPTURE REFERENCE (with left & right golden accent lines)
+  curY = Math.max(curY + 70, 1340);
+  const refText = isEng ? (word ? word.refEn : '') : (word ? word.refMr : '');
+  ctx.font = "bold 32px var(--font-ui), -apple-system, BlinkMacSystemFont, sans-serif";
+  ctx.fillStyle = "#fbbf24";
+  const refWidth = ctx.measureText(refText).width;
+
+  ctx.strokeStyle = "#fbbf24";
+  ctx.lineWidth = 2;
   ctx.beginPath();
-  if (typeof ctx.roundRect === 'function') {
-    ctx.roundRect(cardX + 45, currentY - 32, cardW - 90, 72, 16);
-  } else {
-    ctx.rect(cardX + 45, currentY - 32, cardW - 90, 72);
-  }
-  ctx.fill();
-  ctx.strokeStyle = "rgba(251, 191, 36, 0.35)";
-  ctx.lineWidth = 1.5;
+  ctx.moveTo(540 - (refWidth / 2) - 50, curY - 10);
+  ctx.lineTo(540 - (refWidth / 2) - 15, curY - 10);
+  ctx.moveTo(540 + (refWidth / 2) + 15, curY - 10);
+  ctx.lineTo(540 + (refWidth / 2) + 50, curY - 10);
   ctx.stroke();
 
-  ctx.fillStyle = "#fde047";
-  ctx.font = "bold 28px 'Noto Serif Devanagari', Georgia, serif";
-  const refText = isEng ? `📜 Scripture: ${word ? word.refEn : ''}` : `📜 पवित्र शास्त्र: ${word ? word.refMr : ''}`;
-  ctx.fillText(refText, cardX + 70, currentY + 14);
+  ctx.fillText(refText, 540, curY);
 
-  // BOTTOM BRANDING
-  const brandY = cardY + cardH - 50;
-  ctx.fillStyle = "rgba(255, 255, 255, 0.65)";
-  ctx.font = "bold 22px -apple-system, BlinkMacSystemFont, sans-serif";
-  ctx.textAlign = "center";
-  ctx.fillText("🕊️ River of Life • Holy Bible (पवित्र बायबल)", cardX + (cardW / 2), brandY);
-  ctx.textAlign = "left";
+  // BOTTOM BRANDING BADGE
+  const brandY = 1760;
+  ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+  ctx.font = "bold 24px -apple-system, BlinkMacSystemFont, sans-serif";
+  ctx.fillText("🕊️ River of Life • Holy Bible (पवित्र बायबल)", 540, brandY);
 
   const blob = await new Promise((res) => canvas.toBlob(res, "image/png", 0.95));
   const filename = `Biblical_Word_${(primaryWord || 'Word').replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}.png`;
@@ -22992,6 +22964,7 @@ window.shareBwodToWhatsApp = async function() {
       return;
     }
   } catch (err) {
+    if (err && (err.name === 'AbortError' || err.message?.includes('abort') || err.message?.includes('cancel'))) return;
     console.warn("Native file share fallback:", err);
   }
 
@@ -23013,11 +22986,31 @@ window.saveExactBwodImage = async function() {
   const isEng = (window.state && (window.state.translation === "eng" || window.state.language === "en"));
   showToast(isEng ? "📸 Preparing card..." : "📸 कार्ड तयार होत आहे...");
   try {
-    const { dataUrl, filename } = await generateExactBwodImageBlob();
+    const { dataUrl, filename, blob } = await generateExactBwodImageBlob();
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const file = new File([blob], filename, { type: "image/png", lastModified: Date.now() });
+
+    if (isMobile && navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({
+          files: [file],
+          title: "River of Life - Word of the Day"
+        });
+        showToast(isEng ? "✨ Saved / Shared to Gallery!" : "✨ फोटो गॅलरीमध्ये सेव्ह / शेअर केला!");
+        return;
+      } catch (shareErr) {
+        if (shareErr && (shareErr.name === 'AbortError' || shareErr.message?.includes('abort') || shareErr.message?.includes('cancel'))) {
+          return;
+        }
+      }
+    }
+
     const link = document.createElement("a");
     link.download = filename;
     link.href = dataUrl;
+    document.body.appendChild(link);
     link.click();
+    document.body.removeChild(link);
     showToast(isEng ? "✅ Card saved to device!" : "✅ कार्ड गॅलरीत सेव्ह झाले!");
   } catch (err) {
     console.error("Save image error:", err);

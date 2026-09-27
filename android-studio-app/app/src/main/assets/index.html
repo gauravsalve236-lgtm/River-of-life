@@ -12,7 +12,7 @@
   <script>
     // Force immediate hard purge of all stale Service Workers and CacheStorage
     (function() {
-      const CURRENT_VER = "v2396_BWOD_DAILY_VERSE_PARITY";
+      const CURRENT_VER = "v2397_BWOD_FULLSCREEN_PURE_IMAGE";
       if (localStorage.getItem("rol_app_ver") !== CURRENT_VER) {
         localStorage.setItem("rol_app_ver", CURRENT_VER);
         if ('serviceWorker' in navigator) {
@@ -105,7 +105,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Great+Vibes&family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Noto+Sans+Devanagari:wght@400;500;600;700;800;900&family=Noto+Serif+Devanagari:wght@400;500;600;700;800;900&family=Outfit:wght@500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600;1,700&family=Poppins:wght@400;500;600;700;800;900&family=Rozha+One&display=swap" rel="stylesheet">
   
   <!-- Main Stylesheet (Biblical Word Studio & Home Search) -->
-  <link rel="stylesheet" href="index.css?v=2396_BWOD_DAILY_VERSE_PARITY">
+  <link rel="stylesheet" href="index.css?v=2397_BWOD_FULLSCREEN_PURE_IMAGE">
 
   <!-- Official LiveKit WebRTC Client SDK -->
   <script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
@@ -432,7 +432,7 @@
 
               <!-- 5. Biblical Word of the Day (Styled similar to Daily Bible Verse) -->
               <div class="educational-microlearning-section" id="educational-microlearning-section" style="margin: 6px 0 16px 0;">
-                <div class="home-vod-card" id="card-microlearning-word" onclick="openBwodShareAndSaveModal()" title="Open Word of the Day Card / आजचा शब्द कार्ड उघडा" style="background-image: url('assets/daily_verses/pinterest_golden_path.jpg'); cursor: pointer;">
+                <div class="home-vod-card" id="card-microlearning-word" onclick="openFullscreenBWOD()" title="Open Word of the Day / आजचा शब्द उघडा" style="background-image: url('assets/daily_verses/pinterest_golden_path.jpg'); cursor: pointer;">
                   <div class="home-vod-overlay"></div>
                   
                   <!-- Top Row: Word of the Day Badge & Origin Pill (matching Daily Verse) -->
@@ -480,7 +480,7 @@
                     <button class="home-vod-btn" id="bwod-btn-save-img" onclick="saveExactBwodImage(); event.stopPropagation();" title="Save Image to Gallery / फोटो सेव्ह करा" aria-label="Save Image to Gallery">
                       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                     </button>
-                    <button class="home-vod-btn" id="bwod-btn-share" onclick="openBwodShareAndSaveModal(); event.stopPropagation();" title="Share Card / कार्ड शेअर करा" aria-label="Share Card" style="background: rgba(37, 211, 102, 0.35); border-color: rgba(37, 211, 102, 0.7);">
+                    <button class="home-vod-btn" id="bwod-btn-share" onclick="shareBwodToWhatsApp(); event.stopPropagation();" title="Share to WhatsApp / व्हॉट्सॲपवर शेअर करा" aria-label="Share to WhatsApp" style="background: rgba(37, 211, 102, 0.35); border-color: rgba(37, 211, 102, 0.7);">
                       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
                     </button>
                   </div>
@@ -4063,81 +4063,104 @@
       </div>
     </div>
 
-    <!-- FULLSCREEN BIBLICAL WORD OF THE DAY STUDIO / SHARE MODAL -->
+    <!-- FULLSCREEN BIBLICAL WORD OF THE DAY STUDIO / IMMERSIVE VIEW -->
     <div id="modal-fullscreen-bwod" class="modal-overlay-fullscreen" style="display: none; position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh; background-color: #000; z-index: 99999; overflow: hidden;">
       <div id="fs-bwod-capsule-bg" style="position: absolute; inset: 0; width: 100%; height: 100%; background-size: cover; background-position: center; transition: background-image 0.4s ease; background-image: url('assets/daily_verses/pinterest_golden_path.jpg');">
-        <div id="fs-bwod-overlay-gradient" style="position: absolute; inset: 0; pointer-events: none; z-index: 5; background: linear-gradient(180deg, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.25) 30%, rgba(0,0,0,0.55) 65%, rgba(0,0,0,0.94) 100%);"></div>
+        <!-- Overlay Gradient for contrast & readability -->
+        <div id="fs-bwod-overlay-gradient" style="position: absolute; inset: 0; pointer-events: none; z-index: 5; background: linear-gradient(180deg, rgba(0,0,0,0.68) 0%, rgba(0,0,0,0.22) 28%, rgba(0,0,0,0.58) 65%, rgba(0,0,0,0.95) 100%);"></div>
 
-        <!-- Top Header Navigation -->
+        <!-- Top Header Navigation (Close on Left, Day Switcher in Center) -->
         <div class="fs-vod-top-header" style="position: absolute; top: max(env(safe-area-inset-top, 16px), 16px); left: 50%; transform: translateX(-50%); width: calc(100% - 32px); max-width: 1100px; display: flex; justify-content: space-between; align-items: center; z-index: 30; gap: 8px;">
-          <button onclick="closeFullscreenBWOD(); event.stopPropagation();" aria-label="Close" title="Close / बंद करा" style="width: 44px; height: 44px; border-radius: 50%; background: rgba(0,0,0,0.5); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1.5px solid rgba(255,255,255,0.25); color: #fff; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(0,0,0,0.35); flex-shrink: 0;">
+          <button id="btn-close-fullscreen-bwod" onclick="closeFullscreenBWOD(); event.stopPropagation();" aria-label="Close" title="Close / बंद करा" style="width: 44px; height: 44px; border-radius: 50%; background: rgba(0,0,0,0.5); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1.5px solid rgba(255,255,255,0.25); color: #fff; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(0,0,0,0.35); flex-shrink: 0;">
             &times;
           </button>
           
+          <!-- Day switcher pill -->
           <div class="fs-vod-day-switcher" style="display: flex; align-items: center; gap: 6px; background: rgba(0,0,0,0.5); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid rgba(255,255,255,0.2); padding: 5px 14px; border-radius: 20px; box-shadow: 0 4px 14px rgba(0,0,0,0.35);">
             <button onclick="navigateBWOD('prev')" style="background: transparent; border: none; color: #fff; font-size: 11.5px; font-weight: 700; cursor: pointer; padding: 2px 6px;">&larr; मागील</button>
             <span id="fs-bwod-day-label" style="font-size: 11px; font-weight: 800; color: #fbbf24; text-transform: uppercase;">आजचा शब्द</span>
             <button onclick="navigateBWOD('next')" style="background: transparent; border: none; color: #fff; font-size: 11.5px; font-weight: 700; cursor: pointer; padding: 2px 6px;">पुढील &rarr;</button>
           </div>
 
-          <div style="width: 44px;"></div>
+          <!-- Empty placeholder for balanced header alignment -->
+          <div style="width: 44px; height: 44px; flex-shrink: 0;"></div>
         </div>
 
-        <!-- Center Devotional Word Card in Studio -->
-        <div class="fs-vod-center-viewport" style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 20; padding: 75px 20px 165px 20px; box-sizing: border-box; overflow-y: auto;">
-          <div class="fs-bwod-card-container" id="fs-bwod-card-container" style="width: 100%; max-width: 680px; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1.5px solid rgba(255, 255, 255, 0.22); border-radius: 28px; padding: 28px 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); display: flex; flex-direction: column; gap: 14px; color: #ffffff;">
-            
-            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-              <span style="font-size: 11px; font-weight: 800; color: #fde047; text-transform: uppercase; letter-spacing: 0.8px;">✨ BIBLICAL WORD OF THE DAY</span>
-              <span id="fs-bwod-origin" style="font-size: 11.5px; font-weight: 700; color: #ffffff; background: rgba(255,255,255,0.18); padding: 3px 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.25);">Greek (ग्रीक)</span>
-            </div>
-
-            <div style="text-align: center; margin: 4px 0 8px 0;">
-              <h1 id="fs-bwod-term" style="font-family: var(--font-marathi), var(--font-body), Georgia, serif; font-size: 34px; font-weight: 800; color: #ffffff; margin: 0 0 8px 0; text-shadow: 0 2px 14px rgba(0,0,0,0.6);">Agape (ἀγάπη)</h1>
-              <div id="fs-bwod-pronounce-row" style="display: inline-flex; align-items: center; gap: 6px; background: rgba(253, 224, 71, 0.15); border: 1px solid rgba(253, 224, 71, 0.4); padding: 4px 14px; border-radius: 20px; color: #fde047; font-size: 13px; font-weight: 700;">
-                <span id="fs-bwod-pronounce">उच्चार: अगापे</span>
-              </div>
-            </div>
-
-            <div style="background: rgba(255, 255, 255, 0.08); border-radius: 18px; padding: 16px 18px; border: 1px solid rgba(255, 255, 255, 0.12);">
-              <span style="display: block; font-size: 11px; font-weight: 800; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">📖 पवित्र अर्थ (Biblical Meaning)</span>
-              <p id="fs-bwod-meaning" style="font-family: var(--font-marathi); font-size: 18px; font-weight: 600; line-height: 1.6; color: #ffffff; margin: 0;">निःस्वार्थी, बिनशर्त आणि आत्मसमर्पक दैवी प्रीती</p>
-            </div>
-
-            <div style="background: rgba(255, 255, 255, 0.08); border-radius: 18px; padding: 16px 18px; border: 1px solid rgba(255, 255, 255, 0.12);">
-              <span style="display: block; font-size: 11px; font-weight: 800; color: #93c5fd; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">💡 आत्मिक रहस्य व मनन (Spiritual Insight)</span>
-              <p id="fs-bwod-insight" style="font-family: var(--font-marathi); font-size: 15px; font-weight: 500; line-height: 1.68; color: #e2e8f0; margin: 0;">मानवी प्रेम परिस्थितीवर अवलंबून असते, परंतु 'अगापे' प्रेम आपल्या योग्यतेवर नव्हे तर देवाच्या स्वभावधर्मावर आधारलेले आहे.</p>
-            </div>
-
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.12);">
-              <span id="fs-bwod-ref" style="font-family: var(--font-marathi); font-size: 14px; font-weight: 700; color: #fbbf24;">१ योहान ४:८ • 'देव प्रीती आहे'</span>
-              <button onclick="openMicroLearningBibleChapter(); closeFullscreenBWOD();" style="background: var(--primary); color: #fff; border: none; padding: 7px 14px; border-radius: 10px; font-size: 12.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;">
-                <span>बायबलमध्ये वाचा</span> &rarr;
-              </button>
-            </div>
-
+        <!-- Center Typography Overlay (Directly on wallpaper, identical to Daily Bible Verse) -->
+        <div id="fs-bwod-card-container" class="fullscreen-vod-text-overlay" style="position: absolute; top: calc(50% - 25px); left: 50%; transform: translate(-50%, -50%); width: min(88vw, 880px); max-height: calc(100dvh - 210px); z-index: 15; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; box-sizing: border-box; padding: 0 16px; background: transparent !important; border: none !important; box-shadow: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; pointer-events: auto; overflow-y: auto; scrollbar-width: none;">
+          
+          <!-- Top Tag & Origin Pill -->
+          <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap;">
+            <span id="fs-bwod-badge-pill" style="font-size: 12.5px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: #fbbf24; text-shadow: 0 2px 12px rgba(0,0,0,0.95); font-family: var(--font-ui), sans-serif;">
+              ✦ आजचा पवित्र शब्द ✦
+            </span>
+            <span id="fs-bwod-origin" style="font-size: 11.5px; font-weight: 700; color: #ffffff; background: rgba(255,255,255,0.18); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); padding: 3px 12px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.3); text-shadow: 0 1px 4px rgba(0,0,0,0.8);">
+              Greek (ग्रीक)
+            </span>
           </div>
+
+          <!-- Main Word & Hebrew/Greek Script -->
+          <div style="margin-bottom: 8px; text-align: center;">
+            <h1 id="fs-bwod-primary-word" style="font-family: 'Noto Serif Devanagari', 'Lora', Georgia, serif; font-size: clamp(34px, 5.5vw, 56px); font-weight: 800; color: #ffffff; margin: 0 0 6px 0; text-shadow: 0 4px 24px rgba(0,0,0,0.95), 0 2px 8px rgba(0,0,0,0.9); line-height: 1.15;">
+              Agape
+            </h1>
+            <div style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; margin-top: 4px;">
+              <span id="fs-bwod-script-word" style="font-family: 'Times New Roman', 'Noto Serif Hebrew', Georgia, serif; font-size: clamp(20px, 3.2vw, 30px); font-weight: 700; color: #fde047; background: rgba(251, 191, 36, 0.2); border: 1.5px solid rgba(251, 191, 36, 0.55); padding: 3px 16px; border-radius: 20px; text-shadow: 0 2px 10px rgba(0,0,0,0.9);">
+                (ἀγάπη)
+              </span>
+              <span id="fs-bwod-pronounce" style="font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.85); text-shadow: 0 1px 6px rgba(0,0,0,0.9);">
+                उच्चार: अगापे
+              </span>
+            </div>
+          </div>
+
+          <!-- Meaning Body (Pure typography directly on wallpaper, translated per selected language) -->
+          <blockquote id="fs-bwod-meaning" style="font-family: 'Noto Serif Devanagari', 'Lora', Georgia, serif; font-size: clamp(19px, 3.2vw, 32px); line-height: 1.6; color: #ffffff; font-weight: 600; margin: 12px 0 20px 0; text-shadow: 0 3px 20px rgba(0,0,0,0.98), 0 1px 6px rgba(0,0,0,0.95); text-wrap: balance; width: 100%; text-align: center;">
+            “निःस्वार्थी, बिनशर्त आणि आत्मसमर्पक दैवी प्रीती”
+          </blockquote>
+
+          <!-- Scripture Reference Row -->
+          <div style="display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap;">
+            <div style="height: 1.5px; width: 36px; background: #fbbf24; opacity: 0.85; box-shadow: 0 1px 6px rgba(0,0,0,0.9);"></div>
+            <span id="fs-bwod-ref" style="font-family: var(--font-ui), sans-serif; font-size: 17.5px; font-weight: 800; color: #fbbf24; letter-spacing: 0.6px; text-shadow: 0 2px 12px rgba(0,0,0,0.98);">
+              १ योहान ४:८
+            </span>
+            <div style="height: 1.5px; width: 36px; background: #fbbf24; opacity: 0.85; box-shadow: 0 1px 6px rgba(0,0,0,0.9);"></div>
+          </div>
+
         </div>
 
-        <!-- Bottom Action Floating Dock -->
-        <div class="fs-vod-floating-dock" style="position: absolute; bottom: max(env(safe-area-inset-bottom, 20px), 20px); left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 10px; z-index: 30; background: rgba(0,0,0,0.65); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1.5px solid rgba(255,255,255,0.25); border-radius: 32px; padding: 8px 18px; box-shadow: 0 8px 32px rgba(0,0,0,0.5);">
-          <button class="fs-vod-dock-btn" onclick="cycleBwodWallpaper()" title="Change Wallpaper / वॉलपेपर बदला">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-            <span style="font-size: 11px; font-weight: 700;">वॉलपेपर</span>
+        <!-- Bottom Action Bar (Identical floating dock to Daily Bible Verse) -->
+        <div class="fs-vod-bottom-bar" style="position: absolute; bottom: max(env(safe-area-inset-bottom, 24px), 24px); left: 50%; transform: translateX(-50%); width: auto; min-width: 260px; max-width: calc(100% - 32px); display: flex; justify-content: center; align-items: center; gap: 28px; z-index: 25; background: rgba(0,0,0,0.5); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); padding: 8px 24px; border-radius: 30px; border: 1.5px solid rgba(255,255,255,0.2); box-shadow: 0 8px 28px rgba(0,0,0,0.6);">
+          
+          <!-- Save Image Button -->
+          <button id="btn-bwod-fs-save" onclick="saveExactBwodImage();" title="Save Image / फोटो सेव्ह करा" style="background: transparent; border: none; color: #fff; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; padding: 4px 8px; transition: transform 0.2s ease;">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            <span style="font-size: 11px; font-weight: 700; color: #fff;">Save</span>
           </button>
-          <button class="fs-vod-dock-btn" onclick="saveExactBwodImage()" title="Save Image / फोटो सेव्ह करा">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-            <span style="font-size: 11px; font-weight: 700;">सेव्ह करा</span>
+
+          <!-- Read Full Chapter in Bible Button -->
+          <button id="btn-bwod-fs-read" onclick="openMicroLearningBibleChapter(); closeFullscreenBWOD();" title="Read Full Chapter / संपूर्ण अध्याय वाचा" style="background: transparent; border: none; color: #fff; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; padding: 4px 8px; transition: transform 0.2s ease;">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+            <span style="font-size: 11px; font-weight: 700; color: #fff;">Read</span>
           </button>
-          <button class="fs-vod-dock-btn" onclick="shareBwodToWhatsApp()" title="Share to WhatsApp / व्हॉट्सॲप" style="background: #25D366; color: #fff; border-color: #25D366;">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
-            <span style="font-size: 11px; font-weight: 700; color: #fff;">WhatsApp</span>
+
+          <!-- Share Button (WhatsApp) -->
+          <button id="btn-bwod-fs-share" onclick="shareBwodToWhatsApp();" title="Share to WhatsApp / व्हॉट्सॲपवर शेअर करा" style="background: transparent; border: none; color: #fff; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; padding: 4px 8px; transition: transform 0.2s ease;">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+            <span style="font-size: 11px; font-weight: 700; color: #fff;">Share</span>
           </button>
-          <button class="fs-vod-dock-btn" onclick="openMicroLearningBibleChapter(); closeFullscreenBWOD();" title="Read in Bible / बायबलमध्ये वाचा" style="background: var(--primary); color: #fff;">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
-            <span style="font-size: 11px; font-weight: 700; color: #fff;">वाचा</span>
-          </button>
+
         </div>
+
+        <!-- Right Wallpaper Switcher Thumbnail Button -->
+        <div id="btn-bwod-fs-wallpaper" onclick="cycleBwodWallpaper(); event.stopPropagation();" title="Change Wallpaper / वॉलपेपर बदला" style="position: absolute; bottom: max(env(safe-area-inset-bottom, 24px), 24px); right: 20px; z-index: 26; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; transition: transform 0.2s ease;">
+          <div style="width: 44px; height: 54px; border-radius: 12px; border: 2px solid #ffffff; overflow: hidden; box-shadow: 0 6px 20px rgba(0,0,0,0.65); background: #111; transform: rotate(2deg); transition: transform 0.2s ease;">
+            <img id="bwod-thumbnail-preview" src="assets/daily_verses/pinterest_golden_path.jpg" alt="Wallpaper" style="width: 100%; height: 100%; object-fit: cover;" />
+          </div>
+          <span style="font-size: 10px; font-weight: 800; color: #fbbf24; text-shadow: 0 1px 4px rgba(0,0,0,0.9); text-transform: uppercase; letter-spacing: 0.5px;">वॉलपेपर</span>
+        </div>
+
       </div>
     </div>
 
@@ -6512,7 +6535,7 @@
   <script src="sarvam-tts.js?v=132_MARVBSI_FULL_CHURCH_BIBLE"></script>
   <script src="bible-study.js?v=138_MUSEUM_STUDY_HUB"></script>
   <script src="peerjs.min.js"></script>
-  <script src="app.js?v=2396_BWOD_DAILY_VERSE_PARITY"></script>
+  <script src="app.js?v=2397_BWOD_FULLSCREEN_PURE_IMAGE"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 4.5s no matter what

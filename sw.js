@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v2396_BWOD_DAILY_VERSE_PARITY';
+const CACHE_NAME = 'river-of-life-cache-v2397_BWOD_FULLSCREEN_PURE_IMAGE';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
