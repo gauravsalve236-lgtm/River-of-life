@@ -2463,6 +2463,7 @@ async function openReader(bookKey, chapterNum) {
     }
     
     const verseEl = document.createElement("div");
+    verseEl.id = `verse-${verseNum}`;
     verseEl.dataset.verseId = verseKey;
     verseEl.dataset.book = bookKey;
     verseEl.dataset.chapter = chapterNum;
@@ -3195,8 +3196,10 @@ function renderDailyDevotion() {
     'sunrise.png', 'forest.png', 'mountains.png', 'ocean.png', 'path.png', 'stars.png', 'mist.png'
   ];
   const imgIdx = ((dayOfYear + offset) % images.length + images.length) % images.length;
+  const manualDate = localStorage.getItem('rol_manual_wallpaper_date');
+  const todayDateStr = now.toISOString().slice(0, 10);
   const savedWp = localStorage.getItem('rol_selected_wallpaper');
-  const dailyImg = (savedWp && images.includes(savedWp)) ? savedWp : images[imgIdx];
+  const dailyImg = (manualDate === todayDateStr && savedWp && images.includes(savedWp)) ? savedWp : images[imgIdx];
   window.currentVodImageIndex = images.indexOf(dailyImg) !== -1 ? images.indexOf(dailyImg) : imgIdx;
   const imgUrl = (typeof getVodImageUrl === "function") ? getVodImageUrl(dailyImg) : (dailyImg.includes('.') ? `assets/daily_verses/${dailyImg}` : `assets/daily_verses/${dailyImg}.png`);
   
@@ -4052,7 +4055,7 @@ window.readVODChapter = function() {
   let v = parseInt(vod.verse, 10) || 1;
 
   if (typeof openReaderAndNavigate === 'function') {
-    openReaderAndNavigate(book, ch, v);
+    openReaderAndNavigate(book, ch, v, vod.highlightWord || '');
   } else if (typeof openReader === 'function') {
     if (typeof switchTab === 'function') switchTab('reader');
     openReader(book, ch);
@@ -4714,8 +4717,11 @@ function createBlobUrlFromBase64(base64Content) {
   return URL.createObjectURL(blob);
 }
 
-async function synthesizeVerseAudio(verseText) {
+async function synthesizeVerseAudio(verseText, isEnglish = false) {
   const apiKey = "AIzaSyClWC2VI25zclGPBRMaIaDpqOgH7ZebGeA";
+  const langCode = isEnglish ? "en-US" : "mr-IN";
+  const voiceName = isEnglish ? "en-US-Neural2-F" : "mr-IN-Chirp3-HD-Algieba";
+  const tlCode = isEnglish ? "en" : "mr";
 
   // Tier 1: Try Local Backend Server if running on port 8090
   if (window.location.port === '8090') {
@@ -4725,8 +4731,8 @@ async function synthesizeVerseAudio(verseText) {
         headers: { "Content-Type": "application/json; charset=utf-8" },
         body: JSON.stringify({
           text: verseText,
-          voice: "mr-IN-Chirp3-HD-Algieba",
-          languageCode: "mr-IN",
+          voice: voiceName,
+          languageCode: langCode,
           audioEncoding: "MP3"
         })
       });
@@ -4741,14 +4747,14 @@ async function synthesizeVerseAudio(verseText) {
     }
   }
 
-  // Tier 2: Direct Google Cloud Text-to-Speech REST API Call (Works on GitHub Pages & iPhone Safari!)
+  // Tier 2: Direct Google Cloud Text-to-Speech REST API Call
   try {
     const googleRes = await fetch(`https://texttospeech.googleapis.com/v1/text:synthesize?key=${apiKey}`, {
       method: "POST",
       headers: { "Content-Type": "application/json; charset=utf-8" },
       body: JSON.stringify({
         input: { text: verseText },
-        voice: { languageCode: "mr-IN", name: "mr-IN-Chirp3-HD-Algieba" },
+        voice: { languageCode: langCode, name: voiceName },
         audioConfig: { audioEncoding: "MP3" }
       })
     });
@@ -4762,10 +4768,10 @@ async function synthesizeVerseAudio(verseText) {
     console.warn("Direct Google Cloud API failed, trying fallback", e);
   }
 
-  // Tier 3: High-reliability Google Translate Marathi Audio Fallback for iOS
+  // Tier 3: High-reliability Google Translate Audio Fallback
   try {
     const encodedText = encodeURIComponent(verseText.slice(0, 200));
-    return `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=mr&client=tw-ob`;
+    return `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=${tlCode}&client=tw-ob`;
   } catch(e) {
     throw new Error("Unable to synthesize verse audio");
   }
@@ -4857,6 +4863,7 @@ async function startSpeechNarration(startVerseIndex = null) {
     if (sleepTimerTimeout) { clearTimeout(sleepTimerTimeout); sleepTimerTimeout = null; }
   }
 
+  const isEng = (state && state.translation === "eng");
   let bookName = bookKey;
   const foundMeta = (typeof booksMetadataMr !== 'undefined' && Array.isArray(booksMetadataMr))
     ? booksMetadataMr.find(b =>
@@ -4864,25 +4871,33 @@ async function startSpeechNarration(startVerseIndex = null) {
         b.engName.toLowerCase() === bookKey.toLowerCase()
       )
     : null;
-  if (foundMeta) bookName = foundMeta.name || foundMeta.engName || bookKey;
+  if (foundMeta) bookName = isEng ? (foundMeta.engName || bookKey) : (foundMeta.name || foundMeta.engName || bookKey);
 
-  // Load Marathi verse data
-  let bookDataMr = null;
-  try { bookDataMr = await fetchBookDataMr(bookKey); } catch(e) {}
-  const versesMr = (bookDataMr && bookDataMr.chapters) ? (bookDataMr.chapters[chapterNum - 1] || []) : [];
-  const totalVerses = versesMr.length;
+  // Load verse data depending on active translation (English vs Marathi)
+  let versesList = [];
+  if (isEng) {
+    let bookDataEng = null;
+    try { bookDataEng = await fetchBookDataEng(bookKey); } catch(e) {}
+    versesList = (bookDataEng && bookDataEng.chapters) ? (bookDataEng.chapters[chapterNum - 1] || []) : [];
+  } else {
+    let bookDataMr = null;
+    try { bookDataMr = await fetchBookDataMr(bookKey); } catch(e) {}
+    versesList = (bookDataMr && bookDataMr.chapters) ? (bookDataMr.chapters[chapterNum - 1] || []) : [];
+  }
+  const totalVerses = versesList.length;
 
   if (totalVerses === 0) {
-    showToast("⚠️ मराठी श्लोक उपलब्ध नाहीत");
+    showToast(isEng ? "⚠️ English scripture verses not available" : "⚠️ मराठी श्लोक उपलब्ध नाहीत");
     n.isActive = false;
     updateReaderPlayState(false);
     return;
   }
 
   // Store in narration state
+  n.isEng = isEng;
   n.bookKey = bookKey;
   n.chapterNum = chapterNum;
-  n.versesMr = versesMr;
+  n.versesMr = versesList;
   n.totalVerses = totalVerses;
   n.bookName = bookName;
 
@@ -4951,7 +4966,7 @@ async function startSpeechNarration(startVerseIndex = null) {
       const verseEl = document.querySelector(`.verse-row[data-verse="${verseNum}"]`);
       if (verseEl) verseEl.classList.add("tts-synthesizing-verse");
       try {
-        audioUrl = await synthesizeVerseAudio(verseText);
+        audioUrl = await synthesizeVerseAudio(verseText, !!n.isEng);
       } catch(err) {
         if (n.isStopRequested) return;
         console.error("[TTS] Synthesis error:", err);
@@ -4980,7 +4995,7 @@ async function startSpeechNarration(startVerseIndex = null) {
     if (nextIndex < totalVerses) {
       const nextText = getCleanVerseText(versesMr, nextIndex);
       if (nextText) {
-        synthesizeVerseAudio(nextText).then(url => {
+        synthesizeVerseAudio(nextText, !!n.isEng).then(url => {
           if (!n.isStopRequested) {
             n.prefetchedAudio = url;
             n.prefetchedIndex = nextIndex;
@@ -5414,49 +5429,76 @@ function initAudioVoices() {
    Bilingual Search Discover View
    ========================================================================== */
 async function executeDiscoverSearch() {
-  const query = document.getElementById("discover-search-input").value.trim().toLowerCase();
+  const rawQuery = (document.getElementById("discover-search-input")?.value || "").trim();
+  const query = rawQuery.toLowerCase();
   const listContainer = document.getElementById("discover-search-results-list");
   const statusContainer = document.getElementById("discover-search-results-status");
   
-  if (query.length < 3) {
-    listContainer.innerHTML = "";
-    statusContainer.textContent = "Query must be at least 3 characters long";
+  if (query.length < 2) {
+    if (listContainer) listContainer.innerHTML = "";
+    if (statusContainer) statusContainer.textContent = "Query must be at least 2 characters long";
     return;
   }
   
-  statusContainer.innerHTML = `
-    <div class="loader-container">
-      <div class="ios-spinner"></div>
-      <div style="margin-top: 8px;">Searching scriptures...</div>
-    </div>
-  `;
-  listContainer.innerHTML = "";
+  if (statusContainer) {
+    statusContainer.innerHTML = `
+      <div class="loader-container">
+        <div class="ios-spinner"></div>
+        <div style="margin-top: 8px;">Searching scriptures (${state && state.translation === 'eng' ? 'English' : 'Marathi'})...</div>
+      </div>
+    `;
+  }
+  if (listContainer) listContainer.innerHTML = "";
   
-  const filter = document.querySelector(".filter-pill.active").dataset.filter;
+  const activePill = document.querySelector(".filter-pill.active");
+  const filter = activePill ? activePill.dataset.filter : "ALL";
   const isDevanagari = /[\u0900-\u097f]/.test(query);
-  const searchLang = isDevanagari ? "mar" : "eng";
+  const searchLang = isDevanagari ? "mar" : ((state && state.translation === "eng") ? "eng" : "eng");
+  
+  // Clean punctuation and normalize search tokens
+  const cleanTokens = query
+    .replace(/[.,/#!$%^&*;:{}=\-_`~()?"'’“”]/g, " ")
+    .split(/\s+/)
+    .filter(w => w.length > 0);
+  const phraseQuery = cleanTokens.join(" ");
   
   let matches = [];
-  const words = query.split(/\s+/);
   
   try {
-    for (let i = 0; i < booksMetadataMr.length; i++) {
-      const bookMeta = booksMetadataMr[i];
+    const metaList = (typeof booksMetadataMr !== 'undefined' && Array.isArray(booksMetadataMr)) ? booksMetadataMr : [];
+    for (let i = 0; i < metaList.length; i++) {
+      const bookMeta = metaList[i];
       if (filter === "OT" && bookMeta.testament !== "OT") continue;
       if (filter === "NT" && bookMeta.testament !== "NT") continue;
       
       const bookKey = bookMeta.filename.replace(".json", "");
       const bookData = (searchLang === "mar") ? await fetchBookDataMr(bookKey) : await fetchBookDataEng(bookKey);
-      if (!bookData) continue;
+      if (!bookData || !bookData.chapters) continue;
       
       bookData.chapters.forEach((chapter, cIdx) => {
         chapter.forEach((text, vIdx) => {
+          if (!text) return;
           const textLower = text.toLowerCase();
-          const match = words.every(word => textLower.includes(word));
+          const cleanVerse = textLower.replace(/[.,/#!$%^&*;:{}=\-_`~()?"'’“”]/g, " ");
           
-          if (match) {
+          let isMatch = false;
+          // 1. Exact phrase match
+          if (cleanVerse.includes(phraseQuery)) {
+            isMatch = true;
+          } else if (cleanTokens.length >= 3) {
+            // 2. Multi-word sentence match (70%+ threshold)
+            const matchedCount = cleanTokens.filter(token => cleanVerse.includes(token)).length;
+            if (matchedCount / cleanTokens.length >= 0.7) {
+              isMatch = true;
+            }
+          } else if (cleanTokens.length > 0) {
+            // 3. Short 1-2 words: all words must be present
+            isMatch = cleanTokens.every(token => cleanVerse.includes(token));
+          }
+          
+          if (isMatch) {
             matches.push({
-              bookName: (state.translation === "eng") ? bookMeta.engName : bookMeta.name,
+              bookName: (searchLang === "eng" || (state && state.translation === "eng")) ? (bookMeta.engName || bookKey) : (bookMeta.name || bookKey),
               bookKey,
               chapter: cIdx + 1,
               verse: vIdx + 1,
@@ -5469,20 +5511,27 @@ async function executeDiscoverSearch() {
     }
     
     if (matches.length === 0) {
-      statusContainer.textContent = "No matches found.";
+      if (statusContainer) statusContainer.textContent = "No scripture matches found.";
       return;
     }
     
-    statusContainer.textContent = `Found ${matches.length} matches (${searchLang === 'mar' ? 'Marathi' : 'English'})`;
+    if (statusContainer) {
+      statusContainer.textContent = `Found ${matches.length} matches (${searchLang === 'mar' ? 'Marathi' : 'English'})`;
+    }
     
     matches.forEach(match => {
       const item = document.createElement("div");
       item.className = "search-result-item";
       
       let highlighted = match.text;
-      words.forEach(word => {
-        const regex = new RegExp(`(${word})`, "gi");
-        highlighted = highlighted.replace(regex, '<span class="search-match-highlight">$1</span>');
+      cleanTokens.forEach(word => {
+        if (word.length >= 2) {
+          try {
+            const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const regex = new RegExp(`(${escaped})`, "gi");
+            highlighted = highlighted.replace(regex, '<span class="search-match-highlight">$1</span>');
+          } catch(e) {}
+        }
       });
       
       item.innerHTML = `
@@ -5493,23 +5542,17 @@ async function executeDiscoverSearch() {
       `;
       
       item.addEventListener("click", () => {
-        openReader(match.bookKey, match.chapter);
-        setTimeout(() => {
-          const key = `${match.bookKey}_${match.chapter}_${match.verse}`;
-          const el = document.querySelector(`.verse-row[data-verse-id="${key}"]`);
-          if (el) {
-            el.scrollIntoView({ behavior: "smooth", block: "center" });
-            el.classList.add("selected-pulse");
-            setTimeout(() => el.classList.remove("selected-pulse"), 2500);
-          }
-        }, 500);
-        window.location.hash = "#/reader";
+        if (typeof openReaderAndNavigate === 'function') {
+          openReaderAndNavigate(match.bookKey, match.chapter, match.verse, rawQuery);
+        } else if (typeof openReader === 'function') {
+          openReader(match.bookKey, match.chapter);
+        }
       });
-      listContainer.appendChild(item);
+      if (listContainer) listContainer.appendChild(item);
     });
   } catch (err) {
     console.error("Search failed:", err);
-    statusContainer.textContent = "Search failed.";
+    if (statusContainer) statusContainer.textContent = "Search failed.";
   }
 }
 
@@ -5804,8 +5847,10 @@ function getVerseRef(bookKey, ch, v) {
   return `${bookKey} ${ch}:${v}`;
 }
 
-window.openReaderAndNavigate = async function(book, ch, verse) {
+window.openReaderAndNavigate = async function(book, ch, verse, highlightQuery = '') {
   // 1. Close any open modals and drawers
+  if (typeof closeFullscreenBWOD === 'function') closeFullscreenBWOD();
+  if (typeof closeFullscreenVOD === 'function') closeFullscreenVOD();
   if (typeof closeHeadwatersModal === 'function') closeHeadwatersModal();
   if (typeof closeConfluenceModal === 'function') closeConfluenceModal();
   if (typeof closeLivingWaterResetModal === 'function') closeLivingWaterResetModal();
@@ -5817,7 +5862,6 @@ window.openReaderAndNavigate = async function(book, ch, verse) {
     if (tModal && tModal.style.display === "flex") tModal.style.display = "none";
   }
   if (typeof closeVodMoreSheet === 'function') closeVodMoreSheet();
-  if (typeof closeFullscreenVOD === 'function') closeFullscreenVOD();
 
   // Force close any remaining modal overlay
   document.querySelectorAll(".app-modal-backdrop, .modal-overlay-fullscreen, .prayer-sanctuary-modal-overlay").forEach(m => {
@@ -5834,24 +5878,58 @@ window.openReaderAndNavigate = async function(book, ch, verse) {
   window.location.hash = "#/reader";
 
   // 3. Open the target scripture chapter
-  const bookKey = book || 'lamentations';
-  const chap = parseInt(ch) || 1;
+  const bookKey = (book || 'genesis').toLowerCase().replace('.json', '');
+  const chap = parseInt(ch, 10) || 1;
+  const verseNum = parseInt(verse, 10) || 1;
+
   if (typeof openReader === 'function') {
     await openReader(bookKey, chap);
   }
 
-  // 4. Smoothly scroll to target verse if specified
-  if (verse) {
-    setTimeout(() => {
-      const vKey = `${bookKey}_${chap}_${verse}`;
-      const vEl = document.querySelector(`.verse-row[data-verse-id="${vKey}"]`);
-      if (vEl) {
-        vEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        vEl.classList.add('highlight-target');
-        setTimeout(() => vEl.classList.remove('highlight-target'), 2500);
+  // 4. Smoothly scroll to target verse and apply persistent bright yellow highlight
+  setTimeout(() => {
+    // Clear existing reader yellow highlights
+    document.querySelectorAll('.reader-yellow-highlight').forEach(el => {
+      el.classList.remove('reader-yellow-highlight');
+    });
+
+    const vKey = `${bookKey}_${chap}_${verseNum}`;
+    const vEl = document.getElementById(`verse-${verseNum}`) ||
+                document.querySelector(`.verse-row[data-verse="${verseNum}"]`) ||
+                document.querySelector(`.verse-row[data-verse-id="${vKey}"]`);
+
+    if (vEl) {
+      vEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      vEl.classList.add('reader-yellow-highlight');
+
+      // If specific search or term query provided, wrap occurrences with yellow mark
+      if (highlightQuery && typeof highlightQuery === 'string') {
+        try {
+          const cleanQuery = highlightQuery.replace(/[()[\]"“”,.!:;]/g, ' ').trim();
+          const searchWords = cleanQuery.split(/\s+/).filter(w => w.length >= 2);
+          if (searchWords.length > 0) {
+            const regex = new RegExp(`(${searchWords.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`, 'gi');
+            const walker = document.createTreeWalker(vEl, NodeFilter.SHOW_TEXT, null, false);
+            const nodesToReplace = [];
+            let currentNode = walker.nextNode();
+            while (currentNode) {
+              if (currentNode.parentElement && !currentNode.parentElement.classList.contains('verse-num') && regex.test(currentNode.nodeValue)) {
+                nodesToReplace.push(currentNode);
+              }
+              currentNode = walker.nextNode();
+            }
+            nodesToReplace.forEach(node => {
+              const span = document.createElement('span');
+              span.innerHTML = node.nodeValue.replace(regex, '<mark class="yellow-word-highlight">$1</mark>');
+              node.parentNode.replaceChild(span, node);
+            });
+          }
+        } catch (e) {
+          console.warn('[Highlight] Error highlighting words:', e);
+        }
       }
-    }, 350);
-  }
+    }
+  }, 350);
 };
 
 
@@ -22603,11 +22681,28 @@ const BWOD_WALLPAPERS = [
 ];
 let currentBwodWpIndex = 0;
 
+window.getTodayBwodWallpaper = function() {
+  const now = new Date();
+  const startOfYear = new Date(now.getFullYear(), 0, 1);
+  const dayOfYear = Math.floor((now - startOfYear) / (1000 * 60 * 60 * 24));
+  const offset = (window.state && typeof window.state.bwodDayOffset === 'number') ? window.state.bwodDayOffset : 0;
+  const autoIdx = ((dayOfYear + offset) % BWOD_WALLPAPERS.length + BWOD_WALLPAPERS.length) % BWOD_WALLPAPERS.length;
+  
+  const manualDate = localStorage.getItem("rol_manual_bwod_date");
+  const todayKey = now.toISOString().slice(0, 10);
+  const savedWp = localStorage.getItem("rol_selected_bwod_wallpaper");
+  if (manualDate === todayKey && savedWp && BWOD_WALLPAPERS.includes(savedWp)) {
+    return savedWp;
+  }
+  return BWOD_WALLPAPERS[autoIdx];
+};
+
 window.cycleBwodWallpaper = function(event) {
   if (event) event.stopPropagation();
   currentBwodWpIndex = (currentBwodWpIndex + 1) % BWOD_WALLPAPERS.length;
   const wp = BWOD_WALLPAPERS[currentBwodWpIndex];
   localStorage.setItem("rol_selected_bwod_wallpaper", wp);
+  localStorage.setItem("rol_manual_bwod_date", new Date().toISOString().slice(0, 10));
   
   const card = document.getElementById("card-microlearning-word");
   if (card) {
@@ -22666,7 +22761,7 @@ window.updateBwodStudioUI = function() {
   if (!word) return;
   const isEng = (window.state && (window.state.translation === "eng" || window.state.language === "en"));
   
-  const savedWp = localStorage.getItem("rol_selected_bwod_wallpaper") || BWOD_WALLPAPERS[currentBwodWpIndex];
+  const savedWp = (typeof window.getTodayBwodWallpaper === "function") ? window.getTodayBwodWallpaper() : BWOD_WALLPAPERS[currentBwodWpIndex];
   const fsBg = document.getElementById("fs-bwod-capsule-bg");
   if (fsBg) fsBg.style.backgroundImage = `url('assets/daily_verses/${savedWp}')`;
   
@@ -22714,7 +22809,7 @@ window.updateBwodStudioUI = function() {
 window.generateExactBwodImageBlob = async function() {
   const word = window.getTodayBiblicalWord();
   const isEng = (window.state && (window.state.translation === "eng" || window.state.language === "en"));
-  const savedWp = localStorage.getItem("rol_selected_bwod_wallpaper") || "pinterest_golden_path.jpg";
+  const savedWp = (typeof window.getTodayBwodWallpaper === "function") ? window.getTodayBwodWallpaper() : "pinterest_golden_path.jpg";
   
   const canvas = document.createElement("canvas");
   canvas.width = 1080;
@@ -23025,7 +23120,7 @@ window.renderBiblicalMicroLearning = function() {
   const isEng = (window.state && (window.state.translation === "eng" || window.state.language === "en"));
   
   // Set card background image - scenic golden path default for optimal status presentation
-  const savedWp = localStorage.getItem("rol_selected_bwod_wallpaper") || "pinterest_golden_path.jpg";
+  const savedWp = (typeof window.getTodayBwodWallpaper === "function") ? window.getTodayBwodWallpaper() : "pinterest_golden_path.jpg";
   const card = document.getElementById("card-microlearning-word");
   if (card) {
     card.style.backgroundImage = `url('assets/daily_verses/${savedWp}')`;
@@ -23096,7 +23191,10 @@ window.speakMicroLearningWord = function() {
 window.openMicroLearningBibleChapter = function() {
   const word = window.getTodayBiblicalWord();
   if (word && word.bookKey) {
-    openReaderAndNavigate(word.bookKey, word.chapter, word.verse);
+    const rawTerm = word.term || '';
+    const match = rawTerm.match(/^([^(]+)/);
+    const cleanTerm = match ? match[1].trim() : rawTerm.trim();
+    openReaderAndNavigate(word.bookKey, word.chapter, word.verse, cleanTerm || word.meaningMr);
   }
 };
 
@@ -24882,23 +24980,8 @@ function openDiscoverMoodTopic(topic) {
 }
 window.openDiscoverMoodTopic = openDiscoverMoodTopic;
 
-async function openReaderAndNavigate(bookKey, chapterNum = 1, verseNum = 1) {
-  switchTab('reader');
-  if (typeof openReader === 'function') {
-    await openReader(bookKey, chapterNum);
-    if (verseNum > 1) {
-      setTimeout(() => {
-        const vEl = document.getElementById(`verse-${verseNum}`);
-        if (vEl) {
-          vEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          vEl.classList.add('highlight-flash');
-          setTimeout(() => vEl.classList.remove('highlight-flash'), 2500);
-        }
-      }, 350);
-    }
-  }
-}
-window.openReaderAndNavigate = openReaderAndNavigate;
+// Keep reference to unified openReaderAndNavigate
+// (Implemented with full modal dismiss, reader-yellow-highlight, and word matching)
 
 /* ==========================================================================
    DYNAMIC DAILY DISCOVER TOPICS & DIRECT CHAPTER OPENER (66 BOOKS ROTATION)

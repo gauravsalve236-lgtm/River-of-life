@@ -12,7 +12,7 @@
   <script>
     // Force immediate hard purge of all stale Service Workers and CacheStorage
     (function() {
-      const CURRENT_VER = "v2397_BWOD_FULLSCREEN_PURE_IMAGE";
+      const CURRENT_VER = "v2398_SEARCH_AUDIO_STUDY_POLISH";
       if (localStorage.getItem("rol_app_ver") !== CURRENT_VER) {
         localStorage.setItem("rol_app_ver", CURRENT_VER);
         if ('serviceWorker' in navigator) {
@@ -327,18 +327,6 @@
                     <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.6"><polyline points="9 18 15 12 9 6"></polyline></svg>
                   </button>
                 </div>
-                <div class="home-search-trending-row">
-                  <span class="home-search-trending-label">विषय:</span>
-                  <div class="home-search-trending-scroll">
-                    <button class="home-search-pill" onclick="quickSearchTopic('शांती')">🕊️ शांती (Peace)</button>
-                    <button class="home-search-pill" onclick="quickSearchTopic('विश्वास')">✨ विश्वास (Faith)</button>
-                    <button class="home-search-pill" onclick="quickSearchTopic('प्रार्थना')">🙏 प्रार्थना (Prayer)</button>
-                    <button class="home-search-pill" onclick="quickSearchTopic('कृपा')">✝️ कृपा (Grace)</button>
-                    <button class="home-search-pill" onclick="quickSearchTopic('आरोग्य')">🌿 आरोग्य (Healing)</button>
-                    <button class="home-search-pill" onclick="quickSearchTopic('सामर्थ्य')">🛡️ सामर्थ्य (Strength)</button>
-                    <button class="home-search-pill" onclick="quickSearchTopic('भीती')">⛅ निर्भयता (Courage)</button>
-                  </div>
-                </div>
               </div>
 
               <!-- LIVE CHURCH ANNOUNCEMENTS BROADCAST (If Active) -->
@@ -403,30 +391,6 @@
                 </div>
                 <div style="height: 5px; width: 100%; background: var(--bg); border-radius: 6px; overflow: hidden; margin-top: 12px; border: 1px solid rgba(0,0,0,0.04);">
                   <div id="home-continue-progress-bar" style="height: 100%; width: 35%; background: var(--primary); border-radius: 6px; transition: width 0.3s ease;"></div>
-                </div>
-              </div>
-
-              <!-- 4. Daily Reading Plan (Active plan tracker) -->
-              <div class="minimal-reading-card" id="home-plan-card" onclick="switchTab('plans')" style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 16px; padding: 16px 18px; cursor: pointer; box-shadow: var(--shadow-sm); transition: transform 0.15s ease, box-shadow 0.15s ease;" title="Open Reading Plans / वाचन योजना उघडा">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                  <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="font-size: 18px;">📅</span>
-                    <span style="font-size: 11px; font-weight: 800; color: #3b82f6; letter-spacing: 0.5px; text-transform: uppercase;" data-i18n="plan_card_heading">DAILY READING PLAN • दैनिक वाचन योजना</span>
-                  </div>
-                  <span id="home-plan-day" style="font-size: 11.5px; font-weight: 700; color: var(--text-muted); background: var(--bg); padding: 3px 8px; border-radius: 8px; border: 1px solid var(--border);">Day 15 of 30 • 50%</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                  <div>
-                    <h3 id="home-plan-title" style="margin: 0; font-size: 17px; font-weight: 800; color: var(--text);">Through the New Testament</h3>
-                    <p style="margin: 2px 0 0 0; font-size: 12.5px; color: var(--text-muted); font-weight: 600;">नवा करार वाचन योजना • ३० दिवस</p>
-                  </div>
-                  <button class="btn-primary-mini" style="margin: 0; padding: 8px 14px; border-radius: 10px; font-size: 12.5px; font-weight: 800; background: #3b82f6; color: #fff; border: none; display: flex; align-items: center; gap: 6px;" onclick="event.stopPropagation(); switchTab('plans');">
-                    <span data-i18n="btn_continue">Plan</span>
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                  </button>
-                </div>
-                <div style="height: 5px; width: 100%; background: var(--bg); border-radius: 6px; overflow: hidden; margin-top: 12px; border: 1px solid rgba(0,0,0,0.04);">
-                  <div id="home-plan-progress-fill" style="height: 100%; width: 50%; background: #3b82f6; border-radius: 6px; transition: width 0.3s ease;"></div>
                 </div>
               </div>
 
@@ -785,31 +749,6 @@
                     <button onclick="event.stopPropagation(); openReaderAndNavigate('exodus', 20, 1);" style="background: rgba(0,0,0,0.06); color: var(--text); font-family: var(--font-ui); font-size: 12.5px; font-weight: 700; border: 1px solid var(--border); padding: 7px 12px; border-radius: 10px; cursor: pointer;">
                       📖 Read Exodus 20
                     </button>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 12. Your Spiritual Journey (Milestone and growth summary at the bottom) -->
-              <div class="home-journey-card" onclick="switchTab('you')">
-                <div class="home-journey-header">
-                  <div class="home-journey-tag" data-i18n="journey_tag">YOUR SPIRITUAL JOURNEY</div>
-                  <span class="home-journey-link" data-i18n="journey_view_profile">View Profile &rarr;</span>
-                </div>
-                <div class="home-journey-stats-grid">
-                  <div class="home-journey-stat-box">
-                    <div class="home-stat-icon">🔥</div>
-                    <div class="home-stat-val" id="home-journey-streak">7</div>
-                    <div class="home-stat-lbl" data-i18n="journey_streak_lbl">Day Streak</div>
-                  </div>
-                  <div class="home-journey-stat-box">
-                    <div class="home-stat-icon">📖</div>
-                    <div class="home-stat-val" id="home-journey-chapters">14</div>
-                    <div class="home-stat-lbl" data-i18n="journey_chapters_lbl">Chapters Read</div>
-                  </div>
-                  <div class="home-journey-stat-box">
-                    <div class="home-stat-icon">🔖</div>
-                    <div class="home-stat-val" id="home-journey-saved">5</div>
-                    <div class="home-stat-lbl" data-i18n="journey_saved_lbl">Saved Verses</div>
                   </div>
                 </div>
               </div>
@@ -2658,109 +2597,14 @@
 
           <!-- VIEW: BIBLE STUDY SECTION (INTERACTIVE MUSEUM & JOURNAL) -->
           <section id="view-study" class="app-view" style="display: none;">
-            <div class="view-scroll-content study-view-scroll-content" id="study-view-scroll-content">
-              <div id="bible-study-dynamic-container"></div>
-            </div>
-          </section>
-
-          <!-- VIEW 10: GROW IN FAITH HUB (Spiritual Formation, Hymns, Plans, Quiz, Stories, Study) -->
-          <section id="view-grow" class="app-view" style="display: none;">
-            <div class="view-scroll-content grow-scroll-view" style="max-width: 900px; margin: 0 auto; padding-bottom: 95px;">
-              <!-- Header Banner -->
-              <div class="grow-hero-header" style="background: linear-gradient(135deg, #18181b 0%, #27272a 50%, #09090b 100%); color: #ffffff; border-radius: 20px; padding: 22px 20px; margin-bottom: 18px; box-shadow: 0 8px 30px rgba(0,0,0,0.12); border: 1px solid rgba(255,255,255,0.1); position: relative; overflow: hidden;">
-                <div style="position: absolute; right: -20px; top: -20px; width: 140px; height: 140px; background: radial-gradient(circle, rgba(247,0,47,0.2) 0%, transparent 70%); border-radius: 50%; pointer-events: none;"></div>
-                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-                  <span style="background: rgba(247,0,47,0.25); border: 1px solid rgba(247,0,47,0.5); color: #fca5a5; font-size: 11px; font-weight: 800; padding: 3px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px;">🌱 SPIRITUAL FORMATION</span>
-                </div>
-                <h2 style="font-size: 24px; font-weight: 800; margin: 0 0 6px 0; color: #ffffff; letter-spacing: -0.3px;" data-i18n="grow_hub_title">Grow in Faith • आत्मिक वाढ</h2>
-                <p style="font-size: 13px; color: rgba(255,255,255,0.85); margin: 0; line-height: 1.45;" data-i18n="grow_hub_sub">Deepen your knowledge, praise, study, and daily walk with God.</p>
-              </div>
-
-              <!-- Grow Secondary Features Grid -->
-              <div class="grow-features-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px;">
-                
-                <!-- 1. Hymns & Songs -->
-                <div class="grow-feature-card" onclick="switchTab('hymns')" style="background: #FFFFFF; border: 1.5px solid var(--border); border-radius: 18px; padding: 18px; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); transition: transform 0.15s ease, box-shadow 0.15s ease;">
-                  <div style="display: flex; align-items: flex-start; gap: 14px;">
-                    <div style="width: 46px; height: 46px; border-radius: 12px; background: rgba(247,0,47,0.08); color: #F7002F; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
-                    </div>
-                    <div>
-                      <span style="font-size: 10.5px; font-weight: 800; color: #F7002F; letter-spacing: 0.5px; text-transform: uppercase;">WORSHIP & PRAISE</span>
-                      <h3 style="margin: 2px 0 4px 0; font-size: 16px; font-weight: 800; color: var(--text);">Hymns & Songs (गीते व भजने)</h3>
-                      <p style="margin: 0; font-size: 12.5px; color: var(--text-muted); line-height: 1.4;">50+ Marathi & English hymns with lyrics, chords & audio player.</p>
-                    </div>
-                  </div>
-                  <div style="display: flex; justify-content: flex-end; align-items: center;">
-                    <span style="font-size: 12px; font-weight: 800; color: #F7002F;">Open Hymnal &rarr;</span>
-                  </div>
-                </div>
-
-                <!-- 2. Reading Plans -->
-                <div class="grow-feature-card" onclick="switchTab('plans')" style="background: #FFFFFF; border: 1.5px solid var(--border); border-radius: 18px; padding: 18px; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); transition: transform 0.15s ease, box-shadow 0.15s ease;">
-                  <div style="display: flex; align-items: flex-start; gap: 14px;">
-                    <div style="width: 46px; height: 46px; border-radius: 12px; background: rgba(59,130,246,0.08); color: #3b82f6; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><path d="M9 16l2 2 4-4"></path></svg>
-                    </div>
-                    <div>
-                      <span style="font-size: 10.5px; font-weight: 800; color: #3b82f6; letter-spacing: 0.5px; text-transform: uppercase;">DAILY DISCIPLESHIP</span>
-                      <h3 style="margin: 2px 0 4px 0; font-size: 16px; font-weight: 800; color: var(--text);">Reading Plans (वाचन योजना)</h3>
-                      <p style="margin: 0; font-size: 12.5px; color: var(--text-muted); line-height: 1.4;">Structured reading plans for New Testament, Psalms & Proverbs.</p>
-                    </div>
-                  </div>
-                  <div style="display: flex; justify-content: flex-end; align-items: center;">
-                    <span style="font-size: 12px; font-weight: 800; color: #3b82f6;">Explore Plans &rarr;</span>
-                  </div>
-                </div>
-
-                <!-- 3. Daily Bible Quiz -->
-                <div class="grow-feature-card" onclick="openDailyQuizModal()" style="background: #FFFFFF; border: 1.5px solid var(--border); border-radius: 18px; padding: 18px; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); transition: transform 0.15s ease, box-shadow 0.15s ease;">
-                  <div style="display: flex; align-items: flex-start; gap: 14px;">
-                    <div style="width: 46px; height: 46px; border-radius: 12px; background: rgba(168,85,247,0.08); color: #a855f7; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                    </div>
-                    <div>
-                      <span style="font-size: 10.5px; font-weight: 800; color: #a855f7; letter-spacing: 0.5px; text-transform: uppercase;">TEST KNOWLEDGE</span>
-                      <h3 style="margin: 2px 0 4px 0; font-size: 16px; font-weight: 800; color: var(--text);">Bible Quiz (बायबल परशनमंजषा)</h3>
-                      <p style="margin: 0; font-size: 12.5px; color: var(--text-muted); line-height: 1.4;">Daily interactive scripture questions to test biblical understanding.</p>
-                    </div>
-                  </div>
-                 <!-- Floating playbar capsule above the mobile tab bar / bottom desktop page -->
-      
-                <!-- 5. Bible Study & Museum -->
-                <div class="grow-feature-card" onclick="switchTab('study')" style="background: #FFFFFF; border: 1.5px solid var(--border); border-radius: 18px; padding: 18px; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); transition: transform 0.15s ease, box-shadow 0.15s ease;">
-                  <div style="display: flex; align-items: flex-start; gap: 14px;">
-                    <div style="width: 46px; height: 46px; border-radius: 12px; background: rgba(197,155,39,0.12); color: #c59b27; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-                    </div>
-                    <div>
-                      <span style="font-size: 10.5px; font-weight: 800; color: #c59b27; letter-spacing: 0.5px; text-transform: uppercase;">BIBLICAL SCHOLARSHIP</span>
-                      <h3 style="margin: 2px 0 4px 0; font-size: 16px; font-weight: 800; color: var(--text);">Bible Study & Museum (बायबल अभ्यास व संग्रहालय)</h3>
-                      <p style="margin: 0; font-size: 12.5px; color: var(--text-muted); line-height: 1.4;">Discover the story: 66 Books, Timeline, People & Places, Languages & OIA Method.</p>
-                    </div>
-                  </div>
-                  <div style="display: flex; justify-content: flex-end; align-items: center;">
-                    <span style="font-size: 12px; font-weight: 800; color: #c59b27;">Enter Bible Study &rarr;</span>
-                  </div>
-                </div>
-
-                <!-- 6. Fellowship & Prayer Meetings -->
-                <div class="grow-feature-card" onclick="switchTab('meetings')" style="background: #FFFFFF; border: 1.5px solid var(--border); border-radius: 18px; padding: 18px; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); transition: transform 0.15s ease, box-shadow 0.15s ease;">
-                  <div style="display: flex; align-items: flex-start; gap: 14px;">
-                    <div style="width: 46px; height: 46px; border-radius: 12px; background: rgba(14,165,233,0.08); color: #0ea5e9; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                    </div>
-                    <div>
-                      <span style="font-size: 10.5px; font-weight: 800; color: #0ea5e9; letter-spacing: 0.5px; text-transform: uppercase;">CHURCH FELLOWSHIP</span>
-                      <h3 style="margin: 2px 0 4px 0; font-size: 16px; font-weight: 800; color: var(--text);">Fellowship (सभा व संगती)</h3>
-                      <p style="margin: 0; font-size: 12.5px; color: var(--text-muted); line-height: 1.4;">Church gatherings, online prayer rooms, and spiritual community.</p>
-                    </div>
-                  </div>
-                  <div style="display: flex; justify-content: flex-end; align-items: center;">
-                    <span style="font-size: 12px; font-weight: 800; color: #0ea5e9;">Join Fellowship &rarr;</span>
-                  </div>
-                </div>
-
+            <div class="view-scroll-content study-view-scroll-content" id="study-view-scroll-content" style="max-width: 900px; margin: 0 auto; padding: 16px 12px 95px 12px;">
+              <!-- Header Bar with Back to Grow Button -->
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; padding: 8px 4px;">
+                <button onclick="switchTab('grow')" style="background: var(--bg-content); border: 1.5px solid var(--border); color: var(--text); padding: 8px 16px; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: var(--shadow-sm);">
+                  <span>&larr;</span>
+                  <span>Back to Grow • आत्मिक वाढ</span>
+                </button>
+                <span style="font-size: 11.5px; font-weight: 800; color: #c59b27; text-transform: uppercase; letter-spacing: 0.5px;">📖 BIBLE STUDY SUITE</span>
               </div>
 
               <!-- ==========================================================================
@@ -3336,67 +3180,79 @@
 
               </section>
 
-              <!-- 2. Hymns & Spiritual Songs Card Section (Card-based with cover art & 1-tap lyrics) -->
-              <div class="grow-hymns-preview-section" style="margin-top: 26px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+              <div id="bible-study-dynamic-container"></div>
+            </div>
+          </section>
+
+          <!-- VIEW 10: GROW IN FAITH HUB (Spiritual Formation, Hymns, Plans, Quiz, Stories, Study) -->
+          <section id="view-grow" class="app-view" style="display: none;">
+            <div class="view-scroll-content grow-scroll-view" style="max-width: 900px; margin: 0 auto; padding-bottom: 95px;">
+              <!-- Header Banner -->
+              <div class="grow-hero-header" style="background: linear-gradient(135deg, #18181b 0%, #27272a 50%, #09090b 100%); color: #ffffff; border-radius: 20px; padding: 22px 20px; margin-bottom: 18px; box-shadow: 0 8px 30px rgba(0,0,0,0.12); border: 1px solid rgba(255,255,255,0.1); position: relative; overflow: hidden;">
+                <div style="position: absolute; right: -20px; top: -20px; width: 140px; height: 140px; background: radial-gradient(circle, rgba(247,0,47,0.2) 0%, transparent 70%); border-radius: 50%; pointer-events: none;"></div>
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                  <span style="background: rgba(247,0,47,0.25); border: 1px solid rgba(247,0,47,0.5); color: #fca5a5; font-size: 11px; font-weight: 800; padding: 3px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px;">🌱 SPIRITUAL FORMATION</span>
+                </div>
+                <h2 style="font-size: 24px; font-weight: 800; margin: 0 0 6px 0; color: #ffffff; letter-spacing: -0.3px;" data-i18n="grow_hub_title">Grow in Faith • आत्मिक वाढ</h2>
+                <p style="font-size: 13px; color: rgba(255,255,255,0.85); margin: 0; line-height: 1.45;" data-i18n="grow_hub_sub">Deepen your knowledge, praise, study, and daily walk with God.</p>
+              </div>
+
+              <!-- Grow Secondary Features Grid -->
+              <!-- 3 Clean Focused Spiritual Formation Cards (Study, Hymns, Quiz) -->
+              <div class="grow-features-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 14px;">
+                
+                <!-- 1. Bible Study Tool Card -->
+                <div class="grow-feature-card" onclick="switchTab('study')" style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 20px; padding: 22px; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.04); transition: transform 0.15s ease, box-shadow 0.15s ease;">
                   <div>
-                    <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: var(--text);">Popular Hymns & Worship (लोकप्रिय भजने व गीते)</h3>
-                    <span style="font-size: 12.5px; color: var(--text-muted);">Sing praises with authentic Marathi Christian lyrics</span>
-                  </div>
-                  <button onclick="switchTab('hymns')" style="background: none; border: none; color: #F7002F; font-size: 12.5px; font-weight: 800; cursor: pointer;">
-                    View All 50+ &rarr;
-                  </button>
-                </div>
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px;">
-                  <!-- Card 1 -->
-                  <div onclick="switchTab('hymns'); openHymnDetail(1);" style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 16px; padding: 14px; cursor: pointer; display: flex; align-items: center; gap: 12px; box-shadow: var(--shadow-sm); transition: transform 0.15s ease;">
-                    <div style="width: 44px; height: 44px; border-radius: 10px; background: linear-gradient(135deg, #F7002F, #d97706); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; flex-shrink: 0;">#1</div>
-                    <div style="flex: 1; overflow: hidden;">
-                      <span style="font-size: 10.5px; font-weight: 800; color: #F7002F; text-transform: uppercase;">स्तुती व आराधना</span>
-                      <h4 style="margin: 2px 0 2px 0; font-size: 15px; font-weight: 800; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">देवा तुझी स्तुती असो (Praise to God)</h4>
-                      <p style="margin: 0; font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">देवा तुझी स्तुती असो, सर्वकाळ तुझी...</p>
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                      <div style="width: 48px; height: 48px; border-radius: 14px; background: rgba(197,155,39,0.12); color: #c59b27; display: flex; align-items: center; justify-content: center; font-size: 24px;">
+                        📖
+                      </div>
+                      <span style="font-size: 11px; font-weight: 800; background: rgba(197,155,39,0.15); color: #b45309; padding: 3px 10px; border-radius: 12px; letter-spacing: 0.5px; text-transform: uppercase;">5 Modules • Foundations</span>
                     </div>
+                    <h3 style="margin: 0 0 6px 0; font-size: 18px; font-weight: 800; color: var(--text);">Bible Study & Tools (बायबल अभ्यास साधने)</h3>
+                    <p style="margin: 0; font-size: 13px; color: var(--text-muted); line-height: 1.45;">Deep-dive into Scripture: 5 core study modules, 66 Books timeline, original Hebrew & Greek languages, manuscripts, and the OIA reading method.</p>
                   </div>
-
-                  <!-- Card 2 -->
-                  <div onclick="switchTab('hymns'); openHymnDetail(2);" style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 16px; padding: 14px; cursor: pointer; display: flex; align-items: center; gap: 12px; box-shadow: var(--shadow-sm); transition: transform 0.15s ease;">
-                    <div style="width: 44px; height: 44px; border-radius: 10px; background: linear-gradient(135deg, #3b82f6, #6366f1); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; flex-shrink: 0;">#2</div>
-                    <div style="flex: 1; overflow: hidden;">
-                      <span style="font-size: 10.5px; font-weight: 800; color: #3b82f6; text-transform: uppercase;">तारण व कृपा</span>
-                      <h4 style="margin: 2px 0 2px 0; font-size: 15px; font-weight: 800; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">येशू माझे तारण (Jesus My Salvation)</h4>
-                      <p style="margin: 0; font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">येशू माझे तारण, येशू माझा त्राता...</p>
-                    </div>
-                  </div>
-
-                  <!-- Card 3 -->
-                  <div onclick="switchTab('hymns'); openHymnDetail(3);" style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 16px; padding: 14px; cursor: pointer; display: flex; align-items: center; gap: 12px; box-shadow: var(--shadow-sm); transition: transform 0.15s ease;">
-                    <div style="width: 44px; height: 44px; border-radius: 10px; background: linear-gradient(135deg, #10b981, #059669); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; flex-shrink: 0;">#3</div>
-                    <div style="flex: 1; overflow: hidden;">
-                      <span style="font-size: 10.5px; font-weight: 800; color: #10b981; text-transform: uppercase;">प्रार्थना व समर्पण</span>
-                      <h4 style="margin: 2px 0 2px 0; font-size: 15px; font-weight: 800; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">माझ्या जिवा देवाकडे वळ (Return My Soul)</h4>
-                      <p style="margin: 0; font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">माझ्या जिवा देवाकडे वळ, तोच तुझे...</p>
-                    </div>
+                  <div style="display: flex; justify-content: flex-end; align-items: center; padding-top: 12px; border-top: 1px solid var(--border);">
+                    <span style="font-size: 13px; font-weight: 800; color: #c59b27;">Open Bible Study &rarr;</span>
                   </div>
                 </div>
+
+                <!-- 2. Hymns & Worship Card -->
+                <div class="grow-feature-card" onclick="switchTab('hymns')" style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 20px; padding: 22px; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.04); transition: transform 0.15s ease, box-shadow 0.15s ease;">
+                  <div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                      <div style="width: 48px; height: 48px; border-radius: 14px; background: rgba(247,0,47,0.1); color: #F7002F; display: flex; align-items: center; justify-content: center; font-size: 24px;">
+                        🎵
+                      </div>
+                      <span style="font-size: 11px; font-weight: 800; background: rgba(247,0,47,0.12); color: #dc2626; padding: 3px 10px; border-radius: 12px; letter-spacing: 0.5px; text-transform: uppercase;">Worship & Praise</span>
+                    </div>
+                    <h3 style="margin: 0 0 6px 0; font-size: 18px; font-weight: 800; color: var(--text);">Hymns & Worship (गीते व भजने)</h3>
+                    <p style="margin: 0; font-size: 13px; color: var(--text-muted); line-height: 1.45;">50+ authentic Marathi & English Christian hymns with full lyrics, guitar chords, English titles, and instant audio listening.</p>
+                  </div>
+                  <div style="display: flex; justify-content: flex-end; align-items: center; padding-top: 12px; border-top: 1px solid var(--border);">
+                    <span style="font-size: 13px; font-weight: 800; color: #F7002F;">Open Hymnal &rarr;</span>
+                  </div>
+                </div>
+
+                <!-- 3. Bible Quiz Card -->
+                <div class="grow-feature-card" onclick="openDailyQuizModal()" style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 20px; padding: 22px; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.04); transition: transform 0.15s ease, box-shadow 0.15s ease;">
+                  <div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                      <div style="width: 48px; height: 48px; border-radius: 14px; background: rgba(168,85,247,0.1); color: #a855f7; display: flex; align-items: center; justify-content: center; font-size: 24px;">
+                        🎯
+                      </div>
+                      <span style="font-size: 11px; font-weight: 800; background: rgba(168,85,247,0.15); color: #9333ea; padding: 3px 10px; border-radius: 12px; letter-spacing: 0.5px; text-transform: uppercase;">Daily Challenge</span>
+                    </div>
+                    <h3 style="margin: 0 0 6px 0; font-size: 18px; font-weight: 800; color: var(--text);">Bible Quiz (बायबल प्रश्नमंजुषा)</h3>
+                    <p style="margin: 0; font-size: 13px; color: var(--text-muted); line-height: 1.45;">Interactive daily scripture trivia with instant answer verification, score tracking, and biblical explanations to test your knowledge.</p>
+                  </div>
+                  <div style="display: flex; justify-content: flex-end; align-items: center; padding-top: 12px; border-top: 1px solid var(--border);">
+                    <span style="font-size: 13px; font-weight: 800; color: #a855f7;">Start Quiz &rarr;</span>
+                  </div>
+                </div>
+
               </div>
-
-              <!-- 3. Interactive Bible Quiz Experience Card -->
-              <div class="grow-quiz-promo-card" style="background: linear-gradient(135deg, rgba(168,85,247,0.08), rgba(99,102,241,0.08)); border: 1.5px solid rgba(168,85,247,0.3); border-radius: 20px; padding: 20px; margin-top: 26px; box-shadow: var(--shadow-sm);">
-                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
-                  <div style="display: flex; align-items: center; gap: 14px;">
-                    <div style="width: 50px; height: 50px; border-radius: 14px; background: linear-gradient(135deg, #a855f7, #6366f1); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 26px; box-shadow: 0 4px 14px rgba(168,85,247,0.35); flex-shrink: 0;">🎯</div>
-                    <div>
-                      <span style="font-size: 10.5px; font-weight: 800; color: #a855f7; letter-spacing: 0.5px; text-transform: uppercase;">TEST YOUR SCRIPTURE KNOWLEDGE</span>
-                      <h3 style="margin: 3px 0 2px 0; font-size: 17px; font-weight: 800; color: var(--text);">Daily Scripture Quiz (दैनिक बायबल प्रश्नमंजुषा)</h3>
-                      <p style="margin: 0; font-size: 13px; color: var(--text-muted);">Multi-question challenges, instant green/red answer feedback & live leaderboard points!</p>
-                    </div>
-                  </div>
-                  <button onclick="openBibleQuizModal()" style="background: linear-gradient(135deg, #a855f7, #6366f1); color: #fff; border: none; padding: 10px 18px; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 12px rgba(168,85,247,0.3);">
-                    Start Quiz Now / प्रश्नमंजुषा सुरू करा &rarr;
-                  </button>
-                </div>
-              </div>
-
             </div>
           </section>
         </main>
