@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <!-- Force Fresh Cache on Mobile Browsers -->
@@ -2723,17 +2723,28 @@
                         </div>
                       </div>
 
-                      <!-- 8 Literary Genres Badges -->
-                      <h5 style="margin: 0 0 8px 0; font-size: 13px; font-weight: 800; color: var(--text);">बायबलमधील ८ मुख्य साहित्य प्रकार (8 Literary Genres):</h5>
-                      <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px;">
-                        <span style="background: rgba(59,130,246,0.1); color: #2563eb; font-size: 11.5px; font-weight: 700; padding: 4px 10px; border-radius: 8px;">📜 तोराह / नियमशास्त्र (Law)</span>
-                        <span style="background: rgba(139,92,246,0.1); color: #7c3aed; font-size: 11.5px; font-weight: 700; padding: 4px 10px; border-radius: 8px;">🏛️ ऐतिहासिक पुस्तके (History)</span>
-                        <span style="background: rgba(236,72,153,0.1); color: #db2777; font-size: 11.5px; font-weight: 700; padding: 4px 10px; border-radius: 8px;">🎶 काव्य व स्तोत्रे (Poetry & Wisdom)</span>
-                        <span style="background: rgba(245,158,11,0.1); color: #d97706; font-size: 11.5px; font-weight: 700; padding: 4px 10px; border-radius: 8px;">📢 संदेष्ट्यांचे संदेश (Prophecy)</span>
-                        <span style="background: rgba(16,185,129,0.1); color: #059669; font-size: 11.5px; font-weight: 700; padding: 4px 10px; border-radius: 8px;">✝️ शुभवर्तमाने (Gospels)</span>
-                        <span style="background: rgba(14,165,233,0.1); color: #0284c7; font-size: 11.5px; font-weight: 700; padding: 4px 10px; border-radius: 8px;">🕊️ प्रेषितांची कृत्ये (Acts)</span>
-                        <span style="background: rgba(99,102,241,0.1); color: #4f46e5; font-size: 11.5px; font-weight: 700; padding: 4px 10px; border-radius: 8px;">✉️ प्रेषितांची पत्रे (Epistles)</span>
-                        <span style="background: rgba(239,68,68,0.1); color: #dc2626; font-size: 11.5px; font-weight: 700; padding: 4px 10px; border-radius: 8px;">👑 प्रकटीकरण (Apocalyptic)</span>
+                      <!-- 8 Literary Genres Interactive Cards -->
+                      <h5 style="margin: 0 0 8px 0; font-size: 13px; font-weight: 800; color: var(--text);">बायबलमधील ८ मुख्य साहित्य प्रकार (8 Literary Genres) <span style="color: var(--primary); font-weight: 600; font-size: 11px;">— Tap to explore ▼</span></h5>
+                      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(148px, 1fr)); gap: 8px; margin-bottom: 14px;">
+                        <button type="button" onclick="showGenreDetail('law')" style="background: rgba(59,130,246,0.1); color: #2563eb; font-size: 11px; font-weight: 700; padding: 8px 10px; border-radius: 10px; border: 1.5px solid rgba(59,130,246,0.25); cursor: pointer; text-align: left; line-height: 1.4;">📜 तोराह / Law<br><small style="font-weight: 500; opacity: 0.85;">Genesis–Deut. · ५ पुस्तके</small></button>
+                        <button type="button" onclick="showGenreDetail('history')" style="background: rgba(139,92,246,0.1); color: #7c3aed; font-size: 11px; font-weight: 700; padding: 8px 10px; border-radius: 10px; border: 1.5px solid rgba(139,92,246,0.25); cursor: pointer; text-align: left; line-height: 1.4;">🏛️ History<br><small style="font-weight: 500; opacity: 0.85;">Joshua–Esther · १२ पुस्तके</small></button>
+                        <button type="button" onclick="showGenreDetail('poetry')" style="background: rgba(236,72,153,0.1); color: #db2777; font-size: 11px; font-weight: 700; padding: 8px 10px; border-radius: 10px; border: 1.5px solid rgba(236,72,153,0.25); cursor: pointer; text-align: left; line-height: 1.4;">🎶 Poetry &amp; Wisdom<br><small style="font-weight: 500; opacity: 0.85;">Job–Song · ५ पुस्तके</small></button>
+                        <button type="button" onclick="showGenreDetail('prophecy')" style="background: rgba(245,158,11,0.1); color: #d97706; font-size: 11px; font-weight: 700; padding: 8px 10px; border-radius: 10px; border: 1.5px solid rgba(245,158,11,0.25); cursor: pointer; text-align: left; line-height: 1.4;">📢 Prophecy<br><small style="font-weight: 500; opacity: 0.85;">Isaiah–Malachi · १७ पुस्तके</small></button>
+                        <button type="button" onclick="showGenreDetail('gospels')" style="background: rgba(16,185,129,0.1); color: #059669; font-size: 11px; font-weight: 700; padding: 8px 10px; border-radius: 10px; border: 1.5px solid rgba(16,185,129,0.25); cursor: pointer; text-align: left; line-height: 1.4;">✝️ Gospels<br><small style="font-weight: 500; opacity: 0.85;">Matthew–John · ४ पुस्तके</small></button>
+                        <button type="button" onclick="showGenreDetail('acts')" style="background: rgba(14,165,233,0.1); color: #0284c7; font-size: 11px; font-weight: 700; padding: 8px 10px; border-radius: 10px; border: 1.5px solid rgba(14,165,233,0.25); cursor: pointer; text-align: left; line-height: 1.4;">🕊️ Acts<br><small style="font-weight: 500; opacity: 0.85;">Acts of Apostles · १ पुस्तक</small></button>
+                        <button type="button" onclick="showGenreDetail('epistles')" style="background: rgba(99,102,241,0.1); color: #4f46e5; font-size: 11px; font-weight: 700; padding: 8px 10px; border-radius: 10px; border: 1.5px solid rgba(99,102,241,0.25); cursor: pointer; text-align: left; line-height: 1.4;">✉️ Epistles<br><small style="font-weight: 500; opacity: 0.85;">Romans–Jude · २१ पुस्तके</small></button>
+                        <button type="button" onclick="showGenreDetail('apocalyptic')" style="background: rgba(239,68,68,0.1); color: #dc2626; font-size: 11px; font-weight: 700; padding: 8px 10px; border-radius: 10px; border: 1.5px solid rgba(239,68,68,0.25); cursor: pointer; text-align: left; line-height: 1.4;">👑 Apocalyptic<br><small style="font-weight: 500; opacity: 0.85;">Revelation · १ पुस्तक</small></button>
+                      </div>
+                      <!-- Genre Detail Expandable Panel -->
+                      <div id="genre-detail-panel" style="display: none; background: var(--surface); border: 1.5px solid var(--primary); border-radius: 12px; padding: 14px; margin-bottom: 10px;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                          <h6 id="genre-detail-title" style="margin: 0; font-size: 14px; font-weight: 800; color: var(--primary);"></h6>
+                          <button onclick="document.getElementById('genre-detail-panel').style.display='none'" style="background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-muted); line-height: 1; padding: 0;">×</button>
+                        </div>
+                        <p id="genre-detail-books" style="margin: 0 0 6px 0; font-size: 11.5px; font-weight: 700; color: var(--text);"></p>
+                        <p id="genre-detail-desc" style="margin: 0 0 8px 0; font-size: 12.5px; color: var(--text-muted); line-height: 1.5;"></p>
+                        <div id="genre-detail-keyverse" style="font-size: 12px; color: var(--primary); font-style: italic; font-weight: 600;"></div>
+                      </div>
                       </div>
 
                       <!-- 4-Part Unified Storyline -->
@@ -2827,26 +2838,50 @@
                         </div>
                       </div>
 
-                      <!-- Diversity of Authors Spotlight -->
+                      <!-- Diversity of Authors Spotlight (Interactive) -->
                       <div style="background: var(--bg); padding: 14px; border-radius: 14px; border: 1px solid var(--border); margin-bottom: 14px;">
-                        <h5 style="margin: 0 0 8px 0; font-size: 13px; font-weight: 800; color: var(--text);">लेखकांची विविधता (Visual Authors Spotlight):</h5>
+                        <h5 style="margin: 0 0 8px 0; font-size: 13px; font-weight: 800; color: var(--text);">लेखकांची विविधता <span style="color: var(--primary); font-size: 11px; font-weight: 600;">— Tap for full story ▼</span></h5>
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-bottom: 8px;">
-                          <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px;">
-                            <strong style="font-size: 11.5px; color: #d97706; display: block;">👑 राजा दावीद (David)</strong>
-                            <span style="font-size: 10.5px; color: var(--text-muted);">मेंढपाळ ते महान राजा • ७३ स्तोत्रे</span>
+                          <button type="button" onclick="showAuthorDetail('david')" style="background: var(--surface); border: 1.5px solid rgba(217,119,6,0.3); border-radius: 10px; padding: 10px; text-align: left; cursor: pointer;">
+                            <strong style="font-size: 11.5px; color: #d97706; display: block; margin-bottom: 2px;">👑 राजा दावीद (David)</strong>
+                            <span style="font-size: 10.5px; color: var(--text-muted); display: block;">मेंढपाळ ते महान राजा • ७३ स्तोत्रे</span>
+                            <span style="font-size: 10px; color: #d97706; font-weight: 700; margin-top: 4px; display: block;">View story →</span>
+                          </button>
+                          <button type="button" onclick="showAuthorDetail('moses')" style="background: var(--surface); border: 1.5px solid rgba(37,99,235,0.3); border-radius: 10px; padding: 10px; text-align: left; cursor: pointer;">
+                            <strong style="font-size: 11.5px; color: #2563eb; display: block; margin-bottom: 2px;">📜 मोशे (Moses)</strong>
+                            <span style="font-size: 10.5px; color: var(--text-muted); display: block;">राजपुत्र ते अग्रेसर • तोराह (५ पुस्तके)</span>
+                            <span style="font-size: 10px; color: #2563eb; font-weight: 700; margin-top: 4px; display: block;">View story →</span>
+                          </button>
+                          <button type="button" onclick="showAuthorDetail('paul')" style="background: var(--surface); border: 1.5px solid rgba(124,58,237,0.3); border-radius: 10px; padding: 10px; text-align: left; cursor: pointer;">
+                            <strong style="font-size: 11.5px; color: #7c3aed; display: block; margin-bottom: 2px;">✉️ प्रेषित पौल (Paul)</strong>
+                            <span style="font-size: 10.5px; color: var(--text-muted); display: block;">विद्वान धर्मगुरू • १३-१४ मंडळी पत्रे</span>
+                            <span style="font-size: 10px; color: #7c3aed; font-weight: 700; margin-top: 4px; display: block;">View story →</span>
+                          </button>
+                          <button type="button" onclick="showAuthorDetail('luke')" style="background: var(--surface); border: 1.5px solid rgba(5,150,105,0.3); border-radius: 10px; padding: 10px; text-align: left; cursor: pointer;">
+                            <strong style="font-size: 11.5px; color: #059669; display: block; margin-bottom: 2px;">🩺 लूक (Luke)</strong>
+                            <span style="font-size: 10.5px; color: var(--text-muted); display: block;">वैद्य / डॉक्टर • लूक शुभवर्तमान व कृत्ये</span>
+                            <span style="font-size: 10px; color: #059669; font-weight: 700; margin-top: 4px; display: block;">View story →</span>
+                          </button>
+                          <button type="button" onclick="showAuthorDetail('solomon')" style="background: var(--surface); border: 1.5px solid rgba(245,158,11,0.3); border-radius: 10px; padding: 10px; text-align: left; cursor: pointer;">
+                            <strong style="font-size: 11.5px; color: #f59e0b; display: block; margin-bottom: 2px;">🏛️ शलमोन (Solomon)</strong>
+                            <span style="font-size: 10.5px; color: var(--text-muted); display: block;">जगातील सर्वात बुद्धिमान राजा</span>
+                            <span style="font-size: 10px; color: #f59e0b; font-weight: 700; margin-top: 4px; display: block;">View story →</span>
+                          </button>
+                          <button type="button" onclick="showAuthorDetail('john')" style="background: var(--surface); border: 1.5px solid rgba(99,102,241,0.3); border-radius: 10px; padding: 10px; text-align: left; cursor: pointer;">
+                            <strong style="font-size: 11.5px; color: #4f46e5; display: block; margin-bottom: 2px;">💙 प्रेषित योहान (John)</strong>
+                            <span style="font-size: 10.5px; color: var(--text-muted); display: block;">येशूचा प्रिय शिष्य • ५ पुस्तके</span>
+                            <span style="font-size: 10px; color: #4f46e5; font-weight: 700; margin-top: 4px; display: block;">View story →</span>
+                          </button>
+                        </div>
+                        <!-- Author Detail Panel -->
+                        <div id="author-detail-panel" style="display: none; background: var(--surface); border: 1.5px solid var(--primary); border-radius: 12px; padding: 14px; margin-top: 8px;">
+                          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                            <h6 id="author-detail-name" style="margin: 0; font-size: 14px; font-weight: 800; color: var(--primary);"></h6>
+                            <button onclick="document.getElementById('author-detail-panel').style.display='none'" style="background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-muted); padding: 0;">×</button>
                           </div>
-                          <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px;">
-                            <strong style="font-size: 11.5px; color: #2563eb; display: block;">📜 मोशे (Moses)</strong>
-                            <span style="font-size: 10.5px; color: var(--text-muted);">राजपुत्र ते अग्रेसर • तोराह (५ पुस्तके)</span>
-                          </div>
-                          <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px;">
-                            <strong style="font-size: 11.5px; color: #7c3aed; display: block;">✉️ प्रेषित पौल (Paul)</strong>
-                            <span style="font-size: 10.5px; color: var(--text-muted);">विद्वान धर्मगुरू • १३-१४ मंडळी पत्रे</span>
-                          </div>
-                          <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px;">
-                            <strong style="font-size: 11.5px; color: #059669; display: block;">🩺 लूक (Luke)</strong>
-                            <span style="font-size: 10.5px; color: var(--text-muted);">वैद्य / डॉक्टर • लूक शुभवर्तमान व कृत्ये</span>
-                          </div>
+                          <p id="author-detail-background" style="margin: 0 0 6px 0; font-size: 12.5px; color: var(--text); line-height: 1.5;"></p>
+                          <p id="author-detail-books" style="margin: 0 0 4px 0; font-size: 12px; font-weight: 700; color: var(--primary);"></p>
+                          <p id="author-detail-keyverse" style="margin: 0; font-size: 12px; color: var(--text-muted); font-style: italic;"></p>
                         </div>
                         <p style="margin: 0; font-size: 11.5px; color: var(--text-muted); line-height: 1.45;">
                           सुमारे १५०० वर्षांच्या कालखंडात वेगवेगळ्या पार्श्वभूमीचे असूनही सर्वांनी पवित्र आत्म्याच्या प्रेरणेने एकाच सत्य देवाचे प्रकटीकरण लिहिले (२ पेत्र १:२१).
@@ -6670,5 +6705,4 @@
 
 </body>
 </html>
-
 

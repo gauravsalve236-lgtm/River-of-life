@@ -1,4 +1,4 @@
-
+﻿
 /* ==========================================================================
    PRODUCTION WEBRTC AUDIO & DEVICE PIPELINE MANAGER
    ========================================================================== */
@@ -1062,9 +1062,9 @@ function saveStateToLocalStorage() {
       }
     }
     localStorage.setItem("river_of_life_state_v2", JSON.stringify(state));
-    // Non-blocking Firestore sync for cloud persistence
-    if (state.currentUser && state.currentUser.uid) {
-      syncUserDataToFirestore(); // fire-and-forget; errors are caught inside
+    // Non-blocking Firestore sync for cloud persistence (only if uid and function exists)
+    if (state.currentUser && state.currentUser.uid && typeof syncUserDataToFirestore === 'function') {
+      try { syncUserDataToFirestore(); } catch(e) {}
     }
   } catch (e) {
     console.warn("Failed saving state:", e);
@@ -3745,6 +3745,10 @@ function openStudyToolsModal() {
 
 // First-Launch Onboarding Flow Management
 function checkAndTriggerFirstLaunchOnboarding() {
+  // Never show onboarding if user is already authenticated
+  if (state.currentUser && (state.currentUser.id || state.currentUser.email || state.currentUser.fullName)) {
+    return;
+  }
   const onboarded = localStorage.getItem("rol_onboarded_v1");
   if (!onboarded) {
     const modal = document.getElementById("modal-onboarding-flow");
@@ -3896,6 +3900,63 @@ window.nextOnboardingStep = nextOnboardingStep;
 window.selectOnboardingLanguage = selectOnboardingLanguage;
 window.toggleOnboardingFocus = toggleOnboardingFocus;
 window.finishOnboardingFlow = finishOnboardingFlow;
+
+// ── Study Bible Interactive Genre & Author Detail Functions ──
+const GENRE_DETAILS_DB = {
+  law: { title: '📜 तोराह / नियमशास्त्र (Law / Torah)', books: '📚 Books: Genesis, Exodus, Leviticus, Numbers, Deuteronomy (५ पुस्तके)', desc: 'मोशेच्या मार्फत दिलेले देवाचे करार-नियमशास्त्र, इस्राएलाच्या उत्पत्तीचा इतिहास, मिसर देशातून मुक्ती आणि तंबू-उपासनेचे नियम. हे संपूर्ण बायबलचा पाया आहे, कारण येशूने म्हटले: "मी नियमशास्त्र नष्ट करण्यास नाही तर पूर्ण करण्यास आलो आहे." (मत्तय ५:१७)', keyVerse: '📖 Key Verse: "आदियात देव होता, आणि त्याने आकाश व पृथ्वी निर्माण केली." (उत्पत्ती १:१)' },
+  history: { title: '🏛️ ऐतिहासिक पुस्तके (Historical Books)', books: '📚 Books: Joshua, Judges, Ruth, 1-2 Samuel, 1-2 Kings, 1-2 Chronicles, Ezra, Nehemiah, Esther (१२ पुस्तके)', desc: 'इस्राएलाचा वादभूमीत प्रवेश, न्यायाधीशांचा काळ, राजेशाहीची स्थापना आणि पतन, बाबेलातील बंदिवास, आणि यरुशलेमला परतणे. या पुस्तकांत देव आपल्या लोकांवर आणि राष्ट्रांवर कसे राज्य करतो हे दिसते.', keyVerse: '📖 Key Verse: "हे यहोशू, बलवान हो, धैर्य धर; कारण परमेश्वर तुझा देव तुझ्याबरोबर सर्वत्र जाईल." (यहोशू १:९)' },
+  poetry: { title: '🎶 काव्य व ज्ञान-साहित्य (Poetry & Wisdom)', books: '📚 Books: Job, Psalms, Proverbs, Ecclesiastes, Song of Solomon (५ पुस्तके)', desc: 'दुःखात देवावर विश्वास (ईयोब), उपासनेचे १५० स्तोत्रे (स्तोत्रसंहिता), दैनंदिन जीवनाचे ज्ञान (नीतिसूत्रे), जीवनाचा सार (उपदेशक), आणि वैवाहिक प्रेमाचे काव्य (गीतरत्न). हे मानवी हृदयाचे सर्वोत्तम अभिव्यक्ती आहेत.', keyVerse: '📖 Key Verse: "परमेश्वर माझा मेंढपाळ आहे; मला काहीही उणे पडणार नाही." (स्तोत्र २३:१)' },
+  prophecy: { title: '📢 संदेष्ट्यांचे संदेश (Prophetic Books)', books: '📚 Books: Isaiah, Jeremiah, Lamentations, Ezekiel, Daniel + 12 Minor Prophets (१७ पुस्तके)', desc: 'देवाच्या न्यायाच्या आणि तारणाच्या इशाऱ्यांनी भरलेली ही पुस्तके आहेत. मशीहाच्या आगमनाचे ३०० हून अधिक भविष्यवचने यात आहेत, जी येशूमध्ये अचूकपणे पूर्ण झाली.', keyVerse: '📖 Key Verse: "म्हणून प्रभू स्वतः तुम्हाला एक चिन्ह देईल: पाहा, एक कुमारी गरोदर होऊन पुत्र प्रसवेल." (यशया ७:१४)' },
+  gospels: { title: '✝️ शुभवर्तमाने (The Gospels)', books: '📚 Books: Matthew, Mark, Luke, John (४ पुस्तके)', desc: 'येशू ख्रिस्ताचे जन्म, सेवाकार्य, शिकवण, चमत्कार, वधस्तंभावरील मृत्यू आणि गौरवशाली पुनरुत्थान यांचे चार वेगवेगळ्या दृष्टिकोनातून जिवंत वृत्तांत.', keyVerse: '📖 Key Verse: "देवाने जगावर एवढी प्रीती केली की त्याने आपला एकुलता एक पुत्र दिला." (योहान ३:१६)' },
+  acts: { title: '🕊️ प्रेषितांची कृत्ये (The Book of Acts)', books: '📚 Books: Acts of the Apostles (१ पुस्तक — लूकने लिहिलेले)', desc: 'पवित्र आत्म्याच्या आगमनापासून (पेन्तेकॉस्ट) ते रोम शहरापर्यंत ख्रिस्ती मंडळीच्या पहिल्या ३० वर्षांचा रोमांचक इतिहास. पेत्र, स्तेफन, फिलिप्प आणि प्रेषित पौलांच्या प्रवासाद्वारे सुवार्ता संपूर्ण जगभर पसरली.', keyVerse: '📖 Key Verse: "पण पवित्र आत्मा तुमच्यावर येईल... तुम्ही पृथ्वीच्या शेवटापर्यंत माझे साक्षी व्हाल." (कृत्ये १:८)' },
+  epistles: { title: '✉️ प्रेषितांची पत्रे (The Epistles)', books: '📚 Books: Romans to Jude — पौलाची १४ + सामान्य पत्रे ७ = २१ पुस्तके', desc: 'पहिल्या ख्रिस्ती मंडळींना लिहिलेली ही पत्रे तारणाचे सिद्धांत, ख्रिस्ती जीवनाचे आचरण, मंडळीची रचना आणि येणाऱ्या संकटांत धीर धरण्याचे मार्गदर्शन करतात.', keyVerse: '📖 Key Verse: "कारण मी विश्वास करतो की या काळच्या दुःखांचे येणाऱ्या गौरवाशी काहीच तुलना होत नाही." (रोम ८:१८)' },
+  apocalyptic: { title: '👑 प्रकटीकरण (Apocalyptic Literature)', books: '📚 Books: Revelation (प्रकटीकरण — योहान प्रेषित द्वारा)', desc: 'पत्मा बेटावर प्रेषित योहानाला मिळालेले येशू ख्रिस्ताचे दर्शन. ७ मंडळ्यांना संदेश, इतिहासाचा शेवट, सैतानाचा पराजय, अंतिम न्याय, आणि नवीन यरुशलेम.', keyVerse: '📖 Key Verse: "आणि तो त्यांच्या डोळ्यांतील प्रत्येक अश्रू पुसेल... मृत्यू, शोक पुढे होणार नाहीत." (प्रकटी २१:४)' }
+};
+
+const AUTHOR_DETAILS_DB = {
+  david: { name: '👑 राजा दावीद (King David) — ~1040-970 BC', background: 'बेथलेहेमचा एक साधा मेंढपाळ मुलगा, जो देवाच्या कृपेने इस्राएलाचा महान राजा झाला. गोल्याथचा पराभव, शौल राजापासून पळ, बाथशेबासोबत पाप, आणि पश्चात्ताप — दावीदाचे जीवन म्हणजे कृपा, पाप, माफी आणि पुनःस्थापना यांचा अद्भुत प्रवास. देवाने त्याला "आपल्या मनाचा माणूस" (कृत्ये १३:२२) म्हटले.', books: '📚 Contribution: ७३ स्तोत्रे — Psalms 3-9, 11-32, 34-41, 51-65, 68-70, 86, 101, 103, 108-110, 122, 124, 131, 138-145', keyVerse: '💬 Key Verse: "देव माझा सामर्थ्यरूपी खडक... माझे ढाल व मुक्तीचे शिंग." (स्तोत्र १८:२)' },
+  moses: { name: '📜 मोशे (Moses) — ~1526-1406 BC', background: 'इजिप्शियन राजवाड्यात वाढलेला, परंतु मिद्यान वाळवंटात नम्र करण्यात आलेला. जळत्या झुडपातून देवाचे बोलावणे आले आणि मोशे इस्राएलाचा सर्वात महान संदेष्टा बनला. सीनाय पर्वतावर देवाशी प्रत्यक्ष भेट घेतलेला तो एकमेव मानव.', books: '📚 Contribution: Genesis to Deuteronomy (तोराह) — ५ पुस्तके', keyVerse: '💬 Key Verse: "हे इस्राएला, ऐक; आपला परमेश्वर देव एकच परमेश्वर आहे." (अनुवाद ६:४)' },
+  paul: { name: '✉️ प्रेषित पौल (Apostle Paul) — ~5 AD-67 AD', background: 'तार्सस शहरातील पौल हा एक विद्वान फरीसी होता, जो सुरुवातीला ख्रिस्त्यांचा कडाडून छळ करत होता. दमास्कसच्या रस्त्यावर पुनरुत्थित येशूची भेट झाल्यावर तो क्रांतिकारकरित्या बदलला आणि ख्रिस्ती इतिहासातील सर्वात प्रभावी मिशनरी बनला.', books: '📚 Contribution: Romans, 1-2 Corinthians, Galatians, Ephesians, Philippians, Colossians, 1-2 Thessalonians, 1-2 Timothy, Titus, Philemon (and possibly Hebrews) — १३-१४ पत्रे', keyVerse: '💬 Key Verse: "मला जगणे म्हणजे ख्रिस्त, आणि मरणे म्हणजे लाभ." (फिलिप्पै १:२१)' },
+  luke: { name: '🩺 लूक वैद्य (Luke the Physician)', background: 'NT चे सर्वाधिक खंड लिहिणारा लूक हा एक ग्रीक वैद्य होता. तो पौलाचा जिव्हाळ्याचा साथीदार होता. त्याने प्रत्यक्ष साक्षीदारांशी बोलून काळजीपूर्वक संशोधन करून येशूचा इतिहास लिहिला.', books: '📚 Contribution: Gospel of Luke (दीर्घतम शुभवर्तमान) + Acts of the Apostles = NT चा २८% भाग', keyVerse: '💬 Key Verse: "मनुष्याचा पुत्र हरवलेल्यांना शोधण्यास व तारण्यास आला." (लूक १९:१०)' },
+  solomon: { name: '🏛️ राजा शलमोन (King Solomon) — ~990-931 BC', background: 'दावीदाचा पुत्र, ज्याला देवाने स्वप्नात जे मागेल ते देण्याचे वचन दिले. शलमोनने धन-संपत्तीऐवजी ज्ञान मागितले. तो जगाचा सर्वात श्रीमंत आणि बुद्धिमान राजा बनला आणि त्याने भव्य यरुशलेम मंदिर बांधले.', books: '📚 Contribution: Proverbs (बहुतांश), Ecclesiastes, Song of Solomon — ज्ञान-साहित्याचा भाग', keyVerse: '💬 Key Verse: "परमेश्वराचे भय हे ज्ञानाचा आरंभ आहे." (नीतिसूत्रे १:७)' },
+  john: { name: '💙 प्रेषित योहान (Apostle John) — ~6 AD-100 AD', background: 'जब्दीचा पुत्र, येशूचा "प्रिय शिष्य". वधस्तंभापाशी राहिलेला एकमेव पुरुष प्रेषित. रोमन छळापासून वाचलेला, पत्मा बेटावर निर्वासित असताना प्रकटीकरणाचे दर्शन मिळाले. त्याने प्रेमावर जोर दिला: "देव प्रेम आहे."', books: '📚 Contribution: Gospel of John, 1-2-3 John, Revelation — ५ पुस्तके', keyVerse: '💬 Key Verse: "देव प्रेम आहे; आणि जो प्रेमात राहतो तो देवात राहतो." (१ योहान ४:१६)' }
+};
+
+window.showGenreDetail = function(genreKey) {
+  const data = GENRE_DETAILS_DB[genreKey];
+  if (!data) return;
+  const panel = document.getElementById('genre-detail-panel');
+  const titleEl = document.getElementById('genre-detail-title');
+  const booksEl = document.getElementById('genre-detail-books');
+  const descEl = document.getElementById('genre-detail-desc');
+  const keyVerseEl = document.getElementById('genre-detail-keyverse');
+  if (titleEl) titleEl.textContent = data.title;
+  if (booksEl) booksEl.textContent = data.books;
+  if (descEl) descEl.textContent = data.desc;
+  if (keyVerseEl) keyVerseEl.textContent = data.keyVerse;
+  if (panel) {
+    panel.style.display = 'block';
+    try { panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } catch(e) {}
+  }
+};
+
+window.showAuthorDetail = function(authorKey) {
+  const data = AUTHOR_DETAILS_DB[authorKey];
+  if (!data) return;
+  const panel = document.getElementById('author-detail-panel');
+  const nameEl = document.getElementById('author-detail-name');
+  const bgEl = document.getElementById('author-detail-background');
+  const booksEl = document.getElementById('author-detail-books');
+  const kvEl = document.getElementById('author-detail-keyverse');
+  if (nameEl) nameEl.textContent = data.name;
+  if (bgEl) bgEl.textContent = data.background;
+  if (booksEl) booksEl.textContent = data.books;
+  if (kvEl) kvEl.textContent = data.keyVerse;
+  if (panel) {
+    panel.style.display = 'block';
+    try { panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } catch(e) {}
+  }
+};
 
 function toggleLikeVOD() {
   const { vod } = getCurrentVOD();
@@ -4797,6 +4858,9 @@ function highlightTtsVerse(verseIndex) {
 async function startSpeechNarration(startVerseIndex = null) {
   closeModal("modal-audio-settings");
 
+  // Determine if active reading mode is English
+  const isEng = (state.translation === "eng" || state.language === "en");
+
   // Resolve book/chapter
   const bookKey = (state.activeBook || state.currentBook || "genesis").toLowerCase().replace(".json", "");
   const chapterNum = parseInt(state.activeChapter || state.currentChapter || 1, 10);
@@ -4842,13 +4906,13 @@ async function startSpeechNarration(startVerseIndex = null) {
   
   n.isActive = true;
 
-  // Handle background worship music with soft nature pad default
+  // Handle background worship music with soft nature pad default for professional English Bible reading
   const bgMusicSelect = document.getElementById("audio-bg-music-select");
   const bgVolSlider = document.getElementById("audio-bg-music-vol-slider");
-  let bgChoice = (bgMusicSelect && bgMusicSelect.value) ? bgMusicSelect.value : "ambient";
+  let bgChoice = (bgMusicSelect && bgMusicSelect.value) ? bgMusicSelect.value : (isEng ? "nature" : "ambient");
   let bgVol = bgVolSlider ? parseFloat(bgVolSlider.value) : 0.18;
-  if (bgChoice === "none" && isEng) {
-    bgChoice = "ambient";
+  if (isEng && (!bgMusicSelect || bgMusicSelect.value === "none" || bgMusicSelect.value === "ambient")) {
+    bgChoice = "nature";
     bgVol = 0.18;
   }
   if (bgChoice !== "none") {
@@ -4974,8 +5038,37 @@ async function startSpeechNarration(startVerseIndex = null) {
         audioUrl = await synthesizeVerseAudio(verseText, !!n.isEng);
       } catch(err) {
         if (n.isStopRequested) return;
-        console.error("[TTS] Synthesis error:", err);
-        showToast(`❌ TTS Error: ${err.message}`);
+        console.warn("[TTS] Network synthesis unavailable, engaging offline Web Speech API fallback:", err);
+        if (verseEl) verseEl.classList.remove("tts-synthesizing-verse");
+
+        // High-reliability Web Speech API fallback
+        if (window.speechSynthesis && !n.isStopRequested && n.isActive) {
+          window.speechSynthesis.cancel();
+          const utter = new SpeechSynthesisUtterance(verseText);
+          utter.rate = n.isEng ? 0.92 : 0.85;
+          utter.pitch = 0.98;
+          const voices = window.speechSynthesis.getVoices() || [];
+          if (n.isEng) {
+            const ev = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Samantha') || v.name.includes('David') || v.name.includes('US') || v.name.includes('UK'))) || voices.find(v => v.lang.startsWith('en'));
+            if (ev) utter.voice = ev;
+          } else {
+            const mv = voices.find(v => v.lang.startsWith('mr') || v.lang.startsWith('hi')) || voices[0];
+            if (mv) utter.voice = mv;
+          }
+          utter.onend = () => {
+            if (!n.isStopRequested && n.isActive) {
+              playVerseAt(index + 1);
+            }
+          };
+          utter.onerror = () => {
+            if (!n.isStopRequested && n.isActive) {
+              playVerseAt(index + 1);
+            }
+          };
+          window.speechSynthesis.speak(utter);
+          return;
+        }
+
         n.isActive = false;
         audioState.isPlaying = false;
         isBibleChapterPlaying = false;
@@ -4998,7 +5091,7 @@ async function startSpeechNarration(startVerseIndex = null) {
     // Prefetch next verse in background
     const nextIndex = index + 1;
     if (nextIndex < totalVerses) {
-      const nextText = getCleanVerseText(versesMr, nextIndex);
+      const nextText = getCleanVerseText(currentVerseList, nextIndex);
       if (nextText) {
         synthesizeVerseAudio(nextText, !!n.isEng).then(url => {
           if (!n.isStopRequested) {
@@ -5024,8 +5117,16 @@ async function startSpeechNarration(startVerseIndex = null) {
       URL.revokeObjectURL(audioUrl);
       n.currentAudio = null;
       if (!n.isStopRequested && n.isActive) {
-        showToast("⚠️ ऑडिओ त्रुटी — पुढील श्लोक...");
-        playVerseAt(index + 1);
+        // Fall back to Web Speech for this verse if audio element failed
+        if (window.speechSynthesis) {
+          const utter = new SpeechSynthesisUtterance(verseText);
+          utter.rate = n.isEng ? 0.92 : 0.85;
+          utter.onend = () => playVerseAt(index + 1);
+          utter.onerror = () => playVerseAt(index + 1);
+          window.speechSynthesis.speak(utter);
+        } else {
+          playVerseAt(index + 1);
+        }
       }
     };
 
@@ -11077,12 +11178,39 @@ window.submitGoogleRegistration = async function(e) {
   if (btn) btn.disabled = true;
 
   try {
-    const res = await RolBackendSync.googleAuth(email, fullName, lang, role);
+    let authedUser = null;
+    try {
+      const res = await RolBackendSync.googleAuth(email, fullName, lang, role);
+      authedUser = res && res.user ? res.user : null;
+    } catch (backendErr) {
+      console.warn('[Google Reg] Backend unavailable, creating local session:', backendErr.message);
+    }
+    // Always ensure local session is created whether backend succeeded or not
+    const rawUsername = (email.split('@')[0] || 'google_user').replace(/[^a-zA-Z0-9_-]/g, '_');
+    const localUser = authedUser || {
+      id: `usr_${rawUsername}_${Date.now()}`,
+      email: email.trim().toLowerCase(),
+      fullName: fullName.trim() || rawUsername,
+      username: rawUsername,
+      role: role || 'Member',
+      preferredLanguage: lang || 'mr',
+      photo: null,
+      profilePhoto: null,
+      profile_photo: null,
+      token: `tok_google_local_${rawUsername}_${Date.now()}`
+    };
+    state.currentUser = localUser;
+    localStorage.setItem("rol_access_token", localUser.token || `tok_${Date.now()}`);
+    localStorage.setItem("rol_current_user", JSON.stringify(localUser));
+    localStorage.setItem("rol_user_name", localUser.fullName || localUser.username);
+    saveStateToLocalStorage();
     window.closeGoogleSignupModal();
+    if (typeof updateAllUserAvatars === 'function') updateAllUserAvatars();
     updateAuthUI();
     if (typeof renderYouProfile === 'function') renderYouProfile();
-    showToast(`🎉 Welcome, ${res.user.fullName || res.user.username}! Google account linked / गुगल नोंदणी यशस्वी!`);
+    showToast(`🎉 Welcome, ${localUser.fullName || localUser.username}! Google account linked / गुगल नोंदणी यशस्वी!`);
   } catch (err) {
+    console.error('[Google Reg] Error:', err);
     showToast(err.message || "Registration failed. Please try again.");
   } finally {
     if (btn) btn.disabled = false;
@@ -11189,8 +11317,8 @@ function updateAuthUI() {
     if (drawerUsername) drawerUsername.textContent = state.currentUser.fullName || state.currentUser.username;
     if (drawerEmail) drawerEmail.textContent = state.currentUser.email || "Registered Member";
 
-    if (loggedOutCont) loggedOutCont.style.display = "none";
-    if (loggedInCont) loggedInCont.style.display = "block";
+    if (loggedOutCont) loggedOutCont.style.setProperty("display", "none", "important");
+    if (loggedInCont) loggedInCont.style.setProperty("display", "block", "important");
     const pName = document.getElementById("profile-user-name");
     if (pName) pName.textContent = state.currentUser.fullName || state.currentUser.username || "Guest User";
   } else {
@@ -11208,8 +11336,8 @@ function updateAuthUI() {
     if (cardLoggedOut) cardLoggedOut.style.display = "flex";
     if (cardLoggedIn) cardLoggedIn.style.display = "none";
 
-    if (loggedOutCont) loggedOutCont.style.display = "block";
-    if (loggedInCont) loggedInCont.style.display = "none";
+    if (loggedOutCont) loggedOutCont.style.setProperty("display", "block", "important");
+    if (loggedInCont) loggedInCont.style.setProperty("display", "none", "important");
   }
 
   // Restrict Admin & Pastor Console card strictly to users with role 'admin' or 'pastor'
@@ -11495,6 +11623,60 @@ class AmbientWorshipSynth {
       
       this.isPlaying = true;
 
+      // ── Nature / Ambient-Nature mode: pink noise stream + breeze ──
+      if (type === 'nature' || type === 'ambient_nature') {
+        const bufferSize = this.ctx.sampleRate * 2; // 2-second noise buffer
+        const noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const noiseData = noiseBuffer.getChannelData(0);
+        let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+        for (let i = 0; i < bufferSize; i++) {
+          const white = Math.random() * 2 - 1;
+          b0 = 0.99886 * b0 + white * 0.0555179;
+          b1 = 0.99332 * b1 + white * 0.0750759;
+          b2 = 0.96900 * b2 + white * 0.1538520;
+          b3 = 0.86650 * b3 + white * 0.3104856;
+          b4 = 0.55000 * b4 + white * 0.5329522;
+          b5 = -0.7616 * b5 - white * 0.0168980;
+          noiseData[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.11;
+          b6 = white * 0.115926;
+        }
+        const noiseSource = this.ctx.createBufferSource();
+        noiseSource.buffer = noiseBuffer;
+        noiseSource.loop = true;
+        const streamFilter = this.ctx.createBiquadFilter();
+        streamFilter.type = 'lowpass';
+        streamFilter.frequency.setValueAtTime(900, this.ctx.currentTime);
+        streamFilter.Q.setValueAtTime(0.5, this.ctx.currentTime);
+        const lfo = this.ctx.createOscillator();
+        const lfoGain = this.ctx.createGain();
+        lfo.type = 'sine';
+        lfo.frequency.setValueAtTime(0.12, this.ctx.currentTime);
+        lfoGain.gain.setValueAtTime(180, this.ctx.currentTime);
+        lfo.connect(lfoGain);
+        lfoGain.connect(streamFilter.frequency);
+        lfo.start();
+        const padOsc = this.ctx.createOscillator();
+        const padGain = this.ctx.createGain();
+        padOsc.type = 'sine';
+        padOsc.frequency.setValueAtTime(65.41, this.ctx.currentTime);
+        padGain.gain.setValueAtTime(0, this.ctx.currentTime);
+        padGain.gain.linearRampToValueAtTime(0.03, this.ctx.currentTime + 3);
+        padOsc.connect(padGain);
+        padGain.connect(this.gainNode);
+        padOsc.start();
+        noiseSource.connect(streamFilter);
+        streamFilter.connect(this.gainNode);
+        noiseSource.start();
+        this.oscillators = [
+          { osc: noiseSource, gain: { gain: { value: 0.11 } } },
+          { osc: padOsc, gain: padGain },
+          { osc: lfo, gain: lfoGain }
+        ];
+        this.chordInterval = null;
+        return;
+      }
+
+      // ── Harmonic chord modes: guitar / piano / ambient ──
       const chords = {
         guitar: [
           [130.81, 164.81, 196.00, 261.63], // C
@@ -11585,7 +11767,7 @@ class AmbientWorshipSynth {
     const now = this.ctx ? this.ctx.currentTime : 0;
     this.oscillators.forEach(osc => {
       try {
-        osc.osc.stop(now + 0.5);
+        if (osc.osc && typeof osc.osc.stop === 'function') osc.osc.stop(now + 0.3);
       } catch (e) {}
     });
     this.oscillators = [];
@@ -22963,9 +23145,13 @@ window.generateExactBwodImageBlob = async function() {
   ctx.fillStyle = scrim;
   ctx.fillRect(0, 0, 1080, 1920);
   
-  // Center alignment utility
+  // Center alignment utility with strict LTR direction and center anchor
   const drawWrappedCenteredText = (text, centerY, maxWidth, lineHeight) => {
     if (!text) return centerY;
+    ctx.save();
+    ctx.direction = "ltr";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
     const words = text.split(" ");
     let curLine = "";
     const lines = [];
@@ -22983,9 +23169,13 @@ window.generateExactBwodImageBlob = async function() {
     }
     let curY = centerY;
     for (let i = 0; i < lines.length; i++) {
+      ctx.direction = "ltr";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
       ctx.fillText(lines[i], 540, curY);
       curY += lineHeight;
     }
+    ctx.restore();
     return curY;
   };
 
@@ -22998,14 +23188,16 @@ window.generateExactBwodImageBlob = async function() {
 
   // TOP PILL: Word of the Day & Origin
   let curY = 410;
+  ctx.direction = "ltr";
   ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
 
   const headerTitle = isEng ? `✦ WORD OF THE DAY • ${cleanOrigin.toUpperCase()} ✦` : `✦ आजचा पवित्र शब्द • ${cleanOrigin} ✦`;
   ctx.font = "bold 22px -apple-system, BlinkMacSystemFont, sans-serif";
   const pillW = ctx.measureText(headerTitle).width + 50;
   const pillH = 50;
   const pillX = 540 - (pillW / 2);
-  const pillY = curY - 34;
+  const pillY = curY - 25;
 
   ctx.fillStyle = "rgba(0, 0, 0, 0.55)";
   ctx.beginPath();
@@ -23020,6 +23212,9 @@ window.generateExactBwodImageBlob = async function() {
   ctx.stroke();
 
   ctx.fillStyle = "#fbbf24";
+  ctx.direction = "ltr";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
   ctx.fillText(headerTitle, 540, curY);
 
   // PRIMARY WORD
@@ -23028,6 +23223,9 @@ window.generateExactBwodImageBlob = async function() {
   ctx.font = "bold 82px 'Noto Serif Devanagari', 'Lora', Georgia, serif";
   ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
   ctx.shadowBlur = 24;
+  ctx.direction = "ltr";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
   ctx.fillText(primaryWord, 540, curY);
   ctx.shadowBlur = 0;
 
@@ -23035,11 +23233,14 @@ window.generateExactBwodImageBlob = async function() {
   if (scriptWord) {
     curY += 80;
     ctx.font = "bold 44px 'Times New Roman', 'Noto Serif Hebrew', Georgia, serif";
+    ctx.direction = "ltr";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
     const scriptWidth = ctx.measureText(scriptWord).width;
     const scriptPillW = scriptWidth + 44;
     const scriptPillH = 60;
     const scriptPillX = 540 - (scriptPillW / 2);
-    const scriptPillY = curY - 44;
+    const scriptPillY = curY - 30;
 
     ctx.fillStyle = "rgba(251, 191, 36, 0.22)";
     ctx.beginPath();
@@ -23054,6 +23255,9 @@ window.generateExactBwodImageBlob = async function() {
     ctx.stroke();
 
     ctx.fillStyle = "#fde047";
+    ctx.direction = "ltr";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
     ctx.fillText(scriptWord, 540, curY);
   }
 
@@ -23062,6 +23266,9 @@ window.generateExactBwodImageBlob = async function() {
   ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
   ctx.font = "600 26px -apple-system, BlinkMacSystemFont, sans-serif";
   const pronText = isEng ? `Pronunciation: ${word ? word.pronunciation : ''}` : `उच्चार: ${word ? word.pronunciation : ''}`;
+  ctx.direction = "ltr";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
   ctx.fillText(pronText, 540, curY);
 
   // Decorative Golden Divider Line
@@ -23077,6 +23284,9 @@ window.generateExactBwodImageBlob = async function() {
   curY += 65;
   ctx.fillStyle = "#fbbf24";
   ctx.font = "58px Georgia, serif";
+  ctx.direction = "ltr";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
   ctx.fillText("“", 540, curY);
 
   // MEANING (Language Pure: English only if English, Marathi only if Marathi)
@@ -23094,23 +23304,32 @@ window.generateExactBwodImageBlob = async function() {
   const refText = isEng ? (word ? word.refEn : '') : (word ? word.refMr : '');
   ctx.font = "bold 32px var(--font-ui), -apple-system, BlinkMacSystemFont, sans-serif";
   ctx.fillStyle = "#fbbf24";
+  ctx.direction = "ltr";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
   const refWidth = ctx.measureText(refText).width;
 
   ctx.strokeStyle = "#fbbf24";
   ctx.lineWidth = 2;
   ctx.beginPath();
-  ctx.moveTo(540 - (refWidth / 2) - 50, curY - 10);
-  ctx.lineTo(540 - (refWidth / 2) - 15, curY - 10);
-  ctx.moveTo(540 + (refWidth / 2) + 15, curY - 10);
-  ctx.lineTo(540 + (refWidth / 2) + 50, curY - 10);
+  ctx.moveTo(540 - (refWidth / 2) - 50, curY);
+  ctx.lineTo(540 - (refWidth / 2) - 15, curY);
+  ctx.moveTo(540 + (refWidth / 2) + 15, curY);
+  ctx.lineTo(540 + (refWidth / 2) + 50, curY);
   ctx.stroke();
 
+  ctx.direction = "ltr";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
   ctx.fillText(refText, 540, curY);
 
   // BOTTOM BRANDING BADGE
   const brandY = 1760;
   ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
   ctx.font = "bold 24px -apple-system, BlinkMacSystemFont, sans-serif";
+  ctx.direction = "ltr";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
   ctx.fillText("🕊️ River of Life • Holy Bible (पवित्र बायबल)", 540, brandY);
 
   const blob = await new Promise((res) => canvas.toBlob(res, "image/png", 0.95));
@@ -23124,31 +23343,49 @@ window.shareBwodToWhatsApp = async function() {
   if (!word) return;
   const isEng = (window.state && (window.state.translation === "eng" || window.state.language === "en"));
   
-  const text = isEng
-    ? `✨ *WORD OF THE DAY* ✨\n` +
-      `━━━━━━━━━━━━━━━━━━━━\n` +
-      `🔤 *${word.term}*\n` +
-      `📍 *Origin:* ${word.origin.replace(/\s*\(.*\)/, '').trim()} • *Pronunciation:* ${word.pronunciation}\n\n` +
-      `📖 *Meaning:*\n` +
-      `${word.meaningEn}\n\n` +
-      `📜 *Scripture Reference:*\n` +
-      `${word.refEn}\n\n` +
-      `🔗 *Read Chapter on River of Life Bible:*\n` +
-      `${window.location.origin}\n` +
-      `━━━━━━━━━━━━━━━━━━━━\n` +
-      `🕊️ *River of Life • Holy Bible*`
-    : `✨ *आजचा पवित्र शब्द • WORD OF THE DAY* ✨\n` +
-      `━━━━━━━━━━━━━━━━━━━━\n` +
-      `🔤 *${word.term}*\n` +
-      `📍 *मूळ:* ${word.origin} • *उच्चार:* ${word.pronunciation}\n\n` +
-      `📖 *पवित्र अर्थ:*\n` +
-      `${word.meaningMr}\n\n` +
-      `📜 *पवित्र शास्त्र संदर्भ:*\n` +
-      `${word.refMr}\n\n` +
-      `🔗 *रिव्हर ऑफ लाईफ बायबलवर हा अध्याय वाचा:*\n` +
-      `${window.location.origin}\n` +
-      `━━━━━━━━━━━━━━━━━━━━\n` +
-      `🕊️ *River of Life • पवित्र बायबल*`;
+  // Enforce Left-to-Right Mark (LRM \u200E) on each line so WhatsApp never right-aligns Hebrew/Aramaic words
+  const LRM = "\u200E";
+  const rawTerm = word.term || "";
+  const cleanTerm = rawTerm.replace(/\(([^)]+)\)/, (m, script) => `\u202A(${script})\u202C`);
+  const originClean = isEng ? word.origin.replace(/\s*\(.*\)/, '').trim() : word.origin;
+
+  const lines = isEng
+    ? [
+        `✨ *WORD OF THE DAY* ✨`,
+        `━━━━━━━━━━━━━━━━━━━━`,
+        `🔤 *${cleanTerm}*`,
+        `📍 *Origin:* ${originClean} • *Pronunciation:* ${word.pronunciation}`,
+        ``,
+        `📖 *Meaning:*`,
+        `${word.meaningEn}`,
+        ``,
+        `📜 *Scripture Reference:*`,
+        `${word.refEn}`,
+        ``,
+        `🔗 *Read Chapter on River of Life Bible:*`,
+        `${window.location.origin}`,
+        `━━━━━━━━━━━━━━━━━━━━`,
+        `🕊️ *River of Life • Holy Bible*`
+      ]
+    : [
+        `✨ *आजचा पवित्र शब्द • WORD OF THE DAY* ✨`,
+        `━━━━━━━━━━━━━━━━━━━━`,
+        `🔤 *${cleanTerm}*`,
+        `📍 *मूळ:* ${originClean} • *उच्चार:* ${word.pronunciation}`,
+        ``,
+        `📖 *पवित्र अर्थ:*`,
+        `${word.meaningMr}`,
+        ``,
+        `📜 *पवित्र शास्त्र संदर्भ:*`,
+        `${word.refMr}`,
+        ``,
+        `🔗 *रिव्हर ऑफ लाईफ बायबलवर हा अध्याय वाचा:*`,
+        `${window.location.origin}`,
+        `━━━━━━━━━━━━━━━━━━━━`,
+        `🕊️ *River of Life • पवित्र बायबल*`
+      ];
+
+  const text = lines.map(l => l ? (LRM + l) : "").join("\n");
 
   showToast(isEng ? "📸 Generating card for WhatsApp..." : "📸 WhatsApp साठी कार्ड तयार होत आहे...");
 
