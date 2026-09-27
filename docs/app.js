@@ -23097,366 +23097,265 @@ window.updateBwodStudioUI = function() {
 };
 
 window.generateExactBwodImageBlob = async function() {
-  const word = window.getTodayBiblicalWord();
-  const isEng = (window.state && (window.state.translation === "eng" || window.state.language === "en"));
-  const savedWp = (typeof window.getTodayBwodWallpaper === "function") ? window.getTodayBwodWallpaper() : "pinterest_golden_path.jpg";
+  const word   = window.getTodayBiblicalWord();
+  const isEng  = (window.state && (window.state.translation === "eng" || window.state.language === "en"));
+  const savedWp = (typeof window.getTodayBwodWallpaper === "function")
+    ? window.getTodayBwodWallpaper() : "pinterest_golden_path.jpg";
 
+  // ── Canvas setup (1080x1920 = 9:16 fills WhatsApp Status on all phones) ──
+  const W = 1080, H = 1920;
   const canvas = document.createElement("canvas");
-  // 9:16 — native WhatsApp Status resolution, fills iPhone/Android screen edge-to-edge
-  canvas.width  = 1080;
-  canvas.height = 1920;
+  canvas.width = W; canvas.height = H;
   const ctx = canvas.getContext("2d");
 
   if (document.fonts && document.fonts.ready) {
-    try { await document.fonts.ready; } catch (e) {}
+    try { await document.fonts.ready; } catch(e) {}
   }
 
-  // ── 1. Wallpaper background ───────────────────────────────────────────────
+  // ── 1. Wallpaper ──────────────────────────────────────────────────────────
   const img = new Image();
   img.crossOrigin = "anonymous";
-  img.src = `assets/daily_verses/${savedWp}`;
-  await new Promise((resolve) => {
-    img.onload = resolve;
-    img.onerror = resolve;
-    setTimeout(resolve, 3000);
-  });
-
+  img.src = "assets/daily_verses/" + savedWp;
+  await new Promise(r => { img.onload=r; img.onerror=r; setTimeout(r,3000); });
   if (img.complete && img.naturalWidth > 0) {
-    const scale = Math.max(canvas.width / img.naturalWidth, canvas.height / img.naturalHeight);
-    const dx = (canvas.width  - img.naturalWidth  * scale) / 2;
-    const dy = (canvas.height - img.naturalHeight * scale) / 2;
-    ctx.drawImage(img, dx, dy, img.naturalWidth * scale, img.naturalHeight * scale);
+    const sc = Math.max(W/img.naturalWidth, H/img.naturalHeight);
+    ctx.drawImage(img, (W-img.naturalWidth*sc)/2, (H-img.naturalHeight*sc)/2,
+                  img.naturalWidth*sc, img.naturalHeight*sc);
   } else {
-    const g = ctx.createLinearGradient(0, 0, 1080, 1920);
-    g.addColorStop(0,   "#0f172a");
-    g.addColorStop(0.5, "#1e1b4b");
-    g.addColorStop(1,   "#090d16");
-    ctx.fillStyle = g;
-    ctx.fillRect(0, 0, 1080, 1920);
+    const g = ctx.createLinearGradient(0,0,W,H);
+    g.addColorStop(0,"#0f172a"); g.addColorStop(0.5,"#1e1b4b"); g.addColorStop(1,"#090d16");
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
   }
 
-  // ── 2. Full-bleed scrim — heavier so card pops ───────────────────────────
-  const scrim = ctx.createLinearGradient(0, 0, 0, 1920);
-  scrim.addColorStop(0,    "rgba(5,10,22,0.78)");
-  scrim.addColorStop(0.35, "rgba(5,10,22,0.55)");
-  scrim.addColorStop(0.65, "rgba(5,10,22,0.72)");
-  scrim.addColorStop(1,    "rgba(3,6,14,0.95)");
-  ctx.fillStyle = scrim;
-  ctx.fillRect(0, 0, 1080, 1920);
+  // ── 2. Scrim ──────────────────────────────────────────────────────────────
+  const sc2 = ctx.createLinearGradient(0,0,0,H);
+  sc2.addColorStop(0,   "rgba(5,10,22,0.85)");
+  sc2.addColorStop(0.3, "rgba(5,10,22,0.60)");
+  sc2.addColorStop(0.7, "rgba(5,10,22,0.70)");
+  sc2.addColorStop(1,   "rgba(3,6,14,0.96)");
+  ctx.fillStyle=sc2; ctx.fillRect(0,0,W,H);
 
-  // ── Centre helpers ────────────────────────────────────────────────────────
-  const CX = 540;
+  // ── 3. Helpers ────────────────────────────────────────────────────────────
+  const CX = W/2; // = 540
 
-  /**
-   * ltrFill — pins direction/align/baseline inside save-restore BEFORE every
-   * single fillText so Hebrew/Greek RTL glyphs never flip the anchor right.
-   */
-  const ltrFill = (text, y) => {
+  // Guaranteed center-draw: saves/restores direction+align+baseline every call
+  const draw = (text, y, maxW) => {
     ctx.save();
-    ctx.direction    = "ltr";
-    ctx.textAlign    = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(text, CX, y);
+    ctx.direction="ltr"; ctx.textAlign="center"; ctx.textBaseline="middle";
+    if (maxW) {
+      // auto word-wrap if maxW provided
+      const words = String(text).split(" ");
+      let line="", lh = parseInt(ctx.font)*1.55, startY=y;
+      for (let i=0; i<words.length; i++) {
+        const test = line+words[i]+" ";
+        ctx.direction="ltr";
+        if (ctx.measureText(test).width > maxW && i>0) {
+          ctx.fillText(line.trim(), CX, startY); startY+=lh; line=words[i]+" ";
+        } else { line=test; }
+      }
+      if (line.trim()) ctx.fillText(line.trim(), CX, startY);
+    } else {
+      ctx.fillText(text, CX, y);
+    }
     ctx.restore();
   };
 
-  /** Strip invisible bidi-control marks; keep visible glyphs intact. */
-  const toSafeLTR = (str) => {
-    if (!str) return "";
-    return str.replace(/[\u200E\u200F\u202A-\u202E\u2066-\u2069\u200B\uFEFF]/g, "").trim();
-  };
-
-  /**
-   * measureLines — word-wraps text and returns the array of lines without drawing.
-   * Re-pins ctx.direction before every measureText call.
-   */
-  const measureLines = (text, maxW) => {
+  // Word-wrap returning lines array (for height pre-measurement)
+  const wrapLines = (text, maxW) => {
     if (!text) return [];
-    const safe  = toSafeLTR(text);
-    const words = safe.split(" ");
-    let cur = "";
-    const lines = [];
-    for (let n = 0; n < words.length; n++) {
-      ctx.direction = "ltr";
-      const test = cur + words[n] + " ";
-      if (ctx.measureText(test).width > maxW && n > 0) {
-        lines.push(cur.trim());
-        cur = words[n] + " ";
-      } else {
-        cur = test;
-      }
+    ctx.direction="ltr";
+    const words = String(text).replace(/[\u200E\u200F\u202A-\u202E\u2066-\u2069]/g,"").split(" ");
+    const lines=[]; let line="";
+    for (let i=0; i<words.length; i++) {
+      ctx.direction="ltr";
+      const test=line+words[i]+" ";
+      if (ctx.measureText(test).width>maxW && i>0) { lines.push(line.trim()); line=words[i]+" "; }
+      else { line=test; }
     }
-    if (cur.trim()) lines.push(cur.trim());
+    if (line.trim()) lines.push(line.trim());
     return lines;
   };
 
-  /** Draw pre-measured lines centred at CX, returns final Y. */
-  const drawLines = (lines, startY, lineH) => {
-    let y = startY;
-    for (const line of lines) {
-      ltrFill(line, y);
-      y += lineH;
-    }
-    return y;
-  };
+  // Strip bidi control chars (keep glyphs)
+  const safe = s => s ? s.replace(/[\u200E\u200F\u202A-\u202E\u2066-\u2069\u200B\uFEFF]/g,"").trim() : "";
 
-  // ── 3. Parse word data ────────────────────────────────────────────────────
-  const rawTerm   = word ? word.term : "Agape";
-  const termMatch = rawTerm.match(/^([^(]+)(?:\s*\(([^)]+)\))?/);
-  const primaryWord = termMatch ? termMatch[1].trim() : rawTerm;
-  const scriptWord  = (termMatch && termMatch[2])
-    ? toSafeLTR("(" + termMatch[2].trim() + ")")
-    : "";
-  const cleanOrigin = isEng
-    ? (word ? word.origin.replace(/\s*\(.*\)/, "").trim() : "Greek")
-    : (word ? word.origin : "\u0917\u094D\u0930\u0940\u0915");
-  const meaningText = isEng ? (word ? word.meaningEn : "") : (word ? word.meaningMr : "");
-  const refText     = isEng ? (word ? word.refEn  : "") : (word ? word.refMr  : "");
-  const insightText = isEng ? (word ? word.insightEn || "" : "") : (word ? word.insightMr || "" : "");
+  // ── 4. Word data ──────────────────────────────────────────────────────────
+  const rawTerm = word ? word.term : "Word";
+  const tm = rawTerm.match(/^([^(]+)(?:\s*\(([^)]+)\))?/);
+  const primaryWord = tm ? tm[1].trim() : rawTerm;
+  const scriptWord  = (tm && tm[2]) ? safe("("+tm[2].trim()+")") : "";
+  const origin   = isEng ? (word ? word.origin.replace(/\s*\(.*\)/,"").trim() : "Greek")
+                         : (word ? word.origin : "\u0917\u094D\u0930\u0940\u0915");
+  const meaning  = isEng ? (word ? word.meaningEn : "") : (word ? word.meaningMr : "");
+  const refText  = isEng ? (word ? word.refEn  : "")  : (word ? word.refMr  : "");
 
-  // ── 4. Pre-measure meaning to know total card height ─────────────────────
-  // Card dimensions
-  const CARD_W    = 980;
-  const CARD_X    = CX - CARD_W / 2;   // = 50
-  const TEXT_W    = CARD_W - 120;      // = 860 (60px inset each side)
-  const LINE_H_M  = 62;  // meaning line height
-  const LINE_H_I  = 50;  // insight line height
-
-  ctx.direction = "ltr";
+  // ── 5. Pre-measure meaning lines (used for vertical centering) ────────────
+  const TEXT_W = 860; // available text width inside card
+  const LH_M   = 64;  // meaning line-height px
   ctx.font = "600 38px 'Noto Serif Devanagari','Lora',Georgia,serif";
-  const meaningLines = measureLines(meaningText, TEXT_W);
-  const meaningH = meaningLines.length * LINE_H_M;
+  ctx.direction = "ltr";
+  const mLines = wrapLines(meaning, TEXT_W);
+  const meaningH = mLines.length * LH_M;
 
-  ctx.font = "500 28px 'Noto Serif Devanagari','Lora',Georgia,serif";
-  const insightLines = insightText ? measureLines(insightText, TEXT_W) : [];
-  const insightH = insightLines.length * LINE_H_I;
+  // ── 6. Layout zones ───────────────────────────────────────────────────────
+  //
+  //  TOP ZONE   y=160 → y=820   (word name, script, pronunciation)
+  //  MID ZONE   y=820 → y=1500  (divider, quote, meaning — vertically centred here)
+  //  BOT ZONE   y=1500 → y=1840 (scripture ref, branding)
+  //
+  const TOP_START = 160;
+  const MID_TOP   = 820;
+  const MID_BOT   = 1500;
+  const BOT_END   = 1840;
 
-  // ── 5. Calculate card height from content ────────────────────────────────
-  const VPAD = 80;  // card top + bottom inner padding
-  let cardInnerH = 0;
-  cardInnerH += 56;           // header pill
-  cardInnerH += 56;           // gap after pill
-  cardInnerH += 100;          // primary word (font 82px)
-  if (scriptWord) cardInnerH += 90;  // script pill row
-  cardInnerH += 54;           // pronunciation
-  cardInnerH += 72;           // divider + gap
-  cardInnerH += 58;           // opening quote mark
-  cardInnerH += 40;           // gap before meaning
-  cardInnerH += meaningH;
-  if (insightText) {
-    cardInnerH += 40;         // gap before insight
-    cardInnerH += insightH;
-  }
-  cardInnerH += 72;           // gap before ref
-  cardInnerH += 56;           // scripture ref row
-  cardInnerH += 56;           // gap before branding
-  cardInnerH += 40;           // branding
-
-  const CARD_H = cardInnerH + VPAD * 2;
-  // Vertically centre card on the 1920px canvas (nudge 40px above true centre for visual weight)
-  const CARD_Y = Math.max(60, Math.round((1920 - CARD_H) / 2) - 40);
-
-  // ── 6. Draw glassmorphism content card ───────────────────────────────────
-  // Outer glow
-  ctx.shadowColor = "rgba(251,191,36,0.18)";
-  ctx.shadowBlur  = 40;
-  ctx.fillStyle   = "rgba(6,10,22,0.72)";
+  // ── 7. Dark content card (covers all three zones) ─────────────────────────
+  const cardX=50, cardY=TOP_START-20, cardW=W-100, cardH=(BOT_END-TOP_START)+40;
+  ctx.shadowColor="rgba(251,191,36,0.15)"; ctx.shadowBlur=32;
+  ctx.fillStyle="rgba(4,8,20,0.74)";
   ctx.beginPath();
-  if (typeof ctx.roundRect === "function") {
-    ctx.roundRect(CARD_X, CARD_Y, CARD_W, CARD_H, 36);
-  } else {
-    ctx.rect(CARD_X, CARD_Y, CARD_W, CARD_H);
-  }
-  ctx.fill();
-  ctx.shadowBlur = 0;
-
+  typeof ctx.roundRect==="function"
+    ? ctx.roundRect(cardX,cardY,cardW,cardH,34)
+    : ctx.rect(cardX,cardY,cardW,cardH);
+  ctx.fill(); ctx.shadowBlur=0;
   // Gold border
-  ctx.strokeStyle = "rgba(251,191,36,0.38)";
-  ctx.lineWidth   = 1.8;
+  ctx.strokeStyle="rgba(251,191,36,0.40)"; ctx.lineWidth=1.8;
   ctx.beginPath();
-  if (typeof ctx.roundRect === "function") {
-    ctx.roundRect(CARD_X, CARD_Y, CARD_W, CARD_H, 36);
-  } else {
-    ctx.rect(CARD_X, CARD_Y, CARD_W, CARD_H);
-  }
+  typeof ctx.roundRect==="function"
+    ? ctx.roundRect(cardX,cardY,cardW,cardH,34)
+    : ctx.rect(cardX,cardY,cardW,cardH);
   ctx.stroke();
+  // Top accent stripe
+  ctx.fillStyle="rgba(251,191,36,0.6)";
+  ctx.fillRect(cardX+80,cardY,cardW-160,3);
 
-  // Inner top gold accent stripe
-  ctx.fillStyle = "rgba(251,191,36,0.55)";
+  // ── 8. TOP ZONE ───────────────────────────────────────────────────────────
+
+  // Header pill
+  const headerTxt = isEng
+    ? "\u2736 WORD OF THE DAY \u2022 " + origin.toUpperCase() + " \u2736"
+    : "\u2736 \u0906\u091C\u091A\u093E \u092A\u0935\u093F\u0924\u094D\u0930 \u0936\u092C\u094D\u0926 \u2022 " + origin + " \u2736";
+  ctx.font = "bold 20px -apple-system,BlinkMacSystemFont,sans-serif";
+  ctx.direction="ltr";
+  const hpW=ctx.measureText(headerTxt).width+44, hpH=44;
+  ctx.fillStyle="rgba(251,191,36,0.14)";
   ctx.beginPath();
-  if (typeof ctx.roundRect === "function") {
-    ctx.roundRect(CARD_X + 60, CARD_Y, CARD_W - 120, 3, 2);
-  } else {
-    ctx.rect(CARD_X + 60, CARD_Y, CARD_W - 120, 3);
-  }
+  typeof ctx.roundRect==="function"
+    ? ctx.roundRect(CX-hpW/2, TOP_START+30, hpW, hpH, 22)
+    : ctx.rect(CX-hpW/2, TOP_START+30, hpW, hpH);
   ctx.fill();
+  ctx.strokeStyle="rgba(251,191,36,0.68)"; ctx.lineWidth=1.4; ctx.stroke();
+  ctx.fillStyle="#fbbf24";
+  draw(headerTxt, TOP_START+52);
 
-  // ── 7. Draw content inside card ───────────────────────────────────────────
-  let curY = CARD_Y + VPAD;
+  // Primary word
+  const WORD_Y = TOP_START + 200;
+  ctx.fillStyle="#ffffff";
+  ctx.font = "bold 88px 'Noto Serif Devanagari','Lora',Georgia,serif";
+  ctx.shadowColor="rgba(0,0,0,0.9)"; ctx.shadowBlur=22;
+  draw(primaryWord, WORD_Y);
+  ctx.shadowBlur=0;
 
-  // ▸ HEADER PILL
-  const headerTitle = isEng
-    ? "\u2736 WORD OF THE DAY \u2022 " + cleanOrigin.toUpperCase() + " \u2736"
-    : "\u2736 \u0906\u091C\u091A\u093E \u092A\u0935\u093F\u0924\u094D\u0930 \u0936\u092C\u094D\u0926 \u2022 " + cleanOrigin + " \u2736";
-
-  ctx.direction = "ltr";
-  ctx.font = "bold 21px -apple-system, BlinkMacSystemFont, sans-serif";
-  const pW = ctx.measureText(headerTitle).width + 48;
-  const pH = 48;
-  const pX = CX - pW / 2;
-  const pY = curY - pH / 2;
-
-  ctx.fillStyle = "rgba(251,191,36,0.15)";
-  ctx.beginPath();
-  if (typeof ctx.roundRect === "function") {
-    ctx.roundRect(pX, pY, pW, pH, 24);
-  } else { ctx.rect(pX, pY, pW, pH); }
-  ctx.fill();
-  ctx.strokeStyle = "rgba(251,191,36,0.7)";
-  ctx.lineWidth = 1.5;
-  ctx.stroke();
-
-  ctx.fillStyle = "#fbbf24";
-  ctx.font = "bold 21px -apple-system, BlinkMacSystemFont, sans-serif";
-  ltrFill(headerTitle, curY);
-  curY += 56;
-
-  // ▸ PRIMARY WORD
-  curY += 28;
-  ctx.fillStyle   = "#ffffff";
-  ctx.font        = "bold 86px 'Noto Serif Devanagari','Lora',Georgia,serif";
-  ctx.shadowColor = "rgba(0,0,0,0.9)";
-  ctx.shadowBlur  = 20;
-  ltrFill(primaryWord, curY);
-  ctx.shadowBlur = 0;
-  curY += 72;
-
-  // ▸ SCRIPT GLYPH PILL
+  // Script glyph pill
+  let afterScript = WORD_Y + 82;
   if (scriptWord) {
-    curY += 10;
-    ctx.direction = "ltr";
-    ctx.font = "bold 42px 'Times New Roman','Noto Serif Hebrew',Georgia,serif";
-    const sW = ctx.measureText(scriptWord).width;
-    const spW = sW + 40;
-    const spH = 58;
-    const spX = CX - spW / 2;
-    const spY = curY - 29;
-
-    ctx.fillStyle = "rgba(251,191,36,0.2)";
+    const SY = WORD_Y + 100;
+    ctx.font="bold 40px 'Times New Roman','Noto Serif Hebrew',Georgia,serif";
+    ctx.direction="ltr";
+    const sw=ctx.measureText(scriptWord).width+38;
+    ctx.fillStyle="rgba(251,191,36,0.18)";
     ctx.beginPath();
-    if (typeof ctx.roundRect === "function") {
-      ctx.roundRect(spX, spY, spW, spH, 20);
-    } else { ctx.rect(spX, spY, spW, spH); }
+    typeof ctx.roundRect==="function"
+      ? ctx.roundRect(CX-sw/2,SY-24,sw,52,18)
+      : ctx.rect(CX-sw/2,SY-24,sw,52);
     ctx.fill();
-    ctx.strokeStyle = "rgba(251,191,36,0.7)";
-    ctx.lineWidth = 1.8;
-    ctx.stroke();
-
-    ctx.fillStyle = "#fde047";
-    ltrFill(scriptWord, curY);
-    curY += 72;
+    ctx.strokeStyle="rgba(251,191,36,0.68)"; ctx.lineWidth=1.8; ctx.stroke();
+    ctx.fillStyle="#fde047"; draw(scriptWord, SY);
+    afterScript = SY + 72;
   }
 
-  // ▸ PRONUNCIATION
-  ctx.fillStyle = "rgba(255,255,255,0.82)";
-  ctx.font = "600 25px -apple-system, BlinkMacSystemFont, sans-serif";
+  // Pronunciation
+  ctx.fillStyle="rgba(255,255,255,0.80)";
+  ctx.font="600 25px -apple-system,BlinkMacSystemFont,sans-serif";
   const pronLabel = isEng ? "Pronunciation: " : "\u0909\u091A\u094D\u091A\u093E\u0930: ";
-  ltrFill(pronLabel + (word ? word.pronunciation : ""), curY);
-  curY += 48;
+  draw(pronLabel + (word ? word.pronunciation : ""), afterScript+10);
 
-  // ▸ GOLDEN DIVIDER
-  curY += 14;
-  ctx.strokeStyle = "rgba(251,191,36,0.65)";
-  ctx.lineWidth = 1.5;
+  // ── 9. MID ZONE — meaning vertically centred ──────────────────────────────
+
+  const midH    = MID_BOT - MID_TOP; // = 680px
+  const blockH  = 52 + 10 + meaningH; // quote(52) + gap(10) + meaning lines
+  const midOff  = Math.round((midH - blockH) / 2); // centre offset
+  const quoteY  = MID_TOP + midOff;
+  const meaningStartY = quoteY + 62;
+
+  // Decorative divider above meaning
+  const divY = quoteY - 56;
+  ctx.strokeStyle="rgba(251,191,36,0.55)"; ctx.lineWidth=1.5;
   ctx.beginPath();
-  ctx.moveTo(CX - 160, curY);
-  ctx.lineTo(CX - 12,  curY);
-  // small diamond in centre
-  ctx.moveTo(CX - 8, curY);
-  ctx.lineTo(CX,     curY - 8);
-  ctx.lineTo(CX + 8, curY);
-  ctx.lineTo(CX,     curY + 8);
-  ctx.lineTo(CX - 8, curY);
-  ctx.moveTo(CX + 12, curY);
-  ctx.lineTo(CX + 160, curY);
+  ctx.moveTo(CX-130,divY); ctx.lineTo(CX-14,divY);
+  // small diamond
+  ctx.moveTo(CX-8,divY); ctx.lineTo(CX,divY-8); ctx.lineTo(CX+8,divY);
+  ctx.lineTo(CX,divY+8); ctx.lineTo(CX-8,divY);
+  ctx.moveTo(CX+14,divY); ctx.lineTo(CX+130,divY);
   ctx.stroke();
-  curY += 30;
 
-  // ▸ OPENING QUOTE MARK
-  ctx.fillStyle = "rgba(251,191,36,0.9)";
-  ctx.font = "52px Georgia, serif";
-  ltrFill("\u201C", curY);
-  curY += 48;
+  // Opening quote
+  ctx.fillStyle="rgba(251,191,36,0.90)";
+  ctx.font="56px Georgia,serif";
+  draw("\u201C", quoteY);
 
-  // ▸ MEANING TEXT
-  curY += 8;
-  ctx.fillStyle   = "#ffffff";
-  ctx.font        = "600 38px 'Noto Serif Devanagari','Lora',Georgia,serif";
-  ctx.shadowColor = "rgba(0,0,0,0.95)";
-  ctx.shadowBlur  = 16;
-  curY = drawLines(meaningLines, curY, LINE_H_M);
-  ctx.shadowBlur = 0;
-
-  // ▸ INSIGHT (if available) — smaller italic line
-  if (insightLines.length > 0) {
-    curY += 36;
-    ctx.fillStyle = "rgba(253,224,71,0.82)";
-    ctx.font      = "italic 500 28px 'Noto Serif Devanagari','Lora',Georgia,serif";
-    curY = drawLines(insightLines, curY, LINE_H_I);
+  // Meaning text lines
+  ctx.fillStyle="#ffffff";
+  ctx.font="600 38px 'Noto Serif Devanagari','Lora',Georgia,serif";
+  ctx.shadowColor="rgba(0,0,0,0.95)"; ctx.shadowBlur=14;
+  let mY = meaningStartY;
+  for (const line of mLines) {
+    ctx.save();
+    ctx.direction="ltr"; ctx.textAlign="center"; ctx.textBaseline="middle";
+    ctx.fillText(line, CX, mY);
+    ctx.restore();
+    mY += LH_M;
   }
+  ctx.shadowBlur=0;
 
-  // ▸ DECORATIVE SEPARATOR before scripture
-  curY += 44;
-  ctx.strokeStyle = "rgba(251,191,36,0.5)";
-  ctx.lineWidth = 1;
-  ctx.setLineDash([6, 8]);
-  ctx.beginPath();
-  ctx.moveTo(CARD_X + 80, curY);
-  ctx.lineTo(CARD_X + CARD_W - 80, curY);
-  ctx.stroke();
+  // ── 10. BOT ZONE — scripture ref + branding ───────────────────────────────
+
+  // Dashed separator
+  const sepY = MID_BOT + 50;
+  ctx.strokeStyle="rgba(251,191,36,0.45)"; ctx.lineWidth=1;
+  ctx.setLineDash([6,9]);
+  ctx.beginPath(); ctx.moveTo(cardX+80,sepY); ctx.lineTo(cardX+cardW-80,sepY); ctx.stroke();
   ctx.setLineDash([]);
-  curY += 40;
 
-  // ▸ SCRIPTURE REFERENCE
-  ctx.direction = "ltr";
-  ctx.font      = "bold 30px -apple-system, BlinkMacSystemFont, sans-serif";
-  ctx.fillStyle = "#fbbf24";
-  const refW = ctx.measureText(refText).width;
-
-  // Flanking accent lines
-  ctx.strokeStyle = "#fbbf24";
-  ctx.lineWidth = 2;
+  // Scripture reference
+  const REF_Y = MID_BOT + 130;
+  ctx.font="bold 29px -apple-system,BlinkMacSystemFont,sans-serif";
+  ctx.fillStyle="#fbbf24"; ctx.direction="ltr"; ctx.textAlign="center";
+  const rW=ctx.measureText(refText).width;
+  // Flanking lines
+  ctx.strokeStyle="#fbbf24"; ctx.lineWidth=2;
   ctx.beginPath();
-  ctx.moveTo(CX - refW / 2 - 44, curY);
-  ctx.lineTo(CX - refW / 2 - 14, curY);
-  ctx.moveTo(CX + refW / 2 + 14, curY);
-  ctx.lineTo(CX + refW / 2 + 44, curY);
+  ctx.moveTo(CX-rW/2-44,REF_Y); ctx.lineTo(CX-rW/2-14,REF_Y);
+  ctx.moveTo(CX+rW/2+14,REF_Y); ctx.lineTo(CX+rW/2+44,REF_Y);
   ctx.stroke();
+  draw(refText, REF_Y);
 
-  ltrFill(refText, curY);
-  curY += 56;
+  // Bottom gold rule
+  const ruleY = REF_Y + 72;
+  ctx.strokeStyle="rgba(251,191,36,0.35)"; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(cardX+80,ruleY); ctx.lineTo(cardX+cardW-80,ruleY); ctx.stroke();
 
-  // ▸ BOTTOM GOLD RULE
-  curY += 8;
-  ctx.strokeStyle = "rgba(251,191,36,0.4)";
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(CARD_X + 80, curY);
-  ctx.lineTo(CARD_X + CARD_W - 80, curY);
-  ctx.stroke();
-  curY += 30;
+  // Branding
+  const BRAND_Y = ruleY + 52;
+  ctx.fillStyle="rgba(255,255,255,0.70)";
+  ctx.font="bold 21px -apple-system,BlinkMacSystemFont,sans-serif";
+  draw("\uD83D\uDD4A\uFE0F River of Life \u2022 Holy Bible (\u092A\u0935\u093F\u0924\u094D\u0930 \u092C\u093E\u092F\u092C\u0932)", BRAND_Y);
 
-  // ▸ BRANDING
-  ctx.fillStyle = "rgba(255,255,255,0.72)";
-  ctx.font      = "bold 22px -apple-system, BlinkMacSystemFont, sans-serif";
-  ltrFill("\uD83D\uDD4A\uFE0F River of Life \u2022 Holy Bible (\u092A\u0935\u093F\u0924\u094D\u0930 \u092C\u093E\u092F\u092C\u0932)", curY);
-
-  // ── 8. Export ──────────────────────────────────────────────────────────────
-  const blob = await new Promise((res) => canvas.toBlob(res, "image/png", 0.95));
-  const filename = "Biblical_Word_" + (primaryWord || "Word").replace(/[^a-zA-Z0-9]/g, "_") + "_" + Date.now() + ".png";
-  const dataUrl = canvas.toDataURL("image/png");
-  return { blob, filename, dataUrl };
+  // ── 11. Export ────────────────────────────────────────────────────────────
+  const blob = await new Promise(r => canvas.toBlob(r,"image/png",0.95));
+  const filename = "Biblical_Word_"+(primaryWord||"Word").replace(/[^a-zA-Z0-9]/g,"_")+"_"+Date.now()+".png";
+  return { blob, filename, dataUrl: canvas.toDataURL("image/png") };
 };
+
 
 
 
