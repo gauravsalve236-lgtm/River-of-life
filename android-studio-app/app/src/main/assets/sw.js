@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v2395_REDESIGNED_BWOD_CARD';
+const CACHE_NAME = 'river-of-life-cache-v2396_BWOD_DAILY_VERSE_PARITY';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

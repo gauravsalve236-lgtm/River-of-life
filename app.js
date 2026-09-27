@@ -20914,12 +20914,21 @@ window.downloadRenderedVodImage = async function() {
 
 window.openShareAndSaveModal = async function() {
   try {
+    const isEng = (window.state && (window.state.translation === "eng" || window.state.language === "en"));
     if (typeof showToast === "function") {
-      showToast("⏳ फोटो तयार होत आहे...");
+      showToast(isEng ? "⏳ Preparing verse card..." : "⏳ फोटो तयार होत आहे...");
+    }
+    const modalTitle = document.getElementById("image-preview-modal-title");
+    if (modalTitle) {
+      modalTitle.textContent = isEng ? "Share Verse / वचन शेअर करा" : "वचन शेअर करा • कार्ड";
+    }
+    const modalSubtitle = document.getElementById("image-preview-modal-subtitle");
+    if (modalSubtitle) {
+      modalSubtitle.textContent = isEng ? "High-Resolution Verse Card (HD)" : "हाय-डेफिनिशन वचन कार्ड (HD)";
     }
     const ratio = window.currentVodAspectRatio || 'square';
     const result = await generateExactVerseImageBlob(ratio);
-    window._currentRenderedVodImage = result;
+    window._currentRenderedVodImage = { ...result, type: 'vod' };
     openImagePreviewModal(result.dataUrl, result.filename, result.blob);
   } catch (err) {
     console.error("openShareAndSaveModal error:", err);
@@ -20929,9 +20938,39 @@ window.openShareAndSaveModal = async function() {
   }
 };
 
+window.openBwodShareAndSaveModal = async function() {
+  try {
+    const isEng = (window.state && (window.state.translation === "eng" || window.state.language === "en"));
+    if (typeof showToast === "function") {
+      showToast(isEng ? "⏳ Preparing Word of the Day card..." : "⏳ आजचा शब्द कार्ड तयार होत आहे...");
+    }
+    const modalTitle = document.getElementById("image-preview-modal-title");
+    if (modalTitle) {
+      modalTitle.textContent = isEng ? "Word of the Day Card" : "आजचा पवित्र शब्द • कार्ड";
+    }
+    const modalSubtitle = document.getElementById("image-preview-modal-subtitle");
+    if (modalSubtitle) {
+      modalSubtitle.textContent = isEng ? "High-Resolution Card (HD)" : "हाय-डेफिनिशन कार्ड (HD)";
+    }
+    const result = await generateExactBwodImageBlob();
+    window._currentRenderedVodImage = { ...result, type: 'bwod' };
+    openImagePreviewModal(result.dataUrl, result.filename, result.blob);
+  } catch (err) {
+    console.error("openBwodShareAndSaveModal error:", err);
+    if (typeof showToast === "function") {
+      showToast("कार्ड तयार करताना अडचण आली.");
+    }
+  }
+};
+
 window.shareRenderedVodImage = async function() {
   if (window._currentRenderedVodImage) {
-    const { blob, filename } = window._currentRenderedVodImage;
+    const { blob, filename, type } = window._currentRenderedVodImage;
+    if (type === 'bwod') {
+      closeImagePreviewModal();
+      if (typeof shareBwodToWhatsApp === 'function') shareBwodToWhatsApp();
+      return;
+    }
     if (blob) {
       const file = new File([blob], filename || "daily_bible_verse.png", { type: "image/png", lastModified: Date.now() });
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -22597,8 +22636,20 @@ window.cycleBwodWallpaper = function(event) {
   if (fsBg) {
     fsBg.style.backgroundImage = `url('assets/daily_verses/${wp}')`;
   }
+
+  // If preview modal is open with BWOD, dynamically re-render preview image with new wallpaper
+  const modal = document.getElementById("modal-image-preview-save");
+  if (modal && modal.style.display === "flex" && window._currentRenderedVodImage?.type === 'bwod') {
+    generateExactBwodImageBlob().then(res => {
+      window._currentRenderedVodImage = { ...res, type: 'bwod' };
+      const img = document.getElementById("vod-preview-rendered-img");
+      if (img) img.src = res.dataUrl;
+    });
+  }
+
   if (typeof showToast === 'function') {
-    showToast("🎨 वॉलपेपर बदलला • Scenic wallpaper updated!");
+    const isEng = (window.state && (window.state.translation === "eng" || window.state.language === "en"));
+    showToast(isEng ? "🎨 Wallpaper updated!" : "🎨 वॉलपेपर बदलला!");
   }
 };
 
@@ -23012,21 +23063,18 @@ window.renderBiblicalMicroLearning = function() {
 
   const meaningEl = document.getElementById("micro-word-meaning");
   if (meaningEl) {
-    meaningEl.textContent = isEng ? word.meaningEn : word.meaningMr;
+    meaningEl.textContent = isEng ? `“${word.meaningEn}”` : `“${word.meaningMr}”`;
   }
 
   const refEl = document.getElementById("micro-word-ref");
   if (refEl) {
-    refEl.textContent = isEng ? word.refEn : word.refMr;
-  }
-
-  const btnSaveLabel = document.getElementById("bwod-btn-save-label");
-  if (btnSaveLabel) {
-    btnSaveLabel.textContent = isEng ? "Save Card" : "फोटो सेव्ह";
-  }
-  const btnShareLabel = document.getElementById("bwod-btn-share-label");
-  if (btnShareLabel) {
-    btnShareLabel.textContent = isEng ? "WhatsApp Share" : "व्हॉट्सॲप शेअर";
+    refEl.innerHTML = `
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.3">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+      </svg>
+      <span>${isEng ? word.refEn : word.refMr}</span>
+    `;
   }
 };
 window.renderEducationalMicroLearning = window.renderBiblicalMicroLearning;
