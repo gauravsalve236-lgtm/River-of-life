@@ -4842,14 +4842,19 @@ async function startSpeechNarration(startVerseIndex = null) {
   
   n.isActive = true;
 
-  // Handle background worship music
+  // Handle background worship music with soft nature pad default
   const bgMusicSelect = document.getElementById("audio-bg-music-select");
   const bgVolSlider = document.getElementById("audio-bg-music-vol-slider");
-  if (bgMusicSelect && bgMusicSelect.value !== "none") {
-    const vol = bgVolSlider ? parseFloat(bgVolSlider.value) : 0.3;
+  let bgChoice = (bgMusicSelect && bgMusicSelect.value) ? bgMusicSelect.value : "ambient";
+  let bgVol = bgVolSlider ? parseFloat(bgVolSlider.value) : 0.18;
+  if (bgChoice === "none" && isEng) {
+    bgChoice = "ambient";
+    bgVol = 0.18;
+  }
+  if (bgChoice !== "none") {
     if (typeof ambientSynthInstance !== 'undefined' && ambientSynthInstance) {
-      ambientSynthInstance.setVolume(vol);
-      ambientSynthInstance.start(bgMusicSelect.value);
+      ambientSynthInstance.setVolume(bgVol);
+      ambientSynthInstance.start(bgChoice);
     }
   } else {
     if (typeof ambientSynthInstance !== 'undefined' && ambientSynthInstance) ambientSynthInstance.stop();
@@ -4863,7 +4868,6 @@ async function startSpeechNarration(startVerseIndex = null) {
     if (sleepTimerTimeout) { clearTimeout(sleepTimerTimeout); sleepTimerTimeout = null; }
   }
 
-  const isEng = (state && state.translation === "eng");
   let bookName = bookKey;
   const foundMeta = (typeof booksMetadataMr !== 'undefined' && Array.isArray(booksMetadataMr))
     ? booksMetadataMr.find(b =>
@@ -4942,7 +4946,8 @@ async function startSpeechNarration(startVerseIndex = null) {
     window.audioPlaybackState.activeChapter = chapterNum;
 
     const verseNum = index + 1;
-    const verseText = getCleanVerseText(versesMr, index);
+    const currentVerseList = n.versesMr || versesList || [];
+    const verseText = getCleanVerseText(currentVerseList, index);
 
     if (!verseText) {
       // Skip empty verse
@@ -10732,6 +10737,98 @@ window.openNotificationModal = function() {
   if (modal) modal.style.display = "flex";
   const badge = document.getElementById("header-bell-badge");
   if (badge) badge.style.display = "none";
+
+  // Automatically activate 7:00 AM daily alerts in background without manual setup
+  if (typeof window.autoEnableDailyMorningNotifications === "function") {
+    window.autoEnableDailyMorningNotifications();
+  }
+};
+
+window.autoEnableDailyMorningNotifications = function() {
+  try {
+    localStorage.setItem("rol_daily_notification_enabled", "true");
+    localStorage.setItem("rol_notification_time", "07:00");
+    localStorage.setItem("rol_notification_lang", (state && state.translation) ? state.translation : "mr");
+
+    // Request browser/system notification permission if not yet decided
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission().then(perm => {
+        if (perm === "granted") {
+          showToast("🔔 दररोज सकाळी ७:०० वाजता दैनिक वचन व दिवसाचा शब्द सूचना आपोआप सुरू केली आहे! (Active at 7:00 AM)");
+        }
+      });
+    } else {
+      showToast("🔔 दररोज सकाळी ७:०० वाजता दैनिक वचन व दिवसाचा शब्द सूचना सक्रिय आहे! (Active at 7:00 AM)");
+    }
+
+    // Synchronize native Android/iOS home screen widget
+    if (typeof NativeWidgetBridge !== "undefined" && typeof NativeWidgetBridge.updateDailyVerse === "function") {
+      const { vod } = (typeof getCurrentVOD === "function") ? getCurrentVOD() : { vod: null };
+      if (vod) {
+        const isEng = (state && state.translation === "eng");
+        const text = isEng ? (vod.engText || vod.text) : vod.text;
+        const ref = isEng ? (vod.engRef || vod.ref) : vod.ref;
+        NativeWidgetBridge.updateDailyVerse(text, ref);
+      }
+    }
+  } catch(e) {
+    console.warn("Auto notification activate note:", e);
+  }
+};
+
+window.playBiblicalAudioWord = function(key, original, phonetic) {
+  try {
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(phonetic || key);
+      u.rate = 0.82;
+      u.pitch = 1.0;
+      window.speechSynthesis.speak(u);
+    }
+    showToast(`🔊 ${phonetic} (${original}) उच्चारण ऐकवले!`);
+  } catch(e) {
+    showToast(`🔊 ${phonetic} (${original})`);
+  }
+};
+
+window.loadOiaPreset = function(presetKey) {
+  const presets = {
+    jhn316: {
+      ref: "📖 योहान ३:१६ (John 3:16)",
+      verse: '"कारण देवाने जगावर एवढी प्रीती केली की त्याने आपला एकुलता एक पुत्र दिला, यासाठी की जो कोणी त्याच्यावर विश्वास ठेवतो त्याचा नाश होऊ नये तर त्याला सार्वकालिक जीवन मिळावे."',
+      observe: "मुख्य शब्द: प्रीती, एकुलता एक पुत्र, विश्वास, सार्वकालिक जीवन. क्रिया: देवाने दिले.",
+      interpret: "तारण हे देवाच्या अगापे प्रीतीची देणगी आहे; मानवी कर्माने नाही तर येशूवरील विश्वासाने प्राप्त होते.",
+      apply: "माझ्या संकटात देवाच्या प्रेमावर शंका न घेता, पूर्ण विश्वास ठेवून सार्वकालिक आशेने जगावे."
+    },
+    psa231: {
+      ref: "🌿 स्तोत्रसंहिता २३:१ (Psalm 23:1)",
+      verse: '"परमेश्वर माझा मेंढपाळ आहे; मला काही उणे पडणार नाही."',
+      observe: "नातं: मेंढपाळ आणि मेंढरू. हमी: 'काही उणे पडणार नाही'.",
+      interpret: "दावीद देवाला केवळ राजा नव्हे तर वैयक्तिक काळजी घेणारा मेंढपाळ मानतो. देव आपल्या सर्व गरजा पुरवतो.",
+      apply: "उद्याच्या चिंतेत न पडता, आज सर्वसमर्थ मेंढपाळाच्या मार्गदर्शनावर पूर्ण विसंबून राहावे."
+    },
+    php413: {
+      ref: "🛡️ फिलिप्पै ४:१३ (Philippians 4:13)",
+      verse: '"मला जो सामर्थ्य देतो, त्याच्या साहाय्याने मी सर्व काही करू शकतो."',
+      observe: "स्रोत: 'मला जो सामर्थ्य देतो' (ख्रिस्त). व्याप्ती: 'सर्व काही करू शकतो' (कोणत्याही परिस्थितीत समाधानी राहणे).",
+      interpret: "पौल तुरुंगात असताना हे लिहित आहे; हे स्वतःच्या अहंकाराचे नव्हे तर ख्रिस्ताच्या पुरवठ्याचे गीत आहे.",
+      apply: "कोणत्याही कठीण प्रसंगात स्वतःच्या शक्तीवर नव्हे तर ख्रिस्ताच्या सामर्थ्यावर विसंबून पुढे जात राहावे."
+    }
+  };
+
+  const p = presets[presetKey] || presets.jhn316;
+  const refEl = document.getElementById("oia-sample-ref");
+  const verseEl = document.getElementById("oia-sample-verse");
+  const obsEl = document.getElementById("oia-observe-text");
+  const intEl = document.getElementById("oia-interpret-text");
+  const appEl = document.getElementById("oia-apply-text");
+
+  if (refEl) refEl.textContent = p.ref;
+  if (verseEl) verseEl.textContent = p.verse;
+  if (obsEl) obsEl.textContent = p.observe;
+  if (intEl) intEl.textContent = p.interpret;
+  if (appEl) appEl.textContent = p.apply;
+  showToast(`📖 ${p.ref} अभ्यास ओ.आय.ए. लोड केला!`);
 };
 
 window.closeNotificationModal = function() {
@@ -10824,6 +10921,7 @@ window.selectDeviceGoogleAccount = async function(email, fullName, photo = null)
     
     const backendUser = (res && res.user) ? res.user : {};
     const rawUsername = (backendUser.username || backendUser.fullName || fullName || email.split('@')[0] || 'member').replace(/[^a-zA-Z0-9_-]/g, '_');
+    const token = (res && res.accessToken) || `tok_google_${Date.now()}`;
     const validUser = {
       ...backendUser,
       id: backendUser.id || `usr_${rawUsername}_${Date.now()}`,
@@ -10834,13 +10932,34 @@ window.selectDeviceGoogleAccount = async function(email, fullName, photo = null)
       preferredLanguage: backendUser.preferredLanguage || lang || 'mr',
       photo: photo || backendUser.photo || backendUser.profilePhoto || null,
       profilePhoto: photo || backendUser.photo || backendUser.profilePhoto || null,
-      profile_photo: photo || backendUser.photo || backendUser.profile_photo || null
+      profile_photo: photo || backendUser.photo || backendUser.profile_photo || null,
+      token: token
     };
 
     state.currentUser = validUser;
+    localStorage.setItem("rol_access_token", token);
     localStorage.setItem("rol_current_user", JSON.stringify(validUser));
     localStorage.setItem("rol_user_name", validUser.fullName || validUser.username);
     saveStateToLocalStorage();
+
+    // Log developer device metrics
+    try {
+      const devMetrics = {
+        userAgent: navigator.userAgent,
+        platform: navigator.platform || "Unknown",
+        language: navigator.language || "en",
+        screen: `${window.innerWidth}x${window.innerHeight}`,
+        devicePixelRatio: window.devicePixelRatio || 1,
+        appVersion: "2.39.9",
+        isAndroid: /Android/i.test(navigator.userAgent),
+        isIOS: /iPhone|iPad|iPod/i.test(navigator.userAgent),
+        isPWA: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true,
+        loginAt: new Date().toISOString(),
+        userEmail: validUser.email
+      };
+      localStorage.setItem("rol_device_metrics", JSON.stringify(devMetrics));
+      console.log("[Developer Metrics] Device session logged:", devMetrics);
+    } catch(e) {}
 
     window.closeDeviceGoogleAccountChooser();
     if (typeof closeAuthModal === 'function') closeAuthModal();
@@ -10857,6 +10976,7 @@ window.selectDeviceGoogleAccount = async function(email, fullName, photo = null)
     // Create reliable, sanitized user profile strictly matching ^[a-zA-Z0-9_-]+$
     const rawUsername = (email.split('@')[0] || 'google_user').replace(/[^a-zA-Z0-9_-]/g, '_');
     const cleanId = `usr_${rawUsername}_${Date.now()}`;
+    const localToken = `tok_google_local_${cleanId}`;
     const cleanUser = {
       id: cleanId,
       email: email.trim().toLowerCase(),
@@ -10866,13 +10986,34 @@ window.selectDeviceGoogleAccount = async function(email, fullName, photo = null)
       preferredLanguage: state.translation || 'mr',
       photo: photo || null,
       profilePhoto: photo || null,
-      profile_photo: photo || null
+      profile_photo: photo || null,
+      token: localToken
     };
 
     state.currentUser = cleanUser;
+    localStorage.setItem("rol_access_token", localToken);
     localStorage.setItem("rol_current_user", JSON.stringify(cleanUser));
     localStorage.setItem("rol_user_name", cleanUser.fullName);
     saveStateToLocalStorage();
+
+    // Log developer device metrics
+    try {
+      const devMetrics = {
+        userAgent: navigator.userAgent,
+        platform: navigator.platform || "Unknown",
+        language: navigator.language || "en",
+        screen: `${window.innerWidth}x${window.innerHeight}`,
+        devicePixelRatio: window.devicePixelRatio || 1,
+        appVersion: "2.39.9",
+        isAndroid: /Android/i.test(navigator.userAgent),
+        isIOS: /iPhone|iPad|iPod/i.test(navigator.userAgent),
+        isPWA: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true,
+        loginAt: new Date().toISOString(),
+        userEmail: cleanUser.email
+      };
+      localStorage.setItem("rol_device_metrics", JSON.stringify(devMetrics));
+      console.log("[Developer Metrics] Device session logged:", devMetrics);
+    } catch(e) {}
 
     updateAllUserAvatars();
     updateAuthUI();
@@ -11580,47 +11721,12 @@ function getMeetingsFromStorage() {
     }
     if (!Array.isArray(meetings)) meetings = [];
 
-    // Purge outdated mock meeting IDs
-    meetings = meetings.filter(m => m && m.id !== "meeting_1" && m.id !== "fasting-friday" && m.id !== "sanctuary-dawn" && m.id !== "fellowship-evening" && m.id !== "sunday-worship");
-
-    // Seed default active church meetings if empty
-    if (meetings.length === 0) {
-      meetings = [
-        {
-          id: "rol_holy_communion",
-          title: "Sunday Holy Communion & Worship",
-          description: "रविवारची पवित्र प्रभू भोजन व उपासना सभा. सर्व विश्वासी एकत्र येऊन प्रार्थना व वचन सहभागिता करतील.",
-          host: "Pastor John",
-          date: new Date().toISOString().split('T')[0],
-          time: "10:00 AM",
-          duration: "60",
-          repeat: "weekly",
-          visibility: "public",
-          isSimulation: false,
-          status: "live",
-          participantsCount: 3,
-          invitedCount: 8,
-          createdAt: Date.now() - 3600000
-        },
-        {
-          id: "rol_daily_morning_prayer",
-          title: "Daily Morning Devotion & Prayer Call",
-          description: "दैनिक सकाळची कौटुंबिक प्रार्थना व बायबल अभ्यास.",
-          host: "Pastor Sunil",
-          date: new Date().toISOString().split('T')[0],
-          time: "07:00 AM",
-          duration: "45",
-          repeat: "daily",
-          visibility: "public",
-          isSimulation: false,
-          status: "scheduled",
-          participantsCount: 0,
-          invitedCount: 6,
-          createdAt: Date.now() - 7200000
-        }
-      ];
-      localStorage.setItem("river_of_life_meetings", JSON.stringify(meetings));
-    }
+    // Purge all mock/sample meeting IDs so ONLY real, admin-created sync meetings exist
+    const mockIds = ["rol_holy_communion", "rol_daily_morning_prayer", "meeting_1", "fasting-friday", "sanctuary-dawn", "fellowship-evening", "sunday-worship"];
+    meetings = meetings.filter(m => m && m.id && !mockIds.includes(m.id));
+    
+    // Save sanitized list back
+    localStorage.setItem("river_of_life_meetings", JSON.stringify(meetings));
 
     return meetings;
   } catch (e) {
@@ -12390,7 +12496,9 @@ function createNewMeeting() {
 function renderMeetingsDashboard() {
   const triggerBtn = document.getElementById("btn-schedule-meeting-trigger");
   if (triggerBtn) {
-    triggerBtn.style.display = "block";
+    const role = (state.currentUser?.role || "").toLowerCase();
+    const isAdminOrPastor = (role === "admin" || role === "pastor");
+    triggerBtn.style.display = isAdminOrPastor ? "block" : "none";
   }
 
   const activeTabBtn = document.querySelector("[data-meetings-subtab].active");
@@ -24156,6 +24264,8 @@ function switchAdminSubtab(subtab) {
     renderAdminMeetings();
   } else if (subtab === "prayers") {
     renderAdminPrayers();
+  } else if (subtab === "hymns") {
+    if (typeof window.renderAdminHymnsList === "function") window.renderAdminHymnsList();
   } else if (subtab === "announcements") {
     renderAdminAnnouncements();
   }
@@ -24460,7 +24570,33 @@ function renderAdminPrayers() {
   const container = document.getElementById("admin-prayers-list-container");
   if (!container) return;
 
-  const prayers = window._rolPrayers || [];
+  // Sync public and member submitted prayers into Admin console
+  let publicReqs = [];
+  try {
+    const rawPub = localStorage.getItem("rol_public_prayers");
+    if (rawPub) publicReqs = JSON.parse(rawPub);
+  } catch(e) {}
+
+  let combined = [...(window._rolPrayers || [])];
+  if (Array.isArray(publicReqs)) {
+    publicReqs.forEach(pr => {
+      if (!combined.some(c => c.id === pr.id)) {
+        combined.push({
+          id: pr.id,
+          username: pr.name || "Anonymous Member",
+          text: pr.text || "",
+          category: pr.category || "General",
+          status: pr.isAnswered ? "answered" : "pending",
+          isPublic: !pr.isAnonymous,
+          createdAt: pr.createdAt || Date.now(),
+          pastorNote: pr.pastorNote || ""
+        });
+      }
+    });
+  }
+  window._rolPrayers = combined;
+
+  const prayers = combined;
   const filtered = prayers.filter(p => {
     if (currentAdminPrayerFilter === "all") return true;
     return p.status === currentAdminPrayerFilter;
@@ -24484,10 +24620,11 @@ function renderAdminPrayers() {
 
     const timeStr = formatTimeAgo ? formatTimeAgo(p.createdAt || Date.now()) : "Recently";
     const privacy = p.isPublic ? "🌐 Congregation Circle" : "🔒 Confidential (Pastor Only)";
+    const waText = encodeURIComponent(`नमस्ते! रिव्हर ऑफ लाइफ चर्चमधून पास्टर आपल्या प्रार्थना विनंतीबद्दल संपर्क साधत आहेत:\n"${p.text}"\nआम्ही आपल्यासाठी प्रार्थना केली आहे. देव आपल्याला आशीर्वादित करो!`);
 
     return `
       <div style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 10px;">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
           <div style="display: flex; align-items: center; gap: 8px;">
             <span style="font-weight: 800; font-size: 14.5px; color: var(--text);">From: @${p.username || "Anonymous"}</span>
             <span class="${badgeClass}">${badgeText}</span>
@@ -24506,7 +24643,7 @@ function renderAdminPrayers() {
           </div>
         ` : ""}
 
-        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px;">
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; align-items: center;">
           ${p.status !== "answered" ? `
             <button onclick="adminAcknowledgePrayerPrompt('${p.id}')" class="btn-primary-mini" style="font-size: 12px; padding: 6px 12px;">
               ✍️ Write Blessing Note & Pray
@@ -24519,6 +24656,9 @@ function renderAdminPrayers() {
               Reopen Request
             </button>
           `}
+          <a href="https://api.whatsapp.com/send?text=${waText}" target="_blank" class="btn-primary-mini" style="font-size: 11.5px; padding: 6px 12px; background: #22c55e; border: none; color: #fff; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; border-radius: 8px;">
+            <span>💬 WhatsApp Response</span>
+          </a>
           <button onclick="adminDeletePrayer('${p.id}')" class="btn-danger-mini" style="font-size: 12px; padding: 6px 10px;">
             Delete ✕
           </button>
@@ -24558,10 +24698,133 @@ function adminDeletePrayer(prayerId) {
   if (confirm("Delete this prayer request?")) {
     window._rolPrayers = (window._rolPrayers || []).filter(p => p.id !== prayerId);
     renderAdminPrayers();
-    if (typeof renderPastorPortal === "function") renderPastorPortal();
-    showToast("Prayer request deleted");
+    showToast("Prayer request removed.");
   }
 }
+
+/* ── 5. Hymns & Worship Management ── */
+window.toggleAdminAddHymnForm = function() {
+  const c = document.getElementById("admin-add-hymn-container");
+  if (!c) return;
+  const isOpen = c.style.display === "block";
+  c.style.display = isOpen ? "none" : "block";
+  const btn = document.getElementById("btn-toggle-hymn-form");
+  if (btn) btn.textContent = isOpen ? "+ Add New Hymn / नवीन भजन" : "✕ Close Form";
+};
+
+window.renderAdminHymnsList = function() {
+  const container = document.getElementById("admin-hymns-list-container");
+  if (!container) return;
+
+  const hymns = window.MARATHI_HYMNAL || [];
+  if (hymns.length === 0) {
+    container.innerHTML = `<div style="padding: 20px; text-align: center; color: var(--text-muted);">No hymns available. Add your first hymn above!</div>`;
+    return;
+  }
+
+  container.innerHTML = hymns.map(h => `
+    <div style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(147, 51, 234, 0.12); color: #9333ea; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; flex-shrink: 0;">
+          #${h.number || h.id}
+        </div>
+        <div>
+          <h4 style="margin: 0 0 2px 0; font-size: 14.5px; font-weight: 800; color: var(--text);">${h.titleMr}</h4>
+          <span style="font-size: 12px; color: var(--text-muted);">${h.titleEn || ""} ${h.author ? "• " + h.author : ""}</span>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <button onclick="switchTab('hymns'); openHymnModal(${h.id});" class="btn-secondary-mini" style="font-size: 12px; padding: 6px 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text); cursor: pointer;">
+          👁 View
+        </button>
+        <button onclick="adminDeleteCustomHymn(${h.id})" class="btn-danger-mini" style="font-size: 12px; padding: 6px 10px; cursor: pointer;">
+          ✕
+        </button>
+      </div>
+    </div>
+  `).join("");
+};
+
+window.submitAdminCustomHymn = function() {
+  const num = (document.getElementById("admin-hymn-number")?.value || "").trim();
+  const cat = document.getElementById("admin-hymn-category")?.value || "worship";
+  const titleMr = (document.getElementById("admin-hymn-title-mr")?.value || "").trim();
+  const titleEn = (document.getElementById("admin-hymn-title-en")?.value || "").trim();
+  const author = (document.getElementById("admin-hymn-author")?.value || "").trim();
+  const youtube = (document.getElementById("admin-hymn-youtube")?.value || "").trim();
+  const chorus = (document.getElementById("admin-hymn-chorus")?.value || "").trim();
+  const versesRaw = (document.getElementById("admin-hymn-verses")?.value || "").trim();
+
+  if (!titleMr || !chorus) {
+    showToast("कृपया भजनाचे शीर्षक व ध्रुवपद भरा / Please enter title and chorus.");
+    return;
+  }
+
+  const rawBlocks = versesRaw.split(/\n\s*\n/).filter(b => b.trim().length > 0);
+  const parsedVerses = rawBlocks.map((block, idx) => ({
+    num: idx + 1,
+    text: block.trim()
+  }));
+
+  const categoryLabels = {
+    worship: "स्तुती व आराधना",
+    grace: "कृपा व तारण",
+    cross: "वधस्तंभ व समर्पण",
+    devotion: "भक्ती व प्रार्थना",
+    peace: "शांती व विसावा"
+  };
+
+  const newId = Date.now();
+  const newHymn = {
+    id: newId,
+    number: num || String((window.MARATHI_HYMNAL ? window.MARATHI_HYMNAL.length : 0) + 1),
+    titleMr: titleMr,
+    titleEn: titleEn,
+    category: cat,
+    categoryLabel: categoryLabels[cat] || "स्तुती व आराधना",
+    author: author,
+    youtube: youtube,
+    chorus: chorus,
+    verses: parsedVerses.length > 0 ? parsedVerses : [{ num: 1, text: chorus }],
+    isCustom: true
+  };
+
+  if (!window.MARATHI_HYMNAL) window.MARATHI_HYMNAL = [];
+  window.MARATHI_HYMNAL.unshift(newHymn);
+
+  try {
+    const raw = localStorage.getItem("rol_custom_hymns");
+    let customList = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(customList)) customList = [];
+    customList.unshift(newHymn);
+    localStorage.setItem("rol_custom_hymns", JSON.stringify(customList));
+  } catch(e) {}
+
+  const form = document.getElementById("admin-hymn-form");
+  if (form) form.reset();
+  window.toggleAdminAddHymnForm();
+  window.renderAdminHymnsList();
+  if (typeof renderHymnsList === "function") renderHymnsList();
+  showToast(`🎉 "${titleMr}" भजन यशस्वीरित्या जतन झाले!`);
+};
+
+window.adminDeleteCustomHymn = function(id) {
+  if (!confirm("Are you sure you want to delete this hymn?")) return;
+  window.MARATHI_HYMNAL = (window.MARATHI_HYMNAL || []).filter(h => h.id !== id);
+  try {
+    const raw = localStorage.getItem("rol_custom_hymns");
+    if (raw) {
+      let customList = JSON.parse(raw);
+      if (Array.isArray(customList)) {
+        customList = customList.filter(h => h.id !== id);
+        localStorage.setItem("rol_custom_hymns", JSON.stringify(customList));
+      }
+    }
+  } catch(e) {}
+  window.renderAdminHymnsList();
+  if (typeof renderHymnsList === "function") renderHymnsList();
+  showToast("Hymn deleted / भजन हटवले!");
+};
 
 /* ── 5. Announcements & Live Broadcast Banner ── */
 function renderAdminAnnouncements() {
@@ -25654,6 +25917,20 @@ function filterHymns() {
     clearBtn.style.display = query.length > 0 ? 'block' : 'none';
   }
   
+  try {
+    const rawCustomHymns = localStorage.getItem("rol_custom_hymns");
+    if (rawCustomHymns && window.MARATHI_HYMNAL) {
+      const customList = JSON.parse(rawCustomHymns);
+      if (Array.isArray(customList)) {
+        customList.forEach(ch => {
+          if (!window.MARATHI_HYMNAL.some(x => x.id === ch.id)) {
+            window.MARATHI_HYMNAL.unshift(ch);
+          }
+        });
+      }
+    }
+  } catch(e) {}
+
   const hymns = window.MARATHI_HYMNAL || [];
   const filtered = hymns.filter(h => {
     const matchCat = (_activeHymnCategory === 'all' || h.category === _activeHymnCategory);

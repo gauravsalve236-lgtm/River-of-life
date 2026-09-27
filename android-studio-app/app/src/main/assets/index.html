@@ -12,7 +12,7 @@
   <script>
     // Force immediate hard purge of all stale Service Workers and CacheStorage
     (function() {
-      const CURRENT_VER = "v2398_SEARCH_AUDIO_STUDY_POLISH";
+      const CURRENT_VER = "v2399_STUDY_ADMIN_PRAYER_AUDIO_SYNC";
       if (localStorage.getItem("rol_app_ver") !== CURRENT_VER) {
         localStorage.setItem("rol_app_ver", CURRENT_VER);
         if ('serviceWorker' in navigator) {
@@ -1201,63 +1201,7 @@
                   <!-- Dynamically populated by app.js -->
                 </div>
               </div>
-
-              <img src="assets/images/search_illustration.png" alt="Search illustration" class="search-illustration-img">
-              <p class="search-instruction-text">Find verses by searching for words, a phrase or asking a question.</p>
-              
-              <div class="search-examples-box">
-                <div class="example-group">
-                  <h5>Word Search Examples</h5>
-                  <ul>
-                    <li class="clickable-search-example" data-search="vision">vision / दरशन</li>
-                    <li class="clickable-search-example" data-search="love your neighbor">love your neighbor / शेजाऱयावर परीती</li>
-                    <li class="clickable-search-example" data-search="pride humility">pride humility / नमरता</li>
-                  </ul>
-                </div>
-                
-                <div class="example-group margin-top-sm">
-                  <h5>AI Verse Search Examples</h5>
-                  <ul>
-                    <li class="clickable-search-example" data-search="How do I handle my stress">How do I handle my stress / तणाव कसा हाताळायचा</li>
-                    <li class="clickable-search-example" data-search="Where is that verse about trusting God">Where is that verse about trusting God / देवावर विशवास ठेवणे</li>
-                    <li class="clickable-search-example" data-search="How do I know what purpose Jesus wants for me">How do I know what purpose Jesus wants for me / येशूची मायासाठी इचछा</li>
-                  </ul>
-                </div>
-              </div>
-
-              <!-- Feature 5: Biblical Reference Library & 10 Commandments Hub -->
-              <div class="biblical-foundations-hub" style="margin-top: 24px; text-align: left; width: 100%;">
-                <h4 style="font-family: var(--font-ui); font-size: 15px; font-weight: 800; margin-bottom: 12px; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px;">
-                  Biblical Foundations & Reference / पवित्र शास्त्रातील मूलभूत सतये
-                </h4>
-                
-                <!-- 10 Commandments Card -->
-                <div class="commandments-hub-card" style="background: #ffffff; border-radius: 18px; padding: 20px; color: #000000; border: 1.5px solid var(--border); box-shadow: var(--shadow-sm);">
-                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
-                    <div>
-                      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-                        <span class="badge-brand" style="font-size: 11px; font-weight: 800; padding: 3px 9px; border-radius: 6px;">EXODUS 20 • निर्गम २०</span>
-                        <span style="font-size: 11.5px; color: var(--text-muted); font-weight: 600;">The Moral Law</span>
-                      </div>
-                      <h3 style="font-size: 20px; font-weight: 800; margin: 0; color: #000000;">The 10 Commandments (दहा आजञा)</h3>
-                    </div>
-                    <span style="font-size: 32px;">📜</span>
-                  </div>
-                  <p style="font-size: 13.5px; color: var(--text-muted); margin: 0 0 16px 0; line-height: 1.5;">
-                    God's eternal covenant given at Mount Sinai (Exodus 20 / Deuteronomy 5) and fulfilled in Christ's Great Commandment of love (Matthew 22:37-40).
-                  </p>
-                  
-                  <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <button onclick="toggleTenCommandmentsModal()" style="background: var(--primary); color: #ffffff; font-weight: 800; border: none; padding: 10px 18px; border-radius: 10px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px var(--primary-glow);">
-                      <span>Explore All 10 Commandments (सर्व १० आजञा वाचा)</span>
-                      <span>&rarr;</span>
-                    </button>
-                    <button onclick="openReaderAndNavigate('exodus', 20, 1);" style="background: #000000; color: #ffffff; font-weight: 700; border: none; padding: 10px 14px; border-radius: 10px; font-size: 13px; cursor: pointer;">
-                      Open Exodus 20 in Bible 📖
-                    </button>
-                  </div>
-                </div>
-              </div>
+              <p class="search-instruction-text" style="margin-top: 24px; color: var(--text-muted); font-size: 13.5px; text-align: center;">वचने शोधण्यासाठी वरील सर्च बारमध्ये शब्द किंवा वाक्य टाईप करा / Type any word or phrase to search scripture.</p>
             </div>
 
             <!-- Matches dynamic list -->
@@ -1303,112 +1247,120 @@
               </div>
 
               <!-- 6 Daily Meditation Devotionals Grid -->
-              <div class="meditation-cards-grid" style="display: flex; flex-direction: column; gap: 16px;">
+              <!-- 6 Short, Beautiful, Easy-to-Scroll Prayer Cards -->
+              <div class="meditation-cards-grid" style="display: flex; flex-direction: column; gap: 10px;">
                 
                 <!-- 1. Morning Awakening Prayer -->
-                <div class="meditation-card" onclick="openImmersivePrayerModal('morning_awakening')" style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 18px; padding: 20px; box-shadow: var(--shadow-sm); cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease;" title="Tap to read 2-3 paragraph prayer">
-                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                <div class="meditation-card-compact" onclick="openImmersivePrayerModal('morning_awakening')" style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 16px; padding: 14px 16px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 12px; box-shadow: var(--shadow-sm); transition: transform 0.15s ease;">
+                  <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(245, 158, 11, 0.15); display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0;">🌅</div>
                     <div>
-                      <span style="font-size: 11px; font-weight: 800; background: rgba(245, 158, 11, 0.15); color: #d97706; padding: 3px 8px; border-radius: 6px;">🌅 MORNING DEVOTIONAL</span>
-                      <h4 style="font-size: 17px; font-weight: 800; margin: 6px 0 2px 0; color: var(--text);">Morning Awakening Prayer (प्रभात प्रार्थना)</h4>
-                      <span style="font-size: 12.5px; font-weight: 700; color: var(--primary);">विलापगीते ३:२२-२३ • Lamentations 3:22-23</span>
+                      <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;">
+                        <span style="font-size: 10px; font-weight: 800; background: rgba(245, 158, 11, 0.15); color: #d97706; padding: 2px 7px; border-radius: 6px; text-transform: uppercase;">Morning</span>
+                        <span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">Lamentations 3:22-23</span>
+                      </div>
+                      <h4 style="font-size: 15px; font-weight: 800; margin: 0; color: var(--text);">Morning Prayers (प्रभात प्रार्थना)</h4>
+                      <span style="font-size: 12px; color: var(--text-muted);">Start your day with God's fresh mercy & peace</span>
                     </div>
-                    <span style="font-size: 28px;">🌅</span>
                   </div>
-                  <blockquote style="font-family: var(--font-body); font-size: 14.5px; line-height: 1.6; color: var(--text); background: var(--bg); padding: 12px 14px; border-radius: 10px; border-left: 3px solid var(--primary); margin: 8px 0 12px 0;">
-                    "हे परमेश्वरा, आजच्या नव्या दिवसासाठी मी तुझे आभार मानतो. तुझी दया दररोज सकाळी नवी असते. आजच्या प्रत्येक पावलात, निर्णयात आणि संभाषणात तुझे मार्गदर्शन माझ्यासोबत असू दे. आमेन."
-                  </blockquote>
-                  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-                    <button onclick="event.stopPropagation(); openImmersivePrayerModal('morning_awakening')" class="btn-prayer-listen" style="background: var(--primary-light); color: var(--primary); border: 1px solid var(--primary); padding: 7px 16px; border-radius: 10px; font-size: 12.5px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px;">
-                      <span>📖 संपूर्ण प्रार्थना वाचा व ऐका (Read 3-Para Prayer) →</span>
-                    </button>
-                    <span style="font-size: 12px; color: var(--text-muted);">3-min quiet meditation</span>
+                  <div style="display: flex; align-items: center; gap: 4px; color: #d97706; font-weight: 800; font-size: 13px; flex-shrink: 0;">
+                    <span>Pray</span>
+                    <span>&rarr;</span>
                   </div>
                 </div>
 
-                <!-- 2. Midday Grace & Strength -->
-                <div class="meditation-card" onclick="openImmersivePrayerModal('midday_strength')" style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 18px; padding: 20px; box-shadow: var(--shadow-sm); cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease;" title="Tap to read 2-3 paragraph prayer">
-                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                <!-- 2. Midday Strength & Peace -->
+                <div class="meditation-card-compact" onclick="openImmersivePrayerModal('midday_strength')" style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 16px; padding: 14px 16px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 12px; box-shadow: var(--shadow-sm); transition: transform 0.15s ease;">
+                  <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(59, 130, 246, 0.15); display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0;">☀️</div>
                     <div>
-                      <span style="font-size: 11px; font-weight: 800; background: rgba(59, 130, 246, 0.15); color: #2563eb; padding: 3px 8px; border-radius: 6px;">☀️ MIDDAY RENEWAL</span>
-                      <h4 style="font-size: 17px; font-weight: 800; margin: 6px 0 2px 0; color: var(--text);">Midday Strength & Peace (मध्यान्ह शांती)</h4>
-                      <span style="font-size: 12.5px; font-weight: 700; color: var(--primary);">यशया ४०:३१ • Isaiah 40:31</span>
+                      <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;">
+                        <span style="font-size: 10px; font-weight: 800; background: rgba(59, 130, 246, 0.15); color: #2563eb; padding: 2px 7px; border-radius: 6px; text-transform: uppercase;">Midday</span>
+                        <span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">Isaiah 40:31</span>
+                      </div>
+                      <h4 style="font-size: 15px; font-weight: 800; margin: 0; color: var(--text);">Midday Prayers (मध्यान्ह शांती प्रार्थना)</h4>
+                      <span style="font-size: 12px; color: var(--text-muted);">Renew your strength and calm your mind</span>
                     </div>
-                    <span style="font-size: 28px;">☀️</span>
                   </div>
-                  <blockquote style="font-family: var(--font-body); font-size: 14.5px; line-height: 1.6; color: var(--text); background: var(--bg); padding: 12px 14px; border-radius: 10px; border-left: 3px solid #2563eb; margin: 8px 0 12px 0;">
-                    "हे प्रभो, दिवसाच्या धावपळीत माझे मन तुझ्या शांतीमध्ये स्थिर कर. जे परमेश्वराची वाट पाहतात त्यांना नवे सामर्थ्य प्राप्त होते. माझा थकवा दूर कर आणि मला तुझ्या आत्म्याने पुन्हा उत्साही कर."
-                  </blockquote>
-                  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-                    <button onclick="event.stopPropagation(); openImmersivePrayerModal('midday_strength')" class="btn-prayer-listen" style="background: rgba(37,99,235,0.1); color: #2563eb; border: 1px solid #2563eb; padding: 7px 16px; border-radius: 10px; font-size: 12.5px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px;">
-                      <span>📖 संपूर्ण प्रार्थना वाचा व ऐका (Read 3-Para Prayer) →</span>
-                    </button>
-                    <span style="font-size: 12px; color: var(--text-muted);">Recharge in the Lord</span>
+                  <div style="display: flex; align-items: center; gap: 4px; color: #2563eb; font-weight: 800; font-size: 13px; flex-shrink: 0;">
+                    <span>Pray</span>
+                    <span>&rarr;</span>
                   </div>
                 </div>
 
-                <!-- 3. Evening Surrender & Rest -->
-                <div class="meditation-card" onclick="openImmersivePrayerModal('evening_surrender')" style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 18px; padding: 20px; box-shadow: var(--shadow-sm); cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease;" title="Tap to read 2-3 paragraph prayer">
-                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                <!-- 3. Evening Surrender & Sleep -->
+                <div class="meditation-card-compact" onclick="openImmersivePrayerModal('evening_surrender')" style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 16px; padding: 14px 16px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 12px; box-shadow: var(--shadow-sm); transition: transform 0.15s ease;">
+                  <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(139, 92, 246, 0.15); display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0;">🌙</div>
                     <div>
-                      <span style="font-size: 11px; font-weight: 800; background: rgba(139, 92, 246, 0.15); color: #7c3aed; padding: 3px 8px; border-radius: 6px;">🌙 EVENING PEACE</span>
-                      <h4 style="font-size: 17px; font-weight: 800; margin: 6px 0 2px 0; color: var(--text);">Evening Surrender & Sleep (संध्याकाळचे समर्पण)</h4>
-                      <span style="font-size: 12.5px; font-weight: 700; color: var(--primary);">स्तोत्रसंहिता ४:८ • Psalm 4:8</span>
+                      <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;">
+                        <span style="font-size: 10px; font-weight: 800; background: rgba(139, 92, 246, 0.15); color: #7c3aed; padding: 2px 7px; border-radius: 6px; text-transform: uppercase;">Evening</span>
+                        <span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">Psalm 4:8</span>
+                      </div>
+                      <h4 style="font-size: 15px; font-weight: 800; margin: 0; color: var(--text);">Evening Prayers (संध्याकाळचे समर्पण)</h4>
+                      <span style="font-size: 12px; color: var(--text-muted);">Surrender worries & rest in God's protection</span>
                     </div>
-                    <span style="font-size: 28px;">🌙</span>
                   </div>
-                  <blockquote style="font-family: var(--font-body); font-size: 14.5px; line-height: 1.6; color: var(--text); background: var(--bg); padding: 12px 14px; border-radius: 10px; border-left: 3px solid #7c3aed; margin: 8px 0 12px 0;">
-                    "हे देवा, मी शांतीने निजेन व झोपेन; कारण तूच मला निर्भयपणे राहू देतोस. आजच्या सर्व चिंता मी तुझ्या चरणी सोपवतो. माझ्या घराचे व मनाचे रक्षण कर."
-                  </blockquote>
-                  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-                    <button onclick="event.stopPropagation(); openImmersivePrayerModal('evening_surrender')" class="btn-prayer-listen" style="background: rgba(124,58,237,0.1); color: #7c3aed; border: 1px solid #7c3aed; padding: 7px 16px; border-radius: 10px; font-size: 12.5px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px;">
-                      <span>📖 संपूर्ण प्रार्थना वाचा व ऐका (Read 3-Para Prayer) →</span>
-                    </button>
-                    <span style="font-size: 12px; color: var(--text-muted);">Peaceful sleep meditation</span>
+                  <div style="display: flex; align-items: center; gap: 4px; color: #7c3aed; font-weight: 800; font-size: 13px; flex-shrink: 0;">
+                    <span>Pray</span>
+                    <span>&rarr;</span>
                   </div>
                 </div>
 
                 <!-- 4. Psalm 91 Protection Prayer -->
-                <div class="meditation-card" onclick="openImmersivePrayerModal('psalm91_protection')" style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 18px; padding: 20px; box-shadow: var(--shadow-sm); cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease;" title="Tap to read 2-3 paragraph prayer">
-                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                <div class="meditation-card-compact" onclick="openImmersivePrayerModal('psalm91_protection')" style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 16px; padding: 14px 16px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 12px; box-shadow: var(--shadow-sm); transition: transform 0.15s ease;">
+                  <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(16, 185, 129, 0.15); display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0;">🛡️</div>
                     <div>
-                      <span style="font-size: 11px; font-weight: 800; background: rgba(16, 185, 129, 0.15); color: #059669; padding: 3px 8px; border-radius: 6px;">🛡️ DIVINE PROTECTION</span>
-                      <h4 style="font-size: 17px; font-weight: 800; margin: 6px 0 2px 0; color: var(--text);">Psalm 91 Protection Prayer (स्तोत्र ९१ संपूर्ण संरक्षण)</h4>
-                      <span style="font-size: 12.5px; font-weight: 700; color: var(--primary);">स्तोत्रसंहिता ९१:१-४ • Psalm 91:1-4</span>
+                      <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;">
+                        <span style="font-size: 10px; font-weight: 800; background: rgba(16, 185, 129, 0.15); color: #059669; padding: 2px 7px; border-radius: 6px; text-transform: uppercase;">Protection</span>
+                        <span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">Psalm 91:1-4</span>
+                      </div>
+                      <h4 style="font-size: 15px; font-weight: 800; margin: 0; color: var(--text);">Psalm 91 Protection Prayer (स्तोत्र ९१ संरक्षण)</h4>
+                      <span style="font-size: 12px; color: var(--text-muted);">Divine shield, angel watch & fear-free living</span>
                     </div>
-                    <span style="font-size: 28px;">🛡️</span>
                   </div>
-                  <blockquote style="font-family: var(--font-body); font-size: 14.5px; line-height: 1.6; color: var(--text); background: var(--bg); padding: 12px 14px; border-radius: 10px; border-left: 3px solid #059669; margin: 8px 0 12px 0;">
-                    "जो परात्पर देवाच्या गुप्तस्थळी राहतो, तो सर्वसमर्थाच्या सावलीत विसावा पावेल. परमेश्वर माझा कोट व माझा किल्ला आहे. तो मला सर्व संकटांपासून सोडवील आणि आपल्या पंखांखाली मला आश्रय देईल."
-                  </blockquote>
-                  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-                    <button onclick="event.stopPropagation(); openImmersivePrayerModal('psalm91_protection')" class="btn-prayer-listen" style="background: rgba(5,150,105,0.1); color: #059669; border: 1px solid #059669; padding: 7px 16px; border-radius: 10px; font-size: 12.5px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px;">
-                      <span>📖 संपूर्ण प्रार्थना वाचा व ऐका (Read 3-Para Prayer) →</span>
-                    </button>
-                    <button onclick="event.stopPropagation(); openReaderAndNavigate('psalms', 91, 1);" style="background: none; border: 1px solid var(--border); padding: 6px 12px; border-radius: 8px; font-size: 12px; color: var(--text); cursor: pointer;">
-                      Read Psalm 91 📖
-                    </button>
+                  <div style="display: flex; align-items: center; gap: 4px; color: #059669; font-weight: 800; font-size: 13px; flex-shrink: 0;">
+                    <span>Pray</span>
+                    <span>&rarr;</span>
                   </div>
                 </div>
 
-                <!-- 5. Inner Healing & Stress Relief -->
-                <div class="meditation-card" onclick="openImmersivePrayerModal('inner_healing')" style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 18px; padding: 20px; box-shadow: var(--shadow-sm); cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease;" title="Tap to read 2-3 paragraph prayer">
-                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                <!-- 5. Healing & Deliverance -->
+                <div class="meditation-card-compact" onclick="openImmersivePrayerModal('inner_healing')" style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 16px; padding: 14px 16px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 12px; box-shadow: var(--shadow-sm); transition: transform 0.15s ease;">
+                  <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(236, 72, 153, 0.15); display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0;">🌿</div>
                     <div>
-                      <span style="font-size: 11px; font-weight: 800; background: rgba(236, 72, 153, 0.15); color: #db2777; padding: 3px 8px; border-radius: 6px;">🌿 INNER HEALING</span>
-                      <h4 style="font-size: 17px; font-weight: 800; margin: 6px 0 2px 0; color: var(--text);">Inner Healing & Stress Relief (आत्मिक आरोग्य)</h4>
-                      <span style="font-size: 12.5px; font-weight: 700; color: var(--primary);">मत्तय ११:२८ • Matthew 11:28</span>
+                      <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;">
+                        <span style="font-size: 10px; font-weight: 800; background: rgba(236, 72, 153, 0.15); color: #db2777; padding: 2px 7px; border-radius: 6px; text-transform: uppercase;">Healing</span>
+                        <span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">Matthew 11:28</span>
+                      </div>
+                      <h4 style="font-size: 15px; font-weight: 800; margin: 0; color: var(--text);">Healing & Strength (आरोग्य व चंगाई प्रार्थना)</h4>
+                      <span style="font-size: 12px; color: var(--text-muted);">Deliverance from distress, sickness & pain</span>
                     </div>
-                    <span style="font-size: 28px;">🌿</span>
                   </div>
-                  <blockquote style="font-family: var(--font-body); font-size: 14.5px; line-height: 1.6; color: var(--text); background: var(--bg); padding: 12px 14px; border-radius: 10px; border-left: 3px solid #db2777; margin: 8px 0 12px 0;">
-                    "हे येशू, तू म्हणालास: 'अहो कष्टी व भाराक्रांत जनहो, तुम्ही सर्व मजकडे या, म्हणजे मी तुम्हाला विसावा देईन.' माझ्या मनातील वेदना, भीती आणि ताण मी तुला देतो. तुझी स्वर्गीय शांती माझ्या हृदयात वाहू दे."
-                  </blockquote>
-                  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-                    <button onclick="event.stopPropagation(); openImmersivePrayerModal('inner_healing')" class="btn-prayer-listen" style="background: rgba(219,39,119,0.1); color: #db2777; border: 1px solid #db2777; padding: 7px 16px; border-radius: 10px; font-size: 12.5px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px;">
-                      <span>📖 संपूर्ण प्रार्थना वाचा व ऐका (Read 3-Para Prayer) →</span>
-                    </button>
-                    <span style="font-size: 12px; color: var(--text-muted);">Find deep rest in Christ</span>
+                  <div style="display: flex; align-items: center; gap: 4px; color: #db2777; font-weight: 800; font-size: 13px; flex-shrink: 0;">
+                    <span>Pray</span>
+                    <span>&rarr;</span>
+                  </div>
+                </div>
+
+                <!-- 6. Family Blessing & Peace -->
+                <div class="meditation-card-compact" onclick="openImmersivePrayerModal('family_blessing')" style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 16px; padding: 14px 16px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 12px; box-shadow: var(--shadow-sm); transition: transform 0.15s ease;">
+                  <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(14, 165, 233, 0.15); display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0;">🕊️</div>
+                    <div>
+                      <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;">
+                        <span style="font-size: 10px; font-weight: 800; background: rgba(14, 165, 233, 0.15); color: #0284c7; padding: 2px 7px; border-radius: 6px; text-transform: uppercase;">Family</span>
+                        <span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">Joshua 24:15</span>
+                      </div>
+                      <h4 style="font-size: 15px; font-weight: 800; margin: 0; color: var(--text);">Family Blessing & Peace (कौटुंबिक आशीर्वाद)</h4>
+                      <span style="font-size: 12px; color: var(--text-muted);">Unity, grace and divine harmony in the home</span>
+                    </div>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 4px; color: #0284c7; font-weight: 800; font-size: 13px; flex-shrink: 0;">
+                    <span>Pray</span>
+                    <span>&rarr;</span>
                   </div>
                 </div>
 
@@ -1434,9 +1386,6 @@
                   <div style="display: flex; gap: 8px; align-items: center;">
                     <button onclick="if(typeof fetchMeetingsFromCloud==='function')fetchMeetingsFromCloud(true); if(typeof syncAllLocalMeetingsToCloud==='function')syncAllLocalMeetingsToCloud();" class="btn-secondary-mini" style="background: rgba(255,255,255,0.18); color: #fff; border: 1px solid rgba(255,255,255,0.3); padding: 6px 12px; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 5px;">
                       <span>🔄 Sync / सिंक</span>
-                    </button>
-                    <button id="btn-prayers-schedule-meeting" onclick="openDrawer('drawer-schedule-meeting'); if (typeof populateScheduleHostsDropdown==='function') populateScheduleHostsDropdown();" class="btn-primary-mini" style="background: #22c55e; color: #fff; border: none; padding: 6px 14px; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px;">
-                      <span>+ Schedule Meeting / सभा आयोजित करा</span>
                     </button>
                   </div>
                 </div>
@@ -2229,7 +2178,8 @@
               <button class="admin-subnav-btn" data-admin-subtab="members" onclick="switchAdminSubtab('members')">👥 Members & Roles</button>
               <button class="admin-subnav-btn" data-admin-subtab="vod" onclick="switchAdminSubtab('vod')">📖 Verse of Day (VOD)</button>
               <button class="admin-subnav-btn" data-admin-subtab="meetings" onclick="switchAdminSubtab('meetings')">📹 Video Meetings</button>
-              <button class="admin-subnav-btn" data-admin-subtab="prayers" onclick="switchAdminSubtab('prayers')"> Pastoral Prayers</button>
+              <button class="admin-subnav-btn" data-admin-subtab="prayers" onclick="switchAdminSubtab('prayers')">🙏 Pastoral Prayers</button>
+              <button class="admin-subnav-btn" data-admin-subtab="hymns" onclick="switchAdminSubtab('hymns')">🎵 Hymns & Worship</button>
               <button class="admin-subnav-btn" data-admin-subtab="announcements" onclick="switchAdminSubtab('announcements')">📢 Announcements</button>
               <button class="admin-subnav-btn" data-admin-subtab="settings" onclick="switchAdminSubtab('settings')">⚙ Security & PIN</button>
             </div>
@@ -2545,6 +2495,94 @@
               </div>
             </div>
 
+            <!-- SUBPANEL 8: HYMNS & WORSHIP MANAGEMENT -->
+            <div id="admin-panel-hymns" class="admin-subtab-panel" style="display: none;">
+              <div class="settings-card-group" style="padding: 20px; margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+                  <div>
+                    <h3 style="margin: 0; font-size: 17px; font-weight: 800; color: var(--text);">Hymns & Worship Management / भजन व्यवस्थापन</h3>
+                    <p style="margin: 2px 0 0 0; font-size: 12px; color: var(--text-muted);">Add new Marathi & English hymns, worship songs, chords and YouTube links.</p>
+                  </div>
+                  <button onclick="toggleAdminAddHymnForm()" id="btn-toggle-hymn-form" class="btn-primary-mini" style="margin: 0; padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 800; cursor: pointer;">
+                    + Add New Hymn / नवीन भजन
+                  </button>
+                </div>
+
+                <!-- New Hymn Form (Collapsible) -->
+                <div id="admin-add-hymn-container" style="display: none; background: var(--bg); border: 1.5px solid var(--border); border-radius: 16px; padding: 18px; margin-bottom: 20px;">
+                  <h4 style="margin: 0 0 14px 0; font-size: 15px; font-weight: 800; color: var(--primary);">Add Worship Song / नवीन भजनाचा तपशील</h4>
+                  <form id="admin-hymn-form" onsubmit="event.preventDefault(); submitAdminCustomHymn();" style="display: flex; flex-direction: column; gap: 14px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                      <div>
+                        <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Hymn Number / भजन क्रमांक *</label>
+                        <input type="text" id="admin-hymn-number" placeholder="उदा. 21 किंवा 105" required style="width: 100%; box-sizing: border-box; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 13.5px;">
+                      </div>
+                      <div>
+                        <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Category / श्रेणी *</label>
+                        <select id="admin-hymn-category" style="width: 100%; box-sizing: border-box; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 13.5px;">
+                          <option value="worship">स्तुती व आराधना (Praise & Worship)</option>
+                          <option value="grace">कृपा व तारण (Grace & Salvation)</option>
+                          <option value="cross">वधस्तंभ व समर्पण (Cross & Surrender)</option>
+                          <option value="devotion">भक्ती व प्रार्थना (Devotion & Prayer)</option>
+                          <option value="peace">शांती व विसावा (Peace & Comfort)</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px;">
+                      <div>
+                        <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Title in Marathi (मराठी शीर्षक) *</label>
+                        <input type="text" id="admin-hymn-title-mr" placeholder="उदा. येशू मसीह देवे जीवन" required style="width: 100%; box-sizing: border-box; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 13.5px;">
+                      </div>
+                      <div>
+                        <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Title in English / Transliteration *</label>
+                        <input type="text" id="admin-hymn-title-en" placeholder="e.g. Yeshu Masih Deve Jeevan" required style="width: 100%; box-sizing: border-box; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 13.5px;">
+                      </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px;">
+                      <div>
+                        <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Songwriter / गीतकार / Composer</label>
+                        <input type="text" id="admin-hymn-author" placeholder="उदा. नारायण वामन टिळक / पारंपारिक" style="width: 100%; box-sizing: border-box; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 13.5px;">
+                      </div>
+                      <div>
+                        <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">YouTube Link or Video ID (Optional)</label>
+                        <input type="text" id="admin-hymn-youtube" placeholder="https://youtu.be/... किंवा Video ID" style="width: 100%; box-sizing: border-box; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 13.5px;">
+                      </div>
+                    </div>
+
+                    <div>
+                      <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Chorus / ध्रुवपद *</label>
+                      <textarea id="admin-hymn-chorus" rows="3" placeholder="ध्रुवपदाच्या ओळी येथे लिहा..." required style="width: 100%; box-sizing: border-box; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 13.5px; resize: vertical;"></textarea>
+                    </div>
+
+                    <div>
+                      <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Verses / कडवी (कडव्यांमध्ये एक रिकामी ओळ सोडा) *</label>
+                      <textarea id="admin-hymn-verses" rows="5" placeholder="कडवे १:
+ओळ १...
+ओळ २...
+
+कडवे २:
+ओळ १...
+ओळ २..." required style="width: 100%; box-sizing: border-box; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 13.5px; resize: vertical;"></textarea>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                      <button type="button" onclick="toggleAdminAddHymnForm()" class="btn-secondary-mini" style="padding: 10px 18px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 13px;">Cancel</button>
+                      <button type="submit" class="btn-primary-mini" style="padding: 10px 22px; border-radius: 8px; font-size: 13px; font-weight: 800; cursor: pointer;">
+                        ✨ Publish Hymn / भजन जतन करा
+                      </button>
+                    </div>
+                  </form>
+                </div>
+
+                <!-- Admin Hymns List Container -->
+                <div id="admin-hymns-list-container" style="display: flex; flex-direction: column; gap: 10px;">
+                  <!-- Rendered dynamically -->
+                </div>
+              </div>
+            </div>
+
           </div>
         </section>
 
@@ -2753,11 +2791,65 @@
                         </div>
                       </div>
 
-                      <!-- Diversity of Authors -->
-                      <div style="background: var(--bg); padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 14px;">
-                        <h5 style="margin: 0 0 4px 0; font-size: 13px; font-weight: 800; color: var(--text);">लेखकांची आश्चर्यकारक विविधता (Diversity of 40+ Authors):</h5>
-                        <p style="margin: 0; font-size: 12.5px; color: var(--text-muted); line-height: 1.5;">
-                          राजा (दावीद, शलमोन), मेंढपाळ (आमोस), कोळी/मासेमार (पेत्र, योहान), विद्द्वान व फरीशी (पौल), राजवाड्यातील प्यालेदार (नहेम्या), डॉक्टर/वैद्य (लूक). सुमारे १५०० वर्षांच्या कालखंडात वेगवेगळ्या परिस्थितीत असूनही सर्वांनी पवित्र आत्म्याच्या प्रेरणेने एकाच सत्य देवाचे प्रकटीकरण लिहिले (२ पेत्र १:२१).
+                      <!-- Interactive Hebrew & Greek Audio Pronunciation Soundboard -->
+                      <div style="background: var(--bg); border: 1.5px solid rgba(168,85,247,0.25); border-radius: 14px; padding: 14px; margin-bottom: 14px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                          <h5 style="margin: 0; font-size: 13px; font-weight: 800; color: #7c3aed; display: flex; align-items: center; gap: 6px;">
+                            <span>🔊 मूळ भाषांचे उच्चारण (Hebrew & Greek Audio Pronunciation):</span>
+                          </h5>
+                          <span style="font-size: 10.5px; font-weight: 700; color: var(--text-muted);">Tap word to listen</span>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px;">
+                          <button onclick="playBiblicalAudioWord('shalom', 'שָׁלוֹם', 'Shalom')" type="button" style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; text-align: left; cursor: pointer; display: flex; flex-direction: column; gap: 2px; transition: transform 0.15s ease;">
+                            <span style="font-size: 11px; font-weight: 800; color: #d97706;">🔊 שָׁלוֹם (Shalom)</span>
+                            <span style="font-size: 10.5px; color: var(--text);">शांती व पूर्ण कल्याण</span>
+                          </button>
+                          <button onclick="playBiblicalAudioWord('agape', 'ἀγάπη', 'Agape')" type="button" style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; text-align: left; cursor: pointer; display: flex; flex-direction: column; gap: 2px; transition: transform 0.15s ease;">
+                            <span style="font-size: 11px; font-weight: 800; color: #059669;">🔊 ἀγάπη (Agape)</span>
+                            <span style="font-size: 10.5px; color: var(--text);">निस्वार्थ दैवी प्रेम</span>
+                          </button>
+                          <button onclick="playBiblicalAudioWord('hallelujah', 'הַלְלוּיָהּ', 'Hallelujah')" type="button" style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; text-align: left; cursor: pointer; display: flex; flex-direction: column; gap: 2px; transition: transform 0.15s ease;">
+                            <span style="font-size: 11px; font-weight: 800; color: #7c3aed;">🔊 הַלְלוּיָהּ (Hallelujah)</span>
+                            <span style="font-size: 10.5px; color: var(--text);">परमेश्वराची स्तुती करा</span>
+                          </button>
+                          <button onclick="playBiblicalAudioWord('ruach', 'רוּחַ', 'Ruach')" type="button" style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; text-align: left; cursor: pointer; display: flex; flex-direction: column; gap: 2px; transition: transform 0.15s ease;">
+                            <span style="font-size: 11px; font-weight: 800; color: #2563eb;">🔊 רוּחַ (Ruach)</span>
+                            <span style="font-size: 10.5px; color: var(--text);">पवित्र आत्मा व श्वास</span>
+                          </button>
+                          <button onclick="playBiblicalAudioWord('yahweh', 'יַהְוֶה', 'Yahweh')" type="button" style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; text-align: left; cursor: pointer; display: flex; flex-direction: column; gap: 2px; transition: transform 0.15s ease;">
+                            <span style="font-size: 11px; font-weight: 800; color: #dc2626;">🔊 יַהְוֶה (Yahweh)</span>
+                            <span style="font-size: 10.5px; color: var(--text);">मी जो आहे तो आहे</span>
+                          </button>
+                          <button onclick="playBiblicalAudioWord('amen', 'אָמֵן', 'Amen')" type="button" style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; text-align: left; cursor: pointer; display: flex; flex-direction: column; gap: 2px; transition: transform 0.15s ease;">
+                            <span style="font-size: 11px; font-weight: 800; color: #c59b27;">🔊 אָמֵן (Amen)</span>
+                            <span style="font-size: 10.5px; color: var(--text);">तसेच होवो, सत्य</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      <!-- Diversity of Authors Spotlight -->
+                      <div style="background: var(--bg); padding: 14px; border-radius: 14px; border: 1px solid var(--border); margin-bottom: 14px;">
+                        <h5 style="margin: 0 0 8px 0; font-size: 13px; font-weight: 800; color: var(--text);">लेखकांची विविधता (Visual Authors Spotlight):</h5>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-bottom: 8px;">
+                          <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px;">
+                            <strong style="font-size: 11.5px; color: #d97706; display: block;">👑 राजा दावीद (David)</strong>
+                            <span style="font-size: 10.5px; color: var(--text-muted);">मेंढपाळ ते महान राजा • ७३ स्तोत्रे</span>
+                          </div>
+                          <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px;">
+                            <strong style="font-size: 11.5px; color: #2563eb; display: block;">📜 मोशे (Moses)</strong>
+                            <span style="font-size: 10.5px; color: var(--text-muted);">राजपुत्र ते अग्रेसर • तोराह (५ पुस्तके)</span>
+                          </div>
+                          <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px;">
+                            <strong style="font-size: 11.5px; color: #7c3aed; display: block;">✉️ प्रेषित पौल (Paul)</strong>
+                            <span style="font-size: 10.5px; color: var(--text-muted);">विद्वान धर्मगुरू • १३-१४ मंडळी पत्रे</span>
+                          </div>
+                          <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px;">
+                            <strong style="font-size: 11.5px; color: #059669; display: block;">🩺 लूक (Luke)</strong>
+                            <span style="font-size: 10.5px; color: var(--text-muted);">वैद्य / डॉक्टर • लूक शुभवर्तमान व कृत्ये</span>
+                          </div>
+                        </div>
+                        <p style="margin: 0; font-size: 11.5px; color: var(--text-muted); line-height: 1.45;">
+                          सुमारे १५०० वर्षांच्या कालखंडात वेगवेगळ्या पार्श्वभूमीचे असूनही सर्वांनी पवित्र आत्म्याच्या प्रेरणेने एकाच सत्य देवाचे प्रकटीकरण लिहिले (२ पेत्र १:२१).
                         </p>
                       </div>
 
@@ -2830,6 +2922,39 @@
                           <span style="font-size: 11.5px; color: #059669; font-weight: 700;">याकोब १:२२ - 'वचनाचे केवळ ऐकणारे होऊ नका, तर पाळणारे व्हा.'</span>
                         </div>
 
+                      </div>
+
+                      <!-- Interactive OIA Study Simulator -->
+                      <div style="background: var(--bg); border: 1.5px solid rgba(16,185,129,0.3); border-radius: 14px; padding: 14px; margin-bottom: 14px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+                          <h5 style="margin: 0; font-size: 13px; font-weight: 800; color: #059669; display: flex; align-items: center; gap: 6px;">
+                            <span>⚡ ओ.आय.ए. अभ्यास सिम्युलेटर (Interactive OIA Practice):</span>
+                          </h5>
+                          <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                            <button onclick="loadOiaPreset('jhn316')" type="button" class="btn-secondary-mini" style="font-size: 11px; padding: 3px 8px; border-radius: 6px; background: var(--surface); border: 1px solid var(--border); color: var(--text); cursor: pointer;">योहान ३:१६</button>
+                            <button onclick="loadOiaPreset('psa231')" type="button" class="btn-secondary-mini" style="font-size: 11px; padding: 3px 8px; border-radius: 6px; background: var(--surface); border: 1px solid var(--border); color: var(--text); cursor: pointer;">स्तोत्र २३:१</button>
+                            <button onclick="loadOiaPreset('php413')" type="button" class="btn-secondary-mini" style="font-size: 11px; padding: 3px 8px; border-radius: 6px; background: var(--surface); border: 1px solid var(--border); color: var(--text); cursor: pointer;">फिलिप्पै ४:१३</button>
+                          </div>
+                        </div>
+
+                        <div id="oia-simulator-display" style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 8px; font-size: 12.5px; line-height: 1.45;">
+                          <div style="font-weight: 800; color: var(--primary); margin-bottom: 4px;" id="oia-sample-ref">📖 योहान ३:१६ (John 3:16)</div>
+                          <div style="margin-bottom: 8px; color: var(--text);" id="oia-sample-verse">"कारण देवाने जगावर एवढी प्रीती केली की त्याने आपला एकुलता एक पुत्र दिला, यासाठी की जो कोणी त्याच्यावर विश्वास ठेवतो त्याचा नाश होऊ नये तर त्याला सार्वकालिक जीवन मिळावे."</div>
+                          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; font-size: 11.5px;">
+                            <div style="background: rgba(59,130,246,0.08); padding: 8px; border-radius: 6px; border-left: 2.5px solid #3b82f6;">
+                              <strong style="color: #2563eb; display: block;">१. निरीक्षण (Observe):</strong>
+                              <span id="oia-observe-text">मुख्य शब्द: प्रीती, एकुलता एक पुत्र, विश्वास, सार्वकालिक जीवन. क्रिया: देवाने दिले.</span>
+                            </div>
+                            <div style="background: rgba(245,158,11,0.08); padding: 8px; border-radius: 6px; border-left: 2.5px solid #f59e0b;">
+                              <strong style="color: #d97706; display: block;">२. अर्थ (Interpret):</strong>
+                              <span id="oia-interpret-text">तारण हे देवाच्या अगापे प्रीतीची देणगी आहे; मानवी कर्माने नाही तर येशूवरील विश्वासाने प्राप्त होते.</span>
+                            </div>
+                            <div style="background: rgba(16,185,129,0.08); padding: 8px; border-radius: 6px; border-left: 2.5px solid #10b981;">
+                              <strong style="color: #059669; display: block;">३. उपयोजन (Apply):</strong>
+                              <span id="oia-apply-text">माझ्या संकटात देवाच्या प्रेमावर शंका न घेता, पूर्ण विश्वास ठेवून सार्वकालिक आशेने जगावे.</span>
+                            </div>
+                          </div>
+                        </div>
                       </div>
 
                       <!-- Did You Know Callout Box -->
@@ -4135,9 +4260,10 @@
 
         <!-- Footer Actions -->
         <div style="padding: 12px 20px; border-top: 1px solid var(--border, #E5E7EB); display: flex; justify-content: space-between; align-items: center; background: var(--bg, #F9FAFB);">
-          <button type="button" onclick="closeNotificationModal(); openNotificationSettingsModal();" style="border: none; background: transparent; color: var(--primary, #dfa938); font-size: 12.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px;">
-            ⚙️ वेळेची सेटिंग्ज (Settings)
-          </button>
+          <div style="font-size: 12px; font-weight: 700; color: #16a34a; display: flex; align-items: center; gap: 6px;">
+            <span>✅</span>
+            <span>दररोज स. ७:०० वाजता आपोआप सक्रिय (Daily 7 AM Active)</span>
+          </div>
           <button type="button" onclick="markAllNotificationsAsRead()" style="border: 1px solid var(--border, #E5E7EB); background: var(--surface, #fff); color: var(--text); padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;">
             ✓ सर्व वाचले (Mark all read)
           </button>
@@ -6025,122 +6151,7 @@
       </div>
     </div>
 
-    <!-- Notifications Center Modal -->
-    <div id="modal-notifications-center" class="app-modal-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 99999; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); justify-content: center; align-items: center; padding: 16px;">
-      <div style="background: var(--surface); color: var(--text); border-radius: 24px; border: 1.5px solid var(--border); box-shadow: 0 24px 60px rgba(0,0,0,0.35); width: 100%; max-width: 460px; max-height: 88vh; display: flex; flex-direction: column; overflow: hidden; animation: popInModal 0.25s cubic-bezier(0.16,1,0.3,1);">
-        
-        <!-- Header -->
-        <div style="padding: 18px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, rgba(39, 58, 37, 0.95), rgba(22, 33, 20, 0.98)); color: #fff;">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(223, 169, 56, 0.2); border: 1.5px solid #dfa938; display: flex; align-items: center; justify-content: center; color: #dfa938;">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-            </div>
-            <div>
-              <h3 style="margin: 0; font-size: 16.5px; font-weight: 800; color: #fff;">Notifications / सूचना केंद्र</h3>
-              <span style="font-size: 11.5px; color: rgba(255,255,255,0.75);">River of Life Fellowship Alerts</span>
-            </div>
-          </div>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <button onclick="markAllNotificationsAsRead()" title="Mark all read" style="background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); color: #fff; font-size: 11.5px; font-weight: 700; padding: 5px 10px; border-radius: 12px; cursor: pointer; transition: all 0.2s;">
-              Mark Read
-            </button>
-            <button onclick="closeNotificationModal()" style="background: rgba(255,255,255,0.15); border: none; color: #fff; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center;">✕</button>
-          </div>
-        </div>
 
-        <!-- Notification Items List -->
-        <div style="padding: 16px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; text-align: left;">
-          
-          <!-- Card 1: Today's Scripture Verse -->
-          <div style="background: var(--bg); border: 1.5px solid var(--border); border-radius: 16px; padding: 14px; display: flex; gap: 12px;">
-            <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(223, 169, 56, 0.15); border: 1px solid rgba(223, 169, 56, 0.4); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;">
-              📖
-            </div>
-            <div style="flex: 1; min-width: 0;">
-              <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2px;">
-                <h4 style="margin: 0; font-size: 14px; font-weight: 800; color: var(--text);">Daily Scripture / आजचे वचन</h4>
-                <span style="font-size: 11px; color: var(--text-muted);">Today 6:00 AM</span>
-              </div>
-              <p style="margin: 0 0 8px 0; font-size: 12.5px; color: var(--text); line-height: 1.45;">
-                "कारण देवाने जगावर एवढी प्रीती केली की, त्याने आपला एकुलता एक पुत्र दिला..." — योहान ३:१६
-              </p>
-              <button onclick="closeNotificationModal(); openChapter('JHN', 3);" style="padding: 6px 12px; border-radius: 8px; border: none; background: var(--primary); color: #fff; font-size: 11.5px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-                Read Chapter / अध्याय वाचा ➔
-              </button>
-            </div>
-          </div>
-
-          <!-- Card 2: Live Prayer Fellowship -->
-          <div style="background: var(--bg); border: 1.5px solid var(--border); border-radius: 16px; padding: 14px; display: flex; gap: 12px;">
-            <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.4); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;">
-              🕊️
-            </div>
-            <div style="flex: 1; min-width: 0;">
-              <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2px;">
-                <h4 style="margin: 0; font-size: 14px; font-weight: 800; color: var(--text);">Online Prayer Fellowship / प्रार्थना सभा</h4>
-                <span style="font-size: 11px; color: #22c55e; font-weight: 700;">Tonight 9:00 PM</span>
-              </div>
-              <p style="margin: 0 0 8px 0; font-size: 12.5px; color: var(--text); line-height: 1.45;">
-                River of Life Online Google Meet Prayer Fellowship begins at 9:00 PM. All are invited to join.
-              </p>
-              <button onclick="closeNotificationModal(); switchTab('meetings');" style="padding: 6px 12px; border-radius: 8px; border: none; background: #22c55e; color: #fff; font-size: 11.5px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-                Join Fellowship / सभेला जा ➔
-              </button>
-            </div>
-          </div>
-
-          <!-- Card 3: New Marathi Hymn -->
-          <div style="background: var(--bg); border: 1.5px solid var(--border); border-radius: 16px; padding: 14px; display: flex; gap: 12px;">
-            <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.4); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;">
-              🎵
-            </div>
-            <div style="flex: 1; min-width: 0;">
-              <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2px;">
-                <h4 style="margin: 0; font-size: 14px; font-weight: 800; color: var(--text);">New Marathi Hymn / नवीन भजन</h4>
-                <span style="font-size: 11px; color: var(--text-muted);">Yesterday</span>
-              </div>
-              <p style="margin: 0 0 8px 0; font-size: 12.5px; color: var(--text); line-height: 1.45;">
-                ख्रिस्ती भजने व गीते — नवीन भजने आणि ऑडिओ स्तुती गीते समाविष्ट केली आहेत.
-              </p>
-              <button onclick="closeNotificationModal(); switchTab('hymns');" style="padding: 6px 12px; border-radius: 8px; border: none; background: #9333ea; color: #fff; font-size: 11.5px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-                Browse Hymns / भजने ऐका ➔
-              </button>
-            </div>
-          </div>
-
-          <!-- Card 4: Offline Marathi Audio Bible -->
-          <div style="background: var(--bg); border: 1.5px solid var(--border); border-radius: 16px; padding: 14px; display: flex; gap: 12px;">
-            <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.4); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;">
-              🔊
-            </div>
-            <div style="flex: 1; min-width: 0;">
-              <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2px;">
-                <h4 style="margin: 0; font-size: 14px; font-weight: 800; color: var(--text);">Offline Audio Bible / ऑडिओ बायबल</h4>
-                <span style="font-size: 11px; color: var(--text-muted);">Active</span>
-              </div>
-              <p style="margin: 0 0 8px 0; font-size: 12.5px; color: var(--text); line-height: 1.45;">
-                Marathi Dramatized Audio is ready for crystal-clear offline listening anytime anywhere.
-              </p>
-              <button onclick="closeNotificationModal(); switchTab('audio');" style="padding: 6px 12px; border-radius: 8px; border: none; background: #2563eb; color: #fff; font-size: 11.5px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-                Open Audio Bible / ऑडिओ सुरू करा ➔
-              </button>
-            </div>
-          </div>
-
-        </div>
-
-        <!-- Footer Action -->
-        <div style="padding: 12px 20px; border-top: 1px solid var(--border); background: var(--surface); display: flex; justify-content: space-between; align-items: center;">
-          <button onclick="closeNotificationModal(); openNotificationSettingsModal();" style="padding: 8px 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px;">
-            ⚙️ Notification Settings
-          </button>
-          <button onclick="closeNotificationModal()" style="padding: 8px 18px; border-radius: 10px; border: none; background: var(--border); color: var(--text); font-size: 12.5px; font-weight: 700; cursor: pointer;">
-            Close / बंद करा
-          </button>
-        </div>
-
-      </div>
-    </div>
 
     <!-- Account, Profile, Settings & More Options Drawer -->
     <div id="drawer-account-settings" class="drawer-overlay" style="z-index: 9999;">

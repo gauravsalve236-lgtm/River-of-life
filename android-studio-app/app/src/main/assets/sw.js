@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v2398_SEARCH_AUDIO_STUDY_POLISH';
+const CACHE_NAME = 'river-of-life-cache-v2399_STUDY_ADMIN_PRAYER_AUDIO_SYNC';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
