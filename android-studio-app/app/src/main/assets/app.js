@@ -1,4 +1,4 @@
-﻿
+
 /* ==========================================================================
    PRODUCTION WEBRTC AUDIO & DEVICE PIPELINE MANAGER
    ========================================================================== */
@@ -3196,10 +3196,9 @@ function renderDailyDevotion() {
     'sunrise.png', 'forest.png', 'mountains.png', 'ocean.png', 'path.png', 'stars.png', 'mist.png'
   ];
   const imgIdx = ((dayOfYear + offset) % images.length + images.length) % images.length;
-  const manualDate = localStorage.getItem('rol_manual_wallpaper_date');
-  const todayDateStr = now.toISOString().slice(0, 10);
   const savedWp = localStorage.getItem('rol_selected_wallpaper');
-  const dailyImg = (manualDate === todayDateStr && savedWp && images.includes(savedWp)) ? savedWp : images[imgIdx];
+  const dailyImg = (savedWp && images.includes(savedWp)) ? savedWp : images[imgIdx];
+  window.currentDailyVerseImage = dailyImg;
   window.currentVodImageIndex = images.indexOf(dailyImg) !== -1 ? images.indexOf(dailyImg) : imgIdx;
   const imgUrl = (typeof getVodImageUrl === "function") ? getVodImageUrl(dailyImg) : (dailyImg.includes('.') ? `assets/daily_verses/${dailyImg}` : `assets/daily_verses/${dailyImg}.png`);
   
@@ -3216,6 +3215,10 @@ function renderDailyDevotion() {
 
   const fsCapsule = document.querySelector(".fullscreen-vod-capsule");
   if (fsCapsule) fsCapsule.style.backgroundImage = `url('${imgUrl}')`;
+  const fsBgEl = document.getElementById("fs-vod-capsule-bg");
+  if (fsBgEl) fsBgEl.style.backgroundImage = `url('${imgUrl}')`;
+  const thumbImg = document.getElementById("vod-thumbnail-preview");
+  if (thumbImg) thumbImg.src = imgUrl;
   
   // Continue Reading Card Data Sync
   const contBookEl = document.getElementById("home-continue-book-chapter");
@@ -19468,12 +19471,12 @@ window.applyVodTypographyTheme = function(themeIdx) {
     }
 
     // Quote mark styling & visibility
-    if (quoteEl) {
+    if (quoteMark) {
       if (theme.layoutMode === "watercolor-pill" || theme.layoutMode === "flourish-swash" || theme.layoutMode === "flourish-path") {
-        quoteEl.style.display = "none";
+        quoteMark.style.display = "none";
       } else {
-        quoteEl.style.display = "block";
-        quoteEl.style.color = theme.quoteColor || theme.accentColor || "#fbbf24";
+        quoteMark.style.display = "block";
+        quoteMark.style.color = theme.quoteColor || theme.accentColor || "#fbbf24";
       }
     }
 
@@ -19608,14 +19611,36 @@ window.openFullscreenVOD = function() {
     'sunrise.png', 'forest.png', 'mountains.png'
   ];
   
-  const savedWp = localStorage.getItem("rol_selected_wallpaper");
-  const activeBg = (savedWp && images.includes(savedWp)) 
-    ? savedWp 
-    : images[((dayOfYear + offset) % images.length + images.length) % images.length];
-  const imgUrl = (typeof getVodImageUrl === "function") ? getVodImageUrl(activeBg) : `assets/daily_verses/${activeBg}`;
+  // Synchronize 100% with the image currently displayed on the homepage card
+  let activeBg = window.currentDailyVerseImage;
+  const homeCard = document.getElementById("card-daily-verse-home");
+  if (homeCard && homeCard.style.backgroundImage) {
+    const match = homeCard.style.backgroundImage.match(/url\(['"]?(.*?)['"]?\)/);
+    if (match && match[1]) {
+      const extracted = match[1].split('/').pop().replace(/['"]/g, '');
+      if (extracted) activeBg = extracted;
+    }
+  }
+  if (!activeBg) {
+    activeBg = localStorage.getItem("rol_selected_wallpaper");
+  }
+  if (!activeBg || (images.indexOf(activeBg) === -1 && images.length > 0)) {
+    activeBg = images[((dayOfYear + offset) % images.length + images.length) % images.length];
+  }
+
+  window.currentDailyVerseImage = activeBg;
+  window.currentVodImageIndex = images.indexOf(activeBg) !== -1 ? images.indexOf(activeBg) : 0;
+  try {
+    localStorage.setItem("rol_selected_wallpaper", activeBg);
+  } catch(e) {}
+
+  const imgUrl = (typeof getVodImageUrl === "function") ? getVodImageUrl(activeBg) : (activeBg.includes('.') ? `assets/daily_verses/${activeBg}` : `assets/daily_verses/${activeBg}.png`);
 
   const fsBgEl = document.getElementById("fs-vod-capsule-bg");
   if (fsBgEl) fsBgEl.style.backgroundImage = `url('${imgUrl}')`;
+
+  const fsCapsule = document.querySelector(".fullscreen-vod-capsule");
+  if (fsCapsule) fsCapsule.style.backgroundImage = `url('${imgUrl}')`;
 
   const thumbImg = document.getElementById("vod-thumbnail-preview");
   if (thumbImg) thumbImg.src = imgUrl;
@@ -20270,18 +20295,26 @@ window.generateExactVerseImageBlob = function(customRatio) {
 
     const theme = (window.VOD_TYPOGRAPHY_STYLES && window.VOD_TYPOGRAPHY_STYLES[window.currentVodTypographyIndex || 0]) ? window.VOD_TYPOGRAPHY_STYLES[window.currentVodTypographyIndex || 0] : window.VOD_TYPOGRAPHY_STYLES[0];
 
-    // Priority: user's chosen wallpaper, then theme image, then daily wallpaper
-    const savedWp = localStorage.getItem("rol_selected_wallpaper");
-    let imgFileName = savedWp;
+    // Priority: active home/modal wallpaper, user's chosen wallpaper, then daily wallpaper
+    let imgFileName = window.currentDailyVerseImage;
     if (!imgFileName) {
-      imgFileName = theme.bgImage;
+      const homeCard = document.getElementById("card-daily-verse-home");
+      if (homeCard && homeCard.style.backgroundImage) {
+        const match = homeCard.style.backgroundImage.match(/url\(['"]?(.*?)['"]?\)/);
+        if (match && match[1]) {
+          imgFileName = match[1].split('/').pop().replace(/['"]/g, '');
+        }
+      }
+    }
+    if (!imgFileName) {
+      imgFileName = localStorage.getItem("rol_selected_wallpaper");
     }
     if (!imgFileName) {
       const images = (window.dailyVersesImageList && window.dailyVersesImageList.length > 0) ? window.dailyVersesImageList : ['pinterest_alpine_mountain.jpg', 'sunrise.png'];
       const imgIdx = (typeof window.currentVodImageIndex === 'number') ? window.currentVodImageIndex : (((dayOfYear + offset) % images.length + images.length) % images.length);
       imgFileName = images[imgIdx];
     }
-    const imgUrl = (typeof getVodImageUrl === "function") ? getVodImageUrl(imgFileName) : `assets/daily_verses/${imgFileName}`;
+    const imgUrl = (typeof getVodImageUrl === "function") ? getVodImageUrl(imgFileName) : (imgFileName.includes('.') ? `assets/daily_verses/${imgFileName}` : `assets/daily_verses/${imgFileName}.png`);
 
     if (document.fonts && document.fonts.ready) {
       try {
@@ -23351,49 +23384,23 @@ window.shareBwodToWhatsApp = async function() {
   if (!word) return;
   const isEng = (window.state && (window.state.translation === "eng" || window.state.language === "en"));
   
-  // Enforce Left-to-Right Mark (LRM \u200E) on each line so WhatsApp never right-aligns Hebrew/Aramaic words
-  const LRM = "\u200E";
   const rawTerm = word.term || "";
-  const cleanTerm = rawTerm.replace(/\(([^)]+)\)/, (m, script) => `\u202A(${script})\u202C`);
-  const originClean = isEng ? word.origin.replace(/\s*\(.*\)/, '').trim() : word.origin;
+  const cleanTerm = rawTerm.replace(/\(([^)]+)\)/, (m, script) => `(${script})`);
 
-  const lines = isEng
+  // Clean, concise caption formatted specifically for WhatsApp Status and chat sharing
+  const statusCaption = isEng
     ? [
-        `✨ *WORD OF THE DAY* ✨`,
-        `━━━━━━━━━━━━━━━━━━━━`,
-        `🔤 *${cleanTerm}*`,
-        `📍 *Origin:* ${originClean} • *Pronunciation:* ${word.pronunciation}`,
-        ``,
-        `📖 *Meaning:*`,
-        `${word.meaningEn}`,
-        ``,
-        `📜 *Scripture Reference:*`,
-        `${word.refEn}`,
-        ``,
-        `🔗 *Read Chapter on River of Life Bible:*`,
-        `${window.location.origin}`,
-        `━━━━━━━━━━━━━━━━━━━━`,
+        `✨ *Word of the Day:* ${cleanTerm}`,
+        `📖 *Meaning:* ${word.meaningEn}`,
+        `📜 ${word.refEn}`,
         `🕊️ *River of Life • Holy Bible*`
-      ]
+      ].join("\n")
     : [
-        `✨ *आजचा पवित्र शब्द • WORD OF THE DAY* ✨`,
-        `━━━━━━━━━━━━━━━━━━━━`,
-        `🔤 *${cleanTerm}*`,
-        `📍 *मूळ:* ${originClean} • *उच्चार:* ${word.pronunciation}`,
-        ``,
-        `📖 *पवित्र अर्थ:*`,
-        `${word.meaningMr}`,
-        ``,
-        `📜 *पवित्र शास्त्र संदर्भ:*`,
-        `${word.refMr}`,
-        ``,
-        `🔗 *रिव्हर ऑफ लाईफ बायबलवर हा अध्याय वाचा:*`,
-        `${window.location.origin}`,
-        `━━━━━━━━━━━━━━━━━━━━`,
+        `✨ *आजचा पवित्र शब्द:* ${cleanTerm}`,
+        `📖 *अर्थ:* ${word.meaningMr || word.meaningEn}`,
+        `📜 ${word.refMr || word.refEn}`,
         `🕊️ *River of Life • पवित्र बायबल*`
-      ];
-
-  const text = lines.map(l => l ? (LRM + l) : "").join("\n");
+      ].join("\n");
 
   showToast(isEng ? "📸 Generating card for WhatsApp..." : "📸 WhatsApp साठी कार्ड तयार होत आहे...");
 
@@ -23401,12 +23408,12 @@ window.shareBwodToWhatsApp = async function() {
     const { blob, filename } = await generateExactBwodImageBlob();
     const file = new File([blob], filename, { type: "image/png", lastModified: Date.now() });
 
-    // 1. Try Native Web Share API with image file
+    // 1. Try Native Web Share API with image file and clean status caption
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       await navigator.share({
         files: [file],
-        title: `Word of the Day: ${word.term}`,
-        text: text
+        title: isEng ? `Word of the Day: ${word.term}` : `आजचा पवित्र शब्द: ${word.term}`,
+        text: statusCaption
       });
       showToast(isEng ? "✅ Shared to WhatsApp!" : "✅ WhatsApp वर शेअर केले!");
       return;
@@ -23426,7 +23433,8 @@ window.shareBwodToWhatsApp = async function() {
     showToast(isEng ? "📸 Card downloaded! Now sharing to WhatsApp." : "📸 फोटो डाऊनलोड झाला! आता WhatsApp वर पाठवा.");
   } catch (e) {}
 
-  const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+  const fullShareText = `${statusCaption}\n\n${window.location.origin}`;
+  const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(fullShareText)}`;
   window.open(waUrl, "_blank");
 };
 
