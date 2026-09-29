@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v2400_WOTD_CARD_FIX';
+const CACHE_NAME = 'river-of-life-cache-v2401_GROW_TAB_AND_VOD_SYNC_FIX';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
