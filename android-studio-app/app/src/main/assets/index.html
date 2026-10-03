@@ -12,7 +12,7 @@
   <script>
     // Force immediate hard purge of all stale Service Workers and CacheStorage
     (function() {
-      const CURRENT_VER = "v2405_BWOD_THEMES_PALETTE_AND_COLORS";
+      const CURRENT_VER = "v2406_STORY_STATUS_RESOLUTION_FIX";
       if (localStorage.getItem("rol_app_ver") !== CURRENT_VER) {
         localStorage.setItem("rol_app_ver", CURRENT_VER);
         if ('serviceWorker' in navigator) {
@@ -4226,6 +4226,19 @@
             </div>
           </div>
           <button onclick="closeImagePreviewModal()" aria-label="Close" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); width: 32px; height: 32px; border-radius: 50%; color: #fff; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">&times;</button>
+        </div>
+
+        <!-- Aspect Ratio Selection Tabs (Default: 9:16 Mobile Status / Wallpaper) -->
+        <div style="display: flex; justify-content: center; gap: 8px; padding: 10px 16px; background: #0f1219; border-bottom: 1px solid rgba(255,255,255,0.08);">
+          <button class="btn-vod-ratio-tab active" data-ratio="story" onclick="switchVodAspectRatio('story')" style="flex: 1; padding: 8px 10px; border-radius: 10px; border: 1px solid #fbbf24; background: linear-gradient(135deg, #fbbf24, #d97706); color: #0f172a; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; transition: all 0.2s;">
+            <span>📱 Status (9:16)</span>
+          </button>
+          <button class="btn-vod-ratio-tab" data-ratio="square" onclick="switchVodAspectRatio('square')" style="flex: 1; padding: 8px 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.08); color: #ffffff; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; transition: all 0.2s;">
+            <span>⏹️ Square (1:1)</span>
+          </button>
+          <button class="btn-vod-ratio-tab" data-ratio="portrait" onclick="switchVodAspectRatio('portrait')" style="flex: 1; padding: 8px 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.08); color: #ffffff; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; transition: all 0.2s;">
+            <span>🖼️ Feed (4:5)</span>
+          </button>
         </div>
 
         <!-- Rendered Image Container -->
