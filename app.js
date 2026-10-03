@@ -897,6 +897,321 @@ const VOD_LIST = [
     verse: 11,
     text: "परमेश्वर म्हणतो, “तुमच्याविषयी माझ्या मनात जे संकल्प आहेत ते मी जाणतो; ते संकल्प हिताचे आहेत, अनिष्टाचे नाहीत; ते तुम्हांला तुमच्या भावी सुस्थितीची आशा देणारे आहेत.”",
     engText: "For I know the plans I have for you, declares the Lord, plans to prosper you and not to harm you, plans to give you hope and a future."
+  },
+  {
+    ref: "यशया ४०:३१",
+    engRef: "Isaiah 40:31",
+    book: "isaiah",
+    chapter: 40,
+    verse: 31,
+    text: "जे परमेश्वराची वाट पाहतात त्यांना नवीन सामर्थ्य प्राप्त होईल; ते गरुडासारखे पंख पसरून उंच उडतील; ते धावतील तरी दमणार नाहीत, चालतील तरी थकणार नाहीत.",
+    engText: "Those who hope in the Lord will renew their strength. They will soar on wings like eagles; they will run and not grow weary, they will walk and not be faint."
+  },
+  {
+    ref: "स्तोत्रसंहिता ९१:१-२",
+    engRef: "Psalm 91:1-2",
+    book: "psalms",
+    chapter: 91,
+    verse: 1,
+    text: "जो परात्पर देवाच्या गुप्तस्थळी राहतो, तो सर्वसमर्थाच्या सावलीत विसावा पावेल. मी परमेश्वराविषयी म्हणेन, “तो माझा आश्रय आणि माझा किल्ला आहे, माझा देव, ज्याच्यावर मी भाव ठेवतो.”",
+    engText: "Whoever dwells in the shelter of the Most High will rest in the shadow of the Almighty. I will say of the Lord, 'He is my refuge and my fortress, my God, in whom I trust.'"
+  },
+  {
+    ref: "२ तीमथ्य १:७",
+    engRef: "2 Timothy 1:7",
+    book: "2timothy",
+    chapter: 1,
+    verse: 7,
+    text: "देवाने आपल्याला भीतीचा आत्मा दिलेला नाही, तर सामर्थ्याचा, प्रीतीचा आणि संयमाचा आत्मा दिला आहे.",
+    engText: "For God has not given us a spirit of fear, but of power and of love and of a sound mind."
+  },
+  {
+    ref: "मत्तय ११:२८",
+    engRef: "Matthew 11:28",
+    book: "matthew",
+    chapter: 11,
+    verse: 28,
+    text: "अहो कष्टी व भाराक्रांत जनहो, तुम्ही सर्व मजकडे या, म्हणजे मी तुम्हांला विसावा देईन.",
+    engText: "Come to me, all you who are weary and burdened, and I will give you rest."
+  },
+  {
+    ref: "नीतिसूत्रे १६:३",
+    engRef: "Proverbs 16:3",
+    book: "proverbs",
+    chapter: 16,
+    verse: 3,
+    text: "आपली सर्व कृत्ये परमेश्वरावर सोपव, म्हणजे तुझे बेत सिद्धीस जातील.",
+    engText: "Commit to the Lord whatever you do, and he will establish your plans."
+  },
+  {
+    ref: "१ करिंथकरांस १३:१३",
+    engRef: "1 Corinthians 13:13",
+    book: "1corinthians",
+    chapter: 13,
+    verse: 13,
+    text: "आता विश्वास, आशा आणि प्रीती ही तिन्ही टिकून राहतात; पण ह्यांमध्ये सर्वांत श्रेष्ठ प्रीती आहे.",
+    engText: "And now these three remain: faith, hope and love. But the greatest of these is love."
+  },
+  {
+    ref: "रोमकरांस पत्र ८:३१",
+    engRef: "Romans 8:31",
+    book: "romans",
+    chapter: 8,
+    verse: 31,
+    text: "जर देव आपल्या बाजूचा आहे, तर आपल्याविरुद्ध कोण असणार?",
+    engText: "What, then, shall we say in response to these things? If God is for us, who can be against us?"
+  },
+  {
+    ref: "स्तोत्रसंहिता १२१:१-२",
+    engRef: "Psalm 121:1-2",
+    book: "psalms",
+    chapter: 121,
+    verse: 1,
+    text: "मी डोंगरांकडे आपले डोळे लावितो; माझे साहाय्य कोठून येईल? माझे साहाय्य परमेश्वराकडून, आकाश आणि पृथ्वीच्या निर्माणकर्त्याकडून येते.",
+    engText: "I lift up my eyes to the mountains—where does my help come from? My help comes from the Lord, the Maker of heaven and earth."
+  },
+  {
+    ref: "फिलिप्पैकरांस पत्र ४:६-७",
+    engRef: "Philippians 4:6-7",
+    book: "philippians",
+    chapter: 4,
+    verse: 6,
+    text: "कशाविषयीही चिंता करू नका, तर सर्व गोष्टींत प्रार्थना व याचना करून उपकारस्तुतीसह आपली मागणी देवाला कळवा. म्हणजे सर्व बुद्धीच्या पलीकडची देवाची शांती तुमच्या हृदयांचे आणि मनांचे रक्षण करील.",
+    engText: "Do not be anxious about anything, but in every situation, by prayer and petition, with thanksgiving, present your requests to God. And the peace of God will guard your hearts and minds."
+  },
+  {
+    ref: "विलापगीत ३:२२-२३",
+    engRef: "Lamentations 3:22-23",
+    book: "lamentations",
+    chapter: 3,
+    verse: 22,
+    text: "परमेश्वराच्या असीम दयेमुळेच आमचा नाश झाला नाही, कारण त्याची करुणा कधीही संपत नाही. ती दररोज सकाळी नवी असते; तुझा विश्वासूपणा महान आहे!",
+    engText: "Because of the Lord's great love we are not consumed, for his compassions never fail. They are new every morning; great is your faithfulness."
+  },
+  {
+    ref: "इब्री लोकांस पत्र ११:१",
+    engRef: "Hebrews 11:1",
+    book: "hebrews",
+    chapter: 11,
+    verse: 1,
+    text: "विश्वास म्हणजे ज्या गोष्टींची आपण आशा धरतो त्याविषयीची खात्री, आणि ज्या गोष्टी दिसत नाहीत त्याविषयीचा भरवसा होय.",
+    engText: "Now faith is confidence in what we hope for and assurance about what we do not see."
+  },
+  {
+    ref: "स्तोत्रसंहिता ११९:१०५",
+    engRef: "Psalm 119:105",
+    book: "psalms",
+    chapter: 119,
+    verse: 105,
+    text: "तुझे वचन माझ्या पायांसाठी दिवा आणि माझ्या मार्गासाठी प्रकाश आहे.",
+    engText: "Your word is a lamp for my feet, a light on my path."
+  },
+  {
+    ref: "यशया ४१:१०",
+    engRef: "Isaiah 41:10",
+    book: "isaiah",
+    chapter: 41,
+    verse: 10,
+    text: "तू भिऊ नकोस, कारण मी तुझ्याबरोबर आहे; घाबरू नकोस, कारण मी तुझा देव आहे; मी तुला सामर्थ्य देईन; होय, मी तुला साहाय्य करीन; माझ्या नीतिमत्त्वाच्या उजव्या हाताने मी तुला सावरून धरीन.",
+    engText: "So do not fear, for I am with you; do not be dismayed, for I am your God. I will strengthen you and help you; I will uphold you with my righteous right hand."
+  },
+  {
+    ref: "२ करिंथकरांस ५:१७",
+    engRef: "2 Corinthians 5:17",
+    book: "2corinthians",
+    chapter: 5,
+    verse: 17,
+    text: "म्हणून जर कोणी ख्रिस्तामध्ये आहे, तर तो नवी सृष्टी आहे; जुने ते निघून गेले आहे; पाहा, सर्वकाही नवीन झाले आहे.",
+    engText: "Therefore, if anyone is in Christ, the new creation has come: The old has gone, the new is here!"
+  },
+  {
+    ref: "कलस्सैकरांस पत्र ३:१५",
+    engRef: "Colossians 3:15",
+    book: "colossians",
+    chapter: 3,
+    verse: 15,
+    text: "ख्रिस्ताची शांती तुमच्या अंतःकरणात राज्य करो; कारण याच शांतीसाठी तुम्हांला एका शरीरात पाचारण करण्यात आले आहे; आणि तुम्ही कृतज्ञ असा.",
+    engText: "Let the peace of Christ rule in your hearts, since as members of one body you were called to peace. And be thankful."
+  },
+  {
+    ref: "१ पेत्र ५:७",
+    engRef: "1 Peter 5:7",
+    book: "1peter",
+    chapter: 5,
+    verse: 7,
+    text: "आपली सर्व चिंता त्याच्यावर टाका, कारण तो तुमची काळजी घेतो.",
+    engText: "Cast all your anxiety on him because he cares for you."
+  },
+  {
+    ref: "स्तोत्रसंहिता २७:१",
+    engRef: "Psalm 27:1",
+    book: "psalms",
+    chapter: 27,
+    verse: 1,
+    text: "परमेश्वर माझा प्रकाश व माझे तारण आहे; मी कोणाला भिऊ? परमेश्वर माझ्या जिवाचा कोट आहे; मी कोणाचा थरकाप करू?",
+    engText: "The Lord is my light and my salvation—whom shall I fear? The Lord is the stronghold of my life—of whom shall I be afraid?"
+  },
+  {
+    ref: "योहान १४:२७",
+    engRef: "John 14:27",
+    book: "john",
+    chapter: 14,
+    verse: 27,
+    text: "मी तुम्हांला शांती देऊन ठेवतो; मी आपलीच शांती तुम्हांला देतो; जग देते तशी मी तुम्हांला देत नाही. तुमचे अंतःकरण अस्वस्थ होऊ नये आणि भयभीत होऊ नये.",
+    engText: "Peace I leave with you; my peace I give you. I do not give to you as the world gives. Do not let your hearts be troubled and do not be afraid."
+  },
+  {
+    ref: "नीतिसूत्रे ४:२३",
+    engRef: "Proverbs 4:23",
+    book: "proverbs",
+    chapter: 4,
+    verse: 23,
+    text: "सर्व रक्षणीय गोष्टींपेक्षा आपल्या हृदयाचे रक्षण कर, कारण त्यातूनच जीवनाचे झरे निघतात.",
+    engText: "Above all else, guard your heart, for everything you do flows from it."
+  },
+  {
+    ref: "सफन्या ३:१७",
+    engRef: "Zephaniah 3:17",
+    book: "zephaniah",
+    chapter: 3,
+    verse: 17,
+    text: "तुझा देव परमेश्वर तुझ्यामध्ये आहे; तो तारण करणारा पराक्रमी देव आहे; तो तुझ्याविषयी हर्षाने आनंद करेल; तो आपल्या प्रेमाने तुला शांत करेल आणि गाण्याने तुझ्याविषयी उल्हास करेल.",
+    engText: "The Lord your God is with you, the Mighty Warrior who saves. He will take great delight in you; in his love he will calm you; he will rejoice over you with singing."
+  },
+  {
+    ref: "स्तोत्रसंहिता ३४:८",
+    engRef: "Psalm 34:8",
+    book: "psalms",
+    chapter: 34,
+    verse: 8,
+    text: "चाखून पाहा की परमेश्वर किती चांगला आहे! जो मनुष्य त्याच्यावर भरवसा ठेवतो तो धन्य!",
+    engText: "Taste and see that the Lord is good; blessed is the one who takes refuge in him."
+  },
+  {
+    ref: "१ थेस्सलनीकाकरांस ५:१६-१८",
+    engRef: "1 Thessalonians 5:16-18",
+    book: "1thessalonians",
+    chapter: 5,
+    verse: 16,
+    text: "सर्वदा आनंद करा; नित्य प्रार्थना करा; सर्व परिस्थितीत उपकार माना; कारण ख्रिस्त येशूमध्ये तुमच्याविषयी देवाची हीच इच्छा आहे.",
+    engText: "Rejoice always, pray continually, give thanks in all circumstances; for this is God’s will for you in Christ Jesus."
+  },
+  {
+    ref: "स्तोत्रसंहिता ३७:४",
+    engRef: "Psalm 37:4",
+    book: "psalms",
+    chapter: 37,
+    verse: 4,
+    text: "परमेश्वराच्या ठायी आनंद मान, म्हणजे तो तुझ्या अंतःकरणातील मागण्या पूर्ण करील.",
+    engText: "Take delight in the Lord, and he will give you the desires of your heart."
+  },
+  {
+    ref: "रोमकरांस पत्र १५:१३",
+    engRef: "Romans 15:13",
+    book: "romans",
+    chapter: 15,
+    verse: 13,
+    text: "आशेचा देव तुम्हांला विश्वास ठेवण्यात सर्व आनंदाने व शांतीने भरो, यासाठी की पवित्र आत्म्याच्या सामर्थ्याने तुमची आशा विपुल व्हावी.",
+    engText: "May the God of hope fill you with all joy and peace as you trust in him, so that you may overflow with hope by the power of the Holy Spirit."
+  },
+  {
+    ref: "अनुवाद ३१:६",
+    engRef: "Deuteronomy 31:6",
+    book: "deuteronomy",
+    chapter: 31,
+    verse: 6,
+    text: "धीर धरा आणि मोठे हिंमतवान व्हा; त्यांच्यापुढे घाबरू नका व भयभीत होऊ नका; कारण तुझा देव परमेश्वर स्वतः तुझ्याबरोबर चालतो; तो तुला सोडणार नाही व टाकणार नाही.",
+    engText: "Be strong and courageous. Do not be afraid or terrified because of them, for the Lord your God goes with you; he will never leave you nor forsake you."
+  },
+  {
+    ref: "स्तोत्रसंहिता १९:१४",
+    engRef: "Psalm 19:14",
+    book: "psalms",
+    chapter: 19,
+    verse: 14,
+    text: "हे परमेश्वरा, माझ्या खडका आणि माझ्या तारणहारा, माझ्या तोंडाचे शब्द आणि माझ्या हृदयाचे मनन तुझ्या दृष्टीस मान्य असोत.",
+    engText: "May these words of my mouth and this meditation of my heart be pleasing in your sight, Lord, my Rock and my Redeemer."
+  },
+  {
+    ref: "मत्तय ५:१४",
+    engRef: "Matthew 5:14",
+    book: "matthew",
+    chapter: 5,
+    verse: 14,
+    text: "तुम्ही जगाचा प्रकाश आहा. डोंगरावर वसलेले शहर लपवून ठेवता येत नाही.",
+    engText: "You are the light of the world. A town built on a hill cannot be hidden."
+  },
+  {
+    ref: "गलतीकरांस पत्र २:२०",
+    engRef: "Galatians 2:20",
+    book: "galatians",
+    chapter: 2,
+    verse: 20,
+    text: "मी ख्रिस्ताबरोबर वधस्तंभावर खिळला गेलो आहे; आता यापुढे मी जगत नाही, तर ख्रिस्त माझ्यामध्ये जगतो.",
+    engText: "I have been crucified with Christ and I no longer live, but Christ lives in me."
+  },
+  {
+    ref: "स्तोत्रसंहिता १३९:१४",
+    engRef: "Psalm 139:14",
+    book: "psalms",
+    chapter: 139,
+    verse: 14,
+    text: "मी तुझे उपकार मानतो, कारण माझी घडण भीतीदायक व आश्चर्यकारक रीतीने झाली आहे; तुझी कृत्ये अद्भुत आहेत, हे माझा जीव पूर्णपणे जाणतो.",
+    engText: "I praise you because I am fearfully and wonderfully made; your works are wonderful, I know that full well."
+  },
+  {
+    ref: "प्रकटीकरण २१:४",
+    engRef: "Revelation 21:4",
+    book: "revelation",
+    chapter: 21,
+    verse: 4,
+    text: "तो त्यांच्या डोळ्यांचे सर्व अश्रू पुसून टाकील; यापुढे मरण नसेल; शोक, रडणे किंवा वेदनाही यापुढे असणार नाहीत.",
+    engText: "He will wipe every tear from their eyes. There will be no more death or mourning or crying or pain, for the old order of things has passed away."
+  },
+  {
+    ref: "मीखा ६:८",
+    engRef: "Micah 6:8",
+    book: "micah",
+    chapter: 6,
+    verse: 8,
+    text: "हे मनुष्या, जे उत्तम आहे ते त्याने तुला दाखवले आहे: न्यायाने वागणे, दयेवर प्रीती करणे आणि आपल्या देवाबरोबर नम्रतेने चालणे, याखेरीज परमेश्वर तुझ्याकडून दुसरे काय मागतो?",
+    engText: "He has shown you, O mortal, what is good. And what does the Lord require of you? To act justly and to love mercy and to walk humbly with your God."
+  },
+  {
+    ref: "१ योहान ४:१८",
+    engRef: "1 John 4:18",
+    book: "1john",
+    chapter: 4,
+    verse: 18,
+    text: "प्रीतीमध्ये भीती नसते; उलट परिपूर्ण प्रीती भीतीला बाहेर काढून टाकते.",
+    engText: "There is no fear in love. But perfect love drives out fear, because fear has to do with punishment."
+  },
+  {
+    ref: "इब्री लोकांस पत्र ४:१६",
+    engRef: "Hebrews 4:16",
+    book: "hebrews",
+    chapter: 4,
+    verse: 16,
+    text: "म्हणून आपण कृपेच्या सिंहासनाजवळ धैर्याने जाऊ या, यासाठी की आपल्याला दया लाभावी आणि गरजेच्या वेळी साहाय्यासाठी कृपा मिळावी.",
+    engText: "Let us then approach God’s throne of grace with confidence, so that we may receive mercy and find grace to help us in our time of need."
+  },
+  {
+    ref: "स्तोत्रसंहिता १०३:२-३",
+    engRef: "Psalm 103:2-3",
+    book: "psalms",
+    chapter: 103,
+    verse: 2,
+    text: "हे माझ्या जीवा, परमेश्वराचा धन्यवाद कर आणि त्याच्या कोणत्याही उपकारांची विस्मृती होऊ देऊ नको; तो तुझे सर्व अपराध क्षमा करतो, तो तुझे सर्व रोग बरे करतो.",
+    engText: "Praise the Lord, my soul, and forget not all his benefits—who forgives all your sins and heals all your diseases."
+  },
+  {
+    ref: "मत्तय २८:२०",
+    engRef: "Matthew 28:20",
+    book: "matthew",
+    chapter: 28,
+    verse: 20,
+    text: "आणि पाहा, जगाच्या समाप्तीपर्यंत मी सदैव तुमच्याबरोबर आहे.",
+    engText: "And surely I am with you always, to the very end of the age."
   }
 ];
 
@@ -2950,43 +3265,32 @@ function getCurrentVOD() {
   const oneDay = 1000 * 60 * 60 * 24;
   const dayOfYear = Math.floor(diff / oneDay);
   
-  const offset = state.vodDayOffset || 0;
-  if (offset === 0) {
-    try {
-      const customSaved = localStorage.getItem("rol_custom_vod");
-      if (customSaved) {
-        const customObj = JSON.parse(customSaved);
-        if (customObj && (customObj.text || customObj.engText)) {
-          return {
-            vod: customObj,
-            dayOfYear: dayOfYear,
-            offset: 0
-          };
-        }
+  const offset = (state && typeof state.vodDayOffset === 'number') ? state.vodDayOffset : 0;
+  
+  // Custom saved VOD override if explicitly provided
+  try {
+    const customSaved = localStorage.getItem("rol_custom_vod");
+    if (customSaved && offset === 0) {
+      const customObj = JSON.parse(customSaved);
+      if (customObj && (customObj.text || customObj.engText)) {
+        return {
+          vod: customObj,
+          dayOfYear: dayOfYear,
+          offset: 0,
+          index: 0
+        };
       }
-    } catch(e) {}
+    }
+  } catch(e) {}
 
-    return {
-      vod: VOD_LIST[0],
-      dayOfYear: dayOfYear,
-      offset: 0
-    };
-  }
-
-  if (offset === 1) {
-    return {
-      vod: VOD_LIST[1],
-      dayOfYear: dayOfYear,
-      offset: 1
-    };
-  }
-
-  const len = VOD_LIST.length;
+  const len = (typeof VOD_LIST !== 'undefined' && VOD_LIST.length > 0) ? VOD_LIST.length : 1;
   const vodIdx = ((dayOfYear + offset) % len + len) % len;
+
   return {
     vod: VOD_LIST[vodIdx],
     dayOfYear: dayOfYear,
-    offset: offset
+    offset: offset,
+    index: vodIdx
   };
 }
 
@@ -9469,6 +9773,8 @@ function openImmersivePrayerModal(topicId) {
   isPrayerAudioPlaying = false;
   
   modal.style.display = "flex";
+  const prayerScroller = modal.querySelector(".prayer-sanctuary-scrollable");
+  if (prayerScroller) prayerScroller.scrollTop = 0;
   setTimeout(() => modal.classList.add("active"), 10);
 }
 
@@ -23721,135 +24027,86 @@ window.generateExactBwodImageBlob = async function() {
     try { await document.fonts.ready; } catch(e) {}
   }
 
-  // ── 1. Wallpaper ──────────────────────────────────────────────────────────
+  // ── 1. Full-Bleed Wallpaper (Edge-to-Edge) ───────────────────────────────────
   const img = new Image();
   img.crossOrigin = "anonymous";
   img.src = "assets/daily_verses/" + savedWp;
-  await new Promise(r => { img.onload=r; img.onerror=r; setTimeout(r,3000); });
+  await new Promise(r => { img.onload = r; img.onerror = r; setTimeout(r, 3000); });
   if (img.complete && img.naturalWidth > 0) {
-    const sc = Math.max(W/img.naturalWidth, H/img.naturalHeight);
-    ctx.drawImage(img, (W-img.naturalWidth*sc)/2, (H-img.naturalHeight*sc)/2,
-                  img.naturalWidth*sc, img.naturalHeight*sc);
+    const sc = Math.max(W / img.naturalWidth, H / img.naturalHeight);
+    ctx.drawImage(img, (W - img.naturalWidth * sc) / 2, (H - img.naturalHeight * sc) / 2,
+                  img.naturalWidth * sc, img.naturalHeight * sc);
   } else {
-    const g=ctx.createLinearGradient(0,0,W,H);
-    g.addColorStop(0,"#0f172a"); g.addColorStop(.5,"#1e1b4b"); g.addColorStop(1,"#090d16");
-    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    const g = ctx.createLinearGradient(0, 0, W, H);
+    g.addColorStop(0, "#080e1e"); g.addColorStop(0.5, "#181433"); g.addColorStop(1, "#04060d");
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
   }
 
-  // ── 2. Scrim ──────────────────────────────────────────────────────────────
-  const sc2=ctx.createLinearGradient(0,0,0,H);
-  sc2.addColorStop(0,   "rgba(4,8,18,0.88)");
-  sc2.addColorStop(0.3, "rgba(4,8,18,0.60)");
-  sc2.addColorStop(0.7, "rgba(4,8,18,0.75)");
-  sc2.addColorStop(1,   "rgba(2,4,10,0.97)");
-  ctx.fillStyle=sc2; ctx.fillRect(0,0,W,H);
+  // ── 2. Atmospheric Scrim & Radial Reading Spotlight ────────────────────────
+  // A. Overall vertical gradient (deep status bar protection & rich footer darkness)
+  const sc1 = ctx.createLinearGradient(0, 0, 0, H);
+  sc1.addColorStop(0,    "rgba(3, 6, 16, 0.85)");
+  sc1.addColorStop(0.18, "rgba(3, 6, 16, 0.55)");
+  sc1.addColorStop(0.50, "rgba(2, 5, 14, 0.68)");
+  sc1.addColorStop(0.82, "rgba(2, 4, 12, 0.82)");
+  sc1.addColorStop(1,    "rgba(1, 2, 8, 0.96)");
+  ctx.fillStyle = sc1; ctx.fillRect(0, 0, W, H);
 
-  // ── 3. Word data ──────────────────────────────────────────────────────────
-  const safe = s => (s||"").replace(/[\u200E\u200F\u202A-\u202E\u2066-\u2069\u200B\uFEFF]/g,"").trim();
+  // B. Central soft radial darkening behind text for maximum contrast
+  const rad = ctx.createRadialGradient(W / 2, H * 0.48, 80, W / 2, H * 0.48, 520);
+  rad.addColorStop(0,   "rgba(2, 5, 14, 0.72)");
+  rad.addColorStop(0.65, "rgba(2, 5, 14, 0.45)");
+  rad.addColorStop(1,   "rgba(2, 5, 14, 0.0)");
+  ctx.fillStyle = rad; ctx.fillRect(0, 0, W, H);
+
+  // ── 3. Ornate Double Gold Border & Corner Accents ───────────────────────────
+  const MARGIN = 44;
+  ctx.strokeStyle = "rgba(251, 191, 36, 0.38)";
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(MARGIN, MARGIN, W - MARGIN * 2, H - MARGIN * 2);
+
+  // Inner hairline
+  ctx.strokeStyle = "rgba(251, 191, 36, 0.16)";
+  ctx.lineWidth = 1;
+  ctx.strokeRect(MARGIN + 8, MARGIN + 8, W - (MARGIN + 8) * 2, H - (MARGIN + 8) * 2);
+
+  // 4 Corner Flourishes (L-accents with decorative diamond bead)
+  const drawCorner = (cx, cy, dirX, dirY) => {
+    ctx.save();
+    ctx.strokeStyle = "rgba(251, 191, 36, 0.85)";
+    ctx.lineWidth = 2.4;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy + dirY * 28);
+    ctx.lineTo(cx, cy);
+    ctx.lineTo(cx + dirX * 28, cy);
+    ctx.stroke();
+    // Diamond bead
+    ctx.fillStyle = "#fbbf24";
+    ctx.beginPath();
+    ctx.arc(cx + dirX * 12, cy + dirY * 12, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  };
+  drawCorner(MARGIN + 2, MARGIN + 2, 1, 1);
+  drawCorner(W - MARGIN - 2, MARGIN + 2, -1, 1);
+  drawCorner(MARGIN + 2, H - MARGIN - 2, 1, -1);
+  drawCorner(W - MARGIN - 2, H - MARGIN - 2, -1, -1);
+
+  // ── 4. Word Data Prep ───────────────────────────────────────────────────────
+  const safe = s => (s || "").replace(/[\u200E\u200F\u202A-\u202E\u2066-\u2069\u200B\uFEFF]/g, "").trim();
   const rawTerm = safe(word ? word.term : "Word");
   const tm = rawTerm.match(/^([^(]+)(?:\s*\(([^)]+)\))?/);
   const primaryWord = tm ? tm[1].trim() : rawTerm;
-  const scriptWord  = (tm&&tm[2]) ? "("+tm[2].trim()+")" : "";
+  const scriptWord  = (tm && tm[2]) ? "(" + tm[2].trim() + ")" : "";
   const origin = isEng
-    ? (word ? word.origin.replace(/\s*\(.*\)/,"").trim() : "Greek")
-    : (word ? word.origin : "\u0917\u094D\u0930\u0940\u0915");
-  const meaning = safe(isEng ? (word?word.meaningEn:"") : (word?word.meaningMr:""));
-  const refText = safe(isEng ? (word?word.refEn:"") : (word?word.refMr:""));
+    ? (word ? word.origin.replace(/\s*\(.*\)/, "").trim() : "Greek")
+    : (word ? word.origin : "ग्रीक");
+  const meaning = safe(isEng ? (word ? word.meaningEn : "") : (word ? word.meaningMr : ""));
+  const refText = safe(isEng ? (word ? word.refEn : "") : (word ? word.refMr : ""));
+  const insight = safe(isEng ? (word ? (word.insightEn || word.insightMr) : "") : (word ? word.insightMr : ""));
 
-  // ── 4. Pre-measure meaning ────────────────────────────────────────────────
-  // Force font into canvas first (critical on iOS — ensures Devanagari loaded)
-  const MFONT = "600 34px 'Noto Serif Devanagari','Lora',Georgia,serif";
-  ctx.save();
-  ctx.font = MFONT; ctx.direction = "ltr"; ctx.globalAlpha = 0;
-  ctx.fillText("ब", 0, 0); // render Devanagari glyph to force font load
-  ctx.restore();
-
-  // Conservative text width: 720px (leaves 180px margin each side of center)
-  const TEXT_W = 720;
-  const LH_M   = 54;
-
-  const wrapLines = (text, maxW, font) => {
-    if (!text) return [];
-    ctx.save();
-    ctx.font = font;
-    ctx.direction = "ltr";
-    const words = String(text).split(" ");
-    const lines = [];
-    let cur = "";
-    for (let i = 0; i < words.length; i++) {
-      ctx.direction = "ltr";
-      const t = cur ? (cur + " " + words[i]) : words[i];
-      if (ctx.measureText(t).width > maxW && i > 0) {
-        lines.push(cur.trim());
-        cur = words[i];
-      } else {
-        cur = t;
-      }
-    }
-    if (cur.trim()) lines.push(cur.trim());
-    ctx.restore();
-    return lines;
-  };
-
-  const mLines = wrapLines(meaning, TEXT_W, MFONT);
-  const meaningH = mLines.length * LH_M;
-
-  // ── 5. Card dimensions (dynamic, centred on canvas) ───────────────────────
-  const PAD  = 90;
-  const CARD_W = 960;
-  const CARD_X = (W - CARD_W) / 2; // = 60
-
-  // Fixed section heights
-  const H_HEADER = 56;  // header pill row
-  const H_WORD   = 108; // large word
-  const H_SCRIPT = scriptWord ? 80 : 0;
-  const H_PRON   = 52;
-  const H_DIV    = 62;  // divider + gaps
-  const H_QUOTE  = 54;
-  const H_GAP    = 16;  // gap before meaning
-  const H_MEANING = meaningH;
-  const H_SEP    = 70;  // dashed separator + gaps
-  const H_REF    = 52;  // scripture ref
-  const H_RULE   = 32;  // gold rule
-  const H_BRAND  = 48;  // branding
-
-  const innerH = H_HEADER + H_WORD + H_SCRIPT + H_PRON + H_DIV
-               + H_QUOTE + H_GAP + H_MEANING + H_SEP + H_REF + H_RULE + H_BRAND;
-  const CARD_H = innerH + PAD * 2;
-  // Centre card with slight upward shift for visual balance
-  const CARD_Y = Math.max(80, Math.round((H - CARD_H) / 2) - 40);
-
-  // ── 6. Draw card background ───────────────────────────────────────────────
-  const rr = (x,y,w,h,r) => {
-    if (typeof ctx.roundRect==="function") ctx.roundRect(x,y,w,h,r);
-    else ctx.rect(x,y,w,h);
-  };
-
-  // Outer glow
-  ctx.shadowColor="rgba(251,191,36,0.20)"; ctx.shadowBlur=36;
-  ctx.fillStyle="rgba(3,6,18,0.80)";
-  ctx.beginPath(); rr(CARD_X,CARD_Y,CARD_W,CARD_H,32); ctx.fill();
-  ctx.shadowBlur=0;
-  // Gold border
-  ctx.strokeStyle="rgba(251,191,36,0.42)"; ctx.lineWidth=2;
-  ctx.beginPath(); rr(CARD_X,CARD_Y,CARD_W,CARD_H,32); ctx.stroke();
-  // Top accent stripe
-  ctx.fillStyle="rgba(251,191,36,0.65)";
-  ctx.beginPath(); rr(CARD_X+80,CARD_Y,CARD_W-160,4,2); ctx.fill();
-
-  // ── 7. CLIP to card — prevents any text from overflowing ─────────────────
-  ctx.save();
-  ctx.beginPath(); rr(CARD_X+2,CARD_Y+2,CARD_W-4,CARD_H-4,30); ctx.clip();
-
-  const CX = W/2; // = 540
-  /**
-   * Universal center-drawing helper for all browsers and OS engines (iOS Safari, Android Chrome, Desktop).
-   * WebKit on iOS Safari has a known bug where ctx.textAlign = "center" for Devanagari text, emoji,
-   * or strings with complex script fallbacks fails to offset horizontally, drawing text with its LEFT edge
-   * at CX and shifting everything to the right side of the screen.
-   * By setting ctx.textAlign = "left" explicitly and calculating startX = Math.round(CX - textWidth / 2),
-   * every single engine places the text symmetrically and identically in the absolute center.
-   */
+  // Center drawing helper for all mobile browsers (iOS & Android)
+  const CX = W / 2;
   const ltrFill = (text, y) => {
     if (!text) return;
     ctx.save();
@@ -23863,110 +24120,354 @@ window.generateExactBwodImageBlob = async function() {
     ctx.restore();
   };
 
-  let Y = CARD_Y + PAD;
+  const rr = (x, y, w, h, r) => {
+    if (typeof ctx.roundRect === "function") ctx.roundRect(x, y, w, h, r);
+    else ctx.rect(x, y, w, h);
+  };
 
-  // ── HEADER PILL ───────────────────────────────────────────────────────────
+  const wrapLines = (text, maxW, font) => {
+    if (!text) return [];
+    ctx.save();
+    ctx.font = font;
+    ctx.direction = "ltr";
+    const words = String(text).split(" ");
+    const lines = [];
+    let cur = "";
+    for (let i = 0; i < words.length; i++) {
+      const t = cur ? (cur + " " + words[i]) : words[i];
+      if (ctx.measureText(t).width > maxW && i > 0) {
+        lines.push(cur.trim());
+        cur = words[i];
+      } else {
+        cur = t;
+      }
+    }
+    if (cur.trim()) lines.push(cur.trim());
+    ctx.restore();
+    return lines;
+  };
+
+  // ── 5. Render Vertical Elements ─────────────────────────────────────────────
+  let Y = 250;
+
+  // Header Pill
   const hdr = isEng
-    ? "\u2736 WORD OF THE DAY \u2022 " + origin.toUpperCase() + " \u2736"
-    : "\u2736 \u0906\u091C\u091A\u093E \u092A\u0935\u093F\u0924\u094D\u0930 \u0936\u092C\u094D\u0926 \u2022 " + origin + " \u2736";
-  ctx.font="bold 19px -apple-system,BlinkMacSystemFont,sans-serif"; ctx.direction="ltr";
-  const hW=ctx.measureText(hdr).width+40, hH=42;
-  ctx.fillStyle="rgba(251,191,36,0.16)";
-  ctx.beginPath(); rr(CX-hW/2,Y-hH/2,hW,hH,21); ctx.fill();
-  ctx.strokeStyle="rgba(251,191,36,0.70)"; ctx.lineWidth=1.4; ctx.stroke();
-  ctx.fillStyle="#fbbf24"; ltrFill(hdr, Y);
-  Y += H_HEADER;
+    ? "✦ WORD OF THE DAY • " + origin.toUpperCase() + " ✦"
+    : "✦ आजचा पवित्र शब्द • " + origin + " ✦";
+  ctx.font = "bold 21px -apple-system, BlinkMacSystemFont, sans-serif";
+  ctx.direction = "ltr";
+  const hW = ctx.measureText(hdr).width + 48, hH = 46;
+  ctx.fillStyle = "rgba(251, 191, 36, 0.16)";
+  ctx.beginPath(); rr(CX - hW / 2, Y - hH / 2, hW, hH, 23); ctx.fill();
+  ctx.strokeStyle = "rgba(251, 191, 36, 0.72)"; ctx.lineWidth = 1.4; ctx.stroke();
+  ctx.fillStyle = "#fbbf24";
+  ltrFill(hdr, Y);
 
-  // ── PRIMARY WORD ──────────────────────────────────────────────────────────
-  Y += 24;
-  ctx.fillStyle="#ffffff";
-  ctx.font="bold 80px 'Noto Serif Devanagari','Lora',Georgia,serif";
-  ctx.shadowColor="rgba(0,0,0,0.95)"; ctx.shadowBlur=20;
+  // Primary Word
+  Y += 160;
+  ctx.font = "bold 86px 'Noto Serif Devanagari', 'Lora', Georgia, serif";
+  ctx.fillStyle = "#ffffff";
+  ctx.shadowColor = "rgba(251, 191, 36, 0.40)";
+  ctx.shadowBlur = 24;
   ltrFill(primaryWord, Y);
-  ctx.shadowBlur=0;
-  Y += H_WORD - 24;
+  ctx.shadowBlur = 0;
 
-  // ── SCRIPT GLYPH BADGE ────────────────────────────────────────────────────
+  // Script Glyph Badge
   if (scriptWord) {
-    ctx.font="bold 38px 'Times New Roman','Noto Serif Hebrew',Georgia,serif";
-    ctx.direction="ltr";
-    const sW=ctx.measureText(scriptWord).width+34, sH=50;
-    ctx.fillStyle="rgba(251,191,36,0.18)";
-    ctx.beginPath(); rr(CX-sW/2,Y-sH/2,sW,sH,17); ctx.fill();
-    ctx.strokeStyle="rgba(251,191,36,0.65)"; ctx.lineWidth=1.8; ctx.stroke();
-    ctx.fillStyle="#fde047"; ltrFill(scriptWord, Y);
-    Y += H_SCRIPT;
+    Y += 92;
+    ctx.font = "bold 38px 'Times New Roman', 'Noto Serif Hebrew', Georgia, serif";
+    const sW = ctx.measureText(scriptWord).width + 36, sH = 48;
+    ctx.fillStyle = "rgba(251, 191, 36, 0.18)";
+    ctx.beginPath(); rr(CX - sW / 2, Y - sH / 2, sW, sH, 16); ctx.fill();
+    ctx.strokeStyle = "rgba(251, 191, 36, 0.65)"; ctx.lineWidth = 1.6; ctx.stroke();
+    ctx.fillStyle = "#fde047";
+    ltrFill(scriptWord, Y);
   }
 
-  // ── PRONUNCIATION ─────────────────────────────────────────────────────────
-  ctx.fillStyle="rgba(255,255,255,0.78)";
-  ctx.font="600 23px -apple-system,BlinkMacSystemFont,sans-serif";
-  const pronLbl = isEng ? "Pronunciation: " : "\u0909\u091A\u094D\u091A\u093E\u0930: ";
-  ltrFill(pronLbl + (word?word.pronunciation:""), Y);
-  Y += H_PRON;
+  // Pronunciation
+  Y += 76;
+  ctx.font = "600 24px -apple-system, BlinkMacSystemFont, sans-serif";
+  ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
+  const pronLbl = isEng ? "Pronunciation: " : "उच्चार: ";
+  ltrFill(pronLbl + (word ? word.pronunciation : ""), Y);
 
-  // ── GOLD DIAMOND DIVIDER ──────────────────────────────────────────────────
-  Y += 14;
-  ctx.strokeStyle="rgba(251,191,36,0.55)"; ctx.lineWidth=1.5;
+  // Ornate Gold Diamond Divider
+  Y += 72;
+  ctx.strokeStyle = "rgba(251, 191, 36, 0.70)";
+  ctx.lineWidth = 1.5;
   ctx.beginPath();
-  ctx.moveTo(CX-120,Y); ctx.lineTo(CX-14,Y);
-  ctx.moveTo(CX-8,Y); ctx.lineTo(CX,Y-8); ctx.lineTo(CX+8,Y);
-  ctx.lineTo(CX,Y+8); ctx.lineTo(CX-8,Y);
-  ctx.moveTo(CX+14,Y); ctx.lineTo(CX+120,Y);
+  ctx.moveTo(CX - 150, Y); ctx.lineTo(CX - 18, Y);
+  ctx.moveTo(CX - 10, Y); ctx.lineTo(CX, Y - 10); ctx.lineTo(CX + 10, Y);
+  ctx.lineTo(CX, Y + 10); ctx.lineTo(CX - 10, Y);
+  ctx.moveTo(CX + 18, Y); ctx.lineTo(CX + 150, Y);
   ctx.stroke();
-  Y += H_DIV - 14;
 
-  // ── OPENING QUOTE ─────────────────────────────────────────────────────────
-  ctx.fillStyle="rgba(251,191,36,0.88)";
-  ctx.font="50px Georgia,serif";
-  ltrFill("\u201C", Y);
-  Y += H_QUOTE + H_GAP;
+  // Opening Decorative Quote
+  Y += 72;
+  ctx.font = "68px Georgia, serif";
+  ctx.fillStyle = "#fbbf24";
+  ltrFill("“", Y);
 
-  // ── MEANING (word-wrapped, clipped) ───────────────────────────────────────
-  ctx.fillStyle="#ffffff";
-  ctx.font=MFONT;
-  ctx.shadowColor="rgba(0,0,0,0.95)"; ctx.shadowBlur=14;
+  // Meaning Text
+  Y += 66;
+  const MFONT = "600 38px 'Noto Serif Devanagari', 'Lora', Georgia, serif";
+  const TEXT_W = 840;
+  const LH_M = 58;
+  const mLines = wrapLines(meaning, TEXT_W, MFONT);
+  ctx.font = MFONT;
+  ctx.fillStyle = "#ffffff";
+  ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
+  ctx.shadowBlur = 16;
   for (const line of mLines) {
     ltrFill(line, Y);
     Y += LH_M;
   }
-  ctx.shadowBlur=0;
-  Y += H_SEP - 12;
+  ctx.shadowBlur = 0;
 
-  // ── DASHED SEPARATOR ─────────────────────────────────────────────────────
-  ctx.strokeStyle="rgba(251,191,36,0.40)"; ctx.lineWidth=1;
-  ctx.setLineDash([5,8]);
-  ctx.beginPath(); ctx.moveTo(CARD_X+80,Y); ctx.lineTo(CARD_X+CARD_W-80,Y); ctx.stroke();
-  ctx.setLineDash([]); Y += 40;
-
-  // ── SCRIPTURE REFERENCE ───────────────────────────────────────────────────
-  ctx.font="bold 27px -apple-system,BlinkMacSystemFont,sans-serif";
-  ctx.fillStyle="#fbbf24"; ctx.direction="ltr";
-  // Wrap ref if too long
-  const rLines = wrapLines(refText, TEXT_W, "bold 27px -apple-system,BlinkMacSystemFont,sans-serif");
-  const RLH = 42;
+  // Scripture Reference Badge
+  Y += 48;
+  const RFONT = "bold 29px -apple-system, BlinkMacSystemFont, sans-serif";
+  const rLines = wrapLines("📖 " + refText, TEXT_W, RFONT);
+  const RLH = 46;
   for (const rl of rLines) {
+    const rw = ctx.measureText(rl).width + 36;
+    ctx.fillStyle = "rgba(251, 191, 36, 0.14)";
+    ctx.beginPath(); rr(CX - rw / 2, Y - 22, rw, 44, 22); ctx.fill();
+    ctx.strokeStyle = "rgba(251, 191, 36, 0.55)"; ctx.lineWidth = 1.2; ctx.stroke();
+    ctx.font = RFONT;
+    ctx.fillStyle = "#fbbf24";
     ltrFill(rl, Y);
     Y += RLH;
   }
-  Y += H_RULE - RLH + 6;
 
-  // ── GOLD RULE ─────────────────────────────────────────────────────────────
-  ctx.strokeStyle="rgba(251,191,36,0.35)"; ctx.lineWidth=1;
-  ctx.beginPath(); ctx.moveTo(CARD_X+80,Y); ctx.lineTo(CARD_X+CARD_W-80,Y); ctx.stroke();
-  Y += 36;
+  // Spiritual Insight (if available)
+  if (insight) {
+    Y += 34;
+    const IFONT = "400 24px 'Noto Serif Devanagari', 'Lora', Georgia, serif";
+    const iLines = wrapLines(insight, 800, IFONT).slice(0, 3);
+    ctx.font = IFONT;
+    ctx.fillStyle = "rgba(254, 243, 199, 0.90)";
+    ctx.shadowColor = "rgba(0, 0, 0, 0.9)";
+    ctx.shadowBlur = 10;
+    for (const il of iLines) {
+      ltrFill(il, Y);
+      Y += 38;
+    }
+    ctx.shadowBlur = 0;
+  }
 
-  // ── BRANDING ─────────────────────────────────────────────────────────────
-  ctx.fillStyle="rgba(255,255,255,0.68)";
-  ctx.font="bold 20px -apple-system,BlinkMacSystemFont,sans-serif";
-  ltrFill("\uD83D\uDD4A\uFE0F River of Life \u2022 Holy Bible (\u092A\u0935\u093F\u0924\u094D\u0930 \u092C\u093E\u092F\u092C\u0932)", Y);
+  // Footer Branding Section (Fixed Anchor at bottom)
+  const FY = 1710;
+  ctx.strokeStyle = "rgba(251, 191, 36, 0.35)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(MARGIN + 80, FY); ctx.lineTo(CX - 24, FY);
+  ctx.moveTo(CX + 24, FY); ctx.lineTo(W - MARGIN - 80, FY);
+  ctx.stroke();
 
-  // End clip
-  ctx.restore();
+  // Center cross icon in divider
+  ctx.font = "bold 20px -apple-system, sans-serif";
+  ctx.fillStyle = "#fbbf24";
+  ltrFill("✝", FY);
 
-  // ── Export ────────────────────────────────────────────────────────────────
-  const blob = await new Promise(r => canvas.toBlob(r,"image/png",0.95));
-  const fn = "Biblical_Word_"+(primaryWord||"Word").replace(/[^a-zA-Z0-9]/g,"_")+"_"+Date.now()+".png";
+  ctx.font = "bold 23px -apple-system, BlinkMacSystemFont, sans-serif";
+  ctx.fillStyle = "rgba(255, 255, 255, 0.88)";
+  ltrFill("🕊️ River of Life • पवित्र बायबल", FY + 44);
+
+  ctx.font = "500 18px -apple-system, BlinkMacSystemFont, sans-serif";
+  ctx.fillStyle = "rgba(251, 191, 36, 0.78)";
+  ltrFill("Daily Biblical Word • पवित्र शास्त्र अभ्यास", FY + 78);
+
+  // Export
+  const blob = await new Promise(r => canvas.toBlob(r, "image/png", 0.95));
+  const fn = "Biblical_Word_" + (primaryWord || "Word").replace(/[^a-zA-Z0-9]/g, "_") + "_" + Date.now() + ".png";
+  return { blob, filename: fn, dataUrl: canvas.toDataURL("image/png") };
+};
+
+// ── WhatsApp Status Generator for The Lord's Prayer (प्रभूने शिकवलेली प्रार्थना) ──
+window.generateLordsPrayerStatusBlob = async function(version = 'matthew') {
+  const isLuke = (version === 'luke');
+  const W = 1080, H = 1920;
+  const canvas = document.createElement("canvas");
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext("2d");
+
+  if (document.fonts && document.fonts.ready) {
+    try { await document.fonts.ready; } catch(e) {}
+  }
+
+  // 1. Wallpaper
+  const img = new Image();
+  img.crossOrigin = "anonymous";
+  img.src = "assets/daily_verses/pinterest_golden_path.jpg";
+  await new Promise(r => { img.onload = r; img.onerror = r; setTimeout(r, 2500); });
+  if (img.complete && img.naturalWidth > 0) {
+    const sc = Math.max(W / img.naturalWidth, H / img.naturalHeight);
+    ctx.drawImage(img, (W - img.naturalWidth * sc) / 2, (H - img.naturalHeight * sc) / 2,
+                  img.naturalWidth * sc, img.naturalHeight * sc);
+  } else {
+    const g = ctx.createLinearGradient(0, 0, W, H);
+    g.addColorStop(0, "#0a1024"); g.addColorStop(0.5, "#1d1a3c"); g.addColorStop(1, "#060914");
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  }
+
+  // 2. Atmospheric Scrim
+  const sc1 = ctx.createLinearGradient(0, 0, 0, H);
+  sc1.addColorStop(0,    "rgba(3, 6, 16, 0.88)");
+  sc1.addColorStop(0.20, "rgba(3, 6, 16, 0.60)");
+  sc1.addColorStop(0.50, "rgba(2, 5, 14, 0.72)");
+  sc1.addColorStop(0.85, "rgba(2, 4, 12, 0.86)");
+  sc1.addColorStop(1,    "rgba(1, 2, 8, 0.97)");
+  ctx.fillStyle = sc1; ctx.fillRect(0, 0, W, H);
+
+  // 3. Ornate Double Gold Border & Corner Accents
+  const MARGIN = 44;
+  ctx.strokeStyle = "rgba(251, 191, 36, 0.40)";
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(MARGIN, MARGIN, W - MARGIN * 2, H - MARGIN * 2);
+
+  ctx.strokeStyle = "rgba(251, 191, 36, 0.18)";
+  ctx.lineWidth = 1;
+  ctx.strokeRect(MARGIN + 8, MARGIN + 8, W - (MARGIN + 8) * 2, H - (MARGIN + 8) * 2);
+
+  const drawCorner = (cx, cy, dirX, dirY) => {
+    ctx.save();
+    ctx.strokeStyle = "rgba(251, 191, 36, 0.85)";
+    ctx.lineWidth = 2.4;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy + dirY * 28);
+    ctx.lineTo(cx, cy);
+    ctx.lineTo(cx + dirX * 28, cy);
+    ctx.stroke();
+    ctx.fillStyle = "#fbbf24";
+    ctx.beginPath();
+    ctx.arc(cx + dirX * 12, cy + dirY * 12, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  };
+  drawCorner(MARGIN + 2, MARGIN + 2, 1, 1);
+  drawCorner(W - MARGIN - 2, MARGIN + 2, -1, 1);
+  drawCorner(MARGIN + 2, H - MARGIN - 2, 1, -1);
+  drawCorner(W - MARGIN - 2, H - MARGIN - 2, -1, -1);
+
+  const CX = W / 2;
+  const ltrFill = (text, y) => {
+    if (!text) return;
+    ctx.save();
+    ctx.direction = "ltr";
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+    const str = String(text);
+    const tw = ctx.measureText(str).width;
+    const startX = Math.round(CX - (tw / 2));
+    ctx.fillText(str, startX, y);
+    ctx.restore();
+  };
+
+  const rr = (x, y, w, h, r) => {
+    if (typeof ctx.roundRect === "function") ctx.roundRect(x, y, w, h, r);
+    else ctx.rect(x, y, w, h);
+  };
+
+  // Header Elements
+  let Y = 230;
+  const hdr = "✦ प्रभूने शिकवलेली प्रार्थना • THE LORD'S PRAYER ✦";
+  ctx.font = "bold 20px -apple-system, BlinkMacSystemFont, sans-serif";
+  const hW = ctx.measureText(hdr).width + 46;
+  ctx.fillStyle = "rgba(251, 191, 36, 0.16)";
+  ctx.beginPath(); rr(CX - hW / 2, Y - 22, hW, 44, 22); ctx.fill();
+  ctx.strokeStyle = "rgba(251, 191, 36, 0.70)"; ctx.lineWidth = 1.4; ctx.stroke();
+  ctx.fillStyle = "#fbbf24";
+  ltrFill(hdr, Y);
+
+  // Grand Title
+  Y += 120;
+  ctx.font = "bold 70px 'Noto Serif Devanagari', 'Lora', Georgia, serif";
+  ctx.fillStyle = "#ffffff";
+  ctx.shadowColor = "rgba(251, 191, 36, 0.42)";
+  ctx.shadowBlur = 24;
+  ltrFill("स्वर्गातील पित्याची प्रार्थना", Y);
+  ctx.shadowBlur = 0;
+
+  // Scripture Ref Pill
+  Y += 72;
+  const refPill = isLuke ? "📖 संत लूक ११:२-४" : "📖 संत मत्तय ६:९-१३";
+  ctx.font = "bold 26px -apple-system, BlinkMacSystemFont, sans-serif";
+  const rW = ctx.measureText(refPill).width + 36;
+  ctx.fillStyle = "rgba(251, 191, 36, 0.18)";
+  ctx.beginPath(); rr(CX - rW / 2, Y - 20, rW, 40, 20); ctx.fill();
+  ctx.strokeStyle = "rgba(251, 191, 36, 0.65)"; ctx.lineWidth = 1.2; ctx.stroke();
+  ctx.fillStyle = "#fbbf24";
+  ltrFill(refPill, Y);
+
+  // Divider
+  Y += 60;
+  ctx.strokeStyle = "rgba(251, 191, 36, 0.65)";
+  ctx.lineWidth = 1.4;
+  ctx.beginPath();
+  ctx.moveTo(CX - 140, Y); ctx.lineTo(CX - 14, Y);
+  ctx.moveTo(CX - 8, Y); ctx.lineTo(CX, Y - 8); ctx.lineTo(CX + 8, Y);
+  ctx.lineTo(CX, Y + 8); ctx.lineTo(CX - 8, Y);
+  ctx.moveTo(CX + 14, Y); ctx.lineTo(CX + 140, Y);
+  ctx.stroke();
+
+  // Prayer Stanzas
+  const stanzas = isLuke ? [
+    { text: "‘हे पित्या,", bold: true, color: "#fde047", size: 44 },
+    { text: "तुझे नाव पवित्र मानिले जावो.", bold: false, color: "#ffffff", size: 36 },
+    { text: "तुझे राज्य येवो.", bold: false, color: "#ffffff", size: 36 },
+    { text: "आमची रोजची भाकर रोज आम्हाला दे.", bold: false, color: "#ffffff", size: 36 },
+    { text: "आणि आमच्या पापांची आम्हाला क्षमा कर;", bold: false, color: "#ffffff", size: 36 },
+    { text: "कारण आम्हीही आमच्या प्रत्येक ऋण्याला क्षमा करतो.", bold: false, color: "#ffffff", size: 36 },
+    { text: "आणि आम्हाला परीक्षेत आणू नकोस.’", bold: true, color: "#fde047", size: 38 }
+  ] : [
+    { text: "‘हे आमच्या स्वर्गातील पित्या,", bold: true, color: "#fde047", size: 44 },
+    { text: "तुझे नाव पवित्र मानिले जावो.", bold: false, color: "#ffffff", size: 36 },
+    { text: "तुझे राज्य येवो.", bold: false, color: "#ffffff", size: 36 },
+    { text: "जसे स्वर्गात तसेच पृथ्वीवर", bold: false, color: "#ffffff", size: 36 },
+    { text: "तुझ्या इच्छेप्रमाणे होवो.", bold: false, color: "#ffffff", size: 36 },
+    { text: "आमची रोजची भाकर आज आम्हाला दे.", bold: false, color: "#ffffff", size: 36 },
+    { text: "आणि आम्ही आमच्या ऋण्यांना सोडले आहे", bold: false, color: "#ffffff", size: 36 },
+    { text: "तशीच तू आमची ऋणे आम्हाला सोड.", bold: false, color: "#ffffff", size: 36 },
+    { text: "आणि आम्हाला परीक्षेत आणू नकोस,", bold: false, color: "#ffffff", size: 36 },
+    { text: "पण आम्हाला वाइटापासून सोडीव.", bold: false, color: "#ffffff", size: 36 },
+    { text: "कारण राज्य, सामर्थ्य व गौरव हे सर्वकाळ तुझेच आहेत. आमेन!’", bold: true, color: "#fde047", size: 34 }
+  ];
+
+  Y += 70;
+  for (const st of stanzas) {
+    ctx.font = `${st.bold ? "bold" : "600"} ${st.size}px 'Noto Serif Devanagari', 'Lora', Georgia, serif`;
+    ctx.fillStyle = st.color;
+    ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
+    ctx.shadowBlur = 14;
+    ltrFill(st.text, Y);
+    ctx.shadowBlur = 0;
+    Y += (st.size === 44 ? 76 : (st.size === 38 ? 68 : 58));
+  }
+
+  // Footer Branding
+  const FY = 1710;
+  ctx.strokeStyle = "rgba(251, 191, 36, 0.35)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(MARGIN + 80, FY); ctx.lineTo(CX - 24, FY);
+  ctx.moveTo(CX + 24, FY); ctx.lineTo(W - MARGIN - 80, FY);
+  ctx.stroke();
+
+  ctx.font = "bold 20px -apple-system, sans-serif";
+  ctx.fillStyle = "#fbbf24";
+  ltrFill("✝", FY);
+
+  ctx.font = "bold 23px -apple-system, BlinkMacSystemFont, sans-serif";
+  ctx.fillStyle = "rgba(255, 255, 255, 0.88)";
+  ltrFill("🕊️ River of Life • पवित्र बायबल", FY + 44);
+
+  ctx.font = "500 18px -apple-system, BlinkMacSystemFont, sans-serif";
+  ctx.fillStyle = "rgba(251, 191, 36, 0.78)";
+  ltrFill("The Lord's Prayer • प्रभूने शिकवलेली प्रार्थना", FY + 78);
+
+  const blob = await new Promise(r => canvas.toBlob(r, "image/png", 0.95));
+  const fn = "Lords_Prayer_" + version + "_" + Date.now() + ".png";
   return { blob, filename: fn, dataUrl: canvas.toDataURL("image/png") };
 };
 
@@ -27731,18 +28232,41 @@ let didYouKnowOffset = 0;
 let activeDidYouKnowInsight = DID_YOU_KNOW_INSIGHTS[0];
 
 function renderDidYouKnowWidget() {
-  const track = document.getElementById("dyk-carousel-track");
-  if (!track) return;
-  
   const isEng = (window.state && (window.state.translation === 'eng' || window.state.language === 'en'));
-  const total = DID_YOU_KNOW_INSIGHTS.length;
+  const total = (typeof DID_YOU_KNOW_INSIGHTS !== 'undefined') ? DID_YOU_KNOW_INSIGHTS.length : 30;
 
-  // Daily rotating starting card based on day of year
+  // Daily rotating featured trivia item
   const now = new Date();
   const start = new Date(now.getFullYear(), 0, 0);
   const diff = now - start;
   const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
   const dailyOffset = dayOfYear % total;
+  const todayItem = DID_YOU_KNOW_INSIGHTS[dailyOffset] || DID_YOU_KNOW_INSIGHTS[0];
+
+  // 1. Populate Homepage Master Card Teaser
+  const teaserEl = document.getElementById("home-dyk-teaser-text");
+  if (teaserEl && todayItem) {
+    const q = isEng ? (todayItem.questionEn || todayItem.questionMr) : (todayItem.questionMr || todayItem.questionEn);
+    teaserEl.textContent = `“${q}”`;
+  }
+  const imgEl = document.getElementById("home-dyk-featured-img");
+  if (imgEl && todayItem && todayItem.image) {
+    imgEl.src = todayItem.image;
+    imgEl.alt = todayItem.alt || "Did You Know";
+  }
+  const refEl = document.getElementById("home-dyk-featured-ref");
+  if (refEl && todayItem) {
+    refEl.textContent = isEng ? todayItem.refEn : todayItem.refMr;
+  }
+
+  // 2. Render Hub Grid if container present
+  if (typeof renderDidYouKnowHubGrid === 'function') {
+    renderDidYouKnowHubGrid();
+  }
+
+  // 3. Fallback / Legacy track support if present
+  const track = document.getElementById("dyk-carousel-track");
+  if (!track) return;
   const rotatedInsights = [...DID_YOU_KNOW_INSIGHTS.slice(dailyOffset), ...DID_YOU_KNOW_INSIGHTS.slice(0, dailyOffset)];
   
   track.innerHTML = rotatedInsights.map((item, idx) => {
@@ -28448,14 +28972,89 @@ window.copyLordsPrayerText = function() {
   }
 };
 
-window.shareLordsPrayerToWhatsApp = function() {
-  const isLuke = (window.currentLordsPrayerVersion === 'luke');
-  const shareText = isLuke
-    ? `✝️ *प्रभूने शिकवलेली प्रार्थना (लूक ११:२-४)*\n\n“तुम्ही प्रार्थना कराल तेव्हा म्हणा:\n‘हे पित्या,\nतुझे नाव पवित्र मानिले जावो.\nतुझे राज्य येवो.\nआमची रोजची भाकर रोज आम्हाला दे.\nआणि आमच्या पापांची आम्हाला क्षमा कर;\nकारण आम्हीही आमच्या प्रत्येक ऋण्याला क्षमा करतो.\nआणि आम्हाला परीक्षेत आणू नकोस.’ ”\n\n📖 River of Life - Marathi Bible App`
-    : `✝️ *प्रभूने शिकवलेली प्रार्थना (मत्तय ६:९-१३)*\n\n“म्हणून तुम्ही अशी प्रार्थना करा:\n‘हे आमच्या स्वर्गातील पित्या,\nतुझे नाव पवित्र मानिले जावो.\nतुझे राज्य येवो.\nजसे स्वर्गात तसेच पृथ्वीवर तुझ्या इच्छेप्रमाणे होवो.\nआमची रोजची भाकर आज आम्हाला दे.\nआणि आम्ही आमच्या ऋण्यांना सोडले आहे तशीच तू आमची ऋणे आम्हाला सोड.\nआणि आम्हाला परीक्षेत आणू नकोस,\nपण आम्हाला वाइटापासून सोडीव.’ ”\n\n📖 River of Life - Marathi Bible App`;
+window.openLordsPrayerModal = function(version) {
+  if (version && typeof switchLordsPrayerVersion === 'function') {
+    switchLordsPrayerVersion(version);
+  }
+  const modal = document.getElementById("modal-lords-prayer-hub");
+  if (modal) {
+    modal.style.display = "flex";
+    setTimeout(() => modal.classList.add("active"), 10);
+  }
+};
 
-  const url = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
-  window.open(url, '_blank');
+window.closeLordsPrayerModal = function() {
+  const modal = document.getElementById("modal-lords-prayer-hub");
+  if (modal) {
+    modal.classList.remove("active");
+    setTimeout(() => modal.style.display = "none", 280);
+  }
+  if (window.activeLordsPrayerAudioElement) {
+    window.activeLordsPrayerAudioElement.pause();
+    window.activeLordsPrayerAudioElement = null;
+    const playIcon = document.getElementById("lp-audio-icon-play");
+    const pauseIcon = document.getElementById("lp-audio-icon-pause");
+    const textEl = document.getElementById("lp-audio-btn-text");
+    if (playIcon) playIcon.style.display = "inline";
+    if (pauseIcon) pauseIcon.style.display = "none";
+    if (textEl) textEl.textContent = "ऐका (Listen)";
+  }
+};
+
+window.shareLordsPrayerToWhatsApp = async function() {
+  const isLuke = (window.currentLordsPrayerVersion === 'luke');
+  const ver = isLuke ? 'luke' : 'matthew';
+  const shareText = isLuke
+    ? `✝️ *प्रभूने शिकवलेली प्रार्थना (लूक ११:२-४)*\n\n“तुम्ही प्रार्थना कराल तेव्हा म्हणा:\n‘हे पित्या,\nतुझे नाव पवित्र मानिले जावो.\nतुझे राज्य येवो.\nआमची रोजची भाकर रोज आम्हाला दे.\nआणि आमच्या पापांची आम्हाला क्षमा कर;\nकारण आम्हीही आमच्या प्रत्येक ऋण्याला क्षमा करतो.\nआणि आम्हाला परीक्षेत आणू नकोस.’ ”\n\n🕊️ River of Life • पवित्र बायबल`
+    : `✝️ *प्रभूने शिकवलेली प्रार्थना (मत्तय ६:९-१३)*\n\n“म्हणून तुम्ही अशी प्रार्थना करा:\n‘हे आमच्या स्वर्गातील पित्या,\nतुझे नाव पवित्र मानिले जावो.\nतुझे राज्य येवो.\nजसे स्वर्गात तसेच पृथ्वीवर तुझ्या इच्छेप्रमाणे होवो.\nआमची रोजची भाकर आज आम्हाला दे.\nआणि आम्ही आमच्या ऋण्यांना सोडले आहे तशीच तू आमची ऋणे आम्हाला सोड.\nआणि आम्हाला परीक्षेत आणू नकोस,\nपण आम्हाला वाइटापासून सोडीव.’ ”\n\n🕊️ River of Life • पवित्र बायबल`;
+
+  if (typeof showToast === 'function') showToast("📸 WhatsApp स्टेटससाठी सुंदर कार्ड तयार होत आहे...");
+
+  try {
+    if (typeof window.generateLordsPrayerStatusBlob === 'function') {
+      const { blob, filename, dataUrl } = await window.generateLordsPrayerStatusBlob(ver);
+      const file = new File([blob], filename, { type: "image/png", lastModified: Date.now() });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: "प्रभूने शिकवलेली प्रार्थना • The Lord's Prayer",
+          text: shareText
+        });
+        if (typeof showToast === 'function') showToast("✅ WhatsApp वर शेअर केले!");
+        return;
+      }
+
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            files: [file],
+            title: "प्रभूने शिकवलेली प्रार्थना • The Lord's Prayer",
+            text: shareText
+          });
+          if (typeof showToast === 'function') showToast("✅ WhatsApp वर शेअर केले!");
+          return;
+        } catch (shareErr) {
+          if (shareErr && (shareErr.name === 'AbortError' || shareErr.message?.includes('abort') || shareErr.message?.includes('cancel'))) {
+            return;
+          }
+        }
+      }
+
+      // Auto-download image for status & launch WhatsApp
+      const link = document.createElement("a");
+      link.download = filename;
+      link.href = dataUrl;
+      link.click();
+      if (typeof showToast === 'function') showToast("📸 फोटो डाऊनलोड झाला! आता WhatsApp स्टेटसवर ठेवा.");
+    }
+  } catch (err) {
+    if (err && (err.name === 'AbortError' || err.message?.includes('abort') || err.message?.includes('cancel'))) return;
+    console.warn("Status image share fallback:", err);
+  }
+
+  const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
+  window.open(waUrl, '_blank');
 };
 
 window.readLordsPrayerChapter = function() {
@@ -28466,6 +29065,170 @@ window.readLordsPrayerChapter = function() {
     } else {
       openReaderAndNavigate('matthew', 6, 9);
     }
+  }
+};
+
+/* ==========================================================================
+   Did You Know 30-Topics Hub Modal & Detail Drawer Handlers
+   ========================================================================== */
+window.openDidYouKnowHubModal = function() {
+  const modal = document.getElementById("modal-did-you-know-hub");
+  if (!modal) return;
+  if (typeof renderDidYouKnowHubGrid === 'function') {
+    renderDidYouKnowHubGrid();
+  }
+  modal.style.display = "flex";
+  setTimeout(() => modal.classList.add("active"), 10);
+};
+
+window.closeDidYouKnowHubModal = function() {
+  const modal = document.getElementById("modal-did-you-know-hub");
+  if (modal) {
+    modal.classList.remove("active");
+    setTimeout(() => modal.style.display = "none", 280);
+  }
+};
+
+window.renderDidYouKnowHubGrid = function(query = '') {
+  const grid = document.getElementById("dyk-hub-grid");
+  if (!grid || typeof DID_YOU_KNOW_INSIGHTS === 'undefined') return;
+
+  const isEng = (window.state && (window.state.translation === 'eng' || window.state.language === 'en'));
+  const qClean = (query || '').toLowerCase().trim();
+
+  const filtered = DID_YOU_KNOW_INSIGHTS.filter(item => {
+    if (!qClean) return true;
+    const textAll = `${item.questionEn || ''} ${item.questionMr || ''} ${item.refEn || ''} ${item.refMr || ''}`.toLowerCase();
+    return textAll.includes(qClean);
+  });
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `
+      <div style="grid-column: 1 / -1; padding: 40px 20px; text-align: center; color: var(--text-muted);">
+        <span style="font-size: 32px; display: block; margin-bottom: 8px;">🔍</span>
+        <p style="margin: 0; font-size: 14px; font-weight: 600;">कोणताही विषय सापडला नाही • No topic found</p>
+      </div>
+    `;
+    return;
+  }
+
+  grid.innerHTML = filtered.map((item, idx) => {
+    const qTitle = isEng ? (item.questionEn || item.questionMr) : (item.questionMr || item.questionEn);
+    const ref = isEng ? item.refEn : item.refMr;
+    const bgImage = item.image || "assets/images/did_you_know_esther.jpg";
+    const originalIndex = DID_YOU_KNOW_INSIGHTS.findIndex(x => x.id === item.id) + 1;
+
+    return `
+      <div class="dyk-hub-topic-card ${item.theme || 'dyk-theme-emerald'}" onclick="openDidYouKnowDetail('${item.id}')">
+        <div class="dyk-hub-card-thumb">
+          <img src="${bgImage}" alt="${item.alt || ''}" loading="lazy">
+          <span class="dyk-hub-card-num">#${originalIndex}</span>
+        </div>
+        <div class="dyk-hub-card-content">
+          <span class="dyk-hub-ref-tag">${ref}</span>
+          <h4 class="dyk-hub-card-title">${qTitle}</h4>
+          <span class="dyk-hub-learn-btn">
+            <span>वाचा व शिका</span>
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </span>
+        </div>
+      </div>
+    `;
+  }).join('');
+};
+
+window.filterDidYouKnowHub = function(e) {
+  const q = e && e.target ? e.target.value : (typeof e === 'string' ? e : '');
+  if (typeof renderDidYouKnowHubGrid === 'function') {
+    renderDidYouKnowHubGrid(q);
+  }
+};
+
+window.openDidYouKnowDetail = function(id) {
+  const item = DID_YOU_KNOW_INSIGHTS.find(x => x.id === id) || DID_YOU_KNOW_INSIGHTS[0];
+  if (!item) return;
+
+  const isEng = (window.state && (window.state.translation === 'eng' || window.state.language === 'en'));
+  const modal = document.getElementById("modal-did-you-know-detail");
+  if (!modal) return;
+
+  const originalIndex = DID_YOU_KNOW_INSIGHTS.findIndex(x => x.id === item.id) + 1;
+  const qTitle = isEng ? (item.questionEn || item.questionMr) : (item.questionMr || item.questionEn);
+  const qSub = isEng ? item.questionMr : item.questionEn;
+  const bullets = isEng ? (item.bulletsEn || item.bulletsMr) : (item.bulletsMr || item.bulletsEn);
+  const ref = isEng ? item.refEn : item.refMr;
+  const bgImage = item.image || "assets/images/did_you_know_esther.jpg";
+
+  const numEl = document.getElementById("dyk-detail-num");
+  const imgEl = document.getElementById("dyk-detail-img");
+  const titleEl = document.getElementById("dyk-detail-title");
+  const subEl = document.getElementById("dyk-detail-sub");
+  const bulletsEl = document.getElementById("dyk-detail-bullets");
+  const refEl = document.getElementById("dyk-detail-ref");
+  const readBtn = document.getElementById("dyk-detail-read-btn");
+  const shareBtn = document.getElementById("dyk-detail-share-btn");
+
+  if (numEl) numEl.textContent = `विषय #${originalIndex} / ${DID_YOU_KNOW_INSIGHTS.length}`;
+  if (imgEl) imgEl.src = bgImage;
+  if (titleEl) titleEl.textContent = qTitle;
+  if (subEl) subEl.textContent = qSub || '';
+  if (refEl) refEl.textContent = ref;
+
+  if (bulletsEl) {
+    bulletsEl.innerHTML = (bullets || []).map(b => `
+      <div class="dyk-detail-bullet-row">
+        <span class="dyk-detail-bullet-icon">${b.icon}</span>
+        <span class="dyk-detail-bullet-text">${b.text}</span>
+      </div>
+    `).join('');
+  }
+
+  if (readBtn) {
+    readBtn.onclick = () => {
+      closeDidYouKnowDetail();
+      closeDidYouKnowHubModal();
+      if (typeof openReaderAndNavigate === 'function') {
+        openReaderAndNavigate(item.book, item.chapter, item.verse || 1);
+      }
+    };
+  }
+
+  if (shareBtn) {
+    shareBtn.onclick = () => shareDidYouKnowToWhatsApp(item.id);
+  }
+
+  modal.style.display = "flex";
+  setTimeout(() => modal.classList.add("active"), 10);
+};
+
+window.closeDidYouKnowDetail = function() {
+  const modal = document.getElementById("modal-did-you-know-detail");
+  if (modal) {
+    modal.classList.remove("active");
+    setTimeout(() => modal.style.display = "none", 250);
+  }
+};
+
+window.shareDidYouKnowToWhatsApp = function(id) {
+  const item = DID_YOU_KNOW_INSIGHTS.find(x => x.id === id) || DID_YOU_KNOW_INSIGHTS[0];
+  if (!item) return;
+
+  const isEng = (window.state && (window.state.translation === 'eng' || window.state.language === 'en'));
+  const qTitle = isEng ? (item.questionEn || item.questionMr) : (item.questionMr || item.questionEn);
+  const bullets = isEng ? (item.bulletsEn || item.bulletsMr) : (item.bulletsMr || item.bulletsEn);
+  const ref = isEng ? item.refEn : item.refMr;
+
+  const bulletLines = (bullets || []).map(b => `${b.icon} ${b.text}`).join("\n");
+  const text = `💡 *Did You Know? • तुम्हांला माहीत आहे का?*\n\n*${qTitle}*\n\n${bulletLines}\n\n📖 *संदर्भ:* ${ref}\n\n🕊️ River of Life • पवित्र बायबल\n${window.location.origin}`;
+
+  if (navigator.share) {
+    navigator.share({
+      title: qTitle,
+      text: text
+    }).catch(() => {});
+  } else {
+    const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+    window.open(waUrl, '_blank');
   }
 };
 
