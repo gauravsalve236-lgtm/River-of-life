@@ -21214,19 +21214,9 @@ window.generateExactVerseImageBlob = function(customRatio) {
       } catch (e) {}
     }
 
-    const ratio = customRatio || window.currentVodAspectRatio || 'story';
-    let canvasW = 1080;
-    let canvasH = 1920; // 9:16 Fullscreen Wallpaper & WhatsApp Status by default!
-    if (ratio === 'square') {
-      canvasW = 1080;
-      canvasH = 1080; // 1:1 Square Card
-    } else if (ratio === 'portrait') {
-      canvasW = 1080;
-      canvasH = 1350; // 4:5 Feed Card
-    } else {
-      canvasW = 1080;
-      canvasH = 1920; // 9:16 Fullscreen Wallpaper & Story
-    }
+    const ratio = 'story';
+    const canvasW = 1080;
+    const canvasH = 1920; // Fixed full-bleed 9:16 vertical Mobile Status & Wallpaper
 
     const canvas = document.createElement("canvas");
     canvas.width = canvasW;
@@ -21358,8 +21348,8 @@ window.generateExactVerseImageBlob = function(customRatio) {
           ctx.save();
           if (t.isGold) {
             ctx.fillStyle = "#fbbf24";
-            ctx.shadowColor = "rgba(251, 191, 36, 0.55)";
-            ctx.shadowBlur = 18;
+            ctx.shadowColor = "rgba(251, 191, 36, 0.6)";
+            ctx.shadowBlur = 20;
           } else {
             ctx.fillStyle = "#ffffff";
             ctx.shadowColor = "rgba(0, 0, 0, 0.98)";
@@ -21390,9 +21380,9 @@ window.generateExactVerseImageBlob = function(customRatio) {
       return lines;
     }
 
-    // Unified Luminous Screen-Matched Typography Engine (Identical to Phone Fullscreen Modal)
+    // Unified Luminous Screen-Matched Typography Engine (Medium-large text covering the wallpaper beautifully)
     function renderLuminousScreenLayout() {
-      // Atmospheric Contrast Gradient Overlay (exact match to modal-fullscreen-vod)
+      // Atmospheric Contrast Gradient Overlay (matches modal-fullscreen-vod)
       const overlayGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
       overlayGrad.addColorStop(0, "rgba(0, 0, 0, 0.55)");
       overlayGrad.addColorStop(0.28, "rgba(0, 0, 0, 0.18)");
@@ -21401,65 +21391,42 @@ window.generateExactVerseImageBlob = function(customRatio) {
       ctx.fillStyle = overlayGrad;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      const maxW = 920;
+      const maxW = 940;
       let fontSize;
       let lineH;
 
-      if (ratio === 'story' || ratio === 'wallpaper') {
-        if (displayText.length > 140) {
-          fontSize = 46;
-          lineH = 74;
-        } else if (displayText.length > 80) {
-          fontSize = 52;
-          lineH = 82;
-        } else {
-          fontSize = 58;
-          lineH = 92;
-        }
-      } else if (ratio === 'portrait') {
-        if (displayText.length > 140) {
-          fontSize = 42;
-          lineH = 68;
-        } else if (displayText.length > 80) {
-          fontSize = 48;
-          lineH = 76;
-        } else {
-          fontSize = 54;
-          lineH = 84;
-        }
-      } else { // square
-        if (displayText.length > 140) {
-          fontSize = 38;
-          lineH = 62;
-        } else if (displayText.length > 80) {
-          fontSize = 44;
-          lineH = 70;
-        } else {
-          fontSize = 48;
-          lineH = 76;
-        }
+      // Medium-large prominent typography so text gracefully occupies the wallpaper without feeling small
+      if (displayText.length > 130) {
+        fontSize = 58;
+        lineH = 92;
+      } else if (displayText.length > 75) {
+        fontSize = 66;
+        lineH = 104;
+      } else {
+        fontSize = 76;
+        lineH = 118;
       }
 
       const font = `700 ${fontSize}px ${isMarathi ? "'Noto Serif Devanagari', 'Rozha One', Georgia, serif" : "'Playfair Display', 'Lora', Georgia, serif"}`;
       const tokens = tokenizeVodText(displayText, !isMarathi);
       const lines = wrapTokens(tokens, maxW, font);
 
-      const tagH = (ratio === 'story' || ratio === 'wallpaper') ? 28 : 24;
-      const gapTagQuote = (ratio === 'story' || ratio === 'wallpaper') ? 16 : 10;
-      const quoteH = (ratio === 'story' || ratio === 'wallpaper') ? 44 : 32;
-      const gapQuoteText = (ratio === 'story' || ratio === 'wallpaper') ? 20 : 12;
+      const tagH = 34;
+      const gapTagQuote = 18;
+      const quoteH = 54;
+      const gapQuoteText = 22;
       const textH = lines.length * lineH;
-      const gapTextRef = (ratio === 'story' || ratio === 'wallpaper') ? 38 : 26;
-      const refH = (ratio === 'story' || ratio === 'wallpaper') ? 34 : 28;
+      const gapTextRef = 40;
+      const refH = 38;
 
       const totalBlockH = tagH + gapTagQuote + quoteH + gapQuoteText + textH + gapTextRef + refH;
 
-      const centerY = Math.round(canvas.height * ((ratio === 'story' || ratio === 'wallpaper') ? 0.465 : 0.475));
+      const centerY = Math.round(canvas.height * 0.46);
       let curY = Math.round(centerY - (totalBlockH / 2));
 
       // 1. Top Tag (✦ दैनिक वचन ✦)
       ctx.direction = "ltr";
-      ctx.font = `800 ${(ratio === 'story' || ratio === 'wallpaper') ? 24 : 20}px 'Outfit', -apple-system, sans-serif`;
+      ctx.font = "800 28px 'Outfit', -apple-system, sans-serif";
       ctx.fillStyle = "#fbbf24";
       ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
       ctx.shadowBlur = 14;
@@ -21469,8 +21436,8 @@ window.generateExactVerseImageBlob = function(customRatio) {
       ctx.fillText(tagText, Math.round((canvas.width - tagW) / 2), curY + Math.round(tagH / 2));
       curY += tagH + gapTagQuote;
 
-      // 2. Elegant Quotation Mark (matching Screenshot 1)
-      ctx.font = `600 ${(ratio === 'story' || ratio === 'wallpaper') ? 58 : 46}px Georgia, serif`;
+      // 2. Elegant Quotation Mark (prominent, matching Screenshot 1)
+      ctx.font = "600 78px Georgia, serif";
       ctx.fillStyle = "#fbbf24";
       ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
       ctx.shadowBlur = 16;
@@ -21479,13 +21446,12 @@ window.generateExactVerseImageBlob = function(customRatio) {
       ctx.fillText(quoteStr, Math.round((canvas.width - quoteW) / 2), curY + Math.round(quoteH / 2));
       curY += quoteH + gapQuoteText;
 
-      // 3. Central Verse Body with Golden Highlighted Keywords
+      // 3. Central Verse Body with Golden Highlighted Keywords (prominent medium size)
       drawTokenizedLines(lines, curY + Math.round(lineH / 2), lineH, font);
       curY += textH + gapTextRef;
 
       // 4. Scripture Reference with flanking Golden Accent Lines
-      const refFontSize = (ratio === 'story' || ratio === 'wallpaper') ? 28 : 24;
-      ctx.font = `800 ${refFontSize}px 'Outfit', -apple-system, sans-serif`;
+      ctx.font = "800 32px 'Outfit', -apple-system, sans-serif";
       const refStr = displayRef;
       const refW = ctx.measureText(refStr).width;
       const refCenterY = curY + Math.round(refH / 2);
@@ -21498,11 +21464,11 @@ window.generateExactVerseImageBlob = function(customRatio) {
 
       // Flanking gold lines
       ctx.strokeStyle = "#fbbf24";
-      ctx.lineWidth = 2.5;
+      ctx.lineWidth = 3;
       ctx.shadowColor = "rgba(0, 0, 0, 0.9)";
       ctx.shadowBlur = 8;
-      const lineLen = (ratio === 'story' || ratio === 'wallpaper') ? 48 : 36;
-      const lineGap = 16;
+      const lineLen = 54;
+      const lineGap = 18;
       const leftLineStart = Math.round((canvas.width - refW) / 2) - lineGap - lineLen;
       const leftLineEnd = Math.round((canvas.width - refW) / 2) - lineGap;
       const rightLineStart = Math.round((canvas.width + refW) / 2) + lineGap;
