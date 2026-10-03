@@ -20235,7 +20235,7 @@ window.selectVodTypographyTheme = async function(idx) {
   const modal = document.getElementById("modal-image-preview-save");
   if (modal && modal.style.display === "flex") {
     try {
-      const curRatio = window.currentVodAspectRatio || 'square';
+      const curRatio = window.currentVodAspectRatio || 'story';
       const result = await generateExactVerseImageBlob(curRatio);
       window._currentRenderedVodImage = result;
       const img = document.getElementById("vod-preview-rendered-img");
@@ -21177,8 +21177,21 @@ window.generateExactVerseImageBlob = function(customRatio) {
 
     const theme = (window.VOD_TYPOGRAPHY_STYLES && window.VOD_TYPOGRAPHY_STYLES[window.currentVodTypographyIndex || 0]) ? window.VOD_TYPOGRAPHY_STYLES[window.currentVodTypographyIndex || 0] : window.VOD_TYPOGRAPHY_STYLES[0];
 
-    // Priority: active home/modal wallpaper, user's chosen wallpaper, then daily wallpaper
-    let imgFileName = window.currentDailyVerseImage;
+    // Priority: active fullscreen modal wallpaper, window.currentDailyVerseImage, saved wallpaper, home card wallpaper, then daily fallback
+    let imgFileName = null;
+    const fsBgEl = document.getElementById("fs-vod-capsule-bg");
+    if (fsBgEl && fsBgEl.style.backgroundImage) {
+      const match = fsBgEl.style.backgroundImage.match(/url\(['"]?(.*?)['"]?\)/);
+      if (match && match[1]) {
+        imgFileName = match[1].split('/').pop().replace(/['"]/g, '');
+      }
+    }
+    if (!imgFileName) {
+      imgFileName = window.currentDailyVerseImage;
+    }
+    if (!imgFileName) {
+      imgFileName = localStorage.getItem("rol_selected_wallpaper");
+    }
     if (!imgFileName) {
       const homeCard = document.getElementById("card-daily-verse-home");
       if (homeCard && homeCard.style.backgroundImage) {
@@ -21187,9 +21200,6 @@ window.generateExactVerseImageBlob = function(customRatio) {
           imgFileName = match[1].split('/').pop().replace(/['"]/g, '');
         }
       }
-    }
-    if (!imgFileName) {
-      imgFileName = localStorage.getItem("rol_selected_wallpaper");
     }
     if (!imgFileName) {
       const images = (window.dailyVersesImageList && window.dailyVersesImageList.length > 0) ? window.dailyVersesImageList : ['pinterest_alpine_mountain.jpg', 'sunrise.png'];
@@ -21204,15 +21214,18 @@ window.generateExactVerseImageBlob = function(customRatio) {
       } catch (e) {}
     }
 
-    const ratio = customRatio || window.currentVodAspectRatio || 'square';
+    const ratio = customRatio || window.currentVodAspectRatio || 'story';
     let canvasW = 1080;
-    let canvasH = 1080; // 1:1 Square Card
-    if (ratio === 'portrait') {
+    let canvasH = 1920; // 9:16 Fullscreen Wallpaper & WhatsApp Status by default!
+    if (ratio === 'square') {
+      canvasW = 1080;
+      canvasH = 1080; // 1:1 Square Card
+    } else if (ratio === 'portrait') {
       canvasW = 1080;
       canvasH = 1350; // 4:5 Feed Card
-    } else if (ratio === 'story' || ratio === 'wallpaper') {
+    } else {
       canvasW = 1080;
-      canvasH = 1920; // 9:16 Fullscreen Wallpaper
+      canvasH = 1920; // 9:16 Fullscreen Wallpaper & Story
     }
 
     const canvas = document.createElement("canvas");
@@ -21258,7 +21271,107 @@ window.generateExactVerseImageBlob = function(customRatio) {
       drawCelestialFallback();
     }
 
-    // 2. Wrap Text Utility
+    // 2. Wrap Text Utilities with Golden Keyword Highlighting Support
+    function tokenizeVodText(text, isEng) {
+      if (!text) return [];
+      const kwList = isEng ? [
+        "Armor of God", "Holy Spirit", "God", "Lord", "Jesus", "Christ", "Light", "Peace", "Strength", "Faith", "Salvation", "Grace"
+      ] : [
+        "देवाची शस्त्रसामग्री", "संपूर्ण शस्त्रसामग्री", "शस्त्रसामग्री",
+        "सार्वकालिक जीवन", "पवित्र आत्मा", "परमेश्वर", "ख्रिस्त", "येशू",
+        "कल्याणकारक", "नीतिमत्त्व", "सहनशीलता", "चांगुलपणा", "विश्वासूपणा",
+        "मार्गदर्शक", "सामर्थ्य", "विश्वास", "शांती", "तारण", "कृपा", "प्रकाश"
+      ];
+      kwList.sort((a, b) => b.length - a.length);
+
+      const pattern = isEng 
+        ? new RegExp(`(?<![a-zA-Z])(${kwList.join("|")})(?![a-zA-Z])`, 'gi')
+        : new RegExp(`(?<![\\u0900-\\u097F])(${kwList.join("|")})(?![\\u0900-\\u097F])`, 'g');
+
+      const parts = text.split(pattern);
+      const tokens = [];
+      for (let part of parts) {
+        if (!part) continue;
+        const isKw = kwList.some(kw => isEng ? kw.toLowerCase() === part.toLowerCase() : kw === part);
+        const wordParts = part.split(/(\s+)/);
+        for (let wp of wordParts) {
+          if (!wp) continue;
+          tokens.push({ text: wp, isGold: isKw });
+        }
+      }
+      return tokens;
+    }
+
+    function wrapTokens(tokens, maxW, font) {
+      ctx.font = font;
+      const lines = [];
+      let curLine = [];
+      let curLineW = 0;
+
+      for (let token of tokens) {
+        const isWhitespace = /^\s+$/.test(token.text);
+        if (curLine.length === 0 && isWhitespace) continue;
+
+        const tokenW = ctx.measureText(token.text).width;
+
+        if (curLineW + tokenW > maxW && curLine.length > 0 && !isWhitespace) {
+          while (curLine.length > 0 && /^\s+$/.test(curLine[curLine.length - 1].text)) {
+            curLine.pop();
+          }
+          lines.push(curLine);
+          curLine = [token];
+          curLineW = tokenW;
+        } else {
+          curLine.push(token);
+          curLineW += tokenW;
+        }
+      }
+
+      if (curLine.length > 0) {
+        while (curLine.length > 0 && /^\s+$/.test(curLine[curLine.length - 1].text)) {
+          curLine.pop();
+        }
+        if (curLine.length > 0) {
+          lines.push(curLine);
+        }
+      }
+
+      return lines;
+    }
+
+    function drawTokenizedLines(lines, startY, lineH, font) {
+      ctx.font = font;
+      ctx.direction = "ltr";
+      ctx.textBaseline = "middle";
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        let totalW = 0;
+        for (let t of line) {
+          totalW += ctx.measureText(t.text).width;
+        }
+
+        let curX = Math.round((canvas.width - totalW) / 2);
+        const curY = startY + (i * lineH);
+
+        for (let t of line) {
+          ctx.save();
+          if (t.isGold) {
+            ctx.fillStyle = "#fbbf24";
+            ctx.shadowColor = "rgba(251, 191, 36, 0.55)";
+            ctx.shadowBlur = 18;
+          } else {
+            ctx.fillStyle = "#ffffff";
+            ctx.shadowColor = "rgba(0, 0, 0, 0.98)";
+            ctx.shadowBlur = 24;
+          }
+          ctx.fillText(t.text, curX, curY);
+          ctx.restore();
+          curX += ctx.measureText(t.text).width;
+        }
+      }
+    }
+
     function wrapText(text, maxW, font) {
       ctx.font = font;
       const words = text.split(/\s+/);
@@ -21277,60 +21390,143 @@ window.generateExactVerseImageBlob = function(customRatio) {
       return lines;
     }
 
+    // Unified Luminous Screen-Matched Typography Engine (Identical to Phone Fullscreen Modal)
+    function renderLuminousScreenLayout() {
+      // Atmospheric Contrast Gradient Overlay (exact match to modal-fullscreen-vod)
+      const overlayGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      overlayGrad.addColorStop(0, "rgba(0, 0, 0, 0.55)");
+      overlayGrad.addColorStop(0.28, "rgba(0, 0, 0, 0.18)");
+      overlayGrad.addColorStop(0.65, "rgba(0, 0, 0, 0.45)");
+      overlayGrad.addColorStop(1, "rgba(0, 0, 0, 0.92)");
+      ctx.fillStyle = overlayGrad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const maxW = 920;
+      let fontSize;
+      let lineH;
+
+      if (ratio === 'story' || ratio === 'wallpaper') {
+        if (displayText.length > 140) {
+          fontSize = 46;
+          lineH = 74;
+        } else if (displayText.length > 80) {
+          fontSize = 52;
+          lineH = 82;
+        } else {
+          fontSize = 58;
+          lineH = 92;
+        }
+      } else if (ratio === 'portrait') {
+        if (displayText.length > 140) {
+          fontSize = 42;
+          lineH = 68;
+        } else if (displayText.length > 80) {
+          fontSize = 48;
+          lineH = 76;
+        } else {
+          fontSize = 54;
+          lineH = 84;
+        }
+      } else { // square
+        if (displayText.length > 140) {
+          fontSize = 38;
+          lineH = 62;
+        } else if (displayText.length > 80) {
+          fontSize = 44;
+          lineH = 70;
+        } else {
+          fontSize = 48;
+          lineH = 76;
+        }
+      }
+
+      const font = `700 ${fontSize}px ${isMarathi ? "'Noto Serif Devanagari', 'Rozha One', Georgia, serif" : "'Playfair Display', 'Lora', Georgia, serif"}`;
+      const tokens = tokenizeVodText(displayText, !isMarathi);
+      const lines = wrapTokens(tokens, maxW, font);
+
+      const tagH = (ratio === 'story' || ratio === 'wallpaper') ? 28 : 24;
+      const gapTagQuote = (ratio === 'story' || ratio === 'wallpaper') ? 16 : 10;
+      const quoteH = (ratio === 'story' || ratio === 'wallpaper') ? 44 : 32;
+      const gapQuoteText = (ratio === 'story' || ratio === 'wallpaper') ? 20 : 12;
+      const textH = lines.length * lineH;
+      const gapTextRef = (ratio === 'story' || ratio === 'wallpaper') ? 38 : 26;
+      const refH = (ratio === 'story' || ratio === 'wallpaper') ? 34 : 28;
+
+      const totalBlockH = tagH + gapTagQuote + quoteH + gapQuoteText + textH + gapTextRef + refH;
+
+      const centerY = Math.round(canvas.height * ((ratio === 'story' || ratio === 'wallpaper') ? 0.465 : 0.475));
+      let curY = Math.round(centerY - (totalBlockH / 2));
+
+      // 1. Top Tag (✦ दैनिक वचन ✦)
+      ctx.direction = "ltr";
+      ctx.font = `800 ${(ratio === 'story' || ratio === 'wallpaper') ? 24 : 20}px 'Outfit', -apple-system, sans-serif`;
+      ctx.fillStyle = "#fbbf24";
+      ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
+      ctx.shadowBlur = 14;
+      ctx.textBaseline = "middle";
+      const tagText = isMarathi ? "✦ दैनिक वचन ✦" : "✦ VERSE OF THE DAY ✦";
+      const tagW = ctx.measureText(tagText).width;
+      ctx.fillText(tagText, Math.round((canvas.width - tagW) / 2), curY + Math.round(tagH / 2));
+      curY += tagH + gapTagQuote;
+
+      // 2. Elegant Quotation Mark (matching Screenshot 1)
+      ctx.font = `600 ${(ratio === 'story' || ratio === 'wallpaper') ? 58 : 46}px Georgia, serif`;
+      ctx.fillStyle = "#fbbf24";
+      ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
+      ctx.shadowBlur = 16;
+      const quoteStr = "“";
+      const quoteW = ctx.measureText(quoteStr).width;
+      ctx.fillText(quoteStr, Math.round((canvas.width - quoteW) / 2), curY + Math.round(quoteH / 2));
+      curY += quoteH + gapQuoteText;
+
+      // 3. Central Verse Body with Golden Highlighted Keywords
+      drawTokenizedLines(lines, curY + Math.round(lineH / 2), lineH, font);
+      curY += textH + gapTextRef;
+
+      // 4. Scripture Reference with flanking Golden Accent Lines
+      const refFontSize = (ratio === 'story' || ratio === 'wallpaper') ? 28 : 24;
+      ctx.font = `800 ${refFontSize}px 'Outfit', -apple-system, sans-serif`;
+      const refStr = displayRef;
+      const refW = ctx.measureText(refStr).width;
+      const refCenterY = curY + Math.round(refH / 2);
+
+      ctx.save();
+      ctx.fillStyle = "#fbbf24";
+      ctx.shadowColor = "rgba(0, 0, 0, 0.98)";
+      ctx.shadowBlur = 16;
+      ctx.fillText(refStr, Math.round((canvas.width - refW) / 2), refCenterY);
+
+      // Flanking gold lines
+      ctx.strokeStyle = "#fbbf24";
+      ctx.lineWidth = 2.5;
+      ctx.shadowColor = "rgba(0, 0, 0, 0.9)";
+      ctx.shadowBlur = 8;
+      const lineLen = (ratio === 'story' || ratio === 'wallpaper') ? 48 : 36;
+      const lineGap = 16;
+      const leftLineStart = Math.round((canvas.width - refW) / 2) - lineGap - lineLen;
+      const leftLineEnd = Math.round((canvas.width - refW) / 2) - lineGap;
+      const rightLineStart = Math.round((canvas.width + refW) / 2) + lineGap;
+      const rightLineEnd = Math.round((canvas.width + refW) / 2) + lineGap + lineLen;
+
+      ctx.beginPath();
+      ctx.moveTo(leftLineStart, refCenterY);
+      ctx.lineTo(leftLineEnd, refCenterY);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(rightLineStart, refCenterY);
+      ctx.lineTo(rightLineEnd, refCenterY);
+      ctx.stroke();
+      ctx.restore();
+    }
+
     const layoutMode = theme.layoutMode || "centered-card";
 
     /* ==========================================================================
-       STYLE 1: FLOURISH SWASH (Alpine Mountain Peak & Cross)
+       STYLE 1: FLOURISH SWASH / DEFAULT LUMINOUS SCREEN-MATCHED (Screenshot 1 Matching)
        ========================================================================== */
     if (layoutMode === "flourish-swash") {
-      // Bottom half dark atmospheric gradient overlay to guarantee 100% legibility
-      const grad = ctx.createLinearGradient(0, canvas.height * 0.42, 0, canvas.height);
-      grad.addColorStop(0, 'rgba(10, 15, 25, 0.0)');
-      grad.addColorStop(0.28, 'rgba(10, 15, 25, 0.55)');
-      grad.addColorStop(0.6, 'rgba(8, 12, 20, 0.82)');
-      grad.addColorStop(1, 'rgba(6, 9, 16, 0.94)');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, canvas.height * 0.42, canvas.width, canvas.height * 0.58);
-
-      const maxW = (ratio === 'story') ? 880 : 920;
-      let fontSize = (ratio === 'story') ? (displayText.length > 120 ? 46 : 56) : (displayText.length > 120 ? 42 : 50);
-      const font = `700 ${fontSize}px ${isMarathi ? "'Noto Serif Devanagari', serif" : "'Playfair Display', Georgia, serif"}`;
-      const lines = wrapText(displayText, maxW, font);
-      const lineH = Math.round(fontSize * 1.55);
-
-      let startY = Math.round(canvas.height * (ratio === 'story' ? 0.62 : 0.55));
-
-      // Top Tag
-      ctx.direction = "ltr";
-      ctx.font = "800 21px 'Outfit', sans-serif";
-      ctx.fillStyle = "#fbbf24";
-      ctx.shadowColor = "rgba(0,0,0,0.95)";
-      ctx.shadowBlur = 12;
-      const tagText = isMarathi ? (theme.tagMr || "✦ देवाच्या सामर्थ्याने ✦") : (theme.tagEn || "✦ WITH GOD, ALL THINGS ARE POSSIBLE ✦");
-      const tagW = ctx.measureText(tagText).width;
-      ctx.fillText(tagText, Math.round((canvas.width - tagW) / 2), startY);
-      startY += 52;
-
-      // Verse Body
-      ctx.font = font;
-      ctx.fillStyle = "#ffffff";
-      ctx.shadowColor = "rgba(0,0,0,0.98)";
-      ctx.shadowBlur = 20;
-      for (let i = 0; i < lines.length; i++) {
-        const lineStr = lines[i];
-        const lineW = ctx.measureText(lineStr).width;
-        const lineX = Math.round((canvas.width - lineW) / 2);
-        const curLineY = startY + (i * lineH);
-        ctx.fillText(lineStr, lineX, curLineY);
-      }
-      startY += (lines.length * lineH) + 36;
-
-      // Scripture Reference
-      ctx.font = "800 29px 'Outfit', -apple-system, sans-serif";
-      ctx.fillStyle = "#fbbf24";
-      const refStr = displayRef;
-      const refW = ctx.measureText(refStr).width;
-      ctx.fillText(refStr, Math.round((canvas.width - refW) / 2), startY);
+      renderLuminousScreenLayout();
 
     /* ==========================================================================
        STYLE 2: WATERCOLOR FINE ART & SOLID PILL (Moses Red Sea Watercolor)
@@ -21953,50 +22149,10 @@ window.generateExactVerseImageBlob = function(customRatio) {
       ctx.fillText(refStr, Math.round((canvas.width - refW) / 2), startY);
 
     /* ==========================================================================
-       DEFAULT: CENTERED PREMIUM CARD
+       DEFAULT: CENTERED LUMINOUS SCREEN-MATCHED CARD
        ========================================================================== */
     } else {
-      const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-      grad.addColorStop(0, 'rgba(10, 15, 25, 0.65)');
-      grad.addColorStop(0.5, 'rgba(10, 15, 25, 0.58)');
-      grad.addColorStop(1, 'rgba(8, 12, 20, 0.92)');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      const maxW = (ratio === 'story') ? 880 : 920;
-      let fontSize = (ratio === 'story') ? (displayText.length > 120 ? 46 : 56) : (displayText.length > 120 ? 42 : 50);
-      const font = `${theme.fontWeight || '700'} ${fontSize}px ${isMarathi ? "'Noto Serif Devanagari', serif" : (theme.fontFamily || "'Lora', Georgia, serif")}`;
-      const lines = wrapText(displayText, maxW, font);
-      const lineH = Math.round(fontSize * 1.52);
-
-      let startY = Math.round((canvas.height - (lines.length * lineH + 180)) / 2);
-
-      // Top Tag
-      ctx.direction = "ltr";
-      ctx.font = "800 22px 'Outfit', sans-serif";
-      ctx.fillStyle = theme.accentColor || "#fbbf24";
-      ctx.shadowColor = "rgba(0,0,0,0.95)";
-      ctx.shadowBlur = 14;
-      const tagText = theme.tag || "✦ VERSE OF THE DAY ✦";
-      const tagW = ctx.measureText(tagText).width;
-      ctx.fillText(tagText, Math.round((canvas.width - tagW) / 2), startY);
-      startY += 54;
-
-      // Verse Body
-      ctx.font = font;
-      ctx.fillStyle = theme.textColor || "#ffffff";
-      for (let i = 0; i < lines.length; i++) {
-        const lineW = ctx.measureText(lines[i]).width;
-        ctx.fillText(lines[i], Math.round((canvas.width - lineW) / 2), startY + (i * lineH));
-      }
-      startY += (lines.length * lineH) + 38;
-
-      // Reference
-      ctx.font = "800 30px 'Outfit', sans-serif";
-      ctx.fillStyle = theme.accentColor || "#fbbf24";
-      const refStr = displayRef;
-      const refW = ctx.measureText(refStr).width;
-      ctx.fillText(refStr, Math.round((canvas.width - refW) / 2), startY);
+      renderLuminousScreenLayout();
     }
 
     // 4. Centered River of Life Watermark Badge at Bottom
@@ -22133,7 +22289,7 @@ window.forceHardRefreshApp = async function() {
   window.location.replace(target);
 };
 
-window.currentVodAspectRatio = 'square';
+window.currentVodAspectRatio = 'story';
 
 window.switchVodAspectRatio = async function(newRatio) {
   window.currentVodAspectRatio = newRatio;
@@ -22181,7 +22337,7 @@ window.downloadRenderedVodImage = async function() {
     try {
       const link = document.createElement("a");
       link.href = dataUrl;
-      link.download = filename || "daily_bible_verse.png";
+      link.download = filename || "daily_bible_verse_status.png";
       document.body.appendChild(link);
       link.click();
       setTimeout(() => {
@@ -22207,9 +22363,20 @@ window.openShareAndSaveModal = async function() {
     }
     const modalSubtitle = document.getElementById("image-preview-modal-subtitle");
     if (modalSubtitle) {
-      modalSubtitle.textContent = isEng ? "High-Resolution Verse Card (HD)" : "हाय-डेफिनिशन वचन कार्ड (HD)";
+      modalSubtitle.textContent = isEng ? "High-Resolution Mobile Status (1080×1920 HD)" : "मोबाईल स्टेटस व वॉलपेपर (1080×1920 HD)";
     }
-    const ratio = window.currentVodAspectRatio || 'square';
+    const ratio = window.currentVodAspectRatio || 'story';
+
+    // Synchronize UI ratio tabs
+    document.querySelectorAll('.btn-vod-ratio-tab').forEach(btn => {
+      const isThis = btn.dataset.ratio === ratio;
+      btn.classList.toggle('active', isThis);
+      btn.style.background = isThis ? 'linear-gradient(135deg, #fbbf24, #d97706)' : 'rgba(255,255,255,0.08)';
+      btn.style.color = isThis ? '#0f172a' : '#ffffff';
+      btn.style.borderColor = isThis ? '#fbbf24' : 'rgba(255,255,255,0.2)';
+      btn.style.fontWeight = isThis ? '800' : '600';
+    });
+
     const result = await generateExactVerseImageBlob(ratio);
     window._currentRenderedVodImage = { ...result, type: 'vod' };
     openImagePreviewModal(result.dataUrl, result.filename, result.blob);
@@ -22236,7 +22403,7 @@ window.shareRenderedVodImage = async function() {
       return;
     }
     if (blob) {
-      const file = new File([blob], filename || "daily_bible_verse.png", { type: "image/png", lastModified: Date.now() });
+      const file = new File([blob], filename || "daily_bible_verse_status.png", { type: "image/png", lastModified: Date.now() });
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         try {
           await navigator.share({
@@ -22260,7 +22427,8 @@ window.shareDailyVerseToWhatsApp = async function() {
   try {
     const { vod } = getCurrentVOD();
     showToast("⏳ व्हॉट्सॲपसाठी फोटो तयार होत आहे...");
-    const { blob, filename, dataUrl } = await generateExactVerseImageBlob();
+    const currentRatio = window.currentVodAspectRatio || 'story';
+    const { blob, filename, dataUrl } = await generateExactVerseImageBlob(currentRatio);
     window._currentRenderedVodImage = { blob, filename, dataUrl };
 
     // Standard clean ASCII filename guaranteed safe on iOS Safari & Android
