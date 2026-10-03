@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v2404_MOBILE_STATUS_AND_MODAL_REDESIGN';
+const CACHE_NAME = 'river-of-life-cache-v2405_BWOD_THEMES_PALETTE_AND_COLORS';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

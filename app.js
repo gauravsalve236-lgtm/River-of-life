@@ -23874,58 +23874,311 @@ window.updateMicroLearningBookmarkUI = function() {
 /* ==============================================================================
    BIBLICAL WORD OF THE DAY (BWOD) SCENIC STUDIO & WHATSAPP ENGINE (v2393)
    ============================================================================== */
-const BWOD_WALLPAPERS = [
-  "pinterest_golden_path.jpg",
-  "pinterest_alpine_mountain.jpg",
-  "pinterest_forest_sunset.jpg",
-  "pinterest_light_of_world.jpg",
-  "pinterest_watercolor_red_sea.jpg",
-  "morning_grace_art.jpg",
-  "living_water_falls.jpg",
-  "sunrise.png"
+const BWOD_THEMES = [
+  // ── 1. Heavenly HD Spiritual Images ──────────────────────────────────────────
+  {
+    id: "glory_sunrise",
+    type: "image",
+    value: "glory_cloud_sunrise.jpg",
+    nameMr: "पहाटेचे स्वर्गीय तेज",
+    nameEn: "Glory Sunrise",
+    icon: "🌅"
+  },
+  {
+    id: "heavenly_sunbeams",
+    type: "image",
+    value: "heavenly_sunbeams.jpg",
+    nameMr: "दैवी सूर्यकिरण",
+    nameEn: "Heavenly Rays",
+    icon: "✨"
+  },
+  {
+    id: "celestial_galaxy",
+    type: "image",
+    value: "celestial_galaxy_night.jpg",
+    nameMr: "पवित्र आकाशगंगा",
+    nameEn: "Celestial Cosmos",
+    icon: "🌌"
+  },
+  {
+    id: "emerald_waters",
+    type: "image",
+    value: "emerald_lake_reflection.jpg",
+    nameMr: "शांत पाचू तलाव",
+    nameEn: "Emerald Waters",
+    icon: "🌿"
+  },
+  {
+    id: "living_waterfalls",
+    type: "image",
+    value: "living_water_falls.jpg",
+    nameMr: "जिवंत पाण्याचा झरा",
+    nameEn: "Living Waters",
+    icon: "🌊"
+  },
+  {
+    id: "tree_of_life",
+    type: "image",
+    value: "pinterest_illuminated_tree.jpg",
+    nameMr: "सुवर्ण जीवनवृक्ष",
+    nameEn: "Tree of Life",
+    icon: "🌳"
+  },
+  {
+    id: "golden_harvest",
+    type: "image",
+    value: "golden_wheat_harvest.jpg",
+    nameMr: "सोनेरी कापणी",
+    nameEn: "Golden Harvest",
+    icon: "🌾"
+  },
+  {
+    id: "lavender_sunset",
+    type: "image",
+    value: "sunset_lavender_field.jpg",
+    nameMr: "संध्याकाळची शांती",
+    nameEn: "Lavender Sunset",
+    icon: "🌄"
+  },
+  {
+    id: "lake_cross",
+    type: "image",
+    value: "pinterest_lake_cross.jpg",
+    nameMr: "संध्याकाळचा वधस्तंभ",
+    nameEn: "Twilight Cross",
+    icon: "✝️"
+  },
+  {
+    id: "morning_grace",
+    type: "image",
+    value: "morning_grace_art.jpg",
+    nameMr: "प्रभात कृपा",
+    nameEn: "Morning Grace",
+    icon: "🕊️"
+  },
+  {
+    id: "forest_golden_rays",
+    type: "image",
+    value: "pinterest_forest_sunset.jpg",
+    nameMr: "सोनेरी अरण्य",
+    nameEn: "Forest Light",
+    icon: "🌲"
+  },
+  {
+    id: "genesis_dawn",
+    type: "image",
+    value: "dawn_valley_genesis.jpg",
+    nameMr: "उत्पत्ती प्रभात",
+    nameEn: "Dawn Valley",
+    icon: "⛰️"
+  },
+  // ── 2. Sacred Vibrant Gradient Color Palettes ───────────────────────────────
+  {
+    id: "color_royal_indigo",
+    type: "color",
+    value: "linear-gradient(145deg, #070b19 0%, #17153b 45%, #3b1706 100%)",
+    canvasStops: [
+      { pos: 0, color: "#060914" },
+      { pos: 0.45, color: "#161338" },
+      { pos: 1, color: "#361504" }
+    ],
+    nameMr: "राजेशाही सुवर्ण-इंडिगो",
+    nameEn: "Royal Gold Indigo",
+    icon: "👑"
+  },
+  {
+    id: "color_sacred_emerald",
+    type: "color",
+    value: "linear-gradient(145deg, #022018 0%, #064e3b 50%, #022c22 100%)",
+    canvasStops: [
+      { pos: 0, color: "#021a14" },
+      { pos: 0.5, color: "#064e3b" },
+      { pos: 1, color: "#02241b" }
+    ],
+    nameMr: "पवित्र पाचू (Emerald)",
+    nameEn: "Sacred Emerald",
+    icon: "🟢"
+  },
+  {
+    id: "color_celestial_azure",
+    type: "color",
+    value: "linear-gradient(145deg, #041b2d 0%, #0369a1 50%, #082f49 100%)",
+    canvasStops: [
+      { pos: 0, color: "#031524" },
+      { pos: 0.5, color: "#0369a1" },
+      { pos: 1, color: "#06263b" }
+    ],
+    nameMr: "स्वर्गीय नीलमणी (Azure)",
+    nameEn: "Celestial Azure",
+    icon: "🔵"
+  },
+  {
+    id: "color_imperial_amethyst",
+    type: "color",
+    value: "linear-gradient(145deg, #180829 0%, #4a044e 50%, #1f0b38 100%)",
+    canvasStops: [
+      { pos: 0, color: "#130521" },
+      { pos: 0.5, color: "#4a044e" },
+      { pos: 1, color: "#17072a" }
+    ],
+    nameMr: "जांभळा मखमली (Amethyst)",
+    nameEn: "Imperial Purple",
+    icon: "🟣"
+  },
+  {
+    id: "color_sunrise_amber",
+    type: "color",
+    value: "linear-gradient(145deg, #250914 0%, #701a35 48%, #78350f 100%)",
+    canvasStops: [
+      { pos: 0, color: "#1d060f" },
+      { pos: 0.48, color: "#661730" },
+      { pos: 1, color: "#6b2f0c" }
+    ],
+    nameMr: "सूर्योदय अंबर (Amber)",
+    nameEn: "Sunrise Amber",
+    icon: "🟠"
+  },
+  {
+    id: "color_divine_slate",
+    type: "color",
+    value: "linear-gradient(145deg, #090d16 0%, #1e293b 50%, #05080f 100%)",
+    canvasStops: [
+      { pos: 0, color: "#070a12" },
+      { pos: 0.5, color: "#1a2434" },
+      { pos: 1, color: "#04060c" }
+    ],
+    nameMr: "पवित्र स्लेट (Divine Slate)",
+    nameEn: "Divine Slate",
+    icon: "⚫"
+  }
 ];
-let currentBwodWpIndex = 0;
 
-window.getTodayBwodWallpaper = function() {
+window.BWOD_THEMES = BWOD_THEMES;
+
+window.getTodayBwodTheme = function() {
+  const word = (typeof window.getTodayBiblicalWord === 'function') ? window.getTodayBiblicalWord() : null;
   const now = new Date();
   const startOfYear = new Date(now.getFullYear(), 0, 1);
   const dayOfYear = Math.floor((now - startOfYear) / (1000 * 60 * 60 * 24));
   const offset = (window.state && typeof window.state.bwodDayOffset === 'number') ? window.state.bwodDayOffset : 0;
-  const autoIdx = ((dayOfYear + offset) % BWOD_WALLPAPERS.length + BWOD_WALLPAPERS.length) % BWOD_WALLPAPERS.length;
   
+  // 1. Check user manual selection
   const manualDate = localStorage.getItem("rol_manual_bwod_date");
   const todayKey = now.toISOString().slice(0, 10);
-  const savedWp = localStorage.getItem("rol_selected_bwod_wallpaper");
-  if (manualDate === todayKey && savedWp && BWOD_WALLPAPERS.includes(savedWp)) {
-    return savedWp;
+  const savedThemeId = localStorage.getItem("rol_selected_bwod_theme_id");
+  if (manualDate === todayKey && savedThemeId) {
+    const found = BWOD_THEMES.find(t => t.id === savedThemeId);
+    if (found) return found;
   }
-  return BWOD_WALLPAPERS[autoIdx];
+  
+  // 2. Dynamic daily matching theme based on word id & dayOfYear
+  const seed = (word ? word.id : dayOfYear) + offset;
+  const idx = ((seed % BWOD_THEMES.length) + BWOD_THEMES.length) % BWOD_THEMES.length;
+  return BWOD_THEMES[idx] || BWOD_THEMES[0];
+};
+
+window.getTodayBwodWallpaper = function() {
+  const theme = window.getTodayBwodTheme();
+  return (theme && theme.type === "image") ? theme.value : "glory_cloud_sunrise.jpg";
+};
+
+window.applyBwodTheme = function(theme) {
+  if (!theme) return;
+  localStorage.setItem("rol_selected_bwod_theme_id", theme.id);
+  localStorage.setItem("rol_manual_bwod_date", new Date().toISOString().slice(0, 10));
+
+  // 1. Homepage Card
+  const card = document.getElementById("card-microlearning-word");
+  if (card) {
+    if (theme.type === 'image') {
+      card.style.backgroundImage = `url('assets/daily_verses/${theme.value}')`;
+      card.style.backgroundColor = "transparent";
+    } else {
+      card.style.backgroundImage = theme.value;
+      card.style.backgroundColor = "#070b19";
+    }
+  }
+
+  // 2. Fullscreen Studio Capsule Background
+  const fsBg = document.getElementById("fs-bwod-capsule-bg");
+  if (fsBg) {
+    if (theme.type === 'image') {
+      fsBg.style.backgroundImage = `url('assets/daily_verses/${theme.value}')`;
+      fsBg.style.backgroundColor = "transparent";
+    } else {
+      fsBg.style.backgroundImage = theme.value;
+      fsBg.style.backgroundColor = "#070b19";
+    }
+  }
+
+  // 3. Studio Thumbnail Preview
+  const thumb = document.getElementById("bwod-thumbnail-preview");
+  const thumbContainer = thumb ? thumb.parentElement : null;
+  if (thumb) {
+    if (theme.type === 'image') {
+      thumb.src = `assets/daily_verses/${theme.value}`;
+      thumb.style.display = "block";
+      if (thumbContainer) thumbContainer.style.background = "#111";
+    } else {
+      thumb.style.display = "none";
+      if (thumbContainer) thumbContainer.style.background = theme.value;
+    }
+  }
+
+  // 4. Update Theme Palette Chips
+  document.querySelectorAll(".bwod-theme-chip").forEach(chip => {
+    chip.classList.toggle("active", chip.dataset.themeId === theme.id);
+  });
 };
 
 window.cycleBwodWallpaper = function(event) {
   if (event) event.stopPropagation();
-  currentBwodWpIndex = (currentBwodWpIndex + 1) % BWOD_WALLPAPERS.length;
-  const wp = BWOD_WALLPAPERS[currentBwodWpIndex];
-  localStorage.setItem("rol_selected_bwod_wallpaper", wp);
-  localStorage.setItem("rol_manual_bwod_date", new Date().toISOString().slice(0, 10));
-  
-  const card = document.getElementById("card-microlearning-word");
-  if (card) {
-    card.style.backgroundImage = `url('assets/daily_verses/${wp}')`;
-  }
-  const fsBg = document.getElementById("fs-bwod-capsule-bg");
-  if (fsBg) {
-    fsBg.style.backgroundImage = `url('assets/daily_verses/${wp}')`;
-  }
-  const thumb = document.getElementById("bwod-thumbnail-preview");
-  if (thumb) {
-    thumb.src = `assets/daily_verses/${wp}`;
-  }
+  const curTheme = window.getTodayBwodTheme();
+  let idx = BWOD_THEMES.findIndex(t => t.id === curTheme.id);
+  if (idx === -1) idx = 0;
+  const nextIdx = (idx + 1) % BWOD_THEMES.length;
+  const nextTheme = BWOD_THEMES[nextIdx];
+  window.applyBwodTheme(nextTheme);
 
   if (typeof showToast === 'function') {
     const isEng = (window.state && (window.state.translation === "eng" || window.state.language === "en"));
-    showToast(isEng ? "🎨 Wallpaper updated!" : "🎨 वॉलपेपर बदलला!");
+    const name = isEng ? nextTheme.nameEn : nextTheme.nameMr;
+    showToast(`🎨 ${nextTheme.icon} थीम: ${name}`);
   }
+};
+
+window.selectBwodTheme = function(themeId) {
+  const theme = BWOD_THEMES.find(t => t.id === themeId);
+  if (theme) {
+    window.applyBwodTheme(theme);
+    if (typeof showToast === 'function') {
+      const isEng = (window.state && (window.state.translation === "eng" || window.state.language === "en"));
+      const name = isEng ? theme.nameEn : theme.nameMr;
+      showToast(`🎨 ${theme.icon} थीम: ${name}`);
+    }
+  }
+};
+
+window.renderBwodThemePicker = function() {
+  const track = document.getElementById("bwod-theme-picker-track");
+  if (!track) return;
+  const activeTheme = window.getTodayBwodTheme();
+  const isEng = (window.state && (window.state.translation === "eng" || window.state.language === "en"));
+
+  track.innerHTML = BWOD_THEMES.map(theme => {
+    const isActive = (theme.id === activeTheme.id);
+    const label = isEng ? theme.nameEn : theme.nameMr;
+    const thumbStyle = (theme.type === 'image')
+      ? `background-image: url('assets/daily_verses/${theme.value}'); background-size: cover; background-position: center;`
+      : `background: ${theme.value};`;
+
+    return `
+      <button type="button" class="bwod-theme-chip ${isActive ? 'active' : ''}" data-theme-id="${theme.id}" onclick="selectBwodTheme('${theme.id}')" title="${label}">
+        <span class="bwod-theme-chip-thumb" style="${thumbStyle}"></span>
+        <span>${label}</span>
+      </button>
+    `;
+  }).join('');
 };
 
 window.openFullscreenBWOD = function() {
@@ -23937,6 +24190,9 @@ window.openFullscreenBWOD = function() {
   modal.style.pointerEvents = "auto";
   document.body.style.overflow = "hidden";
   window.updateBwodStudioUI();
+  if (typeof window.renderBwodThemePicker === 'function') {
+    window.renderBwodThemePicker();
+  }
 };
 
 window.closeFullscreenBWOD = function() {
@@ -23959,19 +24215,18 @@ window.navigateBWOD = function(direction) {
   }
   renderBiblicalMicroLearning();
   window.updateBwodStudioUI();
+  if (typeof window.renderBwodThemePicker === 'function') {
+    window.renderBwodThemePicker();
+  }
 };
 
 window.updateBwodStudioUI = function() {
   const word = window.getTodayBiblicalWord();
   if (!word) return;
   const isEng = (window.state && (window.state.translation === "eng" || window.state.language === "en"));
+  const theme = window.getTodayBwodTheme();
   
-  const savedWp = (typeof window.getTodayBwodWallpaper === "function") ? window.getTodayBwodWallpaper() : BWOD_WALLPAPERS[currentBwodWpIndex];
-  const fsBg = document.getElementById("fs-bwod-capsule-bg");
-  if (fsBg) fsBg.style.backgroundImage = `url('assets/daily_verses/${savedWp}')`;
-  
-  const thumb = document.getElementById("bwod-thumbnail-preview");
-  if (thumb) thumb.src = `assets/daily_verses/${savedWp}`;
+  window.applyBwodTheme(theme);
 
   const badgePill = document.getElementById("fs-bwod-badge-pill");
   if (badgePill) badgePill.textContent = isEng ? "✦ WORD OF THE DAY ✦" : "✦ आजचा पवित्र शब्द ✦";
@@ -24014,8 +24269,7 @@ window.updateBwodStudioUI = function() {
 window.generateExactBwodImageBlob = async function() {
   const word   = window.getTodayBiblicalWord();
   const isEng  = (window.state && (window.state.translation === "eng" || window.state.language === "en"));
-  const savedWp = (typeof window.getTodayBwodWallpaper === "function")
-    ? window.getTodayBwodWallpaper() : "pinterest_golden_path.jpg";
+  const theme  = (typeof window.getTodayBwodTheme === "function") ? window.getTodayBwodTheme() : BWOD_THEMES[0];
 
   const W = 1080, H = 1920;
   const canvas = document.createElement("canvas");
@@ -24027,37 +24281,60 @@ window.generateExactBwodImageBlob = async function() {
     try { await document.fonts.ready; } catch(e) {}
   }
 
-  // ── 1. Full-Bleed Wallpaper (Edge-to-Edge) ───────────────────────────────────
-  const img = new Image();
-  img.crossOrigin = "anonymous";
-  img.src = "assets/daily_verses/" + savedWp;
-  await new Promise(r => { img.onload = r; img.onerror = r; setTimeout(r, 3000); });
-  if (img.complete && img.naturalWidth > 0) {
-    const sc = Math.max(W / img.naturalWidth, H / img.naturalHeight);
-    ctx.drawImage(img, (W - img.naturalWidth * sc) / 2, (H - img.naturalHeight * sc) / 2,
-                  img.naturalWidth * sc, img.naturalHeight * sc);
+  // ── 1. Full-Bleed Wallpaper or Vibrant Gradient ─────────────────────────────
+  if (theme.type === "image") {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.src = "assets/daily_verses/" + theme.value;
+    await new Promise(r => { img.onload = r; img.onerror = r; setTimeout(r, 3000); });
+    if (img.complete && img.naturalWidth > 0) {
+      const sc = Math.max(W / img.naturalWidth, H / img.naturalHeight);
+      ctx.drawImage(img, (W - img.naturalWidth * sc) / 2, (H - img.naturalHeight * sc) / 2,
+                    img.naturalWidth * sc, img.naturalHeight * sc);
+    } else {
+      const g = ctx.createLinearGradient(0, 0, W, H);
+      g.addColorStop(0, "#080e1e"); g.addColorStop(0.5, "#181433"); g.addColorStop(1, "#04060d");
+      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    }
+
+    // Atmospheric Scrim & Radial Reading Spotlight for Images
+    const sc1 = ctx.createLinearGradient(0, 0, 0, H);
+    sc1.addColorStop(0,    "rgba(3, 6, 16, 0.85)");
+    sc1.addColorStop(0.18, "rgba(3, 6, 16, 0.55)");
+    sc1.addColorStop(0.50, "rgba(2, 5, 14, 0.68)");
+    sc1.addColorStop(0.82, "rgba(2, 4, 12, 0.82)");
+    sc1.addColorStop(1,    "rgba(1, 2, 8, 0.96)");
+    ctx.fillStyle = sc1; ctx.fillRect(0, 0, W, H);
+
+    const rad = ctx.createRadialGradient(W / 2, H * 0.48, 80, W / 2, H * 0.48, 520);
+    rad.addColorStop(0,    "rgba(2, 5, 14, 0.72)");
+    rad.addColorStop(0.65, "rgba(2, 5, 14, 0.45)");
+    rad.addColorStop(1,    "rgba(2, 5, 14, 0.0)");
+    ctx.fillStyle = rad; ctx.fillRect(0, 0, W, H);
   } else {
+    // Gradient / Color Theme
     const g = ctx.createLinearGradient(0, 0, W, H);
-    g.addColorStop(0, "#080e1e"); g.addColorStop(0.5, "#181433"); g.addColorStop(1, "#04060d");
+    if (Array.isArray(theme.canvasStops)) {
+      theme.canvasStops.forEach(s => g.addColorStop(s.pos, s.color));
+    } else {
+      g.addColorStop(0, "#070b19"); g.addColorStop(0.5, "#17153b"); g.addColorStop(1, "#3b1706");
+    }
     ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+
+    // Radiant Ambient Flare
+    const flare = ctx.createRadialGradient(W / 2, H * 0.42, 60, W / 2, H * 0.42, 540);
+    flare.addColorStop(0, "rgba(251, 191, 36, 0.22)");
+    flare.addColorStop(0.5, "rgba(251, 191, 36, 0.06)");
+    flare.addColorStop(1, "rgba(0, 0, 0, 0.45)");
+    ctx.fillStyle = flare; ctx.fillRect(0, 0, W, H);
+
+    const vig = ctx.createLinearGradient(0, 0, 0, H);
+    vig.addColorStop(0, "rgba(0, 0, 0, 0.65)");
+    vig.addColorStop(0.2, "rgba(0, 0, 0, 0.15)");
+    vig.addColorStop(0.8, "rgba(0, 0, 0, 0.25)");
+    vig.addColorStop(1, "rgba(0, 0, 0, 0.85)");
+    ctx.fillStyle = vig; ctx.fillRect(0, 0, W, H);
   }
-
-  // ── 2. Atmospheric Scrim & Radial Reading Spotlight ────────────────────────
-  // A. Overall vertical gradient (deep status bar protection & rich footer darkness)
-  const sc1 = ctx.createLinearGradient(0, 0, 0, H);
-  sc1.addColorStop(0,    "rgba(3, 6, 16, 0.85)");
-  sc1.addColorStop(0.18, "rgba(3, 6, 16, 0.55)");
-  sc1.addColorStop(0.50, "rgba(2, 5, 14, 0.68)");
-  sc1.addColorStop(0.82, "rgba(2, 4, 12, 0.82)");
-  sc1.addColorStop(1,    "rgba(1, 2, 8, 0.96)");
-  ctx.fillStyle = sc1; ctx.fillRect(0, 0, W, H);
-
-  // B. Central soft radial darkening behind text for maximum contrast
-  const rad = ctx.createRadialGradient(W / 2, H * 0.48, 80, W / 2, H * 0.48, 520);
-  rad.addColorStop(0,   "rgba(2, 5, 14, 0.72)");
-  rad.addColorStop(0.65, "rgba(2, 5, 14, 0.45)");
-  rad.addColorStop(1,   "rgba(2, 5, 14, 0.0)");
-  ctx.fillStyle = rad; ctx.fillRect(0, 0, W, H);
 
   // ── 3. Ornate Double Gold Border & Corner Accents ───────────────────────────
   const MARGIN = 44;
@@ -24592,11 +24869,10 @@ window.renderBiblicalMicroLearning = function() {
   
   const isEng = (window.state && (window.state.translation === "eng" || window.state.language === "en"));
   
-  // Set card background image - scenic golden path default for optimal status presentation
-  const savedWp = (typeof window.getTodayBwodWallpaper === "function") ? window.getTodayBwodWallpaper() : "pinterest_golden_path.jpg";
-  const card = document.getElementById("card-microlearning-word");
-  if (card) {
-    card.style.backgroundImage = `url('assets/daily_verses/${savedWp}')`;
+  // Set card background using curated theme (HD image or sacred color gradient)
+  const currentTheme = (typeof window.getTodayBwodTheme === "function") ? window.getTodayBwodTheme() : BWOD_THEMES[0];
+  if (typeof window.applyBwodTheme === "function") {
+    window.applyBwodTheme(currentTheme);
   }
 
   const titleBadge = document.getElementById("micro-word-header-title");
