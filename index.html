@@ -12,7 +12,7 @@
   <script>
     // Force immediate hard purge of all stale Service Workers and CacheStorage
     (function() {
-      const CURRENT_VER = "v2402_BWOD_STATUS_PERFECT_CENTER_FIX";
+      const CURRENT_VER = "v2403_LORDS_PRAYER_AND_DAILY_ENGAGEMENT";
       if (localStorage.getItem("rol_app_ver") !== CURRENT_VER) {
         localStorage.setItem("rol_app_ver", CURRENT_VER);
         if ('serviceWorker' in navigator) {
@@ -105,7 +105,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Great+Vibes&family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Noto+Sans+Devanagari:wght@400;500;600;700;800;900&family=Noto+Serif+Devanagari:wght@400;500;600;700;800;900&family=Outfit:wght@500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600;1,700&family=Poppins:wght@400;500;600;700;800;900&family=Rozha+One&display=swap" rel="stylesheet">
   
   <!-- Main Stylesheet (Biblical Word Studio & Home Search) -->
-  <link rel="stylesheet" href="index.css?v=2397_BWOD_FULLSCREEN_PURE_IMAGE">
+  <link rel="stylesheet" href="index.css?v=2403_LORDS_PRAYER_AND_DAILY_ENGAGEMENT">
 
   <!-- Official LiveKit WebRTC Client SDK -->
   <script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
@@ -606,6 +606,110 @@
                     </div>
                   </div>
 
+                </div>
+              </div>
+
+              <!-- 8B. The Lord's Prayer (प्रभूने शिकवलेली प्रार्थना - Sacred Teaching of Jesus) -->
+              <div class="home-lords-prayer-section" id="home-lords-prayer-section">
+                <div class="home-section-heading-row" style="display: flex; justify-content: space-between; align-items: flex-end;">
+                  <div>
+                    <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;">
+                      <span style="font-size: 13px;">✝️</span>
+                      <span class="home-sanctuary-kicker" style="color: #d97706;">SACRED TEACHING • मूळ शिकवण</span>
+                    </div>
+                    <h3 class="home-section-title">प्रभूने शिकवलेली प्रार्थना</h3>
+                  </div>
+                  <span class="home-section-sub">The Lord's Prayer</span>
+                </div>
+
+                <div class="lords-prayer-master-card" id="lords-prayer-master-card">
+                  <!-- Atmospheric Header with Aura and Tabs -->
+                  <div class="lords-prayer-card-header">
+                    <div class="lords-prayer-badge-row">
+                      <span class="lords-prayer-kicker-tag">
+                        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v20M17 7H7"/></svg>
+                        <span>येशूचे मार्गदर्शन • Luke 11:1</span>
+                      </span>
+                      <div class="lords-prayer-tabs-pill">
+                        <button type="button" id="lp-tab-matt" class="lp-tab-btn active" onclick="switchLordsPrayerVersion('matthew')">मत्तय ६:९-१३</button>
+                        <button type="button" id="lp-tab-luke" class="lp-tab-btn" onclick="switchLordsPrayerVersion('luke')">लूक ११:२-४</button>
+                      </div>
+                    </div>
+
+                    <!-- Context Teaching Quote (Jesus teaching how to pray) -->
+                    <div class="lords-prayer-context-box">
+                      <div class="lp-quote-icon">“</div>
+                      <p class="lp-context-text">
+                        प्रार्थनेविषयी शिकवताना प्रभू येशूने सांगितले की, आपण ढोंग्यासारखी व निरर्थक शब्दांची प्रार्थना करू नये. उगीच पुष्कळ बोलत राहू नये <em>(मत्तय ६:५-८)</em>. शिष्यांनी विनंती केली: <em>“प्रभू, आम्हाला प्रार्थना करायला शिकव” (लूक ११:१)</em>. त्यावर येशू म्हणाला:
+                      </p>
+                    </div>
+                  </div>
+
+                  <!-- Prayer Verses Body -->
+                  <div class="lords-prayer-body">
+                    <!-- Matthew 6:9-13 (Traditional Prayer) -->
+                    <div id="lp-content-matthew" class="lp-content-view active">
+                      <div class="lp-verse-preface">“म्हणून तुम्ही अशी प्रार्थना करा:”</div>
+                      <div class="lp-stanzas">
+                        <div class="lp-stanza-line prominent">‘हे आमच्या स्वर्गातील पित्या,</div>
+                        <div class="lp-stanza-line">तुझे नाव पवित्र मानिले जावो.</div>
+                        <div class="lp-stanza-line">तुझे राज्य येवो.</div>
+                        <div class="lp-stanza-line">जसे स्वर्गात तसेच पृथ्वीवर तुझ्या इच्छेप्रमाणे होवो.</div>
+                        <div class="lp-stanza-divider"></div>
+                        <div class="lp-stanza-line">आमची रोजची भाकर आज आम्हाला दे.</div>
+                        <div class="lp-stanza-line">आणि आम्ही आमच्या ऋण्यांना सोडले आहे तशीच तू आमची ऋणे आम्हाला सोड.</div>
+                        <div class="lp-stanza-line">आणि आम्हाला परीक्षेत आणू नकोस,</div>
+                        <div class="lp-stanza-line highlight">पण आम्हाला वाइटापासून सोडीव.’</div>
+                      </div>
+                      <div class="lp-ref-tag">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                        <span>मत्तय ६:९-१३ • Matthew 6:9-13 (पारंपारिक प्रार्थना)</span>
+                      </div>
+                    </div>
+
+                    <!-- Luke 11:2-4 (Concise Prayer) -->
+                    <div id="lp-content-luke" class="lp-content-view" style="display: none;">
+                      <div class="lp-verse-preface">संत लूक ह्याने लिहिलेल्या शुभवर्तमानात येशू म्हणाला, “तुम्ही प्रार्थना कराल तेव्हा म्हणा:”</div>
+                      <div class="lp-stanzas">
+                        <div class="lp-stanza-line prominent">‘हे पित्या,</div>
+                        <div class="lp-stanza-line">तुझे नाव पवित्र मानिले जावो.</div>
+                        <div class="lp-stanza-line">तुझे राज्य येवो.</div>
+                        <div class="lp-stanza-divider"></div>
+                        <div class="lp-stanza-line">आमची रोजची भाकर रोज आम्हाला दे.</div>
+                        <div class="lp-stanza-line">आणि आमच्या पापांची आम्हाला क्षमा कर;</div>
+                        <div class="lp-stanza-line">कारण आम्हीही आमच्या प्रत्येक ऋण्याला क्षमा करतो.</div>
+                        <div class="lp-stanza-line highlight">आणि आम्हाला परीक्षेत आणू नकोस.’</div>
+                      </div>
+                      <div class="lp-ref-tag">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                        <span>लूक ११:२-४ • Luke 11:2-4 (संक्षिप्त प्रार्थना)</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Interactive Action Footer -->
+                  <div class="lords-prayer-footer-actions">
+                    <button type="button" class="lp-action-btn primary" id="lp-btn-listen" onclick="toggleLordsPrayerAudio()" title="प्रार्थना ऐका (Listen Audio)">
+                      <svg id="lp-audio-icon-play" viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                      <svg id="lp-audio-icon-pause" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="display: none;"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+                      <span id="lp-audio-btn-text">ऐका (Listen)</span>
+                    </button>
+
+                    <button type="button" class="lp-action-btn" onclick="copyLordsPrayerText()" title="प्रार्थना कॉपी करा (Copy)">
+                      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                      <span>कॉपी करा</span>
+                    </button>
+
+                    <button type="button" class="lp-action-btn" onclick="shareLordsPrayerToWhatsApp()" title="व्हॉट्सॲपवर शेअर करा (Share)">
+                      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
+                      <span>शेअर करा</span>
+                    </button>
+
+                    <button type="button" class="lp-action-btn outline" onclick="readLordsPrayerChapter()" title="बायबलमध्ये अध्याय वाचा (Read Chapter)">
+                      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                      <span>वाचा</span>
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -6434,7 +6538,7 @@
   <script src="sarvam-tts.js?v=132_MARVBSI_FULL_CHURCH_BIBLE"></script>
   <script src="bible-study.js?v=138_MUSEUM_STUDY_HUB"></script>
   <script src="peerjs.min.js"></script>
-  <script src="app.js?v=2402_BWOD_STATUS_PERFECT_CENTER_FIX"></script>
+  <script src="app.js?v=2403_LORDS_PRAYER_AND_DAILY_ENGAGEMENT"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 4.5s no matter what
