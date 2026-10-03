@@ -3240,14 +3240,39 @@ function renderDailyDevotion() {
   if (contPercentEl) contPercentEl.textContent = isEng ? `Chapter ${curCh} of ${totalChs}` : `अध्याय ${curCh} / ${totalChs}`;
   if (contBarEl) contBarEl.style.width = `${readPercent}%`;
 
-  // Today's Prayer Card Sync
+  // Today's Prayer Card Sync (Dynamically rotating daily topic from PRAYER_TOPICS_DATA)
+  const prayerKeys = (typeof PRAYER_TOPICS_DATA !== 'undefined') ? Object.keys(PRAYER_TOPICS_DATA) : [];
+  const todayPrayerKey = prayerKeys.length > 0 ? prayerKeys[dayOfYear % prayerKeys.length] : 'peace_anxiety';
+  const todayPrayer = (typeof PRAYER_TOPICS_DATA !== 'undefined' && PRAYER_TOPICS_DATA[todayPrayerKey]) ? PRAYER_TOPICS_DATA[todayPrayerKey] : null;
+
+  const prayerCardEl = document.getElementById("home-prayer-preview-card");
   const prayerTitleEl = document.getElementById("home-prayer-title");
+  const prayerSubEl = prayerCardEl ? prayerCardEl.querySelector(".figma-tile-sub-mr") : null;
   const prayerExcerptEl = document.getElementById("home-prayer-excerpt");
-  if (prayerTitleEl) {
-    prayerTitleEl.textContent = isEng ? "Peace Over Anxiety" : "शांततेसाठी प्रार्थना • Peace Over Anxiety";
-  }
-  if (prayerExcerptEl) {
-    prayerExcerptEl.textContent = isEng ? '"The peace of God, which surpasses all understanding, will guard your hearts and minds in Christ Jesus."' : '"सर्व बुद्धीपलीकडची देवाची शांती तुमच्या हृदयाचे आणि मनाचे ख्रिस्त येशूमध्ये रक्षण करो."';
+  const prayerRefEl = prayerCardEl ? prayerCardEl.querySelector(".home-prayer-ref") : null;
+  const prayerImgEl = prayerCardEl ? prayerCardEl.querySelector(".figma-tile-cover-img") : null;
+  const prayerActionBtn = prayerCardEl ? prayerCardEl.querySelector(".figma-tile-action-btn") : null;
+
+  if (todayPrayer) {
+    if (prayerTitleEl) prayerTitleEl.textContent = isEng ? todayPrayer.titleEn : todayPrayer.titleMr;
+    if (prayerSubEl) prayerSubEl.textContent = isEng ? todayPrayer.categoryEn : (todayPrayer.subtitleMr || todayPrayer.titleMr);
+    if (prayerExcerptEl) {
+      const excerpt = isEng ? (todayPrayer.verseEn || todayPrayer.subtitleEn) : (todayPrayer.verseMr || todayPrayer.subtitleMr);
+      prayerExcerptEl.textContent = `“${excerpt}”`;
+    }
+    if (prayerRefEl) prayerRefEl.textContent = isEng ? todayPrayer.refEn : todayPrayer.refMr;
+    if (prayerImgEl && todayPrayer.bgImage) prayerImgEl.src = todayPrayer.bgImage;
+    if (prayerActionBtn) {
+      prayerActionBtn.onclick = function(e) {
+        if (e) e.stopPropagation();
+        openImmersivePrayerModal(todayPrayer.id);
+      };
+    }
+    if (prayerCardEl) {
+      prayerCardEl.onclick = function() {
+        openImmersivePrayerModal(todayPrayer.id);
+      };
+    }
   }
 
   // Your Journey Stats Sync
@@ -8832,6 +8857,548 @@ Let the soothing balm of Your Holy Spirit wash over my thoughts, memories, and e
 
 In Your healing and holy name, Jesus, Amen.`,
     amenCount: 395
+  },
+  "financial_breakthrough": {
+    id: "financial_breakthrough",
+    bookKey: "philippians",
+    chapter: 4,
+    categoryMr: "आर्थिक पुरवठा व भरभराट",
+    categoryEn: "FINANCIAL BREAKTHROUGH",
+    titleMr: "आर्थिक पुरवठा व कर्जातून मुक्ती",
+    titleEn: "Financial Breakthrough & Divine Provision",
+    subtitleMr: "परमेश्वर आपल्या विपुलतेनुसार सर्व गरजा भागवतो",
+    subtitleEn: "God supplies every need according to His riches in glory",
+    bgImage: "assets/images/winding_path_journey.jpg",
+    refMr: "फिलिप्पैकरांस ४:१९",
+    refEn: "Philippians 4:19",
+    verseMr: "आणि माझा देव आपल्या संपत्तीप्रमाणे ख्रिस्त येशूमध्ये गौरवाने तुमची प्रत्येक गरज भागवील.",
+    verseEn: "And my God will meet all your needs according to the riches of his glory in Christ Jesus.",
+    prayerMr: `हे सर्व विश्वाचा मालक असलेल्या स्वर्गीय पित्या,
+सर्व धन, संपत्ती आणि जगातील सर्व संसाधने तुझीच आहेत. आज मी माझ्या कुटुंबाच्या सर्व आर्थिक गरजा, जबाबदाऱ्या आणि कर्जाचे ओझे तुझ्या चरणी सोपवतो.
+
+प्रभू, माझ्या कामावर आणि उपजीविकेच्या साधनांवर तुझा विपुल आशीर्वाद असू दे. मला मिळालेल्या धनाचा सुज्ञपणे, प्रामाणिकपणे आणि जबाबदारीने वापर करण्याची स्वर्गीय बुद्धी दे. सर्व अनावश्य खर्च आणि नुकसानीपासून आमचे रक्षण कर. जसा तू आकाशातील पाखरांना आणि रानातील फुलांना सांभाळतोस, तसाच आमच्या सर्व गरजांची पूर्तता कर.
+
+आम्हाला कोणाचेही देणेकरी न ठेवता, इतरांना देणारे आणि गरजूंना मदत करणारे बनव.
+
+येशूच्या नावाने, आमेन.`,
+    prayerEn: `Heavenly Father, Sovereign Provider and Creator of all wealth,
+Everything in heaven and on earth belongs to You. Today I bring before You our household finances, debts, and daily financial obligations.
+
+Lord, open windows of divine opportunity in my career, business, and daily work. Grant me supernatural wisdom to manage every penny with diligence, integrity, and godly stewardship. Shield our home from unexpected financial leaks, wasted resources, and anxiety.
+
+Teach us to walk in generous faith rather than fear of scarcity, trusting that You supply every genuine need according to Your glorious riches in Christ Jesus.
+
+In Jesus' name, Amen.`,
+    amenCount: 420
+  },
+  "children_protection": {
+    id: "children_protection",
+    bookKey: "proverbs",
+    chapter: 22,
+    categoryMr: "मुलांसाठी आशीर्वाद व संरक्षण",
+    categoryEn: "CHILDREN & FUTURE",
+    titleMr: "मुलांचे उज्ज्वल भविष्य व संरक्षण",
+    titleEn: "Blessing & Protection Over Children",
+    subtitleMr: "मुलांच्या पावलांवर देवाचे मार्गदर्शन व बुद्धी",
+    subtitleEn: "Nurturing children in godly wisdom and protection",
+    bgImage: "assets/images/morning_grace_art.jpg",
+    refMr: "नीतिसूत्रे २२:६ • यशया ५४:१३",
+    refEn: "Proverbs 22:6 • Isaiah 54:13",
+    verseMr: "मुलाला योग्य मार्गाचे शिक्षण दे, म्हणजे तो वृद्ध झाल्यावरही त्यापासून वळणार नाही. तुझी सर्व मुले परमेश्वराकडून शिकलेली असतील, आणि त्यांना मोठी शांती लाभेल.",
+    verseEn: "Start children off on the way they should go, and even when they are old they will not turn from it. All your children will be taught by the Lord, and great will be their peace.",
+    prayerMr: `हे प्रेमळ देवादिक्षका,
+माझ्या मुलांना तू मला दिलेली अमूल्य देणगी आहेस. आज मी त्यांना पूर्णपणे तुझ्या सुरक्षित हातात सोपवतो. या जगातील वाईट संगती, दुष्ट प्रभाव, प्रलोभने आणि डिजिटल संकटांपासून त्यांचे रक्षण कर.
+
+त्यांच्या बुद्धीला स्वर्गीय ज्ञान दे आणि त्यांच्या हृदयात तुझ्याविषयी आदर व प्रीती निर्माण कर. त्यांचे शिक्षण, करिअर आणि चारित्र्य तुझ्या गौरवासाठी घडव. त्यांच्या पावलांना नेहमी सत्य आणि नीतिमत्तेच्या मार्गावर चालव.
+
+माझ्या मुलांभोवती तुझ्या देवदूतांचा पहारा अहोरात्र असू दे.
+
+येशूच्या नावात, आमेन.`,
+    prayerEn: `Loving Father and Shepherd of Families,
+Children are a precious heritage from You. I place my children entirely within the safety of Your righteous right hand today. Guard their minds from destructive worldly cultures, peer pressure, and harmful influences.
+
+Grant them a hunger for truth, a sensitive conscience, and divine discernment in every friendship. Bless their schoolwork, physical growth, and future vocations. May they grow in favor with God and people, shining as pure lights of Christ.
+
+Surround them with Your ministering angels everywhere they go.
+
+In Jesus' name, Amen.`,
+    amenCount: 388
+  },
+  "exam_studies": {
+    id: "exam_studies",
+    bookKey: "james",
+    chapter: 1,
+    categoryMr: "अभ्यास, परीक्षा व स्मरणशक्ती",
+    categoryEn: "STUDIES & EXAMS",
+    titleMr: "परीक्षेत यश व स्वर्गीय बुद्धी",
+    titleEn: "Success in Exams & Divine Wisdom",
+    subtitleMr: "अभ्यासात एकाग्रता, आकलनशक्ती व आत्मविश्वास",
+    subtitleEn: "Clarity of mind, retention, and courage during tests",
+    bgImage: "assets/images/moses_mount_sinai_art.jpg",
+    refMr: "याकोब १:५ • दानीएल १:१७",
+    refEn: "James 1:5 • Daniel 1:17",
+    verseMr: "जर तुमच्यापैकी कोणाला बुद्धीची उणीव असेल, तर त्याने ती देवाजवळ मागावी, म्हणजे ती त्याला दिली जाईल; कारण देव कोणालाही दोष न लावता सर्वांना उदारपणे देतो.",
+    verseEn: "If any of you lacks wisdom, you should ask God, who gives generously to all without finding fault, and it will be given to you.",
+    prayerMr: `हे सर्व ज्ञानाच्या उगमा परमेश्वरा,
+जसे तू दानीएल आणि त्याच्या मित्रांना सर्व विद्या आणि ज्ञानात बुद्धिमत्ता दिलीस, तशीच बुद्धी आणि स्मरणशक्ती मला माझ्या अभ्यासात दे.
+
+माझ्या मनातील भीती, गोंधळ आणि विसरभोळेपणा दूर कर. मी जे काही वाचतो आणि शिकतो, ते चांगल्या प्रकारे समजून घेण्याची व परीक्षेच्या वेळी अचूक आठवण्याची कृपा मला दे. परीक्षेच्या खोलीत माझे मन शांत व आत्मविश्वासाने भरलेले असू दे. माझ्या कष्टाचे फळ मला उत्तम यशाच्या रूपात मिळू दे.
+
+येशूच्या नावाने ही प्रार्थना करतो, आमेन.`,
+    prayerEn: `Lord God of All Wisdom and Knowledge,
+Just as You bestowed wisdom, insight, and sharp understanding upon Daniel, pour out Your intellectual grace upon my studies and preparations today.
+
+Silence every voice of exam anxiety, confusion, and panic. Expand my memory to retain and clearly articulate concepts during my assessments. Keep my mind focused, calm, and alert under pressure. Crown my honest hard work with favor, clarity, and outstanding success.
+
+In Jesus' name, Amen.`,
+    amenCount: 365
+  },
+  "forgiveness_freedom": {
+    id: "forgiveness_freedom",
+    bookKey: "colossians",
+    chapter: 3,
+    categoryMr: "क्षमाशीलता व अंतःकरणाचे स्वातंत्र्य",
+    categoryEn: "FREEDOM IN FORGIVENESS",
+    titleMr: "क्षमाशीलता व मनाचे स्वातंत्र्य",
+    titleEn: "The Healing Power of Forgiveness",
+    subtitleMr: "कडूपणातून मुक्ती आणि ख्रिस्ताची खरी प्रीती",
+    subtitleEn: "Releasing resentment to walk in spiritual freedom",
+    bgImage: "assets/images/peace_anxiety_art.jpg",
+    refMr: "कलस्सैकरांस ३:१३",
+    refEn: "Colossians 3:13",
+    verseMr: "तुम्ही एकमेकांचे सहन करा आणि जर कोणाविरुद्ध कोणाची तक्रार असेल तर एकमेकांना क्षमा करा; जशी प्रभूने तुम्हाला क्षमा केली तशी तुम्हीही करा.",
+    verseEn: "Bear with each other and forgive one another if any of you has a grievance against someone. Forgive as the Lord forgave you.",
+    prayerMr: `हे दयाळू प्रभू येशू,
+तू क्रूसावर असताना आपल्या शत्रूंसाठी प्रार्थना केलीस: 'पित्या, यांना क्षमा कर, कारण हे काय करत आहेत हे यांना समजत नाही.'
+
+प्रभू, मला ज्या ज्या लोकांनी दुखावले आहे, माझा विश्वासघात केला आहे किंवा माझ्यावर अन्याय केला आहे, त्या सर्वांना मी मनापासून क्षमा करतो. माझ्या मनातील सर्व कडूपणा, चीड, द्वेष आणि सूडबुद्धी तू धुवून टाक. माझ्या अंतःकरणाला या ओझ्यातून मुक्त कर आणि तिथे तुझी स्वर्गीय प्रीती आणि शांती वाहू दे.
+
+मला क्षमा करणारे आणि प्रेम करणारे अंतःकरण दे.
+
+येशूच्या नावात, आमेन.`,
+    prayerEn: `Merciful Jesus, Redeemer and Savior,
+Even upon the cross, You prayed for Your persecutors: "Father, forgive them, for they know not what they do."
+
+By the power of Your Holy Spirit, I intentionally release every person who has wronged, slandered, rejected, or betrayed me. I break the chains of resentment, bitterness, and grudges off my soul today. Cleanse my heart completely and pour in Your unconditional love, healing every tender wound.
+
+I choose spiritual freedom, wholeness, and peace.
+
+In Jesus' name, Amen.`,
+    amenCount: 310
+  },
+  "overcoming_fear": {
+    id: "overcoming_fear",
+    bookKey: "joshua",
+    chapter: 1,
+    categoryMr: "भीतीवर विजय व आत्मिक धैर्य",
+    categoryEn: "OVERCOMING FEAR",
+    titleMr: "भीतीवर विजय व दैवी धैर्य",
+    titleEn: "Victory Over Fear & Unshakable Courage",
+    subtitleMr: "तू जेथे कुठे जाशील तेथे परमेश्वर तुझ्याबरोबर आहे",
+    subtitleEn: "Be strong and courageous; the Lord your God is with you",
+    bgImage: "assets/images/moses_mount_sinai_art.jpg",
+    refMr: "यहोशू १:९ • २ तीमथ्य १:७",
+    refEn: "Joshua 1:9 • 2 Timothy 1:7",
+    verseMr: "मी तुला आज्ञा केली नाही काय? धीर धर आणि मोठा हिंमतवान हो; घाबरू नको आणि भयभीत होऊ नको; कारण तू जिथे जाशील तिथे तुझा देव परमेश्वर तुझ्याबरोबर आहे.",
+    verseEn: "Have I not commanded you? Be strong and courageous. Do not be afraid; do not be discouraged, for the Lord your God will be with you wherever you go.",
+    prayerMr: `हे पराक्रमी देवा,
+देवाने आपल्याला भीतीचा आत्मा दिलेला नाही, तर सामर्थ्याचा, प्रीतीचा आणि संयमाचा आत्मा दिला आहे.
+
+आज माझ्या मनावर सावट घालणाऱ्या सर्व प्रकारच्या अज्ञात भीती, भविष्याची चिंता आणि आजारपणाची भीती मी येशूच्या नावाने दूर करतो. तू माझा प्रकाश आणि माझे तारण आहेस; मी कोणाला भिऊ? परमेश्वर माझ्या जिवाचा कोट आहे; मी कोणाचा थरकाप करू?
+
+तुझा अथांग हात धरून मी प्रत्येक आव्हानाला निर्भयपणे सामोरा जाईन.
+
+येशूच्या विजयी नावात, आमेन.`,
+    prayerEn: `Almighty God, my Victorious Defender,
+Your Word declares that You have not given us a spirit of fear, but of power, love, and a sound mind.
+
+I silence and reject every spirit of anxiety, panic, and dread in the name of Jesus Christ. The Lord is my light and my salvation—whom shall I fear? The Lord is the stronghold of my life—of whom shall I be afraid?
+
+Anchor my soul in Your eternal presence, and grant me steadfast courage to advance through every obstacle.
+
+In the mighty name of Jesus, Amen.`,
+    amenCount: 377
+  },
+  "marital_harmony": {
+    id: "marital_harmony",
+    bookKey: "ephesians",
+    chapter: 4,
+    categoryMr: "वैवाहिक जीवनात प्रीती व सलोखा",
+    categoryEn: "MARITAL HARMONY",
+    titleMr: "वैवाहिक जीवनात प्रीती व सलोखा",
+    titleEn: "Marital Unity, Love & Grace",
+    subtitleMr: "घरात प्रेमाचा व समजूतदारपणाचा गोड बंध",
+    subtitleEn: "Bound together in patience, honor, and deep affection",
+    bgImage: "assets/images/wedding_cana_miracle.jpg",
+    refMr: "इफिसकरांस ४:२-३",
+    refEn: "Ephesians 4:2-3",
+    verseMr: "पूर्ण लीनतेने, सौम्यतेने आणि सहनशीलतेने एकमेकांना प्रेमाने सहन करा; आणि शांतीच्या बंधनात आत्म्याचे ऐक्य राखण्याचा मनापासून प्रयत्न करा.",
+    verseEn: "Be completely humble and gentle; be patient, bearing with one another in love. Make every effort to keep the unity of the Spirit through the bond of peace.",
+    prayerMr: `हे कुटुंबाचे निर्माणकर्ता देवा,
+तू विवाहाची पवित्र संस्था निर्माण केलीस. मी माझे वैवाहिक जीवन तुझ्या चरणी आणतो. आमच्या नात्यात पहिल्या दिवसासारखी निष्कपट प्रीती, आदर, विश्वास आणि समजूतदारपणा नित्य जिवंत ठेव.
+
+आमच्या संभाषणात गोडवा असू दे. सर्व गैरसमज, अहंकाराची भावना आणि कटू शब्द नष्ट कर. कठीण प्रसंगी एकमेकांना आधार देण्याचे व क्षमा करण्याचे मोठे मन आम्हाला दे. आमचे वैवाहिक नाते तुझ्या करारावर घट्ट उभे राहू दे.
+
+येशूच्या नावात, आमेन.`,
+    prayerEn: `Heavenly Father, Author of Marriage,
+You created holy matrimony as a sacred reflection of Christ's devotion to His church. I pray for deep renewal, tenderness, and mutual respect in our marriage today.
+
+Melt away every seed of discord, hardness of heart, and unspoken frustration. Infuse our home with playful joy, patient listening, and generous forgiveness. May our covenant remain unbroken, built upon the bedrock of Your unfailing truth.
+
+Bless our relationship to be an inspiring testimony of Your enduring love.
+
+In Jesus' name, Amen.`,
+    amenCount: 340
+  },
+  "spiritual_armor": {
+    id: "spiritual_armor",
+    bookKey: "ephesians",
+    chapter: 6,
+    categoryMr: "आत्मिक शस्त्रसामग्री व जय",
+    categoryEn: "SPIRITUAL ARMOR",
+    titleMr: "देवाची संपूर्ण शस्त्रसामग्री व आत्मिक जय",
+    titleEn: "The Full Armor of God & Spiritual Victory",
+    subtitleMr: "शत्रूच्या सर्व युक्त्यांवर विश्वास व वचनाने विजय",
+    subtitleEn: "Stand firm against all spiritual attacks and temptations",
+    bgImage: "assets/images/moses_mount_sinai_art.jpg",
+    refMr: "इफिसकरांस ६:१०-११",
+    refEn: "Ephesians 6:10-11",
+    verseMr: "शेवटी, प्रभूमध्ये आणि त्याच्या पराक्रमाच्या बळात बलवान व्हा. देवाचे संपूर्ण चिलखत अंगात चढवा, यासाठी की तुम्हांला सैतानाच्या कपटी युक्तींसमोर उभे राहता यावे.",
+    verseEn: "Finally, be strong in the Lord and in his mighty power. Put on the full armor of God, so that you can take your stand against the devil’s schemes.",
+    prayerMr: `हे सेनाधीश परमेश्वरा,
+आमची लढाई हाडामांसाविरुद्ध नाही, तर अंधकारातील दुष्ट आत्मिक शक्तींविरुद्ध आहे. आज मी विश्वासाने देवाची संपूर्ण शस्त्रसामग्री धारण करतो.
+
+सत्याची कंबरपट्टा, नीतिमत्तेचे उरस्त्राण, शांतीच्या शुभवर्तमानाची तयारी, विश्वासाची ढाल, तारणाचा टोप आणि आत्म्याची तलवार म्हणजेच देवाचे जिवंत वचन मी हातात घेतो. शत्रूचे सर्व जळते बाण या ढालीने विझून जावोत. मला प्रत्येक प्रलोभनावर व संकटावर विजय दे.
+
+येशू ख्रिस्ताच्या विजयी नावात, आमेन.`,
+    prayerEn: `Lord of Angel Armies,
+Our struggle is not against flesh and blood, but against spiritual powers of darkness. Today, by faith, I take up the full armor of God.
+
+I put on the belt of truth, the breastplate of righteousness, shoes ready with the gospel of peace, the shield of faith, the helmet of salvation, and the sword of the Spirit which is Your Word. Extinguish every flaming arrow of the enemy aimed at my mind and home.
+
+I stand victorious, established in Christ's triumph.
+
+In the mighty name of Jesus, Amen.`,
+    amenCount: 460
+  },
+  "gratitude_thanksgiving": {
+    id: "gratitude_thanksgiving",
+    bookKey: "psalms",
+    chapter: 103,
+    categoryMr: "उपकारस्तुती व कृतज्ञता",
+    categoryEn: "GRATITUDE & PRAISE",
+    titleMr: "उपकारस्तुती व कृतज्ञतेचे अंतःकरण",
+    titleEn: "Heart of Thanksgiving & Gratitude",
+    subtitleMr: "देवाच्या अगणित उपकारांचे नित्य स्मरण",
+    subtitleEn: "Praise the Lord and forget not all His gracious benefits",
+    bgImage: "assets/images/dawn_valley_genesis.jpg",
+    refMr: "स्तोत्रसंहिता १०३:१-२",
+    refEn: "Psalm 103:1-2",
+    verseMr: "हे माझ्या जीवा, परमेश्वराचा धन्यवाद कर; आणि माझ्या अंतर्यामातील सर्वा, त्याच्या पवित्र नावाचा धन्यवाद कर. त्याच्या कोणत्याही उपकारांची विस्मृती होऊ देऊ नको.",
+    verseEn: "Praise the Lord, my soul; all my inmost being, praise his holy name. Praise the Lord, my soul, and forget not all his benefits.",
+    prayerMr: `हे दयाघन पित्या,
+माझ्या आयुष्यातील प्रत्येक श्वासासाठी, आरोग्यासाठी, अन्नासाठी आणि संरक्षणासाठी मी तुझे अंतःकरणापासून उपकार मानतो. तू मला माझ्या अपराधांप्रमाणे वागवले नाहीस, तर आकाशाची पृथ्वीपासून जेवढी उंची आहे, तेवढी मोठी दया तू माझ्यावर केलीस.
+
+तक्रारीच्या आणि असंतोषाच्या जागी माझे हृदय नित्य कृतज्ञतेने आणि स्तुतीने भरलेले राहू दे. जे काही माझ्याकडे आहे त्यामध्ये समाधान मानण्याचे व तुझी थोरवी गाण्याचे मन मला दे.
+
+येशूच्या नावाने, आमेन.`,
+    prayerEn: `Gracious and Generous Father,
+With my whole heart I declare praise unto Your holy name. Thank You for the breath in my lungs, the bread on my table, and Your invisible hand that preserves me daily. You have not treated me as my sins deserve, but have crowned my life with unfailing compassion.
+
+Strip away every spirit of complaining, entitlement, and discontentment. Fill my tongue with joyful songs of thanksgiving through every season of life.
+
+In Jesus' name, Amen.`,
+    amenCount: 390
+  },
+  "hope_in_depression": {
+    id: "hope_in_depression",
+    bookKey: "psalms",
+    chapter: 34,
+    categoryMr: "नैराश्यातून नवी आशा व विसावा",
+    categoryEn: "HOPE IN DESPAIR",
+    titleMr: "नैराश्यातून नवी आशा व विसावा",
+    titleEn: "Light in Darkness & Renewed Hope",
+    subtitleMr: "भग्न अंतःकरणाच्या जवळ परमेश्वर उभा राहतो",
+    subtitleEn: "The Lord is close to the brokenhearted and crushed in spirit",
+    bgImage: "assets/images/serene_sky_prayer.jpg",
+    refMr: "स्तोत्रसंहिता ३४:१८",
+    refEn: "Psalm 34:18",
+    verseMr: "ज्यांचे अंतःकरण भग्न झाले आहे त्यांच्या जवळ परमेश्वर असतो; आणि ज्यांचा आत्मा चूर्ण झाला आहे अशांचा तो उद्धार करतो.",
+    verseEn: "The Lord is close to the brokenhearted and saves those who are crushed in spirit.",
+    prayerMr: `हे दुःखितांचे सांत्वन करणाऱ्या प्रभू,
+आज माझे मन अतिशय उदास आणि निराश झाले आहे. आयुष्यातील अंधकारात मला पुढे मार्ग दिसत नाही. परंतु प्रभू, तू तुटलेल्या मनांना जवळ करणारा आणि जखमांवर फुंकर घालणारा देव आहेस.
+
+माझ्या मनातील हे नैराश्याचे दाट ढग बाजूला कर. मला आठवण करून दे की माझी कहाणी इथेच संपलेली नाही; तू माझ्यासाठी उत्तम योजना आखल्या आहेत. तुझा स्वर्गीय आनंद मला परत दे, कारण परमेश्वराचा आनंद हेच माझे सामर्थ्य आहे.
+
+येशूच्या नावात, आमेन.`,
+    prayerEn: `Gentle Comforter and Healer of Souls,
+When shadows feel overwhelming and sorrow weighs heavy upon my chest, I look up to You. You are nearest when my heart is most broken, catching every unseen tear in Your bottle.
+
+Dispel this heavy fog of grief and hopelessness. Remind my soul that weeping may endure for the night, but joy comes in the morning! Ignite a living flame of hope within my spirit and restore the joy of Your salvation.
+
+In the comforting name of Jesus, Amen.`,
+    amenCount: 415
+  },
+  "workplace_favor": {
+    id: "workplace_favor",
+    bookKey: "psalms",
+    chapter: 90,
+    categoryMr: "नोकरी, व्यवसाय व कार्यात यश",
+    categoryEn: "WORKPLACE BLESSING",
+    titleMr: "नोकरी, व्यवसाय व कार्यात दैवी कृपा",
+    titleEn: "Favor, Diligence & Career Success",
+    subtitleMr: "आपल्या हातांच्या कामावर देवाचा निरंतर आशीर्वाद",
+    subtitleEn: "Establish the work of our hands and grant favor",
+    bgImage: "assets/images/winding_path_journey.jpg",
+    refMr: "स्तोत्रसंहिता ९०:१७",
+    refEn: "Psalm 90:17",
+    verseMr: "आमचा देव परमेश्वर याची प्रसन्नता आमच्यावर असो; आणि तू आमच्या हातांचे काम स्थिर कर; होय, आमच्या हातांचे काम तू स्थिर कर.",
+    verseEn: "May the favor of the Lord our God rest on us; establish the work of our hands for us—yes, establish the work of our hands.",
+    prayerMr: `हे सृष्टीच्या कर्त्या देवा,
+मी माझ्या कामाच्या ठिकाणी, ऑफिसमध्ये आणि व्यवसायात प्रामाणिकपणाने व निष्ठेने कार्य करू शकेन अशी कृपा मला दे. मी केवळ माणसांना संतुष्ट करण्यासाठी नाही, तर देवाची सेवा म्हणून माझे काम उत्कृष्ट दर्जाचे करावे.
+
+माझ्या वरिष्ठांच्या, सहकाऱ्यांच्या आणि ग्राहकांच्या नजरेत मला दया व अनुकूलता लाभू दे. मला नवीन संधी, कार्यक्षमता आणि समस्या सोडवण्याचे ज्ञान दे. माझ्या कष्टांना फलद्रूप कर आणि माझ्या कामाद्वारे इतरांचे भले होऊ दे.
+
+येशूच्या नावाने, आमेन.`,
+    prayerEn: `Lord of Excellence and Diligence,
+I consecrate my daily vocation, career, and business endeavors to You today. Whatever I do, let me work at it with all my heart, as working for the Lord and not for human masters.
+
+Grant me favor with leaders, colleagues, and clients. Give me creative solutions, integrity in speech, and efficiency under pressure. Prosper the work of my hands and make my workplace an avenue of Your blessing and ethical testimony.
+
+In Jesus' name, Amen.`,
+    amenCount: 350
+  },
+  "patience_gods_timing": {
+    id: "patience_gods_timing",
+    bookKey: "ecclesiastes",
+    chapter: 3,
+    categoryMr: "धीर, सहनशीलता व देवाची वेळ",
+    categoryEn: "PATIENCE & GOD'S TIMING",
+    titleMr: "धीर, सहनशीलता व देवाची योग्य वेळ",
+    titleEn: "Patience & Trusting God's Perfect Timing",
+    subtitleMr: "तो प्रत्येक गोष्ट तिच्या योग्य वेळी सुंदर करतो",
+    subtitleEn: "He has made everything beautiful in its proper time",
+    bgImage: "assets/images/dawn_valley_genesis.jpg",
+    refMr: "उपदेशक ३:११",
+    refEn: "Ecclesiastes 3:11",
+    verseMr: "त्याने प्रत्येक गोष्ट तिच्या योग्य वेळी सुंदर केली आहे; आणि त्याने मनुष्याच्या अंतःकरणात सार्वकालिकतेची जाणीव ठेवली आहे.",
+    verseEn: "He has made everything beautiful in its time. He has also set eternity in the human heart.",
+    prayerMr: `हे सर्व नियंत्रक प्रभू,
+माझ्या जीवनातील प्रत्येक क्षणाची वेळ तुझ्या हातात आहे. जेव्हा उत्तरासाठी वाट पाहावी लागते, तेव्हा माझी सहनशीलता सुटू देऊ नको. मला घाईगडबडीत चुकीचे निर्णय घेण्यापासून वाचव.
+
+मला शिकव की देवाची वेळ कधीही उशिरा नसते आणि कधीही लवकर नसते; ती नेहमी अचूक असते. वाट पाहण्याच्या काळात माझा विश्वास दृढ कर आणि मला तुझ्या इच्छेमध्ये शांत राहण्यास शिकव.
+
+येशूच्या नावात, आमेन.`,
+    prayerEn: `Sovereign God and Master of Seasons,
+My times are safely in Your hands. When prayers seem unanswered and the waiting room of life feels long, guard my heart from impatience and rash decisions.
+
+Remind me that You make all things beautiful in their proper season. While I wait, refine my character, deepen my faith, and anchor my hope in Your absolute faithfulness.
+
+In Jesus' name, Amen.`,
+    amenCount: 325
+  },
+  "deliverance_habits": {
+    id: "deliverance_habits",
+    bookKey: "john",
+    chapter: 8,
+    categoryMr: "व्यसनाधीनतेतून व बंधनातून सुटका",
+    categoryEn: "FREEDOM & DELIVERANCE",
+    titleMr: "बंधनातून व वाईट सवयींतून खरी मुक्ती",
+    titleEn: "Total Deliverance & Victorious Freedom",
+    subtitleMr: "पुत्र ज्याला स्वतंत्र करील तो खरोखर स्वतंत्र होईल",
+    subtitleEn: "If the Son sets you free, you will be free indeed",
+    bgImage: "assets/images/peace_anxiety_art.jpg",
+    refMr: "योहान ८:३६",
+    refEn: "John 8:36",
+    verseMr: "म्हणून जर पुत्र तुम्हाला स्वतंत्र करील, तर तुम्ही खरोखरच स्वतंत्र व्हाल.",
+    verseEn: "So if the Son sets you free, you will be free indeed.",
+    prayerMr: `हे महान सोडवणाऱ्या प्रभू येशू,
+माझ्या आयुष्याला जखडून ठेवणाऱ्या प्रत्येक वाईट सवयीतून, व्यसनातून, चुकीच्या विचारांतून आणि जुन्या बंधनांतून मला आज पूर्ण मुक्ती दे.
+
+तुझ्या रक्ताच्या सामर्थ्याने मला शुद्ध कर. जेव्हा जेव्हा प्रलोभन समोर येईल, तेव्हा त्यातून पळून जाण्याचे आणि पवित्रतेने जगण्याचे सामर्थ्य तुझ्या पवित्र आत्म्याद्वारे मला दे. मी यापुढे पापाचा गुलाम नाही, तर देवाचे प्रिय मूल आहे. मला खऱ्या स्वातंत्र्यात चालव.
+
+येशू ख्रिस्ताच्या सामर्थ्यशाली नावात, आमेन.`,
+    prayerEn: `Lord Jesus, Mighty Deliverer,
+You came to set captives free and break every chain. Today, I renounce and surrender every destructive habit, addiction, toxic pattern, and secret compromise into Your hands.
+
+Wash my mind and desires in Your precious cleansing blood. When temptations strike, empower me by Your Holy Spirit to stand resolute and choose purity. I declare that sin shall not have dominion over me, for I am governed by Your marvelous grace.
+
+In Jesus' victorious name, Amen.`,
+    amenCount: 430
+  },
+  "safe_travel": {
+    id: "safe_travel",
+    bookKey: "psalms",
+    chapter: 121,
+    categoryMr: "प्रवासात सुरक्षितता व देवदूतांचा पहारा",
+    categoryEn: "JOURNEY & TRAVEL MERCY",
+    titleMr: "प्रवासात सुरक्षितता व देवदूतांचे रक्षण",
+    titleEn: "Divine Shield During Travel & Journeys",
+    subtitleMr: "तुझ्या जाण्या-येण्यावर परमेश्वराचा पहारा",
+    subtitleEn: "The Lord watches over your coming and going forevermore",
+    bgImage: "assets/images/winding_path_journey.jpg",
+    refMr: "स्तोत्रसंहिता १२१:७-८",
+    refEn: "Psalm 121:7-8",
+    verseMr: "परमेश्वर तुला सर्व वाईटापासून राखील; तो तुझ्या जिवाचे रक्षण करील. तुझ्या जाण्यावर आणि तुझ्या येण्यावर परमेश्वर आतापासून सर्वकाळ पहारा ठेवील.",
+    verseEn: "The Lord will keep you from all harm—he will watch over your life; the Lord will watch over your coming and going both now and forevermore.",
+    prayerMr: `हे मार्ग दाखवणाऱ्या देवा,
+आजच्या माझ्या प्रवासात माझे आणि माझ्यासोबत असलेल्या सर्वांचे रक्षण कर. रस्त्यावरील सर्व धोके, अपघात, यांत्रिक बिघाड आणि दुष्ट लोकांपासून आम्हाला सुरक्षित ठेव.
+
+वाहने चालवणाऱ्यांच्या हातात संयम आणि दक्षता दे. आमचा प्रवास सुरळीत आणि सुखकर होऊ दे. ज्या उद्देशाने आम्ही निघालो आहोत, तो उद्देश सफल करून आम्हाला पुन्हा सुरक्षितपणे घरी परत आण.
+
+येशूच्या नावाने, आमेन.`,
+    prayerEn: `Faithful Guide and Protector of Travelers,
+As I embark on this journey today, I invoke Your divine covering over our path, vehicle, and destinations. Protect us from reckless drivers, sudden hazards, mechanical breakdowns, and bad weather.
+
+Guide the driver with alertness and wisdom. Send Your angels before us to smooth the roads and clear every danger. Bring us safely to our destination and return us home in peace.
+
+In Jesus' name, Amen.`,
+    amenCount: 305
+  },
+  "youth_purpose": {
+    id: "youth_purpose",
+    bookKey: "1timothy",
+    chapter: 4,
+    categoryMr: "तरुणांसाठी जीवन हेतू व पवित्रता",
+    categoryEn: "YOUTH & PURPOSE",
+    titleMr: "तरुणांसाठी जीवन हेतू, सामर्थ्य व पवित्रता",
+    titleEn: "Youth with Godly Purpose & Character",
+    subtitleMr: "शब्दात, वर्तनात, प्रीतीत आणि विश्वासात आदर्श",
+    subtitleEn: "Set an example for believers in speech, conduct, and love",
+    bgImage: "assets/images/morning_grace_art.jpg",
+    refMr: "१ तीमथ्य ४:१२",
+    refEn: "1 Timothy 4:12",
+    verseMr: "तुझ्या तरुणपणाचा कोणीही अनादर करू नये; तर बोलण्यात, वागण्यात, प्रीतीत, विश्वासात आणि पवित्रतेत तू विश्वासणाऱ्यांसाठी नमुना हो.",
+    verseEn: "Don't let anyone look down on you because you are young, but set an example for the believers in speech, in conduct, in love, in faith and in purity.",
+    prayerMr: `हे तरुणांच्या सामर्थ्यवान देवा,
+माझे तारुण्य आणि माझी ऊर्जा या जगातील निरर्थक गोष्टींमध्ये वाया न जाता, तुझ्या सेवेसाठी आणि उत्तम ध्येयासाठी उपयोगी पडू दे.
+
+मला निष्कलंक चारित्र्य, सत्यवचनीपणा आणि पवित्रतेची ओढ दे. माझ्या जीवनाचा खरा हेतू काय आहे हे मला स्पष्टपणे दाखव. मला अशा चांगल्या मित्रांची संगत दे जे मला तुझ्या जवळ आणतील. माझ्याद्वारे या पिढीमध्ये तुझ्या प्रेमाचा आणि सत्याचा प्रकाश चमकू दे.
+
+येशूच्या नावाने, आमेन.`,
+    prayerEn: `Lord God of Strength and Vision,
+I dedicate my youth, vitality, and aspirations to You. Guard my heart from the traps of aimless living, vanity, and moral compromise.
+
+Empower me to be a role model in integrity, speech, compassion, and bold faith. Clarify Your divine calling upon my life and open doors for godly influence. Raise this generation to stand unwavering for truth and love.
+
+In Jesus' name, Amen.`,
+    amenCount: 345
+  },
+  "elderly_blessing": {
+    id: "elderly_blessing",
+    bookKey: "psalms",
+    chapter: 92,
+    categoryMr: "ज्येष्ठांसाठी आरोग्य व समाधान",
+    categoryEn: "HONOR & GRACE IN AGE",
+    titleMr: "ज्येष्ठांसाठी शांती, आरोग्य व समाधान",
+    titleEn: "Abiding Fruitfulness & Honor in Senior Years",
+    subtitleMr: "वृद्धपणातही ते फळ देतील, ते टवटवीत व हिरवेगार राहतील",
+    subtitleEn: "They will still bear fruit in old age, staying fresh and green",
+    bgImage: "assets/images/dawn_valley_genesis.jpg",
+    refMr: "स्तोत्रसंहिता ९२:१४ • यशया ४६:४",
+    refEn: "Psalm 92:14 • Isaiah 46:4",
+    verseMr: "वृद्धपणातही ते फळ देतील; ते रसरशीत व टवटवीत राहतील, यासाठी की परमेश्वर सरळ आहे हे घोषित व्हावे.",
+    verseEn: "They will still bear fruit in old age, they will stay fresh and green, proclaiming, 'The Lord is upright; he is my Rock.'",
+    prayerMr: `हे अनादिकालापासून असलेल्या देवा,
+आयुष्याच्या या संध्याकाळी मी तुझ्या विश्वासूपणाचे स्मरण करतो. तू म्हणालास की 'तुमच्या म्हातारपणापर्यंत मीच तो आहे, आणि तुमचे केस पांढरे होईपर्यंत मीच तुम्हाला उचलून घेईन.'
+
+प्रभू, आमच्या कुटुंबातील ज्येष्ठ मंडळींना उत्तम आरोग्य, मानसिक शांती आणि आदर दे. एकाकीपणाची भावना त्यांच्यापासून दूर ठेव. त्यांचा विश्वास पुढील पिढ्यांसाठी मार्गदर्शक दीपस्तंभ ठरू दे. त्यांना शांततापूर्ण आणि समाधानी आयुष्य लाभू दे.
+
+येशूच्या नावात, आमेन.`,
+    prayerEn: `Everlasting Father, Sustainer through All Generations,
+Thank You for Your unfailing faithfulness across the decades. You promised: "Even to your old age and gray hairs I am he, I am he who will sustain you."
+
+Pour abundant honor, robust health, and gentle peace upon our elders today. Remove every shadow of loneliness or frailty, and let them bear rich spiritual fruit. May their prayers and life wisdom be a crown of glory to our families.
+
+In Jesus' name, Amen.`,
+    amenCount: 330
+  },
+  "godly_friendship": {
+    id: "godly_friendship",
+    bookKey: "proverbs",
+    chapter: 27,
+    categoryMr: "खरी मैत्री व आत्मिक सहभागिता",
+    categoryEn: "TRUE FRIENDSHIP",
+    titleMr: "खरी मैत्री, प्रामाणिक नाते व सहभागिता",
+    titleEn: "Godly Friendship & Faithful Companionship",
+    subtitleMr: "लोखंडाने लोखंड धारदार होते, तसा मनुष्य मित्राला घडवतो",
+    subtitleEn: "As iron sharpens iron, so one person sharpens another",
+    bgImage: "assets/images/morning_grace_art.jpg",
+    refMr: "नीतिसूत्रे २७:१७ • उपदेशक ४:९-१०",
+    refEn: "Proverbs 27:17 • Ecclesiastes 4:9-10",
+    verseMr: "जसे लोखंडाने लोखंड धारदार होते, तसेच एक मनुष्य दुसऱ्याच्या बुद्धीला व स्वभावाला पैलू पाडतो.",
+    verseEn: "As iron sharpens iron, so one person sharpens another.",
+    prayerMr: `हे खऱ्या मित्रा प्रभू येशू,
+तू आम्हाला सेवक नाही तर मित्र म्हटले आहेस. माझ्या जीवनात विश्वासू, प्रामाणिक आणि देवाला भय बाळगणाऱ्या मित्रांचे आशीर्वाद दे.
+
+माझ्या मित्रांसोबत माझे नाते निस्वार्थी प्रेमावर आणि एकमेकांच्या उन्नतीवर आधारलेले असू दे. कठीण काळात एकमेकांच्या पाठीशी उभे राहण्याचे आणि संकटात धीर देण्याचे मन आम्हाला दे. मलाही इतरांसाठी एक चांगला आणि विश्वासू मित्र बनव.
+
+येशूच्या नावाने, आमेन.`,
+    prayerEn: `Lord Jesus, the Faithful Friend Who never leaves,
+You called us friends and laid down Your life for us. Surround me with honest, godly, and supportive friends who sharpen my faith and encourage my walk with You.
+
+Teach me to be a steadfast, loyal, and uplifting companion to others. Bless our friendships with laughter, mutual support, and Christ-centered unity.
+
+In Jesus' name, Amen.`,
+    amenCount: 312
+  },
+  "mountain_faith": {
+    id: "mountain_faith",
+    bookKey: "mark",
+    chapter: 11,
+    categoryMr: "अढळ विश्वास व अशक्य गोष्टींवर विजय",
+    categoryEn: "UNSHAKABLE FAITH",
+    titleMr: "पर्वत हलवणारा दृढ विश्वास",
+    titleEn: "Faith That Moves Mountains",
+    subtitleMr: "देवावर विश्वास ठेवा; विश्वासणाऱ्यासाठी सर्वकाही शक्य आहे",
+    subtitleEn: "Truly I tell you, whoever believes without doubt will see it done",
+    bgImage: "assets/images/moses_mount_sinai_art.jpg",
+    refMr: "मार्क ११:२२-२४",
+    refEn: "Mark 11:22-24",
+    verseMr: "येशूने त्यांना उत्तर दिले, 'देवावर विश्वास ठेवा. मी तुम्हांला खरे सांगतो, जो कोणी या पर्वताला म्हणेल, ‘तू उचलला जा आणि समुद्रात फेकला जा,’ आणि मनात शंका न धरता विश्वास ठेवील, त्याच्यासाठी ते घडेल.'",
+    verseEn: "Have faith in God, Jesus answered. Truly I tell you, if anyone says to this mountain, 'Go, throw yourself into the sea,' and does not doubt in their heart but believes that what they say will happen, it will be done for them.",
+    prayerMr: `हे अशक्य गोष्टी शक्य करणाऱ्या प्रभू,
+जरी माझ्यासमोर डोंगरासारख्या प्रचंड समस्या, अडथळे आणि आव्हाने उभी असली, तरी माझा देव त्या सर्व समस्यांपेक्षा महान आहे!
+
+माझ्या मनातील सर्व अविश्वास, संशय आणि द्विधा वृत्ती काढून टाक. मला मोहरीच्या दाण्याएवढा शुद्ध आणि जिवंत विश्वास दे, जेणेकरून मी संकटांशी बोलून त्यांना येशूच्या नावाने दूर करू शकेन. मला परिस्थितीवर नव्हे, तर तुझ्या प्रतिज्ञांवर नजर ठेवून चालण्याची कृपा दे.
+
+येशूच्या विजयी नावात, आमेन.`,
+    prayerEn: `Almighty God, Worker of Miracles,
+No mountain is too steep and no obstacle too formidable for Your sovereign power. Today I fix my gaze on You rather than the impossible circumstances surrounding me.
+
+Uproot all doubt, skepticism, and wavering from my soul. Grant me mountain-moving faith that speaks life, breakthrough, and victory in Jesus' authority. I step forward boldly, expecting Your supernatural intervention.
+
+In the mighty name of Jesus, Amen.`,
+    amenCount: 445
+  },
+  "nation_community": {
+    id: "nation_community",
+    bookKey: "2chronicles",
+    chapter: 7,
+    categoryMr: "देशासाठी व समाजासाठी प्रार्थना",
+    categoryEn: "PRAYER FOR NATION",
+    titleMr: "देश, समाज व नेत्यांसाठी प्रार्थना",
+    titleEn: "Healing & Blessing Over Our Nation",
+    subtitleMr: "प्रार्थना आणि पश्चात्तापाने भूमीला आरोग्य व समृद्धी",
+    subtitleEn: "Humility, prayer, and revival bringing healing to the land",
+    bgImage: "assets/images/serene_sky_prayer.jpg",
+    refMr: "२ इतिहास ७:१४",
+    refEn: "2 Chronicles 7:14",
+    verseMr: "माझ्या नावाने ओळखले जाणारे माझे लोक जर स्वतःला नम्र करतील, प्रार्थना करतील, माझे मुख शोधतील आणि आपल्या दुष्ट मार्गांपासून फिरतील, तर मी स्वर्गातून त्यांचे ऐकेन, त्यांच्या पापांची क्षमा करीन आणि त्यांच्या भूमीला आरोग्य देईन.",
+    verseEn: "If my people, who are called by my name, will humble themselves and pray and seek my face and turn from their wicked ways, then I will hear from heaven, and I will forgive their sin and will heal their land.",
+    prayerMr: `हे राष्ट्रांचे अधिपती देवा,
+मी माझ्या देशासाठी, आमच्या नेत्यांसाठी आणि संपूर्ण समाजासाठी तुझ्या चरणी मध्यस्थी करतो. आमच्या राज्यकर्त्यांना स्वर्गीय न्याय, बुद्धी आणि लोककल्याणाची दृष्टी दे.
+
+आमच्या देशात शांतता, बंधुभाव, धार्मिक सलोखा आणि समृद्धी नादू दे. सर्व भ्रष्टाचार, गुन्हेगारी, गरिबी आणि हिंसाचाराचा अंत कर. आमच्या भूमीला चंगाई दे आणि तुझ्या सत्याचा प्रकाश सर्वत्र पसरू दे.
+
+येशूच्या नावाने, आमेन.`,
+    prayerEn: `Ruler of Nations and Lord of Justice,
+We lift our beloved country and its leaders into Your hands today. Bestow wisdom, integrity, and genuine compassion for the poor upon all in authority.
+
+Establish peace, racial and religious harmony, justice, and economic flourishing across our towns and cities. Heal our land from division, corruption, and calamity. Let spiritual revival awaken hearts to Your righteousness.
+
+In Jesus' holy name, Amen.`,
+    amenCount: 405
   }
 };
 
@@ -19373,7 +19940,7 @@ window.selectVodTypographyTheme = async function(idx) {
   }
 };
 
-window.applyVodTypographyTheme = function(themeIdx) {
+window.applyVodTypographyTheme = function(themeIdx, forceThemeBg = false) {
   if (typeof themeIdx === "number") {
     window.currentVodTypographyIndex = themeIdx % window.VOD_TYPOGRAPHY_STYLES.length;
   } else if (typeof themeIdx === "string") {
@@ -19426,9 +19993,9 @@ window.applyVodTypographyTheme = function(themeIdx) {
   }
   if (refRow) refRow.style.display = "flex";
 
-    // Update background image if theme has dedicated wallpaper and no custom wallpaper was chosen
+    // Update background image ONLY IF explicitly requested by user (e.g. tapping style pill) and theme has dedicated wallpaper
     const userSavedWp = localStorage.getItem("rol_selected_wallpaper");
-    if (theme.bgImage && !userSavedWp) {
+    if (forceThemeBg && theme.bgImage && !userSavedWp) {
       const imgUrl = `assets/daily_verses/${theme.bgImage}`;
       const fsBgEl = document.getElementById("fs-vod-capsule-bg");
       if (fsBgEl) {
@@ -19624,7 +20191,7 @@ window.openFullscreenVOD = function() {
   if (!activeBg) {
     activeBg = localStorage.getItem("rol_selected_wallpaper");
   }
-  if (!activeBg || (images.indexOf(activeBg) === -1 && images.length > 0)) {
+  if (!activeBg) {
     activeBg = images[((dayOfYear + offset) % images.length + images.length) % images.length];
   }
 
@@ -19637,15 +20204,24 @@ window.openFullscreenVOD = function() {
   const imgUrl = (typeof getVodImageUrl === "function") ? getVodImageUrl(activeBg) : (activeBg.includes('.') ? `assets/daily_verses/${activeBg}` : `assets/daily_verses/${activeBg}.png`);
 
   const fsBgEl = document.getElementById("fs-vod-capsule-bg");
-  if (fsBgEl) fsBgEl.style.backgroundImage = `url('${imgUrl}')`;
+  if (fsBgEl) {
+    fsBgEl.style.background = "";
+    fsBgEl.style.backgroundImage = `url('${imgUrl}')`;
+    fsBgEl.style.backgroundSize = "cover";
+    fsBgEl.style.backgroundPosition = "center";
+  }
 
   const fsCapsule = document.querySelector(".fullscreen-vod-capsule");
-  if (fsCapsule) fsCapsule.style.backgroundImage = `url('${imgUrl}')`;
+  if (fsCapsule) {
+    fsCapsule.style.backgroundImage = `url('${imgUrl}')`;
+    fsCapsule.style.backgroundSize = "cover";
+    fsCapsule.style.backgroundPosition = "center";
+  }
 
   const thumbImg = document.getElementById("vod-thumbnail-preview");
   if (thumbImg) thumbImg.src = imgUrl;
 
-  applyVodTypographyTheme();
+  applyVodTypographyTheme(undefined, false);
 };
 
 window.closeFullscreenVOD = function() {
@@ -26548,6 +27124,606 @@ const DID_YOU_KNOW_INSIGHTS = [
     book: "philippians",
     chapter: 4,
     verse: 6
+  },
+  {
+    id: "dyk_longest_chapter",
+    theme: "dyk-theme-indigo",
+    image: "assets/images/winding_path_journey.jpg",
+    alt: "Illuminated biblical parchment representing Psalm 119",
+    questionEn: "What Is the Longest Chapter in the Bible?",
+    questionMr: "बायबलमधील सर्वात मोठे अध्याय कोणते आहे?",
+    bulletsEn: [
+      { icon: "📜", text: "Psalm 119 with 176 verses in total" },
+      { icon: "🔤", text: "Acrostic poem arranged by the 22 letters of Hebrew alphabet" },
+      { icon: "✍️", text: "8 poetic stanzas dedicated to each Hebrew letter" },
+      { icon: "✨", text: "Celebrates the eternal guidance of God's Word" }
+    ],
+    bulletsMr: [
+      { icon: "📜", text: "स्तोत्रसंहिता ११९ — तब्बल १७६ वचने" },
+      { icon: "🔤", text: "हिब्रू वर्णमालेच्या २२ अक्षरांवर आधारित अक्रॉस्टिक काव्य" },
+      { icon: "✍️", text: "प्रत्येक हिब्रू अक्षरासाठी ८-८ वचनांचे सुंदर कडवे" },
+      { icon: "✨", text: "देवाच्या जिवंत वचनाचे अपरिमित सामर्थ्य व मार्गदर्शन" }
+    ],
+    refEn: "Psalm 119:105 • स्तोत्र ११९:१०५",
+    refMr: "स्तोत्र ११९:१०५ • Psalm 119:105",
+    book: "psalms",
+    chapter: 119,
+    verse: 105
+  },
+  {
+    id: "dyk_shortest_chapter",
+    theme: "dyk-theme-teal",
+    image: "assets/images/morning_grace_art.jpg",
+    alt: "Morning dawn representing Psalm 117 praise of all nations",
+    questionEn: "What Is the Shortest Chapter in the Bible?",
+    questionMr: "बायबलमधील सर्वात लहान अध्याय कोणता आहे?",
+    bulletsEn: [
+      { icon: "📖", text: "Psalm 117 contains only 2 short verses" },
+      { icon: "🕊️", text: "Just 33 words in English & 29 words in Marathi" },
+      { icon: "🌍", text: "A universal call for all nations and tribes to praise God" },
+      { icon: "❤️", text: "Highlights His merciful kindness which endures forever" }
+    ],
+    bulletsMr: [
+      { icon: "📖", text: "स्तोत्रसंहिता ११७ — केवळ २ वचनांचा अध्याय" },
+      { icon: "🕊️", text: "संपूर्ण बायबलमधील सर्वात संक्षिप्त व गोड स्तोत्र" },
+      { icon: "🌍", text: "सर्व राष्ट्रांनी परमेश्वराची स्तुती करण्याचे जागतिक आमंत्रण" },
+      { icon: "❤️", text: "देवाची दया व सत्य सर्वकाळ टिकणारे आहे" }
+    ],
+    refEn: "Psalm 117:1-2 • स्तोत्र ११७:१-२",
+    refMr: "स्तोत्र ११७:१-२ • Psalm 117:1-2",
+    book: "psalms",
+    chapter: 117,
+    verse: 1
+  },
+  {
+    id: "dyk_center_bible",
+    theme: "dyk-theme-emerald",
+    image: "assets/images/serene_sky_prayer.jpg",
+    alt: "Sunlight shining on Scripture at the center of the Bible",
+    questionEn: "What Chapter Sits at the Exact Center of the Bible?",
+    questionMr: "बायबलचा मध्यवर्ती अध्याय कोणता आहे?",
+    bulletsEn: [
+      { icon: "⚖️", text: "Psalm 118 sits centrally between 594 prior & 594 latter chapters" },
+      { icon: "🛡️", text: "Psalm 118:8: \"Better to trust in the Lord than to put confidence in man\"" },
+      { icon: "✝️", text: "Encapsulates the heart of Scripture: complete trust in God" },
+      { icon: "🌅", text: "\"His steadfast love endures forever\" repeats 5 times" }
+    ],
+    bulletsMr: [
+      { icon: "⚖️", text: "स्तोत्र ११८ — बायबलच्या १,१८९ अध्यायांच्या अगदी मध्यभागी" },
+      { icon: "🛡️", text: "स्तोत्र ११८:८: 'मनुष्यावर भरवसा ठेवण्यापेक्षा परमेश्वराला शरण जाणे बरे'" },
+      { icon: "✝️", text: "देवावर संपूर्ण विश्वास ठेवण्याचा बायबलचा मूळ गाभा" },
+      { icon: "🌅", text: "'त्याची दया सर्वकाळ टिकणारी आहे' हा पवित्र उद्घोष" }
+    ],
+    refEn: "Psalm 118:8 • स्तोत्र ११८:८",
+    refMr: "स्तोत्र ११८:८ • Psalm 118:8",
+    book: "psalms",
+    chapter: 118,
+    verse: 8
+  },
+  {
+    id: "dyk_longest_name",
+    theme: "dyk-theme-mahogany",
+    image: "assets/images/moses_mount_sinai_art.jpg",
+    alt: "Prophetic tablet in ancient Hebrew script",
+    questionEn: "What Is the Longest Name in the Bible?",
+    questionMr: "बायबलमधील सर्वात मोठे नाव कोणाचे आहे?",
+    bulletsEn: [
+      { icon: "✍️", text: "Maher-shalal-hash-baz (18 letters in English)" },
+      { icon: "📜", text: "Prophet Isaiah's second son (Isaiah 8:1-3)" },
+      { icon: "⚔️", text: "Prophetic Hebrew name meaning: 'Quick to plunder, swift to spoil'" },
+      { icon: "👑", text: "Foretold the rapid Assyrian conquest of Damascus & Samaria" }
+    ],
+    bulletsMr: [
+      { icon: "✍️", text: "महेर-शलाल-हाश-बज (Maher-shalal-hash-baz)" },
+      { icon: "📜", text: "संदेष्टा यशयाचा मुलगा (यशया ८:१-३)" },
+      { icon: "⚔️", text: "भविष्यसूचक अर्थ: 'लूट करण्यास उतावीळ व भक्ष्य मिळवण्यास तत्पर'" },
+      { icon: "👑", text: "अश्शूरच्या सैन्याकडून शत्रूचा होणारा पराभव दर्शवणारे नाव" }
+    ],
+    refEn: "Isaiah 8:1-3 • यशया ८:१-३",
+    refMr: "यशया ८:१-३ • Isaiah 8:1-3",
+    book: "isaiah",
+    chapter: 8,
+    verse: 1
+  },
+  {
+    id: "dyk_oldest_person",
+    theme: "dyk-theme-indigo",
+    image: "assets/images/dawn_valley_genesis.jpg",
+    alt: "Ancient patriarch Methuselah walking across hills",
+    questionEn: "Who Is the Oldest Person Recorded in the Bible?",
+    questionMr: "बायबलमधील सर्वात जास्त वयाची व्यक्ती कोण?",
+    bulletsEn: [
+      { icon: "⏳", text: "Methuselah lived 969 years (Genesis 5:27)" },
+      { icon: "🌱", text: "Son of Enoch and grandfather of Noah" },
+      { icon: "🌊", text: "His name hints: 'When he dies, it shall be sent'" },
+      { icon: "🌧️", text: "Noah's Great Flood occurred in the very year Methuselah died" }
+    ],
+    bulletsMr: [
+      { icon: "⏳", text: "मथुशेलह (Methuselah) — तब्बल ९६९ वर्षे जगला" },
+      { icon: "🌱", text: "हनोकाचा मुलगा आणि नोहाचा आजोबा (उत्पत्ती ५:२७)" },
+      { icon: "🌊", text: "नावाचा गूढ अर्थ: 'त्याच्या मृत्युनंतर ते (जलप्रलय) येईल'" },
+      { icon: "🌧️", text: "मथुशेलहाचा मृत्यू झाला त्याच वर्षी पृथ्वीवर महापूर आला" }
+    ],
+    refEn: "Genesis 5:27 • उत्पत्ती ५:२७",
+    refMr: "उत्पत्ती ५:२७ • Genesis 5:27",
+    book: "genesis",
+    chapter: 5,
+    verse: 27
+  },
+  {
+    id: "dyk_original_languages",
+    theme: "dyk-theme-teal",
+    image: "assets/images/did_you_know_shepherd.jpg",
+    alt: "Ancient scrolls written in biblical languages",
+    questionEn: "In Which 3 Languages Was the Bible Originally Written?",
+    questionMr: "बायबल कोणत्या ३ मूळ भाषांमध्ये लिहिले गेले?",
+    bulletsEn: [
+      { icon: "📜", text: "Hebrew: Majority of the 39 Old Testament books" },
+      { icon: "🏺", text: "Aramaic: Portions of Daniel & Ezra; spoken words of Jesus" },
+      { icon: "🏛️", text: "Koine Greek: Common street Greek of all 27 New Testament books" },
+      { icon: "🌐", text: "Now translated into over 3,000 languages worldwide" }
+    ],
+    bulletsMr: [
+      { icon: "📜", text: "हिब्रू (Hebrew): जुन्या कराराचा बहुतांश मूळ भाग" },
+      { icon: "🏺", text: "अरामी (Aramaic): दानीएल व एज्राचे काही भाग आणि येशूची बोलीभाषा" },
+      { icon: "🏛️", text: "ग्रीक (Koine Greek): नव्या कराराची आंतरराष्ट्रीय भाषा" },
+      { icon: "🌐", text: "आज जगातील ३,००० हून अधिक भाषांमध्ये बायबल उपलब्ध आहे" }
+    ],
+    refEn: "2 Timothy 3:16 • २ तीमथ्य ३:१६",
+    refMr: "२ तीमथ्य ३:१६ • 2 Timothy 3:16",
+    book: "2timothy",
+    chapter: 3,
+    verse: 16
+  },
+  {
+    id: "dyk_authors_span",
+    theme: "dyk-theme-emerald",
+    image: "assets/images/winding_path_journey.jpg",
+    alt: "Map of three continents and biblical authors",
+    questionEn: "How Many Authors Wrote the Bible and Over How Long?",
+    questionMr: "बायबल किती लेखकांनी आणि किती कालावधीत लिहिले?",
+    bulletsEn: [
+      { icon: "👥", text: "Penned by 40+ diverse human authors inspired by God" },
+      { icon: "⏳", text: "Written over 1,500+ years across 3 continents" },
+      { icon: "👑", text: "Authors included kings, shepherds, scholars, fishermen & doctors" },
+      { icon: "✝️", text: "Yet reveals one unbroken storyline: God's redemption of man" }
+    ],
+    bulletsMr: [
+      { icon: "👥", text: "४० हून अधिक मानवी लेखकांनी पवित्र आत्म्याच्या प्रेरणेने लिहिले" },
+      { icon: "⏳", text: "१,५०० हून अधिक वर्षांचा कालखंड आणि ३ खंड (आशिया, आफ्रिका, युरोप)" },
+      { icon: "👑", text: "राजे, मेंढपाळ, विद्वान, कोळी, डॉक्टर व जकातदारांनी लिहिले" },
+      { icon: "✝️", text: "तरीही सुरुवातीपासून शेवटपर्यंत एकच सुसंगत तारण संदेश!" }
+    ],
+    refEn: "2 Peter 1:21 • २ पेत्र १:२१",
+    refMr: "२ पेत्र १:२१ • 2 Peter 1:21",
+    book: "2peter",
+    chapter: 1,
+    verse: 21
+  },
+  {
+    id: "dyk_fear_not_count",
+    theme: "dyk-theme-indigo",
+    image: "assets/images/peace_anxiety_art.jpg",
+    alt: "Peace and divine calm over mountains",
+    questionEn: "How Many Times Does the Bible Say 'Do Not Be Afraid'?",
+    questionMr: "बायबलमध्ये 'भिऊ नको' हे वचन किती वेळा आले आहे?",
+    bulletsEn: [
+      { icon: "🕊️", text: "Appears 365 times in various forms across Scripture" },
+      { icon: "📅", text: "Exactly one divine assurance for every single day of the year!" },
+      { icon: "🛡️", text: "God repeatedly reassures us that His presence dispels all fear" },
+      { icon: "❤️", text: "Isaiah 41:10: \"Fear not, for I am with you; be not dismayed\"" }
+    ],
+    bulletsMr: [
+      { icon: "🕊️", text: "बायबलमध्ये 'भिऊ नको' (Fear not) तब्बल ३६५ वेळा आले आहे" },
+      { icon: "📅", text: "वर्षाच्या प्रत्येक दिवसासाठी देवाने दिलेले एक खास वचन!" },
+      { icon: "🛡️", text: "देव आपल्यासोबत असल्याने कोणत्याही संकटाला घाबरण्याचे कारण नाही" },
+      { icon: "❤️", text: "यशया ४१:१०: 'तू भिऊ नको, कारण मी तुझ्याबरोबर आहे; घाबरू नको'" }
+    ],
+    refEn: "Isaiah 41:10 • यशया ४१:१०",
+    refMr: "यशया ४१:१० • Isaiah 41:10",
+    book: "isaiah",
+    chapter: 41,
+    verse: 10
+  },
+  {
+    id: "dyk_book_without_god_name",
+    theme: "dyk-theme-mahogany",
+    image: "assets/images/did_you_know_esther.jpg",
+    alt: "Queen Esther in palace",
+    questionEn: "Which Book Never Directly Mentions the Name of God?",
+    questionMr: "कोणत्या पुस्तकात 'देव' हे नाव एकदाही आलेले नाही?",
+    bulletsEn: [
+      { icon: "👑", text: "The Book of Esther never explicitly mentions 'God' or 'Lord'" },
+      { icon: "🕊️", text: "Yet God's sovereign providence is evident on every single page" },
+      { icon: "✨", text: "Demonstrates that God is actively working even when invisible" },
+      { icon: "✡️", text: "Deliverance of the entire Jewish people commemorated in Purim" }
+    ],
+    bulletsMr: [
+      { icon: "👑", text: "एस्तेरच्या पुस्तकात 'देव' (God) हा शब्द एकदाही आलेला नाही" },
+      { icon: "🕊️", text: "तरीही देवाची अद्भुत योजना प्रत्येक पात्रात व घटनेत स्पष्ट दिसते" },
+      { icon: "✨", text: "देव डोळ्यांना दिसत नसतानाही आपल्यासाठी कार्य करत असतो" },
+      { icon: "✡️", text: "यहूदी लोकांच्या तारणाची ही विजयगाथा पुरीम सणात साजरी होते" }
+    ],
+    refEn: "Esther 4:14 • एस्तेर ४:१४",
+    refMr: "एस्तेर ४:१४ • Esther 4:14",
+    book: "esther",
+    chapter: 4,
+    verse: 14
+  },
+  {
+    id: "dyk_selah_meaning",
+    theme: "dyk-theme-teal",
+    image: "assets/images/morning_grace_art.jpg",
+    alt: "David playing harp in prayer",
+    questionEn: "What Does the Word 'Selah' Mean in the Psalms?",
+    questionMr: "स्तोत्रसंहितेतील 'सेला' (Selah) शब्दाचा खरा अर्थ काय?",
+    bulletsEn: [
+      { icon: "🎵", text: "Appears 71 times in Psalms and 3 times in Habakkuk" },
+      { icon: "🤫", text: "A musical pause meaning: 'Pause, be still, and meditate'" },
+      { icon: "🕊️", text: "Invites the worshipper to let sacred truth sink deep into heart" },
+      { icon: "🙏", text: "Worship is not just singing—it is also reverent listening" }
+    ],
+    bulletsMr: [
+      { icon: "🎵", text: "स्तोत्रसंहितेत ७१ वेळा आणि हबक्कूक मध्ये ३ वेळा आला आहे" },
+      { icon: "🤫", text: "संगीतातील पवित्र विराम: 'क्षणभर थांबा, स्तब्ध व्हा आणि मनन करा'" },
+      { icon: "🕊️", text: "देवाचे वचन अंतःकरणात खोलवर मुरण्यासाठी दिलेली मौनाची संधी" },
+      { icon: "🙏", text: "उपासना म्हणजे केवळ बोलणे नव्हे, तर शांत राहून देवाला ऐकणेही आहे" }
+    ],
+    refEn: "Psalm 46:10 • स्तोत्र ४६:१०",
+    refMr: "स्तोत्र ४६:१० • Psalm 46:10",
+    book: "psalms",
+    chapter: 46,
+    verse: 10
+  },
+  {
+    id: "dyk_manna_meaning",
+    theme: "dyk-theme-emerald",
+    image: "assets/images/dawn_valley_genesis.jpg",
+    alt: "Manna falling from heaven in wilderness",
+    questionEn: "What Does the Word 'Manna' Literally Mean?",
+    questionMr: "इस्राएलांना मिळालेल्या 'मन्ना' शब्दाचा खरा अर्थ काय?",
+    bulletsEn: [
+      { icon: "🌾", text: "Comes from Hebrew 'Man-hu' (מָן הוּא) meaning \"What is it?\"" },
+      { icon: "🍯", text: "Tasted like wafers made with pure wild honey" },
+      { icon: "⛺", text: "Miraculously sustained 2+ million Israelites for 40 years" },
+      { icon: "🍞", text: "Prefigured Jesus, the true 'Bread of Life' from heaven" }
+    ],
+    bulletsMr: [
+      { icon: "🌾", text: "हिब्रू 'मान-हू' (Man-hu) वरून आला, ज्याचा अर्थ: 'हे काय आहे?'" },
+      { icon: "🍯", text: "धनेबियासारखे पांढरे व मधाच्या पोळीसारखी त्याची चव होती" },
+      { icon: "⛺", text: "वाळवंटात २० लाखांहून अधिक लोकांना ४० वर्षे दररोज पुरवले" },
+      { icon: "🍞", text: "स्वर्गातून आलेली खरी 'जीवनाची भाकर' म्हणजे येशू ख्रिस्त" }
+    ],
+    refEn: "Exodus 16:15 • निर्गम १६:१५",
+    refMr: "निर्गम १६:१५ • Exodus 16:15",
+    book: "exodus",
+    chapter: 16,
+    verse: 15
+  },
+  {
+    id: "dyk_longest_verse",
+    theme: "dyk-theme-indigo",
+    image: "assets/images/did_you_know_esther.jpg",
+    alt: "Royal Persian decree on scroll",
+    questionEn: "What Is the Longest Verse in the Entire Bible?",
+    questionMr: "बायबलमधील सर्वात मोठे वचन कोणते आहे?",
+    bulletsEn: [
+      { icon: "📜", text: "Esther 8:9 holds the record with approximately 90 words" },
+      { icon: "🏇", text: "Dispatched couriers on royal horses across 127 provinces" },
+      { icon: "✍️", text: "Written in each province's unique script and language" },
+      { icon: "🛡️", text: "Granted God's people the legal right to defend their lives" }
+    ],
+    bulletsMr: [
+      { icon: "📜", text: "एस्तेर ८:९ हे बायबलमधील सर्वात लांब वचन आहे (सुमारे ९० शब्द)" },
+      { icon: "🏇", text: "१२७ प्रांतांमध्ये शाही घोडेस्वारांमार्फत पाठवलेला राजाचा हुकूम" },
+      { icon: "✍️", text: "प्रत्येक प्रांताच्या भाषेत व लिपीत लिहिलेला हा ऐतिहासिक दस्तऐवज" },
+      { icon: "🛡️", text: "यहूद्यांना आत्मसंरक्षणाचा व विजयाचा अधिकार देणारा आदेश" }
+    ],
+    refEn: "Esther 8:9 • एस्तेर ८:९",
+    refMr: "एस्तेर ८:९ • Esther 8:9",
+    book: "esther",
+    chapter: 8,
+    verse: 9
+  },
+  {
+    id: "dyk_first_printed_book",
+    theme: "dyk-theme-mahogany",
+    image: "assets/images/winding_path_journey.jpg",
+    alt: "Gutenberg printing press with Latin Bible",
+    questionEn: "What Was the First Major Book Ever Printed?",
+    questionMr: "जगाच्या इतिहासात सर्वप्रथम छापलेले पुस्तक कोणते?",
+    bulletsEn: [
+      { icon: "🖨️", text: "The Gutenberg Bible printed in 1455 AD in Mainz, Germany" },
+      { icon: "💡", text: "Invented movable metal type specifically to reproduce Scripture" },
+      { icon: "📖", text: "Only ~49 original copies survive today in major world museums" },
+      { icon: "✨", text: "Ignited the Reformation and global mass literacy" }
+    ],
+    bulletsMr: [
+      { icon: "🖨️", text: "गुटेनबर्ग बायबल — १४५५ मध्ये जर्मनीमध्ये छापले गेले" },
+      { icon: "💡", text: "योहानेस गुटेनबर्गने बायबल छापण्यासाठी आधुनिक छापखाना शोधला" },
+      { icon: "📖", text: "आज जगभरातील प्रमुख वस्तुसंग्रहालयांत केवळ ४९ मूळ प्रती शिल्लक आहेत" },
+      { icon: "✨", text: "या एका शोधामुळे जगातील शिक्षण व ज्ञानाची महाक्रांती झाली" }
+    ],
+    refEn: "Matthew 24:35 • मत्तय २४:३५",
+    refMr: "मत्तय २४:३५ • Matthew 24:35",
+    book: "matthew",
+    chapter: 24,
+    verse: 35
+  },
+  {
+    id: "dyk_david_goliath_stones",
+    theme: "dyk-theme-emerald",
+    image: "assets/images/moses_mount_sinai_art.jpg",
+    alt: "Young David gathering stones from brook",
+    questionEn: "Why Did David Pick Up 5 Smooth Stones for Goliath?",
+    questionMr: "दाविदाने गोल्ल्याथाशी लढताना ५ गुळगुळीत दगड का निवडले?",
+    bulletsEn: [
+      { icon: "🪨", text: "1 Samuel 17:40: David picked 5 smooth stones from the stream" },
+      { icon: "⚔️", text: "Goliath had 4 giant brothers/kinsmen in Gath (2 Sam 21:16-22)" },
+      { icon: "🎯", text: "David's faith was paired with complete readiness for all 5 giants" },
+      { icon: "🏆", text: "One single stone was enough to bring Goliath crashing down" }
+    ],
+    bulletsMr: [
+      { icon: "🪨", text: "१ शमुवेल १७:४०: दाविदाने ओढ्यातून ५ गुळगुळीत गोटे निवडले" },
+      { icon: "⚔️", text: "गोल्ल्याथाला गाथ नगरात आणखी ४ राक्षस भाऊ होते (२ शमुवेल २१)" },
+      { icon: "🎯", text: "दावीद केवळ गोल्ल्याथच नव्हे, तर त्याच्या इतर भावांशीही लढायला सज्ज होता!" },
+      { icon: "🏆", text: "परंतु परमेश्वराच्या सामर्थ्याने पहिल्याच दगडात विजय मिळाला" }
+    ],
+    refEn: "1 Samuel 17:40 • १ शमुवेल १७:४०",
+    refMr: "१ शमुवेल १७:४० • 1 Samuel 17:40",
+    book: "1samuel",
+    chapter: 17,
+    verse: 40
+  },
+  {
+    id: "dyk_two_men_never_died",
+    theme: "dyk-theme-teal",
+    image: "assets/images/serene_sky_prayer.jpg",
+    alt: "Chariot of fire ascending to heaven",
+    questionEn: "Which 2 Men in the Bible Never Experienced Physical Death?",
+    questionMr: "बायबलमधील कोणते दोन पुरुष कधीही मरण पावले नाहीत?",
+    bulletsEn: [
+      { icon: "🚶", text: "Enoch walked closely with God, then God took him (Gen 5:24)" },
+      { icon: "🔥", text: "Elijah ascended directly to heaven in a chariot of fire (2 Kings 2:11)" },
+      { icon: "✝️", text: "Elijah reappeared with Moses at Christ's Transfiguration" },
+      { icon: "✨", text: "Prophetic prototypes of the resurrection and eternal life" }
+    ],
+    bulletsMr: [
+      { icon: "🚶", text: "हनोक: देवाबरोबर चालला आणि देवाने त्याला जिवंत उचलून घेतले (उत्पत्ती ५:२४)" },
+      { icon: "🔥", text: "एलिया: अग्नीच्या रथात वादळाने थेट स्वर्गात नेला गेला (२ राजे २:११)" },
+      { icon: "✝️", text: "येशूच्या रूपांतर पर्वतावर मोशेसोबत एलिया पुन्हा प्रकट झाला" },
+      { icon: "✨", text: "मृत्यूवर मात करणाऱ्या सार्वकालिक जीवनाची ही जिवंत साक्ष" }
+    ],
+    refEn: "2 Kings 2:11 • २ राजे २:११",
+    refMr: "२ राजे २:११ • 2 Kings 2:11",
+    book: "2kings",
+    chapter: 2,
+    verse: 11
+  },
+  {
+    id: "dyk_talking_donkey",
+    theme: "dyk-theme-indigo",
+    image: "assets/images/winding_path_journey.jpg",
+    alt: "Balaam and donkey on narrow path",
+    questionEn: "Which Animal in the Bible Spoke with a Human Voice?",
+    questionMr: "बायबलमधील कोणत्या प्राण्याने मानवी आवाजात संवाद साधला?",
+    bulletsEn: [
+      { icon: "🐴", text: "Balaam's donkey spoke when the Lord opened her mouth (Num 22:28)" },
+      { icon: "⚔️", text: "She saw the Angel of the Lord standing with a drawn sword" },
+      { icon: "🛡️", text: "Her speech saved the disobedient prophet from instant death" },
+      { icon: "🌿", text: "Shows that God can use the humblest creatures to speak truth" }
+    ],
+    bulletsMr: [
+      { icon: "🐴", text: "बलामची गाढवी — देवाने तिचे मुख उघडल्यावर ती बोलली (गणना २२:२८)" },
+      { icon: "⚔️", text: "तिने परमेश्वराचा देवदूत हातात तलवार घेऊन उभा असलेला पाहिला" },
+      { icon: "🛡️", text: "हट्टी संदेष्ट्याला मृत्यूपासून वाचवण्यासाठी तिने मानवी आवाजात जाब विचारला" },
+      { icon: "🌿", text: "देव आपले रक्षण करण्यासाठी साध्या प्राण्यांचाही वापर करू शकतो" }
+    ],
+    refEn: "Numbers 22:28 • गणना २२:२८",
+    refMr: "गणना २२:२८ • Numbers 22:28",
+    book: "numbers",
+    chapter: 22,
+    verse: 28
+  },
+  {
+    id: "dyk_sun_stood_still",
+    theme: "dyk-theme-mahogany",
+    image: "assets/images/dawn_valley_genesis.jpg",
+    alt: "Sun and moon standing still over battle valley",
+    questionEn: "In Which Battle Did the Sun Stand Still for a Full Day?",
+    questionMr: "कोणत्या युद्धात सूर्य आणि चंद्र संपूर्ण दिवसभर थांबले?",
+    bulletsEn: [
+      { icon: "☀️", text: "Joshua prayed at Gibeon, and the sun halted in the sky (Josh 10:12-14)" },
+      { icon: "🌙", text: "The moon also remained stationary in the valley of Aijalon" },
+      { icon: "⏳", text: "Delayed going down for about an entire full day" },
+      { icon: "🏆", text: "\"There has never been a day like it before or since\"" }
+    ],
+    bulletsMr: [
+      { icon: "☀️", text: "गिबोन येथील युद्धात यहोशूच्या प्रार्थनेने सूर्य थांबला (यहोशू १०:१२-१४)" },
+      { icon: "🌙", text: "अयालोनाच्या खोऱ्यात चंद्रही एका जागी स्तब्ध राहिला" },
+      { icon: "⏳", text: "सुमारे एक संपूर्ण दिवस सूर्य मावळला नाही" },
+      { icon: "🏆", text: "परमेश्वराने मनुष्याची अशी प्रार्थना ऐकल्याचा हा अद्वितीय दिवस होता" }
+    ],
+    refEn: "Joshua 10:12-14 • यहोशू १०:१२-१४",
+    refMr: "यहोशू १०:१२-१४ • Joshua 10:12-14",
+    book: "joshua",
+    chapter: 10,
+    verse: 12
+  },
+  {
+    id: "dyk_jonah_fish",
+    theme: "dyk-theme-teal",
+    image: "assets/images/peace_anxiety_art.jpg",
+    alt: "Great sea creature beneath ocean waves",
+    questionEn: "Does the Bible Actually Say Jonah Was Swallowed by a Whale?",
+    questionMr: "बायबलमध्ये योनाला देवमाशाने (Whale) गिळल्याचा उल्लेख आहे का?",
+    bulletsEn: [
+      { icon: "🌊", text: "Original Hebrew uses 'Dag Gadol' (דָּג גָּדוֹל) — \"Great Fish / Sea Creature\"" },
+      { icon: "🐋", text: "God specially prepared/appointed this aquatic vessel to preserve Jonah" },
+      { icon: "⏳", text: "Jonah stayed 3 days and 3 nights in its belly praying" },
+      { icon: "✝️", text: "Jesus used Jonah's 3 days as a prophetic sign of His resurrection" }
+    ],
+    bulletsMr: [
+      { icon: "🌊", text: "मूळ हिब्रूमध्ये 'दाग गादोल' (Dag Gadol) म्हणजे 'भव्य मोठा मासा' असा शब्द आहे" },
+      { icon: "🐋", text: "देवाने योनाचा जीव वाचवण्यासाठी हा जलचर खास तयार केला होता" },
+      { icon: "⏳", text: "योनाने ३ दिवस व ३ रात्री माशाच्या पोटात राहून पश्चात्तापाची प्रार्थना केली" },
+      { icon: "✝️", text: "येशूने आपल्या पुनरुत्थानाचे चिन्ह म्हणून योनाचा दाखला दिला" }
+    ],
+    refEn: "Jonah 1:17 • योना १:१७",
+    refMr: "योना १:१७ • Jonah 1:17",
+    book: "jonah",
+    chapter: 1,
+    verse: 17
+  },
+  {
+    id: "dyk_solomon_wisdom_wealth",
+    theme: "dyk-theme-emerald",
+    image: "assets/images/morning_grace_art.jpg",
+    alt: "King Solomon kneeling in prayer at night",
+    questionEn: "What Did Young King Solomon Ask God For in His Dream?",
+    questionMr: "तरुण राजा शलमोनाने देवाकडे संपत्तीऐवजी काय मागितले?",
+    bulletsEn: [
+      { icon: "👑", text: "God told him: \"Ask for whatever you want me to give you\"" },
+      { icon: "🧠", text: "Solomon asked for a discerning heart to govern the people wisely" },
+      { icon: "💎", text: "God was so pleased that He gave him unrivaled wisdom AND wealth" },
+      { icon: "✨", text: "Seeking God's righteousness first brings all other blessings alongside" }
+    ],
+    bulletsMr: [
+      { icon: "👑", text: "देवाने स्वप्नात विचारले: 'तुला काय हवे ते मजजवळ माग'" },
+      { icon: "🧠", text: "शलमोनाने संपत्ती किंवा दीर्घायुष्य न मागता शहाणपण व विवेक मागितला" },
+      { icon: "💎", text: "देवाला हे इतके आवडले की त्याने बुद्धीसोबत अफाट संपत्ती व सन्मान दिला" },
+      { icon: "✨", text: "देवाचे राज्य प्रथम शोधल्यास इतर सर्व गोष्टी आपोआप प्राप्त होतात" }
+    ],
+    refEn: "1 Kings 3:9-13 • १ राजे ३:९-१३",
+    refMr: "१ राजे ३:९-१३ • 1 Kings 3:9-13",
+    book: "1kings",
+    chapter: 3,
+    verse: 9
+  },
+  {
+    id: "dyk_bread_of_life",
+    theme: "dyk-theme-indigo",
+    image: "assets/images/wedding_cana_miracle.jpg",
+    alt: "Christ holding bread of life",
+    questionEn: "What Are the 7 Famous 'I AM' Statements of Jesus in John?",
+    questionMr: "योहानच्या शुभवर्तमानात येशूने केलेली ७ 'मी आहे' विधाने कोणती?",
+    bulletsEn: [
+      { icon: "🍞", text: "I AM: Bread of Life, Light of the World, Door of Sheep" },
+      { icon: "🐑", text: "I AM: The Good Shepherd, Resurrection & the Life" },
+      { icon: "✝️", text: "I AM: The Way, the Truth, and the Life" },
+      { icon: "🍇", text: "I AM: The True Vine — meeting every spiritual hunger of mankind" }
+    ],
+    bulletsMr: [
+      { icon: "🍞", text: "मी जीवनाची भाकर, मी जगाचा प्रकाश, मी मेंढरांचे दार" },
+      { icon: "🐑", text: "मी चांगला मेंढपाळ, मी पुनरुत्थान आणि जीवन" },
+      { icon: "✝️", text: "मीच मार्ग, सत्य आणि जीवन" },
+      { icon: "🍇", text: "मी खरी द्राक्षवेल — मानवाच्या आत्म्याची प्रत्येक भूक भागवणारे ख्रिस्त स्वरूप" }
+    ],
+    refEn: "John 14:6 • योहान १४:६",
+    refMr: "योहान १४:६ • John 14:6",
+    book: "john",
+    chapter: 14,
+    verse: 6
+  },
+  {
+    id: "dyk_paul_shipwrecks",
+    theme: "dyk-theme-mahogany",
+    image: "assets/images/moses_mount_sinai_art.jpg",
+    alt: "Stormy sea and apostle Paul praying on ship",
+    questionEn: "How Many Shipwrecks Did the Apostle Paul Survive?",
+    questionMr: "प्रेषित पौल किती वेळा जहाजाच्या अपघातातून आश्चर्यकारकरित्या वाचला?",
+    bulletsEn: [
+      { icon: "🌊", text: "Survived 3 shipwrecks before writing 2 Corinthians (2 Cor 11:25)" },
+      { icon: "⚓", text: "Once spent a night and a day adrift in the open ocean" },
+      { icon: "🏝️", text: "Later survived a 4th catastrophic shipwreck on Malta (Acts 27)" },
+      { icon: "🛡️", text: "All 276 souls on board survived because God was with Paul" }
+    ],
+    bulletsMr: [
+      { icon: "🌊", text: "२ करिंथकरांस लिहिण्यापूर्वी तो ३ वेळा जहाजाच्या अपघातात वाचला होता" },
+      { icon: "⚓", text: "एकदा संपूर्ण रात्र व दिवस समुद्राच्या खोल पाण्यात तरंगत राहिला" },
+      { icon: "🏝️", text: "नंतर माल्टा बेटाजवळ चौथ्या महाभयंकर अपघातातून सर्व २७६ प्रवासी वाचले!" },
+      { icon: "🛡️", text: "देवाची योजना पूर्ण होईपर्यंत कोणतीही वादळे पौलाला नष्ट करू शकली नाहीत" }
+    ],
+    refEn: "Acts 27:24 • प्रेषितांची कृत्ये २७:२४",
+    refMr: "प्रेषितांची कृत्ये २७:२४ • Acts 27:24",
+    book: "acts",
+    chapter: 27,
+    verse: 24
+  },
+  {
+    id: "dyk_golden_rule",
+    theme: "dyk-theme-teal",
+    image: "assets/images/peace_anxiety_art.jpg",
+    alt: "Christ preaching on mount",
+    questionEn: "What Is the 'Golden Rule' Taught by Jesus?",
+    questionMr: "येशूने शिकवलेला 'सुवर्ण नियम' (Golden Rule) कोणता आहे?",
+    bulletsEn: [
+      { icon: "⭐", text: "Matthew 7:12: \"Do to others whatever you would have them do to you\"" },
+      { icon: "📜", text: "Jesus declared this encapsulates all the Law and the Prophets" },
+      { icon: "❤️", text: "Unlike passive ancient rules (\"don't harm\"), Jesus commanded proactive love" },
+      { icon: "🤝", text: "The foundational compass of Christian relationships and empathy" }
+    ],
+    bulletsMr: [
+      { icon: "⭐", text: "मत्तय ७:१२: 'लोकांनी तुमच्याशी जसे वागावे अशी तुमची इच्छा आहे, तसेच तुम्हीही त्यांच्याशी वागा'" },
+      { icon: "📜", text: "सर्व नियमशास्त्र आणि संदेष्ट्यांच्या शिकवणीचा हा परिपूर्ण सारांश आहे" },
+      { icon: "❤️", text: "केवळ 'वाईट करू नका' असे नाही, तर पुढाकार घेऊन 'चांगले करा' ही येशूची शिकवण" },
+      { icon: "🤝", text: "ख्रिस्ती जीवन, दया व नात्यांचा सर्वात मोठा सुवर्ण नियम" }
+    ],
+    refEn: "Matthew 7:12 • मत्तय ७:१२",
+    refMr: "मत्तय ७:१२ • Matthew 7:12",
+    book: "matthew",
+    chapter: 7,
+    verse: 12
+  },
+  {
+    id: "dyk_peter_shadow",
+    theme: "dyk-theme-emerald",
+    image: "assets/images/serene_sky_prayer.jpg",
+    alt: "Apostle Peter praying for the sick in Jerusalem",
+    questionEn: "Why Did People Bring the Sick Into Peter's Shadow?",
+    questionMr: "लोक आजारी व्यक्तींना पेत्राच्या सावलीत का आणून ठेवत असत?",
+    bulletsEn: [
+      { icon: "👥", text: "Acts 5:15: Crowds brought the sick into streets hoping Peter's shadow would touch them" },
+      { icon: "✨", text: "All of them were healed through the presence of the Holy Spirit" },
+      { icon: "🕊️", text: "Reflected the extraordinary power at work in the early Jerusalem church" },
+      { icon: "✝️", text: "Highlighted not Peter's shadow, but Christ alive in him" }
+    ],
+    bulletsMr: [
+      { icon: "👥", text: "प्रेषितांची कृत्ये ५:१५: पेत्राची सावली पडावी म्हणून लोक रोग्यांना रस्त्यांवर आणत असत" },
+      { icon: "✨", text: "आणि पवित्र आत्म्याच्या जिवंत सामर्थ्याने ते सर्वजण पूर्ण बरे झाले!" },
+      { icon: "🕊️", text: "सुरुवातीच्या मंडळीमधील अद्भुत विश्वास आणि चमत्कारांचे हे दर्शन होते" },
+      { icon: "✝️", text: "हा पेत्राचा नव्हे, तर त्याच्यामध्ये राहणाऱ्या जिवंत ख्रिस्ताचा महिमा होता" }
+    ],
+    refEn: "Acts 5:15-16 • प्रेषितांची कृत्ये ५:१५-१६",
+    refMr: "प्रेषितांची कृत्ये ५:१५-१६ • Acts 5:15-16",
+    book: "acts",
+    chapter: 5,
+    verse: 15
+  },
+  {
+    id: "dyk_garden_of_gethsemane",
+    theme: "dyk-theme-indigo",
+    image: "assets/images/dawn_valley_genesis.jpg",
+    alt: "Olive trees in Garden of Gethsemane under moonlight",
+    questionEn: "What Does 'Gethsemane' Literally Mean in Aramaic/Hebrew?",
+    questionMr: "'गेथशेमाने' या बागेच्या नावाचा मूळ हिब्रू अर्थ काय?",
+    bulletsEn: [
+      { icon: "🫒", text: "Derived from 'Gath-Shemanim' (גת שמנים) meaning \"The Oil Press\"" },
+      { icon: "⚙️", text: "Where harvested olives were crushed under immense stone weights for pure oil" },
+      { icon: "🩸", text: "In this very garden, Jesus experienced agonizing pressure for our sins" },
+      { icon: "✝️", text: "Yet prayed in utter surrender: \"Not my will, but Yours be done\"" }
+    ],
+    bulletsMr: [
+      { icon: "🫒", text: "हिब्रू 'गाथ-शमानीम' वरून आला, ज्याचा अर्थ: 'तेल काढण्याची घाणी (Oil Press)'" },
+      { icon: "⚙️", text: "जिथे ऑलिव्ह फळांना प्रचंड दगडी वजनाखाली चेपून शुद्ध तेल काढले जात असे" },
+      { icon: "🩸", text: "त्याच बागेत आपल्या पापांचे ओझे वाहताना येशूचे हृदय अत्यंत व्याकुळ झाले" },
+      { icon: "✝️", text: "आणि त्याने संपूर्ण समर्पण केले: 'माझी इच्छा नाही, तर तुझीच इच्छा पूर्ण होवो'" }
+    ],
+    refEn: "Luke 22:42-44 • लूक २२:४२-४४",
+    refMr: "लूक २२:४२-४४ • Luke 22:42-44",
+    book: "luke",
+    chapter: 22,
+    verse: 42
   }
 ];
 
@@ -26560,13 +27736,21 @@ function renderDidYouKnowWidget() {
   
   const isEng = (window.state && (window.state.translation === 'eng' || window.state.language === 'en'));
   const total = DID_YOU_KNOW_INSIGHTS.length;
+
+  // Daily rotating starting card based on day of year
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const diff = now - start;
+  const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const dailyOffset = dayOfYear % total;
+  const rotatedInsights = [...DID_YOU_KNOW_INSIGHTS.slice(dailyOffset), ...DID_YOU_KNOW_INSIGHTS.slice(0, dailyOffset)];
   
-  track.innerHTML = DID_YOU_KNOW_INSIGHTS.map((item, idx) => {
-    const qTitle = item.questionEn || item.titleEn;
-    const qSub = item.questionMr || item.titleMr;
-    const bullets = (isEng ? item.bulletsEn : (item.bulletsEn || item.bulletsMr)) || [];
+  track.innerHTML = rotatedInsights.map((item, idx) => {
+    const qTitle = isEng ? (item.questionEn || item.questionMr) : (item.questionMr || item.questionEn);
+    const qSub = isEng ? item.questionMr : item.questionEn;
+    const bullets = isEng ? (item.bulletsEn || item.bulletsMr) : (item.bulletsMr || item.bulletsEn);
     const ref = isEng ? item.refEn : item.refMr;
-    const btnLabel = "Explore Devotional";
+    const btnLabel = isEng ? "Read Scripture" : "वचन वाचा";
     const bgImage = item.image || "assets/images/did_you_know_esther.jpg";
     
     return `
@@ -26590,7 +27774,7 @@ function renderDidYouKnowWidget() {
         </div>
         
         <div class="dyk-bullet-list">
-          ${bullets.map(b => `
+          ${(bullets || []).map(b => `
             <div class="dyk-bullet-item">
               <span class="dyk-bullet-icon">${b.icon}</span>
               <span class="dyk-bullet-text">${b.text}</span>
@@ -26603,7 +27787,7 @@ function renderDidYouKnowWidget() {
             <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
             <span>${ref}</span>
           </span>
-          <button class="dyk-explore-btn" onclick="openDidYouKnowIndex(${idx})" title="Explore Devotional & Scripture">
+          <button class="dyk-explore-btn" onclick="openDidYouKnowInsight('${item.id}')" title="Explore Devotional & Scripture">
             <span>${btnLabel}</span>
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="9 18 15 12 9 6"></polyline>
@@ -26625,6 +27809,13 @@ function slideDykCarousel(direction) {
 
 function openDidYouKnowIndex(idx) {
   const item = DID_YOU_KNOW_INSIGHTS[idx] || DID_YOU_KNOW_INSIGHTS[0];
+  if (item && typeof openReaderAndNavigate === 'function') {
+    openReaderAndNavigate(item.book, item.chapter, item.verse || 1);
+  }
+}
+
+function openDidYouKnowInsight(id) {
+  const item = DID_YOU_KNOW_INSIGHTS.find(x => x.id === id) || DID_YOU_KNOW_INSIGHTS[0];
   if (item && typeof openReaderAndNavigate === 'function') {
     openReaderAndNavigate(item.book, item.chapter, item.verse || 1);
   }
@@ -27127,6 +28318,156 @@ setTimeout(() => {
 
 
 
+
+/* ==============================================================================
+   FEATURE: THE LORD'S PRAYER (प्रभूने शिकवलेली प्रार्थना) CONTROLLER
+   ============================================================================== */
+window.currentLordsPrayerVersion = 'matthew';
+window.isLordsPrayerAudioPlaying = false;
+window.lordsPrayerUtterance = null;
+
+window.switchLordsPrayerVersion = function(version) {
+  window.currentLordsPrayerVersion = version || 'matthew';
+  const tabMatt = document.getElementById("lp-tab-matt");
+  const tabLuke = document.getElementById("lp-tab-luke");
+  const viewMatt = document.getElementById("lp-content-matthew");
+  const viewLuke = document.getElementById("lp-content-luke");
+
+  // Stop any playing audio when switching version
+  if (window.isLordsPrayerAudioPlaying) {
+    window.stopLordsPrayerAudio();
+  }
+
+  if (version === 'luke') {
+    if (tabLuke) tabLuke.classList.add("active");
+    if (tabMatt) tabMatt.classList.remove("active");
+    if (viewLuke) { viewLuke.style.display = "block"; viewLuke.classList.add("active"); }
+    if (viewMatt) { viewMatt.style.display = "none"; viewMatt.classList.remove("active"); }
+  } else {
+    if (tabMatt) tabMatt.classList.add("active");
+    if (tabLuke) tabLuke.classList.remove("active");
+    if (viewMatt) { viewMatt.style.display = "block"; viewMatt.classList.add("active"); }
+    if (viewLuke) { viewLuke.style.display = "none"; viewLuke.classList.remove("active"); }
+  }
+};
+
+window.stopLordsPrayerAudio = function() {
+  if (typeof window.speechSynthesis !== 'undefined') {
+    window.speechSynthesis.cancel();
+  }
+  window.isLordsPrayerAudioPlaying = false;
+  const playIcon = document.getElementById("lp-audio-icon-play");
+  const pauseIcon = document.getElementById("lp-audio-icon-pause");
+  const btnText = document.getElementById("lp-audio-btn-text");
+  if (playIcon) playIcon.style.display = "inline-block";
+  if (pauseIcon) pauseIcon.style.display = "none";
+  if (btnText) btnText.textContent = (window.state && window.state.translation === 'eng') ? "Listen" : "ऐका (Listen)";
+};
+
+window.toggleLordsPrayerAudio = function() {
+  if (window.isLordsPrayerAudioPlaying) {
+    window.stopLordsPrayerAudio();
+    return;
+  }
+
+  if (typeof window.speechSynthesis === 'undefined') {
+    if (typeof showToast === 'function') showToast("🔊 आपल्या डिव्हाइसवर ऑडिओ उपलब्ध नाही.");
+    return;
+  }
+
+  window.speechSynthesis.cancel();
+
+  const isLuke = (window.currentLordsPrayerVersion === 'luke');
+  const speechText = isLuke
+    ? "प्रभूने शिकवलेली प्रार्थना. संत लूक ह्याने लिहिलेल्या शुभवर्तमानात येशू म्हणाला, तुम्ही प्रार्थना कराल तेव्हा म्हणा: हे पित्या, तुझे नाव पवित्र मानिले जावो. तुझे राज्य येवो. आमची रोजची भाकर रोज आम्हाला दे. आणि आमच्या पापांची आम्हाला क्षमा कर; कारण आम्हीही आमच्या प्रत्येक ऋण्याला क्षमा करतो. आणि आम्हाला परीक्षेत आणू नकोस. आमेन."
+    : "प्रभूने शिकवलेली प्रार्थना. म्हणून तुम्ही अशी प्रार्थना करा: हे आमच्या स्वर्गातील पित्या, तुझे नाव पवित्र मानिले जावो. तुझे राज्य येवो. जसे स्वर्गात तसेच पृथ्वीवर तुझ्या इच्छेप्रमाणे होवो. आमची रोजची भाकर आज आम्हाला दे. आणि आम्ही आमच्या ऋण्यांना सोडले आहे तशीच तू आमची ऋणे आम्हाला सोड. आणि आम्हाला परीक्षेत आणू नकोस, पण आम्हाला वाइटापासून सोडीव. आमेन.";
+
+  const utter = new SpeechSynthesisUtterance(speechText);
+  utter.rate = 0.88;
+  utter.pitch = 1.0;
+
+  const voices = window.speechSynthesis.getVoices();
+  const mrVoice = voices.find(v => v.lang && (v.lang.toLowerCase().includes('mr') || v.lang.toLowerCase().includes('mar')));
+  const hiVoice = voices.find(v => v.lang && (v.lang.toLowerCase().includes('hi') || v.lang.toLowerCase().includes('hin')));
+  if (mrVoice) {
+    utter.voice = mrVoice;
+  } else if (hiVoice) {
+    utter.voice = hiVoice;
+  }
+
+  utter.onstart = function() {
+    window.isLordsPrayerAudioPlaying = true;
+    const playIcon = document.getElementById("lp-audio-icon-play");
+    const pauseIcon = document.getElementById("lp-audio-icon-pause");
+    const btnText = document.getElementById("lp-audio-btn-text");
+    if (playIcon) playIcon.style.display = "none";
+    if (pauseIcon) pauseIcon.style.display = "inline-block";
+    if (btnText) btnText.textContent = "थांबवा (Pause)";
+  };
+
+  utter.onend = function() {
+    window.stopLordsPrayerAudio();
+  };
+
+  utter.onerror = function() {
+    window.stopLordsPrayerAudio();
+  };
+
+  window.lordsPrayerUtterance = utter;
+  window.speechSynthesis.speak(utter);
+};
+
+window.copyLordsPrayerText = function() {
+  const isLuke = (window.currentLordsPrayerVersion === 'luke');
+  const text = isLuke
+    ? `✝️ प्रभूने शिकवलेली प्रार्थना (The Lord's Prayer)\n\nसंत लूक ह्याने लिहिलेल्या शुभवर्तमानात येशू म्हणाला, “तुम्ही प्रार्थना कराल तेव्हा म्हणा:\n‘हे पित्या,\nतुझे नाव पवित्र मानिले जावो.\nतुझे राज्य येवो.\nआमची रोजची भाकर रोज आम्हाला दे.\nआणि आमच्या पापांची आम्हाला क्षमा कर;\nकारण आम्हीही आमच्या प्रत्येक ऋण्याला क्षमा करतो.\nआणि आम्हाला परीक्षेत आणू नकोस.’ ”\n\n— लूक ११:२-४ (पवित्र शास्त्र)`
+    : `✝️ प्रभूने शिकवलेली प्रार्थना (The Lord's Prayer)\n\n“म्हणून तुम्ही अशी प्रार्थना करा:\n‘हे आमच्या स्वर्गातील पित्या,\nतुझे नाव पवित्र मानिले जावो.\nतुझे राज्य येवो.\nजसे स्वर्गात तसेच पृथ्वीवर तुझ्या इच्छेप्रमाणे होवो.\nआमची रोजची भाकर आज आम्हाला दे.\nआणि आम्ही आमच्या ऋण्यांना सोडले आहे तशीच तू आमची ऋणे आम्हाला सोड.\nआणि आम्हाला परीक्षेत आणू नकोस,\nपण आम्हाला वाइटापासून सोडीव.’ ”\n\n— मत्तय ६:९-१३ (पवित्र शास्त्र)`;
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => {
+      if (typeof showToast === 'function') showToast("📋 प्रभूने शिकवलेली प्रार्थना कॉपी केली!");
+    }).catch(() => {
+      fallbackCopyText(text);
+    });
+  } else {
+    fallbackCopyText(text);
+  }
+
+  function fallbackCopyText(str) {
+    const ta = document.createElement("textarea");
+    ta.value = str;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+      document.execCommand("copy");
+      if (typeof showToast === 'function') showToast("📋 प्रभूने शिकवलेली प्रार्थना कॉपी केली!");
+    } catch(e) {}
+    document.body.removeChild(ta);
+  }
+};
+
+window.shareLordsPrayerToWhatsApp = function() {
+  const isLuke = (window.currentLordsPrayerVersion === 'luke');
+  const shareText = isLuke
+    ? `✝️ *प्रभूने शिकवलेली प्रार्थना (लूक ११:२-४)*\n\n“तुम्ही प्रार्थना कराल तेव्हा म्हणा:\n‘हे पित्या,\nतुझे नाव पवित्र मानिले जावो.\nतुझे राज्य येवो.\nआमची रोजची भाकर रोज आम्हाला दे.\nआणि आमच्या पापांची आम्हाला क्षमा कर;\nकारण आम्हीही आमच्या प्रत्येक ऋण्याला क्षमा करतो.\nआणि आम्हाला परीक्षेत आणू नकोस.’ ”\n\n📖 River of Life - Marathi Bible App`
+    : `✝️ *प्रभूने शिकवलेली प्रार्थना (मत्तय ६:९-१३)*\n\n“म्हणून तुम्ही अशी प्रार्थना करा:\n‘हे आमच्या स्वर्गातील पित्या,\nतुझे नाव पवित्र मानिले जावो.\nतुझे राज्य येवो.\nजसे स्वर्गात तसेच पृथ्वीवर तुझ्या इच्छेप्रमाणे होवो.\nआमची रोजची भाकर आज आम्हाला दे.\nआणि आम्ही आमच्या ऋण्यांना सोडले आहे तशीच तू आमची ऋणे आम्हाला सोड.\nआणि आम्हाला परीक्षेत आणू नकोस,\nपण आम्हाला वाइटापासून सोडीव.’ ”\n\n📖 River of Life - Marathi Bible App`;
+
+  const url = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+  window.open(url, '_blank');
+};
+
+window.readLordsPrayerChapter = function() {
+  const isLuke = (window.currentLordsPrayerVersion === 'luke');
+  if (typeof openReaderAndNavigate === 'function') {
+    if (isLuke) {
+      openReaderAndNavigate('luke', 11, 2);
+    } else {
+      openReaderAndNavigate('matthew', 6, 9);
+    }
+  }
+};
 
 /* RoL: Ensure all conference iframes retain full permissions policy */
 (function(){
