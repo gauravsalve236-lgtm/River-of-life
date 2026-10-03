@@ -7812,6 +7812,7 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
   box-shadow: 0 24px 64px -12px rgba(0, 0, 0, 0.18), 0 4px 16px rgba(0, 0, 0, 0.04);
   display: flex;
   flex-direction: column;
+  min-height: 0;
   transform: translateY(20px) scale(0.98);
   transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -7830,6 +7831,7 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
     height: 92vh;
     border-radius: 24px 24px 0 0;
     border-bottom: none;
+    min-height: 0;
   }
 }
 
@@ -7843,6 +7845,8 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
   background-color: #FFFFFF;
   display: flex;
   flex-direction: column;
+  min-height: 0;
+  flex: 1;
 }
 
 .prayer-artwork-vignette {
@@ -7910,12 +7914,15 @@ body:has(#modal-live-meeting.active) nav.mobile-bottom-tabs {
   position: relative;
   z-index: 5;
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
-  padding: 6px 22px 96px 22px;
+  padding: 6px 22px 140px 22px;
   display: flex;
   flex-direction: column;
   gap: 16px;
   -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  overscroll-behavior-y: contain;
 }
 
 .prayer-sanctuary-scrollable::-webkit-scrollbar {
@@ -18910,4 +18917,456 @@ body.theme-dark .lp-action-btn.outline {
   color: #fbbf24;
   background: rgba(245, 158, 11, 0.12);
 }
+
+/* ==========================================================================
+   ELEGANT HOMEPAGE THE LORD'S PRAYER CARD
+   ========================================================================== */
+.home-lords-prayer-card {
+  background: var(--bg-surface, #ffffff);
+  border: 1.5px solid var(--border, #e2e8f0);
+  border-left: 4.5px solid #d97706;
+  border-radius: 20px;
+  padding: 18px 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.home-lords-prayer-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 26px rgba(217, 119, 6, 0.12);
+}
+
+.hlp-card-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+}
+
+.hlp-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.hlp-kicker {
+  font-size: 10.5px;
+  font-weight: 800;
+  color: #d97706;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.hlp-ref-pill {
+  font-size: 10px;
+  font-weight: 700;
+  color: #78350f;
+  background: #fef3c7;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.hlp-title {
+  margin: 0;
+  font-size: 17.5px;
+  font-weight: 800;
+  color: var(--text, #0f172a);
+  letter-spacing: -0.2px;
+}
+
+.hlp-snippet {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted, #64748b);
+  line-height: 1.5;
+  font-style: italic;
+}
+
+.hlp-cta-row {
+  margin-top: 4px;
+}
+
+.hlp-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #d97706;
+  transition: gap 0.2s;
+}
+
+.home-lords-prayer-card:hover .hlp-cta-btn {
+  gap: 9px;
+}
+
+.hlp-card-icon-art {
+  width: 50px;
+  height: 50px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: 1px solid #fcd34d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
+}
+
+.hlp-cross-symbol {
+  font-size: 24px;
+  color: #b45309;
+  font-weight: 900;
+  line-height: 1;
+}
+
+[data-theme="dark"] .home-lords-prayer-card,
+body.theme-dark .home-lords-prayer-card {
+  background: #1e293b;
+  border-color: #334155;
+  border-left-color: #fbbf24;
+}
+
+[data-theme="dark"] .hlp-ref-pill,
+body.theme-dark .hlp-ref-pill {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+}
+
+[data-theme="dark"] .hlp-card-icon-art,
+body.theme-dark .hlp-card-icon-art {
+  background: rgba(245, 158, 11, 0.2);
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+/* ==========================================================================
+   DID YOU KNOW HOMEPAGE MASTER CARD & HUB MODAL
+   ========================================================================== */
+.home-dyk-master-section {
+  margin-top: 6px;
+  margin-bottom: 8px;
+}
+
+.home-dyk-master-card {
+  background: var(--bg-surface, #ffffff);
+  border: 1.5px solid var(--border, #e2e8f0);
+  border-left: 4.5px solid #10b981;
+  border-radius: 20px;
+  padding: 16px 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.home-dyk-master-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.12);
+}
+
+.hdyk-card-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  text-align: left;
+}
+
+.hdyk-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.hdyk-kicker {
+  font-size: 10.5px;
+  font-weight: 800;
+  color: #059669;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.hdyk-count-pill {
+  font-size: 10px;
+  font-weight: 700;
+  color: #065f46;
+  background: #d1fae5;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.hdyk-title {
+  margin: 0;
+  font-size: 17.5px;
+  font-weight: 800;
+  color: var(--text, #0f172a);
+}
+
+.hdyk-teaser {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--text-muted, #64748b);
+  line-height: 1.45;
+  font-style: italic;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.hdyk-bottom-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+
+.hdyk-ref-badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted, #64748b);
+}
+
+.hdyk-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #059669;
+  transition: gap 0.2s;
+}
+
+.home-dyk-master-card:hover .hdyk-cta-btn {
+  gap: 7px;
+}
+
+.hdyk-card-right {
+  flex-shrink: 0;
+}
+
+.hdyk-thumb-frame {
+  position: relative;
+  width: 78px;
+  height: 78px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1.5px solid var(--border, #e2e8f0);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.hdyk-thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.hdyk-thumb-chip {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(6, 95, 70, 0.88);
+  color: #fff;
+  font-size: 8.5px;
+  font-weight: 800;
+  text-align: center;
+  padding: 2px 0;
+  letter-spacing: 0.4px;
+}
+
+[data-theme="dark"] .home-dyk-master-card,
+body.theme-dark .home-dyk-master-card {
+  background: #1e293b;
+  border-color: #334155;
+  border-left-color: #34d399;
+}
+
+[data-theme="dark"] .hdyk-count-pill,
+body.theme-dark .hdyk-count-pill {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+}
+
+/* 30 Topics Grid inside Hub Modal */
+.dyk-hub-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+.dyk-hub-topic-card {
+  background: var(--bg-surface, #ffffff);
+  border: 1.5px solid var(--border, #e2e8f0);
+  border-radius: 18px;
+  padding: 12px;
+  cursor: pointer;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.dyk-hub-topic-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  border-color: #10b981;
+}
+
+.dyk-hub-card-thumb {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.dyk-hub-card-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.dyk-hub-card-num {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 800;
+  padding: 1px 5px;
+  border-radius: 6px;
+}
+
+.dyk-hub-card-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-align: left;
+}
+
+.dyk-hub-ref-tag {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #059669;
+}
+
+.dyk-hub-card-title {
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text, #0f172a);
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.dyk-hub-learn-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted, #64748b);
+  margin-top: 2px;
+}
+
+[data-theme="dark"] .dyk-hub-topic-card,
+body.theme-dark .dyk-hub-topic-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+/* Detail Modal Styling */
+.dyk-detail-artwork-frame {
+  position: relative;
+  width: 100%;
+  height: 190px;
+  border-radius: 18px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.dyk-detail-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.dyk-detail-artwork-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.7) 100%);
+}
+
+.dyk-detail-ref-badge {
+  position: absolute;
+  bottom: 12px;
+  left: 14px;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  color: #fbbf24;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(251, 191, 36, 0.4);
+}
+
+.dyk-detail-bullets-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.dyk-detail-bullet-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: var(--bg, #f8fafc);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 14px;
+  padding: 12px 14px;
+  text-align: left;
+}
+
+[data-theme="dark"] .dyk-detail-bullet-row,
+body.theme-dark .dyk-detail-bullet-row {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.dyk-detail-bullet-icon {
+  font-size: 20px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.dyk-detail-bullet-text {
+  font-size: 13.5px;
+  color: var(--text, #1e293b);
+  line-height: 1.5;
+}
+
 

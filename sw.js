@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v2403_LORDS_PRAYER_AND_DAILY_ENGAGEMENT';
+const CACHE_NAME = 'river-of-life-cache-v2404_MOBILE_STATUS_AND_MODAL_REDESIGN';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
