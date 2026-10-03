@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v2401_GROW_TAB_AND_VOD_SYNC_FIX';
+const CACHE_NAME = 'river-of-life-cache-v2402_BWOD_STATUS_PERFECT_CENTER_FIX';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

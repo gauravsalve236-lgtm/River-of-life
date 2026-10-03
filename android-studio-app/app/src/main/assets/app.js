@@ -23194,16 +23194,25 @@ window.generateExactBwodImageBlob = async function() {
 
   const wrapLines = (text, maxW, font) => {
     if (!text) return [];
-    ctx.save(); ctx.font=font; ctx.direction="ltr";
-    const words=text.split(" "); const lines=[]; let cur="";
-    for (let i=0;i<words.length;i++) {
-      ctx.direction="ltr";
-      const t=cur+words[i]+" ";
-      if (ctx.measureText(t).width>maxW && i>0) { lines.push(cur.trim()); cur=words[i]+" "; }
-      else { cur=t; }
+    ctx.save();
+    ctx.font = font;
+    ctx.direction = "ltr";
+    const words = String(text).split(" ");
+    const lines = [];
+    let cur = "";
+    for (let i = 0; i < words.length; i++) {
+      ctx.direction = "ltr";
+      const t = cur ? (cur + " " + words[i]) : words[i];
+      if (ctx.measureText(t).width > maxW && i > 0) {
+        lines.push(cur.trim());
+        cur = words[i];
+      } else {
+        cur = t;
+      }
     }
-    if(cur.trim()) lines.push(cur.trim());
-    ctx.restore(); return lines;
+    if (cur.trim()) lines.push(cur.trim());
+    ctx.restore();
+    return lines;
   };
 
   const mLines = wrapLines(meaning, TEXT_W, MFONT);
@@ -23257,11 +23266,24 @@ window.generateExactBwodImageBlob = async function() {
   ctx.beginPath(); rr(CARD_X+2,CARD_Y+2,CARD_W-4,CARD_H-4,30); ctx.clip();
 
   const CX = W/2; // = 540
-  // ltrFill: guaranteed centre-draw, RTL-safe
+  /**
+   * Universal center-drawing helper for all browsers and OS engines (iOS Safari, Android Chrome, Desktop).
+   * WebKit on iOS Safari has a known bug where ctx.textAlign = "center" for Devanagari text, emoji,
+   * or strings with complex script fallbacks fails to offset horizontally, drawing text with its LEFT edge
+   * at CX and shifting everything to the right side of the screen.
+   * By setting ctx.textAlign = "left" explicitly and calculating startX = Math.round(CX - textWidth / 2),
+   * every single engine places the text symmetrically and identically in the absolute center.
+   */
   const ltrFill = (text, y) => {
+    if (!text) return;
     ctx.save();
-    ctx.direction="ltr"; ctx.textAlign="center"; ctx.textBaseline="middle";
-    ctx.fillText(String(text), CX, y);
+    ctx.direction = "ltr";
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+    const str = String(text);
+    const tw = ctx.measureText(str).width;
+    const startX = Math.round(CX - (tw / 2));
+    ctx.fillText(str, startX, y);
     ctx.restore();
   };
 
@@ -23329,10 +23351,7 @@ window.generateExactBwodImageBlob = async function() {
   ctx.font=MFONT;
   ctx.shadowColor="rgba(0,0,0,0.95)"; ctx.shadowBlur=14;
   for (const line of mLines) {
-    ctx.save();
-    ctx.direction="ltr"; ctx.textAlign="center"; ctx.textBaseline="middle";
-    ctx.fillText(line, CX, Y);
-    ctx.restore();
+    ltrFill(line, Y);
     Y += LH_M;
   }
   ctx.shadowBlur=0;
@@ -23351,8 +23370,8 @@ window.generateExactBwodImageBlob = async function() {
   const rLines = wrapLines(refText, TEXT_W, "bold 27px -apple-system,BlinkMacSystemFont,sans-serif");
   const RLH = 42;
   for (const rl of rLines) {
-    ctx.save(); ctx.direction="ltr"; ctx.textAlign="center"; ctx.textBaseline="middle";
-    ctx.fillText(rl, CX, Y); ctx.restore(); Y += RLH;
+    ltrFill(rl, Y);
+    Y += RLH;
   }
   Y += H_RULE - RLH + 6;
 
@@ -23417,6 +23436,22 @@ window.shareBwodToWhatsApp = async function() {
       });
       showToast(isEng ? "✅ Shared to WhatsApp!" : "✅ WhatsApp वर शेअर केले!");
       return;
+    }
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          files: [file],
+          title: isEng ? `Word of the Day: ${word.term}` : `आजचा पवित्र शब्द: ${word.term}`,
+          text: statusCaption
+        });
+        showToast(isEng ? "✅ Shared to WhatsApp!" : "✅ WhatsApp वर शेअर केले!");
+        return;
+      } catch (shareErr) {
+        if (shareErr && (shareErr.name === 'AbortError' || shareErr.message?.includes('abort') || shareErr.message?.includes('cancel'))) {
+          return;
+        }
+      }
     }
   } catch (err) {
     if (err && (err.name === 'AbortError' || err.message?.includes('abort') || err.message?.includes('cancel'))) return;
