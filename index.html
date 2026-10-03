@@ -12,7 +12,7 @@
   <script>
     // Force immediate hard purge of all stale Service Workers and CacheStorage
     (function() {
-      const CURRENT_VER = "v2404_MOBILE_STATUS_AND_MODAL_REDESIGN";
+      const CURRENT_VER = "v2405_BWOD_THEMES_PALETTE_AND_COLORS";
       if (localStorage.getItem("rol_app_ver") !== CURRENT_VER) {
         localStorage.setItem("rol_app_ver", CURRENT_VER);
         if ('serviceWorker' in navigator) {
@@ -4169,6 +4169,11 @@
             <div style="height: 1.5px; width: 36px; background: #fbbf24; opacity: 0.85; box-shadow: 0 1px 6px rgba(0,0,0,0.9);"></div>
           </div>
 
+        </div>
+
+        <!-- Interactive Background Theme & Palette Picker Drawer -->
+        <div class="bwod-theme-picker-drawer" id="bwod-theme-picker-drawer">
+          <div class="bwod-theme-picker-track" id="bwod-theme-picker-track"></div>
         </div>
 
         <!-- Bottom Action Bar (Identical floating dock to Daily Bible Verse) -->
