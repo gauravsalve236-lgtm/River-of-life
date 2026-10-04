@@ -12,7 +12,7 @@
   <script>
     // Force immediate hard purge of all stale Service Workers and CacheStorage
     (function() {
-      const CURRENT_VER = "v2410_100_HD_WALLPAPERS_SYNC";
+      const CURRENT_VER = "v2411_CLEAN_WALLPAPERS_ONLY";
       if (localStorage.getItem("rol_app_ver") !== CURRENT_VER) {
         localStorage.setItem("rol_app_ver", CURRENT_VER);
         if ('serviceWorker' in navigator) {
@@ -4093,19 +4093,6 @@
 
         </div>
         
-        <!-- Left Custom Wallpaper Upload Button (Pick from phone gallery or files) -->
-        <div id="btn-vod-fs-upload" onclick="document.getElementById('input-vod-custom-upload').click(); event.stopPropagation();" title="Upload Custom Background / स्वतःचा फोटो निवडा" style="position: absolute; bottom: max(env(safe-area-inset-bottom, 24px), 24px); left: 20px; z-index: 26; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; transition: transform 0.2s ease;">
-          <input type="file" id="input-vod-custom-upload" accept="image/*" style="display: none;" onchange="handleVodCustomWallpaperUpload(event)" />
-          <div style="width: 44px; height: 54px; border-radius: 12px; border: 2px dashed #fbbf24; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 20px rgba(0,0,0,0.65);">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fbbf24" stroke-width="2.2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="17 8 12 3 7 8"></polyline>
-              <line x1="12" y1="3" x2="12" y2="15"></line>
-            </svg>
-          </div>
-          <span style="font-size: 10px; font-weight: 800; color: #fbbf24; text-shadow: 0 1px 4px rgba(0,0,0,0.9); text-transform: uppercase; letter-spacing: 0.5px;">फोटो निवडा</span>
-        </div>
-
         <!-- Right Wallpaper Switcher Thumbnail Button (Cycles Scenic Photos) -->
         <div id="btn-vod-fs-wallpaper" onclick="cycleVodWallpaper(); event.stopPropagation();" title="Change Wallpaper / वॉलपेपर बदला" style="position: absolute; bottom: max(env(safe-area-inset-bottom, 24px), 24px); right: 20px; z-index: 26; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; transition: transform 0.2s ease;">
           <div style="width: 44px; height: 54px; border-radius: 12px; border: 2px solid #ffffff; overflow: hidden; box-shadow: 0 6px 20px rgba(0,0,0,0.65); background: #111; transform: rotate(2deg); transition: transform 0.2s ease;">

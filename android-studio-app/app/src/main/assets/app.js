@@ -18234,40 +18234,6 @@ window.loadDailyVersesManifest = async function() {
   }
 };
 
-window.handleVodCustomWallpaperUpload = function(event) {
-  const file = event.target.files && event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const dataUrl = e.target.result;
-    window.currentDailyVerseImage = dataUrl;
-    try {
-      localStorage.setItem("rol_selected_wallpaper", dataUrl);
-    } catch(err) {}
-
-    // 1. Update Fullscreen VOD modal background
-    const fsBgEl = document.getElementById("fs-vod-capsule-bg");
-    if (fsBgEl) fsBgEl.style.backgroundImage = `url('${dataUrl}')`;
-    const fsCapsule = document.querySelector(".fullscreen-vod-capsule");
-    if (fsCapsule) fsCapsule.style.backgroundImage = `url('${dataUrl}')`;
-    const bgDynamic = document.getElementById("vod-dynamic-bg");
-    if (bgDynamic) bgDynamic.style.backgroundImage = `url('${dataUrl}')`;
-
-    // 2. Update Home verse card background
-    const bgHome = document.getElementById("card-daily-verse-home");
-    if (bgHome) bgHome.style.backgroundImage = `url('${dataUrl}')`;
-
-    // 3. Update preview thumbnail
-    const thumbImg = document.getElementById("vod-thumbnail-preview");
-    if (thumbImg) thumbImg.src = dataUrl;
-
-    if (typeof showToast === "function") {
-      showToast("✨ सानुकूल वॉलपेपर सेट केला! (Custom wallpaper applied)");
-    }
-  };
-  reader.readAsDataURL(file);
-};
-
 window.switchVodWallpaper = function(imageName, btnEl) {
   const imgUrl = getVodImageUrl(imageName);
   const bgEl = document.getElementById("vod-dynamic-bg");
