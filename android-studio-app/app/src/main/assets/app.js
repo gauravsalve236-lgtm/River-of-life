@@ -8754,25 +8754,25 @@ const PRAYER_TOPICS_DATA = {
     refEn: "John 2:1-11",
     verseMr: "येशूने आपल्या चिन्हांचा हा आरंभ गालीलातील काना येथे केला आणि आपले सामर्थ्य प्रकट केले, आणि त्याच्या शिष्यांनी त्याच्यावर विश्वास ठेवला.",
     verseEn: "This beginning of signs Jesus did in Cana of Galilee, and manifested His glory; and His disciples believed in Him.",
-    prayerMr: `हे स्वर्गीय पित्या व दयाळू प्रभू येशू,
+    prayerMr: `हे स्वर्गीय पित्या व कृपाळू प्रभू येशू,
 
-कानामधील लग्नाच्या प्रसंगी जेव्हा द्राक्षारसाची कमतरता पडली, तेव्हा तू साध्या पाण्याचे रूपांतर उत्कृष्ट द्राक्षारसात करून आपली दैवी कृपा व सामर्थ्य प्रकट केलेस.
+कानामधील लग्नाच्या प्रसंगी जेव्हा मानवी प्रयत्न थकून गेले आणि द्राक्षारसाची कमतरता निर्माण झाली, तेव्हा तू साध्या पाण्याचे रूपांतर उत्कृष्ट द्राक्षारसात करून आपले दैवी सामर्थ्य व कृपा प्रकट केलीस. प्रभू, तू रिकाम्या भांड्यांमध्ये भरभराट आणणारा आणि मानवी अभावात विपुलता निर्माण करणारा जिवंत देव आहेस.
 
-प्रभू, आज माझ्या जीवनात जिथे जिथे कमतरता, निराशा किंवा अपुरेपण आहे, तिथे तुझा अद्भुत चमत्कार घडू दे. माझ्या आर्थिक, आत्मिक आणि कौटुंबिक गरजांमध्ये तुझा विपुल पुरवठा येऊ दे.
+आज मी माझ्या जीवनातील सर्व उणीवा, थकवा आणि चिंतेचे प्रसंग तुझ्या पवित्र चरणांशी घेऊन येतो. माझ्या कुटुंबात, माझ्या कामामध्ये आणि माझ्या आत्मिक जीवनात जिथे जिथे कोरडेपणा आला आहे, तिथे तुझ्या अद्भुत चमत्काराचा ओघ वाहू दे. जे संपले असे वाटते, त्याला तू नवीन आणि उत्कृष्ट सुरुवात देण्याची शक्ती ठेवतोस यावर माझा ठाम विश्वास आहे.
 
-जसे मरीयेने सेवकांना सांगितले, "तो तुम्हाला जे सांगेल ते करा", तसेच मलाही तुझ्या वचनांचे पूर्ण आज्ञापालन करण्याचे मन दे. माझ्या संकटांचे रूपांतर आनंदाच्या उत्सवात कर.
+जसे मरीयेने सेवकांना सांगितले होते, "तो तुम्हाला जे सांगेल ते करा", तसेच मलाही प्रत्येक परिस्थितीत तुझ्या शब्दांवर विश्वास ठेवून संपूर्ण आज्ञापालन करण्याचे मन दे. माझ्या लज्जेचे रूपांतर सन्मानात आणि माझ्या दुःखाचे रूपांतर उत्सवी आनंदात कर, जेणेकरून माझ्या जीवनाद्वारे केवळ तुझ्याच पवित्र नावाला गौरव प्राप्त होईल.
 
-प्रभू येशूच्या सामर्थ्यशाली नावात ही प्रार्थना करतो,
+प्रभू येशू ख्रिस्ताच्या सामर्थ्यशाली नावात ही प्रार्थना करतो,
 आमेन.`,
-    prayerEn: `Heavenly Father and Lord Jesus,
+    prayerEn: `Heavenly Father and Lord Jesus Christ,
 
-At the wedding in Cana, when the wine ran out and human resources failed, You stepped in and turned ordinary water into the sweetest, finest wine—revealing Your divine glory and boundless grace.
+At the wedding in Cana, when human resources were completely exhausted and joy was about to turn into embarrassment, You stepped into the situation with quiet majesty. By transforming ordinary water into the richest, finest wine, You revealed Your divine glory and declared to all generations that You are the God of supernatural abundance.
 
-Lord, in every area of my life where I face lack, exhaustion, or shortage today, I invite Your miraculous presence. Transform my ordinary moments into extraordinary testimonies of Your provision.
+Lord, today I bring before You every area of my life that feels depleted, dry, or insufficient. Where my strength has failed, where financial or emotional resources have run out, and where hope seems dim, I invite Your miraculous presence. You specialize in taking what is ordinary, broken, and emptied, and filling it to overflowing with heavenly blessing.
 
-Teach me to obey whatever You say to me, trusting that You always save the best for last. Turn my mourning into dancing and my scarcity into abundance.
+Teach my heart to listen attentively to Your voice and to obey without hesitation whatever You tell me to do. Give me the faith to fill the jars of my life with trust, knowing that You always save the best for last. Let Your grace turn my mourning into rejoicing, and let my testimony shine as a beacon of Your everlasting faithfulness.
 
-In the mighty and precious name of Jesus Christ, I pray,
+In the mighty and precious name of our Lord Jesus Christ, I pray,
 Amen.`,
     amenCount: 154
   },
@@ -8791,24 +8791,26 @@ Amen.`,
     refEn: "Psalm 91:1-4",
     verseMr: "जो परात्पराच्या गुप्त स्थानी राहतो, तो सर्वसमर्थाच्या सावलीत विसावा पावेल. तो आपल्या पंखांनी तुला झाकून घेईल, आणि त्याच्या पंखांखाली तुला आश्रय मिळेल.",
     verseEn: "Whoever dwells in the shelter of the Most High will rest in the shadow of the Almighty. He will cover you with his feathers, and under his wings you will find refuge.",
-    prayerMr: `सर्वसमर्थ पित्या,
+    prayerMr: `सर्वसमर्थ आणि दयाळू स्वर्गीय पित्या,
 
-या नवीन सकाळबद्दल मी तुझे कोटी-कोटी आभार मानतो. तुझी दया दररोज सकाळी नवी असते.
+या नवीन सुंदर दिवसाच्या पहाटे मी अत्यंत कृतज्ञ अंतःकरणाने तुझ्या पवित्र चरणांशी येतो. रात्रभर मला व माझ्या कुटुंबाला सुरक्षित ठेवून, या नव्या सूर्योदयाचे दर्शन घडवल्याबद्दल मी तुझे कोटी-कोटी आभार मानतो. प्रभू, तुझी दया दररोज सकाळी नवी असते आणि तुझा विश्वासूपणा अथांग आहे.
 
-आजचा दिवस माझ्या पावलांना मार्गदर्शन कर. प्रत्येक संकट, दुष्ट योजना आणि अपघातांपासून माझे व माझ्या प्रियजनांचे रक्षण कर. माझ्या कार्यात यश दे आणि माझ्याद्वारे तुझ्या प्रेमाचा प्रकाश इतरांपर्यंत पोहोचू दे.
+आजच्या दिवसाच्या प्रत्येक पावलावर मला तुझे मार्गदर्शन लाभू दे. माझ्या विचारांवर, शब्दांवर आणि कृतींवर तुझ्या पवित्र आत्म्याचे नियंत्रण असो. दिवसाच्या उजेडात वावरताना येणारे सर्व अनपेक्षित धोके, दुष्ट योजना, अपघात आणि मोहाचे प्रसंग यांपासून तू मला आणि माझ्या आप्तांना तुझ्या पंखांखाली आश्रय देऊन झाकून ठेव.
 
-तुझ्या पंखांच्या सावलीत मला सुरक्षित ठेव.
+प्रभू, आजच्या माझ्या सर्व कामांमध्ये आणि भेटीगाठींमध्ये तुझ्या कृपेची उपस्थिती जाणवू दे. माझ्या हातांच्या कष्टाला आशीर्वाद दे आणि माझ्याद्वारे तुझ्या प्रेमाचा व आशेचा प्रकाश आज गरजू लोकांपर्यंत पोहोचू दे. मी दिवसभर तुझ्या सान्निध्यात चालेन आणि संकटातही तुझी शांती माझ्या मनात वास करेल असा विश्वास मी धरतो.
 
-येशूच्या नावात, आमेन.`,
-    prayerEn: `Almighty and Ever-Faithful Father,
+प्रभू येशूच्या सामर्थ्यशाली नावात ही प्रार्थना करतो,
+आमेन.`,
+    prayerEn: `Almighty, Ever-Faithful Heavenly Father,
 
-I awake with praise for the gift of this new dawn. Your mercies are new every single morning; great is Your faithfulness.
+I awaken this morning with a heart overflowing with praise and thanksgiving for the precious gift of a new day. Throughout the dark watches of the night, Your watchful eye sustained my breath and guarded my home. Your steadfast love never ceases, and Your tender mercies are made brand new with every morning sun.
 
-Guide my footsteps today, align my decisions with Your will, and shield my loved ones from all seen and unseen dangers. Bless the work of my hands and let my life reflect Your love, patience, and grace to everyone I encounter.
+Lord, as I step out into the demands of this day, I commit my thoughts, words, and actions entirely into Your hands. Direct my steps along paths of righteousness for Your name's sake. Shield me and my loved ones beneath the shelter of Your wings from all unseen snares, sickness, accidents, and sudden anxieties. Be my dwelling place and fortress throughout every hour.
 
-I rest securely under the shadow of Your wings throughout this day.
+Bless the labor of my hands and grant me favor in every conversation, task, and responsibility. May Your Holy Spirit illuminate my heart so that I reflect Christ's patience, generosity, and peace to everyone I meet. I step forward into this day not in my own frail strength, but clothed in Your grace and anchored in Your unfailing promises.
 
-In Jesus' name, Amen.`,
+In the precious and mighty name of Jesus Christ, I pray,
+Amen.`,
     amenCount: 312
   },
   "wisdom_guidance": {
@@ -8826,20 +8828,26 @@ In Jesus' name, Amen.`,
     refEn: "Proverbs 3:5-6",
     verseMr: "तू आपल्या पूर्ण अंतःकरणाने परमेश्वरावर भाव ठेव, आणि आपल्या स्वतःच्या बुद्धीवर अवलंबून राहू नको; आपल्या सर्व मार्गांत त्याची दखल घे, म्हणजे तो तुझे मार्ग नीट करील.",
     verseEn: "Trust in the Lord with all your heart and lean not on your own understanding; in all your ways submit to him, and he will make your paths straight.",
-    prayerMr: `हे सर्वज्ञानी देवा,
+    prayerMr: `हे सर्वज्ञानी आणि अनंत ज्ञानाच्या झऱ्या असणाऱ्या देवा,
 
-माझ्या जीवनातील प्रत्येक निर्णयासाठी, माझ्या नोकरी, व्यवसाय आणि शिक्षणासाठी मला स्वर्गीय बुद्धी आणि विवेक दे.
+मी मान्य करतो की माझी मानवी समज अत्यंत मर्यादित आहे, परंतु तुझे ज्ञान असीम आणि परिपूर्ण आहे. कित्येकदा जीवनाच्या वाटेवर काय करावे हे समजत नसताना, तुझे वचन माझ्या पावलांसाठी दिवा आणि माझ्या मार्गासाठी प्रकाश बनते.
 
-माझ्या पुढील मार्गावर प्रकाश टाक आणि चुकीच्या निर्णयांपासून मला वाचव. माझ्या हातांच्या कष्टाला यश आणि आशीर्वाद दे. मला प्रामाणिकपणाने आणि उत्कृष्टतेने कार्य करण्याचे मन दे.
+प्रभू, आज माझ्या नोकरीत, व्यवसायात, शिक्षणात आणि वैयक्तिक आयुष्यात जे महत्त्वपूर्ण निर्णय मला घ्यावयाचे आहेत, त्यासाठी मला स्वर्गीय बुद्धी, विवेक आणि दूरदृष्टी प्रदान कर. माझ्या स्वतःच्या मर्यादित आकलनावर अवलंबून न राहता, मी पूर्ण अंतःकरणाने तुझ्यावर भाव ठेवावा अशी कृपा मला दे. ज्या ज्या वाटा माझ्यासाठी अनिष्ट आहेत त्या बंद कर, आणि तुझ्या इच्छेनुसार असणारे सर्व स्वर्गीय दरवाजे माझ्यासाठी उघड.
 
-येशूच्या नावात, आमेन.`,
-    prayerEn: `Omniscient God and Wise Counselor,
+माझ्या मार्गातील सर्व अडथळे दूर करून माझे मार्ग नीट कर. माझ्या प्रत्येक कामात प्रामाणिकपणा आणि श्रेष्ठता टिकवून ठेवण्याचे सामर्थ्य मला दे. माझ्या जीवनातील प्रत्येक यशाचे श्रेय मी नम्रतेने तुलाच देईन, आणि माझे जीवन तुझ्या गौरवशाली योजनेची साक्ष बनेल.
 
-I acknowledge that human wisdom is limited, but Your understanding is infinite. Grant me divine discernment, creativity, and wisdom for my career, education, and pivotal life decisions.
+प्रभू येशूच्या पवित्र नावात ही प्रार्थना करतो,
+आमेन.`,
+    prayerEn: `O God of Infinite Wisdom and Sovereign Light,
 
-Open doors of opportunity that no one can shut, and close every door that would lead me away from Your purpose. Bless the work of my hands and let me find favor with leaders and colleagues.
+I humbly acknowledge before You that my earthly perspective is short-sighted, but Your understanding is without fathom. In a world crowded with confusion and conflicting advice, I quiet my soul to listen to Your gentle, guiding voice, knowing that You order the steps of the righteous.
 
-In Jesus' name, Amen.`,
+Father, bestow upon me today the supernatural wisdom, discernment, and clarity that only heaven can provide. In every decision concerning my career, education, relationships, and daily stewardship, deliver me from leaning on my own frail understanding. Give me the grace to surrender all my ways completely unto You, trusting with unbroken faith that You will make my paths straight.
+
+Shut every deceptive door that would lead me away from Your purpose, and open wide the doors of favor, integrity, and divine opportunity that no person can shut. Guard my tongue and mind against foolishness, and grant me the spiritual insight to navigate every complex challenge with humility and excellence.
+
+In the holy and incomparable name of Jesus Christ, I pray,
+Amen.`,
     amenCount: 178
   },
   "peace_anxiety": {
@@ -8857,24 +8865,26 @@ In Jesus' name, Amen.`,
     refEn: "Philippians 4:6-7",
     verseMr: "कशाविषयीही चिंता करू नका, तर सर्व गोष्टींत प्रार्थना व याचना करून उपकारस्तुतीसह आपली मागणी देवाला कळवा. म्हणजे सर्व बुद्धीच्या पलीकडची देवाची शांती तुमच्या हृदयांचे आणि मनांचे रक्षण करील.",
     verseEn: "Do not be anxious about anything, but in every situation, by prayer and petition, with thanksgiving, present your requests to God. And the peace of God, which transcends all understanding, will guard your hearts and your minds.",
-    prayerMr: `हे शांतीच्या अधिपती प्रभू,
+    prayerMr: `हे शांतीचा राजकुमार असणाऱ्या दयाळू प्रभू येशू,
 
-आज माझे मन अनेक चिंतांनी, भविष्याच्या काळजीने आणि भीतींनी व्याकुळ झाले आहे. परंतु तुझे वचन मला सांगते की कशाविषयीही चिंता करू नको.
+माझ्या मनातील सर्व अस्वस्थता, भविष्याची चिंता आणि न बोलता येणाऱ्या सर्व विवंचना मी आज तुझ्या पायांवर समर्पण करतो. जेव्हा जगाचे ओझे माझ्या खांद्यावर जड वाटते, तेव्हा तू मला सांगतोस की, "अहो कष्टी व भाराक्रांत जनहो, माझ्याकडे या, म्हणजे मी तुम्हाला विसावा देईन."
 
-मी माझी प्रत्येक काळजी, समस्या आणि भीती तुझ्या चरणी सोपवतो. सर्व बुद्धीच्या पलीकडची तुझी स्वर्गीय शांती माझ्या मनावर आणि हृदयावर पहारा करो.
+प्रभू, ज्या गोष्टींवर माझे नियंत्रण नाही, त्या गोष्टी मी चिंतेने स्वतःवर ओढवून न घेता प्रार्थनेने आणि विनंतीने तुझ्या हातात सोपवण्यास मला शिकव. माझ्या मनात उद्भवणारे भीतीचे आणि निराशेचे विचार शांत कर. सर्व मानवी समजुतीच्या पलीकडची असणारी तुझी स्वर्गीय शांती आज माझ्या हृदयाचा आणि अंतःकरणाचा ताबा घेवो.
 
-माझ्या मनात चाललेले वादळ शांत कर आणि मला आठवण करून दे की तू सर्व गोष्टींवर नियंत्रण ठेवणारा जिवंत देव आहेस.
+माझ्या कुटुंबात, माझ्या शरीरात आणि माझ्या विचारांमध्ये तुझी शांतता राज्य करो. तू माझा मेंढपाळ आहेस आणि मला कशाचीही कमतरता पडणार नाही हा विश्वास माझ्या आत्म्यात दृढ कर. आजच्या दिवशी कसल्याही संकटात विचलित न होता, मी तुझ्या प्रेमाच्या आणि सामर्थ्याच्या आश्रयात विसावा घेतो.
 
-येशूच्या नावात, आमेन.`,
-    prayerEn: `Lord Jesus, Prince of Peace,
+प्रभू येशूच्या गोड नावात ही प्रार्थना करतो,
+आमेन.`,
+    prayerEn: `Prince of Peace and Faithful Shepherd of My Soul,
 
-Today my heart feels heavy with anxious thoughts, deadlines, and uncertainties about the future. Yet Your Word gently reminds me to cast all my anxieties upon You because You care for me.
+Today I lay down every heavy burden, restless anxiety, and unspoken dread at the foot of Your cross. You see the hidden turmoil of my thoughts, the weight of tomorrow's uncertainties, and the fatigue that attempts to steal my joy. You have promised that when I come to You weary and burdened, You will give me deep, restorative rest.
 
-I surrender every fear, doubt, and worry into Your capable hands right now. Let Your transcendent peace—which surpasses all human understanding—guard my mind, emotions, and thoughts.
+Lord, I release my desperate need to control outcomes and circumstances. Instead of allowing worry to consume my mind, I turn every concern into a prayer, offering my heart to You with thanksgiving. Pour out Your supernatural peace—the peace that surpasses all human understanding—to stand as an impregnable fortress around my heart and mind in Christ Jesus.
 
-Quiet the storm within my soul and anchor my spirit in Your unwavering love and sovereign control.
+Quiet the raging storms within me with Your gentle command: "Peace, be still." Anchor my soul in the unshakeable truth that You hold my tomorrow securely in Your hands. Fill my lungs with the breath of praise, and let Your abiding presence soothe every trembling thought as I walk in restful confidence.
 
-In Jesus' name, Amen.`,
+In the mighty and comforting name of Jesus Christ, I pray,
+Amen.`,
     amenCount: 238
   },
   "healing_health": {
@@ -8892,20 +8902,26 @@ In Jesus' name, Amen.`,
     refEn: "Jeremiah 30:17 • Isaiah 53:5",
     verseMr: "तो आमच्या अपराधांसाठी घायाळ झाला, आमच्या दुष्कर्मांसाठी चिरडला गेला; आमच्या शांतीसाठी त्याला शिक्षा झाली आणि त्याच्या फटक्यांनी आम्हाला आरोग्य प्राप्त झाले.",
     verseEn: "He was pierced for our transgressions, he was crushed for our iniquities; the punishment that brought us peace was on him, and by his wounds we are healed.",
-    prayerMr: `हे महान वैद्या प्रभू येशू,
+    prayerMr: `हे सर्व रोगांवर उपचार करणाऱ्या 'यहोवा रोफे' प्रभू परमेश्वरा,
 
-तू वधस्तंभावर आमच्या सर्व वेदना, आजार आणि दुःखे वाहिलीस. तुझ्या फटक्यांच्या द्वारे आम्हाला पूर्ण आरोग्य प्राप्त झाले आहे यावर माझा दृढ विश्वास आहे.
+तूच आमचा निर्माणकर्ता आणि आमच्या शरीराचा व आत्म्याचा खरा वैद्य आहेस. पवित्र शास्त्र सांगते की, "त्याच्या जखमांनी आपल्याला आरोग्य प्राप्त झाले आहे." प्रभू, मी पूर्ण विश्वासाने तुझ्या आरोग्यदायी आणि सामर्थ्यशाली हातांचा स्पर्श आज माझ्या शरीरावर आणि मनावर मागतो.
 
-माझ्या शरीरातील, मनातील आणि आत्म्यातील प्रत्येक आजारपणावर तुझा रोगनिवारक हात ठेव. मला नवीन आरोग्य आणि ऊर्जा दे. माझे आरोग्य पूर्ववत कर आणि मला तुझ्या गौरवासाठी कार्य करण्यास सक्षम कर.
+माझ्या शरीरातील प्रत्येक पेशी, स्नायू, रक्तवाहिन्या आणि अवयवांना तू तुझ्या दैवी स्पर्शाने स्पर्श कर. सर्व प्रकारचा आजारपण, अशक्तपणा, वेदना आणि शरीरातील असंतुलन तू येशूच्या नावाने दूर कर. जर माझ्या मनात कोणती भीती, तणाव किंवा आत्मिक थकवा असेल, तर त्यालाही तुझ्या पवित्र आत्म्याच्या अग्नीने शुद्ध करून मला पूर्ण आरोग्य दे.
 
-येशूच्या सामर्थ्यशाली नावात, आमेन.`,
-    prayerEn: `Lord Jesus, the Great Physician,
+प्रभू, मला दीर्घायुष्य, सामर्थ्य आणि तुझ्या सेवेसाठी निरोगी शरीर लाभू दे. औषधे आणि डॉक्टरांच्या प्रयत्नांवर तुझा आशीर्वाद असो, पण माझा अंतिम विश्वास केवळ तुझ्याच आरोग्यदायी वचनावर आहे. मला पूर्णपणे बरे करून तुझ्या अद्भुत चमत्काराची साक्ष देण्याचे भाग्य मला लाभो.
 
-You carried our sicknesses and bore our griefs upon the cross. By Your precious stripes and suffering, we are granted total spiritual and physical healing.
+प्रभू येशू ख्रिस्ताच्या आरोग्यदायी नावात ही प्रार्थना करतो,
+आमेन.`,
+    prayerEn: `Lord God Almighty, Jehovah Rapha—the Great Physician,
 
-Lay Your restorative hand upon my body, mind, and spirit right now. Drive away every infirmity, fatigue, and pain. Speak renewal and strength into every cell, restoring my health so that I may serve You with a joyful heart.
+You are the Creator of my inmost being, who knit me together in my mother's womb, and in Your hands are the issues of life and health. Your sacred Word declares that by the stripes of Jesus Christ, we are healed, restored, and made whole. With expectant faith, I reach out to touch the hem of Your garment today.
 
-In the mighty name of Jesus, Amen.`,
+Lord Jesus, release Your divine healing virtue into every fiber of my being. Touch every organ, cell, bloodstream, and tissue with Your renewing power. Cast out all infirmity, disease, pain, and chronic weakness in the authority of Your holy name. Restore vitality where sickness has stolen strength, and renew my energy like that of the eagle.
+
+Touch not only my physical body, but bring wholeness to my soul, releasing all emotional trauma, stress, and weariness. Grant wisdom to medical caregivers, yet let my faith remain anchored in You, the ultimate Healer. Strengthen me to live a long, vibrant life dedicated to honoring You and testifying of Your miraculous power.
+
+In the mighty and healing name of Jesus Christ, I pray,
+Amen.`,
     amenCount: 289
   },
   "family_blessing": {
@@ -8923,22 +8939,26 @@ In the mighty name of Jesus, Amen.`,
     refEn: "Joshua 24:15",
     verseMr: "परंतु मी व माझे घराणे आम्ही तर परमेश्वराचीच सेवा करू.",
     verseEn: "As for me and my household, we will serve the Lord.",
-    prayerMr: `हे दयाळू देवा,
+    prayerMr: `हे कुटुंबांची स्थापना करणाऱ्या दयाळू स्वर्गीय पित्या,
 
-मी माझे घर, माझी मुले आणि माझे कुटुंब तुझ्या पवित्र हातात समर्पित करतो. आमच्या घरात तुझी स्वर्गीय शांती, प्रेम, समजूतदारपणा आणि एकता वास करो.
+तू आम्हाला कुटुंबामध्ये जन्म दिलास आणि एकमेकांशी प्रेमाच्या बंधनात जोडलेस याबद्दल आम्ही तुझे मनःपूर्वक आभार मानतो. यहोशवाप्रमाणे आम्हीही आज शपथपूर्वक घोषित करतो की, "मी आणि माझे घराणे आम्ही तर परमेश्वराचीच सेवा करू."
 
-आमच्या घरातील प्रत्येक व्यक्तीचे रक्षण कर आणि त्यांना तुझ्या मार्गात चालण्यास साहाय्य कर. सर्व कलह, गैरसमज आणि दुरावा दूर कर आणि आमच्या कुटुंबाला तुझ्या विश्वासात मजबूत कर.
+प्रभू, आमच्या घराच्या उंबरठ्यावर तुझ्या पवित्र रक्ताचे संरक्षण असो. आमच्या कुटुंबामध्ये प्रेम, आदर, समज आणि क्षमाशीलता यांचे वातावरण निर्माण कर. कसलाही वाद, मतभेद, कटुता किंवा गैरसमज आमच्यामध्ये स्थान मिळवू नये. एकमेकांच्या कमतरता प्रेमाने स्वीकारण्याचे आणि एकमेकांचे ओझे उचलण्याचे हृदय तू आम्हा सर्वांना दे.
 
-येशूच्या नावात, आमेन.`,
-    prayerEn: `Gracious God, Creator of Families,
+आमच्या घरातील प्रत्येक मुलाला, पालकांना आणि ज्येष्ठांना निरोगी आरोग्य व दीर्घायुष्य दे. आमच्या घरात तुझी शांती, आनंद आणि विपुल आशीर्वाद नित्य वास करोत. आमचे घर तुझ्या प्रकाशाचे दीपस्तंभ बनू दे, जेणेकरून आमच्या घराण्याकडे पाहून अनेकांना तुझ्या अद्भुत प्रेमाची ओळख होईल.
 
-I dedicate my home and family into Your sacred care. Establish our household upon the solid rock of Your Word, where love, patience, forgiveness, and mutual honor reign.
+प्रभू येशूच्या नावात ही प्रार्थना करतो,
+आमेन.`,
+    prayerEn: `Heavenly Father, Architect and Sustainer of the Family,
 
-Protect my children, my spouse, and my parents from the temptations and harms of this world. Draw each heart closer to You in personal faith.
+We praise You for the sacred gift of home and kinship. You have purposefully set us together to love, encourage, and sharpen one another. Today, like Joshua, we resolve with joyful determination: "As for me and my house, we will serve the Lord."
 
-Let our home be an oasis of joy, hospitality, and light in our community.
+Lord, place Your divine shield over our home. Where misunderstandings, sharp words, or generational strains have caused hurt, pour out Your spirit of reconciliation, tender patience, and unconditional grace. Teach us to forgive swiftly, to communicate with gentle kindness, and to honor one another above ourselves.
 
-In Jesus' name, Amen.`,
+Bless our children with spiritual wisdom, shield our elders with vibrant health, and knit our hearts in unbreakable unity. Make our home a sanctuary of prayer, laughter, hospitality, and peace. May the light of Christ radiate from our household so powerfully that neighbors and relatives find hope through our family's testimony.
+
+In Jesus' precious and holy name, I pray,
+Amen.`,
     amenCount: 195
   },
   "strength_trials": {
@@ -8956,22 +8976,26 @@ In Jesus' name, Amen.`,
     refEn: "Isaiah 40:29-31",
     verseMr: "तो थकलेल्याला सामर्थ्य देतो आणि अशक्त असलेल्याचे बळ वाढवतो. जे परमेश्वराची वाट पाहतात ते नवीन सामर्थ्य प्राप्त करतील; ते गरुडासारखे पंख पसरून उंच उडतील.",
     verseEn: "He gives strength to the weary and increases the power of the weak. Those who hope in the Lord will renew their strength. They will soar on wings like eagles.",
-    prayerMr: `हे माझ्या सामर्थ्याच्या खडका,
+    prayerMr: `हे दुर्बलांना सामर्थ्य देणाऱ्या आणि संकटात अतिशय जवळ असणाऱ्या देवा,
 
-जेव्हा माझे स्वतःचे बळ संपून जाते, तेव्हा तू माझे सामर्थ्य बनतोस. या कठीण परिस्थितीमध्ये मला धीर आणि टिकून राहण्याचे बळ दे.
+जेव्हा जीवनातील वादळे तीव्र होतात आणि माझ्या समोरील मार्ग अंधकारमय दिसतो, तेव्हा मी तुझ्या सार्वभौम सामर्थ्यावर माझा विश्वास ठेवतो. प्रभू, तू संकटाच्या समयी आमचा आश्रय आणि दुर्ग आहेस; जेव्हा आमचे मानवी बळ संपते, तेव्हा तुझे स्वर्गीय सामर्थ्य परिपूर्ण रीतीने कार्य करू लागते.
 
-मला आठवण करून दे की हे संकट तात्पुरते आहे, परंतु तुझा विजय सार्वकालिक आहे. मी गरुडासारखा पंख लावून या संकटावर मात करेन, कारण तू माझ्याबरोबर आहेस.
+या कठीण प्रसंगात मला खचून न जाण्याचा आणि हार न मानण्याचा धीर दे. पवित्र शास्त्र सांगते की, "जे परमेश्वराची वाट पाहतात, ते नवीन सामर्थ्य प्राप्त करतील; ते गरुडासारख्या पंखांनी वर उडतील." प्रभू, माझ्या थकून गेलेल्या मनाला व शरीराला आज स्वर्गीय आशेने आणि धैर्याने भरून काढ.
 
-येशूच्या नावात, आमेन.`,
-    prayerEn: `Lord, my Strong Tower and Refuge,
+मी जाणतो की हा प्रसंग मला नष्ट करण्यासाठी नाही, तर मला परिपक्व करण्यासाठी आणि माझा विश्वास शुद्ध करण्यासाठी आला आहे. या अग्नीपरीक्षेतून तू मला अस्सल सोन्यासारखे बाहेर काढशील. माझ्या पाठीशी उभा राहा, माझा हात धरून मला पुढे ने, आणि तुझ्या विजयाचा झेंडा माझ्या जीवनावर फडकव.
 
-When my own strength is exhausted and the road ahead feels steep, You are my unshakable fortress. Renew my vigor, clarity, and determination today.
+प्रभू येशूच्या विजयी नावात ही प्रार्थना करतो,
+आमेन.`,
+    prayerEn: `O Lord, My Rock, Fortress, and Ever-Present Help in Trouble,
 
-Help me to keep my eyes fixed on You rather than the waves around me. Grant me supernatural perseverance to run this race without growing weary.
+When violent storms batter my life and the path ahead seems shrouded in darkness, I run straight into Your sheltering arms. You have promised that You will never leave me nor forsake me. When my finite strength is spent, Your supernatural power is made perfect in my weakness.
 
-By Your mighty Spirit, I will rise above this trial like an eagle soaring on the wind.
+Father, breathe resilience and quiet fortitude into my weary spirit today. Your Word promises that those who wait upon the Lord shall renew their strength; they shall mount up with wings like eagles; they shall run and not be weary; they shall walk and not faint. Anchor my soul in this unshakeable promise right now.
 
-In Jesus' name, Amen.`,
+Help me to remember that this fiery trial has not come to destroy me, but to refine my character, deepen my compassion, and establish my faith. Through every wave of difficulty, hold my right hand firmly. I declare that in Christ Jesus, I am more than a conqueror, and I will emerge on the other side singing songs of deliverance.
+
+In the mighty, undefeated name of Jesus Christ, I pray,
+Amen.`,
     amenCount: 220
   },
   "evening_rest": {
@@ -8989,22 +9013,26 @@ In Jesus' name, Amen.`,
     refEn: "Psalm 4:8",
     verseMr: "मी शांततेने निजेन आणि मला लगेच झोप लागेल; कारण हे परमेश्वरा, केवळ तूच मला सुरक्षिततेमध्ये ठेवतोस.",
     verseEn: "In peace I will lie down and sleep, for you alone, Lord, make me dwell in safety.",
-    prayerMr: `हे कृपाळू पित्या,
+    prayerMr: `हे माझ्या आत्म्याचा रक्षणकर्ता असणाऱ्या स्वर्गीय पित्या,
 
-आजच्या संपूर्ण दिवसातील तुझ्या संरक्षणासाठी आणि आशीर्वादांसाठी तुझे आभार मानतो. दिवसभरात कळत-नकळत घडलेल्या सर्व चुकांची क्षमा कर.
+दिवसभराचे सर्व काम, धावपळ आणि श्रम संपवून मी या शांत रात्री तुझ्या चरणांशी विसावा घेण्यासाठी आलो आहे. दिवसभरात तू मला केलेल्या प्रत्येक साहाय्याबद्दल आणि प्रत्येक धोक्यापासून केलेल्या रक्षणाबद्दल मी तुझे अंतःकरणपूर्वक आभार मानतो.
 
-रात्रीच्या वेळी सर्व ताणतणाव आणि विचार तुझ्या हातात सोपवून मी शांत झोप घेतो. माझ्या घराभोवती तुझ्या देवदूतांचा पहारा असू दे. मला गाढ, विश्रांतीपूर्ण झोप लाभू दे.
+प्रभू, आजच्या दिवसातील माझ्या सर्व अपूर्ण राहिलेल्या योजना, चिंता आणि ताणतणाव मी तुझ्या हातात सोपवतो. रात्रीच्या या शांत प्रहरी माझ्या विचारांना शांत कर. सर्व वाईट स्वप्ने, निद्रानाश आणि भीतीचे विचार माझ्यापासून दूर कर. पवित्र शास्त्र म्हणते, "मी शांततेने निजेन आणि झोपी जाईन; कारण हे परमेश्वरा, केवळ तूच मला सुरक्षित ठेवतोस."
 
-येशूच्या नावात, आमेन.`,
-    prayerEn: `Father of Mercies,
+तुझ्या देवदूतांना आज रात्री माझ्या घराभोवती पहारा देण्याची आज्ञा कर. मला गाढ, शांत आणि ताजी करणारी झोप दे, जेणेकरून उद्या सकाळी मी नव्या उत्साहाने, निरोगी शरीराने आणि तुझ्या गौरवासाठी सज्ज होऊन जागे होऊ शकेन.
 
-As the quiet of the night settles in, I look back on today with a grateful heart. Thank You for sustaining me, forgiving my shortcomings, and keeping me safe.
+प्रभू येशूच्या नावात ही प्रार्थना करतो,
+आमेन.`,
+    prayerEn: `Father of Mercies and Keeper of My Soul,
 
-I release every unfinished task, every heavy conversation, and every burden of tomorrow into Your hands. Wrap my mind in peaceful rest and grant me deep, rejuvenating sleep.
+As the shadows of night fall and the clamor of the day grows quiet, I come before You to lay down all my tools, labors, and weariness. I thank You for carrying me through every hour of this day, for sustaining my breath, and for shielding me from perils seen and unseen.
 
-Let Your angels stand guard over my household throughout the night.
+Lord, I release every unfinished task, anxious problem, and nagging concern into Your capable hands. You neither slumber nor sleep, so I can rest in tranquil peace. Quiet my racing thoughts with Your tender voice. Dispel all insomnia, disturbing dreams, and nocturnal fears. Let Your holy angels pitch their tents around my bedroom and home.
 
-In Jesus' name, Amen.`,
+Bathe my body, mind, and spirit in deep, rejuvenating sleep. Wash away the fatigue of today, and restore my soul so that when morning breaks, I will awaken refreshed, vibrant, and eager to walk in the joy of Your salvation.
+
+In the peaceful and secure name of Jesus Christ, I pray,
+Amen.`,
     amenCount: 264
   },
   "morning_awakening": {
@@ -9022,20 +9050,26 @@ In Jesus' name, Amen.`,
     refEn: "Psalm 5:3",
     verseMr: "हे परमेश्वरा, सकाळी तू माझी प्रार्थना ऐकशील; सकाळी मी तुला आपली विनंती सादर करून वाट पाहीन.",
     verseEn: "In the morning, Lord, you hear my voice; in the morning I lay my requests before you and wait expectantly.",
-    prayerMr: `हे सर्वसमर्थ आणि दयाळू स्वर्गीय पित्या, आजच्या नव्या दिवसाच्या पहाटे मी तुझ्या चरणी नम्रतेने येतो. रात्रभर मला सुरक्षित ठेवून या सुंदर सकाळचा सूर्य पाहण्याची कृपा तू मला दिलीस, याबद्दल माझे हृदय उपकारस्तुतीने भरून गेले आहे. तुझी दया दररोज सकाळी नवी असते आणि तुझा विश्वासूपणा अथांग आहे.
+    prayerMr: `हे पहाटेचा सूर्य उगवणार्‍या आणि जीवनाचा श्वास देणाऱ्या जिवंत देवा,
 
-प्रभू, आजच्या संपूर्ण दिवसात माझे विचार, माझे शब्द आणि माझी सर्व कृत्ये तुझ्या इच्छेनुसार चालू दे. कामाच्या ठिकाणी, कुटुंबात आणि प्रवासात माझ्या पावलांना मार्गदर्शन कर. माझ्यासमोर येणाऱ्या प्रत्येक आव्हानात मला स्वर्गीय ज्ञान आणि धीर दे. मला सर्व प्रकारच्या प्रलोभनांपासून आणि वाईटापासून दूर ठेव.
+या नव्या दिवसाच्या आरंभी मी अत्यंत आनंदाने तुझी स्तुती करतो. माझी झोपमोड करून मला सुरक्षितपणे जागे केल्याबद्दल आणि माझ्या नाकात जीवनाचा श्वास फुंकल्याबद्दल धन्यवाद! प्रभू, तुझी दया दररोज सकाळी नवी असते; तुझा विश्वासूपणा खरोखर महान आहे.
 
-मी आज ज्या ज्या लोकांना भेटेन, त्यांच्यासाठी मी तुझ्या प्रेमाचा आणि आशीर्वादाचा झरा बनावे अशी कृपा कर. माझ्या कुटुंबावर, मित्रांवर आणि संपूर्ण मंडळीवर तुझा संरक्षणाचा हात असू दे. आजचा संपूर्ण दिवस मी तुझ्या पवित्र हातात समर्पित करतो.
+आजचा दिवस मी तुझ्या पवित्र वेदीवर अर्पण करतो. मला आत्मिक ताजेतवानेपण दे, जेणेकरून मी आळस आणि मरगळ झटकून तुझ्या कार्यासाठी उत्साहाने पुढे जाईन. माझे डोळे केवळ शुद्धाकडे पाहोत, माझे कान तुझ्या वाणीकडे लागोत आणि माझे पाय केवळ नीतिमत्त्वाच्या वाटेवर चालोत.
 
-येशू ख्रिस्ताच्या पवित्र व सामर्थ्यशाली नावात, आमेन.`,
-    prayerEn: `Heavenly Father, Almighty Creator, I come into Your presence at the threshold of this brand-new morning with a heart brimming with gratitude. Thank You for sustaining my breath through the stillness of the night and granting me the gift of this new dawn. Your mercies are truly new every single morning, and Your faithfulness is boundless.
+आज येणाऱ्या प्रत्येक आव्हानाचा सामना करण्यासाठी मला स्वर्गीय धैर्य दे. माझ्याद्वारे आज कोणाचेही मन दुखवले जाऊ नये, तर माझ्या शब्दांतून आणि वागण्यातून ख्रिस्ताचे प्रेम, दया आणि उत्तेजन प्रकट व्हावे. माझा संपूर्ण दिवस तुझ्या आशीर्वादाने भरलेला असो.
 
-Lord, as I step into the responsibilities, conversations, and appointments of this day, guide my footsteps along the paths of righteousness. Guard my tongue so that I speak words of grace, encouragement, and truth. Grant me divine wisdom in every decision, patience amid disruptions, and courage to stand firm in faith when trials arise.
+प्रभू येशूच्या पवित्र नावात ही प्रार्थना करतो,
+आमेन.`,
+    prayerEn: `Creator of the Dawn and Giver of Breath,
 
-Let Your Holy Spirit empower me to be a beacon of light, hope, and compassion to everyone I cross paths with today. Shield my family and home under the shadow of Your almighty wings. I dedicate every minute of this day to Your glory and honor.
+With praise upon my lips and reverence in my heart, I greet You at the threshold of this brand-new day. Thank You for preserving my life through the night, for waking my faculties, and for granting me another opportunity to experience Your goodness and advance Your kingdom on earth.
 
-In the precious and victorious name of Jesus Christ, Amen.`,
+Lord, I dedicate every hour of this day unto You. Strip away all spiritual sluggishness, apathy, and distraction. Ignite a fresh fire of holy zeal, purpose, and clarity within my spirit. Guard my eyes from vanity, incline my ears to Your truth, and establish my steps upon the highway of holiness.
+
+Whatever hurdles or surprises arise today, remind me that You are already ahead of me preparing the way. Use my hands to serve, my lips to encourage, and my heart to love unconditionally. Let the sweet fragrance of Jesus Christ rest upon me throughout this day.
+
+In the joyful and powerful name of Jesus Christ, I pray,
+Amen.`,
     amenCount: 342
   },
   "midday_strength": {
@@ -9053,20 +9087,26 @@ In the precious and victorious name of Jesus Christ, Amen.`,
     refEn: "Isaiah 40:29-31",
     verseMr: "तो थकलेल्याला सामर्थ्य देतो आणि अशक्त असलेल्याचे बळ वाढवतो. जे परमेश्वराची वाट पाहतात ते नवीन सामर्थ्य प्राप्त करतील.",
     verseEn: "He gives strength to the weary and increases the power of the weak. Those who hope in the Lord will renew their strength.",
-    prayerMr: `हे माझ्या जीवनाच्या सामर्थ्यवान खडका, दिवसाच्या या मध्यंतरी, कामाच्या गडबडीत आणि थकव्यात मी माझे मन क्षणभर तुझ्याकडे वळवतो. प्रभू, सकाळपासून केलेल्या परिश्रमामुळे माझे शरीर आणि मन थकले असेल, परंतु तुझा आत्मा कधीही थकत नाही. तू अशक्ताला बळ देणारा आणि थकलेल्याला नवी शक्ती देणारा जिवंत देव आहेस.
+    prayerMr: `हे दुपारच्या उन्हातही शीतळ सावली देणाऱ्या माझ्या प्रभू,
 
-या घडीला मी माझ्या मनातील सर्व ताण, गोंधळ आणि काळजी तुझ्या स्वाधीन करतो. माझे विचार पुन्हा तुझ्या शांततेत स्थिर कर. जे परमेश्वराची वाट पाहतात ते गरुडासारखे पंख पसरून उंच उडतील आणि चालताना थकणार नाहीत, या तुझ्या वचनावर मी भरवसा ठेवतो. माझ्या उर्वरित दिवसाच्या कामावर तुझा आशीर्वाद असू दे.
+दिवसाच्या या मध्यभागी, धावपळीच्या आणि कामाच्या गर्दीत मी थोडा वेळ थांबून माझे डोळे तुझ्याकडे लावतो. पवित्र शास्त्र सांगते की, "माझे साहाय्य परमेश्वराकडून येते, ज्याने आकाश व पृथ्वी निर्माण केली." प्रभू, तूच माझ्या सामर्थ्याचा आणि उत्साहाचा खरा उगम आहेस.
 
-माझ्या सहकाऱ्यांशी व कुटुंबाशी संवाद साधताना मला सौम्यता, समजूतदारपणा आणि प्रेम दे. माझ्या कष्टाचे फळ तुझ्या गौरवासाठी उपयोगी पडू दे. तूच माझा खरा विसावा आणि माझ्या आत्म्याचे समाधान आहेस.
+सकाळपासून काम करून आलेला थकवा, कामाचा ताण आणि विचारांची गुंतागुंत या क्षणी तू दूर कर. माझ्या मनाला आणि शरीराला दुपारच्या या वेळेत नवीन स्फूर्ती दे. माझ्या सहकाऱ्यांशी, ग्राहकांशी आणि कुटुंबाशी संवाद साधताना मला संयम, सौम्यता आणि प्रेम टिकवून ठेवण्यास साहाय्य कर.
 
-येशूच्या नावात, आमेन.`,
-    prayerEn: `O Lord, my Fortress and Strength, in the middle of this busy day amidst deadlines and weariness, I pause to fix my eyes upon You. The pressures of work and the demands of this world can easily drain my physical energy and cloud my focus, but Your strength is unfailing and Your well of grace never runs dry.
+उर्वरित दिवसातील सर्व कामांमध्ये मला एकाग्रता आणि यश दे. माझ्या कामातून निष्काळजीपणा दूर करून मला उत्कृष्टतेने कार्य करण्याचे मन दे. दिवसाचा शेवट होईपर्यंत तुझा हात माझ्यावर असू दे आणि माझ्या सर्व प्रयत्नांना तुझ्या आशीर्वादाचे फळ मिळो.
 
-I surrender every frustration, anxiety, and deadline into Your capable hands. Breathe Your supernatural peace into my spirit and revitalize my mind. As Your Word promises, those who wait upon You shall renew their strength, mounting up with wings like eagles, running and not growing weary, walking and not fainting.
+प्रभू येशूच्या नावात ही प्रार्थना करतो,
+आमेन.`,
+    prayerEn: `Lord of Strength and Sustainer of My Labor,
 
-Fill me afresh with patience, diligence, and integrity as I complete the tasks set before me today. Let my attitude and conduct honor You in every interaction. Thank You for being my constant companion and eternal source of joy.
+In the bustling midpoint of this day, I intentionally pause to realign my focus with heaven. When mental fatigue sets in, responsibilities multiply, and human energy wanes, I remember that my help comes from the Lord, the Maker of heaven and earth.
 
-In Jesus' name, Amen.`,
+Father, pour a fresh stream of revitalizing grace into my mind, soul, and body right now. Dissolve every trace of irritability, stress, and anxiety. Grant me renewed patience with difficult people, sharp focus for complicated tasks, and spiritual discernment for every decision that awaits this afternoon.
+
+Help me to work diligently, not merely to please human eyes, but as unto the Lord Christ Himself. Guard my integrity and keep my witness vibrant. Let Your peace prevail over my workplace or home, sustaining me in joy until the day's work is completed.
+
+In the sustaining and precious name of Jesus Christ, I pray,
+Amen.`,
     amenCount: 285
   },
   "evening_surrender": {
@@ -9084,20 +9124,26 @@ In Jesus' name, Amen.`,
     refEn: "Psalm 4:8",
     verseMr: "मी शांततेने निजेन आणि मला लगेच झोप लागेल; कारण हे परमेश्वरा, केवळ तूच मला सुरक्षिततेमध्ये ठेवतोस.",
     verseEn: "In peace I will lie down and sleep, for you alone, Lord, make me dwell in safety.",
-    prayerMr: `हे प्रेमळ पित्या, दिवस मावळला आहे आणि रात्रीची शांतता पसरली आहे. आजच्या संपूर्ण दिवसात तू माझ्यासोबत राहिलास, प्रत्येक संकटापासून माझे रक्षण केलेस आणि माझ्या गरजा पुरवल्यास, याबद्दल मी तुझे कोटी कोटी आभार मानतो. आज दिवसभरात माझ्या हातून घडलेल्या प्रत्येक चुकीची आणि उणिवांची क्षमा कर.
+    prayerMr: `हे दिवसाचा आणि रात्रीचा अधिपती असणाऱ्या सर्वसमर्थ देवा,
 
-आजच्या दिवसातील सर्व अपूर्ण कामे, उद्याची चिंता आणि माझ्या मनावर असलेला भार मी आता पूर्णपणे तुझ्या पायाशी ठेवतो. मला कशाचीही भीती नाही, कारण तू माझ्यावर अहोरात्र लक्ष ठेवणारा देव आहेस. इस्राएलाचा रक्षक कधीही डुलकी घेत नाही आणि झोपतही नाही.
+संध्याकाळच्या या शांत प्रहरी मी माझे हात वर करून तुझी स्तुती करतो. माझी ही प्रार्थना तुझ्यापुढे सुवासिक धुपासारखी मानली जावो. दिवसभरात तू मला दिलेल्या अन्नाबद्दल, पाण्यासाठी, सुरक्षित प्रवासासाठी आणि सर्व आशीर्वादांसाठी मी तुझे आभार मानतो.
 
-माझ्या घरावर आणि प्रियजनांवर तुझ्या पवित्र देवदूतांचा पहारा असू दे. माझ्या मनाला सर्व भीती आणि अस्वस्थतेतून सोडवून गोड आणि विश्रांतीपूर्ण झोप दे, जेणेकरून उद्या सकाळी मी तुझ्या सेवेसाठी नव्या उत्साहाने जागा होऊ शकेन.
+प्रभू, आज माझ्या हातून नकळत किंवा कळत काही चूक झाली असेल, कोणाचे मन दुखावले गेले असेल किंवा माझ्या विचारांत अशुद्धता आली असेल, तर मला क्षमा कर. येशूच्या पवित्र रक्ताने माझे अंतःकरण धुवून स्वच्छ कर. ज्यांनी आज मला दुखावले असेल, त्यांनाही मी पूर्ण अंतःकरणाने क्षमा करतो; माझ्या मनात कोणताही कडवटपणा शिल्लक राहू नये.
 
-येशू ख्रिस्ताच्या नावात, आमेन.`,
-    prayerEn: `Loving Father, as dusk settles and the quiet shadows of night draw near, I bow my head to thank You for Your unwavering protection and provision throughout this day. You have preserved my going out and my coming in. Where I fell short in thought, word, or deed today, I ask for Your loving forgiveness and cleansing grace.
+दिवसभरातील सर्व चिंता, अपूर्ण कामे आणि उद्याची काळजी मी आता तुझ्या हातांत सोपवतो. माझ्या कुटुंबाला आणि घराला तुझ्या पंखांखाली आश्रय दे. तुझ्या दिव्य शांतीमध्ये मला विश्रांती मिळू दे.
 
-Right now, I choose to release every unfinished task, unresolved conflict, and worry about tomorrow into Your mighty hands. I refuse to carry burdens into my rest that only You are big enough to bear. You who watch over Your children neither slumber nor sleep; therefore, I can rest without fear or agitation.
+प्रभू येशूच्या नावात ही प्रार्थना करतो,
+आमेन.`,
+    prayerEn: `Sovereign Father, Ruler of Day and Night,
 
-Post Your guardian angels around my home and my family tonight. Blanket my heart and mind with Your profound peace, and grant me deep, healing, and restorative sleep so that I may awaken tomorrow refreshed and ready to serve You.
+As dusk settles over the land, I lift my hands in humble gratitude. May my prayer rise before You like sweet-smelling incense, and the lifting of my hands be acceptable in Your sight. I thank You for carrying me through the challenges, meetings, and trials of this passing day.
 
-In the name of Jesus, Amen.`,
+Search my heart tonight, O God. If I have stumbled in word, deed, or attitude—if pride, impatience, or harshness crept into my interactions—forgive me and cleanse me with the precious blood of Jesus. I also choose by faith to release and forgive anyone who wronged or offended me today; I will not carry the poison of resentment into my sleep.
+
+I surrender every worry about tomorrow into Your sovereign care. Protect my home, bless my family, and quiet my soul with Your presence. Under the shadow of Your wings, I lay my head to rest in perfect safety.
+
+In the forgiving and holy name of Jesus Christ, I pray,
+Amen.`,
     amenCount: 318
   },
   "psalm91_protection": {
@@ -9115,20 +9161,26 @@ In the name of Jesus, Amen.`,
     refEn: "Psalm 91:1-4",
     verseMr: "जो परात्पर देवाच्या गुप्तस्थळी राहतो, तो सर्वसमर्थाच्या सावलीत विसावा पावेल. परमेश्वर माझा कोट व माझा किल्ला आहे. तो आपल्या पंखांनी तुला आच्छादील.",
     verseEn: "Whoever dwells in the shelter of the Most High will rest in the shadow of the Almighty. I will say of the Lord, 'He is my refuge and my fortress, my God, in whom I trust.'",
-    prayerMr: `हे परात्पर देवा, सर्वसमर्थ परमेश्वरा, मी आज स्वतःला, माझ्या कुटुंबाला आणि माझ्या घरादाराला तुझ्या गुप्तस्थळाच्या सावलीत सुरक्षित ठेवतो. तूच माझा अभेद्य कोट, माझा भक्कम किल्ला आणि माझा एकमेव आश्रय आहेस. कोणत्याही महामारीची, दुष्ट शक्तींची किंवा अंधकारातील संकटांची भीती मला बाळगण्याचे कारण नाही, कारण तू माझा महान रक्षक आहेस.
+    prayerMr: `हे परात्पर आणि सर्वसमर्थ देवा,
 
-प्रभू, तू आपल्या पंखांनी मला आच्छादतोस आणि तुझा सत्य करार ही माझी ढाल आणि संरक्षण आहे. माझ्या उजव्या बाजूला हजारो पडले तरी संकट माझ्या जवळ येणार नाही. तू आपल्या देवदूतांना माझ्याविषयी आज्ञा दिली आहेस की त्यांनी मला माझ्या सर्व मार्गांत सांभाळावे, जेणेकरून माझ्या पायाला दगडाची ठेच लागणार नाही.
+मी तुझ्या गुप्त स्थानी आश्रय घेतो आणि तुझ्या सर्वसमर्थ सावलीत विसावा पावतो. स्तोत्र ९१ च्या वचनांवर पूर्ण विश्वास ठेवून मी आज स्वतःला, माझ्या कुटुंबाला, माझ्या मुलांना आणि माझ्या घरादाराला तुझ्या अभेद्य संरक्षणाखाली समर्पित करतो.
 
-शत्रूच्या प्रत्येक युक्तीचा आणि षडयंत्राचा नाश कर. माझ्या कुटुंबाभोवती तुझ्या अग्नीची भिंत उभी कर. आम्हाला दीर्घायुष्य, उत्तम आरोग्य आणि तुझे तारण अनुभवण्याचे भाग्य दे.
+तू मला पारध्याच्या पाशातून आणि घातक मरीपासून वाचवणारा देव आहेस. रात्रीच्या भयाची, दिवसा उडणाऱ्या बाणाची, अंधारात चालणाऱ्या साथीची आणि भरदुपारी होणाऱ्या नाशाची मला भीती वाटणार नाही; कारण प्रभू, तूच माझा आश्रयदुर्ग आणि माझी ढाल आहेस. माझ्या पाठीमागे हजार आणि उजवीकडे दहा हजार जरी पडले, तरी ते संकट माझ्या जवळ येणार नाही.
 
-येशू ख्रिस्ताच्या सामर्थ्यशाली आणि विजयी नावात, आमेन.`,
-    prayerEn: `Most High God and Almighty Father, I deliberately take shelter under the shadow of Your wings today. You alone are my refuge, my impenetrable fortress, and my God in whom I place my absolute trust. I declare that no evil shall conquer me, nor shall any plague come near my dwelling, because You are my ultimate protector.
+तू आपल्या देवदूतांना माझ्या सर्व मार्गांत माझे रक्षण करण्याची आज्ञा दिली आहेस. कोणत्याही दुष्ट शक्तीचा, जादूटोण्याचा किंवा अपघाताचा माझ्यावर अधिकार चालणार नाही. मी तुझ्या नावाला शरण आलो आहे, म्हणून तू मला उंच स्थानी सुरक्षित ठेवशील या वचनावर मी विश्वास ठेवतो.
 
-Your faithfulness is my shield and buckler. I will not fear the terror by night, nor the arrow that flies by day, nor the pestilence that walks in darkness. Though a thousand fall at my side and ten thousand at my right hand, danger will not touch me because You have commanded Your holy angels to guard me in all my ways.
+प्रभू येशूच्या सामर्थ्यशाली नावात ही प्रार्थना करतो,
+आमेन.`,
+    prayerEn: `Most High God, Shelter of the Ages and Mighty Fortress,
 
-Deliver me and my family from every hidden snare and spiritual attack. Satisfy us with long life, robust health, and show us Your salvation. Let Your presence encompass our going out and coming in from this time forth and forevermore.
+I make my dwelling in the secret place of the Most High, abiding peacefully under the shadow of the Almighty. Standing firmly upon the bedrock promises of Psalm 91, I place myself, my loved ones, our home, and our travels beneath Your impenetrable armor today.
 
-In the mighty and unrivaled name of Jesus, Amen.`,
+You are my deliverer from the snare of the fowler and from every deadly pestilence. I will not fear the terror of the night, nor the arrow that flies by day, nor the plague that stalks in darkness, nor the destruction that wastes at noonday. A thousand may fall at my side and ten thousand at my right hand, but calamity shall not come near my dwelling.
+
+You have given Your holy angels charge over me to keep me in all my ways. In their hands they shall bear me up, lest I dash my foot against a stone. Because I have set my love upon You, You will deliver me and set me securely on high. I claim Your complete, 360-degree divine protection today.
+
+In the mighty and victorious name of Jesus Christ, I pray,
+Amen.`,
     amenCount: 450
   },
   "inner_healing": {
@@ -9146,20 +9198,26 @@ In the mighty and unrivaled name of Jesus, Amen.`,
     refEn: "Matthew 11:28-30",
     verseMr: "अहो कष्टी व भाराक्रांत जनहो, तुम्ही सर्व मजकडे या, म्हणजे मी तुम्हाला विसावा देईन. माझे जू आपल्यावर घ्या व माझ्यापासून शिका; म्हणजे तुमच्या जिवाला विसावा मिळेल.",
     verseEn: "Come to me, all you who are weary and burdened, and I will give you rest. Take my yoke upon you and learn from me, for I am gentle and humble in heart, and you will find rest for your souls.",
-    prayerMr: `हे दयाळू आणि प्रेमळ प्रभू येशू, तू म्हणालास की 'अहो कष्टी व भाराक्रांत जनहो, तुम्ही सर्व मजकडे या, म्हणजे मी तुम्हाला विसावा देईन.' आज मी माझे अंतःकरण, माझ्या मनातील खोलवर लपलेल्या वेदना, निराशा आणि भूतकाळातील कटू आठवणी तुझ्या चरणी आणतो. तू तुटलेल्या हृदयांना जोडणारा आणि जखमांवर मलम लावणारा महान वैद्य आहेस.
+    prayerMr: `हे भग्नहृदयी लोकांचे दुःख दूर करणाऱ्या आणि जखमा बांधणाऱ्या प्रेमळ येशू,
 
-ज्या ज्या लोकांनी मला दुखावले, अपमानित केले किंवा फसवले, त्या सर्वांना क्षमा करण्याचे मोठे मन मला दे. माझ्या मनातील सर्व कडूपणा, राग आणि असंतोष काढून टाक आणि त्या जागी तुझी स्वर्गीय क्षमा आणि प्रीती भरून दे. माझ्या अंतर्मनातील भीतीचे आणि संशयाचे मूळ नष्ट कर.
+माझ्या मनातील खोल जखमा, जुन्या आठवणींचे दुःख, न बोलता आलेले अश्रू आणि उपेक्षेच्या वेदना मी आज तुझ्या चरणांशी उघड्या करतो. माणसे कदाचित माझ्या वेदना समजू शकणार नाहीत, परंतु प्रभू, तू माझ्या प्रत्येक अश्रूचा हिशेब ठेवला आहेस.
 
-तुझ्या पवित्र आत्म्याचा शांतीचा प्रवाह माझ्या आत्म्यात, मनात आणि विचारांत वाहू दे. माझे मन सर्व समजुतीच्या पलीकडच्या दैवी शांतीने भरून जावे. मला पुन्हा नवे समाधान, आनंद आणि आत्मिक उल्हास प्राप्त होऊ दे.
+माझ्या बालपणापासून ते आजपर्यंत झालेल्या सर्व अन्यायांवर, फसवणुकीवर आणि नकारावर तुझ्या वधस्तंभाच्या रक्ताचा मलम लाव. ज्या कडूपणाने आणि निराशेने माझे मन बांधले गेले आहे, त्यातून मला आज पूर्ण मुक्ती दे. मला स्वतःला आणि मला दुखावणाऱ्या इतरांना मनापासून क्षमा करण्याचे सामर्थ्य दे.
 
-येशूच्या गोड आणि तारणहार नावात, आमेन.`,
-    prayerEn: `Compassionate Lord Jesus, You extended the most tender invitation to humanity: "Come to me, all you who are weary and burdened, and I will give you rest." Today, I bring my bruised heart, suppressed tears, and hidden emotional wounds directly to Your feet. You heal the brokenhearted and bind up every painful wound.
+माझ्या तुटलेल्या अंतःकरणाचे तुकडे गोळा करून तू मला एक नवीन, निरोगी आणि आनंदी हृदय दे. माझ्या दुःखाचे रूपांतर तुझ्या सामर्थ्यशाली साक्षीत कर. मला तुझ्या बिनशर्त प्रेमाची जाणीव करून दे, जेणेकरून मी पुन्हा आत्मविश्वासाने आणि आशेने जीवनात पुढे पाऊल टाकू शकेन.
 
-I actively choose to forgive anyone who has betrayed, hurt, judged, or abandoned me. Cleanse my soul of every trace of resentment, bitterness, and anger. Where rejection left deep scars, pour in Your affirming unconditional love. Silence the voice of shame, anxiety, and worthlessness with the truth of Your redemption.
+प्रभू येशूच्या गोड आणि आरोग्यदायी नावात ही प्रार्थना करतो,
+आमेन.`,
+    prayerEn: `Gentle Healer and Comforter of the Brokenhearted,
 
-Let the soothing balm of Your Holy Spirit wash over my thoughts, memories, and emotions. Fill every dry and weary place in my being with rivers of living water. Grant me rest, renewed joy, and complete wholeness so that I may walk forward in victory.
+I come before You bearing the silent, aching wounds of my soul—the memories of rejection, past betrayals, harsh words, and unspeakable disappointments. While human eyes see only my smile, You see the secret tears and the deep aches of my spirit. Your Word assures me that You draw near to the brokenhearted and bind up their wounds.
 
-In Your healing and holy name, Jesus, Amen.`,
+Lord Jesus, walk back through the corridors of my past memories. Apply the soothing balm of Gilead and the healing virtue of Your cross to every emotional scar. Uproot all lingering bitterness, unhealed grief, and toxic shame. Grant me the supernatural grace to forgive those who deeply hurt me, releasing them into Your hands and untying my heart from the past.
+
+Rebuild my shattered confidence upon the foundation of Your unconditional love. Where sorrow held sway, bestow the oil of gladness and a garment of praise. Fill every empty chamber of my heart with the warm light of the Holy Spirit, making me completely whole.
+
+In the tender and restoring name of Jesus Christ, I pray,
+Amen.`,
     amenCount: 395
   },
   "financial_breakthrough": {
@@ -9177,22 +9235,26 @@ In Your healing and holy name, Jesus, Amen.`,
     refEn: "Philippians 4:19",
     verseMr: "आणि माझा देव आपल्या संपत्तीप्रमाणे ख्रिस्त येशूमध्ये गौरवाने तुमची प्रत्येक गरज भागवील.",
     verseEn: "And my God will meet all your needs according to the riches of his glory in Christ Jesus.",
-    prayerMr: `हे सर्व विश्वाचा मालक असलेल्या स्वर्गीय पित्या,
-सर्व धन, संपत्ती आणि जगातील सर्व संसाधने तुझीच आहेत. आज मी माझ्या कुटुंबाच्या सर्व आर्थिक गरजा, जबाबदाऱ्या आणि कर्जाचे ओझे तुझ्या चरणी सोपवतो.
+    prayerMr: `हे 'यहोवा यिरे' सर्व गरजा पुरवणाऱ्या आणि विपुलतेच्या देवा,
 
-प्रभू, माझ्या कामावर आणि उपजीविकेच्या साधनांवर तुझा विपुल आशीर्वाद असू दे. मला मिळालेल्या धनाचा सुज्ञपणे, प्रामाणिकपणे आणि जबाबदारीने वापर करण्याची स्वर्गीय बुद्धी दे. सर्व अनावश्य खर्च आणि नुकसानीपासून आमचे रक्षण कर. जसा तू आकाशातील पाखरांना आणि रानातील फुलांना सांभाळतोस, तसाच आमच्या सर्व गरजांची पूर्तता कर.
+आकाश आणि पृथ्वी, सोने आणि चांदी हे सर्व तुझेच आहे. तू आकाशातील पाखरांना खाऊ घालतोस आणि रानातील फुलांना वैभवशाली वस्त्रे नेसवतोस; मग तुझ्या प्रिय मुलांची काळजी तू कितीतरी पटीने अधिक घेशील याची मला पूर्ण खात्री आहे.
 
-आम्हाला कोणाचेही देणेकरी न ठेवता, इतरांना देणारे आणि गरजूंना मदत करणारे बनव.
+प्रभू, आज माझ्या डोक्यावर असलेले कर्जाचे ओझे, आर्थिक चणचण, व्यवसायातील मंदी किंवा नोकरीतील अडचणी मी तुझ्या पवित्र चरणांशी आणतो. माझ्या आर्थिक मार्गातील सर्व अडथळे तू दूर कर. मला संपत्ती मिळवण्याचे सामर्थ्य आणि स्वर्गीय बुद्धी दे. माझे खर्च सांभाळण्यासाठी आणि प्रामाणिकपणे व्यवहार करण्यासाठी मला विवेक दे.
 
-येशूच्या नावाने, आमेन.`,
-    prayerEn: `Heavenly Father, Sovereign Provider and Creator of all wealth,
-Everything in heaven and on earth belongs to You. Today I bring before You our household finances, debts, and daily financial obligations.
+माझ्या गरजा भागवून इतरांनाही भरभरून देण्याइतकी विपुलता तू माझ्या जीवनात निर्माण कर. खाणाऱ्या कीटकांना आणि उधळपट्टीला तू येशूच्या नावाने दूर कर. पवित्र शास्त्र सांगते की, "माझा देव आपल्या संपत्तीनुसार ख्रिस्त येशूमध्ये गौरवाने तुमची प्रत्येक गरज भागवील." या वचनावर विश्वास ठेवून मी आर्थिक विजयाची घोषणा करतो.
 
-Lord, open windows of divine opportunity in my career, business, and daily work. Grant me supernatural wisdom to manage every penny with diligence, integrity, and godly stewardship. Shield our home from unexpected financial leaks, wasted resources, and anxiety.
+प्रभू येशूच्या सामर्थ्यशाली नावात ही प्रार्थना करतो,
+आमेन.`,
+    prayerEn: `Jehovah Jireh—the Lord My Sovereign Provider,
 
-Teach us to walk in generous faith rather than fear of scarcity, trusting that You supply every genuine need according to Your glorious riches in Christ Jesus.
+The earth is Yours, and everything in it; the gold and the silver belong to You. If You clothe the lilies of the field in splendor and feed the birds of the air without fail, how much more will You care for me, Your beloved child?
 
-In Jesus' name, Amen.`,
+Father, I bring every financial strain, debt, unpaid bill, and economic worry before Your throne of grace. Where avenues seem blocked and human resources fall short, open the windows of heaven and pour out blessings that I will not have room enough to receive. Grant me divine creativity, diligence, and wisdom to steward my finances with integrity and excellence.
+
+Rebuke the devourer over my income, investments, and household. Break the chains of lack, poverty, and anxiety in the name of Jesus. According to Philippians 4:19, You shall supply all my needs according to Your riches in glory by Christ Jesus. Bless me so that I may be a generous channel of blessing to the needy and to Your kingdom.
+
+In the mighty and abundant name of Jesus Christ, I pray,
+Amen.`,
     amenCount: 420
   },
   "children_protection": {
@@ -9210,22 +9272,26 @@ In Jesus' name, Amen.`,
     refEn: "Proverbs 22:6 • Isaiah 54:13",
     verseMr: "मुलाला योग्य मार्गाचे शिक्षण दे, म्हणजे तो वृद्ध झाल्यावरही त्यापासून वळणार नाही. तुझी सर्व मुले परमेश्वराकडून शिकलेली असतील, आणि त्यांना मोठी शांती लाभेल.",
     verseEn: "Start children off on the way they should go, and even when they are old they will not turn from it. All your children will be taught by the Lord, and great will be their peace.",
-    prayerMr: `हे प्रेमळ देवादिक्षका,
-माझ्या मुलांना तू मला दिलेली अमूल्य देणगी आहेस. आज मी त्यांना पूर्णपणे तुझ्या सुरक्षित हातात सोपवतो. या जगातील वाईट संगती, दुष्ट प्रभाव, प्रलोभने आणि डिजिटल संकटांपासून त्यांचे रक्षण कर.
+    prayerMr: `हे बालकांवर अत्यंत प्रेम करणाऱ्या आणि त्यांना आशीर्वाद देणाऱ्या येशू राजा,
 
-त्यांच्या बुद्धीला स्वर्गीय ज्ञान दे आणि त्यांच्या हृदयात तुझ्याविषयी आदर व प्रीती निर्माण कर. त्यांचे शिक्षण, करिअर आणि चारित्र्य तुझ्या गौरवासाठी घडव. त्यांच्या पावलांना नेहमी सत्य आणि नीतिमत्तेच्या मार्गावर चालव.
+पवित्र शास्त्र सांगते की, "मुले ही परमेश्वराकडून मिळालेले वतन आहेत." तू आमच्या पोटी दिलेल्या या प्रिय मुलांसाठी आम्ही तुझे कोटी-कोटी आभार मानतो. आज आम्ही आमच्या सर्व मुलांना तुझ्या शक्तिशाली आणि सुरक्षित हातांमध्ये सोपवतो.
 
-माझ्या मुलांभोवती तुझ्या देवदूतांचा पहारा अहोरात्र असू दे.
+प्रभू, या दुष्ट आणि मोहमयी जगाच्या प्रभावापासून आमच्या मुलांचे रक्षण कर. त्यांच्या शाळेत, प्रवासात, खेळाच्या मैदानावर आणि इंटरनेटच्या विश्वात त्यांचे मन, डोळे आणि अंतःकरण तू शुद्ध व सुरक्षित ठेव. वाईट संगती, व्यसने, नैराश्य आणि घातक विचारांपासून त्यांचे रक्षण कर. त्यांच्या भोवती तुझ्या स्वर्गीय देवदूतांचा पहारा असू दे.
 
-येशूच्या नावात, आमेन.`,
-    prayerEn: `Loving Father and Shepherd of Families,
-Children are a precious heritage from You. I place my children entirely within the safety of Your righteous right hand today. Guard their minds from destructive worldly cultures, peer pressure, and harmful influences.
+आमच्या मुलांना बुद्धी, स्मरणशक्ती, नम्रता आणि देवाचे भय दे. त्यांना जीवनाचा खरा उद्देश समजू दे आणि त्यांनी लहाणपणापासून तुझ्या वचनांवर प्रेम करावे अशी कृपा त्यांना दे. त्यांचे भविष्य उज्ज्वल, आरोग्यपूर्ण आणि तुझ्या गौरवाने भरलेले असो.
 
-Grant them a hunger for truth, a sensitive conscience, and divine discernment in every friendship. Bless their schoolwork, physical growth, and future vocations. May they grow in favor with God and people, shining as pure lights of Christ.
+प्रभू येशूच्या गोड नावात ही प्रार्थना करतो,
+आमेन.`,
+    prayerEn: `Loving Savior and Shepherd of the Little Children,
 
-Surround them with Your ministering angels everywhere they go.
+Children are a heritage from the Lord, the fruit of the womb a sacred reward. With immense gratitude, we bring our precious children, grandchildren, and youth before You, consecrating their lives, health, minds, and destinies into Your tender and mighty keeping.
 
-In Jesus' name, Amen.`,
+Lord, establish a wall of holy fire around them wherever they go—in school, on the road, in social gatherings, and in the digital world. Shield their tender hearts and innocent minds from predatory influences, worldly deceptions, peer pressure, and premature anxieties. Station Your guardian angels around their steps day and night.
+
+Endow them with keen intellect, sharp memories, and a deep hunger for Your Word. Draw them into a personal, intimate relationship with Jesus Christ from their earliest days. Raise them to be men and women of unyielding integrity, bold faith, and compassionate leadership who will bring glory to Your kingdom.
+
+In the precious and protective name of Jesus Christ, I pray,
+Amen.`,
     amenCount: 388
   },
   "exam_studies": {
@@ -9243,18 +9309,26 @@ In Jesus' name, Amen.`,
     refEn: "James 1:5 • Daniel 1:17",
     verseMr: "जर तुमच्यापैकी कोणाला बुद्धीची उणीव असेल, तर त्याने ती देवाजवळ मागावी, म्हणजे ती त्याला दिली जाईल; कारण देव कोणालाही दोष न लावता सर्वांना उदारपणे देतो.",
     verseEn: "If any of you lacks wisdom, you should ask God, who gives generously to all without finding fault, and it will be given to you.",
-    prayerMr: `हे सर्व ज्ञानाच्या उगमा परमेश्वरा,
-जसे तू दानीएल आणि त्याच्या मित्रांना सर्व विद्या आणि ज्ञानात बुद्धिमत्ता दिलीस, तशीच बुद्धी आणि स्मरणशक्ती मला माझ्या अभ्यासात दे.
+    prayerMr: `हे सर्व ज्ञानाचा आणि बुद्धीचा उगम असणाऱ्या देवा,
 
-माझ्या मनातील भीती, गोंधळ आणि विसरभोळेपणा दूर कर. मी जे काही वाचतो आणि शिकतो, ते चांगल्या प्रकारे समजून घेण्याची व परीक्षेच्या वेळी अचूक आठवण्याची कृपा मला दे. परीक्षेच्या खोलीत माझे मन शांत व आत्मविश्वासाने भरलेले असू दे. माझ्या कष्टाचे फळ मला उत्तम यशाच्या रूपात मिळू दे.
+मी माझ्या अभ्यासासाठी आणि आगामी परीक्षांसाठी संपूर्ण मनाने तुझ्यापुढे नतमस्तक होतो. पवित्र शास्त्र सांगते की, "परमेश्वराचे भय हेच ज्ञानाचा आरंभ आहे." प्रभू, मला एकाग्र मन, समजून घेण्याची शक्ती आणि तीक्ष्ण स्मरणशक्ती प्रदान कर.
 
-येशूच्या नावाने ही प्रार्थना करतो, आमेन.`,
-    prayerEn: `Lord God of All Wisdom and Knowledge,
-Just as You bestowed wisdom, insight, and sharp understanding upon Daniel, pour out Your intellectual grace upon my studies and preparations today.
+अभ्यास करताना येणारा आळस, भीती, विचलित करणारे विचार आणि परीक्षेचा ताण तू येशूच्या नावाने माझ्या मनातून काढून टाक. मी जे काही वाचतो आणि शिकतो, ते योग्य वेळी अचूकपणे आठवण्याचे सामर्थ्य मला दे. परीक्षा हॉलमध्ये प्रवेश करताना माझे हृदय तुझ्या स्वर्गीय शांतीने भरून काढ.
 
-Silence every voice of exam anxiety, confusion, and panic. Expand my memory to retain and clearly articulate concepts during my assessments. Keep my mind focused, calm, and alert under pressure. Crown my honest hard work with favor, clarity, and outstanding success.
+प्रश्नांची उत्तरे स्पष्टतेने आणि आत्मविश्वासाने लिहिण्यासाठी माझ्या हातांना आणि बुद्धीला मार्गदर्शन कर. माझ्या प्रामाणिक कष्टाला तू सर्वोत्तम यशाचा मुकुट घाल. माझ्या या शैक्षणिक यशामधून माझ्या पालकांना आनंद आणि तुझ्या पवित्र नावाला मोठेपण लाभो.
 
-In Jesus' name, Amen.`,
+प्रभू येशूच्या नावात ही प्रार्थना करतो,
+आमेन.`,
+    prayerEn: `Lord God, Source of All Knowledge, Wisdom, and Understanding,
+
+As I prepare for my studies and upcoming examinations, I turn to You, the fountainhead of all divine intellect. Your Word declares that if anyone lacks wisdom, they should ask of God, who gives generously to all without finding fault. I receive that heavenly gift today.
+
+Lord, banish all academic anxiety, fear of failure, mental fog, and distraction. Grant me laser-sharp concentration, deep comprehension of difficult subjects, and an exceptional memory. Help me to manage my study time with discipline and diligence, honoring You in my preparation.
+
+When I sit down in the examination hall, calm my nerves with Your supernatural peace. Bring to my remembrance everything I have studied, and guide my pen to articulate answers with clarity, precision, and confidence. Crown my hard work with outstanding success for Your name's glory.
+
+In the wise and victorious name of Jesus Christ, I pray,
+Amen.`,
     amenCount: 365
   },
   "forgiveness_freedom": {
@@ -9272,22 +9346,26 @@ In Jesus' name, Amen.`,
     refEn: "Colossians 3:13",
     verseMr: "तुम्ही एकमेकांचे सहन करा आणि जर कोणाविरुद्ध कोणाची तक्रार असेल तर एकमेकांना क्षमा करा; जशी प्रभूने तुम्हाला क्षमा केली तशी तुम्हीही करा.",
     verseEn: "Bear with each other and forgive one another if any of you has a grievance against someone. Forgive as the Lord forgave you.",
-    prayerMr: `हे दयाळू प्रभू येशू,
-तू क्रूसावर असताना आपल्या शत्रूंसाठी प्रार्थना केलीस: 'पित्या, यांना क्षमा कर, कारण हे काय करत आहेत हे यांना समजत नाही.'
+    prayerMr: `हे असीम दयेच्या आणि क्षमाशीलतेच्या स्वर्गीय पित्या,
 
-प्रभू, मला ज्या ज्या लोकांनी दुखावले आहे, माझा विश्वासघात केला आहे किंवा माझ्यावर अन्याय केला आहे, त्या सर्वांना मी मनापासून क्षमा करतो. माझ्या मनातील सर्व कडूपणा, चीड, द्वेष आणि सूडबुद्धी तू धुवून टाक. माझ्या अंतःकरणाला या ओझ्यातून मुक्त कर आणि तिथे तुझी स्वर्गीय प्रीती आणि शांती वाहू दे.
+तू माझ्या अगणित पापांची, चुकांची आणि कमतरतांची वधस्तंभावर कोणतीही किंमत न मागता क्षमा केलीस याबद्दल मी तुझे निरंतर आभार मानतो. जशी प्रभू येशूने मला क्षमा केली, तसेच मलाही इतरांना मनापासून क्षमा करण्यास शिकव.
 
-मला क्षमा करणारे आणि प्रेम करणारे अंतःकरण दे.
+प्रभू, ज्या लोकांनी मला दुखावले, माझा विश्वासघात केला किंवा माझ्यावर अन्याय केला, त्यांच्याबद्दल माझ्या मनात असलेला राग, कडवटपणा आणि सूडबुद्धी मी आज पूर्णपणे काढून टाकतो. मी त्यांना येशूच्या नावाने मुक्त करतो आणि त्यांच्यावरील सर्व आरोप तुझ्या पवित्र न्यायालयात सोपवतो.
 
-येशूच्या नावात, आमेन.`,
-    prayerEn: `Merciful Jesus, Redeemer and Savior,
-Even upon the cross, You prayed for Your persecutors: "Father, forgive them, for they know not what they do."
+माझ्या अंतःकरणातील क्षमाशीलतेमुळे मला खऱ्या स्वातंत्र्याचा अनुभव येऊ दे. कसल्याही कडूपणाचा विषाक्त पाश माझ्या आत्म्याला जखडू नये. माझे हृदय तुझ्या स्वर्गीय प्रेमाने आणि शांतीने भरून काढ, जेणेकरून मी माझ्या शत्रूंवरही दया दाखवू शकेन आणि तुझ्या खऱ्या शिष्यासारखा जगू शकेन.
 
-By the power of Your Holy Spirit, I intentionally release every person who has wronged, slandered, rejected, or betrayed me. I break the chains of resentment, bitterness, and grudges off my soul today. Cleanse my heart completely and pour in Your unconditional love, healing every tender wound.
+प्रभू येशूच्या पवित्र नावात ही प्रार्थना करतो,
+आमेन.`,
+    prayerEn: `Merciful Father and Author of Grace,
 
-I choose spiritual freedom, wholeness, and peace.
+At Calvary's cross, when I was completely undeserving, You forgave all my sins, wiped away my transgressions, and remembered my iniquities no more. In the light of such boundless, undeserved mercy, how can I harbor grudges against my fellow human beings?
 
-In Jesus' name, Amen.`,
+Lord, today I make the conscious decision to forgive everyone who has wounded, betrayed, slandered, or mistreated me. I tear up the mental debts I held against them. I release all bitterness, resentment, malice, and desire for retaliation into Your righteous hands.
+
+Free my soul from the toxic prison of unforgiveness. Wash away every trace of anger with the cleansing waters of Your Holy Spirit. Fill the empty spaces in my heart with Christlike love and empathy. Enable me to bless those who cursed me, knowing that in forgiving, I reflect the glorious character of my Savior.
+
+In the liberating and compassionate name of Jesus Christ, I pray,
+Amen.`,
     amenCount: 310
   },
   "overcoming_fear": {
@@ -9305,22 +9383,26 @@ In Jesus' name, Amen.`,
     refEn: "Joshua 1:9 • 2 Timothy 1:7",
     verseMr: "मी तुला आज्ञा केली नाही काय? धीर धर आणि मोठा हिंमतवान हो; घाबरू नको आणि भयभीत होऊ नको; कारण तू जिथे जाशील तिथे तुझा देव परमेश्वर तुझ्याबरोबर आहे.",
     verseEn: "Have I not commanded you? Be strong and courageous. Do not be afraid; do not be discouraged, for the Lord your God will be with you wherever you go.",
-    prayerMr: `हे पराक्रमी देवा,
-देवाने आपल्याला भीतीचा आत्मा दिलेला नाही, तर सामर्थ्याचा, प्रीतीचा आणि संयमाचा आत्मा दिला आहे.
+    prayerMr: `हे पराक्रमी आणि सर्वभयाचा नाश करणाऱ्या प्रभू येशू,
 
-आज माझ्या मनावर सावट घालणाऱ्या सर्व प्रकारच्या अज्ञात भीती, भविष्याची चिंता आणि आजारपणाची भीती मी येशूच्या नावाने दूर करतो. तू माझा प्रकाश आणि माझे तारण आहेस; मी कोणाला भिऊ? परमेश्वर माझ्या जिवाचा कोट आहे; मी कोणाचा थरकाप करू?
+पवित्र शास्त्र गर्जनेने सांगते की, "देवाने आपल्याला भीतीचा आत्मा दिला नाही, तर सामर्थ्याचा, प्रीतीचा आणि संयमाचा आत्मा दिला आहे." या स्वर्गीय सत्यावर उभा राहून मी आज माझ्या मनातील सर्व अनामिक भीती, घाबरटपणा आणि चिंता येशूच्या नावाने नाकारतो.
 
-तुझा अथांग हात धरून मी प्रत्येक आव्हानाला निर्भयपणे सामोरा जाईन.
+प्रभू, भविष्याची भीती, आजारपणाची भीती, अपयशाची भीती किंवा मृत्यूची भीती यांपैकी कशाचाही माझ्यावर अधिकार चालणार नाही. तू माझ्या पाठीशी उभा आहेस, तू माझा हात धरला आहेस आणि तू मला सांगतोस, "भिऊ नको, कारण मी तुझ्याबरोबर आहे."
 
-येशूच्या विजयी नावात, आमेन.`,
-    prayerEn: `Almighty God, my Victorious Defender,
-Your Word declares that You have not given us a spirit of fear, but of power, love, and a sound mind.
+तुझे परिपूर्ण प्रेम माझ्या अंतःकरणातून सर्व भीती हाकलून लावो. माझ्या मनाला खंबीर विश्वास, पवित्र धैर्य आणि न डगमगणारा आत्मविश्वास प्रदान कर. सैतानाचे सर्व भयावह विचार तू येशूच्या रक्ताच्या सामर्थ्याने निष्प्रभ कर. मी आज आणि सदैव तुझ्या संरक्षणात धैर्याने पाऊल पुढे टाकीन.
 
-I silence and reject every spirit of anxiety, panic, and dread in the name of Jesus Christ. The Lord is my light and my salvation—whom shall I fear? The Lord is the stronghold of my life—of whom shall I be afraid?
+प्रभू येशूच्या विजयी नावात ही प्रार्थना करतो,
+आमेन.`,
+    prayerEn: `Mighty God, Conqueror of Death and Prince of Peace,
 
-Anchor my soul in Your eternal presence, and grant me steadfast courage to advance through every obstacle.
+Your eternal Word boldly proclaims that You have not given us a spirit of fear, but of power, of love, and of a sound mind. Standing securely upon this unbreakable promise, I rebuke and renounce every spirit of fear, terror, panic, and dread in the matchless name of Jesus Christ.
 
-In the mighty name of Jesus, Amen.`,
+Lord, I cast down every fear of tomorrow, fear of failure, fear of sickness, and fear of lack. When intimidating circumstances rise like towering giants before me, remind my spirit that the Lord of Hosts fights for me. You have said: "Fear not, for I am with you; be not dismayed, for I am your God. I will strengthen you, yes, I will help you."
+
+Let Your perfect love drive out all torment from my soul. Clothe me with holy boldness and calm authority. Fill my mind with sound, disciplined thoughts anchored in Your promises. I walk forward today not as a captive of fear, but as a triumphant child of the Living God.
+
+In the mighty and victorious name of Jesus Christ, I pray,
+Amen.`,
     amenCount: 377
   },
   "marital_harmony": {
@@ -9338,20 +9420,26 @@ In the mighty name of Jesus, Amen.`,
     refEn: "Ephesians 4:2-3",
     verseMr: "पूर्ण लीनतेने, सौम्यतेने आणि सहनशीलतेने एकमेकांना प्रेमाने सहन करा; आणि शांतीच्या बंधनात आत्म्याचे ऐक्य राखण्याचा मनापासून प्रयत्न करा.",
     verseEn: "Be completely humble and gentle; be patient, bearing with one another in love. Make every effort to keep the unity of the Spirit through the bond of peace.",
-    prayerMr: `हे कुटुंबाचे निर्माणकर्ता देवा,
-तू विवाहाची पवित्र संस्था निर्माण केलीस. मी माझे वैवाहिक जीवन तुझ्या चरणी आणतो. आमच्या नात्यात पहिल्या दिवसासारखी निष्कपट प्रीती, आदर, विश्वास आणि समजूतदारपणा नित्य जिवंत ठेव.
+    prayerMr: `हे वैवाहिक कराराची पवित्र स्थापना करणाऱ्या स्वर्गीय देवा,
 
-आमच्या संभाषणात गोडवा असू दे. सर्व गैरसमज, अहंकाराची भावना आणि कटू शब्द नष्ट कर. कठीण प्रसंगी एकमेकांना आधार देण्याचे व क्षमा करण्याचे मोठे मन आम्हाला दे. आमचे वैवाहिक नाते तुझ्या करारावर घट्ट उभे राहू दे.
+तू निर्माण केलेल्या विवाहसंस्थेसाठी आणि माझ्या जोडीदारासाठी मी तुझे मनापासून आभार मानतो. तू आम्हाला दोन जीव मिळून एक केले आहेस; आमचा हा वैवाहिक बंध नित्य तुझ्या प्रेमाने आणि आशीर्वादाने बळकट असो.
 
-येशूच्या नावात, आमेन.`,
-    prayerEn: `Heavenly Father, Author of Marriage,
-You created holy matrimony as a sacred reflection of Christ's devotion to His church. I pray for deep renewal, tenderness, and mutual respect in our marriage today.
+प्रभू, आमच्या वैवाहिक जीवनात नित्य समजूतदारपणा, नम्रता आणि निस्वार्थ प्रेम टिकवून ठेव. आमच्यातील मतभेद, राग, गैरसमज आणि संवादाचा अभाव तू येशूच्या नावाने दूर कर. एकमेकांच्या उणीवांवर बोट न दाखवता, एकमेकांना सांभाळून घेण्याची आणि एकमेकांचा आदर करण्याची कृपा आम्हा दोघांनाही दे.
 
-Melt away every seed of discord, hardness of heart, and unspoken frustration. Infuse our home with playful joy, patient listening, and generous forgiveness. May our covenant remain unbroken, built upon the bedrock of Your unfailing truth.
+बाहेरील कोणत्याही मोहाला, दुष्ट प्रभावाला किंवा संशयाला आमच्या वैवाहिक नात्यात प्रवेश करू देऊ नकोस. आमच्या घरात तुझ्या पवित्र आत्म्याची उपस्थिती राज्य करो. आमचे नाते हे ख्रिस्त आणि मंडळी यांच्यातील पवित्र प्रेमाचे जिवंत उदाहरण बनू दे.
 
-Bless our relationship to be an inspiring testimony of Your enduring love.
+प्रभू येशूच्या नावात ही प्रार्थना करतो,
+आमेन.`,
+    prayerEn: `Heavenly Father, Author and Protector of Sacred Marriage,
 
-In Jesus' name, Amen.`,
+We thank You for the divine covenant of marriage and for the spouse You have graciously placed by my side. You joined us together as one flesh, and what God has joined together, let no human or spiritual power tear apart.
+
+Lord, cultivate within our marriage a profound spirit of unconditional love, mutual respect, deep patience, and tender affection. Drive away all selfish ambition, harsh words, emotional distance, and unresolved anger. Teach us to listen with empathy, to communicate with gentle honesty, and to outdo one another in showing honor.
+
+Guard our minds, eyes, and hearts against all external temptations, lust, and deceptive snares. Weave our two lives with Christ as the unbreakable third strand at the very center. May our home be filled with laughter, loyalty, and joyful prayer, reflecting Christ's unwavering love for His church.
+
+In the holy and precious name of Jesus Christ, I pray,
+Amen.`,
     amenCount: 340
   },
   "spiritual_armor": {
@@ -9369,20 +9457,36 @@ In Jesus' name, Amen.`,
     refEn: "Ephesians 6:10-11",
     verseMr: "शेवटी, प्रभूमध्ये आणि त्याच्या पराक्रमाच्या बळात बलवान व्हा. देवाचे संपूर्ण चिलखत अंगात चढवा, यासाठी की तुम्हांला सैतानाच्या कपटी युक्तींसमोर उभे राहता यावे.",
     verseEn: "Finally, be strong in the Lord and in his mighty power. Put on the full armor of God, so that you can take your stand against the devil’s schemes.",
-    prayerMr: `हे सेनाधीश परमेश्वरा,
-आमची लढाई हाडामांसाविरुद्ध नाही, तर अंधकारातील दुष्ट आत्मिक शक्तींविरुद्ध आहे. आज मी विश्वासाने देवाची संपूर्ण शस्त्रसामग्री धारण करतो.
+    prayerMr: `हे सेनाधीश परमेश्वरा आणि आमच्या आत्मिक युद्धातील सेनापती येशू,
 
-सत्याची कंबरपट्टा, नीतिमत्तेचे उरस्त्राण, शांतीच्या शुभवर्तमानाची तयारी, विश्वासाची ढाल, तारणाचा टोप आणि आत्म्याची तलवार म्हणजेच देवाचे जिवंत वचन मी हातात घेतो. शत्रूचे सर्व जळते बाण या ढालीने विझून जावोत. मला प्रत्येक प्रलोभनावर व संकटावर विजय दे.
+मी जाणतो की आमचा लढा केवळ रक्तमांसाशी नाही, तर अंधकाराच्या अधिपतींशी आणि दुष्ट आत्म्यांशी आहे. म्हणूनच आज मी प्रभूच्या सामर्थ्यात आणि त्याच्या महाबळात स्वतःला बळकट करतो.
 
-येशू ख्रिस्ताच्या विजयी नावात, आमेन.`,
-    prayerEn: `Lord of Angel Armies,
-Our struggle is not against flesh and blood, but against spiritual powers of darkness. Today, by faith, I take up the full armor of God.
+मी आज विश्वासाने देवाची संपूर्ण शस्त्रसामग्री धारण करतो:
+- माझ्या कमरेला सत्याचा पट्टा बांधतो, जेणेकरून मी सैतानाच्या लबाडीला बळी पडणार नाही.
+- नीतिमत्त्वाचे चिलखत माझ्या हृदयावर चढवतो, जेणेकरून येशूचे नीतिमत्त्व माझे रक्षण करेल.
+- शांतीच्या सुवार्तेची सिद्धता माझ्या पायांत जोडे म्हणून घालतो.
+- विश्वासाची ढाल हातामध्ये धरतो, ज्याद्वारे मी दुष्टाचे सर्व पेटते बाण विझवून टाकीन.
+- तारणाचा टोप माझ्या डोक्यावर चढवतो आणि पवित्र आत्म्याची तलवार, जी देवाचे वचन आहे, ती हाती घेतो.
 
-I put on the belt of truth, the breastplate of righteousness, shoes ready with the gospel of peace, the shield of faith, the helmet of salvation, and the sword of the Spirit which is Your Word. Extinguish every flaming arrow of the enemy aimed at my mind and home.
+शत्रूचा कोणताही वार, दुष्ट विचार किंवा हल्ला माझ्यावर यशस्वी होणार नाही. मी ख्रिस्तामध्ये विजयी आहे आणि निरंतर विजयी राहीन!
 
-I stand victorious, established in Christ's triumph.
+प्रभू येशूच्या सामर्थ्यशाली नावात ही प्रार्थना करतो,
+आमेन.`,
+    prayerEn: `Lord of Hosts, Mighty Warrior and Captain of My Salvation,
 
-In the mighty name of Jesus, Amen.`,
+I recognize today that my struggle is not against flesh and blood, but against spiritual rulers, authorities, and cosmic powers of darkness. Therefore, I stand firm, being strong in the Lord and in the power of His sovereign might.
+
+By faith, I put on the whole armor of God today:
+- I fasten the belt of truth around my waist, rejecting all deception and living with transparency.
+- I put on the breastplate of righteousness, guarding my heart with Christ's imputed purity.
+- I shod my feet with the readiness that comes from the gospel of peace, standing firm wherever I walk.
+- Above all, I take up the shield of faith, with which I quench every fiery dart of doubt, temptation, and fear shot by the wicked one.
+- I take the helmet of salvation to protect my thoughts, and the sword of the Spirit, which is the living Word of God, to cut down every lie of the adversary.
+
+Clothed in Your divine armor and praying always in the Spirit, I stand victorious, unshakable, and triumphant in Christ Jesus.
+
+In the mighty and undefeated name of Jesus Christ, I pray,
+Amen.`,
     amenCount: 460
   },
   "gratitude_thanksgiving": {
@@ -9400,18 +9504,26 @@ In the mighty name of Jesus, Amen.`,
     refEn: "Psalm 103:1-2",
     verseMr: "हे माझ्या जीवा, परमेश्वराचा धन्यवाद कर; आणि माझ्या अंतर्यामातील सर्वा, त्याच्या पवित्र नावाचा धन्यवाद कर. त्याच्या कोणत्याही उपकारांची विस्मृती होऊ देऊ नको.",
     verseEn: "Praise the Lord, my soul; all my inmost being, praise his holy name. Praise the Lord, my soul, and forget not all his benefits.",
-    prayerMr: `हे दयाघन पित्या,
-माझ्या आयुष्यातील प्रत्येक श्वासासाठी, आरोग्यासाठी, अन्नासाठी आणि संरक्षणासाठी मी तुझे अंतःकरणापासून उपकार मानतो. तू मला माझ्या अपराधांप्रमाणे वागवले नाहीस, तर आकाशाची पृथ्वीपासून जेवढी उंची आहे, तेवढी मोठी दया तू माझ्यावर केलीस.
+    prayerMr: `हे उपकारांची खाण असणाऱ्या आणि अनंतकाळ प्रेम करणाऱ्या स्वर्गीय पित्या,
 
-तक्रारीच्या आणि असंतोषाच्या जागी माझे हृदय नित्य कृतज्ञतेने आणि स्तुतीने भरलेले राहू दे. जे काही माझ्याकडे आहे त्यामध्ये समाधान मानण्याचे व तुझी थोरवी गाण्याचे मन मला दे.
+"हे माझ्या जीवा, परमेश्वराचा धन्यवाद कर, आणि त्याचे सर्व उपकार विसरू नको!" या स्तोत्रकर्त्याच्या वचनाप्रमाणे मी आज माझे संपूर्ण अंतःकरण तुझ्या उपकारस्तुतीने भरून काढतो. तू मला दिलेल्या प्रत्येक श्वासाबद्दल, अन्नाच्या प्रत्येक घासाबद्दल आणि जीवनातील प्रत्येक क्षणाबद्दल मी तुझे आभार मानतो.
 
-येशूच्या नावाने, आमेन.`,
-    prayerEn: `Gracious and Generous Father,
-With my whole heart I declare praise unto Your holy name. Thank You for the breath in my lungs, the bread on my table, and Your invisible hand that preserves me daily. You have not treated me as my sins deserve, but have crowned my life with unfailing compassion.
+प्रभू, तू माझी सर्व पापे क्षमा केलीस, माझे सर्व रोग बरे केलेस, माझे जीवन नाशाच्या खड्ड्यातून सोडवलेस आणि मला दयेचा व कृपेचा मुकुट घातलास. जेव्हा मी वाट चुकलो होतो तेव्हा तू मला शोधलेस, आणि जेव्हा मी एकाकी होतो तेव्हा तू माझा सोबती झालास.
 
-Strip away every spirit of complaining, entitlement, and discontentment. Fill my tongue with joyful songs of thanksgiving through every season of life.
+माझ्या जीवनातील प्रत्येक मिळालेल्या उत्तरासाठी धन्यवाद, आणि ज्या संकटांतून तू मला सुखरूप बाहेर काढलेस त्याबद्दलही धन्यवाद! माझे तोंड नित्य तुझ्या स्तुतीगायनाने भरलेले असो. तक्रार करण्याऐवजी कृतज्ञतेचे जीवन जगण्याचे मन मला दे, जेणेकरून माझे जीवन तुझ्या उपकारांची जिवंत साक्ष बनेल.
 
-In Jesus' name, Amen.`,
+प्रभू येशूच्या गोड नावात ही प्रार्थना करतो,
+आमेन.`,
+    prayerEn: `O Gracious Father, Giver of Every Good and Perfect Gift,
+
+"Bless the Lord, O my soul, and forget not all His benefits!" With joyful surrender and profound reverence, I lift my voice in unceasing praise to You. For every breath in my lungs, for every sunrise, for food on my table, and for shelter over my head, I offer my deepest thanksgiving.
+
+Lord, You have forgiven all my iniquities, healed my diseases, redeemed my life from destruction, and crowned me with lovingkindness and tender mercies. Even when I was unfaithful, You remained steadfastly faithful. In every dark valley, Your rod and staff comforted me; in every battle, Your right hand secured my victory.
+
+Deliver my heart from murmuring, complaining, or taking Your blessings for granted. Cultivate within me an attitude of perpetual gratitude, so that whether in plenty or in want, songs of thanksgiving remain upon my lips. May my life be a living sacrifice of praise unto Your glorious name.
+
+In the joyful and thankful name of Jesus Christ, I pray,
+Amen.`,
     amenCount: 390
   },
   "hope_in_depression": {
@@ -9429,18 +9541,26 @@ In Jesus' name, Amen.`,
     refEn: "Psalm 34:18",
     verseMr: "ज्यांचे अंतःकरण भग्न झाले आहे त्यांच्या जवळ परमेश्वर असतो; आणि ज्यांचा आत्मा चूर्ण झाला आहे अशांचा तो उद्धार करतो.",
     verseEn: "The Lord is close to the brokenhearted and saves those who are crushed in spirit.",
-    prayerMr: `हे दुःखितांचे सांत्वन करणाऱ्या प्रभू,
-आज माझे मन अतिशय उदास आणि निराश झाले आहे. आयुष्यातील अंधकारात मला पुढे मार्ग दिसत नाही. परंतु प्रभू, तू तुटलेल्या मनांना जवळ करणारा आणि जखमांवर फुंकर घालणारा देव आहेस.
+    prayerMr: `हे अंधकारातून प्रकाशात आणणाऱ्या आणि आशेचा खरा उगम असणाऱ्या येशू,
 
-माझ्या मनातील हे नैराश्याचे दाट ढग बाजूला कर. मला आठवण करून दे की माझी कहाणी इथेच संपलेली नाही; तू माझ्यासाठी उत्तम योजना आखल्या आहेत. तुझा स्वर्गीय आनंद मला परत दे, कारण परमेश्वराचा आनंद हेच माझे सामर्थ्य आहे.
+माझ्या मनातील खिन्नता, उदासिनता आणि न सुटणारे दुःखाचे मळभ मी आज तुझ्या चरणांशी आणतो. कित्येकदा जीवनात आशेचा कोणताही किरण दिसत नसताना आणि सर्व बाजूंनी निराशा घेरून आली असताना, माझे अश्रू फक्त तुलाच ठाऊक असतात.
 
-येशूच्या नावात, आमेन.`,
-    prayerEn: `Gentle Comforter and Healer of Souls,
-When shadows feel overwhelming and sorrow weighs heavy upon my chest, I look up to You. You are nearest when my heart is most broken, catching every unseen tear in Your bottle.
+प्रभू, माझ्या आत्म्याला सांग की, "हे माझ्या जीवा, तू खिन्न का होतोस? देवावर आशा ठेव, कारण मी पुन्हा त्याची स्तुती करीन." नैराश्याचा हा काळ कायमचा नाही याची मला जाणीव करून दे. वधस्तंभाच्या अंधकारानंतर जसे तिसऱ्या दिवशी पुनरुत्थानाचा प्रकाश चमकला, तसेच माझ्या जीवनातील दुःखाचे रूपांतर तू नवीन जीवनात करणार आहेस.
 
-Dispel this heavy fog of grief and hopelessness. Remind my soul that weeping may endure for the night, but joy comes in the morning! Ignite a living flame of hope within my spirit and restore the joy of Your salvation.
+माझ्या विचारांतील नकारात्मकता आणि शून्यतेची भावना तू तुझ्या पवित्र आत्म्याच्या स्पर्शाने दूर कर. मला जगण्याचा नवा उद्देश, नवी उमेद आणि आंतरिक शांती दे. मी एकटा नाही, तर तू माझ्या अतिशय जवळ आहेस हा विश्वास माझ्या हृदयात स्थिर कर.
 
-In the comforting name of Jesus, Amen.`,
+प्रभू येशूच्या सामर्थ्यशाली नावात ही प्रार्थना करतो,
+आमेन.`,
+    prayerEn: `Compassionate Lord Jesus, Light of the World and Anchor of My Soul,
+
+From the depths of emotional weariness, heavy fog, and overwhelming sadness, I lift my eyes to You. You know the days when getting out of bed feels impossible, when tears flow without reason, and when darkness seems like my closest companion. Yet You are the God who sees me, who collects every tear in Your bottle, and who will never abandon me to despair.
+
+Lord, speak to the depths of my downcast soul: "Why are you cast down, O my soul? Hope in God, for I shall again praise Him, the salvation of my countenance." Remind me that feelings are not final truth, but Your promises are eternal and unchanging. Just as the grave could not hold You on the third day, this season of depression will not swallow my destiny.
+
+Dispel the dark clouds with the radiant warmth of Your presence. Breathe fresh life, joy, and holy purpose into my weary spirit. Place Your loving arm around my trembling shoulders and lead me gently out of this valley into the bright light of Your grace.
+
+In the restoring and hopeful name of Jesus Christ, I pray,
+Amen.`,
     amenCount: 415
   },
   "workplace_favor": {
@@ -9458,18 +9578,26 @@ In the comforting name of Jesus, Amen.`,
     refEn: "Psalm 90:17",
     verseMr: "आमचा देव परमेश्वर याची प्रसन्नता आमच्यावर असो; आणि तू आमच्या हातांचे काम स्थिर कर; होय, आमच्या हातांचे काम तू स्थिर कर.",
     verseEn: "May the favor of the Lord our God rest on us; establish the work of our hands for us—yes, establish the work of our hands.",
-    prayerMr: `हे सृष्टीच्या कर्त्या देवा,
-मी माझ्या कामाच्या ठिकाणी, ऑफिसमध्ये आणि व्यवसायात प्रामाणिकपणाने व निष्ठेने कार्य करू शकेन अशी कृपा मला दे. मी केवळ माणसांना संतुष्ट करण्यासाठी नाही, तर देवाची सेवा म्हणून माझे काम उत्कृष्ट दर्जाचे करावे.
+    prayerMr: `हे कष्टाला आशीर्वाद देणाऱ्या आणि प्रामाणिकपणाचे फळ देणाऱ्या देवा,
 
-माझ्या वरिष्ठांच्या, सहकाऱ्यांच्या आणि ग्राहकांच्या नजरेत मला दया व अनुकूलता लाभू दे. मला नवीन संधी, कार्यक्षमता आणि समस्या सोडवण्याचे ज्ञान दे. माझ्या कष्टांना फलद्रूप कर आणि माझ्या कामाद्वारे इतरांचे भले होऊ दे.
+मी माझ्या कामाच्या ठिकाणी, व्यवसायात आणि नोकरीत तुझ्या दिव्य उपस्थितीची आणि कृपेची याचना करतो. पवित्र शास्त्र शिकवते की, "तुम्ही जे काही करता, ते माणसांसाठी म्हणून नाही, तर प्रभूसाठी म्हणून मनापासून करा."
 
-येशूच्या नावाने, आमेन.`,
-    prayerEn: `Lord of Excellence and Diligence,
-I consecrate my daily vocation, career, and business endeavors to You today. Whatever I do, let me work at it with all my heart, as working for the Lord and not for human masters.
+प्रभू, मला माझ्या कामात उत्कृष्ट कौशल्य, ज्ञान, एकाग्रता आणि अचूकता प्रदान कर. कामाचा तणाव, कठीण आव्हाने आणि क्लिष्ट जबाबदाऱ्या हाताळण्यासाठी मला स्वर्गीय बुद्धी दे. माझ्या वरिष्ठांच्या, सहकाऱ्यांच्या आणि ग्राहकांच्या डोळ्यांत मला विशेष सन्मान आणि कृपा लाभू दे.
 
-Grant me favor with leaders, colleagues, and clients. Give me creative solutions, integrity in speech, and efficiency under pressure. Prosper the work of my hands and make my workplace an avenue of Your blessing and ethical testimony.
+माझ्या कामाच्या ठिकाणी होणाऱ्या राजकारणापासून, ईर्ष्या, खोटेपणा आणि अन्यायापासून माझे रक्षण कर. मला प्रामाणिकपणाने आणि सचोटीने काम करण्याचे सामर्थ्य दे. माझ्या हातांच्या कष्टाला भरपूर यश दे, माझ्या उत्पन्नात वाढ कर, आणि माझ्या या कामातून माझ्याद्वारे गरजू लोकांना साहाय्य करण्याचे भाग्य मला लाभो.
 
-In Jesus' name, Amen.`,
+प्रभू येशूच्या नावात ही प्रार्थना करतो,
+आमेन.`,
+    prayerEn: `Lord God, Master Craftsman and Source of Divine Favor,
+
+I consecrate my career, daily labor, business, and workplace into Your hands today. Your Word instructs me that whatever I do, I should work at it with all my heart, as working for the Lord and not for human masters, knowing that I will receive an inheritance from You as my reward.
+
+Father, bestow upon me exceptional skill, creativity, diligence, and precision in all my responsibilities. When complicated problems arise, grant me supernatural insight and innovative solutions. Surround me with favor as with a shield in the eyes of supervisors, colleagues, clients, and leaders.
+
+Protect me from toxic workplace politics, jealousy, dishonesty, and unjust treatment. Enable me to stand as a beacon of integrity, patience, and Christlike character. Bless the fruit of my labor with tangible prosperity, so that I may provide honorably for my family and be a generous channel of support to others.
+
+In the diligent and honoring name of Jesus Christ, I pray,
+Amen.`,
     amenCount: 350
   },
   "patience_gods_timing": {
@@ -9487,18 +9615,26 @@ In Jesus' name, Amen.`,
     refEn: "Ecclesiastes 3:11",
     verseMr: "त्याने प्रत्येक गोष्ट तिच्या योग्य वेळी सुंदर केली आहे; आणि त्याने मनुष्याच्या अंतःकरणात सार्वकालिकतेची जाणीव ठेवली आहे.",
     verseEn: "He has made everything beautiful in its time. He has also set eternity in the human heart.",
-    prayerMr: `हे सर्व नियंत्रक प्रभू,
-माझ्या जीवनातील प्रत्येक क्षणाची वेळ तुझ्या हातात आहे. जेव्हा उत्तरासाठी वाट पाहावी लागते, तेव्हा माझी सहनशीलता सुटू देऊ नको. मला घाईगडबडीत चुकीचे निर्णय घेण्यापासून वाचव.
+    prayerMr: `हे सार्वभौम आणि योग्य वेळी सर्व काही सुंदर करणाऱ्या स्वर्गीय देवा,
 
-मला शिकव की देवाची वेळ कधीही उशिरा नसते आणि कधीही लवकर नसते; ती नेहमी अचूक असते. वाट पाहण्याच्या काळात माझा विश्वास दृढ कर आणि मला तुझ्या इच्छेमध्ये शांत राहण्यास शिकव.
+माझ्या मनातील अधीरता, घाई आणि "माझ्या वेळेनुसार व्हावे" ही मानवी हट्ट मी आज तुझ्या चरणांशी त्याग करतो. पवित्र शास्त्र सांगते की, "त्याने प्रत्येक गोष्ट तिच्या योग्य वेळी सुंदर केली आहे." प्रभू, तुझी वेळ ही नित्य परिपूर्ण आणि सर्वोत्तम असते.
 
-येशूच्या नावात, आमेन.`,
-    prayerEn: `Sovereign God and Master of Seasons,
-My times are safely in Your hands. When prayers seem unanswered and the waiting room of life feels long, guard my heart from impatience and rash decisions.
+जेव्हा मला प्रार्थनांचे उत्तर मिळण्यास उशीर वाटतो, तेव्हा मला धीर धरण्यास आणि वाट पाहण्यास शिकव. अब्राहाम, योसेफ आणि दावीद यांच्या जीवनाप्रमाणे, प्रतीक्षेचा हा काळ माझ्या विश्वासाची परीक्षा आणि माझ्या चारित्र्याची जडणघडण करण्यासाठी आहे हे मला समजण्याचे मन दे.
 
-Remind me that You make all things beautiful in their proper season. While I wait, refine my character, deepen my faith, and anchor my hope in Your absolute faithfulness.
+माझ्या स्वतःच्या बळावर किंवा चुकीच्या मार्गाने गोष्टी साध्य करण्याचा मोह मला होऊ देऊ नकोस. देवाच्या वेळेवर शांतपणे आणि विश्वासाने विसावा घेण्याचे सामर्थ्य मला दे. जेव्हा तू माझ्यासाठी मार्ग उघडशील, तेव्हा तो इतका अद्भुत असेल की कोणीही तो बंद करू शकणार नाही यावर माझा ठाम विश्वास आहे.
 
-In Jesus' name, Amen.`,
+प्रभू येशूच्या नावात ही प्रार्थना करतो,
+आमेन.`,
+    prayerEn: `Sovereign God, Master of Time and Seasons,
+
+I lay down my impatience, frantic striving, and earthly timelines at Your feet today. In a world that demands instant gratification, my heart often struggles when answers seem delayed. Yet Ecclesiastes 3:11 assures me that You make everything beautiful in its proper time.
+
+Lord, teach me how to wait upon You with joyful expectation rather than anxious frustration. Remind me of Abraham, Joseph, and David, whose faith and character were forged in the waiting room of destiny before the promise was fulfilled. Let patience have its perfect work in me, that I may be mature, complete, and lacking nothing.
+
+Keep me from running ahead of Your will or taking shortcuts that compromise my integrity. Anchor my soul in the peaceful certainty that You are never a moment too late, nor a moment too early. When Your appointed time arrives, You will open doors of blessing that exceed all I could ask or imagine.
+
+In the patient and faithful name of Jesus Christ, I pray,
+Amen.`,
     amenCount: 325
   },
   "deliverance_habits": {
@@ -9516,18 +9652,26 @@ In Jesus' name, Amen.`,
     refEn: "John 8:36",
     verseMr: "म्हणून जर पुत्र तुम्हाला स्वतंत्र करील, तर तुम्ही खरोखरच स्वतंत्र व्हाल.",
     verseEn: "So if the Son sets you free, you will be free indeed.",
-    prayerMr: `हे महान सोडवणाऱ्या प्रभू येशू,
-माझ्या आयुष्याला जखडून ठेवणाऱ्या प्रत्येक वाईट सवयीतून, व्यसनातून, चुकीच्या विचारांतून आणि जुन्या बंधनांतून मला आज पूर्ण मुक्ती दे.
+    prayerMr: `हे बंधनातून मुक्त करणाऱ्या आणि पाप-मरणावर विजय मिळवलेल्या प्रभू येशू,
 
-तुझ्या रक्ताच्या सामर्थ्याने मला शुद्ध कर. जेव्हा जेव्हा प्रलोभन समोर येईल, तेव्हा त्यातून पळून जाण्याचे आणि पवित्रतेने जगण्याचे सामर्थ्य तुझ्या पवित्र आत्म्याद्वारे मला दे. मी यापुढे पापाचा गुलाम नाही, तर देवाचे प्रिय मूल आहे. मला खऱ्या स्वातंत्र्यात चालव.
+तू वधस्तंभावर स्वतःचे जीवन देऊन मला सर्व प्रकारच्या गुलामगिरीतून मुक्त केले आहेस. पवित्र शास्त्र सांगते की, "पुत्राने जर तुम्हाला स्वतंत्र केले, तर तुम्ही खरोखर स्वतंत्र व्हाल!" या वचनाच्या सामर्थ्याने मी आज माझ्या जीवनातील सर्व वाईट सवयी, व्यसने आणि मोहाच्या पाशातून मुक्ती मागतो.
 
-येशू ख्रिस्ताच्या सामर्थ्यशाली नावात, आमेन.`,
-    prayerEn: `Lord Jesus, Mighty Deliverer,
-You came to set captives free and break every chain. Today, I renounce and surrender every destructive habit, addiction, toxic pattern, and secret compromise into Your hands.
+प्रभू, ज्या सवयींमुळे माझे शरीर, मन आणि आत्मिक जीवन दूषित होते, त्या सर्वांवर तू तुझ्या रक्ताचा विजय घोषित कर. माझ्या मनातील अशुद्ध विचार, दुर्बलता आणि वारंवार होणाऱ्या चुका तू येशूच्या नावाने जाळून भस्म कर. सैतानाने माझ्याभोवती टाकलेली सर्व पापे मी ख्रिस्ताच्या अधिकारात तोडून टाकतो.
 
-Wash my mind and desires in Your precious cleansing blood. When temptations strike, empower me by Your Holy Spirit to stand resolute and choose purity. I declare that sin shall not have dominion over me, for I am governed by Your marvelous grace.
+माझ्या अंतःकरणात तुझ्या पवित्र आत्म्याची नवीन शक्ती आणि आत्मसंयम दे. मला चांगल्या, पवित्र आणि आरोग्यपूर्ण सवयी अंगीकारण्याचे मन दे. जेव्हा जेव्हा मोह माझ्यासमोर येईल, तेव्हा त्यातून पळ काढण्याची आणि तुझ्या वचनात आश्रय घेण्याची बुद्धी मला लाभो.
 
-In Jesus' victorious name, Amen.`,
+प्रभू येशूच्या मुक्ती देणाऱ्या नावात ही प्रार्थना करतो,
+आमेन.`,
+    prayerEn: `Lord Jesus Christ, Great Deliverer and Breaker of Every Chain,
+
+You suffered on Calvary's cross so that I might walk in absolute liberty. Your Word resounds with triumph: "If the Son sets you free, you shall be free indeed!" Standing upon that divine decree, I bring before You every destructive habit, secret addiction, and cyclical compromise that has held my soul captive.
+
+Lord, by the authority of Your shed blood, I break every toxic chain, every generational bondage, and every ungodly stronghold over my mind, body, and emotions. Where my flesh is weak, infuse me with the resurrecting power of the Holy Spirit. Cleanse my desires, renew my thought patterns, and replace unhealthy cravings with an unquenchable thirst for righteousness.
+
+Grant me self-control, vigilance, and godly accountability. Whenever temptation knocks at the door of my heart, provide the way of escape and give me the courage to run into Your truth. I declare that sin shall no longer have dominion over me, for I am alive unto God in Christ Jesus.
+
+In the liberating and all-powerful name of Jesus Christ, I pray,
+Amen.`,
     amenCount: 430
   },
   "safe_travel": {
@@ -9545,18 +9689,26 @@ In Jesus' victorious name, Amen.`,
     refEn: "Psalm 121:7-8",
     verseMr: "परमेश्वर तुला सर्व वाईटापासून राखील; तो तुझ्या जिवाचे रक्षण करील. तुझ्या जाण्यावर आणि तुझ्या येण्यावर परमेश्वर आतापासून सर्वकाळ पहारा ठेवील.",
     verseEn: "The Lord will keep you from all harm—he will watch over your life; the Lord will watch over your coming and going both now and forevermore.",
-    prayerMr: `हे मार्ग दाखवणाऱ्या देवा,
-आजच्या माझ्या प्रवासात माझे आणि माझ्यासोबत असलेल्या सर्वांचे रक्षण कर. रस्त्यावरील सर्व धोके, अपघात, यांत्रिक बिघाड आणि दुष्ट लोकांपासून आम्हाला सुरक्षित ठेव.
+    prayerMr: `हे आमच्या पावलांचे रक्षण करणाऱ्या आणि मार्गांचा नकाशा असणाऱ्या देवा,
 
-वाहने चालवणाऱ्यांच्या हातात संयम आणि दक्षता दे. आमचा प्रवास सुरळीत आणि सुखकर होऊ दे. ज्या उद्देशाने आम्ही निघालो आहोत, तो उद्देश सफल करून आम्हाला पुन्हा सुरक्षितपणे घरी परत आण.
+मी माझ्या प्रवासाला सुरुवात करताना माझे वाहन, रस्ता, हवामान आणि संपूर्ण प्रवास तुझ्या हातात सोपवतो. पवित्र शास्त्र सांगते की, "परमेश्वर तुझे जाणे आणि येणे आतापासून सदासर्वकाळ सुरक्षित ठेवील."
 
-येशूच्या नावाने, आमेन.`,
-    prayerEn: `Faithful Guide and Protector of Travelers,
-As I embark on this journey today, I invoke Your divine covering over our path, vehicle, and destinations. Protect us from reckless drivers, sudden hazards, mechanical breakdowns, and bad weather.
+प्रभू, प्रवासादरम्यान येणारे सर्व अपघात, यांत्रिक बिघाड, निष्काळजी चालक आणि अनपेक्षित संकटे तू येशूच्या नावाने दूर कर. माझ्या वाहनाभोवती आणि प्रवासाच्या मार्गावर तुझ्या स्वर्गीय देवदूतांचा पहारा तैनात कर. चालकाला एकाग्रता, संयम आणि सतर्कता प्रदान कर.
 
-Guide the driver with alertness and wisdom. Send Your angels before us to smooth the roads and clear every danger. Bring us safely to our destination and return us home in peace.
+मी ज्या कामासाठी किंवा भेटीसाठी प्रवास करत आहे, त्यामध्ये मला यश आणि आनंद लाभू दे. मला माझ्या गंतव्यस्थानी सुखरूप आणि वेळेवर पोहोचव, आणि माझा परतीचा प्रवासही तितकाच सुरक्षित आणि शांतीपूर्ण असू दे.
 
-In Jesus' name, Amen.`,
+प्रभू येशूच्या नावात ही प्रार्थना करतो,
+आमेन.`,
+    prayerEn: `Lord God Almighty, Guardian of My Steps and Protector on the Road,
+
+As I prepare to travel, I place my journey, my vehicle, every road, flight, and condition entirely under Your sovereign surveillance. Psalm 121:8 promises that the Lord shall preserve my going out and my coming in, from this time forth and even forevermore.
+
+Father, station Your ministering angels along every mile of this journey. Rebuke and cancel every potential accident, mechanical failure, reckless driver, severe weather hazard, and unseen obstacle in the name of Jesus Christ. Grant the driver sharp alertness, patience, and steady hands.
+
+May the purpose of my travel be accomplished smoothly, safely, and joyfully. Bring me to my destination in peace, and bring me back home under the shadow of Your wings without incident or harm.
+
+In the protective and guiding name of Jesus Christ, I pray,
+Amen.`,
     amenCount: 305
   },
   "youth_purpose": {
@@ -9574,18 +9726,26 @@ In Jesus' name, Amen.`,
     refEn: "1 Timothy 4:12",
     verseMr: "तुझ्या तरुणपणाचा कोणीही अनादर करू नये; तर बोलण्यात, वागण्यात, प्रीतीत, विश्वासात आणि पवित्रतेत तू विश्वासणाऱ्यांसाठी नमुना हो.",
     verseEn: "Don't let anyone look down on you because you are young, but set an example for the believers in speech, in conduct, in love, in faith and in purity.",
-    prayerMr: `हे तरुणांच्या सामर्थ्यवान देवा,
-माझे तारुण्य आणि माझी ऊर्जा या जगातील निरर्थक गोष्टींमध्ये वाया न जाता, तुझ्या सेवेसाठी आणि उत्तम ध्येयासाठी उपयोगी पडू दे.
+    prayerMr: `हे तरुणांना दृष्टी देणाऱ्या आणि भव्य उद्देशासाठी बोलाविणाऱ्या जिवंत देवा,
 
-मला निष्कलंक चारित्र्य, सत्यवचनीपणा आणि पवित्रतेची ओढ दे. माझ्या जीवनाचा खरा हेतू काय आहे हे मला स्पष्टपणे दाखव. मला अशा चांगल्या मित्रांची संगत दे जे मला तुझ्या जवळ आणतील. माझ्याद्वारे या पिढीमध्ये तुझ्या प्रेमाचा आणि सत्याचा प्रकाश चमकू दे.
+माझ्या तरुण वयासाठी, माझ्या अंगातील ताकदीसाठी आणि माझ्या भविष्यातील स्वप्नांसाठी मी तुझे आभार मानतो. पवित्र शास्त्र म्हणते, "तुझ्या तरुणपणाचा कोणीही अनादर करू नये; तर विश्वासात, प्रेमात, वागणुकीत आणि शुद्धतेत विश्वासणाऱ्यांसाठी आदर्श हो."
 
-येशूच्या नावाने, आमेन.`,
-    prayerEn: `Lord God of Strength and Vision,
-I dedicate my youth, vitality, and aspirations to You. Guard my heart from the traps of aimless living, vanity, and moral compromise.
+प्रभू, आजच्या या मोहमयी जगात अनेक तरुण भरकटत असताना, मला तुझ्या वचनाचा प्रकाश दाखव. इंटरनेट, सोशल मीडिया आणि वाईट मित्रांच्या संगतीतून मला वाचव. माझ्या आयुष्याचा खरा उद्देश काय आहे, तू मला कोणत्या महान कार्यासाठी निर्माण केले आहेस हे मला स्पष्टपणे दाखव.
 
-Empower me to be a role model in integrity, speech, compassion, and bold faith. Clarify Your divine calling upon my life and open doors for godly influence. Raise this generation to stand unwavering for truth and love.
+माझ्या शिक्षणात, करिअरमध्ये आणि वैयक्तिक निर्णयात मला स्वर्गीय मार्गदर्शन दे. मला खंबीर चारित्र्य, शुद्ध अंतःकरण आणि देवाचे भय बाळगणारे मन दे. माझ्या या तरुण वयात मी माझ्या संपूर्ण सामर्थ्याने तुझी सेवा करावी आणि समाजासाठी एक आदर्श बनावे असा आशीर्वाद मला दे.
 
-In Jesus' name, Amen.`,
+प्रभू येशूच्या नावात ही प्रार्थना करतो,
+आमेन.`,
+    prayerEn: `O Sovereign God, Giver of Life, Vision, and Eternal Calling,
+
+I thank You for the vitality, passion, and potential of youth. You have not created me to drift aimlessly through worldly culture, but to shine as a bold light in a generation desperately in need of truth. 1 Timothy 4:12 calls me to let no one despise my youth, but to set an example in speech, conduct, love, faith, and purity.
+
+Lord, shield my mind from the toxic deceptions of social media, secular peer pressure, superficial vanity, and identity confusion. Clarify the divine assignment for which You formed me before the foundation of the world. Align my passions, education, and career pursuits with Your eternal kingdom purposes.
+
+Ignite within me a holy fire for prayer, integrity, and biblical truth. Use my energy, gifts, and voice to build up others, stand against injustice, and lead many to Christ. May my youth be fully consecrated to You, leaving an indelible legacy of faith for generations to come.
+
+In the powerful and inspiring name of Jesus Christ, I pray,
+Amen.`,
     amenCount: 345
   },
   "elderly_blessing": {
@@ -9603,18 +9763,26 @@ In Jesus' name, Amen.`,
     refEn: "Psalm 92:14 • Isaiah 46:4",
     verseMr: "वृद्धपणातही ते फळ देतील; ते रसरशीत व टवटवीत राहतील, यासाठी की परमेश्वर सरळ आहे हे घोषित व्हावे.",
     verseEn: "They will still bear fruit in old age, they will stay fresh and green, proclaiming, 'The Lord is upright; he is my Rock.'",
-    prayerMr: `हे अनादिकालापासून असलेल्या देवा,
-आयुष्याच्या या संध्याकाळी मी तुझ्या विश्वासूपणाचे स्मरण करतो. तू म्हणालास की 'तुमच्या म्हातारपणापर्यंत मीच तो आहे, आणि तुमचे केस पांढरे होईपर्यंत मीच तुम्हाला उचलून घेईन.'
+    prayerMr: `हे पिढ्यानपिढ्यांचा देव असणाऱ्या आणि म्हातारपणापर्यंत सांभाळणाऱ्या प्रेमळ पित्या,
 
-प्रभू, आमच्या कुटुंबातील ज्येष्ठ मंडळींना उत्तम आरोग्य, मानसिक शांती आणि आदर दे. एकाकीपणाची भावना त्यांच्यापासून दूर ठेव. त्यांचा विश्वास पुढील पिढ्यांसाठी मार्गदर्शक दीपस्तंभ ठरू दे. त्यांना शांततापूर्ण आणि समाधानी आयुष्य लाभू दे.
+माझ्या आयुष्याच्या या सोनेरी वर्षांमध्ये मी अत्यंत कृतज्ञ अंतःकरणाने तुझ्यासमोर उभा राहतो. पवित्र शास्त्र सांगते की, "तुमच्या म्हातारपणापर्यंत मी तोच आहे, आणि तुमचे केस पांढरे होईपर्यंत मी तुम्हांला सांभाळीन; मीच निर्माण केले आहे, आणि मीच वागवीन."
 
-येशूच्या नावात, आमेन.`,
-    prayerEn: `Everlasting Father, Sustainer through All Generations,
-Thank You for Your unfailing faithfulness across the decades. You promised: "Even to your old age and gray hairs I am he, I am he who will sustain you."
+प्रभू, माझ्या उतारवयातील आजारपण, अशक्तपणा, एकाकीपणा आणि अस्वस्थता या सर्वांवर तुझा शांतीचा हात ठेव. माझे शरीर आणि मन निरोगी ठेव. माझ्या डोळ्यांना दृष्टी, पायांना बळ आणि अंतःकरणाला आनंद दे. माझ्या कुटुंबात मला आदर, प्रेम आणि काळजी लाभू दे.
 
-Pour abundant honor, robust health, and gentle peace upon our elders today. Remove every shadow of loneliness or frailty, and let them bear rich spiritual fruit. May their prayers and life wisdom be a crown of glory to our families.
+माझ्या म्हातारपणातही मी आत्मिक फळे देत राहावे अशी कृपा मला दे. माझ्या अनुभवातून आणि प्रार्थनेतून मी पुढच्या पिढीला मार्गदर्शन करू शकेन असा आशीर्वाद दे. माझे उर्वरित दिवस समाधानाने आणि तुझ्या गौरवाने भरलेले असोत.
 
-In Jesus' name, Amen.`,
+प्रभू येशूच्या नावात ही प्रार्थना करतो,
+आमेन.`,
+    prayerEn: `Faithful and Everlasting Father, God of All Generations,
+
+As the years advance and the evening of life draws on, I look back over the decades with deep gratitude for Your unbroken faithfulness. Isaiah 46:4 comforts my soul: "Even to your old age, I am He, and even to gray hairs I will carry you! I have made, and I will bear; even I will carry, and will deliver you."
+
+Lord, bless my golden years with peace, dignity, and vibrant health. When physical strength diminishes, renew my inward spirit day by day. Dispel all feelings of loneliness, uselessness, and anxiety about the future. Surround me with loving family, respectful community, and caring companionship.
+
+Keep my mind alert and my heart full of thanksgiving. Let me flourish like a palm tree and bear fruit even in old age, declaring that the Lord is upright and my Rock. May my prayers and wisdom continue to bless and guide my children, grandchildren, and the generations that follow.
+
+In the tender and enduring name of Jesus Christ, I pray,
+Amen.`,
     amenCount: 330
   },
   "godly_friendship": {
@@ -9632,18 +9800,26 @@ In Jesus' name, Amen.`,
     refEn: "Proverbs 27:17 • Ecclesiastes 4:9-10",
     verseMr: "जसे लोखंडाने लोखंड धारदार होते, तसेच एक मनुष्य दुसऱ्याच्या बुद्धीला व स्वभावाला पैलू पाडतो.",
     verseEn: "As iron sharpens iron, so one person sharpens another.",
-    prayerMr: `हे खऱ्या मित्रा प्रभू येशू,
-तू आम्हाला सेवक नाही तर मित्र म्हटले आहेस. माझ्या जीवनात विश्वासू, प्रामाणिक आणि देवाला भय बाळगणाऱ्या मित्रांचे आशीर्वाद दे.
+    prayerMr: `हे आम्हांला मित्र म्हणून हाक मारणाऱ्या आणि निष्कपट प्रेमाचे मूर्तिमंत रूप असणाऱ्या येशू,
 
-माझ्या मित्रांसोबत माझे नाते निस्वार्थी प्रेमावर आणि एकमेकांच्या उन्नतीवर आधारलेले असू दे. कठीण काळात एकमेकांच्या पाठीशी उभे राहण्याचे आणि संकटात धीर देण्याचे मन आम्हाला दे. मलाही इतरांसाठी एक चांगला आणि विश्वासू मित्र बनव.
+पवित्र शास्त्र सांगते की, "जसे लोखंडाने लोखंड धारदार होते, तसेच एक माणूस दुसऱ्या माणसाला धारदार करतो." माझ्या जीवनात तू दिलेल्या चांगल्या मित्रांबद्दल मी तुझे आभार मानतो.
 
-येशूच्या नावाने, आमेन.`,
-    prayerEn: `Lord Jesus, the Faithful Friend Who never leaves,
-You called us friends and laid down Your life for us. Surround me with honest, godly, and supportive friends who sharpen my faith and encourage my walk with You.
+प्रभू, मला असे आत्मिक मित्र लाभू दे जे मला तुझ्या जवळ आणतील, प्रार्थनेत माझ्या पाठीशी उभे राहतील आणि संकटाच्या वेळी मला योग्य सल्ला देतील. दुष्ट, कपटी, चुगलखोर आणि मला देवापासून दूर नेणाऱ्या लोकांपासून मला वेगळे कर. मला चांगल्या संगतीत राहण्याचा विवेक दे.
 
-Teach me to be a steadfast, loyal, and uplifting companion to others. Bless our friendships with laughter, mutual support, and Christ-centered unity.
+मला स्वतःलाही एक विश्वासू, प्रेमळ, क्षमाशील आणि प्रामाणिक मित्र बनण्यास शिकव. माझ्या मित्रांच्या गरजांमध्ये मी धावून जावे आणि त्यांच्या दुःखात त्यांना धीर द्यावा अशी कृपा मला दे. आमची मैत्री तुझ्या पवित्र प्रेमावर आधारित असो आणि ती नित्य टिकून राहो.
 
-In Jesus' name, Amen.`,
+प्रभू येशूच्या नावात ही प्रार्थना करतो,
+आमेन.`,
+    prayerEn: `Lord Jesus, True Friend who Lays Down His Life for His Friends,
+
+We thank You for the blessing of authentic fellowship and godly companionship. Proverbs 27:17 declares that as iron sharpens iron, so one person sharpens another. I pray today over all my friendships and social relationships.
+
+Father, bring into my life faithful, prayerful, and uplifting friends who love truth, walk in integrity, and challenge me to pursue holiness. Remove from my circle all deceitful, toxic, and compromising influences that would drag my soul away from You. Grant me sharp discernment in choosing my closest confidants.
+
+Teach me also to be a loyal, selfless, and encouraging friend. Help me to listen without judgment, to keep confidences, to speak the truth in love, and to carry the burdens of my friends in times of trial. May our friendships honor Christ and shine as a testimony of biblical brotherhood and sisterhood.
+
+In the loyal and loving name of Jesus Christ, I pray,
+Amen.`,
     amenCount: 312
   },
   "mountain_faith": {
@@ -9661,18 +9837,26 @@ In Jesus' name, Amen.`,
     refEn: "Mark 11:22-24",
     verseMr: "येशूने त्यांना उत्तर दिले, 'देवावर विश्वास ठेवा. मी तुम्हांला खरे सांगतो, जो कोणी या पर्वताला म्हणेल, ‘तू उचलला जा आणि समुद्रात फेकला जा,’ आणि मनात शंका न धरता विश्वास ठेवील, त्याच्यासाठी ते घडेल.'",
     verseEn: "Have faith in God, Jesus answered. Truly I tell you, if anyone says to this mountain, 'Go, throw yourself into the sea,' and does not doubt in their heart but believes that what they say will happen, it will be done for them.",
-    prayerMr: `हे अशक्य गोष्टी शक्य करणाऱ्या प्रभू,
-जरी माझ्यासमोर डोंगरासारख्या प्रचंड समस्या, अडथळे आणि आव्हाने उभी असली, तरी माझा देव त्या सर्व समस्यांपेक्षा महान आहे!
+    prayerMr: `हे अशक्य गोष्टी शक्य करणाऱ्या आणि डोंगर हलवणाऱ्या सामर्थ्यशाली देवा,
 
-माझ्या मनातील सर्व अविश्वास, संशय आणि द्विधा वृत्ती काढून टाक. मला मोहरीच्या दाण्याएवढा शुद्ध आणि जिवंत विश्वास दे, जेणेकरून मी संकटांशी बोलून त्यांना येशूच्या नावाने दूर करू शकेन. मला परिस्थितीवर नव्हे, तर तुझ्या प्रतिज्ञांवर नजर ठेवून चालण्याची कृपा दे.
+पवित्र शास्त्र सांगते की, "जर तुमच्याजवळ मोहरीच्या दाण्याएवढाही विश्वास असेल, तर तुम्ही या पर्वताला सांगाल की, येथून तेथे जा, आणि तो जाईल; आणि तुम्हाला काहीच अशक्य असणार नाही!" प्रभू, माझा विश्वास वाढव आणि माझ्या अंतःकरणातील सर्व अविश्वास दूर कर.
 
-येशूच्या विजयी नावात, आमेन.`,
-    prayerEn: `Almighty God, Worker of Miracles,
-No mountain is too steep and no obstacle too formidable for Your sovereign power. Today I fix my gaze on You rather than the impossible circumstances surrounding me.
+आज माझ्या जीवनासमोर उभ्या असलेल्या रोगाचा डोंगर, कर्जाचा डोंगर, कौटुंबिक अडचणींचा डोंगर आणि भीतीचा डोंगर या सर्वांना मी येशूच्या नावाने हुकूम देतो की, तुम्ही माझ्या मार्गातून दूर व्हा आणि समुद्रात फेकून दिले जा! मी परिस्थितीकडे पाहून नाही, तर त्या परिस्थितीवर ताबा ठेवणाऱ्या जिवंत देवाकडे पाहून चालतो.
 
-Uproot all doubt, skepticism, and wavering from my soul. Grant me mountain-moving faith that speaks life, breakthrough, and victory in Jesus' authority. I step forward boldly, expecting Your supernatural intervention.
+माझा विश्वास दृढ, अढळ आणि विजयाने भरलेला असो. संशय आणि दुटप्पी विचार माझ्या मनात येऊ देऊ नकोस. तू दिलेले प्रत्येक वचन माझ्या जीवनात पूर्ण होईल यावर माझा ठाम भरवसा आहे. मी विश्वासाने पाऊल पुढे टाकतो आणि तुझ्या चमत्कारांची वाट पाहतो.
 
-In the mighty name of Jesus, Amen.`,
+प्रभू येशूच्या विजयी नावात ही प्रार्थना करतो,
+आमेन.`,
+    prayerEn: `Almighty God, Worker of Miracles and Mover of Mountains,
+
+Your sacred Word proclaims in Matthew 17:20 that if we have faith as small as a mustard seed, we can speak to the mountain, "Move from here to there," and it will move; nothing will be impossible for us! Lord, I cry out today: I believe; help my unbelief and expand my capacity for mountain-moving faith!
+
+In the supreme authority of Jesus Christ, I speak directly to every mountain standing in my way—every mountain of sickness, mountain of debt, mountain of family dysfunction, and mountain of spiritual opposition: Be removed and cast into the sea! I will not be intimidated by the size of the mountain, for my God is infinitely greater.
+
+Anchor my heart so firmly upon Your promises that no storm of doubt can shake my resolve. Give me the holy audacity to praise You before the breakthrough arrives, knowing that what You have spoken will surely come to pass. I walk forward by faith and not by sight!
+
+In the mighty and unstoppable name of Jesus Christ, I pray,
+Amen.`,
     amenCount: 445
   },
   "nation_community": {
@@ -9690,18 +9874,26 @@ In the mighty name of Jesus, Amen.`,
     refEn: "2 Chronicles 7:14",
     verseMr: "माझ्या नावाने ओळखले जाणारे माझे लोक जर स्वतःला नम्र करतील, प्रार्थना करतील, माझे मुख शोधतील आणि आपल्या दुष्ट मार्गांपासून फिरतील, तर मी स्वर्गातून त्यांचे ऐकेन, त्यांच्या पापांची क्षमा करीन आणि त्यांच्या भूमीला आरोग्य देईन.",
     verseEn: "If my people, who are called by my name, will humble themselves and pray and seek my face and turn from their wicked ways, then I will hear from heaven, and I will forgive their sin and will heal their land.",
-    prayerMr: `हे राष्ट्रांचे अधिपती देवा,
-मी माझ्या देशासाठी, आमच्या नेत्यांसाठी आणि संपूर्ण समाजासाठी तुझ्या चरणी मध्यस्थी करतो. आमच्या राज्यकर्त्यांना स्वर्गीय न्याय, बुद्धी आणि लोककल्याणाची दृष्टी दे.
+    prayerMr: `हे राष्ट्रांचे अधिपती आणि विश्वाचे सार्वभौम राजे असणाऱ्या देवा,
 
-आमच्या देशात शांतता, बंधुभाव, धार्मिक सलोखा आणि समृद्धी नादू दे. सर्व भ्रष्टाचार, गुन्हेगारी, गरिबी आणि हिंसाचाराचा अंत कर. आमच्या भूमीला चंगाई दे आणि तुझ्या सत्याचा प्रकाश सर्वत्र पसरू दे.
+आम्ही आमच्या प्रिय देशासाठी, आमच्या सरकारसाठी आणि सर्व राज्यकर्त्यांसाठी तुझ्याकडे अत्यंत नम्रतेने प्रार्थना करतो. पवित्र शास्त्र सांगते की, "नीतिमत्त्वामुळे राष्ट्राची उन्नती होते." प्रभू, आमच्या नेत्यांना, न्यायाधीशांना आणि प्रशासनाला स्वर्गीय बुद्धी, प्रामाणिकपणा आणि सामान्य जनतेची काळजी घेण्याचे मन दे.
 
-येशूच्या नावाने, आमेन.`,
-    prayerEn: `Ruler of Nations and Lord of Justice,
-We lift our beloved country and its leaders into Your hands today. Bestow wisdom, integrity, and genuine compassion for the poor upon all in authority.
+आमच्या देशातील सर्व प्रांतांमध्ये, जाती-धर्मांमध्ये आणि समाजात शांती, सलोखा, बंधुभाव आणि न्याय नांदू दे. दहशतवाद, हिंसाचार, भ्रष्टाचार आणि आपत्ती यांपासून आमच्या देशाचे रक्षण कर. आमच्या सैनिकांना आणि पोलिसांना सीमेवर व देशात सुरक्षित ठेव.
 
-Establish peace, racial and religious harmony, justice, and economic flourishing across our towns and cities. Heal our land from division, corruption, and calamity. Let spiritual revival awaken hearts to Your righteousness.
+आमच्या देशातील गरिबांना, वंचितांना आणि अनाथांना आधार मिळो. वेळेवर पाऊस पडून शेती पिकू दे आणि आमच्या देशात आर्थिक भरभराट येऊ दे. सर्वात महत्त्वाचे म्हणजे, आमच्या देशात खऱ्या प्रकाशाचा आणि आत्मिक जागृतीचा महापूर वाहू दे, जेणेकरून लक्षावधी लोक तुझ्या उद्धाराचा अनुभव घेतील.
 
-In Jesus' holy name, Amen.`,
+प्रभू येशूच्या पवित्र नावात ही प्रार्थना करतो,
+आमेन.`,
+    prayerEn: `Sovereign Ruler of the Nations and King of Kings,
+
+We lift our beloved nation, its leaders, its government, and all citizens before Your heavenly throne of grace today. Your Word in 1 Timothy 2 instructs us to offer prayers, supplications, and thanksgivings for kings and all who are in high positions, that we may lead a peaceful and quiet life, godly and dignified in every way.
+
+Father, bestow heavenly wisdom, moral integrity, and deep compassion upon our Prime Minister, President, governors, lawmakers, and judges. Grant them the courage to champion justice, protect the vulnerable, and govern with righteousness. Heal our land from political division, corruption, prejudice, and economic disparity.
+
+Establish lasting peace, communal harmony, and mutual respect across every state and city. Shield our defense forces and police personnel with Your divine protection. Send rain in due season, prosper our agriculture and industries, and awaken our nation with a mighty spiritual revival so that millions may come to know the transforming love and truth of Jesus Christ.
+
+In the holy, majestic name of our Lord Jesus Christ, we pray,
+Amen.`,
     amenCount: 405
   }
 };
