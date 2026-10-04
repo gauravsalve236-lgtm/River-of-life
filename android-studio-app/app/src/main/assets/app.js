@@ -18161,13 +18161,13 @@ window.submitPastoralPrayerRequest = function(e) {
    ========================================================================== */
 
 window.dailyVersesImageList = [
-  'pinterest_alpine_mountain.jpg', 'peaceful_pastures.png', 'golden_dawn.png', 'pinterest_lake_cross.jpg',
-  'pinterest_golden_path.jpg', 'misty_mountains.jpg', 'calm_waters.png', 'pinterest_forest_sunset.jpg',
+  'Bible Verse 1.jpg', 'gods_power_psalm_68_28.jpg', 'pinterest_alpine_mountain.jpg', 'peaceful_pastures.png', 'golden_dawn.png', 'pinterest_lake_cross.jpg',
+  'Bible Verse 2.jpg', 'misty_mountains.jpg', 'calm_waters.png', 'pinterest_forest_sunset.jpg',
   'pinterest_good_shepherd.jpg', 'freedom_field.jpg', 'pinterest_light_of_world.jpg', 'mount_zion.png',
   'joy_rain.jpg', 'pinterest_illuminated_tree.jpg', 'river_of_life.png', 'sunrise.png',
   'pinterest_jesus_road.jpg', 'healing_light.png', 'mountains.png', 'pinterest_david_goliath.jpg',
   'ocean.png', 'wisdom_guidance.png', 'stars.png', 'forest.png', 'family_blessing.png',
-  'path.png', 'peace_anxiety.png', 'mist.png', 'candlelight.png', 'pinterest_watercolor_red_sea.jpg',
+  'path.png', 'peace_anxiety.png', 'mist.png', 'candlelight.png', 'Bible Verse 3.jpg',
   'pinterest_lion_split.jpg', 'pinterest_boarding_pass.jpg'
 ];
 window.currentVodImageIndex = 0;
@@ -20190,10 +20190,10 @@ window.VOD_TYPOGRAPHY_STYLES = [
   {
     id: "pinterest-watercolor",
     icon: "🌊",
-    name: "जलचित्र तांबडा समुद्र (Red Sea Art)",
-    shortName: "Red Sea Art",
+    name: "जलचित्र सरोवर (Lake Cross Art)",
+    shortName: "Lake Cross Art",
     tag: "🕊️ FOR WITH GOD • कारण परमेश्वरासाठी",
-    bgImage: "pinterest_watercolor_red_sea.jpg",
+    bgImage: "pinterest_lake_cross.jpg",
     layoutMode: "watercolor-pill",
     fontFamily: "'Lora', 'Noto Serif Devanagari', Georgia, serif",
     fontWeight: "700",
@@ -20227,7 +20227,7 @@ window.VOD_TYPOGRAPHY_STYLES = [
     name: "सुवर्ण मार्ग (Golden Path)",
     shortName: "Golden Path",
     tag: "✝️ WAY, TRUTH & LIFE • मार्ग, सत्य आणि जीवन",
-    bgImage: "pinterest_golden_path.jpg",
+    bgImage: "winding_path_journey.jpg",
     layoutMode: "flourish-path",
     fontFamily: "'Rozha One', 'Noto Serif Devanagari', serif",
     fontWeight: "700",
@@ -20711,8 +20711,8 @@ window.openFullscreenVOD = function() {
   if (fsRefBadge) fsRefBadge.textContent = displayRef;
 
   const images = (window.dailyVersesImageList && window.dailyVersesImageList.length > 0) ? window.dailyVersesImageList : [
-    'pinterest_alpine_mountain.jpg', 'pinterest_watercolor_red_sea.jpg', 'pinterest_forest_sunset.jpg',
-    'pinterest_golden_path.jpg', 'pinterest_light_of_world.jpg', 'pinterest_good_shepherd.jpg',
+    'pinterest_alpine_mountain.jpg', 'pinterest_lake_cross.jpg', 'pinterest_forest_sunset.jpg',
+    'winding_path_journey.jpg', 'pinterest_light_of_world.jpg', 'pinterest_good_shepherd.jpg',
     'sunrise.png', 'forest.png', 'mountains.png'
   ];
   
@@ -21281,9 +21281,9 @@ window.WALLPAPER_CATALOG = [
     "category": "forest"
   },
   {
-    "file": "pinterest_golden_path.jpg",
-    "name": "Golden Highway",
-    "nameMr": "सुवर्ण मार्ग",
+    "file": "winding_path_journey.jpg",
+    "name": "Winding Path",
+    "nameMr": "वळणदार वाट",
     "category": "forest"
   },
   {
@@ -21320,12 +21320,6 @@ window.WALLPAPER_CATALOG = [
     "file": "pinterest_lion_split.jpg",
     "name": "Lion of Judah",
     "nameMr": "यहूदा वंशाचा सिंह",
-    "category": "art"
-  },
-  {
-    "file": "pinterest_watercolor_red_sea.jpg",
-    "name": "Parting of the Waters",
-    "nameMr": "समुद्राची विभागणी",
     "category": "art"
   },
   {
@@ -25134,7 +25128,7 @@ window.generateLordsPrayerStatusBlob = async function(version = 'matthew') {
   // 1. Wallpaper
   const img = new Image();
   img.crossOrigin = "anonymous";
-  img.src = "assets/daily_verses/pinterest_golden_path.jpg";
+  img.src = "assets/daily_verses/Bible%20Verse%201.jpg";
   await new Promise(r => { img.onload = r; img.onerror = r; setTimeout(r, 2500); });
   if (img.complete && img.naturalWidth > 0) {
     const sc = Math.max(W / img.naturalWidth, H / img.naturalHeight);
