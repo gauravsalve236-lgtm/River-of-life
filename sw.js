@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v2411_CLEAN_WALLPAPERS_ONLY';
+const CACHE_NAME = 'river-of-life-cache-v2412_PREMIUM_VOD_LAYOUT_WATERMARK';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

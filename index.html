@@ -12,7 +12,7 @@
   <script>
     // Force immediate hard purge of all stale Service Workers and CacheStorage
     (function() {
-      const CURRENT_VER = "v2411_CLEAN_WALLPAPERS_ONLY";
+      const CURRENT_VER = "v2412_PREMIUM_VOD_LAYOUT_WATERMARK";
       if (localStorage.getItem("rol_app_ver") !== CURRENT_VER) {
         localStorage.setItem("rol_app_ver", CURRENT_VER);
         if ('serviceWorker' in navigator) {
@@ -4037,22 +4037,22 @@
         </div>
         
         <!-- Center Verse Typography Overlay (Directly on wallpaper, responsive to every device screen) -->
-        <div id="fs-vod-card-container" class="fullscreen-vod-text-overlay" style="position: absolute; top: calc(50% - 25px); left: 50%; transform: translate(-50%, -50%); width: min(85vw, 880px); max-height: calc(100dvh - 210px); z-index: 15; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; box-sizing: border-box; padding: 0 16px; background: transparent !important; border: none !important; box-shadow: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; pointer-events: auto; overflow-y: auto; scrollbar-width: none;">
+        <div id="fs-vod-card-container" class="fullscreen-vod-text-overlay" style="position: absolute; top: calc(50% - 25px); left: 50%; transform: translate(-50%, -50%); width: min(92vw, 920px); max-height: calc(100dvh - 180px); z-index: 15; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; box-sizing: border-box; padding: 0 16px; background: transparent !important; border: none !important; box-shadow: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; pointer-events: auto; overflow-y: auto; scrollbar-width: none;">
           
           <!-- Top Tag & Decorative Ornament -->
-          <div id="fs-vod-top-row" style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap;">
-            <span id="fs-vod-badge-pill" style="font-size: 12.5px; font-weight: 800; letter-spacing: 2.2px; text-transform: uppercase; color: #fbbf24; text-shadow: 0 2px 12px rgba(0,0,0,0.95); font-family: var(--font-ui), sans-serif; transition: all 0.3s ease;">
-              ✦ दैनिक वचन ✦
+          <div id="fs-vod-top-row" style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap;">
+            <span id="fs-vod-badge-pill" style="font-size: 13.5px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: #fbbf24; text-shadow: 0 2px 12px rgba(0,0,0,0.95); font-family: var(--font-ui), sans-serif; transition: all 0.3s ease; background: rgba(10, 16, 30, 0.65); padding: 5px 16px; border-radius: 20px; border: 1.5px solid rgba(251, 191, 36, 0.45);">
+              ✦ दैनिक बायबल वचन ✦
             </span>
           </div>
 
           <!-- Decorative Quotation Mark -->
-          <div id="fs-vod-quote-mark" style="font-size: 48px; line-height: 0.6; font-family: Georgia, serif; color: #fbbf24; opacity: 0.95; text-shadow: 0 2px 14px rgba(0,0,0,0.95); margin-bottom: 10px; user-select: none; transition: all 0.3s ease;">
+          <div id="fs-vod-quote-mark" style="font-size: 64px; line-height: 0.6; font-family: Georgia, serif; color: #fbbf24; opacity: 0.95; text-shadow: 0 2px 16px rgba(0,0,0,0.95); margin-bottom: 14px; user-select: none; transition: all 0.3s ease;">
             “
           </div>
 
           <!-- Scripture Verse Body (Multi-line, Bold, Expressive, Balanced, Pure Text on Image) -->
-          <blockquote id="fs-vod-text" style="font-family: 'Noto Serif Devanagari', 'Lora', Georgia, serif; font-size: clamp(20px, 3.6vw, 36px); line-height: 1.62; color: #ffffff; font-weight: 700; margin: 0 0 16px 0; text-shadow: 0 3px 22px rgba(0,0,0,0.98), 0 1px 6px rgba(0,0,0,0.95); text-wrap: balance; width: 100%; text-align: center; transition: all 0.3s ease;">
+          <blockquote id="fs-vod-text" style="font-family: 'Noto Serif Devanagari', 'Lora', Georgia, serif; font-size: clamp(25px, 5.2vw, 44px); line-height: 1.68; color: #ffffff; font-weight: 700; margin: 0 0 20px 0; text-shadow: 0 3px 24px rgba(0,0,0,0.98), 0 1px 6px rgba(0,0,0,0.95); text-wrap: balance; width: 100%; text-align: center; transition: all 0.3s ease;">
             सैतानाच्या डावपेचांपुढे तुम्हांला टिकाव धरता यावा म्हणून <span class="vod-golden-accent">देवाची संपूर्ण शस्त्रसामग्री</span> धारण करा.
           </blockquote>
 
@@ -4061,11 +4061,11 @@
 
           <!-- Scripture Reference Row (Clean scripture reference without MARVBSI suffix) -->
           <div id="fs-vod-ref-row" style="display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap;">
-            <div id="fs-vod-accent-line-left" style="height: 1.5px; width: 36px; background: #fbbf24; opacity: 0.85; box-shadow: 0 1px 6px rgba(0,0,0,0.9); transition: all 0.3s ease;"></div>
-            <span id="fs-vod-ref-badge" style="font-family: var(--font-ui), sans-serif; font-size: 17.5px; font-weight: 800; color: #fbbf24; letter-spacing: 0.6px; text-shadow: 0 2px 12px rgba(0,0,0,0.98); transition: all 0.3s ease;">
+            <div id="fs-vod-accent-line-left" style="height: 2px; width: 44px; background: #fbbf24; opacity: 0.9; box-shadow: 0 1px 6px rgba(0,0,0,0.9); transition: all 0.3s ease;"></div>
+            <span id="fs-vod-ref-badge" style="font-family: var(--font-ui), sans-serif; font-size: 20px; font-weight: 800; color: #fbbf24; letter-spacing: 0.8px; text-shadow: 0 2px 14px rgba(0,0,0,0.98); transition: all 0.3s ease;">
               इफिसकरांस पत्र ६:११
             </span>
-            <div id="fs-vod-accent-line-right" style="height: 1.5px; width: 36px; background: #fbbf24; opacity: 0.85; box-shadow: 0 1px 6px rgba(0,0,0,0.9); transition: all 0.3s ease;"></div>
+            <div id="fs-vod-accent-line-right" style="height: 2px; width: 44px; background: #fbbf24; opacity: 0.9; box-shadow: 0 1px 6px rgba(0,0,0,0.9); transition: all 0.3s ease;"></div>
           </div>
 
         </div>

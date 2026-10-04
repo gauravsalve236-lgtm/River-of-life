@@ -21803,95 +21803,142 @@ window.generateExactVerseImageBlob = function(customRatio) {
       return lines;
     }
 
-    // Unified Luminous Screen-Matched Typography Engine (Medium-large text covering the wallpaper beautifully)
+    // Unified Luminous Screen-Matched Typography Engine (Large commanding text utilizing the wallpaper beautifully)
     function renderLuminousScreenLayout() {
       // Atmospheric Contrast Gradient Overlay (matches modal-fullscreen-vod)
       const overlayGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-      overlayGrad.addColorStop(0, "rgba(0, 0, 0, 0.55)");
-      overlayGrad.addColorStop(0.28, "rgba(0, 0, 0, 0.18)");
-      overlayGrad.addColorStop(0.65, "rgba(0, 0, 0, 0.45)");
-      overlayGrad.addColorStop(1, "rgba(0, 0, 0, 0.92)");
+      overlayGrad.addColorStop(0, "rgba(0, 0, 0, 0.60)");
+      overlayGrad.addColorStop(0.25, "rgba(0, 0, 0, 0.22)");
+      overlayGrad.addColorStop(0.50, "rgba(0, 0, 0, 0.38)");
+      overlayGrad.addColorStop(0.78, "rgba(0, 0, 0, 0.65)");
+      overlayGrad.addColorStop(1, "rgba(0, 0, 0, 0.95)");
       ctx.fillStyle = overlayGrad;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      const maxW = 940;
+      // Subtle atmospheric center radial vignette for dramatic movie-poster readability
+      const radGrad = ctx.createRadialGradient(canvas.width / 2, canvas.height * 0.48, 100, canvas.width / 2, canvas.height * 0.48, 700);
+      radGrad.addColorStop(0, "rgba(0, 0, 0, 0.45)");
+      radGrad.addColorStop(0.7, "rgba(0, 0, 0, 0.25)");
+      radGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
+      ctx.fillStyle = radGrad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Balanced width for natural word wraps that expand vertically
+      const maxW = 900;
       let fontSize;
       let lineH;
 
-      // Medium-large prominent typography so text gracefully occupies the wallpaper without feeling small
-      if (displayText.length > 130) {
-        fontSize = 58;
-        lineH = 92;
-      } else if (displayText.length > 75) {
-        fontSize = 66;
-        lineH = 104;
-      } else {
+      // Generous, large typography so verse covers most of the wallpaper and avoids awkward empty spaces
+      if (displayText.length <= 60) {
+        fontSize = 86;
+        lineH = 138;
+      } else if (displayText.length <= 110) {
         fontSize = 76;
-        lineH = 118;
+        lineH = 122;
+      } else if (displayText.length <= 170) {
+        fontSize = 66;
+        lineH = 106;
+      } else if (displayText.length <= 240) {
+        fontSize = 56;
+        lineH = 92;
+      } else {
+        fontSize = 48;
+        lineH = 80;
       }
 
       const font = `700 ${fontSize}px ${isMarathi ? "'Noto Serif Devanagari', 'Rozha One', Georgia, serif" : "'Playfair Display', 'Lora', Georgia, serif"}`;
       const tokens = tokenizeVodText(displayText, !isMarathi);
       const lines = wrapTokens(tokens, maxW, font);
 
-      const tagH = 34;
-      const gapTagQuote = 18;
-      const quoteH = 54;
-      const gapQuoteText = 22;
+      const tagH = 44;
+      const gapTagQuote = 24;
+      const quoteH = 68;
+      const gapQuoteText = 28;
       const textH = lines.length * lineH;
-      const gapTextRef = 40;
-      const refH = 38;
+      const gapTextRef = 48;
+      const refH = 46;
 
       const totalBlockH = tagH + gapTagQuote + quoteH + gapQuoteText + textH + gapTextRef + refH;
 
-      const centerY = Math.round(canvas.height * 0.46);
-      let curY = Math.round(centerY - (totalBlockH / 2));
+      // Safe bounds: top status bar safe zone (Y = 190) and bottom watermark card safe zone (Y = 1560)
+      const topSafe = 190;
+      const bottomSafe = 1560;
+      const availableH = bottomSafe - topSafe;
 
-      // 1. Top Tag (✦ दैनिक वचन ✦)
+      let curY = Math.round(topSafe + (availableH - totalBlockH) / 2);
+      if (curY < topSafe) curY = topSafe;
+
+      // 1. Top Capsule Tag (✦ दैनिक बायबल वचन ✦)
+      ctx.save();
       ctx.direction = "ltr";
-      ctx.font = "800 28px 'Outfit', -apple-system, sans-serif";
+      const tagText = isMarathi ? "✦ दैनिक बायबल वचन ✦" : "✦ DAILY BIBLE VERSE ✦";
+      ctx.font = "800 24px 'Outfit', -apple-system, sans-serif";
+      const tagTextW = ctx.measureText(tagText).width;
+      const tagPillW = tagTextW + 54;
+      const tagPillH = 44;
+      const tagPillX = Math.round((canvas.width - tagPillW) / 2);
+      const tagPillY = curY;
+
+      ctx.fillStyle = "rgba(10, 16, 30, 0.72)";
+      ctx.strokeStyle = "rgba(251, 191, 36, 0.55)";
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      if (typeof ctx.roundRect === 'function') {
+        ctx.roundRect(tagPillX, tagPillY, tagPillW, tagPillH, 22);
+      } else {
+        ctx.rect(tagPillX, tagPillY, tagPillW, tagPillH);
+      }
+      ctx.fill();
+      ctx.stroke();
+
       ctx.fillStyle = "#fbbf24";
-      ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
-      ctx.shadowBlur = 14;
+      ctx.shadowColor = "rgba(251, 191, 36, 0.4)";
+      ctx.shadowBlur = 10;
+      ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      const tagText = isMarathi ? "✦ दैनिक वचन ✦" : "✦ VERSE OF THE DAY ✦";
-      const tagW = ctx.measureText(tagText).width;
-      ctx.fillText(tagText, Math.round((canvas.width - tagW) / 2), curY + Math.round(tagH / 2));
+      ctx.fillText(tagText, Math.round(canvas.width / 2), tagPillY + Math.round(tagPillH / 2) + 1);
+      ctx.restore();
       curY += tagH + gapTagQuote;
 
-      // 2. Elegant Quotation Mark (prominent, matching Screenshot 1)
-      ctx.font = "600 78px Georgia, serif";
+      // 2. Elegant Golden Quotation Mark (prominent, majestic)
+      ctx.save();
+      ctx.direction = "ltr";
+      ctx.font = "600 88px Georgia, 'Playfair Display', serif";
       ctx.fillStyle = "#fbbf24";
-      ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
-      ctx.shadowBlur = 16;
-      const quoteStr = "“";
-      const quoteW = ctx.measureText(quoteStr).width;
-      ctx.fillText(quoteStr, Math.round((canvas.width - quoteW) / 2), curY + Math.round(quoteH / 2));
+      ctx.shadowColor = "rgba(0, 0, 0, 0.98)";
+      ctx.shadowBlur = 20;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("“", Math.round(canvas.width / 2), curY + Math.round(quoteH / 2));
+      ctx.restore();
       curY += quoteH + gapQuoteText;
 
-      // 3. Central Verse Body with Golden Highlighted Keywords (prominent medium size)
+      // 3. Central Scripture Verse Body with Illuminated Keywords
       drawTokenizedLines(lines, curY + Math.round(lineH / 2), lineH, font);
       curY += textH + gapTextRef;
 
       // 4. Scripture Reference with flanking Golden Accent Lines
-      ctx.font = "800 32px 'Outfit', -apple-system, sans-serif";
+      ctx.save();
+      ctx.direction = "ltr";
+      ctx.font = "800 36px 'Outfit', -apple-system, sans-serif";
       const refStr = displayRef;
       const refW = ctx.measureText(refStr).width;
       const refCenterY = curY + Math.round(refH / 2);
 
-      ctx.save();
       ctx.fillStyle = "#fbbf24";
       ctx.shadowColor = "rgba(0, 0, 0, 0.98)";
-      ctx.shadowBlur = 16;
-      ctx.fillText(refStr, Math.round((canvas.width - refW) / 2), refCenterY);
+      ctx.shadowBlur = 18;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(refStr, Math.round(canvas.width / 2), refCenterY);
 
       // Flanking gold lines
       ctx.strokeStyle = "#fbbf24";
       ctx.lineWidth = 3;
       ctx.shadowColor = "rgba(0, 0, 0, 0.9)";
       ctx.shadowBlur = 8;
-      const lineLen = 54;
-      const lineGap = 18;
+      const lineLen = 64;
+      const lineGap = 20;
       const leftLineStart = Math.round((canvas.width - refW) / 2) - lineGap - lineLen;
       const leftLineEnd = Math.round((canvas.width - refW) / 2) - lineGap;
       const rightLineStart = Math.round((canvas.width + refW) / 2) + lineGap;
@@ -21922,8 +21969,8 @@ window.generateExactVerseImageBlob = function(customRatio) {
        ========================================================================== */
     } else if (layoutMode === "watercolor-pill") {
       // Clean cream paper on top, Moses parting Red Sea at bottom
-      const maxW = (ratio === 'story') ? 860 : 900;
-      let fontSize = (ratio === 'story') ? (displayText.length > 120 ? 44 : 52) : (displayText.length > 120 ? 40 : 46);
+      const maxW = (ratio === 'story') ? 880 : 920;
+      let fontSize = (ratio === 'story') ? (displayText.length > 120 ? 56 : 66) : (displayText.length > 120 ? 48 : 56);
       const font = `700 ${fontSize}px ${isMarathi ? "'Noto Serif Devanagari', 'Rozha One', serif" : "'Lora', Georgia, serif"}`;
       const lines = wrapText(displayText, maxW, font);
       const lineH = Math.round(fontSize * 1.55);
@@ -21932,13 +21979,13 @@ window.generateExactVerseImageBlob = function(customRatio) {
 
       // Header Serif Intro
       ctx.direction = "ltr";
-      ctx.font = "italic 600 26px 'Lora', 'Noto Serif Devanagari', Georgia, serif";
+      ctx.font = "italic 600 30px 'Lora', 'Noto Serif Devanagari', Georgia, serif";
       ctx.fillStyle = "#334155";
       ctx.shadowBlur = 0;
       const introStr = isMarathi ? "कारण परमेश्वरासाठी" : "For with God";
       const introW = ctx.measureText(introStr).width;
       ctx.fillText(introStr, Math.round((canvas.width - introW) / 2), startY);
-      startY += 52;
+      startY += 58;
 
       // Verse Body in Deep Slate Navy
       ctx.font = font;
@@ -21948,14 +21995,14 @@ window.generateExactVerseImageBlob = function(customRatio) {
         const lineW = ctx.measureText(lineStr).width;
         ctx.fillText(lineStr, Math.round((canvas.width - lineW) / 2), startY + (i * lineH));
       }
-      startY += (lines.length * lineH) + 38;
+      startY += (lines.length * lineH) + 42;
 
       // Solid Teal/Navy Pill Reference Badge
       const refStr = displayRef;
-      ctx.font = "800 24px 'Outfit', sans-serif";
+      ctx.font = "800 28px 'Outfit', sans-serif";
       const pillTextW = ctx.measureText(refStr).width;
-      const pillW = pillTextW + 48;
-      const pillH = 50;
+      const pillW = pillTextW + 56;
+      const pillH = 56;
       const pillX = Math.round((canvas.width - pillW) / 2);
       const pillY = startY;
 
@@ -21964,13 +22011,13 @@ window.generateExactVerseImageBlob = function(customRatio) {
       ctx.shadowColor = "rgba(14, 116, 144, 0.35)";
       ctx.shadowBlur = 14;
       ctx.beginPath();
-      if (typeof ctx.roundRect === 'function') ctx.roundRect(pillX, pillY, pillW, pillH, 25);
+      if (typeof ctx.roundRect === 'function') ctx.roundRect(pillX, pillY, pillW, pillH, 28);
       else ctx.rect(pillX, pillY, pillW, pillH);
       ctx.fill();
 
       ctx.fillStyle = "#ffffff";
       ctx.shadowBlur = 0;
-      ctx.fillText(refStr, pillX + 24, pillY + 34);
+      ctx.fillText(refStr, pillX + 28, pillY + 38);
       ctx.restore();
 
     /* ==========================================================================
@@ -22003,22 +22050,22 @@ window.generateExactVerseImageBlob = function(customRatio) {
       ctx.restore();
 
       // 3b. Lower Right Scripture Content Block
-      const rightX = (ratio === 'story') ? 340 : 320;
-      const rightW = canvas.width - rightX - 60;
-      const font = `700 42px ${isMarathi ? "'Noto Serif Devanagari', serif" : "'Lora', Georgia, serif"}`;
+      const rightX = (ratio === 'story') ? 320 : 300;
+      const rightW = canvas.width - rightX - 50;
+      const font = `700 50px ${isMarathi ? "'Noto Serif Devanagari', serif" : "'Lora', Georgia, serif"}`;
       const lines = wrapText(displayText, rightW, font);
-      const lineH = 62;
+      const lineH = 74;
 
-      let startY = Math.round(canvas.height * (ratio === 'story' ? 0.60 : 0.52));
+      let startY = Math.round(canvas.height * (ratio === 'story' ? 0.54 : 0.48));
 
       // Scripture Reference
       ctx.direction = "ltr";
-      ctx.font = "800 32px 'Outfit', sans-serif";
+      ctx.font = "800 36px 'Outfit', sans-serif";
       ctx.fillStyle = "#fbbf24";
       ctx.shadowColor = "rgba(0,0,0,0.95)";
       ctx.shadowBlur = 16;
       ctx.fillText(displayRef, rightX, startY);
-      startY += 48;
+      startY += 52;
 
       // Verse Body
       ctx.font = font;
@@ -22031,30 +22078,30 @@ window.generateExactVerseImageBlob = function(customRatio) {
        STYLE 4: WINDING GOLDEN PATH & ORNATE SWASHES
        ========================================================================== */
     } else if (layoutMode === "flourish-path") {
-      // Lower 48% dark teal forest area
-      const grad = ctx.createLinearGradient(0, canvas.height * 0.48, 0, canvas.height);
+      // Lower 52% dark teal forest area
+      const grad = ctx.createLinearGradient(0, canvas.height * 0.44, 0, canvas.height);
       grad.addColorStop(0, 'rgba(10, 24, 30, 0)');
       grad.addColorStop(0.35, 'rgba(10, 24, 30, 0.88)');
       grad.addColorStop(1, 'rgba(6, 16, 20, 0.97)');
       ctx.fillStyle = grad;
-      ctx.fillRect(0, canvas.height * 0.48, canvas.width, canvas.height * 0.52);
+      ctx.fillRect(0, canvas.height * 0.44, canvas.width, canvas.height * 0.56);
 
-      let startY = Math.round(canvas.height * (ratio === 'story' ? 0.62 : 0.56));
+      let startY = Math.round(canvas.height * (ratio === 'story' ? 0.54 : 0.48));
 
       ctx.direction = "ltr";
-      ctx.font = "italic 600 32px 'Great Vibes', cursive";
+      ctx.font = "italic 600 36px 'Great Vibes', cursive";
       ctx.fillStyle = "#fde047";
       ctx.shadowColor = "rgba(0,0,0,0.95)";
       ctx.shadowBlur = 14;
       const subtitleStr = isMarathi ? "प्रकाश आणि मार्गदर्शन" : "Light to my path";
       const subtitleW = ctx.measureText(subtitleStr).width;
       ctx.fillText(subtitleStr, Math.round((canvas.width - subtitleW) / 2), startY);
-      startY += 52;
+      startY += 58;
 
-      const maxW = (ratio === 'story') ? 880 : 920;
-      const font = `700 44px ${isMarathi ? "'Noto Serif Devanagari', serif" : "'Playfair Display', Georgia, serif"}`;
+      const maxW = (ratio === 'story') ? 900 : 920;
+      const font = `700 58px ${isMarathi ? "'Noto Serif Devanagari', serif" : "'Playfair Display', Georgia, serif"}`;
       const lines = wrapText(displayText, maxW, font);
-      const lineH = 64;
+      const lineH = 86;
 
       ctx.font = font;
       ctx.fillStyle = "#ffffff";
@@ -22065,9 +22112,9 @@ window.generateExactVerseImageBlob = function(customRatio) {
         const curLineY = startY + (i * lineH);
         ctx.fillText(lines[i], curLineX, curLineY);
       }
-      startY += (lines.length * lineH) + 38;
+      startY += (lines.length * lineH) + 44;
 
-      ctx.font = "800 30px 'Outfit', sans-serif";
+      ctx.font = "800 36px 'Outfit', sans-serif";
       ctx.fillStyle = "#facc15";
       const refStr = displayRef;
       const refW = ctx.measureText(refStr).width;
@@ -22081,30 +22128,30 @@ window.generateExactVerseImageBlob = function(customRatio) {
       ctx.strokeStyle = "rgba(253, 230, 138, 0.4)";
       ctx.lineWidth = 2.5;
       ctx.beginPath();
-      const archX = 80;
+      const archX = 70;
       const archY = Math.round(canvas.height * (ratio === 'story' ? 0.08 : 0.06));
-      const archW = canvas.width - 160;
-      const archH = Math.round(canvas.height * (ratio === 'story' ? 0.38 : 0.44));
+      const archW = canvas.width - 140;
+      const archH = Math.round(canvas.height * (ratio === 'story' ? 0.44 : 0.48));
       if (typeof ctx.roundRect === 'function') ctx.roundRect(archX, archY, archW, archH, [120, 120, 20, 20]);
       else ctx.rect(archX, archY, archW, archH);
       ctx.stroke();
 
-      let startY = archY + 70;
+      let startY = archY + 74;
 
       ctx.direction = "ltr";
-      ctx.font = "800 22px 'Outfit', sans-serif";
+      ctx.font = "800 24px 'Outfit', sans-serif";
       ctx.fillStyle = "#fef08a";
       ctx.shadowColor = "rgba(0,0,0,0.95)";
       ctx.shadowBlur = 15;
       const tagStr = isMarathi ? (theme.tagMr || "🕊️ जगाचा खरा प्रकाश 🕊️") : (theme.tagEn || "✦ THE LIGHT SHINES IN THE DARKNESS ✦");
       const tagW = ctx.measureText(tagStr).width;
       ctx.fillText(tagStr, Math.round((canvas.width - tagW) / 2), startY);
-      startY += 54;
+      startY += 58;
 
       const maxW = archW - 60;
-      const font = `700 42px ${isMarathi ? "'Noto Serif Devanagari', serif" : "'Playfair Display', serif"}`;
+      const font = `700 52px ${isMarathi ? "'Noto Serif Devanagari', serif" : "'Playfair Display', serif"}`;
       const lines = wrapText(displayText, maxW, font);
-      const lineH = 62;
+      const lineH = 78;
 
       ctx.font = font;
       ctx.fillStyle = "#ffffff";
@@ -22113,9 +22160,9 @@ window.generateExactVerseImageBlob = function(customRatio) {
         const lineW = ctx.measureText(lines[i]).width;
         ctx.fillText(lines[i], Math.round((canvas.width - lineW) / 2), startY + (i * lineH));
       }
-      startY += (lines.length * lineH) + 32;
+      startY += (lines.length * lineH) + 38;
 
-      ctx.font = "800 28px 'Outfit', sans-serif";
+      ctx.font = "800 34px 'Outfit', sans-serif";
       ctx.fillStyle = "#fef08a";
       const refStr = displayRef;
       const refW = ctx.measureText(refStr).width;
@@ -22125,22 +22172,22 @@ window.generateExactVerseImageBlob = function(customRatio) {
        STYLE 6: GREEN PASTURE GLASS EMBED (Good Shepherd)
        ========================================================================== */
     } else if (layoutMode === "pasture-glass") {
-      const cardW = canvas.width - 140;
-      const cardX = 70;
-      let cardY = Math.round(canvas.height * (ratio === 'story' ? 0.44 : 0.38));
+      const cardW = canvas.width - 120;
+      const cardX = 60;
+      let cardY = Math.round(canvas.height * (ratio === 'story' ? 0.38 : 0.34));
 
       const maxW = cardW - 70;
-      const font = `700 42px ${isMarathi ? "'Noto Sans Devanagari', sans-serif" : "'Lora', Georgia, serif"}`;
+      const font = `700 52px ${isMarathi ? "'Noto Sans Devanagari', sans-serif" : "'Lora', Georgia, serif"}`;
       const lines = wrapText(displayText, maxW, font);
-      const lineH = 60;
-      const cardH = (lines.length * lineH) + 160;
+      const lineH = 76;
+      const cardH = (lines.length * lineH) + 180;
 
       // Frosted Dark Glass Container
       ctx.save();
-      ctx.fillStyle = "rgba(10, 25, 18, 0.72)";
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.22)";
+      ctx.fillStyle = "rgba(10, 25, 18, 0.76)";
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.25)";
       ctx.lineWidth = 2;
-      ctx.shadowColor = "rgba(0, 0, 0, 0.6)";
+      ctx.shadowColor = "rgba(0, 0, 0, 0.65)";
       ctx.shadowBlur = 28;
       ctx.beginPath();
       if (typeof ctx.roundRect === 'function') ctx.roundRect(cardX, cardY, cardW, cardH, 28);
@@ -22149,7 +22196,7 @@ window.generateExactVerseImageBlob = function(customRatio) {
       ctx.stroke();
       ctx.restore();
 
-      let startY = cardY + 60;
+      let startY = cardY + 64;
 
       ctx.direction = "ltr";
       ctx.font = "800 20px 'Outfit', sans-serif";
@@ -22180,36 +22227,36 @@ window.generateExactVerseImageBlob = function(customRatio) {
        STYLE 7: HIGHWAY OF GRACE (Pine Forest Road & Centerline)
        ========================================================================== */
     } else if (layoutMode === "highway-bold") {
-      let startY = Math.round(canvas.height * (ratio === 'story' ? 0.52 : 0.44));
+      let startY = Math.round(canvas.height * (ratio === 'story' ? 0.48 : 0.42));
 
       ctx.direction = "ltr";
-      ctx.font = "900 68px 'Poppins', sans-serif";
+      ctx.font = "900 74px 'Poppins', sans-serif";
       ctx.fillStyle = "#ffffff";
       ctx.shadowColor = "rgba(0,0,0,0.95)";
       ctx.shadowBlur = 20;
       const titleStr = isMarathi ? "माझ्याबरोबर चाला" : "WALK WITH ME";
       const titleW = ctx.measureText(titleStr).width;
       ctx.fillText(titleStr, Math.round((canvas.width - titleW) / 2), startY);
-      startY += 30;
+      startY += 34;
 
       // Twin yellow highway centerline bar
       ctx.fillStyle = "#facc15";
-      const barW = 180;
-      ctx.fillRect(Math.round((canvas.width - barW) / 2), startY, barW, 5);
-      startY += 48;
+      const barW = 200;
+      ctx.fillRect(Math.round((canvas.width - barW) / 2), startY, barW, 6);
+      startY += 52;
 
       const maxW = 900;
-      const font = `700 42px ${isMarathi ? "'Noto Sans Devanagari'" : "'Poppins', sans-serif"}`;
+      const font = `700 52px ${isMarathi ? "'Noto Sans Devanagari'" : "'Poppins', sans-serif"}`;
       const lines = wrapText(displayText, maxW, font);
       ctx.font = font;
       ctx.fillStyle = "#ffffff";
       for (let i = 0; i < lines.length; i++) {
         const lineW = ctx.measureText(lines[i]).width;
-        ctx.fillText(lines[i], Math.round((canvas.width - lineW) / 2), startY + (i * 62));
+        ctx.fillText(lines[i], Math.round((canvas.width - lineW) / 2), startY + (i * 76));
       }
-      startY += (lines.length * 62) + 26;
+      startY += (lines.length * 76) + 36;
 
-      ctx.font = "800 30px 'Poppins', sans-serif";
+      ctx.font = "800 34px 'Poppins', sans-serif";
       ctx.fillStyle = "#facc15";
       const refStr = displayRef;
       const refW = ctx.measureText(refStr).width;
@@ -22223,24 +22270,24 @@ window.generateExactVerseImageBlob = function(customRatio) {
       const startX = 270;
       const availW = canvas.width - startX - 70;
 
-      let startY = Math.round(canvas.height * (ratio === 'story' ? 0.22 : 0.16));
+      let startY = Math.round(canvas.height * (ratio === 'story' ? 0.20 : 0.14));
 
       ctx.direction = "ltr";
       ctx.shadowBlur = 0;
-      ctx.font = "800 20px 'Outfit', sans-serif";
+      ctx.font = "800 22px 'Outfit', sans-serif";
       ctx.fillStyle = "#475569";
       ctx.fillText(isMarathi ? "✈️ सार्वकालिक जीवन" : "✈️ ETERNAL AIRWAYS", startX, startY);
-      startY += 32;
+      startY += 34;
 
-      ctx.font = "900 68px 'Outfit', sans-serif";
+      ctx.font = "900 72px 'Outfit', sans-serif";
       ctx.fillStyle = "#0f172a";
       ctx.fillText(isMarathi ? "येशू ख्रिस्त" : "JESUS CHRIST", startX, startY + 44);
-      startY += 78;
+      startY += 82;
 
-      ctx.font = "800 19px 'Outfit', monospace";
+      ctx.font = "800 20px 'Outfit', monospace";
       ctx.fillStyle = "#0f172a";
       ctx.fillText(isMarathi ? "अंतिम मुक्काम: स्वर्गीय घर" : "FINAL DESTINATION: HEAVEN", startX, startY);
-      startY += 30;
+      startY += 32;
 
       // Divider line
       ctx.strokeStyle = "rgba(15, 23, 42, 0.25)";
@@ -22249,29 +22296,29 @@ window.generateExactVerseImageBlob = function(customRatio) {
       ctx.moveTo(startX, startY);
       ctx.lineTo(startX + availW, startY);
       ctx.stroke();
-      startY += 26;
+      startY += 28;
 
       // Grid: GATE / TIME / ROW / SEAT
-      ctx.font = "800 15px 'Outfit', sans-serif";
+      ctx.font = "800 16px 'Outfit', sans-serif";
       ctx.fillStyle = "#64748b";
       ctx.fillText(isMarathi ? "द्वार" : "GATE", startX, startY);
       ctx.fillText(isMarathi ? "वेळ" : "TIME", startX + 160, startY);
       ctx.fillText(isMarathi ? "कृपा" : "ROW", startX + 320, startY);
       ctx.fillText(isMarathi ? "तारण" : "SEAT", startX + 480, startY);
-      startY += 24;
+      startY += 26;
 
-      ctx.font = "900 24px 'Outfit', sans-serif";
+      ctx.font = "900 26px 'Outfit', sans-serif";
       ctx.fillStyle = "#0f172a";
       ctx.fillText(isMarathi ? (vod.ref ? vod.ref.split(' ')[0] : "योहान") : "JOHN", startX, startY);
       ctx.fillText(isMarathi ? (vod.ref ? vod.ref.split(' ')[1] || "३:१६" : "३:१६") : "3:16", startX + 160, startY);
       ctx.fillText(isMarathi ? "अमर्याद" : "GRACE", startX + 320, startY);
       ctx.fillText(isMarathi ? "निश्चित" : "MERCY", startX + 480, startY);
-      startY += 40;
+      startY += 44;
 
       // Scripture Box Itinerary
-      const font = `700 36px ${isMarathi ? "'Noto Sans Devanagari', 'Poppins'" : "'Outfit', sans-serif"}`;
+      const font = `700 44px ${isMarathi ? "'Noto Sans Devanagari', 'Poppins'" : "'Outfit', sans-serif"}`;
       const lines = wrapText(displayText, availW - 30, font);
-      const boxH = (lines.length * 52) + 80;
+      const boxH = (lines.length * 64) + 90;
 
       ctx.fillStyle = "rgba(15, 23, 42, 0.04)";
       ctx.strokeStyle = "rgba(15, 23, 42, 0.18)";
@@ -22285,12 +22332,12 @@ window.generateExactVerseImageBlob = function(customRatio) {
       ctx.font = font;
       ctx.fillStyle = "#0f172a";
       for (let i = 0; i < lines.length; i++) {
-        ctx.fillText(lines[i], startX + 16, startY + 44 + (i * 52));
+        ctx.fillText(lines[i], startX + 20, startY + 50 + (i * 64));
       }
 
-      ctx.font = "800 22px 'Outfit', sans-serif";
+      ctx.font = "800 26px 'Outfit', sans-serif";
       ctx.fillStyle = "#0369a1";
-      ctx.fillText(displayRef, startX + 16, startY + boxH - 24);
+      ctx.fillText(displayRef, startX + 20, startY + boxH - 26);
 
     /* ==========================================================================
        STYLE 9: EMERALD MOUNTAIN LAKE & CROSS (Joshua 1:9 Aesthetic)
@@ -22305,7 +22352,7 @@ window.generateExactVerseImageBlob = function(customRatio) {
       ctx.fillStyle = grad;
       ctx.fillRect(0, canvas.height * 0.15, canvas.width, canvas.height * 0.85);
 
-      let startY = Math.round(canvas.height * (ratio === 'story' ? 0.15 : 0.09));
+      let startY = Math.round(canvas.height * (ratio === 'story' ? 0.14 : 0.09));
 
       // Draw Ornate White Latin Cross
       const crossCenterX = Math.round(canvas.width / 2);
@@ -22329,22 +22376,22 @@ window.generateExactVerseImageBlob = function(customRatio) {
       ctx.strokeRect(crossCenterX - Math.round(crossW / 2), horizY - Math.round(barThick / 2), crossW, barThick);
       ctx.restore();
 
-      startY += crossH + 32;
+      startY += crossH + 34;
 
       // Scripture Reference Header in Bold Sans-Serif
       ctx.direction = "ltr";
-      ctx.font = "800 36px 'Outfit', sans-serif";
+      ctx.font = "800 38px 'Outfit', sans-serif";
       ctx.fillStyle = "#ffffff";
       ctx.shadowColor = "rgba(0,0,0,0.95)";
       ctx.shadowBlur = 16;
       const refStr = displayRef;
       const refW = ctx.measureText(refStr).width;
       ctx.fillText(refStr, Math.round((canvas.width - refW) / 2), startY);
-      startY += 54;
+      startY += 58;
 
       // Verse Body in Bold Modern Sans
       const maxW = (ratio === 'story') ? 880 : 920;
-      let fontSize = (ratio === 'story') ? (displayText.length > 120 ? 40 : 48) : (displayText.length > 120 ? 36 : 44);
+      let fontSize = (ratio === 'story') ? (displayText.length > 120 ? 50 : 60) : (displayText.length > 120 ? 44 : 52);
       const font = `800 ${fontSize}px ${isMarathi ? "'Noto Sans Devanagari', 'Poppins'" : "'Outfit', 'Poppins', sans-serif"}`;
       const lines = wrapText(`"${displayText}"`, maxW, font);
       const lineH = Math.round(fontSize * 1.5);
@@ -22362,21 +22409,21 @@ window.generateExactVerseImageBlob = function(customRatio) {
        STYLE 10: ILLUMINATED TREE & FROSTED EMERALD GLASS CARD (Romans 5:8 Aesthetic)
        ========================================================================== */
     } else if (layoutMode === "illuminated-tree-glass") {
-      const cardW = canvas.width - 160;
-      const cardX = 80;
+      const cardW = canvas.width - 140;
+      const cardX = 70;
 
       const maxW = cardW - 70;
-      let fontSize = (ratio === 'story') ? (displayText.length > 120 ? 36 : 42) : (displayText.length > 120 ? 32 : 38);
+      let fontSize = (ratio === 'story') ? (displayText.length > 120 ? 48 : 56) : (displayText.length > 120 ? 42 : 48);
       const font = `700 ${fontSize}px ${isMarathi ? "'Noto Serif Devanagari', serif" : "'Lora', Georgia, serif"}`;
       const lines = wrapText(displayText, maxW, font);
       const lineH = Math.round(fontSize * 1.54);
-      const cardH = (lines.length * lineH) + 170;
-      const cardY = Math.round(canvas.height * (ratio === 'story' ? 0.52 : 0.44));
+      const cardH = (lines.length * lineH) + 190;
+      const cardY = Math.round(canvas.height * (ratio === 'story' ? 0.44 : 0.38));
 
       // Frosted Emerald Dark Glass Card Container
       ctx.save();
-      ctx.fillStyle = "rgba(12, 38, 22, 0.76)";
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.22)";
+      ctx.fillStyle = "rgba(12, 38, 22, 0.78)";
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.25)";
       ctx.lineWidth = 1.8;
       ctx.shadowColor = "rgba(0, 0, 0, 0.75)";
       ctx.shadowBlur = 32;
@@ -22387,18 +22434,18 @@ window.generateExactVerseImageBlob = function(customRatio) {
       ctx.stroke();
       ctx.restore();
 
-      let startY = cardY + 54;
+      let startY = cardY + 58;
 
       // Card Header: Reference
       ctx.direction = "ltr";
-      ctx.font = "700 36px 'Lora', 'Playfair Display', Georgia, serif";
+      ctx.font = "700 38px 'Lora', 'Playfair Display', Georgia, serif";
       ctx.fillStyle = "#ffffff";
       ctx.shadowColor = "rgba(0,0,0,0.6)";
       ctx.shadowBlur = 10;
       const refStr = displayRef;
       const refW = ctx.measureText(refStr).width;
       ctx.fillText(refStr, Math.round((canvas.width - refW) / 2), startY);
-      startY += 36;
+      startY += 38;
 
       // Divider Line inside card
       ctx.strokeStyle = "rgba(255, 255, 255, 0.25)";
@@ -22407,7 +22454,7 @@ window.generateExactVerseImageBlob = function(customRatio) {
       ctx.moveTo(cardX + 28, startY);
       ctx.lineTo(cardX + cardW - 28, startY);
       ctx.stroke();
-      startY += 48;
+      startY += 52;
 
       // Verse Body in Card
       ctx.font = font;
@@ -22422,7 +22469,7 @@ window.generateExactVerseImageBlob = function(customRatio) {
        STYLE 11: LION OF JUDAH SPLIT-SCREEN (Psalm 82:6 Aesthetic)
        ========================================================================== */
     } else if (layoutMode === "lion-split") {
-      const splitX = Math.round(canvas.width * 0.52);
+      const splitX = Math.round(canvas.width * 0.48);
 
       // White right canvas
       ctx.fillStyle = "#ffffff";
@@ -22453,21 +22500,21 @@ window.generateExactVerseImageBlob = function(customRatio) {
       const rightX = splitX + 36;
       const rightW = canvas.width - rightX - 36;
 
-      let startY = Math.round(canvas.height * (ratio === 'story' ? 0.22 : 0.18));
+      let startY = Math.round(canvas.height * (ratio === 'story' ? 0.20 : 0.16));
 
       // Huge Impact Headline
       ctx.direction = "ltr";
-      ctx.font = "900 84px 'Outfit', sans-serif";
+      ctx.font = "900 86px 'Outfit', sans-serif";
       ctx.fillStyle = "#0f172a";
       ctx.shadowBlur = 0;
       const leadWord = isMarathi ? "धैर्यवान." : "BE BOLD.";
       ctx.fillText(leadWord, rightX, startY);
-      startY += 78;
+      startY += 82;
 
-      ctx.font = "800 24px 'Outfit', sans-serif";
+      ctx.font = "800 26px 'Outfit', sans-serif";
       ctx.fillStyle = "#d97706";
       ctx.fillText(isMarathi ? "✦ सिंहासारखे ख्रिस्तामध्ये ✦" : "✦ AS BOLD AS A LION ✦", rightX, startY);
-      startY += 40;
+      startY += 44;
 
       // Divider line
       ctx.strokeStyle = "rgba(15, 23, 42, 0.18)";
@@ -22476,46 +22523,46 @@ window.generateExactVerseImageBlob = function(customRatio) {
       ctx.moveTo(rightX, startY);
       ctx.lineTo(rightX + rightW, startY);
       ctx.stroke();
-      startY += 40;
+      startY += 44;
 
       // Verse Body on white right
-      const font = `700 36px ${isMarathi ? "'Noto Sans Devanagari', 'Poppins'" : "'Outfit', sans-serif"}`;
+      const font = `700 44px ${isMarathi ? "'Noto Sans Devanagari', 'Poppins'" : "'Outfit', sans-serif"}`;
       const lines = wrapText(displayText, rightW, font);
-      const lineH = 54;
+      const lineH = 64;
       ctx.font = font;
       ctx.fillStyle = "#1e293b";
       for (let i = 0; i < lines.length; i++) {
         ctx.fillText(lines[i], rightX, startY + (i * lineH));
       }
-      startY += (lines.length * lineH) + 32;
+      startY += (lines.length * lineH) + 36;
 
       // Reference on Lion side bottom-left
-      ctx.font = "800 28px 'Outfit', sans-serif";
+      ctx.font = "800 32px 'Outfit', sans-serif";
       ctx.fillStyle = "#ffffff";
       ctx.shadowColor = "rgba(0,0,0,0.95)";
       ctx.shadowBlur = 16;
-      ctx.fillText(displayRef, 48, canvas.height - (ratio === 'story' ? 240 : 160));
+      ctx.fillText(displayRef, 48, canvas.height - (ratio === 'story' ? 360 : 200));
 
     /* ==========================================================================
        STYLE 12: DAVID & GOLIATH CINEMATIC SLINGSHOT (1 Samuel 17:47 Aesthetic)
        ========================================================================== */
     } else if (layoutMode === "slingshot-battle") {
-      let startY = Math.round(canvas.height * (ratio === 'story' ? 0.44 : 0.38));
+      let startY = Math.round(canvas.height * (ratio === 'story' ? 0.40 : 0.34));
 
       ctx.direction = "ltr";
       // Cinematic Key Phrase above sling cords
-      ctx.font = "700 50px 'Lora', 'Playfair Display', Georgia, serif";
+      ctx.font = "700 54px 'Lora', 'Playfair Display', Georgia, serif";
       ctx.fillStyle = "#ffffff";
       ctx.shadowColor = "rgba(0,0,0,0.95)";
       ctx.shadowBlur = 24;
       const keyPhrase = isMarathi ? "लढाई परमेश्वराची आहे." : "The battle is the Lord's.";
       const phraseW = ctx.measureText(keyPhrase).width;
       ctx.fillText(keyPhrase, Math.round((canvas.width - phraseW) / 2), startY);
-      startY += 48;
+      startY += 52;
 
       // Scripture Verse Body
       const maxW = 900;
-      let fontSize = (ratio === 'story') ? 40 : 36;
+      let fontSize = (ratio === 'story') ? 50 : 44;
       const font = `700 ${fontSize}px ${isMarathi ? "'Noto Serif Devanagari', serif" : "'Lora', Georgia, serif"}`;
       const lines = wrapText(displayText, maxW, font);
       const lineH = Math.round(fontSize * 1.54);
@@ -22527,10 +22574,10 @@ window.generateExactVerseImageBlob = function(customRatio) {
         const lineW = ctx.measureText(lines[i]).width;
         ctx.fillText(lines[i], Math.round((canvas.width - lineW) / 2), startY + (i * lineH));
       }
-      startY += (lines.length * lineH) + 32;
+      startY += (lines.length * lineH) + 36;
 
       // Reference in Glowing Amber Gold
-      ctx.font = "800 30px 'Outfit', sans-serif";
+      ctx.font = "800 34px 'Outfit', sans-serif";
       ctx.fillStyle = "#fde047";
       ctx.shadowBlur = 18;
       const refStr = displayRef;
@@ -22544,61 +22591,83 @@ window.generateExactVerseImageBlob = function(customRatio) {
       renderLuminousScreenLayout();
     }
 
-    // 4. Centered River of Life Watermark Badge at Bottom
+    // 4. River of Life App Official Advertisement & Watermark (Placed in WhatsApp Status Safe Zone)
     ctx.save();
     const isLightBg = (layoutMode === "watercolor-pill" || layoutMode === "boarding-pass");
-    const titleStr = "River of Life Bible";
-    const subStr = "जीवन नदी बायबल ॲप • © River of Life";
 
-    const titleFont = (ratio === 'story') ? "800 26px 'Outfit', sans-serif" : "800 22px 'Outfit', sans-serif";
-    const subFont = (ratio === 'story') ? "700 16px 'Noto Serif Devanagari', sans-serif" : "700 14px 'Noto Serif Devanagari', sans-serif";
-
-    ctx.font = titleFont;
-    const titleMetrics = ctx.measureText(titleStr);
-    ctx.font = subFont;
-    const subMetrics = ctx.measureText(subStr);
-    const maxTextW = Math.max(titleMetrics.width, subMetrics.width);
-
-    const logoSize = (ratio === 'story') ? 54 : 46;
-    const padX = (ratio === 'story') ? 22 : 18;
-    const gapLogo = (ratio === 'story') ? 16 : 14;
-    const badgeW = Math.round((logoImg ? (logoSize + gapLogo) : 0) + maxTextW + (padX * 2) + 6);
-    const badgeH = (ratio === 'story') ? 90 : 76;
+    const badgeW = (ratio === 'story') ? 860 : 780;
+    const badgeH = (ratio === 'story') ? 116 : 96;
     const badgeX = Math.round((canvas.width - badgeW) / 2);
-    const badgeY = canvas.height - badgeH - (ratio === 'story' ? 100 : 30);
+    // Placed in safe zone: 210px from bottom for WhatsApp Story (completely avoids bottom Reply input bar)
+    const badgeY = canvas.height - badgeH - (ratio === 'story' ? 210 : 36);
 
-    ctx.fillStyle = isLightBg ? "rgba(255, 255, 255, 0.92)" : "rgba(10, 16, 30, 0.88)";
-    ctx.strokeStyle = isLightBg ? "rgba(14, 116, 144, 0.35)" : "rgba(251, 191, 36, 0.45)";
+    // Frosted dark card background with gold accent border
+    ctx.fillStyle = isLightBg ? "rgba(255, 255, 255, 0.96)" : "rgba(8, 14, 28, 0.90)";
+    ctx.strokeStyle = isLightBg ? "rgba(14, 116, 144, 0.55)" : "rgba(251, 191, 36, 0.60)";
     ctx.lineWidth = 2;
+    ctx.shadowColor = "rgba(0, 0, 0, 0.75)";
+    ctx.shadowBlur = 24;
 
     ctx.beginPath();
     if (typeof ctx.roundRect === 'function') {
-      ctx.roundRect(badgeX, badgeY, badgeW, badgeH, (ratio === 'story' ? 22 : 18));
+      ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 26);
     } else {
       ctx.rect(badgeX, badgeY, badgeW, badgeH);
     }
     ctx.fill();
     ctx.stroke();
+    ctx.shadowBlur = 0;
 
-    const logoX = badgeX + padX;
+    // App Logo / Emblem on Left
+    const logoSize = (ratio === 'story') ? 72 : 60;
+    const logoPadX = 26;
+    const logoX = badgeX + logoPadX;
     const logoY = badgeY + Math.round((badgeH - logoSize) / 2);
 
     if (logoImg) {
       ctx.drawImage(logoImg, logoX, logoY, logoSize, logoSize);
+    } else {
+      // Elegant circular fallback icon with glowing gold cross
+      ctx.fillStyle = "rgba(251, 191, 36, 0.2)";
+      ctx.strokeStyle = "#fbbf24";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(logoX + logoSize / 2, logoY + logoSize / 2, logoSize / 2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.direction = "ltr";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.font = "bold 34px sans-serif";
+      ctx.fillStyle = "#fbbf24";
+      ctx.fillText("✝", logoX + logoSize / 2, logoY + logoSize / 2);
     }
 
+    // Stacked Advertisement & Branding Typography
+    const textStartX = logoX + logoSize + 22;
     ctx.direction = "ltr";
     ctx.textAlign = "left";
     ctx.textBaseline = "middle";
 
-    const textX = (logoImg ? (logoX + logoSize + gapLogo) : Math.round((canvas.width - titleMetrics.width) / 2));
+    // 1. Primary App Name
+    ctx.font = (ratio === 'story') ? "800 28px 'Outfit', sans-serif" : "800 24px 'Outfit', sans-serif";
     ctx.fillStyle = isLightBg ? "#0f172a" : "#ffffff";
-    ctx.font = titleFont;
-    ctx.fillText(titleStr, textX, badgeY + (ratio === 'story' ? 30 : 25));
+    const brandTitle = "River of Life Bible App • जीवन नदी ॲप";
+    ctx.fillText(brandTitle, textStartX, badgeY + (ratio === 'story' ? 30 : 25));
 
-    ctx.fillStyle = isLightBg ? "#0e7490" : "rgba(251, 191, 36, 0.95)";
-    ctx.font = subFont;
-    ctx.fillText(subStr, textX, badgeY + (ratio === 'story' ? 60 : 50));
+    // 2. Advertisement Tagline
+    ctx.font = (ratio === 'story') ? "700 17px 'Noto Serif Devanagari', 'Outfit', sans-serif" : "700 15px 'Noto Serif Devanagari', 'Outfit', sans-serif";
+    ctx.fillStyle = isLightBg ? "#0e7490" : "#fbbf24";
+    const brandSub = "दैनिक बायबल वचन • Daily Bible Verses & Study";
+    ctx.fillText(brandSub, textStartX, badgeY + (ratio === 'story' ? 62 : 52));
+
+    // 3. Web & Free Download Callout
+    ctx.font = (ratio === 'story') ? "600 14px 'Outfit', sans-serif" : "600 13px 'Outfit', sans-serif";
+    ctx.fillStyle = isLightBg ? "#64748b" : "rgba(255, 255, 255, 0.75)";
+    const brandAd = "विनामूल्य बायबल ॲप • Free Bible App • riveroflifebible.com";
+    ctx.fillText(brandAd, textStartX, badgeY + (ratio === 'story' ? 90 : 76));
+
     ctx.restore();
 
     const safeRefCode = ((vod && vod.engRef) ? vod.engRef : 'Daily_Verse').replace(/[^a-zA-Z0-9]/g, "_");
@@ -25085,8 +25154,8 @@ window.generateExactBwodImageBlob = async function() {
     ctx.shadowBlur = 0;
   }
 
-  // Footer Branding Section (Fixed Anchor at bottom)
-  const FY = 1710;
+  // Footer Branding Section (Positioned in WhatsApp Status Safe Zone)
+  const FY = 1620;
   ctx.strokeStyle = "rgba(251, 191, 36, 0.35)";
   ctx.lineWidth = 1;
   ctx.beginPath();
@@ -25274,8 +25343,8 @@ window.generateLordsPrayerStatusBlob = async function(version = 'matthew') {
     Y += (st.size === 44 ? 76 : (st.size === 38 ? 68 : 58));
   }
 
-  // Footer Branding
-  const FY = 1710;
+  // Footer Branding (Positioned in WhatsApp Status Safe Zone)
+  const FY = 1620;
   ctx.strokeStyle = "rgba(251, 191, 36, 0.35)";
   ctx.lineWidth = 1;
   ctx.beginPath();
