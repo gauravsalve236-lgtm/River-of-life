@@ -12,7 +12,7 @@
   <script>
     // Force immediate hard purge of all stale Service Workers and CacheStorage
     (function() {
-      const CURRENT_VER = "v2409_CLEAN_SHARE_CUSTOM_WALLPAPERS";
+      const CURRENT_VER = "v2410_100_HD_WALLPAPERS_SYNC";
       if (localStorage.getItem("rol_app_ver") !== CURRENT_VER) {
         localStorage.setItem("rol_app_ver", CURRENT_VER);
         if ('serviceWorker' in navigator) {
@@ -6917,7 +6917,7 @@
           <div style="display: flex; align-items: center; gap: 10px; text-align: left;">
             <span style="font-size: 22px;">🖼️</span>
             <div>
-              <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #ffffff;">70 HD Wallpapers • वॉलपेपर गॅलरी</h3>
+              <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #ffffff;">100+ HD Wallpapers • वॉलपेपर गॅलरी</h3>
               <p style="margin: 2px 0 0 0; font-size: 11px; color: #94a3b8;">Choose any scenic wallpaper for Daily Verse</p>
             </div>
           </div>
@@ -6926,13 +6926,14 @@
 
         <!-- Filter Category Tabs -->
         <div style="padding: 10px 14px; overflow-x: auto; white-space: nowrap; display: flex; gap: 6px; border-bottom: 1px solid rgba(255,255,255,0.08);" class="hide-scrollbar">
-          <button class="wallpaper-filter-btn active" onclick="filterWallpaperGallery('all', this)">All (70)</button>
-          <button class="wallpaper-filter-btn" onclick="filterWallpaperGallery('dawn', this)">🌅 Sunrise & Dawn</button>
+          <button class="wallpaper-filter-btn active" onclick="filterWallpaperGallery('all', this)">All (100+)</button>
+          <button class="wallpaper-filter-btn" onclick="filterWallpaperGallery('nature', this)">🌿 New Uploads</button>
+          <button class="wallpaper-filter-btn" onclick="filterWallpaperGallery('art', this)">🕊️ Scripture & Art</button>
           <button class="wallpaper-filter-btn" onclick="filterWallpaperGallery('mountains', this)">🏔️ Mountains</button>
           <button class="wallpaper-filter-btn" onclick="filterWallpaperGallery('water', this)">🌊 Waters & Lakes</button>
           <button class="wallpaper-filter-btn" onclick="filterWallpaperGallery('forest', this)">🌲 Forests & Paths</button>
           <button class="wallpaper-filter-btn" onclick="filterWallpaperGallery('stars', this)">✨ Night Sky & Stars</button>
-          <button class="wallpaper-filter-btn" onclick="filterWallpaperGallery('art', this)">🕊️ Spiritual Art</button>
+          <button class="wallpaper-filter-btn" onclick="filterWallpaperGallery('dawn', this)">🌅 Sunrise & Dawn</button>
         </div>
 
         <!-- Scrollable Wallpapers Grid -->

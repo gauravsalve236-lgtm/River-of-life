@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v2409_CLEAN_SHARE_CUSTOM_WALLPAPERS';
+const CACHE_NAME = 'river-of-life-cache-v2410_100_HD_WALLPAPERS_SYNC';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

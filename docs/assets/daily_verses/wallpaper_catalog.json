@@ -1,5 +1,185 @@
 [
   {
+    "file": "Bible Verse 1.jpg",
+    "name": "Bible Verse Study 1",
+    "nameMr": "बायबल वचन १",
+    "category": "art"
+  },
+  {
+    "file": "Bible Verse 2.jpg",
+    "name": "Bible Verse Study 2",
+    "nameMr": "बायबल वचन २",
+    "category": "art"
+  },
+  {
+    "file": "Bible Verse 3.jpg",
+    "name": "Bible Verse Study 3",
+    "nameMr": "बायबल वचन ३",
+    "category": "art"
+  },
+  {
+    "file": "Bible Verse 4.jpg",
+    "name": "Bible Verse Study 4",
+    "nameMr": "बायबल वचन ४",
+    "category": "art"
+  },
+  {
+    "file": "Bible Verse 5.jpg",
+    "name": "Bible Verse Study 5",
+    "nameMr": "बायबल वचन ५",
+    "category": "art"
+  },
+  {
+    "file": "Bible Verse.jpg",
+    "name": "Sacred Scripture",
+    "nameMr": "पवित्र शास्त्र",
+    "category": "art"
+  },
+  {
+    "file": "gods_power_psalm_68_28.jpg",
+    "name": "God's Mighty Power (Psalm 68:28)",
+    "nameMr": "देवाचे सामर्थ्य (स्तोत्रसंहिता ६८:२८)",
+    "category": "mountains"
+  },
+  {
+    "file": "download (1).jpg",
+    "name": "Heavenly Grace",
+    "nameMr": "स्वर्गीय कृपा",
+    "category": "nature"
+  },
+  {
+    "file": "download (2).jpg",
+    "name": "Peaceful Meadow",
+    "nameMr": "शांत कुरण",
+    "category": "forest"
+  },
+  {
+    "file": "download (3).jpg",
+    "name": "Divine Path",
+    "nameMr": "दैवी मार्ग",
+    "category": "forest"
+  },
+  {
+    "file": "download (4).jpg",
+    "name": "Living Spring",
+    "nameMr": "जिवंत झरा",
+    "category": "water"
+  },
+  {
+    "file": "download (5).jpg",
+    "name": "Radiant Light",
+    "nameMr": "तेजोमय प्रकाश",
+    "category": "stars"
+  },
+  {
+    "file": "download (6).jpg",
+    "name": "Serene Horizon",
+    "nameMr": "शांत क्षितीज",
+    "category": "water"
+  },
+  {
+    "file": "download (7).jpg",
+    "name": "Glorious Sunset",
+    "nameMr": "महिमामय संध्याकाळ",
+    "category": "nature"
+  },
+  {
+    "file": "download (8).jpg",
+    "name": "Quiet Solitude",
+    "nameMr": "शांत एकांत",
+    "category": "mountains"
+  },
+  {
+    "file": "download (9).jpg",
+    "name": "Spiritual Journey",
+    "nameMr": "आत्मिक प्रवास",
+    "category": "forest"
+  },
+  {
+    "file": "download (10).jpg",
+    "name": "Grace Abounding",
+    "nameMr": "अमर्याद कृपा",
+    "category": "nature"
+  },
+  {
+    "file": "download (11).jpg",
+    "name": "Mountain Heights",
+    "nameMr": "उंच पर्वतशिखरे",
+    "category": "mountains"
+  },
+  {
+    "file": "download (12).jpg",
+    "name": "Evening Glow",
+    "nameMr": "संध्याकाळचा प्रकाश",
+    "category": "nature"
+  },
+  {
+    "file": "download.jpg",
+    "name": "Golden Light",
+    "nameMr": "सोनेरी किरणे",
+    "category": "nature"
+  },
+  {
+    "file": "ahmetyuksek-autumn-bend-10069119.jpg",
+    "name": "Autumn River Bend",
+    "nameMr": "शरदातील नदीचे वळण",
+    "category": "forest"
+  },
+  {
+    "file": "alexander1848-night-sky-9059825.jpg",
+    "name": "Starry Night Heavens",
+    "nameMr": "चांदण्यांनी भरलेले आकाश",
+    "category": "stars"
+  },
+  {
+    "file": "fotorieth-bible-1136784.jpg",
+    "name": "Open Holy Bible",
+    "nameMr": "उघडे पवित्र बायबल",
+    "category": "art"
+  },
+  {
+    "file": "frankbeckerde-mountains-6540497.jpg",
+    "name": "Majestic Alpine Range",
+    "nameMr": "भव्य आल्प्स पर्वत",
+    "category": "mountains"
+  },
+  {
+    "file": "katrina_s-book-2378484.jpg",
+    "name": "Scripture Meditation",
+    "nameMr": "वचनाचे मनन",
+    "category": "art"
+  },
+  {
+    "file": "kriemer-verbena-7504222.jpg",
+    "name": "Blooming Verbena",
+    "nameMr": "फुललेली फुले",
+    "category": "nature"
+  },
+  {
+    "file": "ronaldplett-lightning-7690741.jpg",
+    "name": "Almighty Lightning",
+    "nameMr": "सर्वसमर्थ वीज व मेघगर्जना",
+    "category": "mountains"
+  },
+  {
+    "file": "ryank14-cross-7721276.jpg",
+    "name": "Cross on the Hill",
+    "nameMr": "टेकडीवरील वधस्तंभ",
+    "category": "art"
+  },
+  {
+    "file": "wyxina-rose-9059411.jpg",
+    "name": "Rose of Sharon",
+    "nameMr": "शारोनाचे गुलाब",
+    "category": "nature"
+  },
+  {
+    "file": "yuri_b-sunflowers-3292932.jpg",
+    "name": "Sunflowers in Field",
+    "nameMr": "सूर्यफुलांचे शेत",
+    "category": "nature"
+  },
+  {
     "file": "autumn_golden_forest.jpg",
     "name": "Autumn Canopy",
     "nameMr": "सोनेरी शरद ऋतू",
