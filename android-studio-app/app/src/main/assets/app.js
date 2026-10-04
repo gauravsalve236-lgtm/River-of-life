@@ -18175,6 +18175,9 @@ let vodAutoRotateTimer = null;
 
 function getVodImageUrl(imgName) {
   if (!imgName) return 'assets/daily_verses/stars.png';
+  if (imgName.startsWith('data:') || imgName.startsWith('blob:') || imgName.startsWith('http://') || imgName.startsWith('https://')) {
+    return imgName;
+  }
   if (imgName.includes('.')) return `assets/daily_verses/${imgName}`;
   return `assets/daily_verses/${imgName}.png`;
 }
@@ -18192,6 +18195,60 @@ window.loadDailyVersesManifest = async function() {
   } catch (err) {
     console.log('[Daily Verses] Using default wallpaper image list');
   }
+
+  // Auto-discover zero-code drop-in outsourced wallpapers in assets/daily_verses/
+  const dropInCandidates = [
+    'today.jpg', 'today.png', 'today.jpeg', 'today.webp',
+    'custom.jpg', 'custom.png', 'custom.jpeg', 'custom.webp',
+    'daily_verse_custom.jpg', 'daily_verse_custom.png',
+    'wallpaper_custom.jpg', 'wallpaper_custom.png'
+  ];
+
+  for (const candidate of dropInCandidates) {
+    try {
+      const probeRes = await fetch(`assets/daily_verses/${candidate}?t=${Date.now()}`, { method: 'HEAD' });
+      if (probeRes.ok) {
+        if (!window.dailyVersesImageList.includes(candidate)) {
+          window.dailyVersesImageList.unshift(candidate);
+          console.log(`[Daily Verses] Auto-discovered drop-in outsourced wallpaper: ${candidate}`);
+        }
+      }
+    } catch(e) {}
+  }
+};
+
+window.handleVodCustomWallpaperUpload = function(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const dataUrl = e.target.result;
+    window.currentDailyVerseImage = dataUrl;
+    try {
+      localStorage.setItem("rol_selected_wallpaper", dataUrl);
+    } catch(err) {}
+
+    // 1. Update Fullscreen VOD modal background
+    const fsBgEl = document.getElementById("fs-vod-capsule-bg");
+    if (fsBgEl) fsBgEl.style.backgroundImage = `url('${dataUrl}')`;
+    const fsCapsule = document.querySelector(".fullscreen-vod-capsule");
+    if (fsCapsule) fsCapsule.style.backgroundImage = `url('${dataUrl}')`;
+    const bgDynamic = document.getElementById("vod-dynamic-bg");
+    if (bgDynamic) bgDynamic.style.backgroundImage = `url('${dataUrl}')`;
+
+    // 2. Update Home verse card background
+    const bgHome = document.getElementById("card-daily-verse-home");
+    if (bgHome) bgHome.style.backgroundImage = `url('${dataUrl}')`;
+
+    // 3. Update preview thumbnail
+    const thumbImg = document.getElementById("vod-thumbnail-preview");
+    if (thumbImg) thumbImg.src = dataUrl;
+
+    if (typeof showToast === "function") {
+      showToast("✨ सानुकूल वॉलपेपर सेट केला! (Custom wallpaper applied)");
+    }
+  };
+  reader.readAsDataURL(file);
 };
 
 window.switchVodWallpaper = function(imageName, btnEl) {
@@ -21375,7 +21432,12 @@ window.generateExactVerseImageBlob = function(customRatio) {
     if (fsBgEl && fsBgEl.style.backgroundImage) {
       const match = fsBgEl.style.backgroundImage.match(/url\(['"]?(.*?)['"]?\)/);
       if (match && match[1]) {
-        imgFileName = match[1].split('/').pop().replace(/['"]/g, '');
+        const rawUrl = match[1].replace(/['"]/g, '');
+        if (rawUrl.startsWith('data:') || rawUrl.startsWith('blob:') || rawUrl.startsWith('http')) {
+          imgFileName = rawUrl;
+        } else {
+          imgFileName = rawUrl.split('/').pop();
+        }
       }
     }
     if (!imgFileName) {
@@ -21389,7 +21451,12 @@ window.generateExactVerseImageBlob = function(customRatio) {
       if (homeCard && homeCard.style.backgroundImage) {
         const match = homeCard.style.backgroundImage.match(/url\(['"]?(.*?)['"]?\)/);
         if (match && match[1]) {
-          imgFileName = match[1].split('/').pop().replace(/['"]/g, '');
+          const rawUrl = match[1].replace(/['"]/g, '');
+          if (rawUrl.startsWith('data:') || rawUrl.startsWith('blob:') || rawUrl.startsWith('http')) {
+            imgFileName = rawUrl;
+          } else {
+            imgFileName = rawUrl.split('/').pop();
+          }
         }
       }
     }
@@ -21398,7 +21465,11 @@ window.generateExactVerseImageBlob = function(customRatio) {
       const imgIdx = (typeof window.currentVodImageIndex === 'number') ? window.currentVodImageIndex : (((dayOfYear + offset) % images.length + images.length) % images.length);
       imgFileName = images[imgIdx];
     }
-    const imgUrl = (typeof getVodImageUrl === "function") ? getVodImageUrl(imgFileName) : (imgFileName.includes('.') ? `assets/daily_verses/${imgFileName}` : `assets/daily_verses/${imgFileName}.png`);
+    const imgUrl = (typeof getVodImageUrl === "function") 
+      ? getVodImageUrl(imgFileName) 
+      : ((imgFileName && (imgFileName.startsWith('data:') || imgFileName.startsWith('http'))) 
+          ? imgFileName 
+          : (imgFileName && imgFileName.includes('.') ? `assets/daily_verses/${imgFileName}` : `assets/daily_verses/${imgFileName}.png`));
 
     if (document.fonts && document.fonts.ready) {
       try {
@@ -22397,8 +22468,7 @@ window.saveExactDailyVerseImage = async function() {
     if (isMobile && navigator.canShare && navigator.canShare({ files: [file] })) {
       try {
         await navigator.share({
-          files: [file],
-          title: "River of Life - Daily Verse"
+          files: [file]
         });
         showToast("✨ फोटो गॅलरीमध्ये सेव्ह / शेअर केला!");
         return;
@@ -22565,9 +22635,7 @@ window.shareRenderedVodImage = async function() {
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         try {
           await navigator.share({
-            files: [file],
-            title: "River of Life - Daily Bible Verse",
-            text: "आजचे दैनिक वचन • River of Life Bible"
+            files: [file]
           });
           showToast("✨ व्हॉट्सॲपवर शेअर केले!");
           return;
@@ -22598,8 +22666,7 @@ window.shareDailyVerseToWhatsApp = async function() {
     // 1. Try Native Web Share API with ONLY the image file (Pure clean image without duplicate side-text)
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       await navigator.share({
-        files: [file],
-        title: "River of Life - Daily Verse"
+        files: [file]
       });
       showToast("✨ व्हॉट्सॲपवर यशस्वीरीत्या शेअर केले!");
       return;
@@ -22609,8 +22676,7 @@ window.shareDailyVerseToWhatsApp = async function() {
     if (navigator.share) {
       try {
         await navigator.share({
-          files: [file],
-          title: "River of Life - Daily Verse"
+          files: [file]
         });
         showToast("✨ व्हॉट्सॲपवर यशस्वीरीत्या शेअर केले!");
         return;
@@ -25107,12 +25173,10 @@ window.shareBwodToWhatsApp = async function() {
     const { blob, filename } = await generateExactBwodImageBlob();
     const file = new File([blob], filename, { type: "image/png", lastModified: Date.now() });
 
-    // 1. Try Native Web Share API with image file and clean status caption
+    // 1. Try Native Web Share API with image file cleanly (No duplicate status caption)
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       await navigator.share({
-        files: [file],
-        title: isEng ? `Word of the Day: ${word.term}` : `आजचा पवित्र शब्द: ${word.term}`,
-        text: statusCaption
+        files: [file]
       });
       showToast(isEng ? "✅ Shared to WhatsApp!" : "✅ WhatsApp वर शेअर केले!");
       return;
@@ -25121,9 +25185,7 @@ window.shareBwodToWhatsApp = async function() {
     if (navigator.share) {
       try {
         await navigator.share({
-          files: [file],
-          title: isEng ? `Word of the Day: ${word.term}` : `आजचा पवित्र शब्द: ${word.term}`,
-          text: statusCaption
+          files: [file]
         });
         showToast(isEng ? "✅ Shared to WhatsApp!" : "✅ WhatsApp वर शेअर केले!");
         return;
