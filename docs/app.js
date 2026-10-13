@@ -21684,123 +21684,85 @@ window.generateExactVerseImageBlob = function(customRatio) {
       drawCelestialFallback();
     }
 
-    // 2. Wrap Text Utilities with Golden Keyword Highlighting Support
-    function tokenizeVodText(text, isEng) {
-      if (!text) return [];
+    // 2. High-Precision Centered Text & Golden Keyword Utilities
+    const CX = Math.round(canvas.width / 2);
+
+    const ltrFillCenter = (text, y, font = null, color = null, shadowColor = null, shadowBlur = 0) => {
+      if (!text) return { sx: CX, tw: 0 };
+      ctx.save();
+      if (font) ctx.font = font;
+      if (color) ctx.fillStyle = color;
+      if (shadowColor) ctx.shadowColor = shadowColor;
+      if (shadowBlur) ctx.shadowBlur = shadowBlur;
+      ctx.direction = "ltr";
+      ctx.textAlign = "left";
+      ctx.textBaseline = "middle";
+      const str = String(text).trim();
+      const tw = ctx.measureText(str).width;
+      const sx = Math.round(CX - (tw / 2));
+      ctx.fillText(str, sx, y);
+      ctx.restore();
+      return { sx, tw };
+    };
+
+    function wrapText(text, maxW, font) {
+      ctx.save();
+      ctx.font = font;
+      ctx.direction = "ltr";
+      const words = String(text || "").trim().split(/\s+/);
+      const lines = [];
+      let cur = "";
+      for (let i = 0; i < words.length; i++) {
+        const test = cur ? (cur + " " + words[i]) : words[i];
+        if (ctx.measureText(test).width > maxW && cur) {
+          lines.push(cur.trim());
+          cur = words[i];
+        } else {
+          cur = test;
+        }
+      }
+      if (cur.trim()) lines.push(cur.trim());
+      ctx.restore();
+      return lines;
+    }
+
+    function highlightKeywordsInLine(lineStr, startX, y, isEng, font) {
       const kwList = isEng ? [
         "Armor of God", "Holy Spirit", "God", "Lord", "Jesus", "Christ", "Light", "Peace", "Strength", "Faith", "Salvation", "Grace"
       ] : [
-        "देवाची शस्त्रसामग्री", "संपूर्ण शस्त्रसामग्री", "शस्त्रसामग्री",
+        "देवाची संपूर्ण शस्त्रसामग्री", "देवाची शस्त्रसामग्री", "संपूर्ण शस्त्रसामग्री", "शस्त्रसामग्री",
         "सार्वकालिक जीवन", "पवित्र आत्मा", "परमेश्वर", "ख्रिस्त", "येशू",
         "कल्याणकारक", "नीतिमत्त्व", "सहनशीलता", "चांगुलपणा", "विश्वासूपणा",
         "मार्गदर्शक", "सामर्थ्य", "विश्वास", "शांती", "तारण", "कृपा", "प्रकाश"
       ];
       kwList.sort((a, b) => b.length - a.length);
 
-      const pattern = isEng 
-        ? new RegExp(`(?<![a-zA-Z])(${kwList.join("|")})(?![a-zA-Z])`, 'gi')
-        : new RegExp(`(?<![\\u0900-\\u097F])(${kwList.join("|")})(?![\\u0900-\\u097F])`, 'g');
-
-      const parts = text.split(pattern);
-      const tokens = [];
-      for (let part of parts) {
-        if (!part) continue;
-        const isKw = kwList.some(kw => isEng ? kw.toLowerCase() === part.toLowerCase() : kw === part);
-        const wordParts = part.split(/(\s+)/);
-        for (let wp of wordParts) {
-          if (!wp) continue;
-          tokens.push({ text: wp, isGold: isKw });
-        }
-      }
-      return tokens;
-    }
-
-    function wrapTokens(tokens, maxW, font) {
-      ctx.font = font;
-      const lines = [];
-      let curLine = [];
-      let curLineW = 0;
-
-      for (let token of tokens) {
-        const isWhitespace = /^\s+$/.test(token.text);
-        if (curLine.length === 0 && isWhitespace) continue;
-
-        const tokenW = ctx.measureText(token.text).width;
-
-        if (curLineW + tokenW > maxW && curLine.length > 0 && !isWhitespace) {
-          while (curLine.length > 0 && /^\s+$/.test(curLine[curLine.length - 1].text)) {
-            curLine.pop();
-          }
-          lines.push(curLine);
-          curLine = [token];
-          curLineW = tokenW;
-        } else {
-          curLine.push(token);
-          curLineW += tokenW;
-        }
-      }
-
-      if (curLine.length > 0) {
-        while (curLine.length > 0 && /^\s+$/.test(curLine[curLine.length - 1].text)) {
-          curLine.pop();
-        }
-        if (curLine.length > 0) {
-          lines.push(curLine);
-        }
-      }
-
-      return lines;
-    }
-
-    function drawTokenizedLines(lines, startY, lineH, font) {
-      ctx.font = font;
-      ctx.direction = "ltr";
-      ctx.textBaseline = "middle";
-
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
-        let totalW = 0;
-        for (let t of line) {
-          totalW += ctx.measureText(t.text).width;
-        }
-
-        let curX = Math.round((canvas.width - totalW) / 2);
-        const curY = startY + (i * lineH);
-
-        for (let t of line) {
-          ctx.save();
-          if (t.isGold) {
+      for (const kw of kwList) {
+        let searchFrom = 0;
+        while (true) {
+          const idx = isEng ? lineStr.toLowerCase().indexOf(kw.toLowerCase(), searchFrom) : lineStr.indexOf(kw, searchFrom);
+          if (idx === -1) break;
+          const before = idx > 0 ? lineStr[idx - 1] : " ";
+          const after = (idx + kw.length < lineStr.length) ? lineStr[idx + kw.length] : " ";
+          const isWordBoundary = /[\s,.;:!?\u0964\u0965"'“”‘’()—\-]/.test(before) && /[\s,.;:!?\u0964\u0965"'“”‘’()—\-]/.test(after);
+          if (isWordBoundary) {
+            const prefix = lineStr.substring(0, idx);
+            const matchText = lineStr.substring(idx, idx + kw.length);
+            ctx.save();
+            ctx.font = font;
+            ctx.direction = "ltr";
+            ctx.textAlign = "left";
+            ctx.textBaseline = "middle";
+            const pw = ctx.measureText(prefix).width;
             ctx.fillStyle = "#fbbf24";
-            ctx.shadowColor = "rgba(251, 191, 36, 0.6)";
+            ctx.shadowColor = "rgba(251, 191, 36, 0.85)";
             ctx.shadowBlur = 20;
-          } else {
-            ctx.fillStyle = "#ffffff";
-            ctx.shadowColor = "rgba(0, 0, 0, 0.98)";
-            ctx.shadowBlur = 24;
+            ctx.fillText(matchText, startX + pw, y);
+            ctx.restore();
           }
-          ctx.fillText(t.text, curX, curY);
-          ctx.restore();
-          curX += ctx.measureText(t.text).width;
+          searchFrom = idx + kw.length;
         }
       }
-    }
-
-    function wrapText(text, maxW, font) {
-      ctx.font = font;
-      const words = text.split(/\s+/);
-      const lines = [];
-      let cur = "";
-      for (let w of words) {
-        let test = cur ? `${cur} ${w}` : w;
-        if (ctx.measureText(test).width > maxW && cur) {
-          lines.push(cur.trim());
-          cur = w;
-        } else {
-          cur = test;
-        }
-      }
-      if (cur) lines.push(cur.trim());
-      return lines;
     }
 
     // Unified Luminous Screen-Matched Typography Engine (Large commanding text utilizing the wallpaper beautifully)
@@ -21815,7 +21777,7 @@ window.generateExactVerseImageBlob = function(customRatio) {
       ctx.fillStyle = overlayGrad;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Subtle atmospheric center radial vignette for dramatic movie-poster readability
+      // Subtle atmospheric center radial vignette for dramatic readability
       const radGrad = ctx.createRadialGradient(canvas.width / 2, canvas.height * 0.48, 100, canvas.width / 2, canvas.height * 0.48, 700);
       radGrad.addColorStop(0, "rgba(0, 0, 0, 0.45)");
       radGrad.addColorStop(0.7, "rgba(0, 0, 0, 0.25)");
@@ -21823,32 +21785,29 @@ window.generateExactVerseImageBlob = function(customRatio) {
       ctx.fillStyle = radGrad;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Balanced width for natural word wraps that expand vertically
-      const maxW = 900;
+      const maxW = 880;
       let fontSize;
       let lineH;
 
-      // Generous, large typography so verse covers most of the wallpaper and avoids awkward empty spaces
       if (displayText.length <= 60) {
-        fontSize = 86;
-        lineH = 138;
+        fontSize = 82;
+        lineH = 132;
       } else if (displayText.length <= 110) {
-        fontSize = 76;
-        lineH = 122;
+        fontSize = 72;
+        lineH = 118;
       } else if (displayText.length <= 170) {
-        fontSize = 66;
-        lineH = 106;
+        fontSize = 62;
+        lineH = 102;
       } else if (displayText.length <= 240) {
-        fontSize = 56;
-        lineH = 92;
+        fontSize = 52;
+        lineH = 88;
       } else {
-        fontSize = 48;
-        lineH = 80;
+        fontSize = 44;
+        lineH = 76;
       }
 
       const font = `700 ${fontSize}px ${isMarathi ? "'Noto Serif Devanagari', 'Rozha One', Georgia, serif" : "'Playfair Display', 'Lora', Georgia, serif"}`;
-      const tokens = tokenizeVodText(displayText, !isMarathi);
-      const lines = wrapTokens(tokens, maxW, font);
+      const lines = wrapText(displayText, maxW, font);
 
       const tagH = 44;
       const gapTagQuote = 24;
@@ -21860,7 +21819,6 @@ window.generateExactVerseImageBlob = function(customRatio) {
 
       const totalBlockH = tagH + gapTagQuote + quoteH + gapQuoteText + textH + gapTextRef + refH;
 
-      // Safe bounds: top status bar safe zone (Y = 190) and bottom watermark card safe zone (Y = 1560)
       const topSafe = 190;
       const bottomSafe = 1560;
       const availableH = bottomSafe - topSafe;
@@ -21900,7 +21858,7 @@ window.generateExactVerseImageBlob = function(customRatio) {
       ctx.restore();
       curY += tagH + gapTagQuote;
 
-      // 2. Elegant Golden Quotation Mark (prominent, majestic)
+      // 2. Elegant Golden Quotation Mark
       ctx.save();
       ctx.direction = "ltr";
       ctx.font = "600 88px Georgia, 'Playfair Display', serif";
@@ -21913,8 +21871,16 @@ window.generateExactVerseImageBlob = function(customRatio) {
       ctx.restore();
       curY += quoteH + gapQuoteText;
 
-      // 3. Central Scripture Verse Body with Illuminated Keywords
-      drawTokenizedLines(lines, curY + Math.round(lineH / 2), lineH, font);
+      // 3. Central Scripture Verse Body with 100% Guaranteed Centering
+      ctx.save();
+      ctx.font = font;
+      for (let i = 0; i < lines.length; i++) {
+        const lineY = curY + (i * lineH) + Math.round(lineH / 2);
+        const lineStr = lines[i];
+        const { sx } = ltrFillCenter(lineStr, lineY, font, "#ffffff", "rgba(0, 0, 0, 0.98)", 24);
+        highlightKeywordsInLine(lineStr, sx, lineY, !isMarathi, font);
+      }
+      ctx.restore();
       curY += textH + gapTextRef;
 
       // 4. Scripture Reference with flanking Golden Accent Lines
@@ -21967,37 +21933,31 @@ window.generateExactVerseImageBlob = function(customRatio) {
     /* ==========================================================================
        STYLE 2: WATERCOLOR FINE ART & SOLID PILL (Moses Red Sea Watercolor)
        ========================================================================== */
+    /* ==========================================================================
+       STYLE 2: WATERCOLOR FINE ART & SOLID PILL (Centered)
+       ========================================================================== */
     } else if (layoutMode === "watercolor-pill") {
-      // Clean cream paper on top, Moses parting Red Sea at bottom
-      const maxW = (ratio === 'story') ? 880 : 920;
-      let fontSize = (ratio === 'story') ? (displayText.length > 120 ? 56 : 66) : (displayText.length > 120 ? 48 : 56);
+      const maxW = 880;
+      let fontSize = (displayText.length > 120 ? 56 : 66);
       const font = `700 ${fontSize}px ${isMarathi ? "'Noto Serif Devanagari', 'Rozha One', serif" : "'Lora', Georgia, serif"}`;
       const lines = wrapText(displayText, maxW, font);
       const lineH = Math.round(fontSize * 1.55);
 
-      let startY = Math.round(canvas.height * (ratio === 'story' ? 0.16 : 0.12));
+      let startY = Math.round(canvas.height * 0.16);
 
-      // Header Serif Intro
-      ctx.direction = "ltr";
-      ctx.font = "italic 600 30px 'Lora', 'Noto Serif Devanagari', Georgia, serif";
-      ctx.fillStyle = "#334155";
-      ctx.shadowBlur = 0;
+      // Header Serif Intro - Centered
       const introStr = isMarathi ? "कारण परमेश्वरासाठी" : "For with God";
-      const introW = ctx.measureText(introStr).width;
-      ctx.fillText(introStr, Math.round((canvas.width - introW) / 2), startY);
+      const introFont = "italic 600 30px 'Lora', 'Noto Serif Devanagari', Georgia, serif";
+      ltrFillCenter(introStr, startY, introFont, "#334155");
       startY += 58;
 
-      // Verse Body in Deep Slate Navy
-      ctx.font = font;
-      ctx.fillStyle = "#0f172a";
+      // Verse Body in Deep Slate Navy - Centered
       for (let i = 0; i < lines.length; i++) {
-        const lineStr = lines[i];
-        const lineW = ctx.measureText(lineStr).width;
-        ctx.fillText(lineStr, Math.round((canvas.width - lineW) / 2), startY + (i * lineH));
+        ltrFillCenter(lines[i], startY + (i * lineH), font, "#0f172a");
       }
       startY += (lines.length * lineH) + 42;
 
-      // Solid Teal/Navy Pill Reference Badge
+      // Solid Teal/Navy Pill Reference Badge - Centered
       const refStr = displayRef;
       ctx.font = "800 28px 'Outfit', sans-serif";
       const pillTextW = ctx.measureText(refStr).width;
@@ -22017,135 +21977,98 @@ window.generateExactVerseImageBlob = function(customRatio) {
 
       ctx.fillStyle = "#ffffff";
       ctx.shadowBlur = 0;
-      ctx.fillText(refStr, pillX + 28, pillY + 38);
+      ctx.direction = "ltr";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(refStr, Math.round(canvas.width / 2), pillY + Math.round(pillH / 2));
       ctx.restore();
 
     /* ==========================================================================
-       STYLE 3: EDITORIAL VERTICAL POSTER (Forest Sunset)
+       STYLE 3: EDITORIAL POSTER (Centered Sunset Editorial)
        ========================================================================== */
     } else if (layoutMode === "editorial-vertical") {
-      // Soft vignette on right
-      const grad = ctx.createLinearGradient(0, 0, canvas.width, 0);
-      grad.addColorStop(0, 'rgba(10, 15, 25, 0.4)');
-      grad.addColorStop(0.35, 'rgba(10, 15, 25, 0.2)');
-      grad.addColorStop(1, 'rgba(8, 12, 20, 0.7)');
+      const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      grad.addColorStop(0, 'rgba(10, 15, 25, 0.65)');
+      grad.addColorStop(0.3, 'rgba(10, 15, 25, 0.35)');
+      grad.addColorStop(0.7, 'rgba(8, 12, 20, 0.60)');
+      grad.addColorStop(1, 'rgba(6, 10, 18, 0.95)');
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // 3a. Giant Vertical Editorial Title rotated 90 degrees along left
-      ctx.save();
-      const vertTitle = isMarathi ? "देवाचा संकल्प." : "GOD'S PLAN.";
-      ctx.font = "900 86px 'Outfit', 'Playfair Display', serif";
-      ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
-      ctx.shadowColor = "rgba(0,0,0,0.9)";
-      ctx.shadowBlur = 18;
-      ctx.translate(140, Math.round(canvas.height * (ratio === 'story' ? 0.78 : 0.82)));
-      ctx.rotate(-Math.PI / 2);
-      ctx.fillText(vertTitle, 0, 0);
+      let startY = Math.round(canvas.height * 0.36);
 
-      // Cursive Script Accent Overlay across the vertical title
-      ctx.font = "600 48px 'Great Vibes', cursive";
-      ctx.fillStyle = "rgba(253, 230, 138, 0.95)";
-      ctx.fillText(isMarathi ? "प्रभू येशू राजा" : "Jesus is King", 40, 24);
-      ctx.restore();
+      const tagStr = isMarathi ? "✦ देवाचा संकल्प • GOD'S PLAN ✦" : "✦ GOD'S ETERNAL PLAN ✦";
+      ltrFillCenter(tagStr, startY, "800 24px 'Outfit', sans-serif", "#fde68a", "rgba(0,0,0,0.9)", 14);
+      startY += 54;
 
-      // 3b. Lower Right Scripture Content Block
-      const rightX = (ratio === 'story') ? 320 : 300;
-      const rightW = canvas.width - rightX - 50;
-      const font = `700 50px ${isMarathi ? "'Noto Serif Devanagari', serif" : "'Lora', Georgia, serif"}`;
-      const lines = wrapText(displayText, rightW, font);
-      const lineH = 74;
+      const scriptStr = isMarathi ? "“प्रभू येशू राजा”" : "“Jesus is King”";
+      ltrFillCenter(scriptStr, startY, "italic 600 42px 'Great Vibes', 'Playfair Display', cursive", "#fbbf24", "rgba(0,0,0,0.95)", 18);
+      startY += 64;
 
-      let startY = Math.round(canvas.height * (ratio === 'story' ? 0.54 : 0.48));
+      const maxW = 880;
+      let fontSize = displayText.length > 120 ? 54 : 64;
+      const font = `700 ${fontSize}px ${isMarathi ? "'Noto Serif Devanagari', serif" : "'Lora', Georgia, serif"}`;
+      const lines = wrapText(displayText, maxW, font);
+      const lineH = Math.round(fontSize * 1.54);
 
-      // Scripture Reference
-      ctx.direction = "ltr";
-      ctx.font = "800 36px 'Outfit', sans-serif";
-      ctx.fillStyle = "#fbbf24";
-      ctx.shadowColor = "rgba(0,0,0,0.95)";
-      ctx.shadowBlur = 16;
-      ctx.fillText(displayRef, rightX, startY);
-      startY += 52;
-
-      // Verse Body
-      ctx.font = font;
-      ctx.fillStyle = "#ffffff";
       for (let i = 0; i < lines.length; i++) {
-        ctx.fillText(lines[i], rightX, startY + (i * lineH));
+        ltrFillCenter(lines[i], startY + (i * lineH), font, "#ffffff", "rgba(0,0,0,0.98)", 24);
       }
+      startY += (lines.length * lineH) + 42;
+
+      ltrFillCenter(displayRef, startY, "800 36px 'Outfit', sans-serif", "#fde68a", "rgba(0,0,0,0.95)", 16);
 
     /* ==========================================================================
-       STYLE 4: WINDING GOLDEN PATH & ORNATE SWASHES
+       STYLE 4: WINDING GOLDEN PATH & ORNATE SWASHES (Centered)
        ========================================================================== */
     } else if (layoutMode === "flourish-path") {
-      // Lower 52% dark teal forest area
-      const grad = ctx.createLinearGradient(0, canvas.height * 0.44, 0, canvas.height);
+      const grad = ctx.createLinearGradient(0, canvas.height * 0.40, 0, canvas.height);
       grad.addColorStop(0, 'rgba(10, 24, 30, 0)');
       grad.addColorStop(0.35, 'rgba(10, 24, 30, 0.88)');
       grad.addColorStop(1, 'rgba(6, 16, 20, 0.97)');
       ctx.fillStyle = grad;
-      ctx.fillRect(0, canvas.height * 0.44, canvas.width, canvas.height * 0.56);
+      ctx.fillRect(0, canvas.height * 0.40, canvas.width, canvas.height * 0.60);
 
-      let startY = Math.round(canvas.height * (ratio === 'story' ? 0.54 : 0.48));
+      let startY = Math.round(canvas.height * 0.46);
 
-      ctx.direction = "ltr";
-      ctx.font = "italic 600 36px 'Great Vibes', cursive";
-      ctx.fillStyle = "#fde047";
-      ctx.shadowColor = "rgba(0,0,0,0.95)";
-      ctx.shadowBlur = 14;
       const subtitleStr = isMarathi ? "प्रकाश आणि मार्गदर्शन" : "Light to my path";
-      const subtitleW = ctx.measureText(subtitleStr).width;
-      ctx.fillText(subtitleStr, Math.round((canvas.width - subtitleW) / 2), startY);
+      ltrFillCenter(subtitleStr, startY, "italic 600 36px 'Great Vibes', cursive", "#fde047", "rgba(0,0,0,0.95)", 14);
       startY += 58;
 
-      const maxW = (ratio === 'story') ? 900 : 920;
+      const maxW = 880;
       const font = `700 58px ${isMarathi ? "'Noto Serif Devanagari', serif" : "'Playfair Display', Georgia, serif"}`;
       const lines = wrapText(displayText, maxW, font);
       const lineH = 86;
 
-      ctx.font = font;
-      ctx.fillStyle = "#ffffff";
-      ctx.shadowBlur = 22;
       for (let i = 0; i < lines.length; i++) {
-        const lineW = ctx.measureText(lines[i]).width;
-        const curLineX = Math.round((canvas.width - lineW) / 2);
-        const curLineY = startY + (i * lineH);
-        ctx.fillText(lines[i], curLineX, curLineY);
+        ltrFillCenter(lines[i], startY + (i * lineH), font, "#ffffff", "rgba(0,0,0,0.98)", 22);
       }
       startY += (lines.length * lineH) + 44;
 
-      ctx.font = "800 36px 'Outfit', sans-serif";
-      ctx.fillStyle = "#facc15";
-      const refStr = displayRef;
-      const refW = ctx.measureText(refStr).width;
-      ctx.fillText(refStr, Math.round((canvas.width - refW) / 2), startY);
+      ltrFillCenter(displayRef, startY, "800 36px 'Outfit', sans-serif", "#facc15", "rgba(0,0,0,0.95)", 16);
 
     /* ==========================================================================
-       STYLE 5: MAJESTIC SUNBEAM & TOP CATHEDRAL ARCH (Light of the World)
+       STYLE 5: MAJESTIC SUNBEAM & TOP CATHEDRAL ARCH (Centered)
        ========================================================================== */
     } else if (layoutMode === "cathedral-light") {
-      // Arch frame border on top
+      const archX = 70;
+      const archY = Math.round(canvas.height * 0.08);
+      const archW = canvas.width - 140;
+      const archH = Math.round(canvas.height * 0.50);
+
+      ctx.save();
       ctx.strokeStyle = "rgba(253, 230, 138, 0.4)";
       ctx.lineWidth = 2.5;
       ctx.beginPath();
-      const archX = 70;
-      const archY = Math.round(canvas.height * (ratio === 'story' ? 0.08 : 0.06));
-      const archW = canvas.width - 140;
-      const archH = Math.round(canvas.height * (ratio === 'story' ? 0.44 : 0.48));
       if (typeof ctx.roundRect === 'function') ctx.roundRect(archX, archY, archW, archH, [120, 120, 20, 20]);
       else ctx.rect(archX, archY, archW, archH);
       ctx.stroke();
+      ctx.restore();
 
       let startY = archY + 74;
 
-      ctx.direction = "ltr";
-      ctx.font = "800 24px 'Outfit', sans-serif";
-      ctx.fillStyle = "#fef08a";
-      ctx.shadowColor = "rgba(0,0,0,0.95)";
-      ctx.shadowBlur = 15;
       const tagStr = isMarathi ? (theme.tagMr || "🕊️ जगाचा खरा प्रकाश 🕊️") : (theme.tagEn || "✦ THE LIGHT SHINES IN THE DARKNESS ✦");
-      const tagW = ctx.measureText(tagStr).width;
-      ctx.fillText(tagStr, Math.round((canvas.width - tagW) / 2), startY);
+      ltrFillCenter(tagStr, startY, "800 24px 'Outfit', sans-serif", "#fef08a", "rgba(0,0,0,0.95)", 15);
       startY += 58;
 
       const maxW = archW - 60;
@@ -22153,38 +22076,29 @@ window.generateExactVerseImageBlob = function(customRatio) {
       const lines = wrapText(displayText, maxW, font);
       const lineH = 78;
 
-      ctx.font = font;
-      ctx.fillStyle = "#ffffff";
-      ctx.shadowBlur = 24;
       for (let i = 0; i < lines.length; i++) {
-        const lineW = ctx.measureText(lines[i]).width;
-        ctx.fillText(lines[i], Math.round((canvas.width - lineW) / 2), startY + (i * lineH));
+        ltrFillCenter(lines[i], startY + (i * lineH), font, "#ffffff", "rgba(0,0,0,0.98)", 24);
       }
       startY += (lines.length * lineH) + 38;
 
-      ctx.font = "800 34px 'Outfit', sans-serif";
-      ctx.fillStyle = "#fef08a";
-      const refStr = displayRef;
-      const refW = ctx.measureText(refStr).width;
-      ctx.fillText(refStr, Math.round((canvas.width - refW) / 2), startY);
+      ltrFillCenter(displayRef, startY, "800 34px 'Outfit', sans-serif", "#fef08a", "rgba(0,0,0,0.95)", 16);
 
     /* ==========================================================================
-       STYLE 6: GREEN PASTURE GLASS EMBED (Good Shepherd)
+       STYLE 6: GREEN PASTURE GLASS EMBED (Centered)
        ========================================================================== */
-    } else if (layoutMode === "pasture-glass") {
+    } else if (layoutMode === "pasture-glass" || layoutMode === "shepherd-diagonal") {
       const cardW = canvas.width - 120;
-      const cardX = 60;
-      let cardY = Math.round(canvas.height * (ratio === 'story' ? 0.38 : 0.34));
+      const cardX = Math.round((canvas.width - cardW) / 2);
 
       const maxW = cardW - 70;
       const font = `700 52px ${isMarathi ? "'Noto Sans Devanagari', sans-serif" : "'Lora', Georgia, serif"}`;
       const lines = wrapText(displayText, maxW, font);
       const lineH = 76;
       const cardH = (lines.length * lineH) + 180;
+      const cardY = Math.round(canvas.height * 0.38);
 
-      // Frosted Dark Glass Container
       ctx.save();
-      ctx.fillStyle = "rgba(10, 25, 18, 0.76)";
+      ctx.fillStyle = "rgba(10, 25, 18, 0.78)";
       ctx.strokeStyle = "rgba(255, 255, 255, 0.25)";
       ctx.lineWidth = 2;
       ctx.shadowColor = "rgba(0, 0, 0, 0.65)";
@@ -22198,152 +22112,106 @@ window.generateExactVerseImageBlob = function(customRatio) {
 
       let startY = cardY + 64;
 
-      ctx.direction = "ltr";
-      ctx.font = "800 20px 'Outfit', sans-serif";
-      ctx.fillStyle = "#86efac";
-      ctx.shadowBlur = 0;
       const tagStr = isMarathi ? (theme.tagMr || "🌿 उत्तम मेंढपाळ 🌿") : (theme.tagEn || "🌿 THE LORD IS MY SHEPHERD 🌿");
-      const tagW = ctx.measureText(tagStr).width;
-      ctx.fillText(tagStr, Math.round((canvas.width - tagW) / 2), startY);
+      ltrFillCenter(tagStr, startY, "800 20px 'Outfit', sans-serif", "#86efac", "rgba(0,0,0,0.85)", 10);
       startY += 52;
 
-      ctx.font = font;
-      ctx.fillStyle = "#ffffff";
-      ctx.shadowColor = "rgba(0,0,0,0.95)";
-      ctx.shadowBlur = 22;
       for (let i = 0; i < lines.length; i++) {
-        const lineW = ctx.measureText(lines[i]).width;
-        ctx.fillText(lines[i], Math.round((canvas.width - lineW) / 2), startY + (i * lineH));
+        ltrFillCenter(lines[i], startY + (i * lineH), font, "#ffffff", "rgba(0,0,0,0.95)", 22);
       }
       startY += (lines.length * lineH) + 26;
 
-      ctx.font = "800 26px 'Outfit', sans-serif";
-      ctx.fillStyle = "#86efac";
-      const refStr = displayRef;
-      const refW = ctx.measureText(refStr).width;
-      ctx.fillText(refStr, Math.round((canvas.width - refW) / 2), startY);
+      ltrFillCenter(displayRef, startY, "800 26px 'Outfit', sans-serif", "#86efac", "rgba(0,0,0,0.85)", 10);
 
     /* ==========================================================================
-       STYLE 7: HIGHWAY OF GRACE (Pine Forest Road & Centerline)
+       STYLE 7: HIGHWAY OF GRACE (Centered Bold)
        ========================================================================== */
     } else if (layoutMode === "highway-bold") {
-      let startY = Math.round(canvas.height * (ratio === 'story' ? 0.48 : 0.42));
+      let startY = Math.round(canvas.height * 0.44);
 
-      ctx.direction = "ltr";
-      ctx.font = "900 74px 'Poppins', sans-serif";
-      ctx.fillStyle = "#ffffff";
-      ctx.shadowColor = "rgba(0,0,0,0.95)";
-      ctx.shadowBlur = 20;
       const titleStr = isMarathi ? "माझ्याबरोबर चाला" : "WALK WITH ME";
-      const titleW = ctx.measureText(titleStr).width;
-      ctx.fillText(titleStr, Math.round((canvas.width - titleW) / 2), startY);
+      ltrFillCenter(titleStr, startY, "900 74px 'Poppins', sans-serif", "#ffffff", "rgba(0,0,0,0.95)", 20);
       startY += 34;
 
-      // Twin yellow highway centerline bar
+      // Twin yellow highway centerline bar - Centered
       ctx.fillStyle = "#facc15";
       const barW = 200;
       ctx.fillRect(Math.round((canvas.width - barW) / 2), startY, barW, 6);
       startY += 52;
 
-      const maxW = 900;
+      const maxW = 880;
       const font = `700 52px ${isMarathi ? "'Noto Sans Devanagari'" : "'Poppins', sans-serif"}`;
       const lines = wrapText(displayText, maxW, font);
-      ctx.font = font;
-      ctx.fillStyle = "#ffffff";
+
       for (let i = 0; i < lines.length; i++) {
-        const lineW = ctx.measureText(lines[i]).width;
-        ctx.fillText(lines[i], Math.round((canvas.width - lineW) / 2), startY + (i * 76));
+        ltrFillCenter(lines[i], startY + (i * 76), font, "#ffffff", "rgba(0,0,0,0.98)", 24);
       }
       startY += (lines.length * 76) + 36;
 
-      ctx.font = "800 34px 'Poppins', sans-serif";
-      ctx.fillStyle = "#facc15";
-      const refStr = displayRef;
-      const refW = ctx.measureText(refStr).width;
-      ctx.fillText(refStr, Math.round((canvas.width - refW) / 2), startY);
+      ltrFillCenter(displayRef, startY, "800 34px 'Poppins', sans-serif", "#facc15", "rgba(0,0,0,0.95)", 16);
 
     /* ==========================================================================
-       STYLE 8: ETERNAL BOARDING PASS TICKET
+       STYLE 8: ETERNAL BOARDING PASS TICKET (Centered Card)
        ========================================================================== */
     } else if (layoutMode === "boarding-pass") {
-      // Left offset 270px to leave authentic barcode and perforated tear line unobstructed
-      const startX = 270;
-      const availW = canvas.width - startX - 70;
+      const cardW = 860;
+      const startX = Math.round((canvas.width - cardW) / 2);
+      const availW = cardW;
 
-      let startY = Math.round(canvas.height * (ratio === 'story' ? 0.20 : 0.14));
+      let startY = Math.round(canvas.height * 0.20);
 
-      ctx.direction = "ltr";
-      ctx.shadowBlur = 0;
-      ctx.font = "800 22px 'Outfit', sans-serif";
-      ctx.fillStyle = "#475569";
-      ctx.fillText(isMarathi ? "✈️ सार्वकालिक जीवन" : "✈️ ETERNAL AIRWAYS", startX, startY);
-      startY += 34;
-
-      ctx.font = "900 72px 'Outfit', sans-serif";
-      ctx.fillStyle = "#0f172a";
-      ctx.fillText(isMarathi ? "येशू ख्रिस्त" : "JESUS CHRIST", startX, startY + 44);
-      startY += 82;
-
-      ctx.font = "800 20px 'Outfit', monospace";
-      ctx.fillStyle = "#0f172a";
-      ctx.fillText(isMarathi ? "अंतिम मुक्काम: स्वर्गीय घर" : "FINAL DESTINATION: HEAVEN", startX, startY);
-      startY += 32;
-
-      // Divider line
-      ctx.strokeStyle = "rgba(15, 23, 42, 0.25)";
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.moveTo(startX, startY);
-      ctx.lineTo(startX + availW, startY);
-      ctx.stroke();
-      startY += 28;
-
-      // Grid: GATE / TIME / ROW / SEAT
-      ctx.font = "800 16px 'Outfit', sans-serif";
-      ctx.fillStyle = "#64748b";
-      ctx.fillText(isMarathi ? "द्वार" : "GATE", startX, startY);
-      ctx.fillText(isMarathi ? "वेळ" : "TIME", startX + 160, startY);
-      ctx.fillText(isMarathi ? "कृपा" : "ROW", startX + 320, startY);
-      ctx.fillText(isMarathi ? "तारण" : "SEAT", startX + 480, startY);
-      startY += 26;
-
-      ctx.font = "900 26px 'Outfit', sans-serif";
-      ctx.fillStyle = "#0f172a";
-      ctx.fillText(isMarathi ? (vod.ref ? vod.ref.split(' ')[0] : "योहान") : "JOHN", startX, startY);
-      ctx.fillText(isMarathi ? (vod.ref ? vod.ref.split(' ')[1] || "३:१६" : "३:१६") : "3:16", startX + 160, startY);
-      ctx.fillText(isMarathi ? "अमर्याद" : "GRACE", startX + 320, startY);
-      ctx.fillText(isMarathi ? "निश्चित" : "MERCY", startX + 480, startY);
-      startY += 44;
-
-      // Scripture Box Itinerary
+      // Centered Ticket Container
       const font = `700 44px ${isMarathi ? "'Noto Sans Devanagari', 'Poppins'" : "'Outfit', sans-serif"}`;
-      const lines = wrapText(displayText, availW - 30, font);
-      const boxH = (lines.length * 64) + 90;
+      const lines = wrapText(displayText, availW - 60, font);
+      const totalTicketH = 340 + (lines.length * 64);
 
-      ctx.fillStyle = "rgba(15, 23, 42, 0.04)";
-      ctx.strokeStyle = "rgba(15, 23, 42, 0.18)";
-      ctx.lineWidth = 1.5;
+      ctx.save();
+      ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
+      ctx.strokeStyle = "rgba(15, 23, 42, 0.25)";
+      ctx.lineWidth = 2;
+      ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
+      ctx.shadowBlur = 24;
       ctx.beginPath();
-      if (typeof ctx.roundRect === 'function') ctx.roundRect(startX, startY, availW, boxH, 16);
-      else ctx.rect(startX, startY, availW, boxH);
+      if (typeof ctx.roundRect === 'function') ctx.roundRect(startX, startY, cardW, totalTicketH, 24);
+      else ctx.rect(startX, startY, cardW, totalTicketH);
       ctx.fill();
       ctx.stroke();
+      ctx.restore();
 
-      ctx.font = font;
-      ctx.fillStyle = "#0f172a";
+      let innerY = startY + 44;
+
+      // Header Tag - Centered
+      const passTag = isMarathi ? "✈️ सार्वकालिक जीवन • ETERNAL AIRWAYS ✈️" : "✈️ ETERNAL AIRWAYS • BOARDING PASS ✈️";
+      ltrFillCenter(passTag, innerY, "800 22px 'Outfit', sans-serif", "#475569");
+      innerY += 48;
+
+      // Main Destination - Centered
+      const destTitle = isMarathi ? "येशू ख्रिस्त • स्वर्गीय घर" : "JESUS CHRIST • HEAVEN";
+      ltrFillCenter(destTitle, innerY, "900 58px 'Outfit', sans-serif", "#0f172a");
+      innerY += 46;
+
+      // Divider line
+      ctx.strokeStyle = "rgba(15, 23, 42, 0.20)";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(startX + 30, innerY);
+      ctx.lineTo(startX + cardW - 30, innerY);
+      ctx.stroke();
+      innerY += 38;
+
+      // Verse Lines - Centered inside Card
       for (let i = 0; i < lines.length; i++) {
-        ctx.fillText(lines[i], startX + 20, startY + 50 + (i * 64));
+        ltrFillCenter(lines[i], innerY + (i * 64), font, "#0f172a");
       }
+      innerY += (lines.length * 64) + 32;
 
-      ctx.font = "800 26px 'Outfit', sans-serif";
-      ctx.fillStyle = "#0369a1";
-      ctx.fillText(displayRef, startX + 20, startY + boxH - 26);
+      // Reference - Centered
+      ltrFillCenter(displayRef, innerY, "800 28px 'Outfit', sans-serif", "#0369a1");
 
     /* ==========================================================================
-       STYLE 9: EMERALD MOUNTAIN LAKE & CROSS (Joshua 1:9 Aesthetic)
+       STYLE 9: EMERALD MOUNTAIN LAKE & CROSS (Centered)
        ========================================================================== */
     } else if (layoutMode === "lake-cross") {
-      // Vignette over water reflection to make text pop
       const grad = ctx.createLinearGradient(0, canvas.height * 0.15, 0, canvas.height);
       grad.addColorStop(0, 'rgba(6, 20, 24, 0)');
       grad.addColorStop(0.3, 'rgba(6, 20, 24, 0.3)');
@@ -22352,9 +22220,9 @@ window.generateExactVerseImageBlob = function(customRatio) {
       ctx.fillStyle = grad;
       ctx.fillRect(0, canvas.height * 0.15, canvas.width, canvas.height * 0.85);
 
-      let startY = Math.round(canvas.height * (ratio === 'story' ? 0.14 : 0.09));
+      let startY = Math.round(canvas.height * 0.14);
 
-      // Draw Ornate White Latin Cross
+      // Draw Ornate White Latin Cross - Centered
       const crossCenterX = Math.round(canvas.width / 2);
       const crossW = 92;
       const crossH = 144;
@@ -22368,59 +22236,43 @@ window.generateExactVerseImageBlob = function(customRatio) {
       ctx.strokeStyle = "rgba(0,0,0,0.4)";
       ctx.lineWidth = 2;
 
-      // Vertical beam
       ctx.fillRect(crossCenterX - Math.round(barThick / 2), startY, barThick, crossH);
       ctx.strokeRect(crossCenterX - Math.round(barThick / 2), startY, barThick, crossH);
-      // Horizontal beam
       ctx.fillRect(crossCenterX - Math.round(crossW / 2), horizY - Math.round(barThick / 2), crossW, barThick);
       ctx.strokeRect(crossCenterX - Math.round(crossW / 2), horizY - Math.round(barThick / 2), crossW, barThick);
       ctx.restore();
 
       startY += crossH + 34;
 
-      // Scripture Reference Header in Bold Sans-Serif
-      ctx.direction = "ltr";
-      ctx.font = "800 38px 'Outfit', sans-serif";
-      ctx.fillStyle = "#ffffff";
-      ctx.shadowColor = "rgba(0,0,0,0.95)";
-      ctx.shadowBlur = 16;
-      const refStr = displayRef;
-      const refW = ctx.measureText(refStr).width;
-      ctx.fillText(refStr, Math.round((canvas.width - refW) / 2), startY);
+      // Scripture Reference Header - Centered
+      ltrFillCenter(displayRef, startY, "800 38px 'Outfit', sans-serif", "#ffffff", "rgba(0,0,0,0.95)", 16);
       startY += 58;
 
-      // Verse Body in Bold Modern Sans
-      const maxW = (ratio === 'story') ? 880 : 920;
-      let fontSize = (ratio === 'story') ? (displayText.length > 120 ? 50 : 60) : (displayText.length > 120 ? 44 : 52);
+      const maxW = 880;
+      let fontSize = (displayText.length > 120 ? 50 : 60);
       const font = `800 ${fontSize}px ${isMarathi ? "'Noto Sans Devanagari', 'Poppins'" : "'Outfit', 'Poppins', sans-serif"}`;
       const lines = wrapText(`"${displayText}"`, maxW, font);
       const lineH = Math.round(fontSize * 1.5);
 
-      ctx.font = font;
-      ctx.fillStyle = "#ffffff";
-      ctx.shadowColor = "rgba(0,0,0,0.95)";
-      ctx.shadowBlur = 22;
       for (let i = 0; i < lines.length; i++) {
-        const lineW = ctx.measureText(lines[i]).width;
-        ctx.fillText(lines[i], Math.round((canvas.width - lineW) / 2), startY + (i * lineH));
+        ltrFillCenter(lines[i], startY + (i * lineH), font, "#ffffff", "rgba(0,0,0,0.95)", 22);
       }
 
     /* ==========================================================================
-       STYLE 10: ILLUMINATED TREE & FROSTED EMERALD GLASS CARD (Romans 5:8 Aesthetic)
+       STYLE 10: ILLUMINATED TREE & FROSTED EMERALD GLASS CARD (Centered)
        ========================================================================== */
     } else if (layoutMode === "illuminated-tree-glass") {
       const cardW = canvas.width - 140;
-      const cardX = 70;
+      const cardX = Math.round((canvas.width - cardW) / 2);
 
       const maxW = cardW - 70;
-      let fontSize = (ratio === 'story') ? (displayText.length > 120 ? 48 : 56) : (displayText.length > 120 ? 42 : 48);
+      let fontSize = (displayText.length > 120 ? 48 : 56);
       const font = `700 ${fontSize}px ${isMarathi ? "'Noto Serif Devanagari', serif" : "'Lora', Georgia, serif"}`;
       const lines = wrapText(displayText, maxW, font);
       const lineH = Math.round(fontSize * 1.54);
       const cardH = (lines.length * lineH) + 190;
-      const cardY = Math.round(canvas.height * (ratio === 'story' ? 0.44 : 0.38));
+      const cardY = Math.round(canvas.height * 0.42);
 
-      // Frosted Emerald Dark Glass Card Container
       ctx.save();
       ctx.fillStyle = "rgba(12, 38, 22, 0.78)";
       ctx.strokeStyle = "rgba(255, 255, 255, 0.25)";
@@ -22436,18 +22288,11 @@ window.generateExactVerseImageBlob = function(customRatio) {
 
       let startY = cardY + 58;
 
-      // Card Header: Reference
-      ctx.direction = "ltr";
-      ctx.font = "700 38px 'Lora', 'Playfair Display', Georgia, serif";
-      ctx.fillStyle = "#ffffff";
-      ctx.shadowColor = "rgba(0,0,0,0.6)";
-      ctx.shadowBlur = 10;
-      const refStr = displayRef;
-      const refW = ctx.measureText(refStr).width;
-      ctx.fillText(refStr, Math.round((canvas.width - refW) / 2), startY);
+      // Card Header: Reference - Centered
+      ltrFillCenter(displayRef, startY, "700 38px 'Lora', 'Playfair Display', Georgia, serif", "#ffffff", "rgba(0,0,0,0.6)", 10);
       startY += 38;
 
-      // Divider Line inside card
+      // Divider Line inside card - Centered
       ctx.strokeStyle = "rgba(255, 255, 255, 0.25)";
       ctx.lineWidth = 1;
       ctx.beginPath();
@@ -22456,133 +22301,71 @@ window.generateExactVerseImageBlob = function(customRatio) {
       ctx.stroke();
       startY += 52;
 
-      // Verse Body in Card
-      ctx.font = font;
-      ctx.fillStyle = "rgba(255, 255, 255, 0.96)";
-      ctx.shadowBlur = 12;
+      // Verse Body in Card - Centered
       for (let i = 0; i < lines.length; i++) {
-        const lineW = ctx.measureText(lines[i]).width;
-        ctx.fillText(lines[i], Math.round((canvas.width - lineW) / 2), startY + (i * lineH));
+        ltrFillCenter(lines[i], startY + (i * lineH), font, "rgba(255, 255, 255, 0.96)", "rgba(0,0,0,0.85)", 12);
       }
 
     /* ==========================================================================
-       STYLE 11: LION OF JUDAH SPLIT-SCREEN (Psalm 82:6 Aesthetic)
+       STYLE 11: LION OF JUDAH MAJESTIC CARD (Centered Heroic)
        ========================================================================== */
     } else if (layoutMode === "lion-split") {
-      const splitX = Math.round(canvas.width * 0.48);
+      // Cinematic dark vignette overlay across canvas
+      const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      grad.addColorStop(0, "rgba(5, 10, 20, 0.75)");
+      grad.addColorStop(0.35, "rgba(5, 10, 20, 0.35)");
+      grad.addColorStop(0.65, "rgba(5, 10, 20, 0.65)");
+      grad.addColorStop(1, "rgba(3, 7, 15, 0.95)");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // White right canvas
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(splitX, 0, canvas.width - splitX, canvas.height);
+      let startY = Math.round(canvas.height * 0.38);
 
-      // Redraw lion cleanly only on the left side
-      if (bgImg) {
-        ctx.save();
-        ctx.beginPath();
-        ctx.rect(0, 0, splitX, canvas.height);
-        ctx.clip();
-        const scale = Math.max(canvas.width / bgImg.width, canvas.height / bgImg.height);
-        const bx = (canvas.width - bgImg.width * scale) / 2;
-        const by = (canvas.height - bgImg.height * scale) / 2;
-        ctx.drawImage(bgImg, bx, by, bgImg.width * scale, bgImg.height * scale);
-        ctx.restore();
-      }
+      // Heroic Tag - Centered
+      const leadWord = isMarathi ? "✦ यहूदाचा सिंह • LION OF JUDAH ✦" : "✦ THE LION OF JUDAH ✦";
+      ltrFillCenter(leadWord, startY, "900 28px 'Outfit', sans-serif", "#f59e0b", "rgba(0,0,0,0.95)", 18);
+      startY += 54;
 
-      // Vertical Seam
-      ctx.strokeStyle = "rgba(0,0,0,0.12)";
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(splitX, 0);
-      ctx.lineTo(splitX, canvas.height);
-      ctx.stroke();
+      const subLead = isMarathi ? "धैर्यवान आणि विश्वासू" : "BE BOLD & COURAGEOUS";
+      ltrFillCenter(subLead, startY, "800 48px 'Outfit', sans-serif", "#ffffff", "rgba(0,0,0,0.98)", 22);
+      startY += 64;
 
-      // Right-side High-Impact Typography
-      const rightX = splitX + 36;
-      const rightW = canvas.width - rightX - 36;
+      // Verse Body - Centered
+      const maxW = 880;
+      const font = `700 50px ${isMarathi ? "'Noto Sans Devanagari', 'Poppins'" : "'Outfit', sans-serif"}`;
+      const lines = wrapText(displayText, maxW, font);
+      const lineH = 72;
 
-      let startY = Math.round(canvas.height * (ratio === 'story' ? 0.20 : 0.16));
-
-      // Huge Impact Headline
-      ctx.direction = "ltr";
-      ctx.font = "900 86px 'Outfit', sans-serif";
-      ctx.fillStyle = "#0f172a";
-      ctx.shadowBlur = 0;
-      const leadWord = isMarathi ? "धैर्यवान." : "BE BOLD.";
-      ctx.fillText(leadWord, rightX, startY);
-      startY += 82;
-
-      ctx.font = "800 26px 'Outfit', sans-serif";
-      ctx.fillStyle = "#d97706";
-      ctx.fillText(isMarathi ? "✦ सिंहासारखे ख्रिस्तामध्ये ✦" : "✦ AS BOLD AS A LION ✦", rightX, startY);
-      startY += 44;
-
-      // Divider line
-      ctx.strokeStyle = "rgba(15, 23, 42, 0.18)";
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.moveTo(rightX, startY);
-      ctx.lineTo(rightX + rightW, startY);
-      ctx.stroke();
-      startY += 44;
-
-      // Verse Body on white right
-      const font = `700 44px ${isMarathi ? "'Noto Sans Devanagari', 'Poppins'" : "'Outfit', sans-serif"}`;
-      const lines = wrapText(displayText, rightW, font);
-      const lineH = 64;
-      ctx.font = font;
-      ctx.fillStyle = "#1e293b";
       for (let i = 0; i < lines.length; i++) {
-        ctx.fillText(lines[i], rightX, startY + (i * lineH));
+        ltrFillCenter(lines[i], startY + (i * lineH), font, "#f8fafc", "rgba(0,0,0,0.98)", 24);
       }
-      startY += (lines.length * lineH) + 36;
+      startY += (lines.length * lineH) + 42;
 
-      // Reference on Lion side bottom-left
-      ctx.font = "800 32px 'Outfit', sans-serif";
-      ctx.fillStyle = "#ffffff";
-      ctx.shadowColor = "rgba(0,0,0,0.95)";
-      ctx.shadowBlur = 16;
-      ctx.fillText(displayRef, 48, canvas.height - (ratio === 'story' ? 360 : 200));
+      // Reference - Centered
+      ltrFillCenter(displayRef, startY, "800 36px 'Outfit', sans-serif", "#fbbf24", "rgba(0,0,0,0.95)", 16);
 
     /* ==========================================================================
-       STYLE 12: DAVID & GOLIATH CINEMATIC SLINGSHOT (1 Samuel 17:47 Aesthetic)
+       STYLE 12: DAVID & GOLIATH CINEMATIC (Centered)
        ========================================================================== */
     } else if (layoutMode === "slingshot-battle") {
-      let startY = Math.round(canvas.height * (ratio === 'story' ? 0.40 : 0.34));
+      let startY = Math.round(canvas.height * 0.40);
 
-      ctx.direction = "ltr";
-      // Cinematic Key Phrase above sling cords
-      ctx.font = "700 54px 'Lora', 'Playfair Display', Georgia, serif";
-      ctx.fillStyle = "#ffffff";
-      ctx.shadowColor = "rgba(0,0,0,0.95)";
-      ctx.shadowBlur = 24;
       const keyPhrase = isMarathi ? "लढाई परमेश्वराची आहे." : "The battle is the Lord's.";
-      const phraseW = ctx.measureText(keyPhrase).width;
-      ctx.fillText(keyPhrase, Math.round((canvas.width - phraseW) / 2), startY);
-      startY += 52;
+      ltrFillCenter(keyPhrase, startY, "700 54px 'Lora', 'Playfair Display', Georgia, serif", "#ffffff", "rgba(0,0,0,0.95)", 24);
+      startY += 58;
 
-      // Scripture Verse Body
-      const maxW = 900;
-      let fontSize = (ratio === 'story') ? 50 : 44;
+      const maxW = 880;
+      let fontSize = 50;
       const font = `700 ${fontSize}px ${isMarathi ? "'Noto Serif Devanagari', serif" : "'Lora', Georgia, serif"}`;
       const lines = wrapText(displayText, maxW, font);
       const lineH = Math.round(fontSize * 1.54);
 
-      ctx.font = font;
-      ctx.fillStyle = "#f8fafc";
-      ctx.shadowBlur = 26;
       for (let i = 0; i < lines.length; i++) {
-        const lineW = ctx.measureText(lines[i]).width;
-        ctx.fillText(lines[i], Math.round((canvas.width - lineW) / 2), startY + (i * lineH));
+        ltrFillCenter(lines[i], startY + (i * lineH), font, "#f8fafc", "rgba(0,0,0,0.98)", 26);
       }
       startY += (lines.length * lineH) + 36;
 
-      // Reference in Glowing Amber Gold
-      ctx.font = "800 34px 'Outfit', sans-serif";
-      ctx.fillStyle = "#fde047";
-      ctx.shadowBlur = 18;
-      const refStr = displayRef;
-      const refW = ctx.measureText(refStr).width;
-      ctx.fillText(refStr, Math.round((canvas.width - refW) / 2), startY);
+      ltrFillCenter(displayRef, startY, "800 34px 'Outfit', sans-serif", "#fde047", "rgba(0,0,0,0.95)", 18);
 
     /* ==========================================================================
        DEFAULT: CENTERED LUMINOUS SCREEN-MATCHED CARD
