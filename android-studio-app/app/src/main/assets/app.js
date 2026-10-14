@@ -22729,12 +22729,16 @@ window.shareDailyVerseToWhatsApp = async function() {
     }
 
     // 4. Fallback for Desktop & browsers: Download image file & open preview modal
-    const link = document.createElement("a");
-    link.href = dataUrl;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    if (typeof window.downloadBlobToDevice === "function") {
+      await window.downloadBlobToDevice(blob, filename, dataUrl);
+    } else {
+      const link = document.createElement("a");
+      link.href = dataUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
 
     openImagePreviewModal(dataUrl, filename, blob);
 
