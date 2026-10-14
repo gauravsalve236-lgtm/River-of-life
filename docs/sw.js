@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v2412_PREMIUM_VOD_LAYOUT_WATERMARK';
+const CACHE_NAME = 'river-of-life-cache-v2416_PERFECT_ALIGNMENT_STATUS_DOWNLOAD';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
