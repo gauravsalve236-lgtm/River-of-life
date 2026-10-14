@@ -1,4 +1,4 @@
-# Get the directory of this script
+# Safe Push Script for River of Life
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 if ($scriptDir) { Set-Location $scriptDir }
 
@@ -8,29 +8,9 @@ if (-not (Test-Path $gitPath)) {
     Exit
 }
 
-Write-Host "--- Git Initialization ---" -ForegroundColor Cyan
-& $gitPath init
+$env:PATH = (Join-Path $scriptDir "..\mingit\cmd") + ";" + (Join-Path $scriptDir "..\mingit\mingw64\bin") + ";" + $env:PATH
 
-Write-Host "--- Adding Remote Origin ---" -ForegroundColor Cyan
-& $gitPath remote remove origin 2>$null
-& $gitPath remote add origin https://github.com/gauravsalve236-lgtm/River-of-life.git
-
-Write-Host "--- Staging Files ---" -ForegroundColor Cyan
-& $gitPath add -A
-
-Write-Host "--- Committing Changes ---" -ForegroundColor Cyan
-# Configure standard user details for the commit if not already configured
-& $gitPath config user.name "Gaurav Salve"
-& $gitPath config user.email "gauravsalve236@gmail.com"
-& $gitPath commit -m "Add Live Fellowship (Meetings) module and package app for iOS using CapacitorJS"
-
-Write-Host "--- Setting Main Branch ---" -ForegroundColor Cyan
-& $gitPath branch -M main
-
-Write-Host ""
-Write-Host "--- Pushing Files to GitHub ---" -ForegroundColor Yellow
-Write-Host "A GitHub sign-in window may pop up on your screen. Please complete the sign-in to authorize." -ForegroundColor Green
-& $gitPath push -u origin main --force
-
-Write-Host ""
-Write-Host "--- Upload Process Completed! ---" -ForegroundColor Green
+Write-Host "--- Pushing commits to GitHub (main & develop) ---" -ForegroundColor Cyan
+Write-Host "If an authentication window opens, please complete sign-in to authorize." -ForegroundColor Yellow
+& $gitPath push origin main develop
+Write-Host "--- Push Completed! ---" -ForegroundColor Green
