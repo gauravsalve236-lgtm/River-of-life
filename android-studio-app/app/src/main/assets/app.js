@@ -21631,9 +21631,16 @@ window.generateExactVerseImageBlob = function(customRatio) {
           ? imgFileName 
           : (imgFileName && imgFileName.includes('.') ? `assets/daily_verses/${imgFileName}` : `assets/daily_verses/${imgFileName}.png`));
 
-    if (document.fonts && document.fonts.ready) {
+    if (document.fonts) {
       try {
-        await document.fonts.ready;
+        await Promise.all([
+          document.fonts.load("800 24px 'Noto Sans Devanagari'"),
+          document.fonts.load("700 60px 'Noto Serif Devanagari'"),
+          document.fonts.load("800 36px 'Noto Serif Devanagari'"),
+          document.fonts.load("800 24px 'Outfit'"),
+          document.fonts.load("800 36px 'Outfit'"),
+          document.fonts.ready
+        ]);
       } catch (e) {}
     }
 
@@ -21826,15 +21833,16 @@ window.generateExactVerseImageBlob = function(customRatio) {
       let curY = Math.round(topSafe + (availableH - totalBlockH) / 2);
       if (curY < topSafe) curY = topSafe;
 
-      // 1. Top Capsule Tag (✦ दैनिक बायबल वचन ✦)
+      // 1. Top Capsule Tag (✦ दैनिक बायबल वचन ✦) - 100% Mathematically Centered
+      const tagText = isMarathi ? "✦ दैनिक बायबल वचन ✦" : "✦ DAILY BIBLE VERSE ✦";
+      const tagFont = `800 24px ${isMarathi ? "'Noto Sans Devanagari', 'Outfit', -apple-system, sans-serif" : "'Outfit', -apple-system, sans-serif"}`;
       ctx.save();
       ctx.direction = "ltr";
-      const tagText = isMarathi ? "✦ दैनिक बायबल वचन ✦" : "✦ DAILY BIBLE VERSE ✦";
-      ctx.font = "800 24px 'Outfit', -apple-system, sans-serif";
+      ctx.font = tagFont;
       const tagTextW = ctx.measureText(tagText).width;
-      const tagPillW = tagTextW + 54;
+      const tagPillW = Math.round(tagTextW + 54);
       const tagPillH = 44;
-      const tagPillX = Math.round((canvas.width - tagPillW) / 2);
+      const tagPillX = Math.round(CX - (tagPillW / 2));
       const tagPillY = curY;
 
       ctx.fillStyle = "rgba(10, 16, 30, 0.72)";
@@ -21848,27 +21856,13 @@ window.generateExactVerseImageBlob = function(customRatio) {
       }
       ctx.fill();
       ctx.stroke();
-
-      ctx.fillStyle = "#fbbf24";
-      ctx.shadowColor = "rgba(251, 191, 36, 0.4)";
-      ctx.shadowBlur = 10;
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(tagText, Math.round(canvas.width / 2), tagPillY + Math.round(tagPillH / 2) + 1);
       ctx.restore();
+
+      ltrFillCenter(tagText, tagPillY + Math.round(tagPillH / 2) + 1, tagFont, "#fbbf24", "rgba(251, 191, 36, 0.4)", 10);
       curY += tagH + gapTagQuote;
 
-      // 2. Elegant Golden Quotation Mark
-      ctx.save();
-      ctx.direction = "ltr";
-      ctx.font = "600 88px Georgia, 'Playfair Display', serif";
-      ctx.fillStyle = "#fbbf24";
-      ctx.shadowColor = "rgba(0, 0, 0, 0.98)";
-      ctx.shadowBlur = 20;
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText("“", Math.round(canvas.width / 2), curY + Math.round(quoteH / 2));
-      ctx.restore();
+      // 2. Elegant Golden Quotation Mark - 100% Mathematically Centered
+      ltrFillCenter("“", curY + Math.round(quoteH / 2), "600 88px Georgia, 'Playfair Display', serif", "#fbbf24", "rgba(0, 0, 0, 0.98)", 20);
       curY += quoteH + gapQuoteText;
 
       // 3. Central Scripture Verse Body with 100% Guaranteed Centering
@@ -21883,32 +21877,26 @@ window.generateExactVerseImageBlob = function(customRatio) {
       ctx.restore();
       curY += textH + gapTextRef;
 
-      // 4. Scripture Reference with flanking Golden Accent Lines
+      // 4. Scripture Reference with flanking Golden Accent Lines - 100% Mathematically Centered
+      const refFont = `800 36px ${isMarathi ? "'Noto Serif Devanagari', 'Outfit', -apple-system, sans-serif" : "'Outfit', -apple-system, sans-serif"}`;
       ctx.save();
       ctx.direction = "ltr";
-      ctx.font = "800 36px 'Outfit', -apple-system, sans-serif";
-      const refStr = displayRef;
+      ctx.font = refFont;
+      const refStr = String(displayRef || "").trim();
       const refW = ctx.measureText(refStr).width;
       const refCenterY = curY + Math.round(refH / 2);
 
-      ctx.fillStyle = "#fbbf24";
-      ctx.shadowColor = "rgba(0, 0, 0, 0.98)";
-      ctx.shadowBlur = 18;
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(refStr, Math.round(canvas.width / 2), refCenterY);
-
-      // Flanking gold lines
+      // Flanking gold lines symmetrically spaced around reference text
       ctx.strokeStyle = "#fbbf24";
       ctx.lineWidth = 3;
       ctx.shadowColor = "rgba(0, 0, 0, 0.9)";
       ctx.shadowBlur = 8;
       const lineLen = 64;
-      const lineGap = 20;
-      const leftLineStart = Math.round((canvas.width - refW) / 2) - lineGap - lineLen;
-      const leftLineEnd = Math.round((canvas.width - refW) / 2) - lineGap;
-      const rightLineStart = Math.round((canvas.width + refW) / 2) + lineGap;
-      const rightLineEnd = Math.round((canvas.width + refW) / 2) + lineGap + lineLen;
+      const lineGap = 22;
+      const leftLineStart = Math.round(CX - (refW / 2) - lineGap - lineLen);
+      const leftLineEnd = Math.round(CX - (refW / 2) - lineGap);
+      const rightLineStart = Math.round(CX + (refW / 2) + lineGap);
+      const rightLineEnd = Math.round(CX + (refW / 2) + lineGap + lineLen);
 
       ctx.beginPath();
       ctx.moveTo(leftLineStart, refCenterY);
@@ -21920,6 +21908,8 @@ window.generateExactVerseImageBlob = function(customRatio) {
       ctx.lineTo(rightLineEnd, refCenterY);
       ctx.stroke();
       ctx.restore();
+
+      ltrFillCenter(refStr, refCenterY, refFont, "#fbbf24", "rgba(0, 0, 0, 0.98)", 18);
     }
 
     const layoutMode = theme.layoutMode || "centered-card";
@@ -21958,15 +21948,17 @@ window.generateExactVerseImageBlob = function(customRatio) {
       startY += (lines.length * lineH) + 42;
 
       // Solid Teal/Navy Pill Reference Badge - Centered
-      const refStr = displayRef;
-      ctx.font = "800 28px 'Outfit', sans-serif";
+      const refStr = String(displayRef || "").trim();
+      const refFont = `800 28px ${isMarathi ? "'Noto Sans Devanagari', 'Outfit', sans-serif" : "'Outfit', sans-serif"}`;
+      ctx.save();
+      ctx.direction = "ltr";
+      ctx.font = refFont;
       const pillTextW = ctx.measureText(refStr).width;
-      const pillW = pillTextW + 56;
+      const pillW = Math.round(pillTextW + 56);
       const pillH = 56;
-      const pillX = Math.round((canvas.width - pillW) / 2);
+      const pillX = Math.round(CX - (pillW / 2));
       const pillY = startY;
 
-      ctx.save();
       ctx.fillStyle = "#0e7490";
       ctx.shadowColor = "rgba(14, 116, 144, 0.35)";
       ctx.shadowBlur = 14;
@@ -21974,14 +21966,9 @@ window.generateExactVerseImageBlob = function(customRatio) {
       if (typeof ctx.roundRect === 'function') ctx.roundRect(pillX, pillY, pillW, pillH, 28);
       else ctx.rect(pillX, pillY, pillW, pillH);
       ctx.fill();
-
-      ctx.fillStyle = "#ffffff";
-      ctx.shadowBlur = 0;
-      ctx.direction = "ltr";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(refStr, Math.round(canvas.width / 2), pillY + Math.round(pillH / 2));
       ctx.restore();
+
+      ltrFillCenter(refStr, pillY + Math.round(pillH / 2), refFont, "#ffffff");
 
     /* ==========================================================================
        STYLE 3: EDITORIAL POSTER (Centered Sunset Editorial)
@@ -22467,45 +22454,80 @@ window.generateExactVerseImageBlob = function(customRatio) {
   });
 };
 
+window.downloadBlobToDevice = async function(blob, filename, dataUrl) {
+  const safeName = filename || `Daily_Bible_Verse_${Date.now()}.png`;
+
+  let activeBlob = blob;
+  if (!activeBlob && dataUrl) {
+    try {
+      const res = await fetch(dataUrl);
+      activeBlob = await res.blob();
+    } catch (e) {
+      console.warn("Could not convert dataUrl to blob:", e);
+    }
+  }
+
+  // 1. Direct Anchor Download using Object URL (Works on Android Chrome, Desktop browsers, modern iOS Safari)
+  if (activeBlob && window.URL && window.URL.createObjectURL) {
+    try {
+      const blobUrl = window.URL.createObjectURL(activeBlob);
+      const link = document.createElement("a");
+      link.style.display = "none";
+      link.href = blobUrl;
+      link.download = safeName;
+      document.body.appendChild(link);
+      link.click();
+      setTimeout(() => {
+        if (link.parentNode) link.parentNode.removeChild(link);
+        window.URL.revokeObjectURL(blobUrl);
+      }, 4000);
+      return true;
+    } catch (err) {
+      console.warn("Blob URL download failed, falling back to dataUrl:", err);
+    }
+  }
+
+  // 2. Data URL Anchor Fallback
+  if (dataUrl) {
+    try {
+      const link = document.createElement("a");
+      link.style.display = "none";
+      link.href = dataUrl;
+      link.download = safeName;
+      document.body.appendChild(link);
+      link.click();
+      setTimeout(() => {
+        if (link.parentNode) link.parentNode.removeChild(link);
+      }, 1500);
+      return true;
+    } catch (e) {
+      console.warn("Data URL anchor download failed:", e);
+    }
+  }
+
+  // 3. Last fallback: Open in new window
+  if (activeBlob && window.URL && window.URL.createObjectURL) {
+    window.open(window.URL.createObjectURL(activeBlob), "_blank");
+    return true;
+  }
+
+  return false;
+};
+
 window.saveExactDailyVerseImage = async function() {
   try {
-    showToast("⏳ फोटो गॅलरीसाठी तयार होत आहे...");
+    showToast("⏳ फोटो डाऊनलोड होत आहे...");
     const result = await generateExactVerseImageBlob();
     window._currentRenderedVodImage = result;
 
-    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    const file = new File([result.blob], result.filename, { type: "image/png", lastModified: Date.now() });
+    await window.downloadBlobToDevice(result.blob, result.filename, result.dataUrl);
 
-    // 1. Try Native Web Share on Mobile (Allows direct 'Save Image' to Apple Photos on iPhone)
-    if (isMobile && navigator.canShare && navigator.canShare({ files: [file] })) {
-      try {
-        await navigator.share({
-          files: [file]
-        });
-        showToast("✨ फोटो गॅलरीमध्ये सेव्ह / शेअर केला!");
-        return;
-      } catch (shareErr) {
-        if (shareErr && (shareErr.name === 'AbortError' || shareErr.message?.includes('abort') || shareErr.message?.includes('cancel'))) {
-          return;
-        }
-      }
-    }
-
-    // 2. Direct Anchor Download Trigger (Desktop & Android)
-    const link = document.createElement("a");
-    link.href = result.dataUrl;
-    link.download = result.filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    // 3. Open Preview & Direct Save Modal (User can long-press image to save directly to camera roll)
+    // Open preview modal so user can also view the downloaded card, and can share or long-press
     openImagePreviewModal(result.dataUrl, result.filename, result.blob);
-    showToast("📥 फोटो तयार झाला! (Saved to Gallery)");
-
+    showToast("💾 फोटो डिव्हाइसमध्ये डाऊनलोड झाला! (Saved to Device)");
   } catch (err) {
     console.error("Save image error:", err);
-    showToast("Image generation complete.");
+    showToast("⚠️ फोटो डाऊनलोड करताना त्रुटी आली.");
   }
 };
 
@@ -22573,21 +22595,16 @@ window.closeImagePreviewModal = function() {
 
 window.downloadRenderedVodImage = async function() {
   if (window._currentRenderedVodImage) {
-    const { dataUrl, filename } = window._currentRenderedVodImage;
+    const { blob, dataUrl, filename } = window._currentRenderedVodImage;
     try {
-      const link = document.createElement("a");
-      link.href = dataUrl;
-      link.download = filename || "daily_bible_verse_status.png";
-      document.body.appendChild(link);
-      link.click();
-      setTimeout(() => {
-        if (link.parentNode) link.parentNode.removeChild(link);
-      }, 300);
-      showToast("💾 फोटो डिव्हाइसमध्ये सेव्ह झाला! (Saved to Device)");
+      await window.downloadBlobToDevice(blob, filename, dataUrl);
+      showToast("💾 फोटो डिव्हाइसमध्ये डाऊनलोड झाला! (Saved to Device)");
     } catch (e) {
-      console.error("Direct save error:", e);
-      showToast("⚠️ फोटो सेव्ह करताना त्रुटी आली.");
+      console.error("Direct download error:", e);
+      showToast("⚠️ फोटो डाऊनलोड करताना त्रुटी आली.");
     }
+  } else {
+    window.saveExactDailyVerseImage();
   }
 };
 
@@ -22599,11 +22616,11 @@ window.openShareAndSaveModal = async function() {
     }
     const modalTitle = document.getElementById("image-preview-modal-title");
     if (modalTitle) {
-      modalTitle.textContent = isEng ? "Share Verse / वचन शेअर करा" : "वचन शेअर करा • कार्ड";
+      modalTitle.textContent = isEng ? "Daily Bible Verse • Download & Share" : "दैनिक बायबल वचन • डाऊनलोड व शेअर";
     }
     const modalSubtitle = document.getElementById("image-preview-modal-subtitle");
     if (modalSubtitle) {
-      modalSubtitle.textContent = isEng ? "High-Resolution Mobile Status (1080×1920 HD)" : "मोबाईल स्टेटस व वॉलपेपर (1080×1920 HD)";
+      modalSubtitle.textContent = isEng ? "HD Mobile Status & Wallpaper (1080×1920 HD)" : "मोबाईल स्टेटस व वॉलपेपर (1080×1920 HD)";
     }
     const ratio = window.currentVodAspectRatio || 'story';
 
