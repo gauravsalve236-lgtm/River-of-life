@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v2416_PERFECT_ALIGNMENT_STATUS_DOWNLOAD';
+const CACHE_NAME = 'river-of-life-cache-v2417_SIMPLIFIED_CARD_BUTTONS';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
