@@ -13346,15 +13346,28 @@ async function fetchMeetingsFromCloud(showToastFeedback = false) {
         if (item.message) {
           const m = JSON.parse(item.message);
           if (m && m.id) {
-            const idx = localMeetings.findIndex(x => x.id === m.id || (x.title && m.title && x.title === m.title && x.date === m.date && x.time === m.time));
+            const idx = localMeetings.findIndex(x => 
+              x.id === m.id || 
+              (x.code && m.code && x.code === m.code) ||
+              (x.title && m.title && x.title === m.title && x.date === m.date && x.time === m.time)
+            );
             if (idx === -1) {
               localMeetings.unshift(m);
               hasChanges = true;
             } else {
-              if (localMeetings[idx].status !== m.status) {
+              if (localMeetings[idx].status !== m.status || m.endedAt) {
                 localMeetings[idx].status = m.status;
+                if (m.endedAt) localMeetings[idx].endedAt = m.endedAt;
+                if (m.endedBy) localMeetings[idx].endedBy = m.endedBy;
                 hasChanges = true;
               }
+            }
+
+            // Real-time remote ejection: if host ended this meeting and this client is in it
+            if (m.status === "ended" && activeMeetingSession && (activeMeetingSession.meetingId === m.id || (activeMeetingSession.meeting && activeMeetingSession.meeting.id === m.id))) {
+              console.warn("[RiverMeet] Active meeting ended via cloud broadcast:", m.id);
+              exitLiveMeetingRoom();
+              openMeetingEndedModal("The host has ended this meeting for all participants.<br><br>आयोजकांनी ही सभा सर्वांसाठी समाप्त केली आहे.");
             }
           }
         }
@@ -13390,25 +13403,239 @@ function saveMeetingsToStorage(meetings) {
   localStorage.setItem("river_of_life_meetings", JSON.stringify(meetings));
 }
 
-// Instant Meeting Generator
+// Generate Google Meet-Style Unique Meeting Code (e.g. rol-abc-defg-hij)
+function generateMeetingCode() {
+  const chars = "abcdefghijklmnopqrstuvwxyz";
+  const p1 = Array.from({length: 3}, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+  const p2 = Array.from({length: 4}, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+  const p3 = Array.from({length: 3}, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+  return `rol-${p1}-${p2}-${p3}`;
+}
+window.generateMeetingCode = generateMeetingCode;
+
+// Dropdown Menu Toggles for "New Meeting"
+function toggleNewMeetingDropdown(e) {
+  if (e) e.stopPropagation();
+  const menu = document.getElementById("dropdown-new-meeting-menu");
+  if (menu) {
+    menu.style.display = (menu.style.display === "block") ? "none" : "block";
+  }
+}
+function closeNewMeetingDropdown() {
+  const menu = document.getElementById("dropdown-new-meeting-menu");
+  if (menu) menu.style.display = "none";
+}
+window.toggleNewMeetingDropdown = toggleNewMeetingDropdown;
+window.closeNewMeetingDropdown = closeNewMeetingDropdown;
+
+document.addEventListener("click", (e) => {
+  if (!e.target.closest("#btn-google-meet-new") && !e.target.closest("#dropdown-new-meeting-menu")) {
+    closeNewMeetingDropdown();
+  }
+});
+
+// Google Meet "Your meeting is ready" Share Modal Controls
+function openMeetingInviteReadyModal(meeting, isInstant = false) {
+  const modal = document.getElementById("modal-meeting-invite-ready");
+  if (!modal || !meeting) return;
+  const code = meeting.code || meeting.id;
+  const domain = window.location.origin + window.location.pathname;
+  const url = `${domain}?meet=${code}`;
+
+  window._lastReadyMeeting = { ...meeting, url, code };
+
+  const codeEl = document.getElementById("ready-meeting-code");
+  if (codeEl) codeEl.textContent = code;
+
+  const urlEl = document.getElementById("ready-meeting-url");
+  if (urlEl) urlEl.textContent = url;
+
+  const enterBtn = document.getElementById("btn-enter-ready-meeting");
+  if (enterBtn) {
+    enterBtn.style.display = isInstant ? "flex" : "none";
+  }
+
+  modal.style.display = "flex";
+}
+function closeMeetingInviteReadyModal() {
+  const modal = document.getElementById("modal-meeting-invite-ready");
+  if (modal) modal.style.display = "none";
+}
+window.openMeetingInviteReadyModal = openMeetingInviteReadyModal;
+window.closeMeetingInviteReadyModal = closeMeetingInviteReadyModal;
+
+function copyReadyMeetingCode() {
+  if (window._lastReadyMeeting && window._lastReadyMeeting.code) {
+    navigator.clipboard.writeText(window._lastReadyMeeting.code).then(() => {
+      showToast("📋 Meeting code copied! / कोड कॉपी झाला");
+    }).catch(() => {
+      showToast("Code: " + window._lastReadyMeeting.code);
+    });
+  }
+}
+function copyReadyMeetingUrl() {
+  if (window._lastReadyMeeting && window._lastReadyMeeting.url) {
+    navigator.clipboard.writeText(window._lastReadyMeeting.url).then(() => {
+      showToast("🔗 Meeting link copied! / लिंक कॉपी झाली");
+    }).catch(() => {
+      showToast("Link: " + window._lastReadyMeeting.url);
+    });
+  }
+}
+window.copyReadyMeetingCode = copyReadyMeetingCode;
+window.copyReadyMeetingUrl = copyReadyMeetingUrl;
+
+function shareReadyMeetingOnWhatsApp() {
+  if (!window._lastReadyMeeting) return;
+  const m = window._lastReadyMeeting;
+  const timeStr = `${m.date || 'Today'} • ${m.time || 'Live'}`;
+  sharePrayerMeetingWhatsApp(m.title || 'River of Life Meeting', timeStr, m.code || m.id);
+}
+window.shareReadyMeetingOnWhatsApp = shareReadyMeetingOnWhatsApp;
+
+function enterReadyMeeting() {
+  closeMeetingInviteReadyModal();
+  if (window._lastReadyMeeting && window._lastReadyMeeting.id) {
+    triggerJoinMeetingFlow(window._lastReadyMeeting.id);
+  }
+}
+window.enterReadyMeeting = enterReadyMeeting;
+
+// Google Meet Style "Meeting Ended" Modal Controls
+function openMeetingEndedModal(customMsg = null) {
+  const modal = document.getElementById("modal-meeting-ended");
+  if (!modal) return;
+  if (customMsg) {
+    const msgEl = document.getElementById("meeting-ended-detail-msg");
+    if (msgEl) msgEl.innerHTML = customMsg;
+  }
+  modal.style.display = "flex";
+}
+function closeMeetingEndedModal() {
+  const modal = document.getElementById("modal-meeting-ended");
+  if (modal) modal.style.display = "none";
+}
+function openNewMeetingMenu() {
+  closeMeetingEndedModal();
+  if (typeof switchTab === "function") switchTab("meetings");
+  setTimeout(() => {
+    const btn = document.getElementById("btn-google-meet-new");
+    if (btn) btn.scrollIntoView({ behavior: "smooth", block: "center" });
+    toggleNewMeetingDropdown();
+  }, 400);
+}
+window.openMeetingEndedModal = openMeetingEndedModal;
+window.closeMeetingEndedModal = closeMeetingEndedModal;
+window.openNewMeetingMenu = openNewMeetingMenu;
+
+// Host Leave / End Call Dialog Controls
+function handleMeetingLeaveClick() {
+  const loggedIn = (typeof state !== "undefined" && state && state.currentUser && state.currentUser.username) ? state.currentUser.username : "";
+  const isHost = activeMeetingSession ? (activeMeetingSession.isHost || activeMeetingSession.userName === loggedIn) : false;
+  
+  if (isHost || (activeMeetingSession && activeMeetingSession.meeting && activeMeetingSession.meeting.host === loggedIn)) {
+    const modal = document.getElementById("modal-host-end-options");
+    if (modal) {
+      modal.style.display = "flex";
+      return;
+    }
+  }
+
+  if (confirm("Leave this meeting? / सभेतून बाहेर पडायचे आहे का?")) {
+    exitLiveMeetingRoom();
+  }
+}
+window.handleMeetingLeaveClick = handleMeetingLeaveClick;
+
+function closeHostEndOptionsModal() {
+  const modal = document.getElementById("modal-host-end-options");
+  if (modal) modal.style.display = "none";
+}
+window.closeHostEndOptionsModal = closeHostEndOptionsModal;
+
+function confirmHostJustLeaveCall() {
+  closeHostEndOptionsModal();
+  exitLiveMeetingRoom();
+}
+window.confirmHostJustLeaveCall = confirmHostJustLeaveCall;
+
+async function confirmHostEndMeetingForAll() {
+  closeHostEndOptionsModal();
+  await endMeetingForEveryone();
+}
+window.confirmHostEndMeetingForAll = confirmHostEndMeetingForAll;
+
+// Host Permanently Ends Meeting for Everyone & Disables Link
+async function endMeetingForEveryone() {
+  try {
+    const curId = activeMeetingSession ? activeMeetingSession.meetingId : null;
+    const curMeeting = activeMeetingSession ? activeMeetingSession.meeting : null;
+    const loggedIn = (typeof state !== "undefined" && state && state.currentUser && state.currentUser.username) ? state.currentUser.username : "Host";
+
+    console.log("[RiverMeet] Host ending meeting permanently for everyone:", curId);
+
+    if (curId) {
+      const meetings = getMeetingsFromStorage();
+      const mIdx = meetings.findIndex(x => x.id === curId || (curMeeting && x.id === curMeeting.id));
+      if (mIdx !== -1) {
+        meetings[mIdx].status = "ended";
+        meetings[mIdx].endedAt = Date.now();
+        meetings[mIdx].endedBy = loggedIn;
+        saveMeetingsToStorage(meetings);
+      }
+
+      // Broadcast ending to cloud so all participants' apps immediately detect and disconnect
+      const endBroadcast = {
+        type: "MEETING_ENDED",
+        id: curId,
+        code: curMeeting?.code || curId,
+        status: "ended",
+        action: "end_meeting_for_all",
+        endedAt: Date.now(),
+        endedBy: loggedIn,
+        title: curMeeting?.title || "Meeting"
+      };
+      await syncMeetingToCloud(endBroadcast);
+    }
+
+    exitLiveMeetingRoom();
+
+    if (typeof renderMeetingsDashboard === "function") renderMeetingsDashboard();
+    if (typeof renderScheduledPrayersTab === "function") renderScheduledPrayersTab();
+
+    if (typeof showToast === "function") {
+      showToast("🛑 Meeting ended for everyone and link is now disabled. / सभा सर्वांसाठी समाप्त झाली आहे.");
+    }
+  } catch(e) {
+    console.error("[RiverMeet] Error ending meeting for everyone:", e);
+    exitLiveMeetingRoom();
+  }
+}
+window.endMeetingForEveryone = endMeetingForEveryone;
+
+// Google Meet Instant Meeting Generator with Unique Code
 function startInstantMeeting() {
   const user = (typeof state !== "undefined" && state && state.currentUser && state.currentUser.username) ? state.currentUser.username : "Fellowship Host";
-  const randomSuffix = Math.random().toString(36).substring(2, 7);
-  const meetingId = "rol_live_" + randomSuffix;
+  const code = generateMeetingCode();
   const instantMeeting = {
-    id: meetingId,
-    title: "Live Instant Sanctuary (" + user + ")",
-    description: "Live prayer fellowship room • थेट प्रार्थना व सहभागिता दालन",
+    id: code,
+    code: code,
+    roomId: code,
+    title: "Instant Prayer Fellowship (" + user + ")",
+    description: "Live private prayer fellowship session • खाजगी प्रार्थना सभा",
     host: user,
     date: new Date().toISOString().split('T')[0],
-    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    duration: "60",
+    time: "Live Now",
+    duration: 60,
     repeat: "none",
-    visibility: "public",
+    visibility: "private",
+    isPrivate: true,
+    maxParticipants: "Unlimited",
     status: "live",
     participantsCount: 1,
     invitedCount: 0,
-    createdAt: Date.now()
+    createdAt: Date.now(),
+    secretToken: Math.random().toString(36).substring(2, 9)
   };
 
   const meetings = getMeetingsFromStorage();
@@ -13416,80 +13643,50 @@ function startInstantMeeting() {
   saveMeetingsToStorage(meetings);
   syncMeetingToCloud(instantMeeting);
 
-  triggerJoinMeetingFlow(meetingId);
+  // Open the share sheet with link and WhatsApp button
+  openMeetingInviteReadyModal(instantMeeting, true);
+
+  if (typeof renderMeetingsDashboard === "function") renderMeetingsDashboard();
+  if (typeof renderScheduledPrayersTab === "function") renderScheduledPrayersTab();
 }
 window.startInstantMeeting = startInstantMeeting;
 
-// Join Quick Meeting from Input Code
+// Join Quick Meeting from Input Code or Link
 function joinQuickMeetingFromInput() {
   const input = document.getElementById("input-quick-meeting-code");
   if (!input) return;
   const rawCode = input.value.trim();
   if (!rawCode) {
-    if (typeof showToast === "function") showToast("Please enter a meeting code or name / कृपया सभेचा कोड टाका");
+    if (typeof showToast === "function") showToast("Please enter a meeting code or link / कृपया सभेचा कोड टाका");
     return;
   }
-  const cleanCode = rawCode.toLowerCase().replace(/[^a-z0-9_-]/g, "_");
-  const meetings = getMeetingsFromStorage();
-  let m = meetings.find(x => x.id === rawCode || x.id === cleanCode || (x.title && x.title.toLowerCase().includes(rawCode.toLowerCase())));
-  if (!m) {
-    m = {
-      id: cleanCode,
-      title: rawCode,
-      host: "Fellowship",
-      date: new Date().toISOString().split('T')[0],
-      time: "Now",
-      duration: "60",
-      visibility: "public",
-      status: "live",
-      createdAt: Date.now()
-    };
-    meetings.unshift(m);
-    saveMeetingsToStorage(meetings);
-    syncMeetingToCloud(m);
-  }
-
-  triggerJoinMeetingFlow(m.id);
+  input.value = "";
+  triggerJoinMeetingFlow(rawCode);
 }
 window.joinQuickMeetingFromInput = joinQuickMeetingFromInput;
 
-// Check and handle meeting deep links (?join=... or ?room=...)
+// Check and handle meeting deep links (?meet=... or ?join=... or ?room=...)
 function checkAndHandleMeetingDeepLinks() {
   try {
     let joinId = null;
     if (window.location.search) {
       const sp = new URLSearchParams(window.location.search);
-      joinId = sp.get("join") || sp.get("room") || sp.get("meeting");
+      joinId = sp.get("meet") || sp.get("join") || sp.get("room") || sp.get("meeting");
     }
     if (!joinId && window.location.hash && window.location.hash.includes("?")) {
       const q = window.location.hash.split("?")[1];
       if (q) {
         const hp = new URLSearchParams(q);
-        joinId = hp.get("join") || hp.get("room") || hp.get("meeting");
+        joinId = hp.get("meet") || hp.get("join") || hp.get("room") || hp.get("meeting");
       }
     }
 
     if (joinId) {
-      console.log("[RiverMeet] Deep link detected with meeting ID:", joinId);
+      console.log("[RiverMeet] Deep link detected with meeting ID/code:", joinId);
       const cleanId = joinId.trim();
-      const meetings = getMeetingsFromStorage();
-      let m = meetings.find(x => x.id === cleanId);
-      if (!m) {
-        m = {
-          id: cleanId,
-          title: "Sanctuary Fellowship (" + cleanId + ")",
-          host: "Fellowship Host",
-          date: new Date().toISOString().split('T')[0],
-          time: "Live Now",
-          status: "live",
-          createdAt: Date.now()
-        };
-        meetings.unshift(m);
-        saveMeetingsToStorage(meetings);
-      }
       if (typeof switchTab === "function") switchTab("meetings");
       setTimeout(() => {
-        triggerJoinMeetingFlow(m.id);
+        triggerJoinMeetingFlow(cleanId);
       }, 700);
     }
   } catch(e) {
@@ -13676,11 +13873,12 @@ function createNewMeeting() {
 
   const meetings = getMeetingsFromStorage();
 
-  // Create new meeting object
-  const cleanRoomCode = (title || "").toLowerCase().replace(/[^a-z0-9]/g, '') || ("meet_" + Date.now());
+  // Create new meeting object with Google Meet style unique code
+  const code = generateMeetingCode();
   const newMeeting = {
-    id: "meeting_" + Date.now(),
-    roomId: cleanRoomCode,
+    id: code,
+    code: code,
+    roomId: code,
     title,
     description: desc,
     host,
@@ -13689,24 +13887,23 @@ function createNewMeeting() {
     duration,
     repeat,
     visibility,
-    isSimulation: (visibility !== "public"),
+    isPrivate: true,
+    isSimulation: false,
     customUrl: customUrl || "",
     maxParticipants: maxVal || "Unlimited",
     status: goLiveNow ? "live" : "scheduled",
     participantsCount: goLiveNow ? 1 : 0,
     invitedCount: invitedUsers.length,
     invitedUsers: invitedUsers,
-    createdAt: Date.now()
+    createdAt: Date.now(),
+    secretToken: Math.random().toString(36).substring(2, 9)
   };
 
   meetings.unshift(newMeeting);
   saveMeetingsToStorage(meetings);
   syncMeetingToCloud(newMeeting);
 
-  showToast(goLiveNow ? "Meeting Created & Going Live! 🔴" : "Meeting Scheduled Successfully!");
   closeAllDrawers();
-  
-  // Reset form
   document.getElementById("schedule-meeting-form").reset();
 
   if (goLiveNow) {
@@ -13717,6 +13914,7 @@ function createNewMeeting() {
       p.style.display = p.id === "meetings-subtab-live" ? "block" : "none";
     });
     renderMeetingsDashboard();
+    if (typeof renderScheduledPrayersTab === "function") renderScheduledPrayersTab();
     triggerJoinMeetingFlow(newMeeting.id);
   } else {
     // Switch to upcoming tab
@@ -13727,7 +13925,12 @@ function createNewMeeting() {
       p.style.display = p.id === "meetings-subtab-upcoming" ? "block" : "none";
     });
     renderMeetingsDashboard();
+    if (typeof renderScheduledPrayersTab === "function") renderScheduledPrayersTab();
   }
+
+  // Show Google Meet-style shareable invite sheet with link & WhatsApp button
+  openMeetingInviteReadyModal(newMeeting, !!goLiveNow);
+  showToast(goLiveNow ? "Meeting Created & Going Live! 🔴" : "Meeting Scheduled Successfully! 📅 Link Ready");
 
   // Send a simulated notification alert
   setTimeout(() => {
@@ -13948,10 +14151,26 @@ function openMeetingDetails(meetingId) {
 
   // Bind Join button
   const joinBtn = document.getElementById("btn-details-join");
-  joinBtn.onclick = () => {
-    closeAllDrawers();
-    triggerJoinMeetingFlow(m.id);
-  };
+  if (m.status === "ended") {
+    joinBtn.disabled = true;
+    joinBtn.style.opacity = "0.6";
+    joinBtn.style.cursor = "not-allowed";
+    joinBtn.style.background = "#475569";
+    joinBtn.textContent = "🚫 Meeting Ended / सभा समाप्त झाली आहे";
+    joinBtn.onclick = () => {
+      openMeetingEndedModal();
+    };
+  } else {
+    joinBtn.disabled = false;
+    joinBtn.style.opacity = "1";
+    joinBtn.style.cursor = "pointer";
+    joinBtn.style.background = "";
+    joinBtn.textContent = "Join Meeting / सभेत सामील व्हा";
+    joinBtn.onclick = () => {
+      closeAllDrawers();
+      triggerJoinMeetingFlow(m.id);
+    };
+  }
 
   // Bind Share button
   const _el_btn_details_share = document.getElementById("btn-details-share"); if (_el_btn_details_share) _el_btn_details_share.onclick = () => {
@@ -13977,9 +14196,9 @@ function openMeetingDetails(meetingId) {
 // Share meeting invitation via WhatsApp
 function shareMeetingToWhatsApp(meeting) {
   const domain = window.location.origin + window.location.pathname;
-  // Deep-link query to join directly
-  const link = `${domain}?join=${meeting.id}`;
-  const invitationText = `🕊️ *River of Life Meeting Invite* / *आमंत्रण*\n\n📢 *Title:* ${meeting.title}\n📅 *Date:* ${meeting.date}\n⏰ *Time:* ${meeting.time}\n👤 *Host:* ${meeting.host}\n\nJoin us for prayer, worship and Marathi/English Bible study room!\n👉 *Click to join call directly:* ${link}`;
+  const code = meeting.code || meeting.id;
+  const link = `${domain}?meet=${encodeURIComponent(code)}`;
+  const invitationText = `🕊️ *River of Life Church — Prayer Meeting*\n\n📌 *Title:* ${meeting.title}\n📅 *Date:* ${meeting.date}\n⏰ *Time:* ${meeting.time}\n👤 *Host:* ${meeting.host}\n🔢 *Meeting Code:* \`${code}\`\n\n👉 *Click to join call directly:* ${link}\n\n_Note: This is a private meeting. Once the meeting ends, this link is disabled._`;
   
   const encodedText = encodeURIComponent(invitationText);
   window.open(`https://api.whatsapp.com/send?text=${encodedText}`, "_blank");
@@ -13988,13 +14207,13 @@ function shareMeetingToWhatsApp(meeting) {
 // Share invitation text builder
 function copyMeetingInvitation(meeting) {
   const domain = window.location.origin + window.location.pathname;
-  const link = `${domain}#/meetings?join=${meeting.id}`;
-  const invitationText = `🕊️ River of Life Prayer Meeting\n\n📢 Title: ${meeting.title}\n📅 Date: ${meeting.date}\n⏰ Time: ${meeting.time}\n👤 Host: ${meeting.host}\n\nJoin us for prayer, worship and Bible sharing.\n👉 Link: ${link}`;
+  const code = meeting.code || meeting.id;
+  const link = `${domain}?meet=${encodeURIComponent(code)}`;
+  const invitationText = `🕊️ River of Life Church — Prayer Meeting\n\n📌 Title: ${meeting.title}\n📅 Date: ${meeting.date}\n⏰ Time: ${meeting.time}\n👤 Host: ${meeting.host}\n🔢 Meeting Code: ${code}\n\n👉 Link: ${link}\n\nNote: Once this meeting ends, the link will be disabled.`;
 
   navigator.clipboard.writeText(invitationText)
     .then(() => {
       showToast("Invitation Copied to Clipboard! Share to WhatsApp/Email.");
-      // Native sharing if supported
       if (navigator.share) {
         navigator.share({
           title: "River of Life Prayer Meeting Invitation",
@@ -14089,45 +14308,91 @@ function getCanonicalRoomKey(meeting) {
 }
 window.getCanonicalRoomKey = getCanonicalRoomKey;
 
-// Trigger Join Meeting Flow — 100% In-App on Desktop/Android, Direct Safari on iOS
+// Trigger Join Meeting Flow — Google Meet Style Strict Verification & Ejection
 async function triggerJoinMeetingFlow(meetingIdentifier) {
   try {
     unlockAudioContextForMeeting();
-    const meetings = (typeof getMeetingsFromStorage === "function") ? getMeetingsFromStorage() : [];
-    let m = null;
+
+    let raw = "";
     if (typeof meetingIdentifier === "object" && meetingIdentifier !== null) {
-      m = meetingIdentifier;
+      raw = meetingIdentifier.code || meetingIdentifier.id || "";
     } else {
-      const q = String(meetingIdentifier || "").trim().toLowerCase();
-      const qClean = q.replace(/[^a-z0-9]/g, '');
-      m = meetings.find(x => 
-        (x.id && x.id.toLowerCase() === q) || 
-        (x.roomId && x.roomId.toLowerCase() === q) || 
-        (x.title && x.title.trim().toLowerCase() === q) ||
-        (x.title && x.title.toLowerCase().replace(/[^a-z0-9]/g, '') === qClean) ||
-        (x.id && x.id.toLowerCase().replace(/[^a-z0-9]/g, '') === qClean)
-      );
-      if (!m) {
-        m = { id: meetingIdentifier, title: meetingIdentifier, host: "Pastor", roomId: meetingIdentifier };
-      }
+      raw = String(meetingIdentifier || "");
     }
+
+    // Clean up input: extract code from full URLs like https://.../?meet=rol-xxx or ?join=rol-xxx
+    let code = raw.trim();
+    if (code.includes("meet=") || code.includes("join=") || code.includes("room=")) {
+      try {
+        const u = new URL(code, window.location.origin);
+        code = u.searchParams.get("meet") || u.searchParams.get("join") || u.searchParams.get("room") || code;
+      } catch(e) {}
+    }
+    code = code.trim().toLowerCase();
+
+    if (!code) {
+      if (typeof showToast === "function") showToast("Please enter a meeting code or link / कृपया सभेचा कोड टाका");
+      return false;
+    }
+
+    let meetings = (typeof getMeetingsFromStorage === "function") ? getMeetingsFromStorage() : [];
+    let m = meetings.find(x => 
+      (x.id && x.id.toLowerCase() === code) || 
+      (x.code && x.code.toLowerCase() === code) || 
+      (x.roomId && x.roomId.toLowerCase() === code)
+    );
+
+    // If not found locally, fetch latest cloud state (could be created on another device!)
+    if (!m) {
+      try {
+        await fetchMeetingsFromCloud();
+        meetings = getMeetingsFromStorage();
+        m = meetings.find(x => 
+          (x.id && x.id.toLowerCase() === code) || 
+          (x.code && x.code.toLowerCase() === code) || 
+          (x.roomId && x.roomId.toLowerCase() === code)
+        );
+      } catch(e) {}
+    }
+
+    // CRITICAL: Check if meeting is ENDED / DISABLED
+    if (m && m.status === "ended") {
+      console.warn("[RiverMeet] Meeting has ended, access blocked:", m.id);
+      openMeetingEndedModal(`
+        <strong>${m.title || "This meeting"}</strong> has been ended by the host.
+        <br><br>
+        This meeting session is permanently disabled and no one can join after it has ended.
+        <br><br>
+        आयोजकांनी ही सभा समाप्त केली आहे. ही लिंक आता कालबाह्य झाली आहे आणि या सभेत प्रवेश करता येत नाही.
+      `);
+      return false;
+    }
+
+    // If still not found, do not create a fake public room!
+    if (!m) {
+      if (typeof showToast === "function") {
+        showToast("⚠️ सभेचा कोड सापडला नाही / Meeting not found. Please check code or ask host for invite.");
+      }
+      return false;
+    }
+
     _pendingMeetingToJoin = m;
 
-    // Detect iOS (iPhone/iPad): Apple WebKit security sandboxes block cross-origin iframes
-    // from acquiring microphone capture and switching AVAudioSession to PlayAndRecord.
-    // Navigating directly top-level gives native WebRTC permissions, enabling mic & video without errors.
+    // Detect iOS (iPhone/iPad): Direct Safari navigation for WebKit sandbox compliance
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     if (isIOS) {
       const roomUrl = getMiroTalkRoomUrl(m);
       if (typeof showToast === "function") showToast("Opening Sanctuary Call in Safari... 🎙️");
       window.location.href = roomUrl;
-      return;
+      return true;
     }
 
     if (typeof showToast === "function") showToast("Joining Live Sanctuary 🙏");
     await launchLiveMeetingRoom(m, null);
+    return true;
   } catch (err) {
     console.error("[RiverMeet] Error initiating meeting flow:", err);
+    return false;
   }
 }
 window.triggerJoinMeetingFlow = triggerJoinMeetingFlow;
@@ -14702,6 +14967,22 @@ async function launchLiveMeetingRoom(meeting, stream) {
     if (typeof showToast === "function") {
       showToast(isHost ? "You are hosting the Sanctuary call 👑" : "Connected to Sanctuary call 🙏");
     }
+
+    // Active session watcher: auto-disconnect if meeting is ended by host
+    if (window._riverMeetingStatusWatcher) clearInterval(window._riverMeetingStatusWatcher);
+    window._riverMeetingStatusWatcher = setInterval(() => {
+      if (activeMeetingSession && activeMeetingSession.meetingId) {
+        const meetings = (typeof getMeetingsFromStorage === "function") ? getMeetingsFromStorage() : [];
+        const cur = meetings.find(x => x.id === activeMeetingSession.meetingId || (activeMeetingSession.meeting && x.id === activeMeetingSession.meeting.id));
+        if (cur && cur.status === "ended") {
+          console.warn("[RiverMeet] Active meeting was ended remotely:", cur.id);
+          clearInterval(window._riverMeetingStatusWatcher);
+          window._riverMeetingStatusWatcher = null;
+          exitLiveMeetingRoom();
+          openMeetingEndedModal("The host has ended this meeting session for all participants.<br><br>आयोजकांनी ही सभा सर्वांसाठी समाप्त केली आहे.");
+        }
+      }
+    }, 2500);
 
   } catch (err) {
     console.error("[RiverMeet] launchLiveMeetingRoom error:", err);
@@ -16141,6 +16422,10 @@ window.exitLiveMeetingRoom = exitLiveMeetingRoom;
 
 // Cleanup Meeting Resources
 function cleanupRiverMeeting() {
+  if (window._riverMeetingStatusWatcher) {
+    clearInterval(window._riverMeetingStatusWatcher);
+    window._riverMeetingStatusWatcher = null;
+  }
   const mirotalkCont = document.getElementById("meeting-mirotalk-container");
   if (mirotalkCont) {
     mirotalkCont.innerHTML = "";
@@ -19937,8 +20222,9 @@ window.joinPrayerMeetingDirect = function(roomCode, title) {
 
 window.sharePrayerMeetingWhatsApp = function(title, time, roomCode) {
   const domain = window.location.origin + window.location.pathname;
-  const joinUrl = `${domain}?join=${encodeURIComponent(roomCode || 'Sanctuary')}`;
-  const text = `🕊️ *River of Life Church Prayer Meeting*\n\n🙏 *${title}*\n🕒 *Time:* ${time}\n\n🎥 *Join Live Video Call Directly / थेट कॉलमध्ये सामील व्हा:*\n${joinUrl}\n\n_All are welcome to join in prayer and fellowship!_`;
+  const code = roomCode || 'Sanctuary';
+  const joinUrl = `${domain}?meet=${encodeURIComponent(code)}`;
+  const text = `🕊️ *River of Life Church — Prayer Meeting*\n\n📌 *${title}*\n⏱️ *Time / वेळ:* ${time}\n🔢 *Meeting Code:* \`${code}\`\n\n🔗 *Join Video Meeting / सभेत सामील व्हा:*\n${joinUrl}\n\n_Note: This is a private meeting. Once the meeting ends, this link is disabled._`;
   const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
   window.open(waUrl, '_blank');
 };
@@ -26569,47 +26855,90 @@ function openAdminCreateMeetingModal() {
 function handleAdminCreateMeeting(e) {
   if (e) e.preventDefault();
   const title = document.getElementById("admin-meeting-title")?.value.trim();
-  const host = document.getElementById("admin-meeting-host")?.value.trim();
-  const time = document.getElementById("admin-meeting-time")?.value.trim();
-  const roomId = document.getElementById("admin-meeting-room-id")?.value.trim() || `rol-${Date.now()}`;
+  const host = document.getElementById("admin-meeting-host")?.value.trim() || "Pastor";
+  const time = document.getElementById("admin-meeting-time")?.value.trim() || "Live Now";
+  const customRoom = document.getElementById("admin-meeting-room-id")?.value.trim();
+  const code = (customRoom && customRoom.length > 3) ? customRoom : generateMeetingCode();
 
   if (!title) return;
 
-  const meetings = getAdminMeetings();
-  meetings.unshift({
-    id: `meet_${Date.now()}`,
+  const adminMeetings = getAdminMeetings();
+  const adminMeetingObj = {
+    id: code,
     title: title,
     titleMr: title,
     host: host,
     time: time,
-    roomId: roomId,
+    roomId: code,
+    code: code,
     active: true
-  });
+  };
+  adminMeetings.unshift(adminMeetingObj);
+  saveAdminMeetingsList(adminMeetings);
 
-  saveAdminMeetingsList(meetings);
+  // Also sync to main church meetings list
+  const churchMeetings = getMeetingsFromStorage();
+  const mainObj = {
+    id: code,
+    code: code,
+    roomId: code,
+    title: title,
+    host: host,
+    date: new Date().toISOString().split('T')[0],
+    time: time,
+    duration: 60,
+    status: "scheduled",
+    isPrivate: true,
+    createdAt: Date.now()
+  };
+  churchMeetings.unshift(mainObj);
+  saveMeetingsToStorage(churchMeetings);
+  syncMeetingToCloud(mainObj);
+
   closeModal("modal-admin-create-meeting");
   document.getElementById("form-admin-create-meeting")?.reset();
   renderAdminMeetings();
-  showToast("✅ Prayer meeting scheduled!");
+  if (typeof renderScheduledPrayersTab === "function") renderScheduledPrayersTab();
+  if (typeof renderMeetingsDashboard === "function") renderMeetingsDashboard();
+
+  openMeetingInviteReadyModal(mainObj, false);
+  showToast("✅ Prayer meeting scheduled! Link ready to share.");
 }
 
 function deleteAdminMeeting(meetingId) {
   let meetings = getAdminMeetings();
+  const target = meetings.find(m => m.id === meetingId);
   meetings = meetings.filter(m => m.id !== meetingId);
   saveAdminMeetingsList(meetings);
+
+  // Mark ended in church list & broadcast to cloud to disable the meeting!
+  let churchList = getMeetingsFromStorage();
+  const cIdx = churchList.findIndex(m => m.id === meetingId || (target && m.roomId === target.roomId));
+  if (cIdx !== -1) {
+    churchList[cIdx].status = "ended";
+    churchList[cIdx].endedAt = Date.now();
+    saveMeetingsToStorage(churchList);
+    syncMeetingToCloud({
+      type: "MEETING_ENDED",
+      id: meetingId,
+      status: "ended",
+      action: "end_meeting_for_all",
+      endedAt: Date.now()
+    });
+  }
+
   renderAdminMeetings();
-  showToast("Meeting deleted");
+  if (typeof renderScheduledPrayersTab === "function") renderScheduledPrayersTab();
+  if (typeof renderMeetingsDashboard === "function") renderMeetingsDashboard();
+  showToast("Meeting ended and disabled / सभा समाप्त व बंद केली");
 }
 
 function startAdminMeeting(roomId) {
-  window.location.hash = "#/meetings";
-  if (typeof startNativeVideoMeeting === "function") {
-    startNativeVideoMeeting(roomId);
-  }
+  triggerJoinMeetingFlow(roomId);
 }
 
 function copyAdminMeetingInvite(roomId) {
-  const url = `${window.location.origin}/#/meetings?room=${roomId}`;
+  const url = `${window.location.origin}/?meet=${roomId}`;
   navigator.clipboard.writeText(url).then(() => {
     showToast("📋 Meeting invite link copied to clipboard!");
   }).catch(() => {

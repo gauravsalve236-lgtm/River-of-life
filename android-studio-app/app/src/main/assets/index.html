@@ -1396,18 +1396,25 @@
                 <p style="font-size: 13px; color: rgba(255,255,255,0.85); margin: 0; line-height: 1.45;">Join our pastoral live prayer calls, morning dawn fellowship, and fasting prayers via video room.</p>
               </div>
 
-              <!-- Scheduled Prayer Meetings List (Dynamic from Storage / Server) -->
-              <div class="prayers-subtab-header" style="background: linear-gradient(135deg, #1e293b, #0f172a); border-radius: 18px; padding: 22px; margin-bottom: 20px; color: #ffffff; border: 1.5px solid rgba(255,255,255,0.1);">
-                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 8px;">
-                  <span style="background: rgba(34,197,94,0.2); border: 1px solid rgba(34,197,94,0.5); color: #86efac; font-size: 10.5px; font-weight: 800; padding: 3px 10px; border-radius: 20px;">OFFICIAL CHURCH SCHEDULE</span>
-                  <div style="display: flex; gap: 8px; align-items: center;">
-                    <button onclick="if(typeof fetchMeetingsFromCloud==='function')fetchMeetingsFromCloud(true); if(typeof syncAllLocalMeetingsToCloud==='function')syncAllLocalMeetingsToCloud();" class="btn-secondary-mini" style="background: rgba(255,255,255,0.18); color: #fff; border: 1px solid rgba(255,255,255,0.3); padding: 6px 12px; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 5px;">
-                      <span>🔄 Sync / सिंक</span>
-                    </button>
-                  </div>
+              <!-- Clean Google Meet Action Row for Prayer Meetings -->
+              <div style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 18px; padding: 14px 18px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                  <button onclick="startInstantMeeting()" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; border: none; padding: 9px 16px; border-radius: 10px; font-size: 13px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(37,99,235,0.3);">
+                    <span>⚡ Instant Meeting / त्वरित सभा</span>
+                  </button>
+                  <button onclick="openDrawer('drawer-schedule-meeting'); if (typeof populateScheduleHostsDropdown==='function') populateScheduleHostsDropdown();" style="background: rgba(255,255,255,0.08); border: 1.5px solid var(--border); color: var(--text); padding: 9px 14px; border-radius: 10px; font-size: 12.5px; font-weight: 700; cursor: pointer;">
+                    <span>📅 Schedule Meeting / शेड्युल करा</span>
+                  </button>
                 </div>
-                <h3 style="font-size: 21px; font-weight: 800; margin: 0 0 6px 0; color: #ffffff;">Church Prayer Meetings (प्रार्थना सभा)</h3>
-                <p style="font-size: 13px; color: rgba(255,255,255,0.85); margin: 0; line-height: 1.45;">Join scheduled pastoral live prayer calls, fasting prayers, and fellowship sessions. Only official church-scheduled meetings appear here.</p>
+                <div style="display: flex; gap: 6px; align-items: center;">
+                  <input type="text" id="input-prayers-meeting-code" placeholder="Meeting code (rol-xxx)..." style="width: 170px; padding: 9px 12px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--bg); color: var(--text); font-size: 12.5px; font-weight: 600;" onkeydown="if(event.key==='Enter') { triggerJoinMeetingFlow(this.value); this.value=''; }">
+                  <button onclick="const el=document.getElementById('input-prayers-meeting-code'); if(el && el.value.trim()){ triggerJoinMeetingFlow(el.value.trim()); el.value=''; }" style="padding: 9px 14px; border-radius: 10px; border: none; background: #22c55e; color: #fff; font-size: 12.5px; font-weight: 800; cursor: pointer;">
+                    <span>Join / जोडा</span>
+                  </button>
+                  <button onclick="if(typeof fetchMeetingsFromCloud==='function')fetchMeetingsFromCloud(true); if(typeof syncAllLocalMeetingsToCloud==='function')syncAllLocalMeetingsToCloud();" class="btn-secondary-mini" style="padding: 9px 11px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;" title="Sync Meetings">
+                    <span>🔄</span>
+                  </button>
+                </div>
               </div>
 
               <!-- Container for official scheduled meetings -->
@@ -1702,30 +1709,59 @@
               </button>
             </div>
 
-            <!-- Quick Meeting Join & Instant Call Bar -->
-            <div class="quick-meeting-join-card" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.08), rgba(59, 130, 246, 0.08)); border: 1.5px solid rgba(34, 197, 94, 0.35); border-radius: 18px; padding: 14px 18px; margin-bottom: 18px; box-shadow: var(--shadow-sm);">
-              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                  <span style="font-size: 22px;">🎥</span>
+            <!-- Google Meet Style Action Hub -->
+            <div class="google-meet-action-hub" style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 20px; padding: 18px 20px; margin-bottom: 20px; box-shadow: var(--shadow-sm);">
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 14px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <div style="width: 42px; height: 42px; border-radius: 12px; background: rgba(37,99,235,0.12); color: #2563eb; display: flex; align-items: center; justify-content: center; font-size: 22px;">
+                    📹
+                  </div>
                   <div>
-                    <h4 style="margin: 0; font-size: 15px; font-weight: 800; color: var(--text);">Join with Meeting Code / थेट सभेचा कोड टाका</h4>
-                    <p style="margin: 2px 0 0 0; font-size: 11.5px; color: var(--text-muted);">Enter any meeting name/code or start an instant call right now</p>
+                    <h4 style="margin: 0; font-size: 16px; font-weight: 800; color: var(--text);">Video Meetings & Fellowship / व्हिडिओ सभा</h4>
+                    <p style="margin: 2px 0 0 0; font-size: 12px; color: var(--text-muted);">Secure, private video meetings for prayer and church fellowship</p>
                   </div>
                 </div>
-                <div style="display: flex; gap: 8px; align-items: center;">
-                  <button onclick="if(typeof fetchMeetingsFromCloud==='function')fetchMeetingsFromCloud(true); if(typeof syncAllLocalMeetingsToCloud==='function')syncAllLocalMeetingsToCloud();" style="background: rgba(37,99,235,0.1); border: 1px solid rgba(37,99,235,0.25); color: #2563eb; padding: 8px 12px; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 5px;">
-                    <span>🔄 Sync</span>
+                <button onclick="if(typeof fetchMeetingsFromCloud==='function')fetchMeetingsFromCloud(true); if(typeof syncAllLocalMeetingsToCloud==='function')syncAllLocalMeetingsToCloud();" style="background: rgba(37,99,235,0.08); border: 1px solid rgba(37,99,235,0.2); color: #2563eb; padding: 7px 12px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                  <span>🔄 Sync</span>
+                </button>
+              </div>
+
+              <!-- Action Controls Row (Google Meet Style) -->
+              <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                <!-- New Meeting Dropdown Button -->
+                <div style="position: relative; flex-shrink: 0;">
+                  <button id="btn-google-meet-new" onclick="toggleNewMeetingDropdown(event)" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #ffffff; border: none; padding: 11px 18px; border-radius: 12px; font-size: 13.5px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(37,99,235,0.35);">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.3"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+                    <span>New meeting / नवीन सभा ▾</span>
                   </button>
-                  <button onclick="startInstantMeeting()" class="btn-primary-mini" style="background: linear-gradient(135deg, #16a34a, #22c55e); color: #fff; border: none; padding: 8px 14px; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(34,197,94,0.35);">
-                    <span>⚡ Instant Meeting / त्वरित सभा</span>
+                  <div id="dropdown-new-meeting-menu" style="display: none; position: absolute; top: calc(100% + 6px); left: 0; background: var(--bg-content, #ffffff); border: 1.5px solid var(--border); border-radius: 16px; box-shadow: 0 12px 30px rgba(0,0,0,0.25); min-width: 270px; z-index: 100; overflow: hidden; padding: 6px;">
+                    <button onclick="startInstantMeeting(); closeNewMeetingDropdown();" style="width: 100%; text-align: left; padding: 10px 14px; background: transparent; border: none; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 10px; color: var(--text); font-size: 13px; font-weight: 700; transition: background 0.15s;" onmouseover="this.style.background='rgba(37,99,235,0.1)'" onmouseout="this.style.background='transparent'">
+                      <span style="font-size: 18px;">⚡</span>
+                      <div>
+                        <div>Start an instant meeting</div>
+                        <div style="font-size: 11px; color: var(--text-muted); font-weight: 500;">झटपट सभा सुरू करा</div>
+                      </div>
+                    </button>
+                    <button onclick="openDrawer('drawer-schedule-meeting'); if (typeof populateScheduleHostsDropdown==='function') populateScheduleHostsDropdown(); closeNewMeetingDropdown();" style="width: 100%; text-align: left; padding: 10px 14px; background: transparent; border: none; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 10px; color: var(--text); font-size: 13px; font-weight: 700; transition: background 0.15s;" onmouseover="this.style.background='rgba(37,99,235,0.1)'" onmouseout="this.style.background='transparent'">
+                      <span style="font-size: 18px;">📅</span>
+                      <div>
+                        <div>Schedule for later</div>
+                        <div style="font-size: 11px; color: var(--text-muted); font-weight: 500;">पुढील वेळेसाठी शेड्युल करा</div>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Code / Link Input & Join Button -->
+                <div style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 260px;">
+                  <div style="position: relative; flex: 1;">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none;"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect><line x1="6" y1="8" x2="6" y2="8"></line><line x1="10" y1="8" x2="10" y2="8"></line><line x1="14" y1="8" x2="14" y2="8"></line><line x1="18" y1="8" x2="18" y2="8"></line><line x1="6" y1="12" x2="6" y2="12"></line><line x1="10" y1="12" x2="10" y2="12"></line><line x1="14" y1="12" x2="14" y2="12"></line><line x1="18" y1="12" x2="18" y2="12"></line><line x1="7" y1="16" x2="17" y2="16"></line></svg>
+                    <input type="text" id="input-quick-meeting-code" placeholder="Enter a code or link (उदा. rol-xxx-yyyy-zzz)..." style="width: 100%; box-sizing: border-box; padding: 11px 14px 11px 38px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--bg); color: var(--text); font-size: 13.5px; outline: none; font-weight: 600;" onkeydown="if(event.key==='Enter') joinQuickMeetingFromInput()">
+                  </div>
+                  <button onclick="joinQuickMeetingFromInput()" style="padding: 11px 20px; border-radius: 12px; border: none; background: linear-gradient(135deg, #16a34a, #22c55e); color: #fff; font-size: 13.5px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap; box-shadow: 0 4px 12px rgba(34,197,94,0.3);">
+                    <span>Join / जॉईन</span>
                   </button>
                 </div>
-              </div>
-              <div style="display: flex; gap: 8px;">
-                <input type="text" id="input-quick-meeting-code" placeholder="Enter Meeting Name or Code (उदा. test, sunday, fellowship)..." style="flex: 1; padding: 10px 14px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--bg-content); color: var(--text); font-size: 13.5px; outline: none; font-weight: 600;" onkeydown="if(event.key==='Enter') joinQuickMeetingFromInput()">
-                <button onclick="joinQuickMeetingFromInput()" style="padding: 10px 18px; border-radius: 12px; border: none; background: linear-gradient(135deg, #16a34a, #22c55e); color: #fff; font-size: 13px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap;">
-                  <span>Join Call 🚀</span>
-                </button>
               </div>
             </div>
 
@@ -5563,7 +5599,7 @@
             <button onclick="openMeetingInSafariDirectly()" style="padding: 6px 12px; border-radius: 12px; font-size: 11.5px; font-weight: 800; background: rgba(245, 158, 11, 0.2); border: 1px solid #f59e0b; color: #fbbf24; cursor: pointer; display: flex; align-items: center; gap: 4px;" title="Open in Safari / Fullscreen Browser">
               🎙️ <span>Open in Browser</span>
             </button>
-            <button id="btn-meeting-leave-top" onclick="exitLiveMeetingRoom()" class="river-end-call-btn" title="End Call">
+            <button id="btn-meeting-leave-top" onclick="handleMeetingLeaveClick()" class="river-end-call-btn" title="End Call">
               <span>🚪 End Call / सोडा</span>
             </button>
           </div>
@@ -5688,7 +5724,7 @@
               </button>
 
               <!-- End Call Button -->
-              <button id="btn-river-hangup" onclick="exitLiveMeetingRoom()" class="river-ctrl-btn river-ctrl-hangup" title="Leave Meeting">
+              <button id="btn-river-hangup" onclick="handleMeetingLeaveClick()" class="river-ctrl-btn river-ctrl-hangup" title="Leave Meeting">
                 <div class="river-ctrl-icon-wrap hangup-icon">
                   <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
                     <path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08a.996.996 0 0 1 0-1.41C3.28 8.77 7.42 7 12 7s8.72 1.77 11.71 4.67c.39.39.39 1.02 0 1.41l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/>
@@ -5795,6 +5831,107 @@
 
         </div>
 
+    </div>
+    </div>
+
+    <!-- 1. Google Meet Style Host End Meeting Options Modal -->
+    <div id="modal-host-end-options" class="meeting-modal-overlay" style="display: none; align-items: center; justify-content: center; z-index: 1000000; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 16px;">
+      <div style="background: var(--bg-content, #18181b); color: var(--text, #ffffff); border-radius: 24px; border: 1.5px solid rgba(255,255,255,0.15); max-width: 400px; width: 100%; padding: 24px; text-align: center; box-shadow: 0 25px 60px rgba(0,0,0,0.8); animation: popInModal 0.25s cubic-bezier(0.16,1,0.3,1);">
+        <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(239, 68, 68, 0.15); border: 1.5px solid rgba(239, 68, 68, 0.4); color: #ef4444; display: flex; align-items: center; justify-content: center; font-size: 26px; margin: 0 auto 14px auto;">
+          🚪
+        </div>
+        <h3 style="margin: 0 0 6px 0; font-size: 19px; font-weight: 800; color: #ffffff;">Leave or End Meeting?</h3>
+        <p style="margin: 0 0 20px 0; font-size: 13px; color: #94a3b8; line-height: 1.45;">
+          You are the host. Would you like to end the meeting session for everyone and disable this link, or just leave?
+          <br><span style="font-size: 11.5px; color: #f87171;">(सर्वांसाठी सभा संपवल्यास ही लिंक कायमची बंद होईल)</span>
+        </p>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <button onclick="confirmHostEndMeetingForAll()" style="width: 100%; padding: 13px; border-radius: 14px; background: #dc2626; color: #ffffff; border: none; font-size: 13.5px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 14px rgba(220,38,38,0.4);">
+            <span>🛑 End meeting for everyone / सर्वांसाठी सभा संपवा</span>
+          </button>
+          <button onclick="confirmHostJustLeaveCall()" style="width: 100%; padding: 12px; border-radius: 14px; background: rgba(255,255,255,0.1); color: #ffffff; border: 1px solid rgba(255,255,255,0.2); font-size: 13px; font-weight: 700; cursor: pointer;">
+            <span>🚪 Just leave call / फक्त मी बाहेर पडा</span>
+          </button>
+          <button onclick="closeHostEndOptionsModal()" style="width: 100%; padding: 10px; border-radius: 14px; background: transparent; color: #94a3b8; border: none; font-size: 12.5px; font-weight: 600; cursor: pointer;">
+            Cancel / मागे जा
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Google Meet Style Meeting Ended Modal -->
+    <div id="modal-meeting-ended" class="meeting-modal-overlay" style="display: none; align-items: center; justify-content: center; z-index: 1000000; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 16px;">
+      <div style="background: var(--bg-content, #18181b); color: var(--text, #ffffff); border-radius: 24px; border: 1.5px solid rgba(239, 68, 68, 0.4); max-width: 440px; width: 100%; padding: 28px 24px; text-align: center; box-shadow: 0 25px 60px rgba(0,0,0,0.7); animation: popInModal 0.25s cubic-bezier(0.16,1,0.3,1);">
+        <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(239, 68, 68, 0.15); border: 2px solid rgba(239, 68, 68, 0.4); color: #ef4444; display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 16px auto;">
+          🛑
+        </div>
+        <span style="display: inline-block; background: rgba(239, 68, 68, 0.18); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.35); font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">
+          MEETING ENDED • सभा समाप्त झाली
+        </span>
+        <h3 style="margin: 0 0 8px 0; font-size: 20px; font-weight: 800; color: #ffffff;">
+          This meeting has ended / ही सभा संपली आहे
+        </h3>
+        <p id="meeting-ended-detail-msg" style="margin: 0 0 16px 0; font-size: 13.5px; color: #94a3b8; line-height: 1.5;">
+          The host has ended this meeting session. The link is no longer active and no one can join this meeting room.
+          <br><br>
+          आयोजकांनी ही सभा सर्वांसाठी समाप्त केली आहे. या लिंकवरून आता सभेत प्रवेश करता येणार नाही.
+        </p>
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
+          <button onclick="closeMeetingEndedModal(); openNewMeetingMenu();" style="width: 100%; padding: 13px; border-radius: 14px; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #ffffff; border: none; font-size: 14px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 16px rgba(37,99,235,0.4);">
+            <span>➕ Schedule or Start New Meeting / नवीन सभा</span>
+          </button>
+          <button onclick="closeMeetingEndedModal(); if(typeof switchTab==='function')switchTab('home');" style="width: 100%; padding: 12px; border-radius: 14px; background: rgba(255,255,255,0.08); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.18); font-size: 13.5px; font-weight: 700; cursor: pointer;">
+            <span>🏠 Back to Home / मुख्य पानावर जा</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Google Meet "Your meeting is ready" Share Modal -->
+    <div id="modal-meeting-invite-ready" class="meeting-modal-overlay" style="display: none; align-items: center; justify-content: center; z-index: 1000000; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 16px;">
+      <div style="background: var(--bg-content, #18181b); color: var(--text, #ffffff); border-radius: 24px; border: 1.5px solid rgba(34, 197, 94, 0.4); max-width: 460px; width: 100%; padding: 26px 22px; text-align: left; box-shadow: 0 25px 60px rgba(0,0,0,0.7); animation: popInModal 0.25s cubic-bezier(0.16,1,0.3,1);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(34, 197, 94, 0.18); border: 1px solid rgba(34, 197, 94, 0.4); color: #22c55e; display: flex; align-items: center; justify-content: center; font-size: 22px;">
+              🎉
+            </div>
+            <div>
+              <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #ffffff;">Your meeting is ready / सभा तयार आहे</h3>
+              <p style="margin: 2px 0 0 0; font-size: 12px; color: #94a3b8;">Share this private invite link with people you want to join.</p>
+            </div>
+          </div>
+          <button onclick="closeMeetingInviteReadyModal()" style="background: rgba(255,255,255,0.1); border: none; color: #fff; width: 30px; height: 30px; border-radius: 50%; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;">&times;</button>
+        </div>
+
+        <!-- Meeting Code Box -->
+        <div style="background: #090d16; border: 1.5px solid rgba(255,255,255,0.14); border-radius: 14px; padding: 12px 14px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <span style="font-size: 11px; text-transform: uppercase; color: #94a3b8; font-weight: 700; letter-spacing: 0.5px;">MEETING CODE</span>
+            <div id="ready-meeting-code" style="font-family: monospace; font-size: 16px; font-weight: 800; color: #22c55e; letter-spacing: 1px;">rol-abc-defg-hij</div>
+          </div>
+          <button onclick="copyReadyMeetingCode()" style="background: rgba(34,197,94,0.18); border: 1px solid rgba(34,197,94,0.35); color: #4ade80; padding: 7px 12px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+            <span>📋 Copy Code</span>
+          </button>
+        </div>
+
+        <!-- Direct URL Box -->
+        <div style="background: #090d16; border: 1.5px solid rgba(255,255,255,0.14); border-radius: 14px; padding: 10px 14px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+          <span id="ready-meeting-url" style="font-size: 12.5px; color: #cbd5e1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: monospace;">https://riveroflifebible.com/?meet=rol-abc-defg-hij</span>
+          <button onclick="copyReadyMeetingUrl()" style="background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); color: #ffffff; padding: 7px 12px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 5px;">
+            <span>🔗 Copy Link</span>
+          </button>
+        </div>
+
+        <!-- Action Buttons -->
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <button id="btn-share-ready-whatsapp" onclick="shareReadyMeetingOnWhatsApp()" style="width: 100%; padding: 13px; border-radius: 14px; background: linear-gradient(135deg, #22c55e, #16a34a); color: #ffffff; border: none; font-size: 14px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 16px rgba(34,197,94,0.4);">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+            <span>Share via WhatsApp / व्हॉट्सॲपवर पाठवा</span>
+          </button>
+          <button id="btn-enter-ready-meeting" onclick="enterReadyMeeting()" style="width: 100%; padding: 12px; border-radius: 14px; background: rgba(37,99,235,0.2); border: 1.5px solid #2563eb; color: #60a5fa; font-size: 13.5px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <span>🚀 Join Meeting Now / आता सभेत जा</span>
+          </button>
+        </div>
       </div>
     </div>
 
@@ -6659,7 +6796,7 @@
   <script src="sarvam-tts.js?v=132_MARVBSI_FULL_CHURCH_BIBLE"></script>
   <script src="bible-study.js?v=138_MUSEUM_STUDY_HUB"></script>
   <script src="peerjs.min.js"></script>
-  <script src="app.js?v=2417_SIMPLIFIED_CARD_BUTTONS"></script>
+  <script src="app.js?v=2418_GOOGLE_MEET_PRIVATE_LIFECYCLE"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 4.5s no matter what

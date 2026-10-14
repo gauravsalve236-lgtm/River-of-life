@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v2417_SIMPLIFIED_CARD_BUTTONS';
+const CACHE_NAME = 'river-of-life-cache-v2418_GOOGLE_MEET_PRIVATE_LIFECYCLE';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
