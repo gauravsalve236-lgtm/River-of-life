@@ -17063,9 +17063,9 @@ body:has(#view-reader.active) .mobile-bottom-tabs {
     margin-bottom: 4px !important;
   }
   #fs-vod-text {
-    font-size: clamp(19px, 5.2vw, 25px) !important;
-    line-height: 1.55 !important;
-    margin-bottom: 12px !important;
+    font-size: var(--fs-vod-font-size, clamp(19px, 5.2vw, 25px));
+    line-height: var(--fs-vod-line-height, 1.55);
+    margin-bottom: 12px;
   }
   #fs-vod-flourish-swash {
     width: min(85%, 240px) !important;
@@ -17073,7 +17073,7 @@ body:has(#view-reader.active) .mobile-bottom-tabs {
     margin: -4px auto 10px auto !important;
   }
   #fs-vod-ref-badge {
-    font-size: 15px !important;
+    font-size: 15px;
   }
   .fs-vod-top-header {
     width: calc(100% - 20px) !important;
@@ -17105,12 +17105,12 @@ body:has(#view-reader.active) .mobile-bottom-tabs {
     width: min(86vw, 680px) !important;
   }
   #fs-vod-text {
-    font-size: clamp(23px, 3.6vw, 32px) !important;
-    line-height: 1.6 !important;
-    margin-bottom: 16px !important;
+    font-size: var(--fs-vod-font-size, clamp(23px, 3.6vw, 32px));
+    line-height: var(--fs-vod-line-height, 1.6);
+    margin-bottom: 16px;
   }
   #fs-vod-ref-badge {
-    font-size: 18px !important;
+    font-size: 18px;
   }
 }
 
@@ -17120,12 +17120,12 @@ body:has(#view-reader.active) .mobile-bottom-tabs {
     width: min(80vw, 880px) !important;
   }
   #fs-vod-text {
-    font-size: clamp(28px, 2.5vw, 38px) !important;
-    line-height: 1.65 !important;
-    margin-bottom: 20px !important;
+    font-size: var(--fs-vod-font-size, clamp(28px, 2.5vw, 38px));
+    line-height: var(--fs-vod-line-height, 1.65);
+    margin-bottom: 20px;
   }
   #fs-vod-ref-badge {
-    font-size: 19.5px !important;
+    font-size: 19.5px;
   }
   #fs-vod-pinterest-strip {
     justify-content: center !important;

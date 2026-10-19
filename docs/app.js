@@ -3467,7 +3467,20 @@ function renderDailyDevotion() {
   if (homeVodRefMrEl) homeVodRefMrEl.textContent = isEng ? "" : (vod.ref || vod.engRef);
   if (homeVodVersionTag) homeVodVersionTag.textContent = isEng ? "NLT" : "MARVBSI";
 
-  // Calculate Daily Rotating Typography Theme from dayOfYear + offset
+  // Expanded Luminous Rotating Scenic Wallpapers from assets/daily_verses/
+  const images = (window.dailyVersesImageList && window.dailyVersesImageList.length > 0) ? window.dailyVersesImageList : [
+    'sunrise.png', 'forest.png', 'mountains.png', 'ocean.png', 'path.png', 'stars.png', 'mist.png'
+  ];
+  const imgIdx = ((dayOfYear + offset) % images.length + images.length) % images.length;
+  const savedWp = localStorage.getItem('rol_selected_wallpaper');
+  const dailyImg = (savedWp && (images.includes(savedWp) || savedWp.startsWith('data:') || savedWp.startsWith('blob:') || savedWp.startsWith('http'))) ? savedWp : images[imgIdx];
+  window.currentDailyVerseImage = dailyImg;
+  window.currentVodImageIndex = images.indexOf(dailyImg) !== -1 ? images.indexOf(dailyImg) : imgIdx;
+  const imgUrl = (typeof getVodImageUrl === "function") ? getVodImageUrl(dailyImg) : (dailyImg.includes('.') ? `assets/daily_verses/${dailyImg}` : `assets/daily_verses/${dailyImg}.png`);
+
+  // Compute Active Wallpaper Atmosphere & Adaptive Verse Metrics
+  const atmo = (typeof window.getWallpaperAtmosphere === "function") ? window.getWallpaperAtmosphere(dailyImg) : "nature";
+  const metrics = (typeof window.computeAdaptiveVerseMetrics === "function") ? window.computeAdaptiveVerseMetrics(displayText, isEng) : { homeFontSize: "18px", homeLineHeight: "1.66", homeFontWeight: "700" };
   const stylesCount = (window.VOD_TYPOGRAPHY_STYLES && window.VOD_TYPOGRAPHY_STYLES.length) ? window.VOD_TYPOGRAPHY_STYLES.length : 14;
   const dailyThemeIdx = ((dayOfYear + offset) % stylesCount + stylesCount) % stylesCount;
   if (!window.userCustomTypographySelected) {
@@ -3476,6 +3489,11 @@ function renderDailyDevotion() {
   const theme = (window.VOD_TYPOGRAPHY_STYLES && window.VOD_TYPOGRAPHY_STYLES[window.currentVodTypographyIndex || 0]) 
     ? window.VOD_TYPOGRAPHY_STYLES[window.currentVodTypographyIndex || 0] 
     : (window.VOD_TYPOGRAPHY_STYLES ? window.VOD_TYPOGRAPHY_STYLES[0] : null);
+  const atmoConfig = (typeof window.getAtmosphereStyleConfig === "function") 
+    ? window.getAtmosphereStyleConfig(atmo, window.currentVodTypographyIndex || dailyThemeIdx) 
+    : null;
+
+  const activeAccent = (atmoConfig ? atmoConfig.accentColor : theme?.accentColor) || "#fbbf24";
 
   const homeVodTextEl = document.getElementById("home-vod-text");
   if (homeVodTextEl) {
@@ -3484,43 +3502,61 @@ function renderDailyDevotion() {
     homeVodTextEl.style.margin = "";
     homeVodTextEl.style.background = "transparent";
     homeVodTextEl.style.border = "none";
-    if (theme) {
-      let activeFont = theme.fontFamily;
-      let activeLineHeight = theme.lineHeight || "1.62";
-      if (!isEng) {
-        if (theme.fontFamily.includes('Rozha One')) {
-          activeFont = "'Rozha One', 'Noto Serif Devanagari', serif";
-        } else if (theme.fontFamily.includes('Poppins') || theme.fontFamily.includes('Outfit')) {
-          activeFont = "'Noto Sans Devanagari', 'Poppins', -apple-system, sans-serif";
-        } else if (theme.fontFamily.includes('Cinzel')) {
-          activeFont = "'Cinzel', 'Noto Serif Devanagari', Georgia, serif";
-        } else if (theme.fontFamily.includes('Lora')) {
-          activeFont = "'Lora', 'Noto Serif Devanagari', Georgia, serif";
-        } else {
-          activeFont = "'Noto Serif Devanagari', 'Playfair Display', Georgia, serif";
-        }
-        activeLineHeight = "1.68";
+    
+    let activeFont = theme?.fontFamily || "'Lora', 'Noto Serif Devanagari', serif";
+    if (atmoConfig) {
+      activeFont = isEng ? atmoConfig.fontEng : atmoConfig.fontMarathi;
+    } else if (!isEng) {
+      if (theme?.fontFamily?.includes('Rozha One')) {
+        activeFont = "'Rozha One', 'Noto Serif Devanagari', serif";
+      } else if (theme?.fontFamily?.includes('Poppins') || theme?.fontFamily?.includes('Outfit')) {
+        activeFont = "'Noto Sans Devanagari', 'Poppins', -apple-system, sans-serif";
+      } else if (theme?.fontFamily?.includes('Cinzel')) {
+        activeFont = "'Cinzel', 'Noto Serif Devanagari', Georgia, serif";
+      } else if (theme?.fontFamily?.includes('Lora')) {
+        activeFont = "'Lora', 'Noto Serif Devanagari', Georgia, serif";
+      } else {
+        activeFont = "'Noto Serif Devanagari', 'Playfair Display', Georgia, serif";
       }
-      homeVodTextEl.style.fontFamily = activeFont;
-      homeVodTextEl.style.fontWeight = theme.fontWeight || "700";
-      homeVodTextEl.style.color = theme.textColor || "#ffffff";
-      homeVodTextEl.style.textShadow = theme.textShadow || "0 2px 14px rgba(0,0,0,0.85)";
-      homeVodTextEl.style.lineHeight = activeLineHeight;
-      homeVodTextEl.style.letterSpacing = theme.letterSpacing || "normal";
+    }
+
+    homeVodTextEl.style.fontFamily = activeFont;
+    homeVodTextEl.style.fontSize = metrics.homeFontSize;
+    homeVodTextEl.style.fontWeight = metrics.homeFontWeight || "700";
+    homeVodTextEl.style.color = "#ffffff";
+    homeVodTextEl.style.textShadow = (atmoConfig ? atmoConfig.textShadow : theme?.textShadow) || "0 2px 14px rgba(0,0,0,0.85)";
+    homeVodTextEl.style.lineHeight = metrics.homeLineHeight;
+    homeVodTextEl.style.letterSpacing = "0.2px";
+
+    if (atmoConfig && atmoConfig.archetype === "editorial-left") {
+      homeVodTextEl.style.borderLeft = `3.5px solid ${activeAccent}`;
+      homeVodTextEl.style.paddingLeft = "14px";
+      homeVodTextEl.style.textAlign = "left";
+    } else {
+      homeVodTextEl.style.borderLeft = "none";
+      homeVodTextEl.style.paddingLeft = "0";
+      homeVodTextEl.style.textAlign = "left";
     }
   }
 
   const homeVodBadgeEl = document.querySelector("#card-daily-verse-home .home-vod-badge");
-  if (homeVodBadgeEl && theme) {
-    homeVodBadgeEl.textContent = isEng ? (theme.tagEn || theme.tag || "VERSE OF THE DAY") : (theme.tagMr || theme.tag || "दैनिक वचन");
-    if (theme.accentColor) {
-      homeVodBadgeEl.style.color = theme.accentColor;
-      homeVodBadgeEl.style.borderColor = theme.accentColor + "66";
+  if (homeVodBadgeEl) {
+    if (atmoConfig) {
+      homeVodBadgeEl.textContent = isEng ? atmoConfig.badgeEn : atmoConfig.badgeMr;
+      homeVodBadgeEl.style.color = activeAccent;
+      homeVodBadgeEl.style.borderColor = atmoConfig.tagBorder;
+      homeVodBadgeEl.style.background = atmoConfig.tagBg;
+    } else if (theme) {
+      homeVodBadgeEl.textContent = isEng ? (theme.tagEn || theme.tag || "VERSE OF THE DAY") : (theme.tagMr || theme.tag || "दैनिक वचन");
+      if (theme.accentColor) {
+        homeVodBadgeEl.style.color = theme.accentColor;
+        homeVodBadgeEl.style.borderColor = theme.accentColor + "66";
+      }
     }
   }
 
-  if (homeVodRefEl && theme && theme.accentColor) {
-    homeVodRefEl.style.color = theme.accentColor;
+  if (homeVodRefEl) {
+    homeVodRefEl.style.color = activeAccent;
   }
 
   // Native Widget sync for Android & iOS
@@ -3541,18 +3577,7 @@ function renderDailyDevotion() {
   
   const fsVodTextEl = document.getElementById("fs-vod-text");
   if (fsVodTextEl) fsVodTextEl.innerHTML = formatMarathiVodTypography(displayText, isEng);
-  
-  // Expanded Luminous Rotating Scenic Wallpapers from assets/daily_verses/
-  const images = (window.dailyVersesImageList && window.dailyVersesImageList.length > 0) ? window.dailyVersesImageList : [
-    'sunrise.png', 'forest.png', 'mountains.png', 'ocean.png', 'path.png', 'stars.png', 'mist.png'
-  ];
-  const imgIdx = ((dayOfYear + offset) % images.length + images.length) % images.length;
-  const savedWp = localStorage.getItem('rol_selected_wallpaper');
-  const dailyImg = (savedWp && (images.includes(savedWp) || savedWp.startsWith('data:') || savedWp.startsWith('blob:') || savedWp.startsWith('http'))) ? savedWp : images[imgIdx];
-  window.currentDailyVerseImage = dailyImg;
-  window.currentVodImageIndex = images.indexOf(dailyImg) !== -1 ? images.indexOf(dailyImg) : imgIdx;
-  const imgUrl = (typeof getVodImageUrl === "function") ? getVodImageUrl(dailyImg) : (dailyImg.includes('.') ? `assets/daily_verses/${dailyImg}` : `assets/daily_verses/${dailyImg}.png`);
-  
+
   const bgEl = document.getElementById("vod-dynamic-bg") || document.querySelector(".youversion-vod-bg") || document.querySelector(".daily-verse-card-bg");
   if (bgEl) bgEl.style.backgroundImage = `url('${imgUrl}')`;
 
@@ -20501,6 +20526,200 @@ function formatMarathiVodTypography(text, isEng) {
   return text.replace(devPattern, '<span class="vod-golden-accent">$1</span>');
 }
 
+// ══════════════════════════════════════════════════════════════════════════════
+// DYNAMIC WALLPAPER-AWARE & VERSE-LENGTH-ADAPTIVE TYPOGRAPHY ENGINE (v2415)
+// ══════════════════════════════════════════════════════════════════════════════
+
+window.getWallpaperAtmosphere = function(imgFileName) {
+  if (!imgFileName) return 'nature';
+  const fn = String(imgFileName).toLowerCase();
+  
+  if (Array.isArray(window.WALLPAPER_CATALOG)) {
+    const entry = window.WALLPAPER_CATALOG.find(w => w.file && fn.includes(w.file.toLowerCase()));
+    if (entry && entry.category) {
+      if (entry.category === 'forest') return 'nature';
+      return entry.category;
+    }
+  }
+  
+  if (fn.match(/mountain|snow|summit|alpine|sinai|rock|cliff|frankbeckerde/)) return 'mountains';
+  if (fn.match(/sea|water|lake|ocean|river|waterfall|falls|beach|calm_waters/)) return 'water';
+  if (fn.match(/forest|tree|wood|pine|garden|flower|rose|sunflower|pasture|autumn|bend|hakantahmaz|spring|valley/)) return 'nature';
+  if (fn.match(/star|night|galaxy|celestial|sky|alexander/)) return 'stars';
+  if (fn.match(/sun|dawn|morning|sunset|sunrise|dusk|wheat|beam|lichtblick/)) return 'dawn';
+  if (fn.match(/cross|bible|shepherd|lion|art|church|david|goliath|boarding/)) return 'art';
+  
+  return 'nature';
+};
+
+window.computeAdaptiveVerseMetrics = function(textStr, isEng) {
+  const str = String(textStr || "").trim();
+  const words = str.split(/\s+/).filter(Boolean);
+  const wordCount = words.length;
+  const charCount = str.length;
+
+  if (wordCount <= 14 && charCount <= 85) {
+    return {
+      tier: 'short',
+      homeFontSize: '23px',
+      homeLineHeight: '1.58',
+      homeFontWeight: '800',
+      fsFontSize: 'clamp(30px, 5.2vw, 44px)',
+      fsLineHeight: '1.55',
+      canvasFontSize: 78,
+      canvasLineH: 124
+    };
+  } else if (wordCount <= 26 && charCount <= 165) {
+    return {
+      tier: 'medium',
+      homeFontSize: '18px',
+      homeLineHeight: '1.66',
+      homeFontWeight: '700',
+      fsFontSize: 'clamp(22px, 3.8vw, 32px)',
+      fsLineHeight: '1.62',
+      canvasFontSize: 60,
+      canvasLineH: 98
+    };
+  } else {
+    // Long verse (like Psalm 103:2-3 in user's screenshot)
+    return {
+      tier: 'long',
+      homeFontSize: '15.5px',
+      homeLineHeight: '1.74',
+      homeFontWeight: '600',
+      fsFontSize: 'clamp(17.5px, 2.9vw, 24px)',
+      fsLineHeight: '1.68',
+      canvasFontSize: 46,
+      canvasLineH: 78
+    };
+  }
+};
+
+window.computeAdaptiveWordMetrics = function(wordObj, isEng) {
+  if (!wordObj) return { termFontSize: '26px', meaningFontSize: '16px' };
+  const rawTerm = wordObj.term || "";
+  const meaning = isEng ? (wordObj.meaningEn || "") : (wordObj.meaningMr || "");
+  const termLen = rawTerm.length;
+  const meaningWords = meaning.split(/\s+/).length;
+
+  return {
+    termFontSize: termLen <= 12 ? '28px' : '23px',
+    fsTermFontSize: termLen <= 12 ? 'clamp(38px, 6.2vw, 56px)' : 'clamp(28px, 4.4vw, 42px)',
+    meaningFontSize: meaningWords <= 8 ? '18px' : (meaningWords <= 16 ? '16px' : '14.5px'),
+    fsMeaningFontSize: meaningWords <= 8 ? 'clamp(23px, 3.8vw, 32px)' : (meaningWords <= 16 ? 'clamp(19px, 3.0vw, 26px)' : 'clamp(16.5px, 2.6vw, 22px)'),
+    canvasTermSize: termLen <= 12 ? 76 : 58,
+    canvasMeaningSize: meaningWords <= 8 ? 48 : (meaningWords <= 16 ? 40 : 34)
+  };
+};
+
+window.getAtmosphereStyleConfig = function(atmosphere, daySeed) {
+  const configs = {
+    nature: {
+      accentColor: "#fde047",
+      secondaryColor: "#86efac",
+      quoteColor: "#fde047",
+      badgeMr: "🌿 देवाचे वचन • निसर्ग 🌿",
+      badgeEn: "🌿 NATURE & SCRIPTURE 🌿",
+      bwodBadgeMr: "🌿 आजचा पवित्र शब्द 🌿",
+      bwodBadgeEn: "🌿 WORD OF THE DAY 🌿",
+      fontMarathi: "'Lora', 'Noto Serif Devanagari', Georgia, serif",
+      fontEng: "'Playfair Display', 'Lora', Georgia, serif",
+      tagBorder: "rgba(134, 239, 172, 0.45)",
+      tagBg: "rgba(6, 78, 59, 0.65)",
+      cardBackdrop: "linear-gradient(180deg, rgba(6, 78, 59, 0.38) 0%, rgba(15, 23, 42, 0.84) 100%)",
+      glassBg: "rgba(6, 44, 34, 0.58)",
+      textShadow: "0 3px 20px rgba(0,0,0,0.96), 0 1px 4px rgba(0,0,0,0.92)"
+    },
+    mountains: {
+      accentColor: "#fef08a",
+      secondaryColor: "#ffffff",
+      quoteColor: "#fef08a",
+      badgeMr: "🏔️ सामर्थ्याचे वचन • पर्वत 🏔️",
+      badgeEn: "🏔️ MOUNTAIN OF FAITH 🏔️",
+      bwodBadgeMr: "🏔️ आजचा पवित्र शब्द 🏔️",
+      bwodBadgeEn: "🏔️ SACRED WORD 🏔️",
+      fontMarathi: "'Cinzel', 'Rozha One', 'Noto Serif Devanagari', serif",
+      fontEng: "'Cinzel', 'Playfair Display', serif",
+      tagBorder: "rgba(254, 240, 138, 0.5)",
+      tagBg: "rgba(15, 23, 42, 0.7)",
+      cardBackdrop: "linear-gradient(180deg, rgba(15, 23, 42, 0.45) 0%, rgba(10, 15, 30, 0.9) 100%)",
+      glassBg: "rgba(15, 23, 42, 0.6)",
+      textShadow: "0 4px 24px rgba(0,0,0,0.98), 0 2px 6px rgba(0,0,0,0.95)"
+    },
+    dawn: {
+      accentColor: "#fbbf24",
+      secondaryColor: "#f59e0b",
+      quoteColor: "#fbbf24",
+      badgeMr: "🌅 प्रभात वचन • सूर्योदय 🌅",
+      badgeEn: "🌅 MORNING MERCIES 🌅",
+      bwodBadgeMr: "🌅 आजचा पवित्र शब्द 🌅",
+      bwodBadgeEn: "🌅 DAWN INSPIRATION 🌅",
+      fontMarathi: "'Rozha One', 'Noto Serif Devanagari', serif",
+      fontEng: "'Playfair Display', 'Lora', Georgia, serif",
+      tagBorder: "rgba(251, 191, 36, 0.55)",
+      tagBg: "rgba(120, 53, 15, 0.55)",
+      cardBackdrop: "linear-gradient(180deg, rgba(69, 26, 3, 0.45) 0%, rgba(15, 23, 42, 0.88) 100%)",
+      glassBg: "rgba(45, 15, 8, 0.56)",
+      textShadow: "0 3px 22px rgba(0,0,0,0.96), 0 0 16px rgba(251,191,36,0.4)"
+    },
+    water: {
+      accentColor: "#38bdf8",
+      secondaryColor: "#22d3ee",
+      quoteColor: "#38bdf8",
+      badgeMr: "🌊 जीवन नदी • शांती 🌊",
+      badgeEn: "🌊 LIVING WATERS • PEACE 🌊",
+      bwodBadgeMr: "🌊 आजचा पवित्र शब्द 🌊",
+      bwodBadgeEn: "🌊 LIVING WORD 🌊",
+      fontMarathi: "'Outfit', 'Noto Sans Devanagari', sans-serif",
+      fontEng: "'Outfit', 'Lora', sans-serif",
+      tagBorder: "rgba(56, 189, 248, 0.55)",
+      tagBg: "rgba(14, 116, 144, 0.55)",
+      cardBackdrop: "linear-gradient(180deg, rgba(12, 74, 110, 0.45) 0%, rgba(15, 23, 42, 0.88) 100%)",
+      glassBg: "rgba(8, 38, 55, 0.6)",
+      textShadow: "0 3px 20px rgba(0,0,0,0.96), 0 0 14px rgba(56,189,248,0.35)"
+    },
+    stars: {
+      accentColor: "#fef08a",
+      secondaryColor: "#c084fc",
+      quoteColor: "#fef08a",
+      badgeMr: "✨ स्वर्गीय तेज • सार्वकालिक ✨",
+      badgeEn: "✨ CELESTIAL GLORY ✦",
+      bwodBadgeMr: "✨ आजचा पवित्र शब्द ✨",
+      bwodBadgeEn: "✨ HEAVENLY WORD ✨",
+      fontMarathi: "'Cinzel', 'Poppins', 'Noto Sans Devanagari', sans-serif",
+      fontEng: "'Cinzel', 'Poppins', sans-serif",
+      tagBorder: "rgba(192, 132, 252, 0.5)",
+      tagBg: "rgba(49, 46, 129, 0.6)",
+      cardBackdrop: "linear-gradient(180deg, rgba(30, 27, 75, 0.5) 0%, rgba(15, 23, 42, 0.94) 100%)",
+      glassBg: "rgba(20, 16, 52, 0.62)",
+      textShadow: "0 3px 24px rgba(0,0,0,0.98), 0 0 20px rgba(192,132,252,0.4)"
+    },
+    art: {
+      accentColor: "#fbbf24",
+      secondaryColor: "#fcd34d",
+      quoteColor: "#fbbf24",
+      badgeMr: "✝️ पवित्र शास्त्रवचन • करार ✝️",
+      badgeEn: "✝️ SCRIPTURE OF TRUTH ✝️",
+      bwodBadgeMr: "✝️ आजचा पवित्र शब्द ✝️",
+      bwodBadgeEn: "✝️ BIBLICAL WORD ✝️",
+      fontMarathi: "'Playfair Display', 'Rozha One', 'Noto Serif Devanagari', serif",
+      fontEng: "'Playfair Display', Georgia, serif",
+      tagBorder: "rgba(251, 191, 36, 0.55)",
+      tagBg: "rgba(20, 15, 30, 0.7)",
+      cardBackdrop: "linear-gradient(180deg, rgba(30, 20, 25, 0.5) 0%, rgba(15, 23, 42, 0.92) 100%)",
+      glassBg: "rgba(22, 16, 28, 0.62)",
+      textShadow: "0 3px 22px rgba(0,0,0,0.98), 0 1px 5px rgba(0,0,0,0.95)"
+    }
+  };
+
+  const base = configs[atmosphere] || configs.nature;
+  // Rotate through 4 design archetypes: glass-card, editorial-left, monumental-crest, radiant-atmosphere
+  const archetypes = ["glass-card", "editorial-left", "monumental-crest", "radiant-atmosphere"];
+  const archetype = archetypes[Math.abs(Number(daySeed) || 0) % archetypes.length];
+
+  return { ...base, archetype };
+};
+
 
 window.VOD_TYPOGRAPHY_STYLES = [
   {
@@ -20888,10 +21107,40 @@ window.applyVodTypographyTheme = function(themeIdx, forceThemeBg = false) {
       }
     }
 
+    // Active Wallpaper Atmosphere & Adaptive Metrics Engine
+    const activeWp = window.currentDailyVerseImage || localStorage.getItem("rol_selected_wallpaper") || "sunrise.png";
+    const atmo = (typeof window.getWallpaperAtmosphere === "function") ? window.getWallpaperAtmosphere(activeWp) : "nature";
+    const metrics = (typeof window.computeAdaptiveVerseMetrics === "function") ? window.computeAdaptiveVerseMetrics(displayText, !isMarathi) : { homeFontSize: "18px", fsFontSize: "26px", homeLineHeight: "1.66", fsLineHeight: "1.62", homeFontWeight: "700" };
+    const atmoConfig = (typeof window.getAtmosphereStyleConfig === "function") ? window.getAtmosphereStyleConfig(atmo, window.currentVodTypographyIndex || 0) : null;
+
+    if (cardContainer) {
+      cardContainer.style.setProperty("display", "flex", "important");
+      cardContainer.style.setProperty("--fs-vod-font-size", metrics.fsFontSize);
+      cardContainer.style.setProperty("--fs-vod-line-height", metrics.fsLineHeight);
+
+      if (atmoConfig && atmoConfig.archetype === "glass-card") {
+        cardContainer.style.background = atmoConfig.glassBg;
+        cardContainer.style.backdropFilter = "blur(18px)";
+        cardContainer.style.webkitBackdropFilter = "blur(18px)";
+        cardContainer.style.border = `1.5px solid ${atmoConfig.tagBorder}`;
+        cardContainer.style.borderRadius = "24px";
+        cardContainer.style.padding = "24px 28px";
+        cardContainer.style.boxShadow = `0 16px 44px rgba(0,0,0,0.5), 0 0 25px ${atmoConfig.accentColor}25`;
+      } else {
+        cardContainer.style.background = "transparent";
+        cardContainer.style.border = "none";
+        cardContainer.style.boxShadow = "none";
+        cardContainer.style.backdropFilter = "none";
+        cardContainer.style.webkitBackdropFilter = "none";
+        cardContainer.style.padding = "0 16px";
+      }
+    }
+
     if (textEl) {
       let activeFont = theme.fontFamily;
-      let activeLineHeight = theme.lineHeight || "1.62";
-      if (isMarathi) {
+      if (atmoConfig) {
+        activeFont = isMarathi ? atmoConfig.fontMarathi : atmoConfig.fontEng;
+      } else if (isMarathi) {
         if (theme.fontFamily.includes('Noto Sans') || theme.fontFamily.includes('Poppins')) {
           activeFont = "'Noto Sans Devanagari', 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif";
         } else if (theme.fontFamily.includes('Rozha One')) {
@@ -20899,23 +21148,34 @@ window.applyVodTypographyTheme = function(themeIdx, forceThemeBg = false) {
         } else {
           activeFont = "'Noto Serif Devanagari', 'Noto Sans Devanagari', Georgia, serif";
         }
-        activeLineHeight = "1.68";
       }
+
       textEl.style.fontFamily = activeFont;
-      textEl.style.fontWeight = theme.fontWeight;
-      textEl.style.color = theme.textColor;
-      textEl.style.textShadow = theme.textShadow || "none";
-      textEl.style.lineHeight = activeLineHeight;
+      textEl.style.fontSize = metrics.fsFontSize;
+      textEl.style.lineHeight = metrics.fsLineHeight;
+      textEl.style.fontWeight = metrics.homeFontWeight || theme.fontWeight;
+      textEl.style.color = theme.textColor || "#ffffff";
+      textEl.style.textShadow = (atmoConfig ? atmoConfig.textShadow : theme.textShadow) || "none";
       textEl.style.letterSpacing = theme.letterSpacing || "normal";
+
+      if (atmoConfig && atmoConfig.archetype === "editorial-left") {
+        textEl.style.textAlign = "left";
+        textEl.style.borderLeft = `3.5px solid ${atmoConfig.accentColor}`;
+        textEl.style.paddingLeft = "18px";
+      } else {
+        textEl.style.textAlign = "center";
+        textEl.style.borderLeft = "none";
+        textEl.style.paddingLeft = "0";
+      }
     }
 
     // Quote mark styling & visibility
     if (quoteMark) {
-      if (theme.layoutMode === "watercolor-pill" || theme.layoutMode === "flourish-swash" || theme.layoutMode === "flourish-path") {
+      if (theme.layoutMode === "watercolor-pill" || theme.layoutMode === "flourish-swash" || theme.layoutMode === "flourish-path" || (atmoConfig && atmoConfig.archetype === "editorial-left")) {
         quoteMark.style.display = "none";
       } else {
         quoteMark.style.display = "block";
-        quoteMark.style.color = theme.quoteColor || theme.accentColor || "#fbbf24";
+        quoteMark.style.color = (atmoConfig ? atmoConfig.accentColor : theme.quoteColor) || theme.accentColor || "#fbbf24";
       }
     }
 
@@ -20927,36 +21187,34 @@ window.applyVodTypographyTheme = function(themeIdx, forceThemeBg = false) {
     const refBadge = document.getElementById("fs-vod-ref-badge");
     const lineLeft = document.getElementById("fs-vod-accent-line-left");
     const lineRight = document.getElementById("fs-vod-accent-line-right");
+    const activeAccent = (atmoConfig ? atmoConfig.accentColor : theme.accentColor) || "#fbbf24";
+
     if (refBadge) {
-      if (theme.layoutMode === "watercolor-pill") {
-        refBadge.style.color = "#ffffff";
-        refBadge.style.background = "#0e7490";
-        refBadge.style.padding = "6px 18px";
-        refBadge.style.borderRadius = "20px";
-        refBadge.style.boxShadow = "0 3px 14px rgba(14,116,144,0.45)";
-        if (lineLeft) lineLeft.style.display = "none";
-        if (lineRight) lineRight.style.display = "none";
-      } else {
-        refBadge.style.color = theme.accentColor || "#fbbf24";
-        refBadge.style.background = "transparent";
-        refBadge.style.padding = "0";
-        refBadge.style.borderRadius = "0";
-        refBadge.style.boxShadow = "none";
-        if (lineLeft) {
-          lineLeft.style.display = "block";
-          lineLeft.style.background = theme.accentColor || "#fbbf24";
-        }
-        if (lineRight) {
-          lineRight.style.display = "block";
-          lineRight.style.background = theme.accentColor || "#fbbf24";
-        }
+      refBadge.style.color = activeAccent;
+      refBadge.style.background = "transparent";
+      refBadge.style.padding = "0";
+      refBadge.style.borderRadius = "0";
+      refBadge.style.boxShadow = "none";
+      if (lineLeft) {
+        lineLeft.style.display = (atmoConfig && atmoConfig.archetype === "editorial-left") ? "none" : "block";
+        lineLeft.style.background = activeAccent;
+      }
+      if (lineRight) {
+        lineRight.style.display = (atmoConfig && atmoConfig.archetype === "editorial-left") ? "none" : "block";
+        lineRight.style.background = activeAccent;
       }
     }
 
   const badgePill = document.getElementById("fs-vod-badge-pill");
   if (badgePill) {
-    badgePill.style.color = theme.accentColor || "#fbbf24";
-    badgePill.textContent = isMarathi ? (theme.tagMr || "✦ दैनिक वचन ✦") : (theme.tagEn || "✦ VERSE OF THE DAY ✦");
+    badgePill.style.color = activeAccent;
+    if (atmoConfig) {
+      badgePill.style.background = atmoConfig.tagBg;
+      badgePill.style.borderColor = atmoConfig.tagBorder;
+      badgePill.textContent = isMarathi ? atmoConfig.badgeMr : atmoConfig.badgeEn;
+    } else {
+      badgePill.textContent = isMarathi ? (theme.tagMr || "✦ दैनिक वचन ✦") : (theme.tagEn || "✦ VERSE OF THE DAY ✦");
+    }
   }
 
   const themeNameLabel = document.getElementById("fs-vod-theme-name");
@@ -20981,12 +21239,13 @@ window.applyVodTypographyTheme = function(themeIdx, forceThemeBg = false) {
     liveContainer.style.display = "none";
   }
 
-  // Synchronize Home Screen Daily Verse Card Typography
+  // Synchronize Home Screen Daily Verse Card Typography & Design
   const homeVodTextEl = document.getElementById("home-vod-text");
-  if (homeVodTextEl && theme) {
+  if (homeVodTextEl) {
     let activeFont = theme.fontFamily;
-    let activeLineHeight = theme.lineHeight || "1.62";
-    if (isMarathi) {
+    if (atmoConfig) {
+      activeFont = isMarathi ? atmoConfig.fontMarathi : atmoConfig.fontEng;
+    } else if (isMarathi) {
       if (theme.fontFamily.includes('Noto Sans') || theme.fontFamily.includes('Poppins')) {
         activeFont = "'Noto Sans Devanagari', 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif";
       } else if (theme.fontFamily.includes('Rozha One')) {
@@ -20998,28 +21257,45 @@ window.applyVodTypographyTheme = function(themeIdx, forceThemeBg = false) {
       } else {
         activeFont = "'Noto Serif Devanagari', 'Playfair Display', Georgia, serif";
       }
-      activeLineHeight = "1.68";
     }
     homeVodTextEl.style.fontFamily = activeFont;
-    homeVodTextEl.style.fontWeight = theme.fontWeight || "700";
+    homeVodTextEl.style.fontSize = metrics.homeFontSize;
+    homeVodTextEl.style.fontWeight = metrics.homeFontWeight || theme.fontWeight || "700";
     homeVodTextEl.style.color = theme.textColor || "#ffffff";
-    homeVodTextEl.style.textShadow = theme.textShadow || "0 2px 14px rgba(0,0,0,0.85)";
-    homeVodTextEl.style.lineHeight = activeLineHeight;
+    homeVodTextEl.style.textShadow = (atmoConfig ? atmoConfig.textShadow : theme.textShadow) || "0 2px 14px rgba(0,0,0,0.85)";
+    homeVodTextEl.style.lineHeight = metrics.homeLineHeight;
     homeVodTextEl.style.letterSpacing = theme.letterSpacing || "normal";
+
+    if (atmoConfig && atmoConfig.archetype === "editorial-left") {
+      homeVodTextEl.style.borderLeft = `3.5px solid ${activeAccent}`;
+      homeVodTextEl.style.paddingLeft = "14px";
+      homeVodTextEl.style.textAlign = "left";
+    } else {
+      homeVodTextEl.style.borderLeft = "none";
+      homeVodTextEl.style.paddingLeft = "0";
+      homeVodTextEl.style.textAlign = "left";
+    }
   }
 
   const homeVodBadgeEl = document.querySelector("#card-daily-verse-home .home-vod-badge");
-  if (homeVodBadgeEl && theme) {
-    homeVodBadgeEl.textContent = isMarathi ? (theme.tagMr || theme.tag || "✦ दैनिक वचन ✦") : (theme.tagEn || theme.tag || "✦ VERSE OF THE DAY ✦");
-    if (theme.accentColor) {
-      homeVodBadgeEl.style.color = theme.accentColor;
-      homeVodBadgeEl.style.borderColor = theme.accentColor + "66";
+  if (homeVodBadgeEl) {
+    if (atmoConfig) {
+      homeVodBadgeEl.textContent = isMarathi ? atmoConfig.badgeMr : atmoConfig.badgeEn;
+      homeVodBadgeEl.style.color = activeAccent;
+      homeVodBadgeEl.style.borderColor = atmoConfig.tagBorder;
+      homeVodBadgeEl.style.background = atmoConfig.tagBg;
+    } else {
+      homeVodBadgeEl.textContent = isMarathi ? (theme.tagMr || theme.tag || "✦ दैनिक वचन ✦") : (theme.tagEn || theme.tag || "✦ VERSE OF THE DAY ✦");
+      if (theme.accentColor) {
+        homeVodBadgeEl.style.color = theme.accentColor;
+        homeVodBadgeEl.style.borderColor = theme.accentColor + "66";
+      }
     }
   }
 
   const homeVodRefEl = document.getElementById("home-vod-ref");
-  if (homeVodRefEl && theme && theme.accentColor) {
-    homeVodRefEl.style.color = theme.accentColor;
+  if (homeVodRefEl) {
+    homeVodRefEl.style.color = activeAccent;
   }
 
   window.renderVodPinterestStrips();
@@ -22244,28 +22520,22 @@ window.generateExactVerseImageBlob = function(customRatio) {
       ctx.fillStyle = radGrad;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+      const atmo = (typeof window.getWallpaperAtmosphere === "function") ? window.getWallpaperAtmosphere(imgFileName) : "nature";
+      const atmoConfig = (typeof window.getAtmosphereStyleConfig === "function")
+        ? window.getAtmosphereStyleConfig(atmo, (vod.id || dayOfYear) + offset)
+        : null;
+      const adaptiveMetrics = (typeof window.computeAdaptiveVerseMetrics === "function")
+        ? window.computeAdaptiveVerseMetrics(displayText, !isMarathi)
+        : null;
+
       const maxW = 880;
-      let fontSize;
-      let lineH;
-
-      if (displayText.length <= 60) {
-        fontSize = 82;
-        lineH = 132;
-      } else if (displayText.length <= 110) {
-        fontSize = 72;
-        lineH = 118;
-      } else if (displayText.length <= 170) {
-        fontSize = 62;
-        lineH = 102;
-      } else if (displayText.length <= 240) {
-        fontSize = 52;
-        lineH = 88;
-      } else {
-        fontSize = 44;
-        lineH = 76;
-      }
-
-      const font = `700 ${fontSize}px ${isMarathi ? "'Noto Serif Devanagari', 'Rozha One', Georgia, serif" : "'Playfair Display', 'Lora', Georgia, serif"}`;
+      let fontSize = adaptiveMetrics ? adaptiveMetrics.canvasFontSize : (displayText.length <= 60 ? 82 : (displayText.length <= 110 ? 72 : (displayText.length <= 170 ? 62 : (displayText.length <= 240 ? 52 : 44))));
+      let lineH = adaptiveMetrics ? adaptiveMetrics.canvasLineH : (displayText.length <= 60 ? 132 : (displayText.length <= 110 ? 118 : (displayText.length <= 170 ? 102 : (displayText.length <= 240 ? 88 : 76))));
+      const fontFam = isMarathi 
+        ? (atmoConfig ? atmoConfig.fontMarathi : "'Noto Serif Devanagari', 'Rozha One', Georgia, serif") 
+        : (atmoConfig ? atmoConfig.fontEng : "'Playfair Display', 'Lora', Georgia, serif");
+      const font = `700 ${fontSize}px ${fontFam}`;
+      const accent = (atmoConfig && atmoConfig.accentColor) ? atmoConfig.accentColor : "#fbbf24";
       const lines = wrapText(displayText, maxW, font);
 
       const tagH = 44;
@@ -22285,8 +22555,34 @@ window.generateExactVerseImageBlob = function(customRatio) {
       let curY = Math.round(topSafe + (availableH - totalBlockH) / 2);
       if (curY < topSafe) curY = topSafe;
 
-      // 1. Top Capsule Tag (✦ दैनिक बायबल वचन ✦) - 100% Mathematically Centered
-      const tagText = isMarathi ? "✦ दैनिक बायबल वचन ✦" : "✦ DAILY BIBLE VERSE ✦";
+      // Draw frosted glass card container if atmosphere calls for it (e.g. green nature or busy wallpaper)
+      if (atmoConfig && atmoConfig.archetype === "glass-card") {
+        const cardPadX = 40;
+        const cardPadY = 44;
+        const cardX = Math.round(CX - maxW / 2 - cardPadX);
+        const cardY = Math.round(curY - 24);
+        const cardW = Math.round(maxW + cardPadX * 2);
+        const cardH = Math.round(totalBlockH + cardPadY * 2);
+
+        ctx.save();
+        ctx.fillStyle = atmoConfig.glassBg || "rgba(10, 20, 15, 0.65)";
+        ctx.strokeStyle = atmoConfig.tagBorder || "rgba(255, 255, 255, 0.22)";
+        ctx.lineWidth = 2;
+        ctx.shadowColor = "rgba(0, 0, 0, 0.65)";
+        ctx.shadowBlur = 45;
+        ctx.beginPath();
+        if (typeof ctx.roundRect === 'function') {
+          ctx.roundRect(cardX, cardY, cardW, cardH, 32);
+        } else {
+          ctx.rect(cardX, cardY, cardW, cardH);
+        }
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // 1. Top Capsule Tag (✦ दैनिक बायबल वचन ✦ / Wallpaper Badge) - 100% Mathematically Centered
+      const tagText = atmoConfig ? (isMarathi ? atmoConfig.badgeMr : atmoConfig.badgeEn) : (isMarathi ? "✦ दैनिक बायबल वचन ✦" : "✦ DAILY BIBLE VERSE ✦");
       const tagFont = `800 24px ${isMarathi ? "'Noto Sans Devanagari', 'Outfit', -apple-system, sans-serif" : "'Outfit', -apple-system, sans-serif"}`;
       ctx.save();
       ctx.direction = "ltr";
@@ -22297,8 +22593,8 @@ window.generateExactVerseImageBlob = function(customRatio) {
       const tagPillX = Math.round(CX - (tagPillW / 2));
       const tagPillY = curY;
 
-      ctx.fillStyle = "rgba(10, 16, 30, 0.72)";
-      ctx.strokeStyle = "rgba(251, 191, 36, 0.55)";
+      ctx.fillStyle = (atmoConfig && atmoConfig.tagBg) ? atmoConfig.tagBg : "rgba(10, 16, 30, 0.72)";
+      ctx.strokeStyle = (atmoConfig && atmoConfig.tagBorder) ? atmoConfig.tagBorder : "rgba(251, 191, 36, 0.55)";
       ctx.lineWidth = 1.6;
       ctx.beginPath();
       if (typeof ctx.roundRect === 'function') {
@@ -22310,11 +22606,11 @@ window.generateExactVerseImageBlob = function(customRatio) {
       ctx.stroke();
       ctx.restore();
 
-      ltrFillCenter(tagText, tagPillY + Math.round(tagPillH / 2) + 1, tagFont, "#fbbf24", "rgba(251, 191, 36, 0.4)", 10);
+      ltrFillCenter(tagText, tagPillY + Math.round(tagPillH / 2) + 1, tagFont, accent, `${accent}66`, 10);
       curY += tagH + gapTagQuote;
 
       // 2. Elegant Golden Quotation Mark - 100% Mathematically Centered
-      ltrFillCenter("“", curY + Math.round(quoteH / 2), "600 88px Georgia, 'Playfair Display', serif", "#fbbf24", "rgba(0, 0, 0, 0.98)", 20);
+      ltrFillCenter("“", curY + Math.round(quoteH / 2), "600 88px Georgia, 'Playfair Display', serif", accent, "rgba(0, 0, 0, 0.98)", 20);
       curY += quoteH + gapQuoteText;
 
       // 3. Central Scripture Verse Body with 100% Guaranteed Centering
@@ -22338,8 +22634,8 @@ window.generateExactVerseImageBlob = function(customRatio) {
       const refW = ctx.measureText(refStr).width;
       const refCenterY = curY + Math.round(refH / 2);
 
-      // Flanking gold lines symmetrically spaced around reference text
-      ctx.strokeStyle = "#fbbf24";
+      // Flanking accent lines symmetrically spaced around reference text
+      ctx.strokeStyle = accent;
       ctx.lineWidth = 3;
       ctx.shadowColor = "rgba(0, 0, 0, 0.9)";
       ctx.shadowBlur = 8;
@@ -22361,7 +22657,7 @@ window.generateExactVerseImageBlob = function(customRatio) {
       ctx.stroke();
       ctx.restore();
 
-      ltrFillCenter(refStr, refCenterY, refFont, "#fbbf24", "rgba(0, 0, 0, 0.98)", 18);
+      ltrFillCenter(refStr, refCenterY, refFont, accent, "rgba(0, 0, 0, 0.98)", 18);
     }
 
     const layoutMode = theme.layoutMode || "centered-card";
@@ -25105,12 +25401,52 @@ window.updateBwodStudioUI = function() {
   
   window.applyBwodTheme(theme);
 
+  const activeBg = theme.value || theme.id || "nature";
+  const atmo = (typeof window.getWallpaperAtmosphere === "function") ? window.getWallpaperAtmosphere(activeBg) : "nature";
+  const now = new Date();
+  const dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 1)) / (1000 * 60 * 60 * 24));
+  const offset = (window.state && typeof window.state.bwodDayOffset === 'number') ? window.state.bwodDayOffset : 0;
+  const atmoConfig = (typeof window.getAtmosphereStyleConfig === "function") 
+    ? window.getAtmosphereStyleConfig(atmo, (word.id || dayOfYear) + offset) 
+    : null;
+  const wordMetrics = (typeof window.computeAdaptiveWordMetrics === "function") 
+    ? window.computeAdaptiveWordMetrics(word, isEng) 
+    : { fsTermFontSize: 'clamp(38px, 6vw, 56px)', fsMeaningFontSize: 'clamp(20px, 3.2vw, 28px)' };
+
+  const cardContainer = document.getElementById("fs-bwod-card-container");
+  if (cardContainer && atmoConfig) {
+    if (atmoConfig.archetype === "glass-card") {
+      cardContainer.style.background = atmoConfig.glassBg;
+      cardContainer.style.backdropFilter = "blur(18px)";
+      cardContainer.style.webkitBackdropFilter = "blur(18px)";
+      cardContainer.style.border = `1.5px solid ${atmoConfig.tagBorder}`;
+      cardContainer.style.borderRadius = "24px";
+      cardContainer.style.padding = "24px 28px";
+      cardContainer.style.boxShadow = `0 16px 44px rgba(0,0,0,0.5), 0 0 25px ${atmoConfig.accentColor}25`;
+    } else {
+      cardContainer.style.background = "transparent";
+      cardContainer.style.border = "none";
+      cardContainer.style.boxShadow = "none";
+      cardContainer.style.backdropFilter = "none";
+      cardContainer.style.webkitBackdropFilter = "none";
+      cardContainer.style.padding = "0 16px";
+    }
+  }
+
   const badgePill = document.getElementById("fs-bwod-badge-pill");
-  if (badgePill) badgePill.textContent = isEng ? "✦ WORD OF THE DAY ✦" : "✦ आजचा पवित्र शब्द ✦";
+  if (badgePill && atmoConfig) {
+    badgePill.textContent = isEng ? atmoConfig.bwodBadgeEn : atmoConfig.bwodBadgeMr;
+    badgePill.style.color = atmoConfig.accentColor;
+    badgePill.style.borderColor = atmoConfig.tagBorder;
+    badgePill.style.background = atmoConfig.tagBg;
+  }
 
   const cleanOrigin = isEng ? word.origin.replace(/\s*\(.*\)/, '').trim() : word.origin;
   const fsOrigin = document.getElementById("fs-bwod-origin");
-  if (fsOrigin) fsOrigin.textContent = cleanOrigin;
+  if (fsOrigin) {
+    fsOrigin.textContent = cleanOrigin;
+    if (atmoConfig) fsOrigin.style.borderColor = atmoConfig.tagBorder;
+  }
 
   const rawTerm = word.term || "";
   const match = rawTerm.match(/^([^(]+)(?:\s*\(([^)]+)\))?/);
@@ -25118,13 +25454,22 @@ window.updateBwodStudioUI = function() {
   const scriptWord = match && match[2] ? `(${match[2].trim()})` : "";
   
   const fsPrimary = document.getElementById("fs-bwod-primary-word");
-  if (fsPrimary) fsPrimary.textContent = primaryWord;
+  if (fsPrimary) {
+    fsPrimary.textContent = primaryWord;
+    fsPrimary.style.fontSize = wordMetrics.fsTermFontSize;
+    fsPrimary.style.fontFamily = isEng ? (atmoConfig ? atmoConfig.fontEng : "'Playfair Display', serif") : (atmoConfig ? atmoConfig.fontMarathi : "'Rozha One', 'Noto Serif Devanagari', serif");
+    if (atmoConfig) fsPrimary.style.textShadow = atmoConfig.textShadow;
+  }
 
   const fsScript = document.getElementById("fs-bwod-script-word");
   if (fsScript) {
     if (scriptWord) {
       fsScript.textContent = scriptWord;
       fsScript.style.display = "inline-block";
+      if (atmoConfig) {
+        fsScript.style.borderColor = atmoConfig.tagBorder;
+        fsScript.style.color = atmoConfig.accentColor;
+      }
     } else {
       fsScript.style.display = "none";
     }
@@ -25134,10 +25479,18 @@ window.updateBwodStudioUI = function() {
   if (fsPron) fsPron.textContent = isEng ? `Pronunciation: ${word.pronunciation}` : `उच्चार: ${word.pronunciation}`;
   
   const fsMeaning = document.getElementById("fs-bwod-meaning");
-  if (fsMeaning) fsMeaning.textContent = isEng ? `“${word.meaningEn}”` : `“${word.meaningMr}”`;
+  if (fsMeaning) {
+    fsMeaning.textContent = isEng ? `“${word.meaningEn}”` : `“${word.meaningMr}”`;
+    fsMeaning.style.fontSize = wordMetrics.fsMeaningFontSize;
+    fsMeaning.style.fontFamily = isEng ? atmoConfig?.fontEng : atmoConfig?.fontMarathi;
+    if (atmoConfig) fsMeaning.style.textShadow = atmoConfig.textShadow;
+  }
   
   const fsRef = document.getElementById("fs-bwod-ref");
-  if (fsRef) fsRef.textContent = isEng ? word.refEn : word.refMr;
+  if (fsRef) {
+    fsRef.textContent = isEng ? word.refEn : word.refMr;
+    if (atmoConfig) fsRef.style.color = atmoConfig.accentColor;
+  }
   
   const dayLabel = document.getElementById("fs-bwod-day-label");
   if (dayLabel) dayLabel.textContent = isEng ? `Day ${word.id}` : `आजचा शब्द`;
@@ -25147,6 +25500,19 @@ window.generateExactBwodImageBlob = async function() {
   const word   = window.getTodayBiblicalWord();
   const isEng  = (window.state && (window.state.translation === "eng" || window.state.language === "en"));
   const theme  = (typeof window.getTodayBwodTheme === "function") ? window.getTodayBwodTheme() : BWOD_THEMES[0];
+
+  const activeBg = theme.value || theme.id || "nature";
+  const atmo = (typeof window.getWallpaperAtmosphere === "function") ? window.getWallpaperAtmosphere(activeBg) : "nature";
+  const now = new Date();
+  const dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 1)) / (1000 * 60 * 60 * 24));
+  const offset = (window.state && typeof window.state.bwodDayOffset === 'number') ? window.state.bwodDayOffset : 0;
+  const atmoConfig = (typeof window.getAtmosphereStyleConfig === "function") 
+    ? window.getAtmosphereStyleConfig(atmo, (word.id || dayOfYear) + offset) 
+    : null;
+  const wordMetrics = (typeof window.computeAdaptiveWordMetrics === "function") 
+    ? window.computeAdaptiveWordMetrics(word, isEng) 
+    : { canvasTermSize: 84, canvasMeaningSize: 38 };
+  const accent = (atmoConfig && atmoConfig.accentColor) ? atmoConfig.accentColor : "#fbbf24";
 
   const W = 1080, H = 1920;
   const canvas = document.createElement("canvas");
@@ -25200,8 +25566,8 @@ window.generateExactBwodImageBlob = async function() {
 
     // Radiant Ambient Flare
     const flare = ctx.createRadialGradient(W / 2, H * 0.42, 60, W / 2, H * 0.42, 540);
-    flare.addColorStop(0, "rgba(251, 191, 36, 0.22)");
-    flare.addColorStop(0.5, "rgba(251, 191, 36, 0.06)");
+    flare.addColorStop(0, `${accent}38`);
+    flare.addColorStop(0.5, `${accent}10`);
     flare.addColorStop(1, "rgba(0, 0, 0, 0.45)");
     ctx.fillStyle = flare; ctx.fillRect(0, 0, W, H);
 
@@ -25213,21 +25579,21 @@ window.generateExactBwodImageBlob = async function() {
     ctx.fillStyle = vig; ctx.fillRect(0, 0, W, H);
   }
 
-  // ── 3. Ornate Double Gold Border & Corner Accents ───────────────────────────
+  // ── 3. Ornate Double Border & Corner Accents ───────────────────────────
   const MARGIN = 44;
-  ctx.strokeStyle = "rgba(251, 191, 36, 0.38)";
+  ctx.strokeStyle = (atmoConfig && atmoConfig.tagBorder) ? atmoConfig.tagBorder : `${accent}60`;
   ctx.lineWidth = 1.5;
   ctx.strokeRect(MARGIN, MARGIN, W - MARGIN * 2, H - MARGIN * 2);
 
   // Inner hairline
-  ctx.strokeStyle = "rgba(251, 191, 36, 0.16)";
+  ctx.strokeStyle = `${accent}28`;
   ctx.lineWidth = 1;
   ctx.strokeRect(MARGIN + 8, MARGIN + 8, W - (MARGIN + 8) * 2, H - (MARGIN + 8) * 2);
 
   // 4 Corner Flourishes (L-accents with decorative diamond bead)
   const drawCorner = (cx, cy, dirX, dirY) => {
     ctx.save();
-    ctx.strokeStyle = "rgba(251, 191, 36, 0.85)";
+    ctx.strokeStyle = accent;
     ctx.lineWidth = 2.4;
     ctx.beginPath();
     ctx.moveTo(cx, cy + dirY * 28);
@@ -25235,7 +25601,7 @@ window.generateExactBwodImageBlob = async function() {
     ctx.lineTo(cx + dirX * 28, cy);
     ctx.stroke();
     // Diamond bead
-    ctx.fillStyle = "#fbbf24";
+    ctx.fillStyle = accent;
     ctx.beginPath();
     ctx.arc(cx + dirX * 12, cy + dirY * 12, 2.5, 0, Math.PI * 2);
     ctx.fill();
@@ -25245,6 +25611,28 @@ window.generateExactBwodImageBlob = async function() {
   drawCorner(W - MARGIN - 2, MARGIN + 2, -1, 1);
   drawCorner(MARGIN + 2, H - MARGIN - 2, 1, -1);
   drawCorner(W - MARGIN - 2, H - MARGIN - 2, -1, -1);
+
+  // ── Frosted Glass Card Backing if Atmosphere Archetype is glass-card ──────
+  if (atmoConfig && atmoConfig.archetype === "glass-card") {
+    ctx.save();
+    ctx.fillStyle = atmoConfig.glassBg || "rgba(10, 20, 15, 0.65)";
+    ctx.strokeStyle = atmoConfig.tagBorder || "rgba(255, 255, 255, 0.22)";
+    ctx.lineWidth = 2;
+    ctx.shadowColor = "rgba(0, 0, 0, 0.65)";
+    ctx.shadowBlur = 45;
+    ctx.beginPath();
+    const gPadX = 48;
+    const gY = 360;
+    const gH = 920;
+    if (typeof ctx.roundRect === 'function') {
+      ctx.roundRect(MARGIN + gPadX, gY, W - (MARGIN + gPadX) * 2, gH, 32);
+    } else {
+      ctx.rect(MARGIN + gPadX, gY, W - (MARGIN + gPadX) * 2, gH);
+    }
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
+  }
 
   // ── 4. Word Data Prep ───────────────────────────────────────────────────────
   const safe = s => (s || "").replace(/[\u200E\u200F\u202A-\u202E\u2066-\u2069\u200B\uFEFF]/g, "").trim();
@@ -25305,23 +25693,26 @@ window.generateExactBwodImageBlob = async function() {
   let Y = 250;
 
   // Header Pill
-  const hdr = isEng
-    ? "✦ WORD OF THE DAY • " + origin.toUpperCase() + " ✦"
-    : "✦ आजचा पवित्र शब्द • " + origin + " ✦";
+  const hdr = atmoConfig 
+    ? (isEng ? atmoConfig.bwodBadgeEn : atmoConfig.bwodBadgeMr)
+    : (isEng ? "✦ WORD OF THE DAY • " + origin.toUpperCase() + " ✦" : "✦ आजचा पवित्र शब्द • " + origin + " ✦");
   ctx.font = "bold 21px -apple-system, BlinkMacSystemFont, sans-serif";
   ctx.direction = "ltr";
   const hW = ctx.measureText(hdr).width + 48, hH = 46;
-  ctx.fillStyle = "rgba(251, 191, 36, 0.16)";
+  ctx.fillStyle = (atmoConfig && atmoConfig.tagBg) ? atmoConfig.tagBg : `${accent}28`;
   ctx.beginPath(); rr(CX - hW / 2, Y - hH / 2, hW, hH, 23); ctx.fill();
-  ctx.strokeStyle = "rgba(251, 191, 36, 0.72)"; ctx.lineWidth = 1.4; ctx.stroke();
-  ctx.fillStyle = "#fbbf24";
+  ctx.strokeStyle = (atmoConfig && atmoConfig.tagBorder) ? atmoConfig.tagBorder : `${accent}99`; ctx.lineWidth = 1.4; ctx.stroke();
+  ctx.fillStyle = accent;
   ltrFill(hdr, Y);
 
   // Primary Word
   Y += 160;
-  ctx.font = "bold 86px 'Noto Serif Devanagari', 'Lora', Georgia, serif";
+  const termFont = isEng 
+    ? (atmoConfig ? atmoConfig.fontEng : "'Playfair Display', Georgia, serif")
+    : (atmoConfig ? atmoConfig.fontMarathi : "'Noto Serif Devanagari', 'Rozha One', Georgia, serif");
+  ctx.font = `bold ${wordMetrics.canvasTermSize || 86}px ${termFont}`;
   ctx.fillStyle = "#ffffff";
-  ctx.shadowColor = "rgba(251, 191, 36, 0.40)";
+  ctx.shadowColor = `${accent}66`;
   ctx.shadowBlur = 24;
   ltrFill(primaryWord, Y);
   ctx.shadowBlur = 0;
@@ -25331,10 +25722,10 @@ window.generateExactBwodImageBlob = async function() {
     Y += 92;
     ctx.font = "bold 38px 'Times New Roman', 'Noto Serif Hebrew', Georgia, serif";
     const sW = ctx.measureText(scriptWord).width + 36, sH = 48;
-    ctx.fillStyle = "rgba(251, 191, 36, 0.18)";
+    ctx.fillStyle = `${accent}28`;
     ctx.beginPath(); rr(CX - sW / 2, Y - sH / 2, sW, sH, 16); ctx.fill();
-    ctx.strokeStyle = "rgba(251, 191, 36, 0.65)"; ctx.lineWidth = 1.6; ctx.stroke();
-    ctx.fillStyle = "#fde047";
+    ctx.strokeStyle = `${accent}99`; ctx.lineWidth = 1.6; ctx.stroke();
+    ctx.fillStyle = accent;
     ltrFill(scriptWord, Y);
   }
 
@@ -25345,9 +25736,9 @@ window.generateExactBwodImageBlob = async function() {
   const pronLbl = isEng ? "Pronunciation: " : "उच्चार: ";
   ltrFill(pronLbl + (word ? word.pronunciation : ""), Y);
 
-  // Ornate Gold Diamond Divider
+  // Ornate Divider
   Y += 72;
-  ctx.strokeStyle = "rgba(251, 191, 36, 0.70)";
+  ctx.strokeStyle = accent;
   ctx.lineWidth = 1.5;
   ctx.beginPath();
   ctx.moveTo(CX - 150, Y); ctx.lineTo(CX - 18, Y);
@@ -25359,12 +25750,15 @@ window.generateExactBwodImageBlob = async function() {
   // Opening Decorative Quote
   Y += 72;
   ctx.font = "68px Georgia, serif";
-  ctx.fillStyle = "#fbbf24";
+  ctx.fillStyle = accent;
   ltrFill("“", Y);
 
   // Meaning Text
   Y += 66;
-  const MFONT = "600 38px 'Noto Serif Devanagari', 'Lora', Georgia, serif";
+  const meaningFont = isEng 
+    ? (atmoConfig ? atmoConfig.fontEng : "'Lora', Georgia, serif")
+    : (atmoConfig ? atmoConfig.fontMarathi : "'Noto Serif Devanagari', Georgia, serif");
+  const MFONT = `600 ${wordMetrics.canvasMeaningSize || 38}px ${meaningFont}`;
   const TEXT_W = 840;
   const LH_M = 58;
   const mLines = wrapLines(meaning, TEXT_W, MFONT);
@@ -25385,11 +25779,11 @@ window.generateExactBwodImageBlob = async function() {
   const RLH = 46;
   for (const rl of rLines) {
     const rw = ctx.measureText(rl).width + 36;
-    ctx.fillStyle = "rgba(251, 191, 36, 0.14)";
+    ctx.fillStyle = `${accent}22`;
     ctx.beginPath(); rr(CX - rw / 2, Y - 22, rw, 44, 22); ctx.fill();
-    ctx.strokeStyle = "rgba(251, 191, 36, 0.55)"; ctx.lineWidth = 1.2; ctx.stroke();
+    ctx.strokeStyle = `${accent}88`; ctx.lineWidth = 1.2; ctx.stroke();
     ctx.font = RFONT;
-    ctx.fillStyle = "#fbbf24";
+    ctx.fillStyle = accent;
     ltrFill(rl, Y);
     Y += RLH;
   }
@@ -25397,7 +25791,7 @@ window.generateExactBwodImageBlob = async function() {
   // Spiritual Insight (if available)
   if (insight) {
     Y += 34;
-    const IFONT = "400 24px 'Noto Serif Devanagari', 'Lora', Georgia, serif";
+    const IFONT = `400 24px ${meaningFont}`;
     const iLines = wrapLines(insight, 800, IFONT).slice(0, 3);
     ctx.font = IFONT;
     ctx.fillStyle = "rgba(254, 243, 199, 0.90)";
@@ -25412,7 +25806,7 @@ window.generateExactBwodImageBlob = async function() {
 
   // Footer Branding Section (Positioned in WhatsApp Status Safe Zone)
   const FY = 1620;
-  ctx.strokeStyle = "rgba(251, 191, 36, 0.35)";
+  ctx.strokeStyle = `${accent}55`;
   ctx.lineWidth = 1;
   ctx.beginPath();
   ctx.moveTo(MARGIN + 80, FY); ctx.lineTo(CX - 24, FY);
@@ -25421,7 +25815,7 @@ window.generateExactBwodImageBlob = async function() {
 
   // Center cross icon in divider
   ctx.font = "bold 20px -apple-system, sans-serif";
-  ctx.fillStyle = "#fbbf24";
+  ctx.fillStyle = accent;
   ltrFill("✝", FY);
 
   ctx.font = "bold 23px -apple-system, BlinkMacSystemFont, sans-serif";
@@ -25429,7 +25823,7 @@ window.generateExactBwodImageBlob = async function() {
   ltrFill("🕊️ River of Life • पवित्र बायबल", FY + 44);
 
   ctx.font = "500 18px -apple-system, BlinkMacSystemFont, sans-serif";
-  ctx.fillStyle = "rgba(251, 191, 36, 0.78)";
+  ctx.fillStyle = accent;
   ltrFill("Daily Biblical Word • पवित्र शास्त्र अभ्यास", FY + 78);
 
   // Export
@@ -25748,32 +26142,65 @@ window.renderBiblicalMicroLearning = function() {
     window.applyBwodTheme(currentTheme);
   }
 
+  const activeBg = currentTheme.value || currentTheme.id || "nature";
+  const atmo = (typeof window.getWallpaperAtmosphere === "function") ? window.getWallpaperAtmosphere(activeBg) : "nature";
+  const now = new Date();
+  const dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 1)) / (1000 * 60 * 60 * 24));
+  const offset = (window.state && typeof window.state.bwodDayOffset === 'number') ? window.state.bwodDayOffset : 0;
+  const atmoConfig = (typeof window.getAtmosphereStyleConfig === "function") 
+    ? window.getAtmosphereStyleConfig(atmo, (word.id || dayOfYear) + offset) 
+    : null;
+  const wordMetrics = (typeof window.computeAdaptiveWordMetrics === "function") 
+    ? window.computeAdaptiveWordMetrics(word, isEng) 
+    : { homeTermFontSize: '26px', homeMeaningFontSize: '16px' };
+
+  const wordCard = document.getElementById("card-microlearning-word");
+  if (wordCard && atmoConfig) {
+    if (atmoConfig.archetype === "glass-card") {
+      wordCard.style.boxShadow = `0 12px 36px rgba(0,0,0,0.45), 0 0 20px ${atmoConfig.accentColor}25`;
+      wordCard.style.borderColor = atmoConfig.tagBorder;
+    } else {
+      wordCard.style.boxShadow = "var(--shadow-lg, 0 10px 25px rgba(0,0,0,0.3))";
+      wordCard.style.borderColor = "rgba(255, 255, 255, 0.15)";
+    }
+  }
+
   const titleBadge = document.getElementById("micro-word-header-title");
   if (titleBadge) {
-    titleBadge.textContent = isEng ? "✦ WORD OF THE DAY ✦" : "✦ आजचा पवित्र शब्द ✦";
+    titleBadge.textContent = atmoConfig ? (isEng ? atmoConfig.bwodBadgeEn : atmoConfig.bwodBadgeMr) : (isEng ? "✦ WORD OF THE DAY ✦" : "✦ आजचा पवित्र शब्द ✦");
+    if (atmoConfig) {
+      titleBadge.style.color = atmoConfig.accentColor;
+      titleBadge.style.borderColor = atmoConfig.tagBorder;
+      titleBadge.style.background = atmoConfig.tagBg;
+    }
   }
 
   const originEl = document.getElementById("micro-word-origin");
   if (originEl) {
     originEl.textContent = isEng ? word.origin.replace(/\s*\(.*\)/, '').trim() : word.origin;
+    if (atmoConfig) {
+      originEl.style.borderColor = atmoConfig.tagBorder;
+    }
   }
 
   const termEl = document.getElementById("micro-word-term");
   if (termEl) {
     const rawTerm = word.term || '';
     const match = rawTerm.match(/^([^(]+)(?:\s*\(([^)]+)\))?/);
-    if (match) {
-      const primaryWord = match[1].trim();
-      const scriptWord = match[2] ? `(${match[2].trim()})` : '';
-      termEl.innerHTML = `<span class="micro-word-highlighted">${primaryWord}</span> ${scriptWord ? `<span class="micro-word-original-script" id="micro-word-script-badge">${scriptWord}</span>` : ''}`;
-    } else {
-      termEl.innerHTML = `<span class="micro-word-highlighted">${rawTerm}</span>`;
-    }
+    const primaryWord = match ? match[1].trim() : rawTerm;
+    const scriptWord = match && match[2] ? `(${match[2].trim()})` : '';
+    const fontFam = isEng ? (atmoConfig ? atmoConfig.fontEng : 'inherit') : (atmoConfig ? atmoConfig.fontMarathi : 'inherit');
+    termEl.innerHTML = `<span class="micro-word-highlighted" style="font-family: ${fontFam};">${primaryWord}</span> ${scriptWord ? `<span class="micro-word-original-script" id="micro-word-script-badge">${scriptWord}</span>` : ''}`;
+    termEl.style.fontSize = wordMetrics.homeTermFontSize;
+    if (atmoConfig) termEl.style.textShadow = atmoConfig.textShadow;
   }
 
   const meaningEl = document.getElementById("micro-word-meaning");
   if (meaningEl) {
     meaningEl.textContent = isEng ? `“${word.meaningEn}”` : `“${word.meaningMr}”`;
+    meaningEl.style.fontSize = wordMetrics.homeMeaningFontSize;
+    meaningEl.style.fontFamily = isEng ? (atmoConfig ? atmoConfig.fontEng : 'inherit') : (atmoConfig ? atmoConfig.fontMarathi : 'inherit');
+    if (atmoConfig) meaningEl.style.textShadow = atmoConfig.textShadow;
   }
 
   const refEl = document.getElementById("micro-word-ref");
@@ -25785,6 +26212,7 @@ window.renderBiblicalMicroLearning = function() {
       </svg>
       <span>${isEng ? word.refEn : word.refMr}</span>
     `;
+    if (atmoConfig) refEl.style.color = atmoConfig.accentColor;
   }
 };
 window.renderEducationalMicroLearning = window.renderBiblicalMicroLearning;
