@@ -3467,6 +3467,16 @@ function renderDailyDevotion() {
   if (homeVodRefMrEl) homeVodRefMrEl.textContent = isEng ? "" : (vod.ref || vod.engRef);
   if (homeVodVersionTag) homeVodVersionTag.textContent = isEng ? "NLT" : "MARVBSI";
 
+  // Calculate Daily Rotating Typography Theme from dayOfYear + offset
+  const stylesCount = (window.VOD_TYPOGRAPHY_STYLES && window.VOD_TYPOGRAPHY_STYLES.length) ? window.VOD_TYPOGRAPHY_STYLES.length : 14;
+  const dailyThemeIdx = ((dayOfYear + offset) % stylesCount + stylesCount) % stylesCount;
+  if (!window.userCustomTypographySelected) {
+    window.currentVodTypographyIndex = dailyThemeIdx;
+  }
+  const theme = (window.VOD_TYPOGRAPHY_STYLES && window.VOD_TYPOGRAPHY_STYLES[window.currentVodTypographyIndex || 0]) 
+    ? window.VOD_TYPOGRAPHY_STYLES[window.currentVodTypographyIndex || 0] 
+    : (window.VOD_TYPOGRAPHY_STYLES ? window.VOD_TYPOGRAPHY_STYLES[0] : null);
+
   const homeVodTextEl = document.getElementById("home-vod-text");
   if (homeVodTextEl) {
     homeVodTextEl.innerHTML = `“${formatMarathiVodTypography(displayText, isEng)}”`;
@@ -3474,6 +3484,43 @@ function renderDailyDevotion() {
     homeVodTextEl.style.margin = "";
     homeVodTextEl.style.background = "transparent";
     homeVodTextEl.style.border = "none";
+    if (theme) {
+      let activeFont = theme.fontFamily;
+      let activeLineHeight = theme.lineHeight || "1.62";
+      if (!isEng) {
+        if (theme.fontFamily.includes('Rozha One')) {
+          activeFont = "'Rozha One', 'Noto Serif Devanagari', serif";
+        } else if (theme.fontFamily.includes('Poppins') || theme.fontFamily.includes('Outfit')) {
+          activeFont = "'Noto Sans Devanagari', 'Poppins', -apple-system, sans-serif";
+        } else if (theme.fontFamily.includes('Cinzel')) {
+          activeFont = "'Cinzel', 'Noto Serif Devanagari', Georgia, serif";
+        } else if (theme.fontFamily.includes('Lora')) {
+          activeFont = "'Lora', 'Noto Serif Devanagari', Georgia, serif";
+        } else {
+          activeFont = "'Noto Serif Devanagari', 'Playfair Display', Georgia, serif";
+        }
+        activeLineHeight = "1.68";
+      }
+      homeVodTextEl.style.fontFamily = activeFont;
+      homeVodTextEl.style.fontWeight = theme.fontWeight || "700";
+      homeVodTextEl.style.color = theme.textColor || "#ffffff";
+      homeVodTextEl.style.textShadow = theme.textShadow || "0 2px 14px rgba(0,0,0,0.85)";
+      homeVodTextEl.style.lineHeight = activeLineHeight;
+      homeVodTextEl.style.letterSpacing = theme.letterSpacing || "normal";
+    }
+  }
+
+  const homeVodBadgeEl = document.querySelector("#card-daily-verse-home .home-vod-badge");
+  if (homeVodBadgeEl && theme) {
+    homeVodBadgeEl.textContent = isEng ? (theme.tagEn || theme.tag || "VERSE OF THE DAY") : (theme.tagMr || theme.tag || "दैनिक वचन");
+    if (theme.accentColor) {
+      homeVodBadgeEl.style.color = theme.accentColor;
+      homeVodBadgeEl.style.borderColor = theme.accentColor + "66";
+    }
+  }
+
+  if (homeVodRefEl && theme && theme.accentColor) {
+    homeVodRefEl.style.color = theme.accentColor;
   }
 
   // Native Widget sync for Android & iOS
@@ -3501,7 +3548,7 @@ function renderDailyDevotion() {
   ];
   const imgIdx = ((dayOfYear + offset) % images.length + images.length) % images.length;
   const savedWp = localStorage.getItem('rol_selected_wallpaper');
-  const dailyImg = (savedWp && images.includes(savedWp)) ? savedWp : images[imgIdx];
+  const dailyImg = (savedWp && (images.includes(savedWp) || savedWp.startsWith('data:') || savedWp.startsWith('blob:') || savedWp.startsWith('http'))) ? savedWp : images[imgIdx];
   window.currentDailyVerseImage = dailyImg;
   window.currentVodImageIndex = images.indexOf(dailyImg) !== -1 ? images.indexOf(dailyImg) : imgIdx;
   const imgUrl = (typeof getVodImageUrl === "function") ? getVodImageUrl(dailyImg) : (dailyImg.includes('.') ? `assets/daily_verses/${dailyImg}` : `assets/daily_verses/${dailyImg}.png`);
@@ -20745,6 +20792,7 @@ window.renderVodPinterestStrips = function() {
 };
 
 window.selectVodTypographyTheme = async function(idx) {
+  window.userCustomTypographySelected = true;
   window.currentVodTypographyIndex = idx % window.VOD_TYPOGRAPHY_STYLES.length;
   window.applyVodTypographyTheme(window.currentVodTypographyIndex);
   window.renderVodPinterestStrips();
@@ -20933,6 +20981,47 @@ window.applyVodTypographyTheme = function(themeIdx, forceThemeBg = false) {
     liveContainer.style.display = "none";
   }
 
+  // Synchronize Home Screen Daily Verse Card Typography
+  const homeVodTextEl = document.getElementById("home-vod-text");
+  if (homeVodTextEl && theme) {
+    let activeFont = theme.fontFamily;
+    let activeLineHeight = theme.lineHeight || "1.62";
+    if (isMarathi) {
+      if (theme.fontFamily.includes('Noto Sans') || theme.fontFamily.includes('Poppins')) {
+        activeFont = "'Noto Sans Devanagari', 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif";
+      } else if (theme.fontFamily.includes('Rozha One')) {
+        activeFont = "'Rozha One', 'Noto Serif Devanagari', serif";
+      } else if (theme.fontFamily.includes('Cinzel')) {
+        activeFont = "'Cinzel', 'Noto Serif Devanagari', Georgia, serif";
+      } else if (theme.fontFamily.includes('Lora')) {
+        activeFont = "'Lora', 'Noto Serif Devanagari', Georgia, serif";
+      } else {
+        activeFont = "'Noto Serif Devanagari', 'Playfair Display', Georgia, serif";
+      }
+      activeLineHeight = "1.68";
+    }
+    homeVodTextEl.style.fontFamily = activeFont;
+    homeVodTextEl.style.fontWeight = theme.fontWeight || "700";
+    homeVodTextEl.style.color = theme.textColor || "#ffffff";
+    homeVodTextEl.style.textShadow = theme.textShadow || "0 2px 14px rgba(0,0,0,0.85)";
+    homeVodTextEl.style.lineHeight = activeLineHeight;
+    homeVodTextEl.style.letterSpacing = theme.letterSpacing || "normal";
+  }
+
+  const homeVodBadgeEl = document.querySelector("#card-daily-verse-home .home-vod-badge");
+  if (homeVodBadgeEl && theme) {
+    homeVodBadgeEl.textContent = isMarathi ? (theme.tagMr || theme.tag || "✦ दैनिक वचन ✦") : (theme.tagEn || theme.tag || "✦ VERSE OF THE DAY ✦");
+    if (theme.accentColor) {
+      homeVodBadgeEl.style.color = theme.accentColor;
+      homeVodBadgeEl.style.borderColor = theme.accentColor + "66";
+    }
+  }
+
+  const homeVodRefEl = document.getElementById("home-vod-ref");
+  if (homeVodRefEl && theme && theme.accentColor) {
+    homeVodRefEl.style.color = theme.accentColor;
+  }
+
   window.renderVodPinterestStrips();
 };
 
@@ -20963,12 +21052,13 @@ window.toggleVodLanguage = function() {
 };
 
 window.cycleVodTypographyTheme = function(showFeedback = true) {
-  const count = window.VOD_TYPOGRAPHY_STYLES.length;
+  window.userCustomTypographySelected = true;
+  const count = (window.VOD_TYPOGRAPHY_STYLES && window.VOD_TYPOGRAPHY_STYLES.length) ? window.VOD_TYPOGRAPHY_STYLES.length : 14;
   window.currentVodTypographyIndex = ((window.currentVodTypographyIndex || 0) + 1) % count;
   applyVodTypographyTheme(window.currentVodTypographyIndex);
   const theme = window.VOD_TYPOGRAPHY_STYLES[window.currentVodTypographyIndex];
-  if (showFeedback && typeof showToast === "function") {
-    showToast(`🎨 फॉन्ट व डिझाईन: ${theme.name}`);
+  if (showFeedback && typeof showToast === "function" && theme) {
+    showToast(`✨ फॉन्ट व डिझाईन: ${theme.name}`);
   }
 };
 
@@ -21710,6 +21800,22 @@ function renderWallpaperGalleryGrid(filterCategory) {
   }
 
   let html = '';
+  const savedWp = localStorage.getItem("rol_selected_wallpaper");
+  if (savedWp && (savedWp.startsWith('data:') || savedWp.startsWith('blob:') || savedWp.startsWith('http'))) {
+    html += `
+      <div class="wallpaper-tile-card is-active" 
+           style="background-image: url('${savedWp}'); border: 2.5px solid #22c55e;"
+           title="माझा अपलोड केलेला फोटो (My Custom Wallpaper)">
+        <div class="wallpaper-tile-check" style="background: #22c55e;">✓</div>
+        <div class="wallpaper-tile-overlay"></div>
+        <div class="wallpaper-tile-info">
+          <span>My Upload</span>
+          <span class="wallpaper-tile-info-mr">माझा फोटो</span>
+        </div>
+      </div>
+    `;
+  }
+
   filtered.forEach(w => {
     const isCur = (w.file === currentFile);
     const imgUrl = (typeof getVodImageUrl === 'function') ? getVodImageUrl(w.file) : ('assets/daily_verses/' + w.file);
@@ -21780,6 +21886,66 @@ window.selectWallpaperFromGallery = function(file, name, nameMr) {
 
   if (typeof showToast === "function") {
     showToast(`🖼️ वॉलपेपर सेट केले: ${nameMr || name || file}`);
+  }
+};
+
+// Upload Custom Wallpaper from User Device
+window.uploadCustomDailyVerseWallpaper = function(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const dataUrl = e.target.result;
+    try {
+      localStorage.setItem("rol_selected_wallpaper", dataUrl);
+    } catch(err) {
+      console.warn("Storage quota warning:", err);
+    }
+
+    window.currentDailyVerseImage = dataUrl;
+
+    const heroCard = document.getElementById("card-daily-verse-home");
+    if (heroCard) {
+      heroCard.style.backgroundImage = `url('${dataUrl}')`;
+    }
+    const fsCapsule = document.querySelector(".fullscreen-vod-capsule");
+    if (fsCapsule) fsCapsule.style.backgroundImage = `url('${dataUrl}')`;
+    const fsBgEl = document.getElementById("fs-vod-capsule-bg");
+    if (fsBgEl) fsBgEl.style.backgroundImage = `url('${dataUrl}')`;
+    const bgDynamic = document.getElementById("vod-dynamic-bg");
+    if (bgDynamic) bgDynamic.style.backgroundImage = `url('${dataUrl}')`;
+    const thumbImg = document.getElementById("vod-thumbnail-preview");
+    if (thumbImg) thumbImg.src = dataUrl;
+
+    if (typeof closeDrawer === "function") {
+      closeDrawer("drawer-wallpaper-gallery");
+    } else {
+      const drawer = document.getElementById("drawer-wallpaper-gallery");
+      if (drawer) drawer.classList.remove("active");
+    }
+
+    if (typeof showToast === "function") {
+      showToast("🖼️ नवीन वॉलपेपर यशस्वीरित्या सेट झाला! (Custom Wallpaper Set)");
+    }
+  };
+  reader.readAsDataURL(file);
+};
+
+// Reset to Daily Rotating Wallpaper
+window.resetDailyVerseWallpaper = function() {
+  localStorage.removeItem("rol_selected_wallpaper");
+  if (typeof renderHome === "function") {
+    renderHome();
+  }
+  if (typeof closeDrawer === "function") {
+    closeDrawer("drawer-wallpaper-gallery");
+  } else {
+    const drawer = document.getElementById("drawer-wallpaper-gallery");
+    if (drawer) drawer.classList.remove("active");
+  }
+  if (typeof showToast === "function") {
+    showToast("🔄 आजचा मूळ वॉलपेपर पूर्ववत केला (Reset to Daily Wallpaper)");
   }
 };
 

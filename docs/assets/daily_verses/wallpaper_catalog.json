@@ -1,590 +1,590 @@
-[
-  {
-    "file": "Bible Verse 1.jpg",
-    "name": "Bible Verse Study 1",
-    "nameMr": "बायबल वचन १",
-    "category": "art"
-  },
-  {
-    "file": "Bible Verse 2.jpg",
-    "name": "Bible Verse Study 2",
-    "nameMr": "बायबल वचन २",
-    "category": "art"
-  },
-  {
-    "file": "Bible Verse 3.jpg",
-    "name": "Bible Verse Study 3",
-    "nameMr": "बायबल वचन ३",
-    "category": "art"
-  },
-  {
-    "file": "Bible Verse 4.jpg",
-    "name": "Bible Verse Study 4",
-    "nameMr": "बायबल वचन ४",
-    "category": "art"
-  },
-  {
-    "file": "Bible Verse 5.jpg",
-    "name": "Bible Verse Study 5",
-    "nameMr": "बायबल वचन ५",
-    "category": "art"
-  },
-  {
-    "file": "Bible Verse.jpg",
-    "name": "Sacred Scripture",
-    "nameMr": "पवित्र शास्त्र",
-    "category": "art"
-  },
-  {
-    "file": "gods_power_psalm_68_28.jpg",
-    "name": "God's Mighty Power (Psalm 68:28)",
-    "nameMr": "देवाचे सामर्थ्य (स्तोत्रसंहिता ६८:२८)",
-    "category": "mountains"
-  },
-  {
-    "file": "download (1).jpg",
-    "name": "Heavenly Grace",
-    "nameMr": "स्वर्गीय कृपा",
-    "category": "nature"
-  },
-  {
-    "file": "download (2).jpg",
-    "name": "Peaceful Meadow",
-    "nameMr": "शांत कुरण",
-    "category": "forest"
-  },
-  {
-    "file": "download (3).jpg",
-    "name": "Divine Path",
-    "nameMr": "दैवी मार्ग",
-    "category": "forest"
-  },
-  {
-    "file": "download (4).jpg",
-    "name": "Living Spring",
-    "nameMr": "जिवंत झरा",
-    "category": "water"
-  },
-  {
-    "file": "download (5).jpg",
-    "name": "Radiant Light",
-    "nameMr": "तेजोमय प्रकाश",
-    "category": "stars"
-  },
-  {
-    "file": "download (6).jpg",
-    "name": "Serene Horizon",
-    "nameMr": "शांत क्षितीज",
-    "category": "water"
-  },
-  {
-    "file": "download (7).jpg",
-    "name": "Glorious Sunset",
-    "nameMr": "महिमामय संध्याकाळ",
-    "category": "nature"
-  },
-  {
-    "file": "download (8).jpg",
-    "name": "Quiet Solitude",
-    "nameMr": "शांत एकांत",
-    "category": "mountains"
-  },
-  {
-    "file": "download (9).jpg",
-    "name": "Spiritual Journey",
-    "nameMr": "आत्मिक प्रवास",
-    "category": "forest"
-  },
-  {
-    "file": "download (10).jpg",
-    "name": "Grace Abounding",
-    "nameMr": "अमर्याद कृपा",
-    "category": "nature"
-  },
-  {
-    "file": "download (11).jpg",
-    "name": "Mountain Heights",
-    "nameMr": "उंच पर्वतशिखरे",
-    "category": "mountains"
-  },
-  {
-    "file": "download (12).jpg",
-    "name": "Evening Glow",
-    "nameMr": "संध्याकाळचा प्रकाश",
-    "category": "nature"
-  },
-  {
-    "file": "download.jpg",
-    "name": "Golden Light",
-    "nameMr": "सोनेरी किरणे",
-    "category": "nature"
-  },
-  {
-    "file": "ahmetyuksek-autumn-bend-10069119.jpg",
-    "name": "Autumn River Bend",
-    "nameMr": "शरदातील नदीचे वळण",
-    "category": "forest"
-  },
-  {
-    "file": "alexander1848-night-sky-9059825.jpg",
-    "name": "Starry Night Heavens",
-    "nameMr": "चांदण्यांनी भरलेले आकाश",
-    "category": "stars"
-  },
-  {
-    "file": "fotorieth-bible-1136784.jpg",
-    "name": "Open Holy Bible",
-    "nameMr": "उघडे पवित्र बायबल",
-    "category": "art"
-  },
-  {
-    "file": "frankbeckerde-mountains-6540497.jpg",
-    "name": "Majestic Alpine Range",
-    "nameMr": "भव्य आल्प्स पर्वत",
-    "category": "mountains"
-  },
-  {
-    "file": "katrina_s-book-2378484.jpg",
-    "name": "Scripture Meditation",
-    "nameMr": "वचनाचे मनन",
-    "category": "art"
-  },
-  {
-    "file": "kriemer-verbena-7504222.jpg",
-    "name": "Blooming Verbena",
-    "nameMr": "फुललेली फुले",
-    "category": "nature"
-  },
-  {
-    "file": "ronaldplett-lightning-7690741.jpg",
-    "name": "Almighty Lightning",
-    "nameMr": "सर्वसमर्थ वीज व मेघगर्जना",
-    "category": "mountains"
-  },
-  {
-    "file": "ryank14-cross-7721276.jpg",
-    "name": "Cross on the Hill",
-    "nameMr": "टेकडीवरील वधस्तंभ",
-    "category": "art"
-  },
-  {
-    "file": "wyxina-rose-9059411.jpg",
-    "name": "Rose of Sharon",
-    "nameMr": "शारोनाचे गुलाब",
-    "category": "nature"
-  },
-  {
-    "file": "yuri_b-sunflowers-3292932.jpg",
-    "name": "Sunflowers in Field",
-    "nameMr": "सूर्यफुलांचे शेत",
-    "category": "nature"
-  },
-  {
-    "file": "autumn_golden_forest.jpg",
-    "name": "Autumn Canopy",
-    "nameMr": "सोनेरी शरद ऋतू",
-    "category": "forest"
-  },
-  {
-    "file": "blooming_spring_valley.jpg",
-    "name": "Spring Wildflowers",
-    "nameMr": "वसंत ऋतूतील रानफुले",
-    "category": "forest"
-  },
-  {
-    "file": "book_psalms_cover.png",
-    "name": "Songs of Praise",
-    "nameMr": "स्तोत्रांचे गायन",
-    "category": "art"
-  },
-  {
-    "file": "calm_pasture_river.jpg",
-    "name": "Gentle Meadow Brook",
-    "nameMr": "कुरणातील वाहता ओढा",
-    "category": "water"
-  },
-  {
-    "file": "calm_waters.png",
-    "name": "Still Waters (Psalm 23)",
-    "nameMr": "शांत पाण्याचे झरे",
-    "category": "water"
-  },
-  {
-    "file": "candlelight.png",
-    "name": "Light of the Sanctuary",
-    "nameMr": "मंदिराचा दीप",
-    "category": "art"
-  },
-  {
-    "file": "celestial_galaxy_night.jpg",
-    "name": "Milky Way Splendor",
-    "nameMr": "तेजोमय आकाशगंगा",
-    "category": "stars"
-  },
-  {
-    "file": "coastal_cliffs_twilight.jpg",
-    "name": "Coastal Cliffs at Twilight",
-    "nameMr": "समुद्रकिनारा व संध्याकाळ",
-    "category": "water"
-  },
-  {
-    "file": "dawn_valley_genesis.jpg",
-    "name": "Valley of Creation",
-    "nameMr": "निर्मितीची दरी",
-    "category": "art"
-  },
-  {
-    "file": "desert_oasis_sunset.jpg",
-    "name": "Sunset in the Wilderness",
-    "nameMr": "वाळवंटातील सूर्यास्त",
-    "category": "dawn"
-  },
-  {
-    "file": "divine_healing_art.jpg",
-    "name": "Touch of Healing",
-    "nameMr": "आरोग्याचा स्पर्श",
-    "category": "art"
-  },
-  {
-    "file": "emerald_lake_reflection.jpg",
-    "name": "Emerald Mountain Lake",
-    "nameMr": "पाचूचे तळे व पर्वत",
-    "category": "water"
-  },
-  {
-    "file": "family_blessing.png",
-    "name": "Valley of Blessing",
-    "nameMr": "आशीर्वादाची दरी",
-    "category": "art"
-  },
-  {
-    "file": "forest.png",
-    "name": "Emerald Forest",
-    "nameMr": "हिरवेगार अरण्य",
-    "category": "forest"
-  },
-  {
-    "file": "freedom_field.jpg",
-    "name": "Meadow of Peace",
-    "nameMr": "शांतीचे कुरण",
-    "category": "dawn"
-  },
-  {
-    "file": "glory_cloud_sunrise.jpg",
-    "name": "Praise the Morning",
-    "nameMr": "सकाळची स्तुती",
-    "category": "dawn"
-  },
-  {
-    "file": "golden_dawn.png",
-    "name": "Heavenly Dawn",
-    "nameMr": "दैवी प्रभात",
-    "category": "dawn"
-  },
-  {
-    "file": "golden_wheat_harvest.jpg",
-    "name": "Harvest of Faith",
-    "nameMr": "विश्वासाचे पीक",
-    "category": "dawn"
-  },
-  {
-    "file": "healing_light.png",
-    "name": "Rays of Grace",
-    "nameMr": "कृपेचे किरण",
-    "category": "dawn"
-  },
-  {
-    "file": "heavenly_sunbeams.jpg",
-    "name": "Heavenly Sunbeams",
-    "nameMr": "स्वर्गीय सूर्यकिरण",
-    "category": "dawn"
-  },
-  {
-    "file": "joy_rain.jpg",
-    "name": "Showers of Blessing",
-    "nameMr": "आशीर्वादाच्या धारा",
-    "category": "water"
-  },
-  {
-    "file": "living_water_falls.jpg",
-    "name": "Cascading Springs",
-    "nameMr": "निर्मळ पाण्याचे धबधबे",
-    "category": "water"
-  },
-  {
-    "file": "mist.png",
-    "name": "Misty Highlands",
-    "nameMr": "धुक्याची दरी",
-    "category": "mountains"
-  },
-  {
-    "file": "misty_mountains.jpg",
-    "name": "Atmospheric Range",
-    "nameMr": "धुक्याची शिखरे",
-    "category": "mountains"
-  },
-  {
-    "file": "misty_pine_canopy.jpg",
-    "name": "Misty Pine Forest",
-    "nameMr": "धुक्याचे पाइन अरण्य",
-    "category": "forest"
-  },
-  {
-    "file": "morning_grace_art.jpg",
-    "name": "Morning Grace",
-    "nameMr": "प्रभात कृपा",
-    "category": "art"
-  },
-  {
-    "file": "moses_mount_sinai_art.jpg",
-    "name": "Mount Sinai Revelation",
-    "nameMr": "सिनाय पर्वतावरील प्रकटीकरण",
-    "category": "art"
-  },
-  {
-    "file": "mount_zion.png",
-    "name": "Mount Zion Majesty",
-    "nameMr": "सीयोन पर्वत",
-    "category": "mountains"
-  },
-  {
-    "file": "mountains.png",
-    "name": "Majestic Peaks",
-    "nameMr": "भव्य पर्वतशिखरे",
-    "category": "mountains"
-  },
-  {
-    "file": "ocean.png",
-    "name": "Pacific Sunset",
-    "nameMr": "शांत समुद्रकिनारा",
-    "category": "water"
-  },
-  {
-    "file": "olive_grove_garden.jpg",
-    "name": "Garden of Olives",
-    "nameMr": "जैतुनाची बाग",
-    "category": "forest"
-  },
-  {
-    "file": "path.png",
-    "name": "Sunlit Path",
-    "nameMr": "प्रकाशाची वाट",
-    "category": "forest"
-  },
-  {
-    "file": "peace_anxiety.png",
-    "name": "Peace at Eventide",
-    "nameMr": "संध्याकाळची शांती",
-    "category": "dawn"
-  },
-  {
-    "file": "peace_anxiety_art.jpg",
-    "name": "Peace beyond Understanding",
-    "nameMr": "सर्व बुद्धीपलीकडची शांती",
-    "category": "art"
-  },
-  {
-    "file": "peaceful_pastures.png",
-    "name": "Green Pastures",
-    "nameMr": "हिरवी कुरणे",
-    "category": "forest"
-  },
-  {
-    "file": "pexels-akshansh-singh-2197107-16142865.jpg",
-    "name": "Himalayan Ridge Dawn",
-    "nameMr": "हिमालयीन प्रभात",
-    "category": "mountains"
-  },
-  {
-    "file": "pexels-clive-kim-2523249-6307488.jpg",
-    "name": "Alpine Lake Woods",
-    "nameMr": "शांत तलाव व अरण्य",
-    "category": "water"
-  },
-  {
-    "file": "pexels-connorscottmcmanus-29146345.jpg",
-    "name": "Golden Shoreline",
-    "nameMr": "सोनेरी लाटा",
-    "category": "water"
-  },
-  {
-    "file": "pexels-evlivanburak-34120977.jpg",
-    "name": "Rolling Highlands",
-    "nameMr": "हिरवेगार डोंगर",
-    "category": "mountains"
-  },
-  {
-    "file": "pexels-friededia-30649280.jpg",
-    "name": "Dolomite Ridge",
-    "nameMr": "उंच कडा व ढग",
-    "category": "mountains"
-  },
-  {
-    "file": "pexels-hakantahmaz-6015200.jpg",
-    "name": "Sunburst Canyon",
-    "nameMr": "दरीतील किरणे",
-    "category": "dawn"
-  },
-  {
-    "file": "pexels-ian-panelo-38569111.jpg",
-    "name": "Pastel Sunrise Clouds",
-    "nameMr": "गुलाबी मेघमाला",
-    "category": "dawn"
-  },
-  {
-    "file": "pexels-kienvirak-4991338.jpg",
-    "name": "Rainforest Cascade",
-    "nameMr": "जंगलातील धबधबा",
-    "category": "water"
-  },
-  {
-    "file": "pexels-kienvirak-6335993.jpg",
-    "name": "Crystal Torrent",
-    "nameMr": "शुद्ध जलप्रवाह",
-    "category": "water"
-  },
-  {
-    "file": "pexels-lichtblick800-30299053.jpg",
-    "name": "Alpine Light",
-    "nameMr": "शिखरावरील प्रकाश",
-    "category": "mountains"
-  },
-  {
-    "file": "pexels-serjosoza-31933183.jpg",
-    "name": "Crimson Dunes",
-    "nameMr": "लालसर वाळूचे ढीग",
-    "category": "dawn"
-  },
-  {
-    "file": "pexels-unal-aslan-48172282-17693776.jpg",
-    "name": "High Pasture Sunrise",
-    "nameMr": "उंच कुरणातील सकाळ",
-    "category": "dawn"
-  },
-  {
-    "file": "pexels-willianjusten-16573043.jpg",
-    "name": "Horizon Twilight",
-    "nameMr": "क्षितिजावरील संध्याकाळ",
-    "category": "water"
-  },
-  {
-    "file": "pinterest_alpine_mountain.jpg",
-    "name": "Alpine Solitude",
-    "nameMr": "अल्पाइन शिखर",
-    "category": "mountains"
-  },
-  {
-    "file": "pinterest_boarding_pass.jpg",
-    "name": "Heavenly Journey",
-    "nameMr": "स्वर्गीय प्रवास",
-    "category": "art"
-  },
-  {
-    "file": "pinterest_david_goliath.jpg",
-    "name": "Valley of Elah",
-    "nameMr": "एलाहची दरी",
-    "category": "art"
-  },
-  {
-    "file": "pinterest_forest_sunset.jpg",
-    "name": "Twilight Pines",
-    "nameMr": "पाइन वनातील संध्याकाळ",
-    "category": "forest"
-  },
-  {
-    "file": "pinterest_good_shepherd.jpg",
-    "name": "The Good Shepherd",
-    "nameMr": "उत्तम मेंढपाळ",
-    "category": "art"
-  },
-  {
-    "file": "pinterest_illuminated_tree.jpg",
-    "name": "Tree by the Waters",
-    "nameMr": "पाण्याजवळचे झाड",
-    "category": "art"
-  },
-  {
-    "file": "pinterest_jesus_road.jpg",
-    "name": "Road to Emmaus",
-    "nameMr": "इम्माऊसची वाट",
-    "category": "art"
-  },
-  {
-    "file": "pinterest_lake_cross.jpg",
-    "name": "Lake Reflection & Cross",
-    "nameMr": "तळे व क्रूसाचे प्रतिबिंब",
-    "category": "art"
-  },
-  {
-    "file": "pinterest_light_of_world.jpg",
-    "name": "Beacon of Hope",
-    "nameMr": "आशेचा दीप",
-    "category": "art"
-  },
-  {
-    "file": "pinterest_lion_split.jpg",
-    "name": "Lion of Judah",
-    "nameMr": "यहूदा वंशाचा सिंह",
-    "category": "art"
-  },
-  {
-    "file": "river_of_life.png",
-    "name": "Living Waters",
-    "nameMr": "जीवनाचे पाणी",
-    "category": "water"
-  },
-  {
-    "file": "serene_sky_prayer.jpg",
-    "name": "Prayer in Solitude",
-    "nameMr": "शांततेतील प्रार्थना",
-    "category": "art"
-  },
-  {
-    "file": "snow_mountain_majesty.jpg",
-    "name": "Snow Peak Majesty",
-    "nameMr": "हिमशिखर सौंदर्य",
-    "category": "mountains"
-  },
-  {
-    "file": "stars.png",
-    "name": "Celestial Night",
-    "nameMr": "तारकामय आकाश",
-    "category": "stars"
-  },
-  {
-    "file": "sunrise.png",
-    "name": "Golden Dawn & Meadow",
-    "nameMr": "सोनेरी प्रभात व कुरण",
-    "category": "dawn"
-  },
-  {
-    "file": "sunset_lavender_field.jpg",
-    "name": "Lavender Sunset",
-    "nameMr": "लॅव्हेंडर सूर्यास्त",
-    "category": "dawn"
-  },
-  {
-    "file": "tropical_sunset_beach.jpg",
-    "name": "Ocean Sunset Shore",
-    "nameMr": "सूर्यास्ताचा रम्य सागरतीर",
-    "category": "water"
-  },
-  {
-    "file": "wedding_cana_miracle.jpg",
-    "name": "The First Miracle",
-    "nameMr": "काना गावातील चमत्कार",
-    "category": "art"
-  },
-  {
-    "file": "winding_path_journey.jpg",
-    "name": "Walk of Faith",
-    "nameMr": "विश्वासाचा प्रवास",
-    "category": "art"
-  },
-  {
-    "file": "wisdom_guidance.png",
-    "name": "Light upon My Path",
-    "nameMr": "मार्गावर प्रकाश",
-    "category": "forest"
-  }
+﻿[
+    {
+        "file":  "ahmetyuksek-autumn-bend-10069119.jpg",
+        "name":  "ahmetyuksek autumn bend 10069119",
+        "nameMr":  "ahmetyuksek autumn bend 10069119",
+        "category":  "art"
+    },
+    {
+        "file":  "alexander1848-night-sky-9059825.jpg",
+        "name":  "alexander1848 night sky 9059825",
+        "nameMr":  "alexander1848 night sky 9059825",
+        "category":  "stars"
+    },
+    {
+        "file":  "autumn_golden_forest.jpg",
+        "name":  "autumn golden forest",
+        "nameMr":  "autumn golden forest",
+        "category":  "forest"
+    },
+    {
+        "file":  "Bible Verse 1.jpg",
+        "name":  "Bible Verse 1",
+        "nameMr":  "Bible Verse 1",
+        "category":  "art"
+    },
+    {
+        "file":  "Bible Verse 2.jpg",
+        "name":  "Bible Verse 2",
+        "nameMr":  "Bible Verse 2",
+        "category":  "art"
+    },
+    {
+        "file":  "Bible Verse 3.jpg",
+        "name":  "Bible Verse 3",
+        "nameMr":  "Bible Verse 3",
+        "category":  "art"
+    },
+    {
+        "file":  "Bible Verse 4.jpg",
+        "name":  "Bible Verse 4",
+        "nameMr":  "Bible Verse 4",
+        "category":  "art"
+    },
+    {
+        "file":  "Bible Verse 5.jpg",
+        "name":  "Bible Verse 5",
+        "nameMr":  "Bible Verse 5",
+        "category":  "art"
+    },
+    {
+        "file":  "Bible Verse.jpg",
+        "name":  "Bible Verse",
+        "nameMr":  "Bible Verse",
+        "category":  "art"
+    },
+    {
+        "file":  "blooming_spring_valley.jpg",
+        "name":  "blooming spring valley",
+        "nameMr":  "blooming spring valley",
+        "category":  "art"
+    },
+    {
+        "file":  "book_psalms_cover.png",
+        "name":  "book psalms cover",
+        "nameMr":  "book psalms cover",
+        "category":  "art"
+    },
+    {
+        "file":  "calm_pasture_river.jpg",
+        "name":  "calm pasture river",
+        "nameMr":  "calm pasture river",
+        "category":  "water"
+    },
+    {
+        "file":  "calm_waters.png",
+        "name":  "calm waters",
+        "nameMr":  "calm waters",
+        "category":  "water"
+    },
+    {
+        "file":  "candlelight.png",
+        "name":  "candlelight",
+        "nameMr":  "candlelight",
+        "category":  "art"
+    },
+    {
+        "file":  "celestial_galaxy_night.jpg",
+        "name":  "celestial galaxy night",
+        "nameMr":  "celestial galaxy night",
+        "category":  "stars"
+    },
+    {
+        "file":  "coastal_cliffs_twilight.jpg",
+        "name":  "coastal cliffs twilight",
+        "nameMr":  "coastal cliffs twilight",
+        "category":  "art"
+    },
+    {
+        "file":  "dawn_valley_genesis.jpg",
+        "name":  "dawn valley genesis",
+        "nameMr":  "dawn valley genesis",
+        "category":  "dawn"
+    },
+    {
+        "file":  "desert_oasis_sunset.jpg",
+        "name":  "desert oasis sunset",
+        "nameMr":  "desert oasis sunset",
+        "category":  "dawn"
+    },
+    {
+        "file":  "divine_healing_art.jpg",
+        "name":  "divine healing art",
+        "nameMr":  "divine healing art",
+        "category":  "art"
+    },
+    {
+        "file":  "download (1).jpg",
+        "name":  "download (1)",
+        "nameMr":  "download (1)",
+        "category":  "art"
+    },
+    {
+        "file":  "download (10).jpg",
+        "name":  "download (10)",
+        "nameMr":  "download (10)",
+        "category":  "art"
+    },
+    {
+        "file":  "download (11).jpg",
+        "name":  "download (11)",
+        "nameMr":  "download (11)",
+        "category":  "art"
+    },
+    {
+        "file":  "download (12).jpg",
+        "name":  "download (12)",
+        "nameMr":  "download (12)",
+        "category":  "art"
+    },
+    {
+        "file":  "download (2).jpg",
+        "name":  "download (2)",
+        "nameMr":  "download (2)",
+        "category":  "art"
+    },
+    {
+        "file":  "download (3).jpg",
+        "name":  "download (3)",
+        "nameMr":  "download (3)",
+        "category":  "art"
+    },
+    {
+        "file":  "download (4).jpg",
+        "name":  "download (4)",
+        "nameMr":  "download (4)",
+        "category":  "art"
+    },
+    {
+        "file":  "download (5).jpg",
+        "name":  "download (5)",
+        "nameMr":  "download (5)",
+        "category":  "art"
+    },
+    {
+        "file":  "download (6).jpg",
+        "name":  "download (6)",
+        "nameMr":  "download (6)",
+        "category":  "art"
+    },
+    {
+        "file":  "download (7).jpg",
+        "name":  "download (7)",
+        "nameMr":  "download (7)",
+        "category":  "art"
+    },
+    {
+        "file":  "download (8).jpg",
+        "name":  "download (8)",
+        "nameMr":  "download (8)",
+        "category":  "art"
+    },
+    {
+        "file":  "download (9).jpg",
+        "name":  "download (9)",
+        "nameMr":  "download (9)",
+        "category":  "art"
+    },
+    {
+        "file":  "download.jpg",
+        "name":  "download",
+        "nameMr":  "download",
+        "category":  "art"
+    },
+    {
+        "file":  "emerald_lake_reflection.jpg",
+        "name":  "emerald lake reflection",
+        "nameMr":  "emerald lake reflection",
+        "category":  "water"
+    },
+    {
+        "file":  "family_blessing.png",
+        "name":  "family blessing",
+        "nameMr":  "family blessing",
+        "category":  "art"
+    },
+    {
+        "file":  "forest.png",
+        "name":  "forest",
+        "nameMr":  "forest",
+        "category":  "forest"
+    },
+    {
+        "file":  "fotorieth-bible-1136784.jpg",
+        "name":  "fotorieth bible 1136784",
+        "nameMr":  "fotorieth bible 1136784",
+        "category":  "art"
+    },
+    {
+        "file":  "frankbeckerde-mountains-6540497.jpg",
+        "name":  "frankbeckerde mountains 6540497",
+        "nameMr":  "frankbeckerde mountains 6540497",
+        "category":  "mountains"
+    },
+    {
+        "file":  "freedom_field.jpg",
+        "name":  "freedom field",
+        "nameMr":  "freedom field",
+        "category":  "art"
+    },
+    {
+        "file":  "glory_cloud_sunrise.jpg",
+        "name":  "glory cloud sunrise",
+        "nameMr":  "glory cloud sunrise",
+        "category":  "dawn"
+    },
+    {
+        "file":  "gods_power_psalm_68_28.jpg",
+        "name":  "gods power psalm 68 28",
+        "nameMr":  "gods power psalm 68 28",
+        "category":  "art"
+    },
+    {
+        "file":  "golden_dawn.png",
+        "name":  "golden dawn",
+        "nameMr":  "golden dawn",
+        "category":  "dawn"
+    },
+    {
+        "file":  "golden_wheat_harvest.jpg",
+        "name":  "golden wheat harvest",
+        "nameMr":  "golden wheat harvest",
+        "category":  "art"
+    },
+    {
+        "file":  "healing_light.png",
+        "name":  "healing light",
+        "nameMr":  "healing light",
+        "category":  "art"
+    },
+    {
+        "file":  "heavenly_sunbeams.jpg",
+        "name":  "heavenly sunbeams",
+        "nameMr":  "heavenly sunbeams",
+        "category":  "dawn"
+    },
+    {
+        "file":  "joy_rain.jpg",
+        "name":  "joy rain",
+        "nameMr":  "joy rain",
+        "category":  "art"
+    },
+    {
+        "file":  "katrina_s-book-2378484.jpg",
+        "name":  "katrina s book 2378484",
+        "nameMr":  "katrina s book 2378484",
+        "category":  "art"
+    },
+    {
+        "file":  "kriemer-verbena-7504222.jpg",
+        "name":  "kriemer verbena 7504222",
+        "nameMr":  "kriemer verbena 7504222",
+        "category":  "art"
+    },
+    {
+        "file":  "living_water_falls.jpg",
+        "name":  "living water falls",
+        "nameMr":  "living water falls",
+        "category":  "water"
+    },
+    {
+        "file":  "mist.png",
+        "name":  "mist",
+        "nameMr":  "mist",
+        "category":  "art"
+    },
+    {
+        "file":  "misty_mountains.jpg",
+        "name":  "misty mountains",
+        "nameMr":  "misty mountains",
+        "category":  "mountains"
+    },
+    {
+        "file":  "misty_pine_canopy.jpg",
+        "name":  "misty pine canopy",
+        "nameMr":  "misty pine canopy",
+        "category":  "forest"
+    },
+    {
+        "file":  "morning_grace_art.jpg",
+        "name":  "morning grace art",
+        "nameMr":  "morning grace art",
+        "category":  "dawn"
+    },
+    {
+        "file":  "moses_mount_sinai_art.jpg",
+        "name":  "moses mount sinai art",
+        "nameMr":  "moses mount sinai art",
+        "category":  "mountains"
+    },
+    {
+        "file":  "mount_zion.png",
+        "name":  "mount zion",
+        "nameMr":  "mount zion",
+        "category":  "art"
+    },
+    {
+        "file":  "mountains.png",
+        "name":  "mountains",
+        "nameMr":  "mountains",
+        "category":  "mountains"
+    },
+    {
+        "file":  "ocean.png",
+        "name":  "ocean",
+        "nameMr":  "ocean",
+        "category":  "water"
+    },
+    {
+        "file":  "olive_grove_garden.jpg",
+        "name":  "olive grove garden",
+        "nameMr":  "olive grove garden",
+        "category":  "forest"
+    },
+    {
+        "file":  "path.png",
+        "name":  "path",
+        "nameMr":  "path",
+        "category":  "art"
+    },
+    {
+        "file":  "peace_anxiety.png",
+        "name":  "peace anxiety",
+        "nameMr":  "peace anxiety",
+        "category":  "art"
+    },
+    {
+        "file":  "peace_anxiety_art.jpg",
+        "name":  "peace anxiety art",
+        "nameMr":  "peace anxiety art",
+        "category":  "art"
+    },
+    {
+        "file":  "peaceful_pastures.png",
+        "name":  "peaceful pastures",
+        "nameMr":  "peaceful pastures",
+        "category":  "art"
+    },
+    {
+        "file":  "pexels-akshansh-singh-2197107-16142865.jpg",
+        "name":  "pexels akshansh singh 2197107 16142865",
+        "nameMr":  "pexels akshansh singh 2197107 16142865",
+        "category":  "art"
+    },
+    {
+        "file":  "pexels-clive-kim-2523249-6307488.jpg",
+        "name":  "pexels clive kim 2523249 6307488",
+        "nameMr":  "pexels clive kim 2523249 6307488",
+        "category":  "art"
+    },
+    {
+        "file":  "pexels-connorscottmcmanus-29146345.jpg",
+        "name":  "pexels connorscottmcmanus 29146345",
+        "nameMr":  "pexels connorscottmcmanus 29146345",
+        "category":  "art"
+    },
+    {
+        "file":  "pexels-evlivanburak-34120977.jpg",
+        "name":  "pexels evlivanburak 34120977",
+        "nameMr":  "pexels evlivanburak 34120977",
+        "category":  "art"
+    },
+    {
+        "file":  "pexels-friededia-30649280.jpg",
+        "name":  "pexels friededia 30649280",
+        "nameMr":  "pexels friededia 30649280",
+        "category":  "art"
+    },
+    {
+        "file":  "pexels-hakantahmaz-6015200.jpg",
+        "name":  "pexels hakantahmaz 6015200",
+        "nameMr":  "pexels hakantahmaz 6015200",
+        "category":  "art"
+    },
+    {
+        "file":  "pexels-ian-panelo-38569111.jpg",
+        "name":  "pexels ian panelo 38569111",
+        "nameMr":  "pexels ian panelo 38569111",
+        "category":  "art"
+    },
+    {
+        "file":  "pexels-kienvirak-4991338.jpg",
+        "name":  "pexels kienvirak 4991338",
+        "nameMr":  "pexels kienvirak 4991338",
+        "category":  "art"
+    },
+    {
+        "file":  "pexels-kienvirak-6335993.jpg",
+        "name":  "pexels kienvirak 6335993",
+        "nameMr":  "pexels kienvirak 6335993",
+        "category":  "art"
+    },
+    {
+        "file":  "pexels-lichtblick800-30299053.jpg",
+        "name":  "pexels lichtblick800 30299053",
+        "nameMr":  "pexels lichtblick800 30299053",
+        "category":  "art"
+    },
+    {
+        "file":  "pexels-serjosoza-31933183.jpg",
+        "name":  "pexels serjosoza 31933183",
+        "nameMr":  "pexels serjosoza 31933183",
+        "category":  "art"
+    },
+    {
+        "file":  "pexels-unal-aslan-48172282-17693776.jpg",
+        "name":  "pexels unal aslan 48172282 17693776",
+        "nameMr":  "pexels unal aslan 48172282 17693776",
+        "category":  "art"
+    },
+    {
+        "file":  "pexels-willianjusten-16573043.jpg",
+        "name":  "pexels willianjusten 16573043",
+        "nameMr":  "pexels willianjusten 16573043",
+        "category":  "art"
+    },
+    {
+        "file":  "pinterest_alpine_mountain.jpg",
+        "name":  "pinterest alpine mountain",
+        "nameMr":  "pinterest alpine mountain",
+        "category":  "mountains"
+    },
+    {
+        "file":  "pinterest_boarding_pass.jpg",
+        "name":  "pinterest boarding pass",
+        "nameMr":  "pinterest boarding pass",
+        "category":  "art"
+    },
+    {
+        "file":  "pinterest_david_goliath.jpg",
+        "name":  "pinterest david goliath",
+        "nameMr":  "pinterest david goliath",
+        "category":  "art"
+    },
+    {
+        "file":  "pinterest_forest_sunset.jpg",
+        "name":  "pinterest forest sunset",
+        "nameMr":  "pinterest forest sunset",
+        "category":  "forest"
+    },
+    {
+        "file":  "pinterest_good_shepherd.jpg",
+        "name":  "pinterest good shepherd",
+        "nameMr":  "pinterest good shepherd",
+        "category":  "art"
+    },
+    {
+        "file":  "pinterest_illuminated_tree.jpg",
+        "name":  "pinterest illuminated tree",
+        "nameMr":  "pinterest illuminated tree",
+        "category":  "forest"
+    },
+    {
+        "file":  "pinterest_jesus_road.jpg",
+        "name":  "pinterest jesus road",
+        "nameMr":  "pinterest jesus road",
+        "category":  "art"
+    },
+    {
+        "file":  "pinterest_lake_cross.jpg",
+        "name":  "pinterest lake cross",
+        "nameMr":  "pinterest lake cross",
+        "category":  "water"
+    },
+    {
+        "file":  "pinterest_light_of_world.jpg",
+        "name":  "pinterest light of world",
+        "nameMr":  "pinterest light of world",
+        "category":  "art"
+    },
+    {
+        "file":  "pinterest_lion_split.jpg",
+        "name":  "pinterest lion split",
+        "nameMr":  "pinterest lion split",
+        "category":  "art"
+    },
+    {
+        "file":  "river_of_life.png",
+        "name":  "river of life",
+        "nameMr":  "river of life",
+        "category":  "water"
+    },
+    {
+        "file":  "ronaldplett-lightning-7690741.jpg",
+        "name":  "ronaldplett lightning 7690741",
+        "nameMr":  "ronaldplett lightning 7690741",
+        "category":  "art"
+    },
+    {
+        "file":  "ryank14-cross-7721276.jpg",
+        "name":  "ryank14 cross 7721276",
+        "nameMr":  "ryank14 cross 7721276",
+        "category":  "art"
+    },
+    {
+        "file":  "serene_sky_prayer.jpg",
+        "name":  "serene sky prayer",
+        "nameMr":  "serene sky prayer",
+        "category":  "stars"
+    },
+    {
+        "file":  "snow_mountain_majesty.jpg",
+        "name":  "snow mountain majesty",
+        "nameMr":  "snow mountain majesty",
+        "category":  "mountains"
+    },
+    {
+        "file":  "stars.png",
+        "name":  "stars",
+        "nameMr":  "stars",
+        "category":  "stars"
+    },
+    {
+        "file":  "sunrise.png",
+        "name":  "sunrise",
+        "nameMr":  "sunrise",
+        "category":  "dawn"
+    },
+    {
+        "file":  "sunset_lavender_field.jpg",
+        "name":  "sunset lavender field",
+        "nameMr":  "sunset lavender field",
+        "category":  "dawn"
+    },
+    {
+        "file":  "tropical_sunset_beach.jpg",
+        "name":  "tropical sunset beach",
+        "nameMr":  "tropical sunset beach",
+        "category":  "dawn"
+    },
+    {
+        "file":  "wedding_cana_miracle.jpg",
+        "name":  "wedding cana miracle",
+        "nameMr":  "wedding cana miracle",
+        "category":  "art"
+    },
+    {
+        "file":  "winding_path_journey.jpg",
+        "name":  "winding path journey",
+        "nameMr":  "winding path journey",
+        "category":  "art"
+    },
+    {
+        "file":  "wisdom_guidance.png",
+        "name":  "wisdom guidance",
+        "nameMr":  "wisdom guidance",
+        "category":  "art"
+    },
+    {
+        "file":  "wyxina-rose-9059411.jpg",
+        "name":  "wyxina rose 9059411",
+        "nameMr":  "wyxina rose 9059411",
+        "category":  "forest"
+    },
+    {
+        "file":  "yuri_b-sunflowers-3292932.jpg",
+        "name":  "yuri b sunflowers 3292932",
+        "nameMr":  "yuri b sunflowers 3292932",
+        "category":  "forest"
+    }
 ]
