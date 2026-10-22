@@ -24,3 +24,6 @@ android-studio-app/.gradle/
 /*.png
 backup_*/
 restored_*/
+
+*.apk
+

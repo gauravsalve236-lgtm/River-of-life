@@ -1477,22 +1477,9 @@ const RolBackendSync = {
         });
       }
       
-      if (list.length === 0) {
-        list = [
-          { email: 'gauravsalve236@gmail.com', fullName: 'Gaurav Salve', photo: null, color: '#1a73e8' },
-          { email: 'gauchi2323@gmail.com', fullName: 'Gauchi', photo: null, color: '#202124' },
-          { email: 'supermangee23@gmail.com', fullName: 'Gee', photo: null, color: '#e37400' },
-          { email: 'gauravsalve2012@gmail.com', fullName: 'Gaurav Salve', photo: null, color: '#1e8e3e' }
-        ];
-      }
       return list;
     } catch (e) {
-      return [
-        { email: 'gauravsalve236@gmail.com', fullName: 'Gaurav Salve', photo: null, color: '#1a73e8' },
-        { email: 'gauchi2323@gmail.com', fullName: 'Gauchi', photo: null, color: '#202124' },
-        { email: 'supermangee23@gmail.com', fullName: 'Gee', photo: null, color: '#e37400' },
-        { email: 'gauravsalve2012@gmail.com', fullName: 'Gaurav Salve', photo: null, color: '#1e8e3e' }
-      ];
+      return [];
     }
   },
 
@@ -4474,7 +4461,7 @@ window.submitFellowshipDiscussion = function() {
     commentCard.style.cssText = "background: var(--pill-bg, #FAFAF8); border-radius: 12px; padding: 10px 12px; animation: fadeInFellowship 0.3s ease;";
     commentCard.innerHTML = `
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-        <strong style="font-size: 12.5px; color: var(--text);">Gaurav S. (You)</strong>
+        <strong style="font-size: 12.5px; color: var(--text);">${state.currentUser ? escapeHtml(state.currentUser.fullName || state.currentUser.username) : "Member"} (You)</strong>
         <span style="font-size: 11px; color: var(--steel-muted, #A3A6AE);">Just now</span>
       </div>
       <p style="font-size: 12.5px; color: var(--text-muted); margin: 0; line-height: 1.45;">${text}</p>
@@ -4494,7 +4481,7 @@ window.submitPrayerRequest = function() {
   const catSelect = document.getElementById("prayer-req-category");
   const detailInput = document.getElementById("prayer-req-details");
 
-  const name = nameInput?.value.trim() || "Gaurav S.";
+  const name = nameInput?.value.trim() || (state.currentUser?.fullName || state.currentUser?.username || "Member");
   const cat = catSelect?.value || "Spiritual Growth";
   const details = detailInput?.value.trim();
 
@@ -12095,38 +12082,45 @@ window.openDeviceGoogleAccountChooser = function() {
     const accounts = window.RolBackendSync.getDeviceAccounts();
     container.innerHTML = "";
 
-    accounts.forEach((acc, idx) => {
-      const initial = (acc.fullName || acc.email || "G").charAt(0).toUpperCase();
-      const colors = ["#1a73e8", "#202124", "#e37400", "#1e8e3e", "#9333ea"];
-      const bg = acc.color || colors[idx % colors.length];
+    if (!accounts || accounts.length === 0) {
+      const emptyEl = document.createElement("div");
+      emptyEl.style.cssText = "padding: 16px 24px; color: #5f6368; font-size: 13px; text-align: center; line-height: 1.45;";
+      emptyEl.innerHTML = "No saved accounts on this device yet.<br><span style='font-size: 12px; color: #1a73e8; font-weight: 600;'>Tap 'Sign in with Google (Popup)' above or 'Use another account' below.</span>";
+      container.appendChild(emptyEl);
+    } else {
+      accounts.forEach((acc, idx) => {
+        const initial = (acc.fullName || acc.email || "M").charAt(0).toUpperCase();
+        const colors = ["#1a73e8", "#202124", "#e37400", "#1e8e3e", "#9333ea"];
+        const bg = acc.color || colors[idx % colors.length];
 
-      const itemEl = document.createElement("div");
-      itemEl.className = "google-account-item";
-      itemEl.style.cssText = "display: flex; align-items: center; gap: 16px; padding: 13px 24px; cursor: pointer; transition: background 0.15s; border-bottom: 1px solid #dadce0;";
-      
-      const avatarHtml = acc.photo 
-        ? `<img src="${acc.photo}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex-shrink: 0;">`
-        : `<div style="width: 40px; height: 40px; border-radius: 50%; background: ${bg}; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 500; font-size: 18px; flex-shrink: 0;">${initial}</div>`;
+        const itemEl = document.createElement("div");
+        itemEl.className = "google-account-item";
+        itemEl.style.cssText = "display: flex; align-items: center; gap: 16px; padding: 13px 24px; cursor: pointer; transition: background 0.15s; border-bottom: 1px solid #dadce0;";
+        
+        const avatarHtml = acc.photo 
+          ? `<img src="${acc.photo}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex-shrink: 0;">`
+          : `<div style="width: 40px; height: 40px; border-radius: 50%; background: ${bg}; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 500; font-size: 18px; flex-shrink: 0;">${initial}</div>`;
 
-      itemEl.innerHTML = `
-        ${avatarHtml}
-        <div style="text-align: left; line-height: 1.35; flex: 1;">
-          <div style="font-weight: 500; font-size: 15px; color: #202124;">${acc.fullName || 'Google User'}</div>
-          <div style="font-size: 12.5px; color: #5f6368;">${acc.email}</div>
-        </div>
-      `;
+        itemEl.innerHTML = `
+          ${avatarHtml}
+          <div style="text-align: left; line-height: 1.35; flex: 1;">
+            <div style="font-weight: 500; font-size: 15px; color: #202124;">${acc.fullName || 'Google User'}</div>
+            <div style="font-size: 12.5px; color: #5f6368;">${acc.email}</div>
+          </div>
+        `;
 
-      itemEl.addEventListener("mouseenter", () => {
-        itemEl.style.background = "#f8f9fa";
+        itemEl.addEventListener("mouseenter", () => {
+          itemEl.style.background = "#f8f9fa";
+        });
+        itemEl.addEventListener("mouseleave", () => {
+          itemEl.style.background = "transparent";
+        });
+        itemEl.addEventListener("click", () => {
+          window.selectDeviceGoogleAccount(acc.email, acc.fullName, acc.photo);
+        });
+        container.appendChild(itemEl);
       });
-      itemEl.addEventListener("mouseleave", () => {
-        itemEl.style.background = "transparent";
-      });
-      itemEl.addEventListener("click", () => {
-        window.selectDeviceGoogleAccount(acc.email, acc.fullName, acc.photo);
-      });
-      container.appendChild(itemEl);
-    });
+    }
   }
 
   // Trigger Google Identity Services One Tap prompt if supported
@@ -12280,8 +12274,11 @@ window.signInWithGoogleDirectPopup = async function() {
         return;
       }
     }
-    // Fallback if popup is blocked or unavailable
-    await window.selectDeviceGoogleAccount('gauravsalve236@gmail.com', 'Gaurav Salve', null);
+    // If popup is blocked or unavailable, prompt user to select or add account
+    if (statusEl) {
+      statusEl.style.display = "block";
+      statusEl.innerHTML = `<span style="color:#d93025;">Popup unavailable or cancelled. Choose an account below:</span>`;
+    }
   } catch (err) {
     console.warn("[Google Popup Notice]:", err.message);
     if (statusEl) {

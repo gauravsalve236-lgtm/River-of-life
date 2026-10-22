@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v2419_NATIVE_LIVEKIT_WEBRTC_ENGINE';
+const CACHE_NAME = 'river-of-life-cache-v2420_CLEAN_USER_AUTH_AND_WEBRTC';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
