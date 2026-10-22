@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v2418_GOOGLE_MEET_PRIVATE_LIFECYCLE';
+const CACHE_NAME = 'river-of-life-cache-v2419_NATIVE_LIVEKIT_WEBRTC_ENGINE';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

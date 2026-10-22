@@ -14345,38 +14345,23 @@ function getJitsiServerDomain() {
 window.getJitsiServerDomain = getJitsiServerDomain;
 
 function getCanonicalRoomKey(meeting) {
-  if (!meeting) return "sanctuary";
+  if (!meeting) return "rol_sanctuary_general";
   if (typeof meeting === "string") {
-    try {
-      const list = (typeof getMeetingsFromStorage === "function") ? getMeetingsFromStorage() : [];
-      const q = meeting.trim().toLowerCase();
-      const qClean = q.replace(/[^a-z0-9]/g, '');
-      const match = list.find(m => 
-        (m.id && m.id.toLowerCase() === q) ||
-        (m.roomId && m.roomId.toLowerCase() === q) ||
-        (m.title && m.title.trim().toLowerCase() === q) ||
-        (m.title && m.title.toLowerCase().replace(/[^a-z0-9]/g, '') === qClean) ||
-        (m.id && m.id.toLowerCase().replace(/[^a-z0-9]/g, '') === qClean)
-      );
-      if (match) return getCanonicalRoomKey(match);
-    } catch(e) {}
     const clean = meeting.toLowerCase().replace(/[^a-z0-9]/g, '');
-    return clean || "sanctuary";
+    return clean ? "rol_" + clean : "rol_sanctuary_general";
   }
 
-  // Deterministic room key based on title or roomId so all devices always match
+  // Primary unique key: meeting.code, meeting.roomId, or meeting.id
+  const code = meeting.code || meeting.roomId || meeting.id;
+  if (code) {
+    const clean = code.toString().toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (clean) return "rol_" + clean;
+  }
+
   const titleClean = (meeting.title || "").toLowerCase().replace(/[^a-z0-9]/g, '');
-  if (titleClean && titleClean !== "livefellowship" && titleClean !== "riveroflifemeeting" && titleClean !== "sanctuary") {
-    return titleClean;
-  }
+  if (titleClean) return "rol_" + titleClean;
 
-  const roomIdClean = (meeting.roomId || "").toLowerCase().replace(/[^a-z0-9]/g, '');
-  if (roomIdClean) return roomIdClean;
-
-  const idClean = (meeting.id || "").toString().toLowerCase().replace(/[^a-z0-9]/g, '');
-  if (idClean) return idClean;
-
-  return "sanctuary";
+  return "rol_sanctuary_general";
 }
 window.getCanonicalRoomKey = getCanonicalRoomKey;
 
@@ -14440,24 +14425,24 @@ async function triggerJoinMeetingFlow(meetingIdentifier) {
       return false;
     }
 
-    // If still not found, do not create a fake public room!
+    // If still not found, construct an active meeting session from the valid invite code so invited users NEVER get stuck!
     if (!m) {
-      if (typeof showToast === "function") {
-        showToast("⚠️ सभेचा कोड सापडला नाही / Meeting not found. Please check code or ask host for invite.");
-      }
-      return false;
+      console.log("[RiverMeet] Joining direct room with code:", code);
+      m = {
+        id: code,
+        code: code,
+        roomId: code,
+        title: "Fellowship Sanctuary (" + code + ")",
+        date: new Date().toISOString().split('T')[0],
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        host: "Church Leader",
+        status: "active"
+      };
+      meetings.unshift(m);
+      if (typeof saveMeetingsToStorage === "function") saveMeetingsToStorage(meetings);
     }
 
     _pendingMeetingToJoin = m;
-
-    // Detect iOS (iPhone/iPad): Direct Safari navigation for WebKit sandbox compliance
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    if (isIOS) {
-      const roomUrl = getMiroTalkRoomUrl(m);
-      if (typeof showToast === "function") showToast("Opening Sanctuary Call in Safari... 🎙️");
-      window.location.href = roomUrl;
-      return true;
-    }
 
     if (typeof showToast === "function") showToast("Joining Live Sanctuary 🙏");
     await launchLiveMeetingRoom(m, null);
@@ -14468,6 +14453,23 @@ async function triggerJoinMeetingFlow(meetingIdentifier) {
   }
 }
 window.triggerJoinMeetingFlow = triggerJoinMeetingFlow;
+
+function copyCurrentMeetingInviteUrl() {
+  const m = (activeMeetingSession && activeMeetingSession.meeting) ? activeMeetingSession.meeting : (RiverMeet.meeting || {});
+  const code = m.code || m.id || (activeMeetingSession ? activeMeetingSession.roomKey : "sanctuary");
+  const domain = window.location.origin + window.location.pathname;
+  const url = `${domain}?meet=${encodeURIComponent(code)}`;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(() => {
+      if (typeof showToast === "function") showToast("📋 Meeting invite link copied! / लिंक कॉपी झाली");
+    }).catch(() => {
+      if (typeof showToast === "function") showToast("Meeting link: " + url);
+    });
+  } else {
+    if (typeof showToast === "function") showToast("Meeting link: " + url);
+  }
+}
+window.copyCurrentMeetingInviteUrl = copyCurrentMeetingInviteUrl;
 
 /* ═══════════════════════════════════════════════════════════════
    RIVER OF LIFE MULTI-PARTY VIDEO MEETING ENGINE
@@ -14926,7 +14928,7 @@ async function launchLiveMeetingRoom(meeting, stream) {
 
     const roomKey = getCanonicalRoomKey(meeting);
 
-    console.log("[RiverMeet] Starting Live Meeting Room:", { roomKey, meetingTitle, loggedIn, isHost });
+    console.log("[RiverMeet] Starting Live Native Meeting Room:", { roomKey, meetingTitle, loggedIn, isHost });
 
     // Clean up any existing meeting session
     cleanupRiverMeeting();
@@ -14968,77 +14970,50 @@ async function launchLiveMeetingRoom(meeting, stream) {
     }
 
     // Set Sanctuary Engine Indicator
-    updateMiroTalkIndicatorUI();
-
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    const roomUrl = getMiroTalkRoomUrl(meeting);
-
-    // Apple WebKit security sandboxes block cross-origin iframes from capturing microphone audio
-    // and setting AVAudioSession to PlayAndRecord. On iOS devices, open directly as top-level window.
-    if (isIOS) {
-      if (typeof showToast === "function") showToast("Opening Sanctuary call in Safari... 🎙️");
-      window.location.href = roomUrl;
-      return;
+    const ind = document.getElementById("river-engine-indicator");
+    if (ind) {
+      ind.textContent = "⚡ In-App WebRTC SFU 🟢";
     }
 
-    // Toggle iOS specific Safari direct access helper
-    const iosHelper = document.getElementById("river-ios-mic-helper");
-    if (iosHelper) {
-      iosHelper.style.display = isIOS ? "flex" : "none";
+    // Ensure MiroTalk iframe container is closed and hidden
+    const mirotalkCont = document.getElementById("meeting-mirotalk-container");
+    if (mirotalkCont) {
+      mirotalkCont.style.display = "none";
+      mirotalkCont.innerHTML = "";
     }
 
-    // Hide custom bottom floating buttons so MiroTalk's full native buttons are interactive
-    const bottomControls = document.querySelector(".river-meeting-controls-wrapper");
-    if (bottomControls) bottomControls.style.display = "none";
-
+    // Ensure Native Multi-Participant Video Grid is active & displayed
     const videoGrid = document.getElementById("river-video-grid");
-    if (videoGrid) videoGrid.style.display = "none";
-
-    // Ensure iOS WebKit audioSession category is 'play-and-record' (not playback) so capture is allowed
-    if ('audioSession' in navigator) {
-      try {
-        navigator.audioSession.type = 'play-and-record';
-        console.log("[RiverMeet] audioSession set to 'play-and-record' for video call");
-      } catch (e) {
-        console.warn("[RiverMeet] audioSession play-and-record warning:", e);
-      }
+    if (videoGrid) {
+      videoGrid.style.display = "grid";
+      videoGrid.innerHTML = "";
     }
 
-    // Stop active speech synthesis or background media elements that hold audio session locks
+    // Ensure custom bottom floating toolbar is visible
+    const bottomControls = document.querySelector(".river-meeting-controls-wrapper");
+    if (bottomControls) {
+      bottomControls.style.display = "flex";
+    }
+
+    // Reset Mic / Cam control icons
+    updateMicControlUI(false);
+    updateCamControlUI(false);
+
+    // Stop active speech synthesis or background audio
     try {
       if (window.speechSynthesis && window.speechSynthesis.speaking) {
         window.speechSynthesis.cancel();
       }
       const mediaEls = document.querySelectorAll('audio, video');
       mediaEls.forEach(el => {
-        if (el.id !== 'webrtc-room-iframe' && !el.closest('#meeting-mirotalk-container')) {
+        if (!el.closest('#modal-live-meeting')) {
           try { el.pause(); } catch(e) {}
         }
       });
     } catch(e) {}
 
-    const mirotalkCont = document.getElementById("meeting-mirotalk-container");
-    if (mirotalkCont) {
-      mirotalkCont.style.display = "block";
-      mirotalkCont.innerHTML = `
-        <iframe 
-          id="webrtc-room-iframe"
-          src="${roomUrl}" 
-          width="100%" 
-          height="100%" 
-          allow="camera; microphone; speaker-selection; display-capture; autoplay; fullscreen; picture-in-picture; clipboard-write; camera *; microphone *; autoplay *" 
-          allowusermedia="true"
-          playsinline="true"
-          webkit-playsinline="true"
-          allowfullscreen="true"
-          style="border: none; width: 100%; height: 100%; background: #090d16;">
-        </iframe>
-      `;
-    }
-
-    if (typeof showToast === "function") {
-      showToast(isHost ? "You are hosting the Sanctuary call 👑" : "Connected to Sanctuary call 🙏");
-    }
+    // Initialize 100% Native In-App LiveKit SFU Video Meeting
+    await initLiveKitRoom(meeting, roomKey, loggedIn, isHost);
 
     // Active session watcher: auto-disconnect if meeting is ended by host
     if (window._riverMeetingStatusWatcher) clearInterval(window._riverMeetingStatusWatcher);
@@ -15154,6 +15129,7 @@ async function initLiveKitRoom(meeting, roomKey, loggedIn, isHost) {
 
     room.on(LivekitClient.RoomEvent.ParticipantConnected, (participant) => {
       console.log("[RiverMeet] Participant joined LiveKit room:", participant.identity, participant.name);
+      ensureLiveKitParticipantTile(participant);
       updateVideoGridCount();
       updateParticipantsRoster();
       if (typeof showToast === "function") {
@@ -15321,8 +15297,48 @@ async function initLiveKitRoom(meeting, roomKey, loggedIn, isHost) {
   }
 }
 
+// Ensure Participant Tile in Grid
+function ensureLiveKitParticipantTile(participant) {
+  const grid = document.getElementById("river-video-grid");
+  if (!grid || !participant) return null;
+  const peerId = participant.identity || participant;
+  const displayName = participant.name || peerId;
+
+  let tile = document.getElementById('river-tile-' + peerId);
+  if (!tile) {
+    tile = document.createElement("div");
+    tile.id = 'river-tile-' + peerId;
+    tile.className = "river-video-tile";
+    tile.innerHTML = `
+      <div class="river-video-holder" id="river-holder-${peerId}"></div>
+      <div class="river-tile-avatar" id="river-avatar-${peerId}" style="display: flex;">
+        <div class="river-avatar-circle">${(displayName || 'M').charAt(0).toUpperCase()}</div>
+        <span style="margin-top: 8px; font-size: 13px; color: #cbd5e1; font-weight: 700;">${displayName}</span>
+      </div>
+      <div class="river-tile-overlay">
+        <div class="river-tile-nametag">
+          <span class="river-tile-mic-icon" id="river-mic-${peerId}">🎙️</span>
+          <span>${displayName}</span>
+        </div>
+      </div>
+      <button class="river-unmute-tile-btn" id="river-unmute-${peerId}" style="display: none;" onclick="unmuteRiverPeer('${peerId}', event)">
+        🔊 Tap to unmute / आवाज ऐका
+      </button>
+    `;
+    tile.addEventListener('click', () => {
+      if (typeof unlockAllMeetingAudio === 'function') unlockAllMeetingAudio();
+    });
+    grid.appendChild(tile);
+    updateVideoGridCount();
+    updateParticipantsRoster();
+  }
+  return tile;
+}
+window.ensureLiveKitParticipantTile = ensureLiveKitParticipantTile;
+
 // Attach LiveKit Remote Video Tile
 function attachLiveKitRemoteVideoTile(peerId, track, displayName) {
+  ensureLiveKitParticipantTile({ identity: peerId, name: displayName });
   const grid = document.getElementById("river-video-grid");
   if (!grid) return;
 
@@ -15394,6 +15410,11 @@ function attachLiveKitRemoteAudio(peerId, track, displayName) {
   audioEl.defaultMuted = false;
   audioEl.volume = 1.0;
   document.body.appendChild(audioEl);
+
+  // Mobile / iOS Loudspeaker routing via Web Audio API
+  if (track.mediaStreamTrack) {
+    routeRemoteAudioToSpeaker(peerId, new MediaStream([track.mediaStreamTrack]));
+  }
 
   const playPromise = audioEl.play();
   if (playPromise && typeof playPromise.catch === 'function') {

@@ -5599,13 +5599,13 @@
             <div class="river-meeting-title-box">
               <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                 <h3 id="meeting-room-title-display" class="river-meeting-title">River of Life Sanctuary</h3>
-                <span id="river-engine-indicator" onclick="toggleMiroTalkMode()" class="river-engine-pill" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 6px; letter-spacing: 0.5px; cursor: pointer;" title="Tap to switch between MiroTalk SFU (50+ Users) & MiroTalk P2P">⚡ MiroTalk SFU (50+ Users) ▾</span>
+                <span id="river-engine-indicator" class="river-engine-pill" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 6px; letter-spacing: 0.5px;" title="Pure In-App WebRTC SFU powered by LiveKit Cloud">⚡ In-App WebRTC SFU 🟢</span>
               </div>
             </div>
           </div>
           <div class="river-meeting-header-right" style="display: flex; align-items: center; gap: 8px;">
-            <button onclick="openMeetingInSafariDirectly()" style="padding: 6px 12px; border-radius: 12px; font-size: 11.5px; font-weight: 800; background: rgba(245, 158, 11, 0.2); border: 1px solid #f59e0b; color: #fbbf24; cursor: pointer; display: flex; align-items: center; gap: 4px;" title="Open in Safari / Fullscreen Browser">
-              🎙️ <span>Open in Browser</span>
+            <button onclick="copyCurrentMeetingInviteUrl()" style="padding: 6px 12px; border-radius: 12px; font-size: 11.5px; font-weight: 800; background: rgba(37, 99, 235, 0.25); border: 1px solid #3b82f6; color: #93c5fd; cursor: pointer; display: flex; align-items: center; gap: 4px;" title="Copy Meeting Invite Link">
+              📋 <span>Invite Link</span>
             </button>
             <button id="btn-meeting-leave-top" onclick="handleMeetingLeaveClick()" class="river-end-call-btn" title="End Call">
               <span>🚪 End Call / सोडा</span>
@@ -5627,11 +5627,11 @@
 
         <!-- Video Conference Stage -->
         <div id="river-native-meeting-stage" class="river-native-meeting-stage" style="position: relative; width: 100%; height: 100%; flex: 1; min-height: 0; overflow: hidden; background: #090d16;">
-          <div id="meeting-mirotalk-container" style="display: block; width: 100%; height: 100%; position: absolute; inset: 0; z-index: 10;"></div>
+          <div id="meeting-mirotalk-container" style="display: none; width: 100%; height: 100%; position: absolute; inset: 0; z-index: 10;"></div>
           <!-- Native In-App WebRTC Video Stage -->
           
           <!-- Dynamic Responsive Video Grid -->
-          <div id="river-video-grid" class="river-video-grid" data-count="1" style="display: none;">
+          <div id="river-video-grid" class="river-video-grid" data-count="1" style="display: grid;">
             <!-- Tiles populated dynamically by app.js -->
           </div>
 
@@ -6804,7 +6804,7 @@
   <script src="sarvam-tts.js?v=132_MARVBSI_FULL_CHURCH_BIBLE"></script>
   <script src="bible-study.js?v=138_MUSEUM_STUDY_HUB"></script>
   <script src="peerjs.min.js"></script>
-  <script src="app.js?v=2418_GOOGLE_MEET_PRIVATE_LIFECYCLE"></script>
+  <script src="app.js?v=2419_NATIVE_LIVEKIT_WEBRTC_ENGINE"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 4.5s no matter what
