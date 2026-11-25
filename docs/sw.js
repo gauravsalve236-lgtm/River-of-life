@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v2425_PROFESSIONAL_UPGRADE';
+const CACHE_NAME = 'river-of-life-cache-v2426_MARATHI_SERMON_DETAILS';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
