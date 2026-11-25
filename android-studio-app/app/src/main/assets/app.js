@@ -1265,6 +1265,26 @@ document.addEventListener("DOMContentLoaded", async () => {
   // 2. Wrap all app initializations in safe try/catch blocks
   try {
     loadStateFromLocalStorage();
+  if (window.FirebaseApp && typeof FirebaseApp.listenPrayers === 'function') {
+    try {
+      FirebaseApp.listenPrayers(prayers => {
+        window._rolPrayers = prayers;
+        if (typeof renderPublicPrayerRequests === 'function') renderPublicPrayerRequests(currentPrayerRequestsFilter);
+        if (typeof renderPastorPortal === 'function') renderPastorPortal();
+        if (typeof renderUserPortal === 'function') renderUserPortal();
+      });
+    } catch (e) {}
+  }
+  if (window.FirebaseApp && typeof FirebaseApp.getGoogleRedirectResult === 'function') {
+    FirebaseApp.getGoogleRedirectResult().then(res => {
+      if (res && res.user && res.user.email && typeof window.selectDeviceGoogleAccount === 'function') {
+        window.selectDeviceGoogleAccount(res.user.email, res.user.displayName || res.user.email.split('@')[0], res.user.photoURL || null);
+      }
+    }).catch(() => {});
+  }
+  if (state.currentUser && typeof window.restoreUserReadingState === 'function') {
+    window.restoreUserReadingState(state.currentUser, false);
+  }
     if (typeof updateAuthUI === "function") updateAuthUI();
     applyStylesFromState();
     initRouting();
@@ -1368,6 +1388,146 @@ function loadStateFromLocalStorage() {
   state.sarvamPace = state.sarvamPace || 0.92;
 }
 
+function getRolUserStorageKey(user) {
+  const u = user || state.currentUser;
+  if (!u) return null;
+  if (u.email) return 'email_' + u.email.trim().toLowerCase();
+  if (u.uid) return 'uid_' + u.uid;
+  if (u.id) return 'id_' + u.id;
+  return null;
+}
+
+window.syncUserDataToFirestore = async function(extraData = {}) {
+  const u = state.currentUser;
+  if (!u) return;
+  const uid = u.uid || u.id;
+  const readingSnapshot = {
+    activeBook: state.activeBook || 'genesis',
+    activeChapter: state.activeChapter || 1,
+    activeVerse: state.activeVerse || 1,
+    translation: state.translation || 'mar',
+    updatedAt: Date.now()
+  };
+
+  try {
+    const uKey = getRolUserStorageKey(u);
+    if (uKey) {
+      const storeRaw = localStorage.getItem('rol_user_reading_profiles');
+      const store = storeRaw ? JSON.parse(storeRaw) : {};
+      store[uKey] = {
+        user: {
+          uid: uid,
+          id: u.id || uid,
+          email: u.email || '',
+          fullName: u.fullName || u.username || 'Member',
+          username: u.username || 'member',
+          photo: u.photo || u.profilePhoto || null,
+          role: u.role || 'Member',
+          churchName: u.churchName || state.churchName || 'River of Life Church',
+          phone: u.phone || '',
+          preferredLanguage: u.preferredLanguage || state.translation || 'mar'
+        },
+        lastReading: readingSnapshot,
+        bookmarks: state.bookmarks || [],
+        highlights: state.highlights || {},
+        history: (state.history || []).slice(0, 50),
+        streak: state.streak || 1,
+        ...extraData
+      };
+      localStorage.setItem('rol_user_reading_profiles', JSON.stringify(store));
+    }
+  } catch (e) {
+    console.warn('[ROL] Local user profile save notice:', e.message);
+  }
+
+  if (window.FirebaseApp && typeof FirebaseApp.saveUserData === 'function' && uid) {
+    try {
+      await FirebaseApp.saveUserData(uid, {
+        email: u.email || '',
+        fullName: u.fullName || u.username || 'Member',
+        username: u.username || 'member',
+        photo: u.photo || u.profilePhoto || '',
+        role: u.role || 'Member',
+        preferredLanguage: state.translation || 'mar',
+        lastReading: readingSnapshot,
+        bookmarks: (state.bookmarks || []).slice(0, 100),
+        streak: state.streak || 1,
+        lastSeenAt: Date.now(),
+        ...extraData
+      });
+    } catch (e) {
+      console.warn('[ROL Firebase] User sync notice:', e.message);
+    }
+  }
+};
+
+window.restoreUserReadingState = async function(user, autoOpenReader = false) {
+  const u = user || state.currentUser;
+  if (!u) return null;
+  const uid = u.uid || u.id;
+  const uKey = getRolUserStorageKey(u);
+  let restoredReading = null;
+
+  try {
+    if (uKey) {
+      const storeRaw = localStorage.getItem('rol_user_reading_profiles');
+      const store = storeRaw ? JSON.parse(storeRaw) : {};
+      const rec = store[uKey];
+      if (rec) {
+        if (rec.lastReading && rec.lastReading.activeBook) restoredReading = rec.lastReading;
+        if (Array.isArray(rec.bookmarks) && rec.bookmarks.length > 0) {
+          const existingRefs = new Set((state.bookmarks || []).map(b => b.ref));
+          rec.bookmarks.forEach(b => { if (b && b.ref && !existingRefs.has(b.ref)) state.bookmarks.push(b); });
+        }
+        if (rec.highlights && typeof rec.highlights === 'object') {
+          state.highlights = { ...state.highlights, ...rec.highlights };
+        }
+        if (rec.streak && rec.streak > (state.streak || 1)) state.streak = rec.streak;
+      }
+    }
+  } catch (e) {}
+
+  if (window.FirebaseApp && typeof FirebaseApp.getUserProfile === 'function' && uid) {
+    try {
+      const cloudProfile = await FirebaseApp.getUserProfile(uid);
+      if (cloudProfile) {
+        if (cloudProfile.lastReading && cloudProfile.lastReading.activeBook) {
+          if (!restoredReading || (cloudProfile.lastReading.updatedAt || 0) >= (restoredReading.updatedAt || 0)) {
+            restoredReading = cloudProfile.lastReading;
+          }
+        }
+        if (Array.isArray(cloudProfile.bookmarks) && cloudProfile.bookmarks.length > 0) {
+          const existingRefs = new Set((state.bookmarks || []).map(b => b.ref));
+          cloudProfile.bookmarks.forEach(b => { if (b && b.ref && !existingRefs.has(b.ref)) state.bookmarks.push(b); });
+        }
+        if (cloudProfile.fullName && !u.fullName) u.fullName = cloudProfile.fullName;
+        if (cloudProfile.role) u.role = cloudProfile.role;
+      }
+    } catch (e) {}
+  }
+
+  if (restoredReading && restoredReading.activeBook) {
+    state.activeBook = restoredReading.activeBook;
+    state.activeChapter = parseInt(restoredReading.activeChapter, 10) || 1;
+    state.activeVerse = parseInt(restoredReading.activeVerse, 10) || 1;
+    if (restoredReading.translation) state.translation = restoredReading.translation;
+    localStorage.setItem("river_of_life_state_v2", JSON.stringify(state));
+    if (typeof renderContinueReadingCard === 'function') {
+      try { renderContinueReadingCard(); } catch (e) {}
+    }
+    if (autoOpenReader && typeof window.openReaderAndNavigate === 'function') {
+      setTimeout(() => {
+        window.openReaderAndNavigate(state.activeBook, state.activeChapter, state.activeVerse || 1);
+        if (typeof showToast === 'function') {
+          const bookLabel = state.activeBook.charAt(0).toUpperCase() + state.activeBook.slice(1);
+          showToast(`📖 Resumed where you left off: ${bookLabel} ${state.activeChapter}`);
+        }
+      }, 350);
+    }
+  }
+  return restoredReading;
+};
+
 function saveStateToLocalStorage() {
   try {
     if (state.currentUser) {
@@ -1377,9 +1537,11 @@ function saveStateToLocalStorage() {
       }
     }
     localStorage.setItem("river_of_life_state_v2", JSON.stringify(state));
-    // Non-blocking Firestore sync for cloud persistence (only if uid and function exists)
-    if (state.currentUser && state.currentUser.uid && typeof syncUserDataToFirestore === 'function') {
-      try { syncUserDataToFirestore(); } catch(e) {}
+    if (state.currentUser && typeof syncUserDataToFirestore === 'function') {
+      if (window._rolSyncTimer) clearTimeout(window._rolSyncTimer);
+      window._rolSyncTimer = setTimeout(() => {
+        try { syncUserDataToFirestore(); } catch(e) {}
+      }, 500);
     }
   } catch (e) {
     console.warn("Failed saving state:", e);
@@ -1633,8 +1795,16 @@ const RolBackendSync = {
       });
       if (res.ok) {
         const data = await res.json();
-        if (data && data.progress && Array.isArray(data.progress)) {
+        if (data && data.progress && Array.isArray(data.progress) && data.progress.length > 0) {
           console.log('[RolBackendSync] Synced reading progress records:', data.progress.length);
+          const latest = data.progress[0];
+          if (latest && latest.book_name) {
+            state.activeBook = String(latest.book_name).toLowerCase();
+            state.activeChapter = parseInt(latest.chapter_number, 10) || 1;
+            state.activeVerse = parseInt(latest.last_verse, 10) || 1;
+            saveStateToLocalStorage();
+            if (typeof renderContinueReadingCard === 'function') renderContinueReadingCard();
+          }
         }
       }
     } catch (e) {
@@ -2155,6 +2325,12 @@ function switchTab(rawRoute) {
       renderPrayersScreen();
     } else if (route === "meetings") {
       renderMeetingsDashboard();
+    } else if (route === "sermons") {
+      if (typeof renderSermonStudio === "function") renderSermonStudio();
+    } else if (route === "church") {
+      if (typeof renderChurchHub === "function") renderChurchHub();
+    } else if (route === "sundayschool") {
+      if (typeof renderSundaySchool === "function") renderSundaySchool();
     } else if (route === "admin") {
       if (typeof renderAdminPanel === "function") renderAdminPanel();
     } else if (route === "reader") {
@@ -12155,11 +12331,14 @@ window.selectDeviceGoogleAccount = async function(email, fullName, photo = null)
     const res = await RolBackendSync.googleAuth(email, fullName || email.split('@')[0], lang, role);
     
     const backendUser = (res && res.user) ? res.user : {};
+    const cleanEmail = (backendUser.email || email).trim().toLowerCase();
+    const detUid = (window.FirebaseApp?.auth?.currentUser?.uid) || ('google_' + btoa(cleanEmail).replace(/[^a-zA-Z0-9]/g, '').slice(0, 18));
     const rawUsername = (backendUser.username || backendUser.fullName || fullName || email.split('@')[0] || 'member').replace(/[^a-zA-Z0-9_-]/g, '_');
-    const token = (res && res.accessToken) || `tok_google_${Date.now()}`;
+    const token = (res && res.accessToken) || `tok_google_${detUid}`;
     const validUser = {
       ...backendUser,
-      id: backendUser.id || `usr_${rawUsername}_${Date.now()}`,
+      uid: backendUser.uid || detUid,
+      id: backendUser.id || detUid,
       email: (backendUser.email || email).trim().toLowerCase(),
       fullName: backendUser.fullName || fullName || rawUsername,
       username: rawUsername,
@@ -12201,6 +12380,8 @@ window.selectDeviceGoogleAccount = async function(email, fullName, photo = null)
     updateAllUserAvatars();
     updateAuthUI();
     if (typeof renderYouProfile === 'function') renderYouProfile();
+    if (typeof window.syncUserDataToFirestore === 'function') window.syncUserDataToFirestore();
+    if (typeof window.restoreUserReadingState === 'function') window.restoreUserReadingState(validUser, true);
     showToast(`🎉 Welcome, ${validUser.fullName}! Signed in with Google / गुगल खाते जोडले गेले!`);
   } catch (err) {
     console.warn('[Device Google Auth] Backend sync notice, establishing authenticated local session:', err.message);
@@ -12208,11 +12389,14 @@ window.selectDeviceGoogleAccount = async function(email, fullName, photo = null)
     window.closeDeviceGoogleAccountChooser();
     if (typeof closeAuthModal === 'function') closeAuthModal();
 
-    // Create reliable, sanitized user profile strictly matching ^[a-zA-Z0-9_-]+$
+    // Create reliable, deterministic user profile strictly matching ^[a-zA-Z0-9_-]+$
+    const cleanEmailLower = email.trim().toLowerCase();
+    const detLocalUid = (window.FirebaseApp?.auth?.currentUser?.uid) || ('google_' + btoa(cleanEmailLower).replace(/[^a-zA-Z0-9]/g, '').slice(0, 18));
     const rawUsername = (email.split('@')[0] || 'google_user').replace(/[^a-zA-Z0-9_-]/g, '_');
-    const cleanId = `usr_${rawUsername}_${Date.now()}`;
+    const cleanId = detLocalUid;
     const localToken = `tok_google_local_${cleanId}`;
     const cleanUser = {
+      uid: cleanId,
       id: cleanId,
       email: email.trim().toLowerCase(),
       fullName: (fullName && fullName.trim()) ? fullName.trim() : rawUsername,
@@ -12253,6 +12437,8 @@ window.selectDeviceGoogleAccount = async function(email, fullName, photo = null)
     updateAllUserAvatars();
     updateAuthUI();
     if (typeof renderYouProfile === 'function') renderYouProfile();
+    if (typeof window.syncUserDataToFirestore === 'function') window.syncUserDataToFirestore();
+    if (typeof window.restoreUserReadingState === 'function') window.restoreUserReadingState(cleanUser, true);
     showToast(`🎉 Welcome, ${cleanUser.fullName}! Signed in with Google / गुगल खाते जोडले गेले!`);
   }
 };
@@ -15090,8 +15276,9 @@ async function initLiveKitRoom(meeting, roomKey, loggedIn, isHost) {
     // Render Local Video Tile placeholder immediately
     renderLocalVideoTile(loggedIn, isHost);
 
-    // Deterministic unique identity per user session
-    const identity = loggedIn + '_' + Math.random().toString(36).substring(2, 7);
+    // Sanitized deterministic unique identity per user session (safe for DOM IDs & LiveKit)
+    const safeName = String(loggedIn || 'Member').replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 24) || 'Member';
+    const identity = safeName + '_' + Math.random().toString(36).substring(2, 7);
     RiverMeet.myPeerId = identity;
 
     const token = await generateLiveKitToken(
@@ -15373,8 +15560,12 @@ function attachLiveKitRemoteVideoTile(peerId, track, displayName) {
     videoEl.id = 'river-video-' + peerId;
     videoEl.setAttribute("playsinline", "");
     videoEl.setAttribute("webkit-playsinline", "");
-    videoEl.muted = false;
-    videoEl.defaultMuted = false;
+    videoEl.autoplay = true;
+    videoEl.muted = true;
+    videoEl.defaultMuted = true;
+    videoEl.style.width = "100%";
+    videoEl.style.height = "100%";
+    videoEl.style.objectFit = "cover";
     holder.appendChild(videoEl);
     videoEl.play().catch(e => {
       console.warn("[LiveKit] Remote video autoplay notice:", e);
@@ -15408,10 +15599,7 @@ function attachLiveKitRemoteAudio(peerId, track, displayName) {
   audioEl.volume = 1.0;
   document.body.appendChild(audioEl);
 
-  // Mobile / iOS Loudspeaker routing via Web Audio API
-  if (track.mediaStreamTrack) {
-    routeRemoteAudioToSpeaker(peerId, new MediaStream([track.mediaStreamTrack]));
-  }
+  // Avoid double audio playback (Web Audio + <audio> element causes echo); only unlock AudioContext for iOS/Android speaker
 
   const playPromise = audioEl.play();
   if (playPromise && typeof playPromise.catch === 'function') {
@@ -20174,11 +20362,28 @@ window.submitPrayerRequestPublic = function() {
   allReqs.unshift(newRequest);
   savePublicPrayerRequests(allReqs);
 
+  // Sync to Cloud Firestore so Pastor, Church, and Everyone receive it in real-time
+  if (window.FirebaseApp && typeof FirebaseApp.savePrayer === 'function') {
+    const audience = target === 'pastor' ? 'pastor' : (target === 'leaders' ? 'church' : 'everyone');
+    FirebaseApp.savePrayer({
+      uid: state?.currentUser?.uid || state?.currentUser?.id || ('guest_' + Date.now()),
+      userEmail: state?.currentUser?.email || '',
+      username: name,
+      fullName: name,
+      category: category,
+      audience: audience,
+      text: text,
+      isPublic: audience !== 'pastor'
+    }).catch(e => console.warn('[ROL Prayer] Cloud sync notice:', e.message));
+  }
+
   if (textEl) textEl.value = "";
   if (nameEl && !isAnonymous) nameEl.value = "";
 
   renderPublicPrayerRequests(currentPrayerRequestsFilter);
-  showToast("🙏 प्रार्थना विनंती पाठवली! आम्ही तुमच्यासाठी प्रार्थना करतो.");
+  showToast(target === 'pastor'
+    ? "🔒 प्रार्थना विनंती पास्टरांकडे पाठवली गेली आहे!"
+    : "🙏 प्रार्थना विनंती मंडळीसोबत शेअर केली गेली आहे!");
 };
 
 window.filterPublicPrayerRequests = function(filter, btn) {
@@ -20196,8 +20401,23 @@ window.renderPublicPrayerRequests = function(filter = currentPrayerRequestsFilte
   const container = document.getElementById("user-submitted-requests-list");
   if (!container) return;
 
-  const allReqs = getPublicPrayerRequests();
-  let filtered = allReqs;
+  const cloudPrayers = Array.isArray(window._rolPrayers) ? window._rolPrayers.map(p => ({
+    id: p.id,
+    category: p.category || 'प्रार्थना विनंती (Prayer)',
+    target: p.audience === 'pastor' ? 'pastor' : (p.isPublic ? 'church' : 'pastor'),
+    name: p.fullName || p.username || 'Member',
+    text: p.text,
+    createdAt: p.createdAt || Date.now(),
+    amenCount: p.amenCount || 1,
+    isAnswered: p.status === 'answered',
+    pastorNote: p.pastorNote || '',
+    isMy: !!(state.currentUser && (p.uid === state.currentUser.uid || p.uid === state.currentUser.id))
+  })) : [];
+  const localReqs = getPublicPrayerRequests();
+  const seenTexts = new Set(cloudPrayers.map(c => c.text));
+  const mergedReqs = [...cloudPrayers, ...localReqs.filter(l => !seenTexts.has(l.text))];
+  const isPastorOrAdmin = !!(state.currentUser && (state.currentUser.isPastor || state.currentUser.isAdmin || /pastor|admin/i.test(state.currentUser.role || '')));
+  let filtered = mergedReqs.filter(r => r.target !== 'pastor' || r.isMy || isPastorOrAdmin);
   if (filter === "my") {
     filtered = allReqs.filter(r => r.isMy || (!r.isAnonymous && state.currentUser && r.name === (state.currentUser.displayName || state.currentUser.username)));
   } else if (filter === "answered") {
@@ -27226,6 +27446,8 @@ function switchAdminSubtab(subtab) {
     renderAdminPrayers();
   } else if (subtab === "hymns") {
     if (typeof window.renderAdminHymnsList === "function") window.renderAdminHymnsList();
+  } else if (subtab === "church" || subtab === "sermons" || subtab === "sundayschool") {
+    if (typeof window.renderAdminChurchAndContentPanels === "function") window.renderAdminChurchAndContentPanels();
   } else if (subtab === "announcements") {
     renderAdminAnnouncements();
   }

@@ -59,12 +59,32 @@
 
     /* ── Authentication ── */
 
-    /** Open Google Sign-In popup */
+    /** Open Google Sign-In popup (with mobile/WebView redirect fallback) */
     async signInWithGoogle() {
       const provider = new firebase.auth.GoogleAuthProvider();
       provider.addScope('profile');
       provider.addScope('email');
-      return auth.signInWithPopup(provider);
+      provider.setCustomParameters({ prompt: 'select_account' });
+      try {
+        return await auth.signInWithPopup(provider);
+      } catch (err) {
+        if (err && (err.code === 'auth/popup-blocked' || err.code === 'auth/operation-not-supported-in-this-environment')) {
+          await auth.signInWithRedirect(provider);
+          return null;
+        }
+        throw err;
+      }
+    },
+
+    /** Check redirect result on startup (for mobile/iOS/Android redirect flow) */
+    async getGoogleRedirectResult() {
+      try {
+        if (!auth || typeof auth.getRedirectResult !== 'function') return null;
+        return await auth.getRedirectResult();
+      } catch (e) {
+        console.warn('[ROL Firebase] Redirect result notice:', e.message);
+        return null;
+      }
     },
 
     /** Sign in with email + password */
@@ -169,14 +189,21 @@
      * @returns {DocumentReference}
      */
     async savePrayer(prayerObj) {
+      const audience = prayerObj.audience || (prayerObj.isPublic ? 'church' : 'pastor');
       return db.collection('prayers').add({
-        uid:       prayerObj.uid       || '',
-        username:  prayerObj.username  || 'Anonymous',
-        text:      prayerObj.text      || '',
-        isPublic:  !!prayerObj.isPublic,
-        status:    'pending',
+        uid:        prayerObj.uid       || '',
+        userEmail:  prayerObj.userEmail || '',
+        username:   prayerObj.username  || 'Anonymous',
+        fullName:   prayerObj.fullName  || prayerObj.username || 'Member',
+        text:       prayerObj.text      || '',
+        category:   prayerObj.category  || 'General',
+        audience:   audience,
+        isPublic:   audience !== 'pastor',
+        status:     'pending',
         pastorNote: '',
-        createdAt: serverTimestamp()
+        amenCount:  0,
+        prayedBy:   [],
+        createdAt:  serverTimestamp()
       });
     },
 
@@ -214,6 +241,49 @@
         }, err => {
           console.error('[ROL Firebase] Prayer listener error:', err);
         });
+    },
+
+    /* ── Firestore: Generic Church / Sermon / Sunday School / Admin Sync ── */
+
+    async getDoc(collectionName, docId) {
+      const doc = await db.collection(collectionName).doc(docId).get();
+      return docToObj(doc);
+    },
+
+    async setDoc(collectionName, docId, data) {
+      return db.collection(collectionName).doc(docId).set({
+        ...data,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+    },
+
+    async getCollection(collectionName, orderField = 'createdAt') {
+      try {
+        const snap = await db.collection(collectionName).orderBy(orderField, 'desc').get();
+        return snap.docs.map(docToObj);
+      } catch (e) {
+        const snap = await db.collection(collectionName).get();
+        return snap.docs.map(docToObj);
+      }
+    },
+
+    listenCollection(collectionName, callback, orderField = 'createdAt') {
+      try {
+        return db.collection(collectionName)
+          .orderBy(orderField, 'desc')
+          .onSnapshot(snap => callback(snap.docs.map(docToObj)), err => {
+            console.warn(`[ROL Firebase] Listener error (${collectionName}):`, err.message);
+          });
+      } catch (e) {
+        return db.collection(collectionName)
+          .onSnapshot(snap => callback(snap.docs.map(docToObj)), err => {
+            console.warn(`[ROL Firebase] Listener error (${collectionName}):`, err.message);
+          });
+      }
+    },
+
+    async deleteDoc(collectionName, docId) {
+      return db.collection(collectionName).doc(docId).delete();
     },
   };
 

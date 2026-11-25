@@ -2240,9 +2240,19 @@
               <button class="admin-subnav-btn" data-admin-subtab="meetings" onclick="switchAdminSubtab('meetings')">📹 Video Meetings</button>
               <button class="admin-subnav-btn" data-admin-subtab="prayers" onclick="switchAdminSubtab('prayers')">🙏 Pastoral Prayers</button>
               <button class="admin-subnav-btn" data-admin-subtab="hymns" onclick="switchAdminSubtab('hymns')">🎵 Hymns & Worship</button>
+              <button class="admin-subnav-btn" data-admin-subtab="church" onclick="switchAdminSubtab('church')">⛪ Church Info & Media</button>
+              <button class="admin-subnav-btn" data-admin-subtab="sermons" onclick="switchAdminSubtab('sermons')">🎙️ Sermons AI</button>
+              <button class="admin-subnav-btn" data-admin-subtab="sundayschool" onclick="switchAdminSubtab('sundayschool')">🎒 Sunday School</button>
               <button class="admin-subnav-btn" data-admin-subtab="announcements" onclick="switchAdminSubtab('announcements')">📢 Announcements</button>
               <button class="admin-subnav-btn" data-admin-subtab="settings" onclick="switchAdminSubtab('settings')">⚙ Security & PIN</button>
             </div>
+
+            <!-- SUBPANEL EXTRA: CHURCH INFO, MEDIA, NOTICES & DIRECTORY -->
+            <div id="admin-panel-church" class="admin-subtab-panel" style="display: none;"></div>
+            <!-- SUBPANEL EXTRA: SERMONS & PREACHING TOPICS -->
+            <div id="admin-panel-sermons" class="admin-subtab-panel" style="display: none;"></div>
+            <!-- SUBPANEL EXTRA: SUNDAY SCHOOL MANAGER -->
+            <div id="admin-panel-sundayschool" class="admin-subtab-panel" style="display: none;"></div>
 
             <!-- SUBPANEL 1: OVERVIEW -->
             <div id="admin-panel-overview" class="admin-subtab-panel active">
@@ -2649,6 +2659,36 @@
         <!-- ==========================================================================
              VIEW 9: MARATHI HYMNS & WORSHIP SANCTUARY (उपासना संगीत)
              ========================================================================== -->
+        <!-- VIEW 11A: PREACHING & SERMON SPEECH STUDIO (AI + DAILY TOPICS) -->
+        <section id="view-sermons" class="app-view" style="display: none;">
+          <div class="view-scroll-content" style="max-width: 980px; margin: 0 auto; padding-bottom: 90px;">
+            <div style="margin-bottom: 14px;">
+              <button onclick="switchTab('grow')" style="background: var(--bg-content); border: 1.5px solid var(--border); color: var(--text); padding: 8px 14px; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer;">&larr; Back to Grow</button>
+            </div>
+            <div id="sermon-studio-root"></div>
+          </div>
+        </section>
+
+        <!-- VIEW 11B: CHURCH HUB (INFO, NOTICES, MEDIA GALLERY, MEMBERS DIRECTORY) -->
+        <section id="view-church" class="app-view" style="display: none;">
+          <div class="view-scroll-content" style="max-width: 980px; margin: 0 auto; padding-bottom: 90px;">
+            <div style="margin-bottom: 14px;">
+              <button onclick="switchTab('home')" style="background: var(--bg-content); border: 1.5px solid var(--border); color: var(--text); padding: 8px 14px; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer;">&larr; Back to Home</button>
+            </div>
+            <div id="church-hub-root"></div>
+          </div>
+        </section>
+
+        <!-- VIEW 11C: SUNDAY SCHOOL (LESSONS, MEMORY VERSES, QUIZZES) -->
+        <section id="view-sundayschool" class="app-view" style="display: none;">
+          <div class="view-scroll-content" style="max-width: 980px; margin: 0 auto; padding-bottom: 90px;">
+            <div style="margin-bottom: 14px;">
+              <button onclick="switchTab('grow')" style="background: var(--bg-content); border: 1.5px solid var(--border); color: var(--text); padding: 8px 14px; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer;">&larr; Back to Grow</button>
+            </div>
+            <div id="sunday-school-root"></div>
+          </div>
+        </section>
+
         <section id="view-hymns" class="app-view" style="display: none;">
             <div class="view-scroll-content" style="max-width: 900px; margin: 0 auto; padding-bottom: 95px;">
               
@@ -3419,6 +3459,51 @@
               <!-- 3 Clean Focused Spiritual Formation Cards (Study, Hymns, Quiz) -->
               <div class="grow-features-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 14px;">
                 
+                <!-- 0A. Preaching & Sermon Speech AI Card -->
+                <div class="grow-feature-card" onclick="openSermonStudio()" style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 20px; padding: 22px; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.04);">
+                  <div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                      <div style="width: 48px; height: 48px; border-radius: 14px; background: rgba(224,83,95,0.12); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 24px;">🎙️</div>
+                      <span style="font-size: 11px; font-weight: 800; background: rgba(224,83,95,0.12); color: var(--primary); padding: 3px 10px; border-radius: 12px; text-transform: uppercase;">Daily AI Topics • 15–30m</span>
+                    </div>
+                    <h3 style="margin: 0 0 6px 0; font-size: 18px; font-weight: 800; color: var(--text);">Preaching & Sermon Studio (प्रवचन व भाषण)</h3>
+                    <p style="margin: 0; font-size: 13px; color: var(--text-muted); line-height: 1.45;">Daily rotating topics & AI speech outlines (15–30 mins) for church sermons and family prayer—easy to understand and biblically rich.</p>
+                  </div>
+                  <div style="display: flex; justify-content: flex-end; align-items: center; padding-top: 12px; border-top: 1px solid var(--border);">
+                    <span style="font-size: 13px; font-weight: 800; color: var(--primary);">Open Sermon Studio &rarr;</span>
+                  </div>
+                </div>
+
+                <!-- 0B. Sunday School Card -->
+                <div class="grow-feature-card" onclick="openSundaySchool()" style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 20px; padding: 22px; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.04);">
+                  <div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                      <div style="width: 48px; height: 48px; border-radius: 14px; background: rgba(5,150,105,0.12); color: #059669; display: flex; align-items: center; justify-content: center; font-size: 24px;">🎒</div>
+                      <span style="font-size: 11px; font-weight: 800; background: rgba(5,150,105,0.12); color: #059669; padding: 3px 10px; border-radius: 12px; text-transform: uppercase;">Kids & Teens</span>
+                    </div>
+                    <h3 style="margin: 0 0 6px 0; font-size: 18px; font-weight: 800; color: var(--text);">Sunday School (संडे स्कूल)</h3>
+                    <p style="margin: 0; font-size: 13px; color: var(--text-muted); line-height: 1.45;">Age-group Bible lessons, memory verses, discussion questions, fun activities, and interactive quizzes for children & youth.</p>
+                  </div>
+                  <div style="display: flex; justify-content: flex-end; align-items: center; padding-top: 12px; border-top: 1px solid var(--border);">
+                    <span style="font-size: 13px; font-weight: 800; color: #059669;">Open Sunday School &rarr;</span>
+                  </div>
+                </div>
+
+                <!-- 0C. Church Hub Card -->
+                <div class="grow-feature-card" onclick="openChurchHub('info')" style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 20px; padding: 22px; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.04);">
+                  <div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                      <div style="width: 48px; height: 48px; border-radius: 14px; background: rgba(37,99,235,0.12); color: #2563eb; display: flex; align-items: center; justify-content: center; font-size: 24px;">⛪</div>
+                      <span style="font-size: 11px; font-weight: 800; background: rgba(37,99,235,0.12); color: #2563eb; padding: 3px 10px; border-radius: 12px; text-transform: uppercase;">Info • Media • Directory</span>
+                    </div>
+                    <h3 style="margin: 0 0 6px 0; font-size: 18px; font-weight: 800; color: var(--text);">Church Hub & Directory (चर्च माहिती)</h3>
+                    <p style="margin: 0; font-size: 13px; color: var(--text-muted); line-height: 1.45;">Church info, service timings, live notices, photos & videos gallery, and searchable church members directory.</p>
+                  </div>
+                  <div style="display: flex; justify-content: flex-end; align-items: center; padding-top: 12px; border-top: 1px solid var(--border);">
+                    <span style="font-size: 13px; font-weight: 800; color: #2563eb;">Open Church Hub &rarr;</span>
+                  </div>
+                </div>
+
                 <!-- 1. Bible Study Tool Card -->
                 <div class="grow-feature-card" onclick="switchTab('study')" style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 20px; padding: 22px; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.04); transition: transform 0.15s ease, box-shadow 0.15s ease;">
                   <div>
@@ -3749,6 +3834,31 @@
             <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(245,158,11,0.15); display: flex; align-items: center; justify-content: center; font-size: 18px;"></div>
             <h4 style="margin: 0; font-size: 14px; font-weight: 800; color: var(--text);">Bible Quiz</h4>
             <span style="font-size: 11.5px; color: var(--text-muted);">Trivia challenge, points & badges</span>
+          </div>
+
+          <!-- 6A. Preaching & Sermon Studio -->
+          <div class="more-card-item" onclick="closeDrawer('drawer-more-menu'); openSermonStudio();" style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 16px; padding: 14px; cursor: pointer; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+            <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(224,83,95,0.15); display: flex; align-items: center; justify-content: center; font-size: 18px;">🎙️</div>
+            <h4 style="margin: 0; font-size: 14px; font-weight: 800; color: var(--text);">Sermon & Speech AI</h4>
+            <span style="font-size: 11.5px; color: var(--text-muted);">15–30 min preaching & prayer speeches</span>
+          </div>
+
+          <!-- 6B. Church Hub -->
+          <div class="more-card-item" onclick="closeDrawer('drawer-more-menu'); openChurchHub('info');" style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 16px; padding: 14px; cursor: pointer; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+            <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(37,99,235,0.15); display: flex; align-items: center; justify-content: center; font-size: 18px;">⛪</div>
+            <h4 style="margin: 0; font-size: 14px; font-weight: 800; color: var(--text);">Church Info & Media</h4>
+            <span style="font-size: 11.5px; color: var(--text-muted);">Notices, photos, videos & directory</span>
+          </div>
+
+          <!-- 6C. Sunday School -->
+          <div class="more-card-item" onclick="closeDrawer('drawer-more-menu'); openSundaySchool();" style="background: var(--surface); border: 1.5px solid var(--border); border-radius: 16px; padding: 14px; cursor: pointer; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); grid-column: span 2;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(5,150,105,0.15); display: flex; align-items: center; justify-content: center; font-size: 18px;">🎒</div>
+              <div>
+                <h4 style="margin: 0; font-size: 14px; font-weight: 800; color: var(--text);">Sunday School / संडे स्कूल</h4>
+                <span style="font-size: 11.5px; color: var(--text-muted);">Kids & teens Bible lessons, memory verses & quizzes</span>
+              </div>
+            </div>
           </div>
 
           <!-- 7. Admin & Pastor Console -->
@@ -6800,11 +6910,19 @@
       <span id="toast-message">Copied to clipboard!</span>
     </div>
 
+  <!-- Firebase Compat SDK + River of Life Firebase Engine -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="firebase.js?v=2425_AUTH_PRAYER_SYNC"></script>
+
   <!-- App Main Logic (MiroTalk SFU Video & Audio Integration) -->
   <script src="sarvam-tts.js?v=132_MARVBSI_FULL_CHURCH_BIBLE"></script>
   <script src="bible-study.js?v=138_MUSEUM_STUDY_HUB"></script>
   <script src="peerjs.min.js"></script>
-  <script src="app.js?v=2420_CLEAN_USER_AUTH_AND_WEBRTC"></script>
+  <script src="app.js?v=2425_PROFESSIONAL_UPGRADE"></script>
+  <script src="sermon-studio.js?v=2425_SERMON_AI_ENGINE"></script>
+  <script src="church-sunday-school.js?v=2425_CHURCH_SUNDAY_SCHOOL_ADMIN"></script>
 
   <script>
     // Fallback Safety: Guarantee splash screen is hidden within 4.5s no matter what
