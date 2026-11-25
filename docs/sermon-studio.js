@@ -397,10 +397,24 @@
   };
 
   let currentSermonId = null;
+  let sermonViewMode = 'list';
 
   window.openSermonStudio = function (topicId) {
     if (typeof switchTab === 'function') switchTab('sermons');
+    sermonViewMode = topicId ? 'detail' : 'list';
     window.renderSermonStudio(topicId || null);
+  };
+
+  window.openSermonTopicDetail = function (topicId) {
+    sermonViewMode = 'detail';
+    window.renderSermonStudio(topicId);
+    const sc = document.querySelector('#view-sermons .view-scroll-content');
+    if (sc) sc.scrollTop = 0;
+  };
+
+  window.backToSermonTopicsList = function () {
+    sermonViewMode = 'list';
+    window.renderSermonStudio(null);
   };
 
   window.setSermonLang = function (lang) {
@@ -419,8 +433,9 @@
     let pool = list.filter(t => t.id !== currentSermonId);
     if (!pool.length) pool = list;
     const pick = pool[Math.floor(Math.random() * pool.length)];
+    sermonViewMode = 'detail';
     window.renderSermonStudio(pick.id);
-    if (typeof showToast === 'function') showToast('🎲 नवीन प्रवचन विषय निवडला! (New topic loaded)');
+    if (typeof showToast === 'function') showToast('🎲 नवीन प्रवचन विषय निवडला!');
   };
 
   window.renderSermonStudio = function (selectedId = null) {
@@ -429,9 +444,87 @@
 
     const topics = window.getSermonTopics();
     const daily = window.getDailySermonTopic();
-    const active = topics.find(t => t.id === selectedId) || topics.find(t => t.id === currentSermonId) || daily;
-    currentSermonId = active ? active.id : null;
+    if (selectedId) currentSermonId = selectedId;
+    const active = topics.find(t => t.id === (selectedId || currentSermonId)) || daily;
     const isMr = sermonLang === 'mr';
+
+    const builderHtml = `
+      <div id="custom-sermon-builder-panel" style="display: none; background: var(--bg-content); border: 1.5px solid var(--primary); border-radius: 18px; padding: 18px; margin-bottom: 18px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <h4 style="margin: 0; font-size: 15px; font-weight: 800; color: var(--primary);">✨ नवीन १५–३० मिनिटांचे प्रवचन / भाषण तयार करा</h4>
+          <button onclick="document.getElementById('custom-sermon-builder-panel').style.display='none'" style="background: transparent; border: none; font-size: 18px; cursor: pointer; color: var(--text-muted);">&times;</button>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 12px;">
+          <input id="ai-sermon-topic-input" type="text" placeholder="विषय लिहा (उदा. कुटुंबात प्रार्थना, क्षमा, विश्वास)" style="padding: 10px 12px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--bg); color: var(--text); font-size: 13px;">
+          <input id="ai-sermon-verse-input" type="text" placeholder="बायबल संदर्भ (उदा. स्तोत्र २३, योहान ३:१६)" style="padding: 10px 12px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--bg); color: var(--text); font-size: 13px;">
+          <select id="ai-sermon-occasion-input" style="padding: 10px 12px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--bg); color: var(--text); font-size: 13px;">
+            <option value="कुटुंब प्रार्थना (Family Prayer)">🏠 कुटुंब प्रार्थना (Family Prayer)</option>
+            <option value="रविवार चर्च संदेश (Sunday Sermon)">⛪ रविवार चर्च संदेश (Sunday Sermon)</option>
+            <option value="तरुण सभा (Youth Meeting)">🔥 तरुण सभा (Youth Meeting)</option>
+            <option value="कॉटेज प्रार्थना (Cottage Prayer)">🕯️ कॉटेज प्रार्थना (Cottage Prayer)</option>
+          </select>
+          <select id="ai-sermon-duration-input" style="padding: 10px 12px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--bg); color: var(--text); font-size: 13px;">
+            <option value="15–20 मिनिटे">⏱ १५–२० मिनिटे</option>
+            <option value="20–25 मिनिटे" selected>⏱ २०–२५ मिनिटे</option>
+            <option value="25–30 मिनिटे">⏱ २५–३० मिनिटे</option>
+          </select>
+        </div>
+        <button onclick="sermonViewMode='detail'; generateCustomSermonSpeech()" class="btn-primary-block" style="margin: 0; padding: 12px; border-radius: 12px; font-size: 13.5px; font-weight: 800;">
+          ✨ संपूर्ण मराठी भाषण तयार करा (Generate Speech)
+        </button>
+      </div>
+    `;
+
+    if (sermonViewMode === 'list') {
+      const topicCardsHtml = topics.map(t => {
+        const isDaily = daily && t.id === daily.id;
+        return `
+          <div onclick="openSermonTopicDetail('${t.id}')" style="background: var(--bg-content); border: 1.5px solid ${isDaily ? 'var(--primary)' : 'var(--border)'}; border-radius: 18px; padding: 18px; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 10px; box-shadow: var(--shadow-sm);">
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px;">
+                <span style="font-size: 11px; font-weight: 800; padding: 3px 10px; border-radius: 999px; background: ${isDaily ? 'rgba(16,185,129,0.14)' : 'rgba(224,83,95,0.1)'}; color: ${isDaily ? '#059669' : 'var(--primary)'};">
+                  ${isDaily ? '✨ आजचा विशेष विषय (Today)' : '⏱ ' + (t.duration || '20–25 मिनिटे')}
+                </span>
+                <span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">${t.occasion || ''}</span>
+              </div>
+              <h3 style="margin: 0 0 4px 0; font-size: 17px; font-weight: 800; color: var(--text); line-height: 1.35;">${isMr ? (t.titleMr || t.title) : t.title}</h3>
+              <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">${isMr ? t.title : (t.titleMr || '')}</div>
+              <div style="font-size: 12.5px; font-weight: 700; color: var(--primary);">📖 ${t.scripture}</div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px solid var(--border); font-size: 12.5px; font-weight: 800; color: var(--primary);">
+              <span>${(t.points || []).length} सविस्तर मुद्दे व प्रार्थना</span>
+              <span>संपूर्ण माहिती पहा &rarr;</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      root.innerHTML = `
+        <div style="background: linear-gradient(135deg, #1f1b2e 0%, #3b1d2a 100%); color: #fff; border-radius: 20px; padding: 20px; margin-bottom: 16px; box-shadow: 0 10px 28px rgba(0,0,0,0.18);">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
+            <div>
+              <span style="display: inline-block; background: rgba(255,255,255,0.15); padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 800; margin-bottom: 8px;">🎙️ प्रवचन व भाषण तयारी स्टुडिओ • SERMON AI</span>
+              <h2 style="margin: 0 0 6px 0; font-size: 21px; font-weight: 800;">प्रवचन विषय निवडा (१५–३० मिनिटांची संपूर्ण माहिती)</h2>
+              <p style="margin: 0; font-size: 13px; color: rgba(255,255,255,0.84);">कोणत्याही एका विषयावर क्लिक करा — त्या विषयाचे सर्व मुद्दे, बायबल वचने, उदाहरणे आणि प्रार्थना एकाच पानावर वाचता येतील.</p>
+            </div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button onclick="shuffleSermonTopic()" style="background: #f59e0b; color: #111827; border: none; padding: 9px 13px; border-radius: 12px; font-size: 12.5px; font-weight: 800; cursor: pointer;">🎲 रँडम विषय उघडा</button>
+              <button onclick="openCustomSermonBuilder()" style="background: rgba(255,255,255,0.18); color: #fff; border: 1px solid rgba(255,255,255,0.3); padding: 9px 13px; border-radius: 12px; font-size: 12.5px; font-weight: 800; cursor: pointer;">✨ स्वतःचा विषय तयार करा</button>
+            </div>
+          </div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.15); align-items: center;">
+            <span style="font-size: 11.5px; color: rgba(255,255,255,0.8); font-weight: 700;">भाषा / Language:</span>
+            <button onclick="setSermonLang('mr')" style="padding: 5px 11px; border-radius: 8px; border: none; font-size: 12px; font-weight: 800; cursor: pointer; background: ${isMr ? '#fff' : 'rgba(255,255,255,0.15)'}; color: ${isMr ? '#111827' : '#fff'};">मराठी (सोपी भाषा)</button>
+            <button onclick="setSermonLang('en')" style="padding: 5px 11px; border-radius: 8px; border: none; font-size: 12px; font-weight: 800; cursor: pointer; background: ${!isMr ? '#fff' : 'rgba(255,255,255,0.15)'}; color: ${!isMr ? '#111827' : '#fff'};">English</button>
+          </div>
+        </div>
+        ${builderHtml}
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px;">
+          ${topicCardsHtml}
+        </div>
+      `;
+      return;
+    }
 
     const pointsHtml = (active.points || []).map((pt) => {
       const heading = isMr ? (pt.headingMr || pt.heading) : (pt.heading || pt.headingMr);
@@ -461,87 +554,24 @@
       `;
     }).join('');
 
-    const topicChips = topics.map(t => {
-      const isAct = active && t.id === active.id;
-      const isDaily = daily && t.id === daily.id;
-      return `
-        <button onclick="renderSermonStudio('${t.id}')" style="text-align: left; padding: 11px 14px; border-radius: 14px; border: 1.5px solid ${isAct ? 'var(--primary)' : 'var(--border)'}; background: ${isAct ? 'rgba(224,83,95,0.1)' : 'var(--bg)'}; color: var(--text); cursor: pointer; min-width: 225px; max-width: 270px; flex: 0 0 auto;">
-          <div style="display: flex; justify-content: space-between; align-items: center; gap: 6px; margin-bottom: 4px;">
-            <span style="font-size: 10.5px; font-weight: 800; color: ${isDaily ? '#059669' : 'var(--text-muted)'};">${isDaily ? '✨ आजचा विषय (Today)' : (t.duration || '20 मिनिटे')}</span>
-          </div>
-          <div style="font-size: 13.5px; font-weight: 800; line-height: 1.35;">${t.titleMr || t.title}</div>
-          <div style="font-size: 11px; color: var(--text-muted); margin-top: 3px;">${t.scripture}</div>
-        </button>
-      `;
-    }).join('');
-
     const openingText = isMr ? (active.openingPrayerMr || active.openingPrayer) : (active.openingPrayer || active.openingPrayerMr);
     const introText = isMr ? (active.introductionMr || active.introduction) : (active.introduction || active.introductionMr);
     const appText = isMr ? (active.applicationMr || active.application) : (active.application || active.applicationMr);
     const closingText = isMr ? (active.closingPrayerMr || active.closingPrayer) : (active.closingPrayer || active.closingPrayerMr);
 
     root.innerHTML = `
-      <!-- Header Banner -->
-      <div style="background: linear-gradient(135deg, #1f1b2e 0%, #3b1d2a 100%); color: #fff; border-radius: 20px; padding: 20px; margin-bottom: 16px; box-shadow: 0 10px 28px rgba(0,0,0,0.18);">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
-          <div>
-            <span style="display: inline-block; background: rgba(255,255,255,0.15); padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 800; margin-bottom: 8px;">🎙️ प्रवचन व भाषण तयारी स्टुडिओ • SERMON AI</span>
-            <h2 style="margin: 0 0 6px 0; font-size: 21px; font-weight: 800;">चर्च संदेश व कुटुंब प्रार्थनेसाठी सविस्तर भाषण (१५–३० मिनिटे)</h2>
-            <p style="margin: 0; font-size: 13px; color: rgba(255,255,255,0.84);">दररोज बदलणारे विषय, सोपी मराठी भाषा, बायबल वचनांचे संदर्भ, उदाहरणे आणि प्रार्थना—सर्वांना सहज समजेल अशी माहिती.</p>
-          </div>
-          <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
-            <button onclick="shuffleSermonTopic()" style="background: #f59e0b; color: #111827; border: none; padding: 9px 13px; border-radius: 12px; font-size: 12.5px; font-weight: 800; cursor: pointer;">🎲 दुसरा विषय (Random)</button>
-            <button onclick="openCustomSermonBuilder()" style="background: rgba(255,255,255,0.18); color: #fff; border: 1px solid rgba(255,255,255,0.3); padding: 9px 13px; border-radius: 12px; font-size: 12.5px; font-weight: 800; cursor: pointer;">✨ स्वतःचा विषय तयार करा</button>
-          </div>
-        </div>
-        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.15); align-items: center;">
-          <span style="font-size: 11.5px; color: rgba(255,255,255,0.8); font-weight: 700;">भाषा / Language:</span>
-          <button onclick="setSermonLang('mr')" style="padding: 5px 11px; border-radius: 8px; border: none; font-size: 12px; font-weight: 800; cursor: pointer; background: ${isMr ? '#fff' : 'rgba(255,255,255,0.15)'}; color: ${isMr ? '#111827' : '#fff'};">मराठी (सोपी भाषा)</button>
-          <button onclick="setSermonLang('en')" style="padding: 5px 11px; border-radius: 8px; border: none; font-size: 12px; font-weight: 800; cursor: pointer; background: ${!isMr ? '#fff' : 'rgba(255,255,255,0.15)'}; color: ${!isMr ? '#111827' : '#fff'};">English</button>
-          <span style="margin-left: auto; font-size: 11.5px; color: rgba(255,255,255,0.8); font-weight: 700;">अक्षर आकार:</span>
-          <button onclick="adjustSermonFont(-1)" style="padding: 4px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.3); background: transparent; color: #fff; font-weight: 800; cursor: pointer;">A-</button>
-          <button onclick="adjustSermonFont(1)" style="padding: 4px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.3); background: transparent; color: #fff; font-weight: 800; cursor: pointer;">A+</button>
-        </div>
-      </div>
-
-      <!-- Custom AI Speech Builder Panel -->
-      <div id="custom-sermon-builder-panel" style="display: none; background: var(--bg-content); border: 1.5px solid var(--primary); border-radius: 18px; padding: 18px; margin-bottom: 18px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-          <h4 style="margin: 0; font-size: 15px; font-weight: 800; color: var(--primary);">✨ नवीन १५–३० मिनिटांचे प्रवचन / भाषण तयार करा</h4>
-          <button onclick="document.getElementById('custom-sermon-builder-panel').style.display='none'" style="background: transparent; border: none; font-size: 18px; cursor: pointer; color: var(--text-muted);">&times;</button>
-        </div>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 12px;">
-          <input id="ai-sermon-topic-input" type="text" placeholder="विषय लिहा (उदा. कुटुंबात प्रार्थना, क्षमा, विश्वास)" style="padding: 10px 12px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--bg); color: var(--text); font-size: 13px;">
-          <input id="ai-sermon-verse-input" type="text" placeholder="बायबल संदर्भ (उदा. स्तोत्र २३, योहान ३:१६)" style="padding: 10px 12px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--bg); color: var(--text); font-size: 13px;">
-          <select id="ai-sermon-occasion-input" style="padding: 10px 12px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--bg); color: var(--text); font-size: 13px;">
-            <option value="कुटुंब प्रार्थना (Family Prayer)">🏠 कुटुंब प्रार्थना (Family Prayer)</option>
-            <option value="रविवार चर्च संदेश (Sunday Sermon)">⛪ रविवार चर्च संदेश (Sunday Sermon)</option>
-            <option value="तरुण सभा (Youth Meeting)">🔥 तरुण सभा (Youth Meeting)</option>
-            <option value="कॉटेज प्रार्थना (Cottage Prayer)">🕯️ कॉटेज प्रार्थना (Cottage Prayer)</option>
-          </select>
-          <select id="ai-sermon-duration-input" style="padding: 10px 12px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--bg); color: var(--text); font-size: 13px;">
-            <option value="15–20 मिनिटे">⏱ १५–२० मिनिटे</option>
-            <option value="20–25 मिनिटे" selected>⏱ २०–२५ मिनिटे</option>
-            <option value="25–30 मिनिटे">⏱ २५–३० मिनिटे</option>
-          </select>
-        </div>
-        <button onclick="generateCustomSermonSpeech()" class="btn-primary-block" style="margin: 0; padding: 12px; border-radius: 12px; font-size: 13.5px; font-weight: 800;">
-          ✨ संपूर्ण मराठी भाषण तयार करा (Generate Speech)
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 14px;">
+        <button onclick="backToSermonTopicsList()" style="background: var(--bg-content); border: 1.5px solid var(--border); color: var(--text); padding: 8px 14px; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: pointer;">
+          &larr; सर्व विषय पहा (All Topics)
         </button>
-      </div>
-
-      <!-- Daily & Random Topics Carousel -->
-      <div style="margin-bottom: 18px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-          <h4 style="margin: 0; font-size: 14px; font-weight: 800; color: var(--text);">📚 सर्व प्रवचन विषय (${topics.length}) — दररोज बदलणारे</h4>
-          <span style="font-size: 11.5px; color: var(--text-muted);">स्वाइप करून निवडा &rarr;</span>
-        </div>
-        <div style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 6px;">
-          ${topicChips}
+        <div style="display: flex; gap: 6px; align-items: center;">
+          <button onclick="setSermonLang('mr')" style="padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 12px; font-weight: 800; cursor: pointer; background: ${isMr ? 'var(--primary)' : 'var(--bg-content)'}; color: ${isMr ? '#fff' : 'var(--text)'};">मराठी</button>
+          <button onclick="setSermonLang('en')" style="padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 12px; font-weight: 800; cursor: pointer; background: ${!isMr ? 'var(--primary)' : 'var(--bg-content)'}; color: ${!isMr ? '#fff' : 'var(--text)'};">English</button>
+          <button onclick="adjustSermonFont(-1)" style="padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-content); color: var(--text); font-weight: 800; cursor: pointer;">A-</button>
+          <button onclick="adjustSermonFont(1)" style="padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-content); color: var(--text); font-weight: 800; cursor: pointer;">A+</button>
         </div>
       </div>
 
-      <!-- Active Sermon / Speech Card -->
       <div style="background: var(--bg-content); border: 1.5px solid var(--border); border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 16px; box-shadow: var(--shadow-sm);">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px; border-bottom: 1px solid var(--border); padding-bottom: 14px;">
           <div>
