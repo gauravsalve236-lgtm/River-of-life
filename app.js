@@ -10130,6 +10130,176 @@ Establish lasting peace, communal harmony, and mutual respect across every state
 In the holy, majestic name of our Lord Jesus Christ, we pray,
 Amen.`,
     amenCount: 405
+  },
+  "youth_wisdom": {
+    id: "youth_wisdom",
+    bookKey: "james",
+    chapter: 1,
+    categoryMr: "बुद्धी व भविष्य",
+    categoryEn: "YOUTH & WISDOM",
+    titleMr: "विद्यार्थी व तरुणांसाठी बुद्धी व यश प्रार्थना",
+    titleEn: "Wisdom & Success for Youth & Students",
+    subtitleMr: "अभ्यास, करिअर व योग्य निर्णयांसाठी देवाचे मार्गदर्शन",
+    subtitleEn: "Clarity in studies, career & life decisions",
+    bgImage: "assets/images/dawn_valley_genesis.jpg",
+    refMr: "याकोब १:५",
+    refEn: "James 1:5",
+    verseMr: "जर तुमच्यापैकी कोणामध्ये बुद्धीची उणीव असेल, तर जो देव सर्वांना उदारपणे व दोष न लावता देतो त्याच्याकडे ती मागावी; म्हणजे ती त्याला दिली जाईल.",
+    verseEn: "If any of you lacks wisdom, you should ask God, who gives generously to all without finding fault, and it will be given to you.",
+    prayerMr: `हे सर्वज्ञानी स्वर्गीय पित्या,
+
+आज मी आमच्या घरातील सर्व विद्यार्थी, मुले आणि तरुणांसाठी तुझ्या चरणाशी प्रार्थना करतो. तुझे वचन सांगते की तू बुद्धी उदारपणे देणारा देव आहेस. त्यांच्या अभ्यासात, परीक्षांमध्ये, नोकरी व व्यवसायाच्या संधींमध्ये त्यांना स्वच्छ बुद्धी, एकाग्रता आणि आत्मविश्वास दे.
+
+प्रभू, जगातील चुकीच्या संगतीपासून, व्यसनांपासून आणि निराशेपासून त्यांचे रक्षण कर. प्रत्येक कठीण निर्णयाच्या वेळी तुझा पवित्र आत्मा त्यांना योग्य दिशा दाखवो. त्यांच्या कष्टाला यश दे आणि त्यांच्या जीवनाद्वारे तुझ्या नावाचा गौरव होऊ दे.
+
+प्रभू येशू ख्रिस्ताच्या नावाने, आमेन.`,
+    prayerEn: `All-Wise Heavenly Father,
+
+Today I lift up every student and young person in our family and church. Your Word promises that You give wisdom generously without finding fault. Grant them sharp minds, focus in their studies and exams, and open doors for their careers.
+
+Protect them from negative influences, discouragement, and anxiety. Guide every decision by Your Holy Spirit and bless the work of their hands.
+
+In Jesus’ name, Amen.`,
+    amenCount: 218
+  },
+  "financial_breakthrough": {
+    id: "financial_breakthrough",
+    bookKey: "philippians",
+    chapter: 4,
+    categoryMr: "आर्थिक आशीर्वाद",
+    categoryEn: "PROVISION & BLESSING",
+    titleMr: "आर्थिक आशीर्वाद व कर्जातून मुक्तीची प्रार्थना",
+    titleEn: "Financial Provision & Debt Freedom",
+    subtitleMr: "प्रभूच्या वैभवाप्रमाणे सर्व गरजांचा पुरवठा",
+    subtitleEn: "Trusting God’s abundant provision",
+    bgImage: "assets/images/wedding_cana_miracle.jpg",
+    refMr: "फिलिप्पैकर ४:१९",
+    refEn: "Philippians 4:19",
+    verseMr: "माझा देव ख्रिस्त येशूमध्ये आपल्या वैभवानुसार तुमच्या सर्व गरजा पूर्ण करील.",
+    verseEn: "And my God will meet all your needs according to the riches of his glory in Christ Jesus.",
+    prayerMr: `हे यहोवा यिरे — आमची सर्व गरज पुरवणाऱ्या देवा,
+
+आज आमच्या कुटुंबातील आर्थिक ताण, कर्जाचा बोजा आणि कामकाजातील अडचणी आम्ही तुझ्या हातात देतो. प्रभू, तू पाच भाकरी व दोन माशांमधून हजारो लोकांना तृप्त केलेस; आज आमच्या थोड्या साधनांनाही तुझा आशीर्वाद दे.
+
+आमच्या हातांच्या कष्टाला भरभराट दे, कर्ज फेडण्याचे मार्ग उघड, आणि आम्हांला काटकसरीने व उदार मनाने जगण्याचे ज्ञान दे. आर्थिक चिंतेऐवजी तुझ्यावर संपूर्ण विश्वास ठेवण्याचे बळ आम्हांला दे.
+
+प्रभू येशूच्या नावाने, आमेन.`,
+    prayerEn: `Jehovah Jireh, our Provider,
+
+We bring every financial burden, debt, and work concern before You. You multiplied five loaves and two fish to feed thousands—bless the work of our hands, open new doors of provision, and grant us wisdom to manage our resources faithfully.
+
+In Jesus’ name, Amen.`,
+    amenCount: 274
+  },
+  "marriage_harmony": {
+    id: "marriage_harmony",
+    bookKey: "ecclesiastes",
+    chapter: 4,
+    categoryMr: "वैवाहिक शांती",
+    categoryEn: "MARRIAGE & UNITY",
+    titleMr: "वैवाहिक जीवन व पती-पत्नीतील प्रीतीसाठी प्रार्थना",
+    titleEn: "Marriage Harmony, Love & Unity",
+    subtitleMr: "तीन पदरी दोरीसह कुटुंबातील गोडवा",
+    subtitleEn: "A cord of three strands is not quickly broken",
+    bgImage: "assets/images/wedding_cana_miracle.jpg",
+    refMr: "उपदेशक ४:९, १२",
+    refEn: "Ecclesiastes 4:9, 12",
+    verseMr: "एकापेक्षा दोघे बरे... आणि तीन पदरी दोरी लवकर तुटत नाही.",
+    verseEn: "Two are better than one... A cord of three strands is not quickly broken.",
+    prayerMr: `हे प्रीतीच्या देवा,
+
+तू विवाहाची पवित्र संस्था निर्माण केलीस. आज प्रत्येक पती-पत्नीमध्ये संयम, आदर, क्षमाशीलता आणि खरे प्रेम वाढू दे. आमच्या वैवाहिक जीवनात तू स्वतः तिसरा पदर होऊन राहा, जेणेकरून कोणताही गैरसमज किंवा ताण आमचे ऐक्य तोडू शकणार नाही.
+
+एकमेकांचे ऐकण्याचे, एकमेकांना आधार देण्याचे आणि एकत्र प्रार्थना करण्याचे मन आम्हांला दे.
+
+प्रभू येशूच्या नावाने, आमेन.`,
+    prayerEn: `God of Love,
+
+Bless every marriage with patience, mutual respect, quick forgiveness, and enduring love. Be the third strand at the center of our home so nothing can break our unity.
+
+In Jesus’ name, Amen.`,
+    amenCount: 196
+  },
+  "church_revival": {
+    id: "church_revival",
+    bookKey: "acts",
+    chapter: 4,
+    categoryMr: "चर्च व जागृती",
+    categoryEn: "CHURCH REVIVAL",
+    titleMr: "रिव्हर ऑफ लाईफ चर्च व पास्टरांसाठी प्रार्थना",
+    titleEn: "Church Revival & Pastor’s Strength",
+    subtitleMr: "मंडळीतील ऐक्य, पवित्र आत्म्याचे अभिषेक व सेवाकार्य",
+    subtitleEn: "Boldness, unity & spiritual revival",
+    bgImage: "assets/images/dawn_valley_genesis.jpg",
+    refMr: "प्रेषितांची कृत्ये ४:३१",
+    refEn: "Acts 4:31",
+    verseMr: "त्यांनी प्रार्थना केल्यावर ज्या जागी ते जमले होते ती जागा हालली; आणि ते सर्वजण पवित्र आत्म्याने भरले व देवाचे वचन धैर्याने बोलू लागले.",
+    verseEn: "After they prayed, the place where they were meeting was shaken. And they were all filled with the Holy Spirit and spoke the word of God boldly.",
+    prayerMr: `हे मंडळीच्या मस्तक प्रभू येशू,
+
+आज आमच्या रिव्हर ऑफ लाईफ चर्चसाठी, आमच्या पास्टरांसाठी, संडे स्कूल शिक्षकांसाठी आणि सर्व सेवकांसाठी आम्ही प्रार्थना करतो. त्यांना शारीरिक व आत्मिक सामर्थ्य दे. आमच्या मंडळीत पवित्र आत्म्याची जागृती पाठव, अनेक नवीन जीव तुझ्याकडे येऊ देत आणि प्रत्येक कुटुंब आत्मिकरीत्या मजबूत होऊ दे.
+
+आमेन.`,
+    prayerEn: `Lord Jesus, Head of the Church,
+
+Bless River of Life Church, our pastors, Sunday School teachers, and every member. Pour out Your Holy Spirit, strengthen our leaders, and bring spiritual revival to our city.
+
+Amen.`,
+    amenCount: 312
+  },
+  "travel_safety": {
+    id: "travel_safety",
+    bookKey: "psalms",
+    chapter: 121,
+    categoryMr: "प्रवास संरक्षण",
+    categoryEn: "SAFE JOURNEY",
+    titleMr: "प्रवास व कामाच्या ठिकाणी सुरक्षिततेची प्रार्थना",
+    titleEn: "Safe Journey & Daily Work Protection",
+    subtitleMr: "येण्या-जाण्यात प्रभूचा पहारा",
+    subtitleEn: "The Lord watches over your coming and going",
+    bgImage: "assets/images/dawn_valley_genesis.jpg",
+    refMr: "स्तोत्रसंहिता १२१:७-८",
+    refEn: "Psalm 121:7-8",
+    verseMr: "परमेश्वर तुझे सर्व वाईटापासून रक्षण करील; तो तुझ्या जिवाचे रक्षण करील. आतापासून सर्वकाळपर्यंत परमेश्वर तुझ्या जाण्याचे व येण्याचे रक्षण करील.",
+    verseEn: "The Lord will keep you from all harm—he will watch over your life; the Lord will watch over your coming and going both now and forevermore.",
+    prayerMr: `हे इस्राएलाचे रक्षण करणाऱ्या देवा,
+
+आजच्या प्रवासात, रस्त्यावर आणि कामाच्या ठिकाणी तू आमच्या पुढे आणि मागे चाल. सर्व अपघातांपासून, धोक्यांपासून आणि अचानक येणाऱ्या संकटांपासून मला व माझ्या कुटुंबाला सुरक्षित घरी परत आण.
+
+प्रभू येशूच्या नावाने, आमेन.`,
+    prayerEn: `Keeper of Israel,
+
+Watch over our coming and going today. Guard us on every road and workplace and bring us safely home.
+
+In Jesus’ name, Amen.`,
+    amenCount: 185
+  },
+  "repentance_renewal": {
+    id: "repentance_renewal",
+    bookKey: "psalms",
+    chapter: 51,
+    categoryMr: "नवीन सुरुवात",
+    categoryEn: "RENEWAL & MERCY",
+    titleMr: "पश्चात्ताप, शुद्ध अंतःकरण व नवीन सुरुवात",
+    titleEn: "Clean Heart & Spiritual Renewal",
+    subtitleMr: "देवाच्या कृपेने पुन्हा उभे राहणे",
+    subtitleEn: "Create in me a pure heart, O God",
+    bgImage: "assets/images/dawn_valley_genesis.jpg",
+    refMr: "स्तोत्रसंहिता ५१:१०",
+    refEn: "Psalm 51:10",
+    verseMr: "हे देवा, माझ्यात शुद्ध अंतःकरण निर्माण कर, आणि माझ्या ठायी स्थिर आत्मा नव्याने उत्पन्न कर.",
+    verseEn: "Create in me a pure heart, O God, and renew a steadfast spirit within me.",
+    prayerMr: `हे दयाळू पित्या,
+
+माझ्या जाणूनबुजून किंवा नकळत झालेल्या सर्व चुका व पापे मी तुझ्यासमोर कबूल करतो. येशूच्या पवित्र रक्ताने मला शुद्ध कर. माझ्यात शुद्ध अंतःकरण निर्माण कर आणि तुझ्या तारणाचा आनंद पुन्हा एकदा माझ्या जीवनात ताजा कर.
+
+आमेन.`,
+    prayerEn: `Merciful Father,
+
+I confess my shortcomings before You. Cleanse me, create in me a pure heart, and restore to me the joy of Your salvation.
+
+Amen.`,
+    amenCount: 241
   }
 };
 

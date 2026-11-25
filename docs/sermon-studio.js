@@ -366,6 +366,355 @@
       closingPrayerMr: 'प्रभू, आमचे हात, आमची वाणी आणि आमचा वेळ तुझ्या राज्याच्या सेवेसाठी वापर. आमेन.',
       closingPrayer: 'Lord, use our hands, voices, and time to bring Your love to those around us. Amen.',
       createdAt: 1700000006000
+    },
+    {
+      id: 'srm_psalm91_protection',
+      title: 'God’s Protection & Shelter in Troubled Times',
+      titleMr: 'संकटात देवाची सुरक्षा, आश्रय आणि निर्भय जीवन',
+      occasion: 'कुटुंब संरक्षण प्रार्थना / चर्च संदेश (Protection & Family Prayer)',
+      duration: '20–25 मिनिटे (20–25 mins)',
+      scripture: 'स्तोत्रसंहिता ९१:१-१६ • स्तोत्रसंहिता १२१:१-८ • नीतिसूत्रे १८:१०',
+      book: 'psalms',
+      chapter: 91,
+      verse: 1,
+      openingPrayerMr: 'सर्वसमर्थ देवा, तू आमचा आश्रय आणि अभेद्य किल्ला आहेस. आज आमच्या घरातील लहानांपासून मोठ्यांपर्यंत सर्वांना तुझ्या पंखांखाली सुरक्षित ठेव. आमेन.',
+      openingPrayer: 'Almighty God, You are our refuge and fortress. Cover our families under Your wings today. Amen.',
+      introductionMr: 'आजच्या काळात प्रत्येक कुटुंबाला आरोग्याची, प्रवासाची, नोकरीची आणि भविष्याची चिंता वाटते. पण स्तोत्रसंहिता ९१ हे देवाने आपल्या लेकरांना दिलेले एक सुरक्षित अभयपत्र आहे. देवाच्या जवळ राहणाऱ्या व्यक्तीला देव कसे संरक्षण देतो ते आज पाहूया.',
+      introduction: 'Psalm 91 is God’s promise of shelter and protection for every family that dwells near Him.',
+      points: [
+        {
+          headingMr: '१. परात्पराच्या गुप्त स्थानी राहणे म्हणजे काय?',
+          heading: '1. Dwelling in the Shelter of the Most High',
+          time: '७ मिनिटे',
+          verseRef: 'स्तोत्रसंहिता ९१:१-२ (Psalm 91:1-2)',
+          verseQuoteMr: '“जो परात्पराच्या गुप्त स्थानी राहतो, तो सर्वसमर्थाच्या सावलीत विसावा पावेल. मी परमेश्वराविषयी म्हणेन, ‘तो माझा आश्रय व माझा गड आहे; माझा देव, त्याच्यावर मी भरवसा ठेवतो.’”',
+          book: 'psalms',
+          chapter: 91,
+          verse: 1,
+          explanationMr: 'फक्त संकटात देवाला भेटायला येणारा पाहुणा नव्हे, तर दररोज देवाच्या सान्निध्यात राहणारा "निवासी" बना. जेव्हा आपण दररोज प्रार्थना व वचनाद्वारे देवाशी जोडलेले असतो, तेव्हा त्याची सावली आपल्यावर राहते.',
+          explanation: 'Don’t just visit God in emergencies—dwell daily in His presence through prayer and Scripture.',
+          illustrationMr: 'जसे कोंबडी धोक्याची चाहूल लागताच आपल्या पिल्लांना पंखांखाली लपवते, तसेच देव आपल्या लेकरांना संकटापासून झाकून ठेवतो.'
+        },
+        {
+          headingMr: '२. देवदूतांचे पहारे आणि देवाचे वचन',
+          heading: '2. God Commands His Angels Concerning You',
+          time: '७ मिनिटे',
+          verseRef: 'स्तोत्रसंहिता ९१:११ (Psalm 91:11)',
+          verseQuoteMr: '“कारण तुझ्या सर्व मार्गांत तुझे रक्षण करावे म्हणून तो तुझ्याविषयी आपल्या दूतांना आज्ञा देईल.”',
+          book: 'psalms',
+          chapter: 91,
+          verse: 11,
+          explanationMr: 'आपण प्रवासाला निघतो, मुले शाळेत जातात किंवा रात्री झोपतो—आपल्याला न दिसणारे देवाचे दूत आपल्या सभोवती पहारा देतात. त्यामुळे भीतीऐवजी विश्वासाने दिवस सुरू करा.',
+          explanation: 'God assigns His angels to guard your ways—start each day and journey in faith, not fear.'
+        },
+        {
+          headingMr: '३. देवाला हाक मारणाऱ्याला तो उत्तर देतो',
+          heading: '3. When You Call, He Answers',
+          time: '६ मिनिटे',
+          verseRef: 'स्तोत्रसंहिता ९१:१५ (Psalm 91:15)',
+          verseQuoteMr: '“तो मला हाक मारील, आणि मी त्याला उत्तर देईन; संकटात मी त्याच्याबरोबर राहीन; मी त्याला सोडवीन व त्याला सन्मान देईन.”',
+          book: 'psalms',
+          chapter: 91,
+          verse: 15,
+          explanationMr: 'देवाचे वचन स्पष्ट आहे: संकटात तो आपल्याला सोडून जात नाही, तर "मी त्याच्याबरोबर राहीन" असे अभिवचन देतो.',
+          explanation: 'God promises: "I will be with him in trouble; I will deliver him."'
+        }
+      ],
+      applicationMr: 'दररोज सकाळी घर सोडण्यापूर्वी कुटुंबातील सर्वांनी मिळून स्तोत्र ९१:१-२ म्हणत संरक्षण प्रार्थना करा.',
+      application: 'Pray Psalm 91:1-2 together as a family every morning before leaving home.',
+      closingPrayerMr: 'हे प्रभू, आमच्या घराभोवती तुझ्या रक्ताचे व अग्नीचे कुंपण घाल. आमच्या येण्या-जाण्यात तूच रक्षण कर. आमेन.',
+      closingPrayer: 'Lord, surround our home with Your protection and peace. Amen.',
+      createdAt: 1700000007000
+    },
+    {
+      id: 'srm_youth_guidance',
+      title: 'God’s Guidance & Purpose for Youth & Future',
+      titleMr: 'तरुणांसाठी, विद्यार्थ्यांसाठी देवाचे मार्गदर्शन व भविष्य',
+      occasion: 'तरुण सभा / विद्यार्थी व कुटुंब (Youth & Students)',
+      duration: '20–25 मिनिटे (20–25 mins)',
+      scripture: 'नीतिसूत्रे ३:५-६ • यिर्मया २९:११ • १ तीमथ्य ४:१२',
+      book: 'proverbs',
+      chapter: 3,
+      verse: 5,
+      openingPrayerMr: 'बुद्धी देणाऱ्या देवा, आजच्या तरुण पिढीसाठी आणि विद्यार्थ्यांसाठी तुझे मार्गदर्शन मागतो. त्यांच्या अभ्यासात, करिअरमध्ये आणि निर्णयांमध्ये तुझा प्रकाश दे. आमेन.',
+      openingPrayer: 'God of wisdom, guide our youth and students in their studies, careers, and life choices. Amen.',
+      introductionMr: 'शिक्षण, नोकरी, लग्न किंवा मोबाईल व मित्रांचा दबाव—आजच्या तरुणांसमोर अनेक प्रश्न असतात. पण देव सांगतो की माझ्याकडे तुमच्यासाठी "कल्याणाचे आणि आशेचे बेत" आहेत!',
+      introduction: 'Youth face pressure about studies, career, and relationships, yet God holds plans of hope and a future.',
+      points: [
+        {
+          headingMr: '१. स्वतःच्या समजुतीवर नव्हे, तर देवावर विश्वास ठेवा',
+          heading: '1. Trust the Lord, Not Just Your Own Understanding',
+          time: '७ मिनिटे',
+          verseRef: 'नीतिसूत्रे ३:५-६ (Proverbs 3:5-6)',
+          verseQuoteMr: '“तू आपल्या सर्व अंतःकरणाने परमेश्वरावर भरवसा ठेव, आणि आपल्याच समजुतीवर विसंबून राहू नको; तुझ्या सर्व मार्गांत त्याचे स्मरण कर, म्हणजे तो तुझे मार्ग सरळ करील.”',
+          book: 'proverbs',
+          chapter: 3,
+          verse: 5,
+          explanationMr: 'मानवी बुद्धी मर्यादित असते, पण देव पुढची १० वर्षे पाहू शकतो. कोणताही मोठा निर्णय घेताना आधी देवाला विचारा—तो योग्य दारे उघडतो.',
+          explanation: 'Ask God before major decisions; He sees the whole road ahead and makes your paths straight.'
+        },
+        {
+          headingMr: '२. देवाकडे तुमच्यासाठी उत्तम योजना आहे',
+          heading: '2. God Has Plans to Give You Hope and a Future',
+          time: '७ मिनिटे',
+          verseRef: 'यिर्मया २९:११ (Jeremiah 29:11)',
+          verseQuoteMr: '“कारण परमेश्वर म्हणतो, ‘जे बेत मी तुमच्याविषयी केले आहेत, ते मला माहीत आहेत; ते नाशाचे नसून कल्याणाचे बेत आहेत, ते तुम्हाला भविष्याची आशा देण्यासाठी आहेत.’”',
+          book: 'jeremiah',
+          chapter: 29,
+          verse: 11,
+          explanationMr: 'कधी अपयश आले किंवा उशीर झाला तरी निराश होऊ नका. देवाची वेळ आणि त्याची योजना नेहमीच सर्वोत्तम असते.',
+          explanation: 'Do not lose heart over delays or setbacks—God’s timing and plan are always for your good.'
+        },
+        {
+          headingMr: '३. तरुण वयात ख्रिस्ताचे आदर्श बना',
+          heading: '3. Set an Example in Youth',
+          time: '६ मिनिटे',
+          verseRef: '१ तीमथ्य ४:१२ (1 Timothy 4:12)',
+          verseQuoteMr: '“तू तरुण आहेस म्हणून कोणी तुला तुच्छ मानू नये; तर बोलण्यात, आचरणात, प्रीतीत, विश्वासात व शुद्धतेत विश्वासणाऱ्यांसमोर आदर्श हो.”',
+          book: '1timothy',
+          chapter: 4,
+          verse: 12,
+          explanationMr: 'देव वापरण्यासाठी वय मोठे असण्याची गरज नाही—दावीद, दानीएल आणि तीमथ्य तरुण असतानाच देवाने त्यांच्याद्वारे मोठी कामे केली!',
+          explanation: 'God used David, Daniel, and Timothy in their youth—be an example in speech, conduct, and purity.'
+        }
+      ],
+      applicationMr: 'या आठवड्यात दररोज अभ्यासापूर्वी किंवा कामापूर्वी २ मिनिटे देवाला बुद्धी व एकाग्रतेसाठी प्रार्थना करा.',
+      application: 'Pray for wisdom and focus for 2 minutes every day before studying or starting work.',
+      closingPrayerMr: 'प्रभू, आमच्या तरुणांना आणि विद्यार्थ्यांना योग्य मार्ग दाखव व त्यांच्या जीवनातून तुझे गौरव होऊ दे. आमेन.',
+      closingPrayer: 'Lord, guide our youth and let their lives bring glory to Your name. Amen.',
+      createdAt: 1700000008000
+    },
+    {
+      id: 'srm_christian_family',
+      title: 'Building a Christ-Centered Family & Parenting',
+      titleMr: 'ख्रिस्तावर आधारित सुखी कुटुंब आणि सुसंस्कृत पालकत्व',
+      occasion: 'कुटुंब सभा / विवाह व पालकत्व (Family & Marriage)',
+      duration: '20–30 मिनिटे (20–30 mins)',
+      scripture: 'यहोशवा २४:१५ • इफिसकर ५:२५ • इफिसकर ६:१-४',
+      book: 'joshua',
+      chapter: 24,
+      verse: 15,
+      openingPrayerMr: 'कुटुंबाची स्थापना करणाऱ्या देवा, आमच्या घरातील पती-पत्नी, आई-वडील आणि मुले यांच्यात तुझी प्रीती, आदर आणि शांती नांदू दे. आमेन.',
+      openingPrayer: 'Creator of the family, fill our homes with Your love, respect, and peace. Amen.',
+      introductionMr: 'चांगली घरे विटा-सिमेंटने नाही, तर प्रीती, आदर आणि प्रार्थनेने बनतात. यहोशवाने संपूर्ण इस्राएलसमोर ठाम निर्णय घेतला: "मी व माझे घर तर परमेश्वराची सेवा करू."',
+      introduction: 'Strong homes are built on love, respect, and prayer—choosing with Joshua: "As for me and my house, we will serve the Lord."',
+      points: [
+        {
+          headingMr: '१. कुटुंबाचा ठाम निर्णय: आम्ही प्रभूची सेवा करू',
+          heading: '1. A Household Decision to Serve the Lord',
+          time: '७ मिनिटे',
+          verseRef: 'यहोशवा २४:१५ (Joshua 24:15)',
+          verseQuoteMr: '“पण मी व माझे घर तर परमेश्वराची सेवा करू.”',
+          book: 'joshua',
+          chapter: 24,
+          verse: 15,
+          explanationMr: 'घरात देवाचे स्थान पहिले असले पाहिजे. जेव्हा आई-वडील स्वतः प्रार्थना करतात व चर्चमध्ये जातात, तेव्हा मुले आपोआप तेच शिकतात.',
+          explanation: 'Put God first in the home; children naturally follow the faith they see lived by their parents.'
+        },
+        {
+          headingMr: '२. पती-पत्नीतील प्रीती आणि आदर',
+          heading: '2. Love & Respect in Marriage',
+          time: '७ मिनिटे',
+          verseRef: 'इफिसकर ५:२५, ३३ (Ephesians 5:25, 33)',
+          verseQuoteMr: '“पतींनो, जशी ख्रिस्ताने मंडळीवर प्रीती केली... तशी तुम्हीही आपआपल्या पत्नीवर प्रीती करा.”',
+          book: 'ephesians',
+          chapter: 5,
+          verse: 25,
+          explanationMr: 'येशूने मंडळीसाठी स्वतःला दिले—तशीच निस्वार्थी प्रीती आणि सन्मान पती-पत्नीने एकमेकांना दिल्यास घरात स्वर्गीय आनंद राहतो.',
+          explanation: 'Selfless love and mutual respect between husband and wife build an unshakeable home.'
+        },
+        {
+          headingMr: '३. मुलांचे प्रभूच्या शिक्षणात संगोपन',
+          heading: '3. Raising Children in the Lord',
+          time: '७ मिनिटे',
+          verseRef: 'इफिसकर ६:१-४ • नीतिसूत्रे २२:६',
+          verseQuoteMr: '“मुलांनो, प्रभूमध्ये आपल्या आईबापांच्या आज्ञेत राहा... आणि बापांनो, आपल्या मुलांना राग आणू नका, तर प्रभूच्या शिस्तीत व शिक्षणात त्यांचे पालनपोषण करा.”',
+          book: 'ephesians',
+          chapter: 6,
+          verse: 1,
+          explanationMr: 'रागावून नव्हे, तर प्रेमाने व बायबलच्या गोष्टी सांगून मुलांना घडवा. लहानपणी लावलेली चांगली वळणे आयुष्यभर टिकतात.',
+          explanation: 'Nurture children patiently with Scripture and prayer rather than anger.'
+        }
+      ],
+      applicationMr: 'आठवड्यातून एक संध्याकाळ "फॅमिली बायबल टाइम" ठेवा—मोबाईल बाजूला ठेवून एकत्र गाणे गा, वचन वाचा आणि प्रार्थना करा.',
+      application: 'Set aside one evening a week for Family Bible Time—phones away, worship, Scripture, and prayer together.',
+      closingPrayerMr: 'हे प्रभू, आमच्या घरातील प्रत्येक नातेसंबंध तुझ्या कृपेने मजबूत कर. आमचे घर तुझे साक्षीदार होऊ दे. आमेन.',
+      closingPrayer: 'Lord, strengthen every relationship in our home and make our family a witness of Your love. Amen.',
+      createdAt: 1700000009000
+    },
+    {
+      id: 'srm_healing_hope',
+      title: 'Healing, Comfort & Hope in Times of Sickness',
+      titleMr: 'आजारीपणात आणि दुःखात देवाची चंगाई व सांत्वन',
+      occasion: 'चंगाई प्रार्थना / आजारी व्यक्तींसाठी (Healing & Comfort)',
+      duration: '15–25 मिनिटे (15–25 mins)',
+      scripture: 'यशया ५३:४-५ • याकोब ५:१४-१५ • स्तोत्रसंहिता १४७:३',
+      book: 'james',
+      chapter: 5,
+      verse: 14,
+      openingPrayerMr: 'चंगाई देणाऱ्या देवा, जे कोणी आजारी, थकलेले किंवा दुःखी आहेत त्यांना तुझा बरे करणारा स्पर्श दे आणि मनाला धीर दे. आमेन.',
+      openingPrayer: 'Lord our Healer, touch everyone who is sick, weary, or grieving with Your healing hand. Amen.',
+      introductionMr: 'शारीरिक आजारपण किंवा मनाचे दुःख आपल्याला खूप खचवून टाकते. पण पवित्र शास्त्र सांगते की आपला प्रभू येशू हा "यहोवा राफा" — म्हणजेच आपला वैद्य आहे!',
+      introduction: 'Sickness and pain can discourage us, yet God reveals Himself as Jehovah Rapha—the Lord who heals.',
+      points: [
+        {
+          headingMr: '१. येशूने आपले आजार व वेदना स्वतःवर घेतल्या',
+          heading: '1. Jesus Carried Our Sickness and Sorrows',
+          time: '६ मिनिटे',
+          verseRef: 'यशया ५३:४-५ (Isaiah 53:4-5)',
+          verseQuoteMr: '“खरोखर त्याने आमचे रोग स्वतःवर घेतले व आमच्या वेदना वाहिल्या... त्याच्या फटक्यांनी आम्हांला चंगाई मिळाली आहे.”',
+          book: 'isaiah',
+          chapter: 53,
+          verse: 4,
+          explanationMr: 'क्रूसावर येशूने केवळ पापाची क्षमाच नाही तर शरीर व मनाच्या चंगाईचाही पाया घातला. आपण त्याच्या कृपेवर हक्काने विश्वास ठेवू शकतो.',
+          explanation: 'At the cross, Jesus bore our infirmities and sorrows—we can trust His compassion.'
+        },
+        {
+          headingMr: '२. मंडळीची विश्वासाची प्रार्थना आजाराला उठवते',
+          heading: '2. The Prayer of Faith Will Heal the Sick',
+          time: '७ मिनिटे',
+          verseRef: 'याकोब ५:१४-१५ (James 5:14-15)',
+          verseQuoteMr: '“तुमच्यात कोणी आजारी आहे का? त्याने मंडळीच्या वडीलधाऱ्यांना बोलवावे; आणि त्यांनी प्रभूच्या नावाने त्याला तेल लावून त्याच्यासाठी प्रार्थना करावी; म्हणजे विश्वासाची प्रार्थना त्या रोग्याला बरे करील.”',
+          book: 'james',
+          chapter: 5,
+          verse: 14,
+          explanationMr: 'डॉक्टरांचे उपचार घेत असतानाही आपण प्रार्थनेचे सामर्थ्य विसरू नये. पास्टर व मंडळी जेव्हा एकमताने प्रार्थना करतात, तेव्हा देव चमत्कार करतो.',
+          explanation: 'Alongside medical care, never underestimate the united prayer of pastors and the church.'
+        },
+        {
+          headingMr: '३. देव भग्न अंतःकरणांनाही बरे करतो',
+          heading: '3. He Heals the Brokenhearted',
+          time: '५ मिनिटे',
+          verseRef: 'स्तोत्रसंहिता १४७:३ (Psalm 147:3)',
+          verseQuoteMr: '“तो भग्न अंतःकरणाच्या लोकांना बरे करतो आणि त्यांच्या जखमा बांधतो.”',
+          book: 'psalms',
+          chapter: 147,
+          verse: 3,
+          explanationMr: 'बाहेरच्या जखमांपेक्षा मनाच्या जखमा खोल असतात. येशू आपल्या हृदयातील एकटेपणा व दुःख हळुवारपणे बरे करतो.',
+          explanation: 'Jesus gently binds up emotional wounds, grief, and loneliness.'
+        }
+      ],
+      applicationMr: 'आज तुमच्या ओळखीत जे कोणी आजारी आहेत त्यांना फोन करा आणि त्यांच्यासाठी १ मिनिट प्रार्थना करा.',
+      application: 'Call someone who is sick or lonely today and pray a 1-minute blessing over them.',
+      closingPrayerMr: 'प्रभू येशू, तुझा चंगाईचा हात आजारी व्यक्तींवर ठेव. त्यांना पूर्ण आरोग्य, धीर आणि शांती दे. आमेन.',
+      closingPrayer: 'Lord Jesus, lay Your healing hand upon the sick and grant full restoration and peace. Amen.',
+      createdAt: 1700000010000
+    },
+    {
+      id: 'srm_good_shepherd',
+      title: 'The Lord Is My Shepherd (Psalm 23)',
+      titleMr: 'परमेश्वर माझा मेंढपाळ आहे — मला काहीही उणे पडणार नाही',
+      occasion: 'कुटुंब प्रार्थना / सांत्वन व विश्वास (Psalm 23 Meditation)',
+      duration: '20–25 मिनिटे (20–25 mins)',
+      scripture: 'स्तोत्रसंहिता २३:१-६ • योहान १०:११',
+      book: 'psalms',
+      chapter: 23,
+      verse: 1,
+      openingPrayerMr: 'उत्तम मेंढपाळ प्रभू येशू, तू आम्हांला नावाने ओळखतोस आणि हिरव्या कुरणांत चालवतोस. आज तुझ्या वचनाद्वारे आम्हांला तृप्त कर. आमेन.',
+      openingPrayer: 'Good Shepherd Jesus, You know us by name and lead us beside still waters. Feed our souls today. Amen.',
+      introductionMr: 'बायबलमधील सर्वात प्रसिद्ध आणि प्रत्येकाला धीर देणारे स्तोत्र म्हणजे स्तोत्रसंहिता २३. दावीद स्वतः मेंढपाळ होता, म्हणून त्याला माहीत होते की मेंढपाळ आपल्या मेंढरांची किती काळजी घेतो.',
+      introduction: 'Psalm 23 is the most beloved Psalm because David knew firsthand how tenderly a shepherd cares for his sheep.',
+      points: [
+        {
+          headingMr: '१. देव आपली प्रत्येक गरज पुरवतो (उणे पडणार नाही)',
+          heading: '1. The Lord Provides Everything We Need',
+          time: '७ मिनिटे',
+          verseRef: 'स्तोत्रसंहिता २३:१-३ (Psalm 23:1-3)',
+          verseQuoteMr: '“परमेश्वर माझा मेंढपाळ आहे; मला काहीही उणे पडणार नाही. तो मला हिरव्या कुरणांत बसवतो; तो मला शांत पाण्याजवळ नेतो; तो माझा जीव ताजातवाना करतो.”',
+          book: 'psalms',
+          chapter: 23,
+          verse: 1,
+          explanationMr: 'मेंढरांना स्वतःला रस्ता सापडत नाही; मेंढपाळ त्यांना चांगले चारा व शांत पाणी शोधून देतो. तसेच देव आपल्या कुटुंबाच्या अन्नाची, आरोग्याची आणि आत्मिक शांततेची काळजी घेतो.',
+          explanation: 'A shepherd finds green pastures and still waters—God cares for your daily provision and inner rest.'
+        },
+        {
+          headingMr: '२. मृत्युछायेच्या दरीतही आपण एकटे नाही',
+          heading: '2. Even in the Darkest Valley, You Are Not Alone',
+          time: '७ मिनिटे',
+          verseRef: 'स्तोत्रसंहिता २३:४ (Psalm 23:4)',
+          verseQuoteMr: '“जरी मी मृत्युछायेच्या दरीतून चाललो, तरी मी कोणत्याही वाईटास भिणार नाही; कारण तू माझ्याबरोबर आहेस; तुझी काठी व तुझा सोटा हीच मला धीर देतात.”',
+          book: 'psalms',
+          chapter: 23,
+          verse: 4,
+          explanationMr: 'कधी कधी जीवन अंधारमय दरीसारखे वाटते. पण तेथेही मेंढपाळाची काठी आपले रक्षण करते—तू माझ्याबरोबर आहेस हाच सर्वात मोठा धीर आहे!',
+          explanation: 'In the darkest valleys, the Shepherd’s rod and staff protect and comfort us.'
+        },
+        {
+          headingMr: '३. देवाची कृपा व दया आयुष्यभर आपल्या मागोमाग येते',
+          heading: '3. Goodness and Mercy Follow Us All Our Days',
+          time: '६ मिनिटे',
+          verseRef: 'स्तोत्रसंहिता २३:६ (Psalm 23:6)',
+          verseQuoteMr: '“निश्चयेकरून माझ्या आयुष्याचे सर्व दिवस चांगुलपणा व दया माझ्या मागोमाग येतील; आणि मी परमेश्वराच्या घरात सर्वकाळ राहीन.”',
+          book: 'psalms',
+          chapter: 23,
+          verse: 6,
+          explanationMr: 'आपल्या भूतकाळातील चुकांपेक्षा देवाची दया मोठी आहे, आणि आपले भविष्य अनंतकाळ त्याच्या घरात सुरक्षित आहे.',
+          explanation: 'God’s goodness and mercy pursue us every day, and our eternal home is secure.'
+        }
+      ],
+      applicationMr: 'आज कुटुंबातील सर्वांनी मिळून स्तोत्र २३ तोंडपाठ म्हणण्याचा सराव करा आणि संकटात त्याची आठवण ठेवा.',
+      application: 'Memorize Psalm 23 together as a family and recite it whenever worry comes.',
+      closingPrayerMr: 'उत्तम मेंढपाळा, तुझ्या कळपात आम्हांला सुरक्षित ठेवल्याबद्दल धन्यवाद. तुझी दया आमच्यावर सदैव राहो. आमेन.',
+      closingPrayer: 'Good Shepherd, thank You for keeping us safe in Your flock. Amen.',
+      createdAt: 1700000011000
+    },
+    {
+      id: 'srm_salvation_newlife',
+      title: 'New Life & Salvation in Jesus Christ',
+      titleMr: 'ख्रिस्तामध्ये नवीन जीवन आणि तारणाचा आनंद',
+      occasion: 'सुवार्ता संदेश / रविवार सेवा (Gospel & Salvation)',
+      duration: '20–25 मिनिटे (20–25 mins)',
+      scripture: 'योहान ३:१६ • २ करिंथकर ५:१७ • रोमन्स १०:९',
+      book: 'john',
+      chapter: 3,
+      verse: 16,
+      openingPrayerMr: 'तारणहार प्रभू येशू, तू क्रूसावर आमच्यासाठी आपले जीवन दिलेस याबद्दल आम्ही तुझे उपकार मानतो. आज प्रत्येक हृदयात तुझ्या तारणाचा आनंद भर. आमेन.',
+      openingPrayer: 'Savior Jesus, thank You for giving Your life on the cross for us. Fill every heart with the joy of salvation. Amen.',
+      introductionMr: 'माणूस बाहेरून कितीही बदल करण्याचा प्रयत्न करतो, पण आतले हृदय फक्त येशू ख्रिस्तच बदलू शकतो! आज आपण सुवार्तेचा मुख्य संदेश पाहूया.',
+      introduction: 'Only Jesus Christ can transform a human heart from the inside out and give true eternal life.',
+      points: [
+        {
+          headingMr: '१. देवाची अफाट प्रीती — योहान ३:१६',
+          heading: '1. God’s Unconditional Love',
+          time: '७ मिनिटे',
+          verseRef: 'योहान ३:१६ (John 3:16)',
+          verseQuoteMr: '“कारण देवाने जगावर एवढी प्रीती केली की, त्याने आपला एकुलता एक पुत्र दिला, अशासाठी की जो कोणी त्याच्यावर विश्वास ठेवतो त्याचा नाश होऊ नये तर त्याला अनंतकाळचे जीवन मिळावे.”',
+          book: 'john',
+          chapter: 3,
+          verse: 16,
+          explanationMr: 'तारण ही आपण पैशाने किंवा पुण्याने विकत घेतलेली गोष्ट नाही; ती देवाच्या प्रीतीची मोफत देणगी आहे!',
+          explanation: 'Salvation is not earned by money or works—it is God’s free gift of love in Christ.'
+        },
+        {
+          headingMr: '२. ख्रिस्तामध्ये आपण नवीन सृष्टी आहोत',
+          heading: '2. A New Creation in Christ',
+          time: '७ मिनिटे',
+          verseRef: '२ करिंथकर ५:१७ (2 Corinthians 5:17)',
+          verseQuoteMr: '“म्हणून जो कोणी ख्रिस्तामध्ये आहे, तो नवी सृष्टी आहे; जुने ते होऊन गेले, पाहा सर्व नवे झाले आहे.”',
+          book: '2corinthians',
+          chapter: 5,
+          verse: 17,
+          explanationMr: 'तुमचा भूतकाळ कितीही वाईट असला तरी येशूकडे आल्यावर तो जुने सर्व पुसून टाकतो आणि तुम्हाला नवीन सुरुवात देतो.',
+          explanation: 'No matter your past, in Christ old things pass away and everything becomes new.'
+        },
+        {
+          headingMr: '३. मुखाने कबूल करणे व हृदयाने विश्वास ठेवणे',
+          heading: '3. Confess and Believe',
+          time: '६ मिनिटे',
+          verseRef: 'रोमन्स १०:९ (Romans 10:9)',
+          verseQuoteMr: '“जर तू आपल्या मुखाने येशूला प्रभू म्हणून कबूल करशील व देवाने त्याला मेलेल्यांतून उठवले असा आपल्या अंतःकरणात विश्वास ठेवशील, तर तुझे तारण होईल.”',
+          book: 'romans',
+          chapter: 10,
+          verse: 9,
+          explanationMr: 'आजच येशूला तुमच्या जीवनाचा प्रभू व तारणारा म्हणून स्वीकारा आणि शांतीचे नवीन जीवन सुरू करा.',
+          explanation: 'Confess Jesus as Lord and believe in your heart—today is the day of salvation.'
+        }
+      ],
+      applicationMr: 'ज्यांनी अद्याप येशूला वैयक्तिक तारणारा म्हणून स्वीकारले नाही, त्यांनी आज नम्रपणे त्याचे स्वागत करावे आणि इतरांनाही ही सुवार्ता सांगावी.',
+      application: 'Invite someone this week to hear the Good News of Jesus’ love and forgiveness.',
+      closingPrayerMr: 'प्रभू येशू, आमच्या पापांची क्षमा करून आम्हांला नवीन जीवन दिल्याबद्दल धन्यवाद. आम्ही तुझेच आहोत. आमेन.',
+      closingPrayer: 'Lord Jesus, thank You for forgiving our sins and giving us new life in You. Amen.',
+      createdAt: 1700000012000
     }
   ];
 
@@ -463,6 +812,39 @@
         ],
         engageMr: 'श्रोत्यांना सांगा: "वादळ बाहेर असले तरी आपल्या नावेत येशू आहे की नाही, हे सर्वात महत्त्वाचे आहे!"',
         svg: '<svg viewBox="0 0 600 150" style="width:100%;max-width:560px;height:auto;display:block;margin:0 auto;"><rect x="15" y="20" width="165" height="110" rx="14" fill="#fee2e2" stroke="#ef4444" stroke-width="2"/><text x="97" y="58" text-anchor="middle" font-size="22">🌊</text><text x="97" y="88" text-anchor="middle" font-size="13" font-weight="800" fill="#991b1b">जीवनातील वादळ</text><text x="97" y="108" text-anchor="middle" font-size="11" fill="#7f1d1d">भीती व चिंता</text><text x="195" y="80" font-size="22" fill="#9ca3af">→</text><rect x="215" y="20" width="170" height="110" rx="14" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/><text x="300" y="58" text-anchor="middle" font-size="22">✝️</text><text x="300" y="88" text-anchor="middle" font-size="13" font-weight="800" fill="#92400e">येशूला हाक मारा</text><text x="300" y="108" text-anchor="middle" font-size="11" fill="#78350f">“शांत हो, स्तब्ध हो!”</text><text x="400" y="80" font-size="22" fill="#9ca3af">→</text><rect x="420" y="20" width="165" height="110" rx="14" fill="#d1fae5" stroke="#10b981" stroke-width="2"/><text x="502" y="58" text-anchor="middle" font-size="22">🕊️</text><text x="502" y="88" text-anchor="middle" font-size="13" font-weight="800" fill="#065f46">ख्रिस्ताची शांती</text><text x="502" y="108" text-anchor="middle" font-size="11" fill="#064e3b">अंतःकरणात स्थैर्य</text></svg>'
+      },
+      srm_psalm91_protection: {
+        contextMr: 'स्तोत्रसंहिता ९१ हे अनेक अभ्यासकांच्या मते मोशेने किंवा दावीदाने संकटाच्या काळात रचले आहे. प्रभू येशूची परीक्षा होताना सैतानानेही यातील वचनांचा उल्लेख केला होता.',
+        wordStudyMr: 'हिब्रू शब्द "Machseh" (आश्रयस्थान) — वादळात वा कडक उन्हात डोंगरातील सुरक्षित गुहा, जिथे कोणताही शत्रू पोहोचू शकत नाही.',
+        extraRefs: [
+          { label: 'स्तोत्रसंहिता १२१:७-८', book: 'psalms', ch: 121, v: 7 },
+          { label: 'नीतिसूत्रे १८:१०', book: 'proverbs', ch: 18, v: 10 },
+          { label: 'यशया ५४:१७', book: 'isaiah', ch: 54, v: 17 }
+        ],
+        engageMr: 'कुटुंबातील सर्वांना विचारा: "दररोज सकाळी घर सोडताना आपण देवाचे संरक्षण वचन का आठवले पाहिजे?"',
+        svg: '<svg viewBox="0 0 600 140" style="width:100%;max-width:560px;height:auto;display:block;margin:0 auto;"><rect x="20" y="20" width="160" height="100" rx="14" fill="#d1fae5" stroke="#10b981" stroke-width="2"/><text x="100" y="55" text-anchor="middle" font-size="20">🛡️</text><text x="100" y="84" text-anchor="middle" font-size="13" font-weight="800" fill="#065f46">देवाचा आश्रय</text><text x="195" y="75" font-size="22" fill="#9ca3af">→</text><rect x="220" y="20" width="160" height="100" rx="14" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/><text x="300" y="55" text-anchor="middle" font-size="20">👼</text><text x="300" y="84" text-anchor="middle" font-size="13" font-weight="800" fill="#1e40af">देवदूतांचे रक्षण</text><text x="395" y="75" font-size="22" fill="#9ca3af">→</text><rect x="420" y="20" width="160" height="100" rx="14" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/><text x="500" y="55" text-anchor="middle" font-size="20">🕊️</text><text x="500" y="84" text-anchor="middle" font-size="13" font-weight="800" fill="#92400e">निर्भय जीवन</text></svg>'
+      },
+      srm_youth_guidance: {
+        contextMr: 'शलोमोन राजाने नीतिसूत्रे ३ मध्ये तरुणांना व्यावहारिक जीवनज्ञान दिले, तर यिर्मया २९:११ हे बंदिवासात असलेल्या लोकांना आशेचा संदेश म्हणून दिले होते.',
+        wordStudyMr: 'हिब्रू शब्द "Yashar" (मार्ग सरळ करणे) — रस्त्यातील खड्डे आणि अडथळे दूर करून पुढे चालण्याचा मार्ग सुगम करणे.',
+        extraRefs: [
+          { label: 'स्तोत्रसंहिता ११९:९', book: 'psalms', ch: 119, v: 9 },
+          { label: 'याकोब १:५', book: 'james', ch: 1, v: 5 },
+          { label: 'उपदेशक १२:१', book: 'ecclesiastes', ch: 12, v: 1 }
+        ],
+        engageMr: 'तरुणांना विचारा: "तुम्ही जीवनातील मोठा निर्णय घेताना आधी कोणाचा सल्ला घेता?"',
+        svg: '<svg viewBox="0 0 600 140" style="width:100%;max-width:560px;height:auto;display:block;margin:0 auto;"><rect x="20" y="20" width="160" height="100" rx="14" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/><text x="100" y="55" text-anchor="middle" font-size="20">🙏</text><text x="100" y="84" text-anchor="middle" font-size="13" font-weight="800" fill="#92400e">देवावर भरवसा</text><text x="195" y="75" font-size="22" fill="#9ca3af">→</text><rect x="220" y="20" width="160" height="100" rx="14" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/><text x="300" y="55" text-anchor="middle" font-size="20">🧭</text><text x="300" y="84" text-anchor="middle" font-size="13" font-weight="800" fill="#1e40af">योग्य मार्गदर्शन</text><text x="395" y="75" font-size="22" fill="#9ca3af">→</text><rect x="420" y="20" width="160" height="100" rx="14" fill="#d1fae5" stroke="#10b981" stroke-width="2"/><text x="500" y="55" text-anchor="middle" font-size="20">🌟</text><text x="500" y="84" text-anchor="middle" font-size="13" font-weight="800" fill="#065f46">उज्ज्वल भविष्य</text></svg>'
+      },
+      srm_good_shepherd: {
+        contextMr: 'दावीद राजा तरुणपणी बेथलेहेमच्या डोंगरावर मेंढरे चारत असे. सिंह व अस्वलापासून मेंढरांचे रक्षण करताना त्याला देवाच्या काळजीचा थेट अनुभव आला.',
+        wordStudyMr: 'हिब्रू शब्द "Rohi" (माझा मेंढपाळ) — केवळ कळपाचा मालक नव्हे, तर प्रत्येक मेंढराची वैयक्तिक काळजी घेणारा मित्र व रक्षक.',
+        extraRefs: [
+          { label: 'योहान १०:११', book: 'john', ch: 10, v: 11 },
+          { label: 'यशया ४०:११', book: 'isaiah', ch: 40, v: 11 },
+          { label: 'फिलिप्पैकर ४:१९', book: 'philippians', ch: 4, v: 19 }
+        ],
+        engageMr: 'सर्वांना एकत्र म्हणायला सांगा: "परमेश्वर माझा मेंढपाळ आहे; मला काहीही उणे पडणार नाही!"',
+        svg: '<svg viewBox="0 0 600 140" style="width:100%;max-width:560px;height:auto;display:block;margin:0 auto;"><rect x="20" y="20" width="160" height="100" rx="14" fill="#d1fae5" stroke="#10b981" stroke-width="2"/><text x="100" y="55" text-anchor="middle" font-size="20">🌿</text><text x="100" y="84" text-anchor="middle" font-size="13" font-weight="800" fill="#065f46">हिरवे कुरण (पुरवठा)</text><text x="195" y="75" font-size="22" fill="#9ca3af">→</text><rect x="220" y="20" width="160" height="100" rx="14" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/><text x="300" y="55" text-anchor="middle" font-size="20">🦯</text><text x="300" y="84" text-anchor="middle" font-size="13" font-weight="800" fill="#1e40af">दरीत संरक्षण</text><text x="395" y="75" font-size="22" fill="#9ca3af">→</text><rect x="420" y="20" width="160" height="100" rx="14" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/><text x="500" y="55" text-anchor="middle" font-size="20">👑</text><text x="500" y="84" text-anchor="middle" font-size="13" font-weight="800" fill="#92400e">अनंत घर</text></svg>'
       },
       srm_forgiveness_love: {
         contextMr: 'इफिसस शहर विविध संस्कृती व मतभेद असलेल्या लोकांनी भरलेले होते. पौल त्यांना आठवण करून देतो की चर्च आणि कुटुंब हे क्षमेवर टिकलेले असते.',

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'river-of-life-cache-v2428_SERMON_VISUALS_AND_CONTEXT';
+const CACHE_NAME = 'river-of-life-cache-v2429_MORE_SERMONS_AND_PRAYERS';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
