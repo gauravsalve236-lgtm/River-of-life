@@ -438,6 +438,58 @@
     if (typeof showToast === 'function') showToast('🎲 नवीन प्रवचन विषय निवडला!');
   };
 
+
+  function getTopicVisualAndContext(active, isMr) {
+    const id = active.id || '';
+    const ctxMap = {
+      srm_prayer_power: {
+        contextMr: 'प्रेषित पौलाने फिलिप्पैकर पत्र रोममधील तुरुंगात साखळदंडात असताना लिहिले (इ.स. ६१-६२). कठीण परिस्थितीतही तो "सर्वदा आनंद करा आणि चिंता करू नका" असे सांगतो.',
+        wordStudyMr: 'मूळ ग्रीक शब्द "Eirene" (शांती) / हिब्रू "Shalom" — याचा अर्थ केवळ भांडण नसणे नव्हे, तर देवाच्या उपस्थितीमुळे मनाला मिळणारे संपूर्ण स्थैर्य व कल्याण.',
+        extraRefs: [
+          { label: 'स्तोत्रसंहिता ५५:२२', book: 'psalms', ch: 55, v: 22 },
+          { label: 'यिर्मया ३३:३', book: 'jeremiah', ch: 33, v: 3 },
+          { label: 'लूक १८:१', book: 'luke', ch: 18, v: 1 }
+        ],
+        engageMr: 'बोलताना सर्वांना विचारा: "आज आपल्यापैकी प्रत्येकाच्या मनात कोणती एक चिंता आहे जी आपण आत्ता प्रार्थनेत देवाला देऊ शकतो?"',
+        svg: '<svg viewBox="0 0 600 170" style="width:100%;max-width:560px;height:auto;display:block;margin:0 auto;"><rect x="10" y="25" width="125" height="120" rx="14" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/><text x="72" y="65" text-anchor="middle" font-size="22">🙌</text><text x="72" y="95" text-anchor="middle" font-size="13" font-weight="800" fill="#92400e">१. स्तुती</text><text x="72" y="116" text-anchor="middle" font-size="11" fill="#78350f">Adoration</text><text x="150" y="90" font-size="20" fill="#9ca3af">→</text><rect x="165" y="25" width="125" height="120" rx="14" fill="#fee2e2" stroke="#ef4444" stroke-width="2"/><text x="227" y="65" text-anchor="middle" font-size="22">🤍</text><text x="227" y="95" text-anchor="middle" font-size="13" font-weight="800" fill="#991b1b">२. क्षमा</text><text x="227" y="116" text-anchor="middle" font-size="11" fill="#7f1d1d">Confession</text><text x="305" y="90" font-size="20" fill="#9ca3af">→</text><rect x="320" y="25" width="125" height="120" rx="14" fill="#d1fae5" stroke="#10b981" stroke-width="2"/><text x="382" y="65" text-anchor="middle" font-size="22">🙏</text><text x="382" y="95" text-anchor="middle" font-size="13" font-weight="800" fill="#065f46">३. आभार</text><text x="382" y="116" text-anchor="middle" font-size="11" fill="#064e3b">Thanksgiving</text><text x="460" y="90" font-size="20" fill="#9ca3af">→</text><rect x="475" y="25" width="115" height="120" rx="14" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/><text x="532" y="65" text-anchor="middle" font-size="22">🕊️</text><text x="532" y="95" text-anchor="middle" font-size="13" font-weight="800" fill="#1e40af">४. विनंती</text><text x="532" y="116" text-anchor="middle" font-size="11" fill="#1e3a8a">Supplication</text></svg>'
+      },
+      srm_faith_storms: {
+        contextMr: 'गालील समुद्र डोंगरांनी वेढलेला असल्यामुळे तिथे अचानक जोरदार वादळे येत असत. नावेतील अनेक शिष्य अनुभवी कोळी (Fishermen) होते, तरीही ते घाबरले—म्हणजे ते वादळ खरोखरच भयंकर होते!',
+        wordStudyMr: 'ग्रीक शब्द "Galene" (मोठी शांतता) — येशूच्या एका शब्दाने निसर्गातील प्रक्षुब्ध लाटा आरशासारख्या शांत झाल्या.',
+        extraRefs: [
+          { label: 'स्तोत्रसंहिता २३:४', book: 'psalms', ch: 23, v: 4 },
+          { label: 'योहान १४:२७', book: 'john', ch: 14, v: 27 },
+          { label: 'रोमन्स ८:३१', book: 'romans', ch: 8, v: 31 }
+        ],
+        engageMr: 'श्रोत्यांना सांगा: "वादळ बाहेर असले तरी आपल्या नावेत येशू आहे की नाही, हे सर्वात महत्त्वाचे आहे!"',
+        svg: '<svg viewBox="0 0 600 150" style="width:100%;max-width:560px;height:auto;display:block;margin:0 auto;"><rect x="15" y="20" width="165" height="110" rx="14" fill="#fee2e2" stroke="#ef4444" stroke-width="2"/><text x="97" y="58" text-anchor="middle" font-size="22">🌊</text><text x="97" y="88" text-anchor="middle" font-size="13" font-weight="800" fill="#991b1b">जीवनातील वादळ</text><text x="97" y="108" text-anchor="middle" font-size="11" fill="#7f1d1d">भीती व चिंता</text><text x="195" y="80" font-size="22" fill="#9ca3af">→</text><rect x="215" y="20" width="170" height="110" rx="14" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/><text x="300" y="58" text-anchor="middle" font-size="22">✝️</text><text x="300" y="88" text-anchor="middle" font-size="13" font-weight="800" fill="#92400e">येशूला हाक मारा</text><text x="300" y="108" text-anchor="middle" font-size="11" fill="#78350f">“शांत हो, स्तब्ध हो!”</text><text x="400" y="80" font-size="22" fill="#9ca3af">→</text><rect x="420" y="20" width="165" height="110" rx="14" fill="#d1fae5" stroke="#10b981" stroke-width="2"/><text x="502" y="58" text-anchor="middle" font-size="22">🕊️</text><text x="502" y="88" text-anchor="middle" font-size="13" font-weight="800" fill="#065f46">ख्रिस्ताची शांती</text><text x="502" y="108" text-anchor="middle" font-size="11" fill="#064e3b">अंतःकरणात स्थैर्य</text></svg>'
+      },
+      srm_forgiveness_love: {
+        contextMr: 'इफिसस शहर विविध संस्कृती व मतभेद असलेल्या लोकांनी भरलेले होते. पौल त्यांना आठवण करून देतो की चर्च आणि कुटुंब हे क्षमेवर टिकलेले असते.',
+        wordStudyMr: 'ग्रीक शब्द "Charizomai" (क्षमा करणे) — याचे मूळ "Charis" म्हणजे "कृपा/मोफत देणगी" आहे. क्षमा ही समोरच्याला दिलेली कृपेची भेट आहे.',
+        extraRefs: [
+          { label: 'मत्तय १८:२१-२२', book: 'matthew', ch: 18, v: 21 },
+          { label: '१ करिंथकर १३:४-७', book: '1corinthians', ch: 13, v: 4 },
+          { label: 'रोमन्स १२:१८', book: 'romans', ch: 12, v: 18 }
+        ],
+        engageMr: 'एक छोटा प्रश्न विचारा: "कधी कधी आपण स्वतःचे मन हलके करण्यासाठी क्षमा करणे किती गरजेचे असते, याचा अनुभव तुम्ही घेतला आहे का?"',
+        svg: '<svg viewBox="0 0 600 140" style="width:100%;max-width:560px;height:auto;display:block;margin:0 auto;"><rect x="20" y="20" width="160" height="100" rx="14" fill="#fce7f3" stroke="#ec4899" stroke-width="2"/><text x="100" y="55" text-anchor="middle" font-size="20">💔</text><text x="100" y="84" text-anchor="middle" font-size="13" font-weight="800" fill="#9d174d">दुखावलेले मन</text><text x="195" y="75" font-size="22" fill="#9ca3af">→</text><rect x="220" y="20" width="160" height="100" rx="14" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/><text x="300" y="55" text-anchor="middle" font-size="20">✝️</text><text x="300" y="84" text-anchor="middle" font-size="13" font-weight="800" fill="#92400e">ख्रिस्ताची क्षमा</text><text x="395" y="75" font-size="22" fill="#9ca3af">→</text><rect x="420" y="20" width="160" height="100" rx="14" fill="#d1fae5" stroke="#10b981" stroke-width="2"/><text x="500" y="55" text-anchor="middle" font-size="20">🤝</text><text x="500" y="84" text-anchor="middle" font-size="13" font-weight="800" fill="#065f46">नात्यांची चंगाई</text></svg>'
+      }
+    };
+
+    return ctxMap[id] || {
+      contextMr: 'पवित्र शास्त्र केवळ प्राचीन इतिहास नाही, तर आजच्या कुटुंबासाठी आणि मंडळीसाठी देवाचा जिवंत संदेश आहे. प्रत्येक वचन संदर्भासहित समजावून सांगा.',
+      wordStudyMr: 'देवाचे वचन (Logos व Rhema) — वाचलेले वचन जेव्हा आपण प्रार्थनेने हृदयात घेतो, तेव्हा ते आपल्या जीवनात सामर्थ्याने कार्य करते.',
+      extraRefs: [
+        { label: 'स्तोत्रसंहिता ११९:१०५', book: 'psalms', ch: 119, v: 105 },
+        { label: 'रोमन्स ८:२८', book: 'romans', ch: 8, v: 28 },
+        { label: 'योहान ३:१६', book: 'john', ch: 3, v: 16 }
+      ],
+      engageMr: 'संदेश देताना श्रोत्यांशी डोळ्यांचा संपर्क ठेवा आणि प्रत्येक मुद्द्यानंतर एक व्यावहारिक उदाहरण द्या.',
+      svg: '<svg viewBox="0 0 600 140" style="width:100%;max-width:560px;height:auto;display:block;margin:0 auto;"><rect x="20" y="20" width="160" height="100" rx="14" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/><text x="100" y="55" text-anchor="middle" font-size="20">📖</text><text x="100" y="84" text-anchor="middle" font-size="13" font-weight="800" fill="#1e40af">१. वचन ऐकणे</text><text x="195" y="75" font-size="22" fill="#9ca3af">→</text><rect x="220" y="20" width="160" height="100" rx="14" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/><text x="300" y="55" text-anchor="middle" font-size="20">💡</text><text x="300" y="84" text-anchor="middle" font-size="13" font-weight="800" fill="#92400e">२. समजून घेणे</text><text x="395" y="75" font-size="22" fill="#9ca3af">→</text><rect x="420" y="20" width="160" height="100" rx="14" fill="#d1fae5" stroke="#10b981" stroke-width="2"/><text x="500" y="55" text-anchor="middle" font-size="20">🏠</text><text x="500" y="84" text-anchor="middle" font-size="13" font-weight="800" fill="#065f46">३. घरात आचरण</text></svg>'
+    };
+  }
+
   window.renderSermonStudio = function (selectedId = null) {
     const root = document.getElementById('sermon-studio-root');
     if (!root) return;
@@ -607,6 +659,26 @@
         <div style="background: rgba(59,130,246,0.07); border: 1px solid rgba(59,130,246,0.25); border-radius: 14px; padding: 15px;">
           <div style="font-size: 12px; font-weight: 800; color: #2563eb; margin-bottom: 5px;">🏠 ४. कुटुंब व दैनंदिन जीवनातील उपयोग (३–४ मिनिटे)</div>
           <p style="margin: 0; font-size: ${sermonFontSize}px; line-height: 1.7; color: var(--text);">${appText}</p>
+        </div>
+
+        <!-- Visual Diagram & Bible Historical Context -->
+        <div style="background: var(--bg); border: 1.5px solid var(--border); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px;">
+          <div style="font-size: 12px; font-weight: 800; color: var(--primary);">🎨 विषयाचे चित्ररूप सादरीकरण (Visual Summary)</div>
+          ${getTopicVisualAndContext(active, isMr).svg}
+          <div style="background: rgba(59,130,246,0.06); border-left: 4px solid #3b82f6; padding: 10px 12px; border-radius: 0 10px 10px 0;">
+            <div style="font-size: 12px; font-weight: 800; color: #1d4ed8; margin-bottom: 3px;">🏛️ बायबल ऐतिहासिक पार्श्वभूमी व शब्दार्थ (Context & Word Study)</div>
+            <div style="font-size: ${sermonFontSize - 0.5}px; line-height: 1.65; color: var(--text);">${getTopicVisualAndContext(active, isMr).contextMr}</div>
+            <div style="font-size: ${sermonFontSize - 0.5}px; line-height: 1.65; color: var(--text); margin-top: 6px;"><strong>📖 मूल शब्दार्थ:</strong> ${getTopicVisualAndContext(active, isMr).wordStudyMr}</div>
+          </div>
+          <div>
+            <div style="font-size: 12px; font-weight: 800; color: var(--text-muted); margin-bottom: 6px;">🔗 भाषणासाठी अतिरिक्त बायबल संदर्भ (Extra Cross-References):</div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              ${getTopicVisualAndContext(active, isMr).extraRefs.map(r => `<button onclick="openReaderAndNavigate('${r.book}', ${r.ch}, ${r.v})" style="padding: 6px 11px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg-content); color: var(--primary); font-size: 12px; font-weight: 800; cursor: pointer;">📖 ${r.label}</button>`).join('')}
+            </div>
+          </div>
+          <div style="background: rgba(245,158,11,0.08); border-radius: 10px; padding: 10px 12px; font-size: ${sermonFontSize - 0.5}px; color: var(--text);">
+            <strong>🎤 बोलताना लक्षात ठेवा (Speaker Tip):</strong> ${getTopicVisualAndContext(active, isMr).engageMr}
+          </div>
         </div>
 
         <div style="background: rgba(168,85,247,0.07); border: 1px solid rgba(168,85,247,0.25); border-radius: 14px; padding: 15px;">
